@@ -324,11 +324,124 @@
   <h1>Source code for jupedsim.routing</h1><div class="highlight"><pre>
 <span></span><span class="c1"># SPDX-License-Identifier: LGPL-3.0-or-later</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">heapq</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">itertools</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
 <span class="kn">import</span><span class="w"> </span><span class="nn">jupedsim.native</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">py_jps</span>
 
 <span class="c1"># Alias the routing engines.</span>
 <span class="n">RoutingEngine</span> <span class="o">=</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">RoutingEngine</span>
 <span class="n">TAStarRoutingEngine</span> <span class="o">=</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">TAStarRoutingEngine</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_tri_area2</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">c</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Signed area*2 of triangle (a, b, c) in Mononen&#39;s funnel convention.</span>
+
+<span class="sd">    &gt; 0 when c is on the clockwise side of a-&gt;b. Matches the sign comparisons</span>
+<span class="sd">    used by the Simple Stupid Funnel Algorithm below.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">-</span> <span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_points_equal</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-9</span><span class="p">))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_point_segment_distance</span><span class="p">(</span>
+    <span class="n">p</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Euclidean distance from point *p* to segment ``[a, b]``.&quot;&quot;&quot;</span>
+    <span class="n">ab</span> <span class="o">=</span> <span class="n">b</span> <span class="o">-</span> <span class="n">a</span>
+    <span class="n">denom</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">ab</span><span class="p">,</span> <span class="n">ab</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">denom</span> <span class="o">&lt;=</span> <span class="mf">1e-18</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">p</span> <span class="o">-</span> <span class="n">a</span><span class="p">))</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">p</span> <span class="o">-</span> <span class="n">a</span><span class="p">,</span> <span class="n">ab</span><span class="p">))</span> <span class="o">/</span> <span class="n">denom</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">t</span><span class="p">))</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">p</span> <span class="o">-</span> <span class="p">(</span><span class="n">a</span> <span class="o">+</span> <span class="n">t</span> <span class="o">*</span> <span class="n">ab</span><span class="p">)))</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">_Funnel</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Incremental two-sided funnel from a fixed start point.</span>
+
+<span class="sd">    Maintains the taut path from the start to the current &quot;mouth&quot; edge as an</span>
+<span class="sd">    apex (with the committed distance ``apex_g`` already walked to reach it)</span>
+<span class="sd">    plus a left and right chain of vertices beyond the apex. ``push_left`` /</span>
+<span class="sd">    ``push_right`` extend the funnel by one portal vertex, advancing the apex</span>
+<span class="sd">    (and committing distance) whenever the funnel collapses. Used by TA* only</span>
+<span class="sd">    to score search nodes; the emitted geometry comes from :meth:`_funnel`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;apex&quot;</span><span class="p">,</span> <span class="s2">&quot;apex_g&quot;</span><span class="p">,</span> <span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="s2">&quot;right&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apex</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">apex_g</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">apex</span> <span class="o">=</span> <span class="n">apex</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">apex_g</span> <span class="o">=</span> <span class="n">apex_g</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># beyond apex, outermost last</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;_Funnel&quot;</span><span class="p">:</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">_Funnel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">apex</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">apex_g</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">f</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">mouth_left</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">apex</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">mouth_right</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">apex</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">g_to_mouth</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Shortest distance from start to reach the current mouth edge.</span>
+
+<span class="sd">        The apex sees the whole mouth, so this is the committed apex distance</span>
+<span class="sd">        plus the point-to-segment distance from the apex to the mouth edge.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">apex_g</span> <span class="o">+</span> <span class="n">_point_segment_distance</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">apex</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mouth_left</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">mouth_right</span><span class="p">()</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">push_right</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Tighten the right chain: keep only vertices where the chain still</span>
+        <span class="c1"># turns clockwise (taut) towards p.</span>
+        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="p">:</span>
+            <span class="n">last</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">prev</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">apex</span>
+            <span class="k">if</span> <span class="n">_tri_area2</span><span class="p">(</span><span class="n">prev</span><span class="p">,</span> <span class="n">last</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Right chain emptied: if p crossed over the left boundary, the</span>
+            <span class="c1"># funnel collapses and the apex advances along the left chain.</span>
+            <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="p">:</span>
+                <span class="n">l0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">_tri_area2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">apex</span><span class="p">,</span> <span class="n">l0</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">apex_g</span> <span class="o">+=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">l0</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">apex</span><span class="p">))</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">apex</span> <span class="o">=</span> <span class="n">l0</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">break</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">push_left</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="p">:</span>
+            <span class="n">last</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">prev</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">apex</span>
+            <span class="k">if</span> <span class="n">_tri_area2</span><span class="p">(</span><span class="n">prev</span><span class="p">,</span> <span class="n">last</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="p">:</span>
+                <span class="n">r0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">_tri_area2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">apex</span><span class="p">,</span> <span class="n">r0</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">apex_g</span> <span class="o">+=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">r0</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">apex</span><span class="p">))</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">apex</span> <span class="o">=</span> <span class="n">r0</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">break</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="DirectPathRoutingEngine">
@@ -366,6 +479,338 @@
 <a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.DirectPathRoutingEngine.is_routable">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">is_routable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">True</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="PythonTAStarRoutingEngine">
+<a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.PythonTAStarRoutingEngine">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">PythonTAStarRoutingEngine</span><span class="p">(</span><span class="n">RoutingEngine</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Pure-Python TA* (Triangulation A*) any-angle routing engine.</span>
+
+<span class="sd">    A faithful funnel-based TA* (Demyen &amp; Buro) over the triangulated</span>
+<span class="sd">    nav-mesh: A* on the triangle adjacency graph where each search node</span>
+<span class="sd">    carries the incremental funnel from the start, ``g`` is the exact taut</span>
+<span class="sd">    distance to reach the node&#39;s mouth edge and ``h`` is the straight-line</span>
+<span class="sd">    lower bound to the goal. The optimal triangle channel is then string-</span>
+<span class="sd">    pulled into the taut path. Runs on the same mesh as</span>
+<span class="sd">    :class:`TAStarRoutingEngine` (used here only to triangulate the geometry).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_native_tastar</span> <span class="o">=</span> <span class="n">TAStarRoutingEngine</span><span class="p">()</span>  <span class="c1"># only used to get the mesh</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_vertices</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_polygons</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># neighbors[t][i] = triangle across edge (poly[i], poly[i+1]) or -1.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_neighbors</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+
+<div class="viewcode-block" id="PythonTAStarRoutingEngine.name">
+<a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.PythonTAStarRoutingEngine.name">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;PythonTAStar&quot;</span></div>
+
+
+<div class="viewcode-block" id="PythonTAStarRoutingEngine.from_mesh">
+<a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.PythonTAStarRoutingEngine.from_mesh">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_mesh</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">verts</span><span class="p">,</span> <span class="n">polys</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;PythonTAStarRoutingEngine&quot;</span><span class="p">:</span>
+        <span class="n">engine</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">()</span>
+        <span class="n">engine</span><span class="o">.</span><span class="n">_set_mesh</span><span class="p">(</span><span class="n">verts</span><span class="p">,</span> <span class="n">polys</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">engine</span></div>
+
+
+<div class="viewcode-block" id="PythonTAStarRoutingEngine.set_geometry">
+<a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.PythonTAStarRoutingEngine.set_geometry">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geometry</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_native_tastar</span><span class="o">.</span><span class="n">set_geometry</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_mesh</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_native_tastar</span><span class="o">.</span><span class="n">mesh</span><span class="p">())</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verts</span><span class="p">,</span> <span class="n">polys</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">verts</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_polygons</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">polys</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_build_adjacency</span><span class="p">()</span>
+
+<div class="viewcode-block" id="PythonTAStarRoutingEngine.mesh">
+<a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.PythonTAStarRoutingEngine.mesh">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vertices</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;set_geometry must be called first&quot;</span><span class="p">)</span>
+        <span class="n">verts</span> <span class="o">=</span> <span class="p">[(</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">y</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vertices</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">verts</span><span class="p">,</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_polygons</span><span class="p">]</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_build_adjacency</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Map each undirected edge to the (triangle, edge-index) pairs using it.</span>
+        <span class="n">edge_to</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="n">poly</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_polygons</span><span class="p">):</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">poly</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+                <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">poly</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">poly</span><span class="p">[(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="n">n</span><span class="p">]</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> <span class="k">if</span> <span class="n">a</span> <span class="o">&lt;</span> <span class="n">b</span> <span class="k">else</span> <span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+                <span class="n">edge_to</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">t</span><span class="p">,</span> <span class="n">i</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_neighbors</span> <span class="o">=</span> <span class="p">[[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">poly</span><span class="p">)</span> <span class="k">for</span> <span class="n">poly</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_polygons</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">users</span> <span class="ow">in</span> <span class="n">edge_to</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">users</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="p">(</span><span class="n">t0</span><span class="p">,</span> <span class="n">i0</span><span class="p">),</span> <span class="p">(</span><span class="n">t1</span><span class="p">,</span> <span class="n">i1</span><span class="p">)</span> <span class="o">=</span> <span class="n">users</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_neighbors</span><span class="p">[</span><span class="n">t0</span><span class="p">][</span><span class="n">i0</span><span class="p">]</span> <span class="o">=</span> <span class="n">t1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_neighbors</span><span class="p">[</span><span class="n">t1</span><span class="p">][</span><span class="n">i1</span><span class="p">]</span> <span class="o">=</span> <span class="n">t0</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_locate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Index of the polygon containing *point*, or ``None``.&quot;&quot;&quot;</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">verts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vertices</span>
+        <span class="n">eps</span> <span class="o">=</span> <span class="mf">1e-9</span>
+        <span class="k">for</span> <span class="n">poly_idx</span><span class="p">,</span> <span class="n">poly</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_polygons</span><span class="p">):</span>
+            <span class="n">ring</span> <span class="o">=</span> <span class="n">verts</span><span class="p">[</span><span class="n">poly</span><span class="p">]</span>
+            <span class="c1"># CCW convex polygon: inside iff point is left-of every edge.</span>
+            <span class="n">edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">ring</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-</span> <span class="n">ring</span>
+            <span class="n">rel</span> <span class="o">=</span> <span class="n">p</span> <span class="o">-</span> <span class="n">ring</span>
+            <span class="n">cross</span> <span class="o">=</span> <span class="n">edges</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">rel</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">edges</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">rel</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">cross</span> <span class="o">&gt;=</span> <span class="o">-</span><span class="n">eps</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">poly_idx</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_orient</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">from_poly</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Left/right endpoints of edge ``{a, b}`` for travel leaving *from_poly*.</span>
+
+<span class="sd">        The shared edge appears in *from_poly*&#39;s CCW winding as ``(u, v)``;</span>
+<span class="sd">        crossing it outward puts the edge head ``v`` on the left of travel and</span>
+<span class="sd">        the tail ``u`` on the right.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">poly</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_polygons</span><span class="p">[</span><span class="n">from_poly</span><span class="p">]</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">poly</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="n">u</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">poly</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">poly</span><span class="p">[(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="n">n</span><span class="p">]</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">u</span> <span class="o">==</span> <span class="n">a</span> <span class="ow">and</span> <span class="n">v</span> <span class="o">==</span> <span class="n">b</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">u</span> <span class="o">==</span> <span class="n">b</span> <span class="ow">and</span> <span class="n">v</span> <span class="o">==</span> <span class="n">a</span><span class="p">):</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vertices</span><span class="p">[</span><span class="n">v</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vertices</span><span class="p">[</span><span class="n">u</span><span class="p">]</span>
+        <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s2">&quot;edge not found in polygon&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_shared_edge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+        <span class="n">shared</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_polygons</span><span class="p">[</span><span class="n">a</span><span class="p">])</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_polygons</span><span class="p">[</span><span class="n">b</span><span class="p">]))</span>
+        <span class="k">return</span> <span class="n">shared</span>  <span class="c1"># type: ignore[return-value]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_channel_portals</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
+        <span class="n">lefts</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">rights</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">channel</span><span class="p">,</span> <span class="n">channel</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
+            <span class="n">u</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shared_edge</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+            <span class="n">left</span><span class="p">,</span> <span class="n">right</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_orient</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+            <span class="n">lefts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">left</span><span class="p">)</span>
+            <span class="n">rights</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">right</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">lefts</span><span class="p">,</span> <span class="n">rights</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_funnel</span><span class="p">(</span>
+        <span class="n">frm</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+        <span class="n">to</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+        <span class="n">lefts</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+        <span class="n">rights</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;String-pull (Simple Stupid Funnel Algorithm) across the portals.&quot;&quot;&quot;</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">frm</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">goal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">to</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="c1"># Pad with degenerate start/goal portals so apex moves are uniform.</span>
+        <span class="n">left</span> <span class="o">=</span> <span class="p">[</span><span class="n">start</span><span class="p">,</span> <span class="o">*</span><span class="n">lefts</span><span class="p">,</span> <span class="n">goal</span><span class="p">]</span>
+        <span class="n">right</span> <span class="o">=</span> <span class="p">[</span><span class="n">start</span><span class="p">,</span> <span class="o">*</span><span class="n">rights</span><span class="p">,</span> <span class="n">goal</span><span class="p">]</span>
+
+        <span class="n">pts</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">start</span><span class="p">]</span>
+        <span class="n">apex</span><span class="p">,</span> <span class="n">p_left</span><span class="p">,</span> <span class="n">p_right</span> <span class="o">=</span> <span class="n">start</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">start</span>
+        <span class="n">apex_i</span> <span class="o">=</span> <span class="n">left_i</span> <span class="o">=</span> <span class="n">right_i</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">left</span><span class="p">):</span>
+            <span class="n">lv</span><span class="p">,</span> <span class="n">rv</span> <span class="o">=</span> <span class="n">left</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">right</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="c1"># Tighten the right side.</span>
+            <span class="k">if</span> <span class="n">_tri_area2</span><span class="p">(</span><span class="n">apex</span><span class="p">,</span> <span class="n">p_right</span><span class="p">,</span> <span class="n">rv</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">_points_equal</span><span class="p">(</span><span class="n">apex</span><span class="p">,</span> <span class="n">p_right</span><span class="p">)</span> <span class="ow">or</span> <span class="n">_tri_area2</span><span class="p">(</span><span class="n">apex</span><span class="p">,</span> <span class="n">p_left</span><span class="p">,</span> <span class="n">rv</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
+                    <span class="n">p_right</span><span class="p">,</span> <span class="n">right_i</span> <span class="o">=</span> <span class="n">rv</span><span class="p">,</span> <span class="n">i</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># Right crossed left: left vertex becomes a corner.</span>
+                    <span class="n">pts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p_left</span><span class="p">)</span>
+                    <span class="n">apex</span> <span class="o">=</span> <span class="n">p_left</span>
+                    <span class="n">apex_i</span> <span class="o">=</span> <span class="n">left_i</span>
+                    <span class="n">p_left</span> <span class="o">=</span> <span class="n">p_right</span> <span class="o">=</span> <span class="n">apex</span>
+                    <span class="n">left_i</span> <span class="o">=</span> <span class="n">right_i</span> <span class="o">=</span> <span class="n">apex_i</span>
+                    <span class="n">i</span> <span class="o">=</span> <span class="n">apex_i</span> <span class="o">+</span> <span class="mi">1</span>
+                    <span class="k">continue</span>
+            <span class="c1"># Tighten the left side.</span>
+            <span class="k">if</span> <span class="n">_tri_area2</span><span class="p">(</span><span class="n">apex</span><span class="p">,</span> <span class="n">p_left</span><span class="p">,</span> <span class="n">lv</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">_points_equal</span><span class="p">(</span><span class="n">apex</span><span class="p">,</span> <span class="n">p_left</span><span class="p">)</span> <span class="ow">or</span> <span class="n">_tri_area2</span><span class="p">(</span><span class="n">apex</span><span class="p">,</span> <span class="n">p_right</span><span class="p">,</span> <span class="n">lv</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">:</span>
+                    <span class="n">p_left</span><span class="p">,</span> <span class="n">left_i</span> <span class="o">=</span> <span class="n">lv</span><span class="p">,</span> <span class="n">i</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">pts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p_right</span><span class="p">)</span>
+                    <span class="n">apex</span> <span class="o">=</span> <span class="n">p_right</span>
+                    <span class="n">apex_i</span> <span class="o">=</span> <span class="n">right_i</span>
+                    <span class="n">p_left</span> <span class="o">=</span> <span class="n">p_right</span> <span class="o">=</span> <span class="n">apex</span>
+                    <span class="n">left_i</span> <span class="o">=</span> <span class="n">right_i</span> <span class="o">=</span> <span class="n">apex_i</span>
+                    <span class="n">i</span> <span class="o">=</span> <span class="n">apex_i</span> <span class="o">+</span> <span class="mi">1</span>
+                    <span class="k">continue</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">pts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">goal</span><span class="p">)</span>
+
+        <span class="c1"># Drop consecutive duplicates (degenerate portals can repeat a corner).</span>
+        <span class="n">out</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pts</span><span class="p">:</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">out</span> <span class="ow">or</span> <span class="n">out</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">t</span><span class="p">:</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+<div class="viewcode-block" id="PythonTAStarRoutingEngine.compute_waypoints">
+<a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.PythonTAStarRoutingEngine.compute_waypoints">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_waypoints</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">frm</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+        <span class="n">to</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vertices</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;set_geometry must be called first&quot;</span><span class="p">)</span>
+
+        <span class="n">start_tri</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_locate</span><span class="p">(</span><span class="n">frm</span><span class="p">)</span>
+        <span class="n">goal_tri</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_locate</span><span class="p">(</span><span class="n">to</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">start_tri</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">goal_tri</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;endpoint outside mesh (start=</span><span class="si">{</span><span class="n">start_tri</span><span class="si">}</span><span class="s2">, goal=</span><span class="si">{</span><span class="n">goal_tri</span><span class="si">}</span><span class="s2">)&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">start_tri</span> <span class="o">==</span> <span class="n">goal_tri</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">frm</span><span class="p">,</span> <span class="n">to</span><span class="p">]</span>
+
+        <span class="n">channel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_search</span><span class="p">(</span><span class="n">frm</span><span class="p">,</span> <span class="n">to</span><span class="p">,</span> <span class="n">start_tri</span><span class="p">,</span> <span class="n">goal_tri</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">channel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;no path between endpoints&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_funnel</span><span class="p">(</span><span class="n">frm</span><span class="p">,</span> <span class="n">to</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_channel_portals</span><span class="p">(</span><span class="n">channel</span><span class="p">))</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_search</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">frm</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+        <span class="n">to</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+        <span class="n">start_tri</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">goal_tri</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Plain TA* (Demyen &amp; Buro): triangle channel start_tri -&gt; goal_tri.</span>
+
+<span class="sd">        A* over the triangle adjacency graph where each node carries the</span>
+<span class="sd">        incremental funnel from the start, ``g`` is the funnel-exact distance</span>
+<span class="sd">        to the node&#39;s mouth edge and ``h`` is the straight-line lower bound to</span>
+<span class="sd">        the goal. Nodes are keyed by the directed edge ``(prev_tri, tri)`` and</span>
+<span class="sd">        deduped by best ``g`` (the textbook TA* prune): fast and optimal in the</span>
+<span class="sd">        vast majority of cases, with the rare suboptimality that motivated</span>
+<span class="sd">        polyanya.&quot;&quot;&quot;</span>
+        <span class="n">frm_p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">frm</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">goal_p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">to</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+        <span class="c1"># Open heap entries: (f, kind, counter, payload).</span>
+        <span class="c1">#   interior: kind=0, payload=(key=(prev_tri, tri), g, funnel)</span>
+        <span class="c1">#   terminal: kind=1, payload=(channel,)</span>
+        <span class="n">counter</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+        <span class="n">heap</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">parent</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">best_g</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">channel_of</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+            <span class="n">seq</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">cur</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">key</span>
+            <span class="k">while</span> <span class="n">cur</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">seq</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cur</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">nxt</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cur</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">nxt</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">seq</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cur</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="k">break</span>
+                <span class="n">cur</span> <span class="o">=</span> <span class="n">nxt</span>
+            <span class="n">seq</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">seq</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">expand</span><span class="p">(</span><span class="n">prev_tri</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">tri</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">funnel</span><span class="p">:</span> <span class="n">_Funnel</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">poly</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_polygons</span><span class="p">[</span><span class="n">tri</span><span class="p">]</span>
+            <span class="n">mouth</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_shared_edge</span><span class="p">(</span><span class="n">prev_tri</span><span class="p">,</span> <span class="n">tri</span><span class="p">))</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">poly</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+                <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">poly</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">poly</span><span class="p">[(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="n">n</span><span class="p">]</span>
+                <span class="k">if</span> <span class="p">{</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">}</span> <span class="o">==</span> <span class="n">mouth</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_neighbors</span><span class="p">[</span><span class="n">tri</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">nb</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="n">nb</span> <span class="o">==</span> <span class="n">goal_tri</span><span class="p">:</span>
+                    <span class="n">heapq</span><span class="o">.</span><span class="n">heappush</span><span class="p">(</span>
+                        <span class="n">heap</span><span class="p">,</span>
+                        <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">next</span><span class="p">(</span><span class="n">counter</span><span class="p">),</span>
+                         <span class="p">(</span><span class="n">channel_of</span><span class="p">((</span><span class="n">prev_tri</span><span class="p">,</span> <span class="n">tri</span><span class="p">))</span> <span class="o">+</span> <span class="p">[</span><span class="n">nb</span><span class="p">],)),</span>
+                    <span class="p">)</span>
+                    <span class="k">continue</span>
+                <span class="n">_</span><span class="p">,</span> <span class="n">new_right</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_orient</span><span class="p">(</span><span class="n">tri</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+                <span class="n">o_idx</span> <span class="o">=</span> <span class="n">a</span> <span class="k">if</span> <span class="n">a</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">mouth</span> <span class="k">else</span> <span class="n">b</span>
+                <span class="n">o_pt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vertices</span><span class="p">[</span><span class="n">o_idx</span><span class="p">]</span>
+                <span class="n">child</span> <span class="o">=</span> <span class="n">funnel</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">_points_equal</span><span class="p">(</span><span class="n">new_right</span><span class="p">,</span> <span class="n">o_pt</span><span class="p">):</span>
+                    <span class="n">child</span><span class="o">.</span><span class="n">push_right</span><span class="p">(</span><span class="n">o_pt</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">child</span><span class="o">.</span><span class="n">push_left</span><span class="p">(</span><span class="n">o_pt</span><span class="p">)</span>
+                <span class="n">g</span> <span class="o">=</span> <span class="n">child</span><span class="o">.</span><span class="n">g_to_mouth</span><span class="p">()</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="n">tri</span><span class="p">,</span> <span class="n">nb</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">g</span> <span class="o">&gt;=</span> <span class="n">best_g</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">))</span> <span class="o">-</span> <span class="mf">1e-12</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="n">best_g</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">g</span>
+                <span class="n">parent</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">prev_tri</span><span class="p">,</span> <span class="n">tri</span><span class="p">)</span>
+                <span class="n">h</span> <span class="o">=</span> <span class="n">_point_segment_distance</span><span class="p">(</span>
+                    <span class="n">goal_p</span><span class="p">,</span> <span class="n">child</span><span class="o">.</span><span class="n">mouth_left</span><span class="p">(),</span> <span class="n">child</span><span class="o">.</span><span class="n">mouth_right</span><span class="p">()</span>
+                <span class="p">)</span>
+                <span class="n">heapq</span><span class="o">.</span><span class="n">heappush</span><span class="p">(</span>
+                    <span class="n">heap</span><span class="p">,</span> <span class="p">(</span><span class="n">g</span> <span class="o">+</span> <span class="n">h</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">next</span><span class="p">(</span><span class="n">counter</span><span class="p">),</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">child</span><span class="p">))</span>
+                <span class="p">)</span>
+
+        <span class="c1"># Seed from the start triangle.</span>
+        <span class="n">poly</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_polygons</span><span class="p">[</span><span class="n">start_tri</span><span class="p">]</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">poly</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_neighbors</span><span class="p">[</span><span class="n">start_tri</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">nb</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">poly</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">poly</span><span class="p">[(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="n">n</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">nb</span> <span class="o">==</span> <span class="n">goal_tri</span><span class="p">:</span>
+                <span class="n">heapq</span><span class="o">.</span><span class="n">heappush</span><span class="p">(</span>
+                    <span class="n">heap</span><span class="p">,</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">next</span><span class="p">(</span><span class="n">counter</span><span class="p">),</span> <span class="p">([</span><span class="n">start_tri</span><span class="p">,</span> <span class="n">nb</span><span class="p">],))</span>
+                <span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="n">new_left</span><span class="p">,</span> <span class="n">new_right</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_orient</span><span class="p">(</span><span class="n">start_tri</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+            <span class="n">funnel</span> <span class="o">=</span> <span class="n">_Funnel</span><span class="p">(</span><span class="n">frm_p</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+            <span class="n">funnel</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="p">[</span><span class="n">new_left</span><span class="p">]</span>
+            <span class="n">funnel</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="p">[</span><span class="n">new_right</span><span class="p">]</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="n">start_tri</span><span class="p">,</span> <span class="n">nb</span><span class="p">)</span>
+            <span class="n">best_g</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">funnel</span><span class="o">.</span><span class="n">g_to_mouth</span><span class="p">()</span>
+            <span class="n">parent</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">h</span> <span class="o">=</span> <span class="n">_point_segment_distance</span><span class="p">(</span><span class="n">goal_p</span><span class="p">,</span> <span class="n">new_left</span><span class="p">,</span> <span class="n">new_right</span><span class="p">)</span>
+            <span class="n">heapq</span><span class="o">.</span><span class="n">heappush</span><span class="p">(</span>
+                <span class="n">heap</span><span class="p">,</span>
+                <span class="p">(</span><span class="n">best_g</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">+</span> <span class="n">h</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">next</span><span class="p">(</span><span class="n">counter</span><span class="p">),</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">best_g</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">funnel</span><span class="p">)),</span>
+            <span class="p">)</span>
+
+        <span class="k">while</span> <span class="n">heap</span><span class="p">:</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">kind</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">payload</span> <span class="o">=</span> <span class="n">heapq</span><span class="o">.</span><span class="n">heappop</span><span class="p">(</span><span class="n">heap</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">payload</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># goal channel</span>
+            <span class="n">key</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">funnel</span> <span class="o">=</span> <span class="n">payload</span>
+            <span class="k">if</span> <span class="n">g</span> <span class="o">&gt;</span> <span class="n">best_g</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">))</span> <span class="o">+</span> <span class="mf">1e-12</span><span class="p">:</span>
+                <span class="k">continue</span>  <span class="c1"># stale: superseded by a cheaper funnel to this edge</span>
+            <span class="n">expand</span><span class="p">(</span><span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">key</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">funnel</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="PythonTAStarRoutingEngine.is_routable">
+<a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.PythonTAStarRoutingEngine.is_routable">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_routable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vertices</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;set_geometry must be called first&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_locate</span><span class="p">(</span><span class="n">point</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span></div>
 </div>
 
 </pre></div>

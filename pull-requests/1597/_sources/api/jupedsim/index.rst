@@ -36,6 +36,7 @@ Classes
    jupedsim.LineSegment
    jupedsim.NeighborhoodSearch
    jupedsim.NotifiableQueueStage
+   jupedsim.PythonTAStarRoutingEngine
    jupedsim.Recording
    jupedsim.RecordingAgent
    jupedsim.RecordingFrame
@@ -1787,6 +1788,42 @@ Attributes
       :param count: Number of agents to be popped from the front of the
                     queue
 
+
+
+.. py:class:: PythonTAStarRoutingEngine
+
+   Bases: :py:obj:`RoutingEngine`
+
+
+   Pure-Python TA* (Triangulation A*) any-angle routing engine.
+
+   A faithful funnel-based TA* (Demyen & Buro) over the triangulated
+   nav-mesh: A* on the triangle adjacency graph where each search node
+   carries the incremental funnel from the start, ``g`` is the exact taut
+   distance to reach the node's mouth edge and ``h`` is the straight-line
+   lower bound to the goal. The optimal triangle channel is then string-
+   pulled into the taut path. Runs on the same mesh as
+   :class:`TAStarRoutingEngine` (used here only to triangulate the geometry).
+
+
+   .. py:method:: compute_waypoints(frm: tuple[float, float], to: tuple[float, float]) -> list[tuple[float, float]]
+
+
+   .. py:method:: from_mesh(verts, polys) -> PythonTAStarRoutingEngine
+      :classmethod:
+
+
+
+   .. py:method:: is_routable(point: tuple[float, float]) -> bool
+
+
+   .. py:method:: mesh() -> tuple[list[tuple[float, float]], list[list[int]]]
+
+
+   .. py:method:: name() -> str
+
+
+   .. py:method:: set_geometry(geometry) -> None
 
 
 .. py:class:: Recording(db_connection_str: str, uri=False)

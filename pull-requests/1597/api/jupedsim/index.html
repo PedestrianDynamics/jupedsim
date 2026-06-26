@@ -641,6 +641,15 @@
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.NotifiableQueueStage.pop"><code class="docutils literal notranslate"><span class="pre">NotifiableQueueStage.pop()</span></code></a></li>
 </ul>
 </li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.PythonTAStarRoutingEngine"><code class="docutils literal notranslate"><span class="pre">PythonTAStarRoutingEngine</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.PythonTAStarRoutingEngine.compute_waypoints"><code class="docutils literal notranslate"><span class="pre">PythonTAStarRoutingEngine.compute_waypoints()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.PythonTAStarRoutingEngine.from_mesh"><code class="docutils literal notranslate"><span class="pre">PythonTAStarRoutingEngine.from_mesh()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.PythonTAStarRoutingEngine.is_routable"><code class="docutils literal notranslate"><span class="pre">PythonTAStarRoutingEngine.is_routable()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.PythonTAStarRoutingEngine.mesh"><code class="docutils literal notranslate"><span class="pre">PythonTAStarRoutingEngine.mesh()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.PythonTAStarRoutingEngine.name"><code class="docutils literal notranslate"><span class="pre">PythonTAStarRoutingEngine.name()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.PythonTAStarRoutingEngine.set_geometry"><code class="docutils literal notranslate"><span class="pre">PythonTAStarRoutingEngine.set_geometry()</span></code></a></li>
+</ul>
+</li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Recording"><code class="docutils literal notranslate"><span class="pre">Recording</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Recording.bounds"><code class="docutils literal notranslate"><span class="pre">Recording.bounds()</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Recording.frame"><code class="docutils literal notranslate"><span class="pre">Recording.frame()</span></code></a></li>
@@ -925,52 +934,55 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#jupedsim.NotifiableQueueStage" title="jupedsim.NotifiableQueueStage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NotifiableQueueStage</span></code></a></p></td>
 <td><p>Models a queue where agents can wait until notified.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#jupedsim.Recording" title="jupedsim.Recording"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Recording</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#jupedsim.PythonTAStarRoutingEngine" title="jupedsim.PythonTAStarRoutingEngine"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PythonTAStarRoutingEngine</span></code></a></p></td>
+<td><p>Pure-Python TA* (Triangulation A*) any-angle routing engine.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#jupedsim.Recording" title="jupedsim.Recording"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Recording</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#jupedsim.RecordingAgent" title="jupedsim.RecordingAgent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RecordingAgent</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#jupedsim.RecordingAgent" title="jupedsim.RecordingAgent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RecordingAgent</span></code></a></p></td>
 <td><p>Data for a single agent at a single frame.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#jupedsim.RecordingFrame" title="jupedsim.RecordingFrame"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RecordingFrame</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#jupedsim.RecordingFrame" title="jupedsim.RecordingFrame"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RecordingFrame</span></code></a></p></td>
 <td><p>A single frame from the simulation.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#jupedsim.Simulation" title="jupedsim.Simulation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Simulation</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#jupedsim.Simulation" title="jupedsim.Simulation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Simulation</span></code></a></p></td>
 <td><p>Defines a simulation of pedestrian movement over a continuous walkable area.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#jupedsim.SocialForceModel" title="jupedsim.SocialForceModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SocialForceModel</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#jupedsim.SocialForceModel" title="jupedsim.SocialForceModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SocialForceModel</span></code></a></p></td>
 <td><p>Parameters for Social Force Model</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#jupedsim.SocialForceModelAgentParameters" title="jupedsim.SocialForceModelAgentParameters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SocialForceModelAgentParameters</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#jupedsim.SocialForceModelAgentParameters" title="jupedsim.SocialForceModelAgentParameters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SocialForceModelAgentParameters</span></code></a></p></td>
 <td><p>Parameters required to create an Agent in the Social Force Model.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#jupedsim.SocialForceModelState" title="jupedsim.SocialForceModelState"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SocialForceModelState</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#jupedsim.SocialForceModelState" title="jupedsim.SocialForceModelState"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SocialForceModelState</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#jupedsim.SqliteTrajectoryWriter" title="jupedsim.SqliteTrajectoryWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SqliteTrajectoryWriter</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#jupedsim.SqliteTrajectoryWriter" title="jupedsim.SqliteTrajectoryWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SqliteTrajectoryWriter</span></code></a></p></td>
 <td><p>Write trajectory data into a sqlite db</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#jupedsim.TrajectoryWriter" title="jupedsim.TrajectoryWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TrajectoryWriter</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#jupedsim.TrajectoryWriter" title="jupedsim.TrajectoryWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TrajectoryWriter</span></code></a></p></td>
 <td><p>Interface for trajectory serialization</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#jupedsim.Transition" title="jupedsim.Transition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Transition</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#jupedsim.Transition" title="jupedsim.Transition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Transition</span></code></a></p></td>
 <td><p>Describes the Transition at a stage.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#jupedsim.WaitingSetStage" title="jupedsim.WaitingSetStage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">WaitingSetStage</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#jupedsim.WaitingSetStage" title="jupedsim.WaitingSetStage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">WaitingSetStage</span></code></a></p></td>
 <td><p>Models a set of waiting positions that can be activated or deactivated.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#jupedsim.WaitingSetState" title="jupedsim.WaitingSetState"><code class="xref py py-obj docutils literal notranslate"><span class="pre">WaitingSetState</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#jupedsim.WaitingSetState" title="jupedsim.WaitingSetState"><code class="xref py py-obj docutils literal notranslate"><span class="pre">WaitingSetState</span></code></a></p></td>
 <td><p>Create a collection of name/value pairs.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#jupedsim.WarpDriverModel" title="jupedsim.WarpDriverModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">WarpDriverModel</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#jupedsim.WarpDriverModel" title="jupedsim.WarpDriverModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">WarpDriverModel</span></code></a></p></td>
 <td><p>Parameters for WarpDriver Model.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#jupedsim.WarpDriverModelAgentParameters" title="jupedsim.WarpDriverModelAgentParameters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">WarpDriverModelAgentParameters</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#jupedsim.WarpDriverModelAgentParameters" title="jupedsim.WarpDriverModelAgentParameters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">WarpDriverModelAgentParameters</span></code></a></p></td>
 <td><p>Parameters required to create an Agent in the WarpDriver Model.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#jupedsim.WarpDriverModelState" title="jupedsim.WarpDriverModelState"><code class="xref py py-obj docutils literal notranslate"><span class="pre">WarpDriverModelState</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#jupedsim.WarpDriverModelState" title="jupedsim.WarpDriverModelState"><code class="xref py py-obj docutils literal notranslate"><span class="pre">WarpDriverModelState</span></code></a></p></td>
 <td><p>State of an agent using the WarpDriver Model.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#jupedsim.WaypointStage" title="jupedsim.WaypointStage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">WaypointStage</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#jupedsim.WaypointStage" title="jupedsim.WaypointStage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">WaypointStage</span></code></a></p></td>
 <td><p>Models a waypoint.</p></td>
 </tr>
 </tbody>
@@ -2875,6 +2887,50 @@ queue</p>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="jupedsim.PythonTAStarRoutingEngine">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PythonTAStarRoutingEngine</span></span><a class="reference internal" href="../../_modules/jupedsim/routing.html#PythonTAStarRoutingEngine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jupedsim.PythonTAStarRoutingEngine" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#jupedsim.RoutingEngine" title="jupedsim.RoutingEngine"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RoutingEngine</span></code></a></p>
+<p>Pure-Python TA* (Triangulation A*) any-angle routing engine.</p>
+<p>A faithful funnel-based TA* (Demyen &amp; Buro) over the triangulated
+nav-mesh: A* on the triangle adjacency graph where each search node
+carries the incremental funnel from the start, <code class="docutils literal notranslate"><span class="pre">g</span></code> is the exact taut
+distance to reach the node’s mouth edge and <code class="docutils literal notranslate"><span class="pre">h</span></code> is the straight-line
+lower bound to the goal. The optimal triangle channel is then string-
+pulled into the taut path. Runs on the same mesh as
+<a class="reference internal" href="#jupedsim.TAStarRoutingEngine" title="jupedsim.TAStarRoutingEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">TAStarRoutingEngine</span></code></a> (used here only to triangulate the geometry).</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="jupedsim.PythonTAStarRoutingEngine.compute_waypoints">
+<span class="sig-name descname"><span class="pre">compute_waypoints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/jupedsim/routing.html#PythonTAStarRoutingEngine.compute_waypoints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jupedsim.PythonTAStarRoutingEngine.compute_waypoints" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jupedsim.PythonTAStarRoutingEngine.from_mesh">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">verts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">polys</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#jupedsim.PythonTAStarRoutingEngine" title="jupedsim.PythonTAStarRoutingEngine"><span class="pre">PythonTAStarRoutingEngine</span></a></span></span><a class="reference internal" href="../../_modules/jupedsim/routing.html#PythonTAStarRoutingEngine.from_mesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jupedsim.PythonTAStarRoutingEngine.from_mesh" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jupedsim.PythonTAStarRoutingEngine.is_routable">
+<span class="sig-name descname"><span class="pre">is_routable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="../../_modules/jupedsim/routing.html#PythonTAStarRoutingEngine.is_routable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jupedsim.PythonTAStarRoutingEngine.is_routable" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jupedsim.PythonTAStarRoutingEngine.mesh">
+<span class="sig-name descname"><span class="pre">mesh</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/jupedsim/routing.html#PythonTAStarRoutingEngine.mesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jupedsim.PythonTAStarRoutingEngine.mesh" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jupedsim.PythonTAStarRoutingEngine.name">
+<span class="sig-name descname"><span class="pre">name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../../_modules/jupedsim/routing.html#PythonTAStarRoutingEngine.name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jupedsim.PythonTAStarRoutingEngine.name" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jupedsim.PythonTAStarRoutingEngine.set_geometry">
+<span class="sig-name descname"><span class="pre">set_geometry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geometry</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../_modules/jupedsim/routing.html#PythonTAStarRoutingEngine.set_geometry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jupedsim.PythonTAStarRoutingEngine.set_geometry" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="jupedsim.Recording">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Recording</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_connection_str</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">uri</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/jupedsim/recording.html#Recording"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jupedsim.Recording" title="Link to this definition">#</a></dt>
 <dd><dl class="py method">
@@ -4728,6 +4784,15 @@ basic information about this library.</p>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.NotifiableQueueStage.count_targeting"><code class="docutils literal notranslate"><span class="pre">NotifiableQueueStage.count_targeting()</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.NotifiableQueueStage.enqueued"><code class="docutils literal notranslate"><span class="pre">NotifiableQueueStage.enqueued()</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.NotifiableQueueStage.pop"><code class="docutils literal notranslate"><span class="pre">NotifiableQueueStage.pop()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.PythonTAStarRoutingEngine"><code class="docutils literal notranslate"><span class="pre">PythonTAStarRoutingEngine</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.PythonTAStarRoutingEngine.compute_waypoints"><code class="docutils literal notranslate"><span class="pre">PythonTAStarRoutingEngine.compute_waypoints()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.PythonTAStarRoutingEngine.from_mesh"><code class="docutils literal notranslate"><span class="pre">PythonTAStarRoutingEngine.from_mesh()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.PythonTAStarRoutingEngine.is_routable"><code class="docutils literal notranslate"><span class="pre">PythonTAStarRoutingEngine.is_routable()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.PythonTAStarRoutingEngine.mesh"><code class="docutils literal notranslate"><span class="pre">PythonTAStarRoutingEngine.mesh()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.PythonTAStarRoutingEngine.name"><code class="docutils literal notranslate"><span class="pre">PythonTAStarRoutingEngine.name()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.PythonTAStarRoutingEngine.set_geometry"><code class="docutils literal notranslate"><span class="pre">PythonTAStarRoutingEngine.set_geometry()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Recording"><code class="docutils literal notranslate"><span class="pre">Recording</span></code></a><ul class="nav section-nav flex-column">
