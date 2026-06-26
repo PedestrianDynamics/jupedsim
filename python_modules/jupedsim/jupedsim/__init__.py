@@ -71,7 +71,7 @@ from jupedsim.models.warp_driver import (
 from jupedsim.neighborhood import NeighborhoodSearch
 from jupedsim.recording import Recording, RecordingAgent, RecordingFrame
 from jupedsim.routing import (
-    AStarRoutingEngine,
+    TAStarRoutingEngine,
     DirectPathRoutingEngine,
     RoutingEngine,
 )
@@ -128,7 +128,7 @@ __all__ = [
     "Recording",
     "RecordingAgent",
     "RecordingFrame",
-    "AStarRoutingEngine",
+    "TAStarRoutingEngine",
     "DirectPathRoutingEngine",
     "RoutingEngine",
     "Simulation",

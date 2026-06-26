@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Simulation.hpp"
 
-#include "AStarRoutingEngine.hpp"
 #include "CollisionGeometry.hpp"
 #include "GeneralizedCentrifugalForceModelData.hpp"
 #include "GenericAgent.hpp"
@@ -15,6 +14,7 @@
 #include "SimulationError.hpp"
 #include "Stage.hpp"
 #include "StageDescription.hpp"
+#include "TAStarRoutingEngine.hpp"
 #include "Tracing.hpp"
 #include "Visitor.hpp"
 
@@ -39,7 +39,7 @@ Simulation::Simulation(
     , _geometry(std::move(geometry))
 {
     if(!routingEngine) {
-        routingEngine = std::make_unique<AStarRoutingEngine>();
+        routingEngine = std::make_unique<TAStarRoutingEngine>();
     }
     routingEngine->set_geometry(*_geometry);
     _routingEngine = std::move(routingEngine);

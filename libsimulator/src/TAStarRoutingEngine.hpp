@@ -10,22 +10,22 @@
 #include <string>
 #include <vector>
 
-class AStarRoutingEngine : public RoutingEngine
+class TAStarRoutingEngine : public RoutingEngine
 {
     CDT cdt{};
     std::unique_ptr<Mesh> mesh{};
 
 public:
-    AStarRoutingEngine() = default;
-    ~AStarRoutingEngine() override = default;
+    TAStarRoutingEngine() = default;
+    ~TAStarRoutingEngine() override = default;
 
-    AStarRoutingEngine(const AStarRoutingEngine& other) = delete;
-    AStarRoutingEngine& operator=(const AStarRoutingEngine& other) = delete;
+    TAStarRoutingEngine(const TAStarRoutingEngine& other) = delete;
+    TAStarRoutingEngine& operator=(const TAStarRoutingEngine& other) = delete;
 
-    AStarRoutingEngine(AStarRoutingEngine&& other) = default;
-    AStarRoutingEngine& operator=(AStarRoutingEngine&& other) = default;
+    TAStarRoutingEngine(TAStarRoutingEngine&& other) = default;
+    TAStarRoutingEngine& operator=(TAStarRoutingEngine&& other) = default;
 
-    std::string name() const override { return "AStar"; }
+    std::string name() const override { return "TAStar"; }
     void set_geometry(const CollisionGeometry& geometry) override;
     std::vector<Point> compute_waypoints(Point from, Point destination) override;
     bool is_routable(Point p) const override;

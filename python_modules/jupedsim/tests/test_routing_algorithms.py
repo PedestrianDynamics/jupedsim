@@ -16,7 +16,7 @@ def make_sim():
 
 def test_default_routing_is_astar():
     sim = make_sim()
-    assert sim.routing_engine_name == "AStar"
+    assert sim.routing_engine_name == "TAStar"
 
 
 def test_construct_with_direct_path_engine():
@@ -32,9 +32,9 @@ def test_construct_with_astar_engine():
     sim = jps.Simulation(
         model=jps.CollisionFreeSpeedModel(),
         geometry=GEOMETRY,
-        routing_engine=jps.AStarRoutingEngine(),
+        routing_engine=jps.TAStarRoutingEngine(),
     )
-    assert sim.routing_engine_name == "AStar"
+    assert sim.routing_engine_name == "TAStar"
 
 
 def test_switch_to_direct_path():
@@ -46,17 +46,17 @@ def test_switch_to_direct_path():
 def test_switch_back_to_astar():
     sim = make_sim()
     sim.switch_routing_engine(jps.DirectPathRoutingEngine())
-    sim.switch_routing_engine(jps.AStarRoutingEngine())
-    assert sim.routing_engine_name == "AStar"
+    sim.switch_routing_engine(jps.TAStarRoutingEngine())
+    assert sim.routing_engine_name == "TAStar"
 
 
 def test_astar_engine_name():
-    navi = jps.AStarRoutingEngine()
-    assert navi.name == "AStar"
+    navi = jps.TAStarRoutingEngine()
+    assert navi.name == "TAStar"
 
 
 def test_astar_waypoints_straight_line_in_open_space():
-    navi = jps.AStarRoutingEngine()
+    navi = jps.TAStarRoutingEngine()
     navi.set_geometry(GEOMETRY)
     from_pt = (10.0, 10.0)
     to_pt = (90.0, 90.0)

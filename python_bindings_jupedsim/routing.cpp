@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "AStarRoutingEngine.hpp"
 #include "CollisionGeometry.hpp"
 #include "RoutingEngine.hpp"
+#include "TAStarRoutingEngine.hpp"
 #include "conversion.hpp"
 
 #include <pybind11/pybind11.h>
@@ -157,9 +157,9 @@ Returns:
     If the point is inside the geometry.
 )doc");
 
-    py::class_<AStarRoutingEngine, RoutingEngine, py::smart_holder>(
+    py::class_<TAStarRoutingEngine, RoutingEngine, py::smart_holder>(
         m,
-        "AStarRoutingEngine",
+        "TAStarRoutingEngine",
         R"doc(A* shortest-path routing on a navigation mesh.
 
 Default-construct object. Either pass to :class:`Simulation` (which calls
@@ -169,11 +169,11 @@ before performing any routing query.
         .def(py::init<>(), "Default-construct an engine without a geometry.")
         .def(
             "mesh",
-            [](const AStarRoutingEngine& routingEngine) {
+            [](const TAStarRoutingEngine& routingEngine) {
                 const auto mesh = routingEngine.MeshData();
                 if(!mesh) {
                     throw std::runtime_error(
-                        "AStarRoutingEngine has no geometry; call set_geometry first");
+                        "TAStarRoutingEngine has no geometry; call set_geometry first");
                 }
                 const auto polygonCount = mesh->CountPolygons();
                 using Ind = decltype(mesh->Polygons(0).vertices);

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "AStarRoutingEngine.hpp"
+#include "TAStarRoutingEngine.hpp"
 
 #include "CfgCgal.hpp"
 #include "CollisionGeometry.hpp"
@@ -24,9 +24,9 @@
 #include <vector>
 
 ////////////////////////////////////////////////////////////////////////////////
-// AStarRoutingEngine
+// TAStarRoutingEngine
 ////////////////////////////////////////////////////////////////////////////////
-void AStarRoutingEngine::set_geometry(const CollisionGeometry& geometry)
+void TAStarRoutingEngine::set_geometry(const CollisionGeometry& geometry)
 {
     const auto& poly = geometry.Polygon();
     cdt = CDT{};
@@ -98,10 +98,10 @@ double length_of_path(const std::vector<Point>& path)
     return segment_sum;
 }
 
-std::vector<Point> AStarRoutingEngine::compute_waypoints(Point currentPosition, Point destination)
+std::vector<Point> TAStarRoutingEngine::compute_waypoints(Point currentPosition, Point destination)
 {
     if(!mesh) {
-        throw SimulationError("AStarRoutingEngine has no geometry; call set_geometry first");
+        throw SimulationError("TAStarRoutingEngine has no geometry; call set_geometry first");
     }
     const auto from_pos = CDT::Point{currentPosition.x, currentPosition.y};
     const auto to_pos = CDT::Point{destination.x, destination.y};
@@ -256,10 +256,10 @@ std::vector<Point> AStarRoutingEngine::compute_waypoints(Point currentPosition, 
     return path;
 }
 
-bool AStarRoutingEngine::is_routable(Point p) const
+bool TAStarRoutingEngine::is_routable(Point p) const
 {
     if(!mesh) {
-        throw SimulationError("AStarRoutingEngine has no geometry; call set_geometry first");
+        throw SimulationError("TAStarRoutingEngine has no geometry; call set_geometry first");
     }
     try {
         find_face({p.x, p.y});
@@ -269,7 +269,7 @@ bool AStarRoutingEngine::is_routable(Point p) const
     return true;
 }
 
-CDT::Face_handle AStarRoutingEngine::find_face(K::Point_2 p) const
+CDT::Face_handle TAStarRoutingEngine::find_face(K::Point_2 p) const
 {
     const auto face = cdt.locate(p);
     if(face == nullptr || cdt.is_infinite(face) || !face->get_in_domain()) {
@@ -282,7 +282,7 @@ CDT::Face_handle AStarRoutingEngine::find_face(K::Point_2 p) const
 }
 
 std::vector<Point>
-AStarRoutingEngine::straightenPath(Point from, Point to, const std::vector<CDT::Face_handle>& path)
+TAStarRoutingEngine::straightenPath(Point from, Point to, const std::vector<CDT::Face_handle>& path)
 {
     // TODO(kkratz): Remove the 0.2m edge width adjustment and replace this with p[roper
     // arc-paths from the "Efficient Triangulation-Based Pathfinding" publication

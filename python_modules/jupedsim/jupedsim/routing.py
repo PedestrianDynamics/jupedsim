@@ -4,7 +4,7 @@ import jupedsim.native as py_jps
 
 # Alias the routing engines.
 RoutingEngine = py_jps.RoutingEngine
-AStarRoutingEngine = py_jps.AStarRoutingEngine
+TAStarRoutingEngine = py_jps.TAStarRoutingEngine
 
 
 class DirectPathRoutingEngine(RoutingEngine):
