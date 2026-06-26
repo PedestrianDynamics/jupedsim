@@ -68,7 +68,9 @@ class ViewGeometryWidget(QWidget):
 
         reset_cam_bt.clicked.connect(self.render_widget.reset_camera)
         self.render_widget.on_hover_triangle.connect(self.hover_label.setText)
-        routing_combo.currentTextChanged.connect(self._on_routing_engine_changed)
+        routing_combo.currentTextChanged.connect(
+            self._on_routing_engine_changed
+        )
 
     def _on_routing_engine_changed(self, engine_name: str) -> None:
         if engine_name == "DirectPath":
