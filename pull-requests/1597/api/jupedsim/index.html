@@ -827,9 +827,9 @@
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.set_error_callback"><code class="docutils literal notranslate"><span class="pre">set_error_callback()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.set_info_callback"><code class="docutils literal notranslate"><span class="pre">set_info_callback()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.set_warning_callback"><code class="docutils literal notranslate"><span class="pre">set_warning_callback()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.AStarRoutingEngine"><code class="docutils literal notranslate"><span class="pre">AStarRoutingEngine</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Hdf5TrajectoryWriter"><code class="docutils literal notranslate"><span class="pre">Hdf5TrajectoryWriter</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.RoutingEngine"><code class="docutils literal notranslate"><span class="pre">RoutingEngine</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.TAStarRoutingEngine"><code class="docutils literal notranslate"><span class="pre">TAStarRoutingEngine</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -1022,13 +1022,13 @@
 <h3>Attributes<a class="headerlink" href="#attributes" title="Link to this heading">#</a></h3>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#jupedsim.AStarRoutingEngine" title="jupedsim.AStarRoutingEngine"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AStarRoutingEngine</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#jupedsim.Hdf5TrajectoryWriter" title="jupedsim.Hdf5TrajectoryWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Hdf5TrajectoryWriter</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#jupedsim.Hdf5TrajectoryWriter" title="jupedsim.Hdf5TrajectoryWriter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Hdf5TrajectoryWriter</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#jupedsim.RoutingEngine" title="jupedsim.RoutingEngine"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RoutingEngine</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#jupedsim.RoutingEngine" title="jupedsim.RoutingEngine"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RoutingEngine</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#jupedsim.TAStarRoutingEngine" title="jupedsim.TAStarRoutingEngine"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TAStarRoutingEngine</span></code></a></p></td>
 <td><p></p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">__commit__</span></code></p></td>
@@ -3305,11 +3305,11 @@ These agents are can no longer be accessed.</p>
 passed-in object afterwards.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>engine</strong> – Routing engine like <a class="reference internal" href="#jupedsim.AStarRoutingEngine" title="jupedsim.AStarRoutingEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">AStarRoutingEngine</span></code></a>.</p>
+<dd class="field-odd"><p><strong>engine</strong> – Routing engine like <a class="reference internal" href="#jupedsim.TAStarRoutingEngine" title="jupedsim.TAStarRoutingEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">TAStarRoutingEngine</span></code></a>.</p>
 </dd>
 </dl>
 <p>Example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sim</span><span class="o">.</span><span class="n">switch_routing_engine</span><span class="p">(</span><span class="n">jps</span><span class="o">.</span><span class="n">AStarRoutingEngine</span><span class="p">())</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sim</span><span class="o">.</span><span class="n">switch_routing_engine</span><span class="p">(</span><span class="n">jps</span><span class="o">.</span><span class="n">TAStarRoutingEngine</span><span class="p">())</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -4348,11 +4348,6 @@ basic information about this library.</p>
 </dd></dl>
 
 <dl class="py data">
-<dt class="sig sig-object py" id="jupedsim.AStarRoutingEngine">
-<span class="sig-name descname"><span class="pre">AStarRoutingEngine</span></span><a class="headerlink" href="#jupedsim.AStarRoutingEngine" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py data">
 <dt class="sig sig-object py" id="jupedsim.Hdf5TrajectoryWriter">
 <span class="sig-name descname"><span class="pre">Hdf5TrajectoryWriter</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="reference internal" href="../../_modules/jupedsim.html#Hdf5TrajectoryWriter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jupedsim.Hdf5TrajectoryWriter" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
@@ -4360,6 +4355,11 @@ basic information about this library.</p>
 <dl class="py data">
 <dt class="sig sig-object py" id="jupedsim.RoutingEngine">
 <span class="sig-name descname"><span class="pre">RoutingEngine</span></span><a class="headerlink" href="#jupedsim.RoutingEngine" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="jupedsim.TAStarRoutingEngine">
+<span class="sig-name descname"><span class="pre">TAStarRoutingEngine</span></span><a class="headerlink" href="#jupedsim.TAStarRoutingEngine" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 </section>
@@ -4916,9 +4916,9 @@ basic information about this library.</p>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.set_error_callback"><code class="docutils literal notranslate"><span class="pre">set_error_callback()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.set_info_callback"><code class="docutils literal notranslate"><span class="pre">set_info_callback()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.set_warning_callback"><code class="docutils literal notranslate"><span class="pre">set_warning_callback()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.AStarRoutingEngine"><code class="docutils literal notranslate"><span class="pre">AStarRoutingEngine</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Hdf5TrajectoryWriter"><code class="docutils literal notranslate"><span class="pre">Hdf5TrajectoryWriter</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.RoutingEngine"><code class="docutils literal notranslate"><span class="pre">RoutingEngine</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.TAStarRoutingEngine"><code class="docutils literal notranslate"><span class="pre">TAStarRoutingEngine</span></code></a></li>
 </ul>
 </li>
 </ul>

@@ -431,7 +431,7 @@
 
 <span class="sd">            dt: Iteration step size in seconds. It is recommended to</span>
 <span class="sd">                leave this at its default value.</span>
-<span class="sd">            routing_engine: Optional routing engine instance. Defaults to :class:`~jupedsim.AStarRoutingEngine`.</span>
+<span class="sd">            routing_engine: Optional routing engine instance. Defaults to :class:`~jupedsim.TAStarRoutingEngine`.</span>
 <span class="sd">                 Ownership is transferred to the simulation.</span>
 <span class="sd">            trajectory_writer: Any object implementing the</span>
 <span class="sd">                TrajectoryWriter interface. JuPedSim provides a writer that outputs trajectory data</span>
@@ -993,11 +993,11 @@
 <span class="sd">        passed-in object afterwards.</span>
 
 <span class="sd">        Arguments:</span>
-<span class="sd">            engine: Routing engine like :class:`~jupedsim.AStarRoutingEngine`.</span>
+<span class="sd">            engine: Routing engine like :class:`~jupedsim.TAStarRoutingEngine`.</span>
 
 <span class="sd">        Example::</span>
 
-<span class="sd">            sim.switch_routing_engine(jps.AStarRoutingEngine())</span>
+<span class="sd">            sim.switch_routing_engine(jps.TAStarRoutingEngine())</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">switch_routing_engine</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span></div>
 

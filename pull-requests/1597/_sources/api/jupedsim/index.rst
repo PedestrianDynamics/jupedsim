@@ -79,9 +79,9 @@ Attributes
 
 .. autoapisummary::
 
-   jupedsim.AStarRoutingEngine
    jupedsim.Hdf5TrajectoryWriter
    jupedsim.RoutingEngine
+   jupedsim.TAStarRoutingEngine
    jupedsim.__commit__
    jupedsim.__compiler__
    jupedsim.__version__
@@ -2120,11 +2120,11 @@ Attributes
       Ownership of *engine* is transferred to the simulation; do not use the
       passed-in object afterwards.
 
-      :param engine: Routing engine like :class:`~jupedsim.AStarRoutingEngine`.
+      :param engine: Routing engine like :class:`~jupedsim.TAStarRoutingEngine`.
 
       Example::
 
-          sim.switch_routing_engine(jps.AStarRoutingEngine())
+          sim.switch_routing_engine(jps.TAStarRoutingEngine())
 
 
 
@@ -3068,13 +3068,13 @@ Attributes
    :type fn: fn<str>
 
 
-.. py:data:: AStarRoutingEngine
-
 .. py:data:: Hdf5TrajectoryWriter
    :value: None
 
 
 .. py:data:: RoutingEngine
+
+.. py:data:: TAStarRoutingEngine
 
 
 
