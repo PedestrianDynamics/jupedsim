@@ -10,6 +10,7 @@ JuPedSim
    Concepts <concepts/index>
    Pedestrian Models <pedestrian_models/index>
    Notebooks <notebooks/index>
+   Debugging <debugging/index>
    History <history>
    Disclaimer <disclaimer>
    API reference <api/jupedsim/index>
