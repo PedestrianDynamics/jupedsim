@@ -83,8 +83,9 @@ Point Point::Rotate90Deg() const
     return {-y, x};
 }
 
-bool Point::IsUnitLength(double tolerance) const
+bool Point::IsUnitLength() const
 {
+    constexpr double tolerance = 1e-9;
     return std::abs(1 - NormSquare()) <= tolerance;
 }
 

@@ -300,10 +300,6 @@ class Simulation:
                 Id of the added agent.
         """
 
-        # Helper function to allow not passing orientation to models not requiring it.
-        def orientation_or_zero(param):
-            return getattr(param, "orientation", (0.0, 0.0))
-
         if isinstance(
             parameters, GeneralizedCentrifugalForceModelAgentParameters
         ):
@@ -321,14 +317,14 @@ class Simulation:
             )
         elif isinstance(parameters, CollisionFreeSpeedModelAgentParameters):
             model = py_jps.CollisionFreeSpeedModelState(
-                orientation=orientation_or_zero(parameters),
+                orientation=parameters.orientation,
                 time_gap=parameters.time_gap,
                 desired_speed=parameters.desired_speed,
                 radius=parameters.radius,
             )
         elif isinstance(parameters, CollisionFreeSpeedModelV2AgentParameters):
             model = py_jps.CollisionFreeSpeedModelV2State(
-                orientation=orientation_or_zero(parameters),
+                orientation=parameters.orientation,
                 strength_neighbor_repulsion=parameters.strength_neighbor_repulsion,
                 range_neighbor_repulsion=parameters.range_neighbor_repulsion,
                 strength_geometry_repulsion=parameters.strength_geometry_repulsion,
@@ -339,7 +335,7 @@ class Simulation:
             )
         elif isinstance(parameters, CollisionFreeSpeedModelV3AgentParameters):
             model = py_jps.CollisionFreeSpeedModelV3State(
-                orientation=orientation_or_zero(parameters),
+                orientation=parameters.orientation,
                 strength_neighbor_repulsion=parameters.strength_neighbor_repulsion,
                 range_neighbor_repulsion=parameters.range_neighbor_repulsion,
                 strength_geometry_repulsion=parameters.strength_geometry_repulsion,
@@ -354,7 +350,7 @@ class Simulation:
             )
         elif isinstance(parameters, AnticipationVelocityModelAgentParameters):
             model = py_jps.AnticipationVelocityModelState(
-                orientation=orientation_or_zero(parameters),
+                orientation=parameters.orientation,
                 strength_neighbor_repulsion=parameters.strength_neighbor_repulsion,
                 range_neighbor_repulsion=parameters.range_neighbor_repulsion,
                 wall_buffer_distance=parameters.wall_buffer_distance,
@@ -377,7 +373,7 @@ class Simulation:
             )
         elif isinstance(parameters, WarpDriverModelAgentParameters):
             model = py_jps.WarpDriverModelState(
-                orientation=orientation_or_zero(parameters),
+                orientation=parameters.orientation,
                 desired_speed=parameters.desired_speed,
                 radius=parameters.radius,
             )

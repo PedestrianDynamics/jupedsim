@@ -51,7 +51,7 @@ public:
 
     /// Tests that the vector is length 1
     /// @return length == 1
-    bool IsUnitLength(double tolerance = std::numeric_limits<double>::epsilon()) const;
+    bool IsUnitLength() const;
 
     // operators
     /// addition
