@@ -71,9 +71,9 @@ from jupedsim.models.warp_driver import (
 from jupedsim.neighborhood import NeighborhoodSearch
 from jupedsim.recording import Recording, RecordingAgent, RecordingFrame
 from jupedsim.routing import (
-    TAStarRoutingEngine,
     DirectPathRoutingEngine,
     RoutingEngine,
+    TAStarRoutingEngine,
 )
 from jupedsim.serialization import TrajectoryWriter
 from jupedsim.simulation import Simulation
