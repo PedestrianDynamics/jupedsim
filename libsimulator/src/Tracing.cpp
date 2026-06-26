@@ -36,9 +36,6 @@ perfetto::TraceConfig buildDefaultTraceConfig(const std::string& output_path)
     // How often accumulated trace data is written from the in-memory ring buffer
     // to the file. Lower values reduce memory pressure; higher values reduce I/O.
     cfg.set_file_write_period_ms(100);
-    // How often data sources are asked to flush their pending events into the
-    // ring buffer so they are visible to the file writer above.
-    // cfg.set_flush_period_ms(100);
     // Maximum time to wait for a flush to complete before giving up.
     cfg.set_flush_timeout_ms(5000);
 
