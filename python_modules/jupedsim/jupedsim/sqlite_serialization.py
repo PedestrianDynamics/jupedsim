@@ -10,7 +10,7 @@ from shapely import from_wkt
 from jupedsim.serialization import TrajectoryWriter
 from jupedsim.simulation import Simulation
 
-DATABASE_VERSION: Final = 2
+DATABASE_VERSION: Final = 3
 
 
 def get_database_version(connection: sqlite3.Connection) -> int:
@@ -85,9 +85,7 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
                 "   frame INTEGER NOT NULL,"
                 "   id INTEGER NOT NULL,"
                 "   pos_x REAL NOT NULL,"
-                "   pos_y REAL NOT NULL,"
-                "   ori_x REAL NOT NULL,"
-                "   ori_y REAL NOT NULL)"
+                "   pos_y REAL NOT NULL)"
             )
             cur.execute("DROP TABLE IF EXISTS metadata")
             cur.execute(
@@ -145,13 +143,11 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
                     agent.id,
                     agent.position[0],
                     agent.position[1],
-                    agent.orientation[0],
-                    agent.orientation[1],
                 )
                 for agent in simulation.agents()
             ]
             cur.executemany(
-                "INSERT INTO trajectory_data VALUES(?, ?, ?, ?, ?, ?)",
+                "INSERT INTO trajectory_data VALUES(?, ?, ?, ?)",
                 frame_data,
             )
 
@@ -237,9 +233,10 @@ def update_database_to_latest_version(connection: sqlite3.Connection):
         convert_database_v1_to_v2(connection)
         version = 2
 
-    # if version == 2:
-    #     convert_database_v2_to_v3
-    #     version = 3
+    if version == 2:
+        convert_database_v2_to_v3(connection)
+        version = 3
+
     # ... for future versions
 
 
@@ -281,5 +278,28 @@ def convert_database_v1_to_v2(connection: sqlite3.Connection):
         )
         cur.execute("COMMIT")
         cur.execute("VACUUM")
+    except sqlite3.Error as e:
+        raise TrajectoryWriter.Exception(f"Error writing to database: {e}")
+
+
+def convert_database_v2_to_v3(connection: sqlite3.Connection):
+    cur = connection.cursor()
+
+    try:
+        cur.execute("BEGIN")
+
+        version = get_database_version(connection)
+        if version != 2:
+            raise RuntimeError(
+                f"Internal Error: When converting from database version 2 to 3, encountered database version {version}."
+            )
+
+        # Orientation (ori_x, ori_y) does no longer exist. Only change
+        # the version in-place as v2 only has additional data we just ignore.
+        cur.execute(
+            "UPDATE metadata SET value = ? WHERE key = ?", (3, "version")
+        )
+
+        cur.execute("COMMIT")
     except sqlite3.Error as e:
         raise TrajectoryWriter.Exception(f"Error writing to database: {e}")

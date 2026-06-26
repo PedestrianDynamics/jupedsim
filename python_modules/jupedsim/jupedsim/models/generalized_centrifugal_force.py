@@ -187,6 +187,15 @@ class GeneralizedCentrifugalForceModelState:
         self._obj.desired_direction = e0
 
     @property
+    def orientation(self) -> tuple[float, float]:
+        """Orientation of this agent."""
+        return self._obj.orientation
+
+    @orientation.setter
+    def orientation(self, orientation):
+        self._obj.orientation = orientation
+
+    @property
     def tau(self) -> float:
         return self._obj.tau
 

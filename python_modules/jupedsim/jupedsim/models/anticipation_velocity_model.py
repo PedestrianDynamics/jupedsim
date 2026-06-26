@@ -96,6 +96,15 @@ class AnticipationVelocityModelState:
         self._obj = backing
 
     @property
+    def orientation(self) -> tuple[float, float]:
+        """Orientation of this agent."""
+        return self._obj.orientation
+
+    @orientation.setter
+    def orientation(self, orientation):
+        self._obj.orientation = orientation
+
+    @property
     def time_gap(self) -> float:
         return self._obj.time_gap
 
