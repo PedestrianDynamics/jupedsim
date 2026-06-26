@@ -179,13 +179,6 @@ Attributes
       Access model specific state of this agent.
 
 
-   .. py:property:: orientation
-      :type: tuple[float, float]
-
-
-      Orientation of the agent.
-
-
    .. py:property:: position
       :type: tuple[float, float]
 
@@ -306,6 +299,10 @@ Attributes
 
       Position of the agent.
 
+   .. attribute:: orientation
+
+      Orientation of the agent.
+
    .. attribute:: time_gap
 
       Time constant that describe how fast pedestrian close gaps.
@@ -362,6 +359,12 @@ Attributes
    .. py:attribute:: journey_id
       :type:  int
       :value: 0
+
+
+
+   .. py:attribute:: orientation
+      :type:  tuple[float, float]
+      :value: (0.0, 0.0)
 
 
 
@@ -427,6 +430,13 @@ Attributes
 
 
       desired Speed of this agent.
+
+
+   .. py:property:: orientation
+      :type: tuple[float, float]
+
+
+      Orientation of this agent.
 
 
    .. py:property:: radius
@@ -569,7 +579,7 @@ Attributes
 
 
 
-.. py:class:: CollisionFreeSpeedModelAgentParameters(*, position: tuple[float, float] = (0.0, 0.0), time_gap: float = 1.0, desired_speed: float = 1.2, radius: float = 0.2, journey_id: int = 0, stage_id: int = 0, v0: float | None = None)
+.. py:class:: CollisionFreeSpeedModelAgentParameters(*, position: tuple[float, float] = (0.0, 0.0), orientation: tuple[float, float] = (0.0, 0.0), time_gap: float = 1.0, desired_speed: float = 1.2, radius: float = 0.2, journey_id: int = 0, stage_id: int = 0, v0: float | None = None)
 
    Agent parameters for Collision Free Speed Model.
 
@@ -594,6 +604,10 @@ Attributes
    .. attribute:: position
 
       Position of the agent.
+
+   .. attribute:: orientation
+
+      Orientation of the agent.
 
    .. attribute:: time_gap
 
@@ -625,6 +639,12 @@ Attributes
    .. py:attribute:: journey_id
       :type:  int
       :value: 0
+
+
+
+   .. py:attribute:: orientation
+      :type:  tuple[float, float]
+      :value: (0.0, 0.0)
 
 
 
@@ -666,6 +686,13 @@ Attributes
       desired Speed of this agent.
 
 
+   .. py:property:: orientation
+      :type: tuple[float, float]
+
+
+      Orientation of this agent.
+
+
    .. py:property:: radius
       :type: float
 
@@ -698,7 +725,7 @@ Attributes
    A more detailed description can be found at https://pedestriandynamics.org/models/collision_free_speed_model/
 
 
-.. py:class:: CollisionFreeSpeedModelV2AgentParameters(*, position: tuple[float, float] = (0.0, 0.0), time_gap: float = 1.0, desired_speed: float = 1.2, v0: float | None = None, radius: float = 0.2, journey_id: int = 0, stage_id: int = 0, strength_neighbor_repulsion: float = 8.0, range_neighbor_repulsion: float = 0.1, strength_geometry_repulsion: float = 5.0, range_geometry_repulsion: float = 0.02)
+.. py:class:: CollisionFreeSpeedModelV2AgentParameters(*, position: tuple[float, float] = (0.0, 0.0), orientation: tuple[float, float] = (0.0, 0.0), time_gap: float = 1.0, desired_speed: float = 1.2, v0: float | None = None, radius: float = 0.2, journey_id: int = 0, stage_id: int = 0, strength_neighbor_repulsion: float = 8.0, range_neighbor_repulsion: float = 0.1, strength_geometry_repulsion: float = 5.0, range_geometry_repulsion: float = 0.02)
 
    Agent parameters for Collision Free Speed Model V2.
 
@@ -723,6 +750,10 @@ Attributes
    .. attribute:: position
 
       Position of the agent.
+
+   .. attribute:: orientation
+
+      Orientation of the agent.
 
    .. attribute:: time_gap
 
@@ -770,6 +801,12 @@ Attributes
    .. py:attribute:: journey_id
       :type:  int
       :value: 0
+
+
+
+   .. py:attribute:: orientation
+      :type:  tuple[float, float]
+      :value: (0.0, 0.0)
 
 
 
@@ -835,6 +872,13 @@ Attributes
       desired Speed of this agent.
 
 
+   .. py:property:: orientation
+      :type: tuple[float, float]
+
+
+      Orientation of this agent.
+
+
    .. py:property:: radius
       :type: float
 
@@ -890,7 +934,7 @@ Attributes
    around the desired direction.
 
 
-.. py:class:: CollisionFreeSpeedModelV3AgentParameters(*, position: tuple[float, float] = (0.0, 0.0), time_gap: float = 1.0, desired_speed: float = 1.2, v0: float | None = None, radius: float = 0.2, journey_id: int = 0, stage_id: int = 0, strength_neighbor_repulsion: float = 8.0, range_neighbor_repulsion: float = 0.1, strength_geometry_repulsion: float = 5.0, range_geometry_repulsion: float = 0.02, range_x_scale: float = 20.0, range_y_scale: float = 8.0, theta_max_upper_bound: float = 1.57, agent_buffer: float = 0.0)
+.. py:class:: CollisionFreeSpeedModelV3AgentParameters(*, position: tuple[float, float] = (0.0, 0.0), orientation: tuple[float, float] = (0.0, 0.0), time_gap: float = 1.0, desired_speed: float = 1.2, v0: float | None = None, radius: float = 0.2, journey_id: int = 0, stage_id: int = 0, strength_neighbor_repulsion: float = 8.0, range_neighbor_repulsion: float = 0.1, strength_geometry_repulsion: float = 5.0, range_geometry_repulsion: float = 0.02, range_x_scale: float = 20.0, range_y_scale: float = 8.0, theta_max_upper_bound: float = 1.57, agent_buffer: float = 0.0)
 
    Agent parameters for Collision Free Speed Model V3.
 
@@ -919,6 +963,10 @@ Attributes
    .. attribute:: position
 
       Position of the agent.
+
+   .. attribute:: orientation
+
+      Orientation of the agent.
 
    .. attribute:: time_gap
 
@@ -995,6 +1043,12 @@ Attributes
    .. py:attribute:: journey_id
       :type:  int
       :value: 0
+
+
+
+   .. py:attribute:: orientation
+      :type:  tuple[float, float]
+      :value: (0.0, 0.0)
 
 
 
@@ -1079,6 +1133,13 @@ Attributes
    .. py:property:: desired_speed
       :type: float
 
+
+
+   .. py:property:: orientation
+      :type: tuple[float, float]
+
+
+      Orientation of this agent.
 
 
    .. py:property:: radius
@@ -1269,7 +1330,7 @@ Attributes
 
    .. attribute:: orientation
 
-      Orientation of the agent.
+      Orientation of the agent. Has to be normalized to length 1.0
 
    .. attribute:: journey_id
 
@@ -1440,6 +1501,13 @@ Attributes
 
 
       Desired direction of this agent.
+
+
+   .. py:property:: orientation
+      :type: tuple[float, float]
+
+
+      Orientation of this agent.
 
 
    .. py:property:: speed
@@ -1700,9 +1768,6 @@ Attributes
 
    .. py:method:: bounds() -> jupedsim.internal.aabb.AABB
 
-      Get bounds of the position data contained in this recording.
-
-
 
    .. py:method:: frame(index: int) -> RecordingFrame
 
@@ -1754,10 +1819,6 @@ Attributes
 
    .. py:attribute:: id
       :type:  int
-
-
-   .. py:attribute:: orientation
-      :type:  tuple[float, float]
 
 
    .. py:attribute:: position
@@ -2137,7 +2198,7 @@ Attributes
 
 
 
-.. py:class:: SocialForceModelAgentParameters(position: tuple[float, float] = (0.0, 0.0), orientation: tuple[float, float] = (0.0, 0.0), journey_id: int = -1, stage_id: int = -1, velocity: tuple[float, float] = (0.0, 0.0), mass: float = 80.0, desired_speed: float = 0.8, reaction_time: float = 0.5, agent_scale: float = 2000, obstacle_scale: float = 2000, force_distance: float = 0.08, radius: float = 0.3, desiredSpeed=None, reactionTime=None, agentScale=None, obstacleScale=None, forceDistance=None)
+.. py:class:: SocialForceModelAgentParameters(position: tuple[float, float] = (0.0, 0.0), journey_id: int = -1, stage_id: int = -1, velocity: tuple[float, float] = (0.0, 0.0), mass: float = 80.0, desired_speed: float = 0.8, reaction_time: float = 0.5, agent_scale: float = 2000, obstacle_scale: float = 2000, force_distance: float = 0.08, radius: float = 0.3, desiredSpeed=None, reactionTime=None, agentScale=None, obstacleScale=None, forceDistance=None)
 
    Parameters required to create an Agent in the Social Force Model.
 
@@ -2147,10 +2208,6 @@ Attributes
    .. attribute:: position
 
       Position of the agent.
-
-   .. attribute:: orientation
-
-      Orientation of the agent.
 
    .. attribute:: journey_id
 
@@ -2246,12 +2303,6 @@ Attributes
    .. py:attribute:: obstacle_scale
       :type:  float
       :value: 2000
-
-
-
-   .. py:attribute:: orientation
-      :type:  tuple[float, float]
-      :value: (0.0, 0.0)
 
 
 
@@ -2777,6 +2828,13 @@ Attributes
 
 
       Desired speed of this agent [m/s].
+
+
+   .. py:property:: orientation
+      :type: tuple[float, float]
+
+
+      Orientation of this agent.
 
 
    .. py:property:: radius
