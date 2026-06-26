@@ -163,6 +163,12 @@ class PythonTAStarRoutingEngine(RoutingEngine):
         self._polygons: list[list[int]] = []
         # neighbors[t][i] = triangle across edge (poly[i], poly[i+1]) or -1.
         self._neighbors: list[list[int]] = []
+        self._tri_pts: np.ndarray | None = None  # (T, 3, 2) vertex coords
+        # Uniform-grid point-location index over triangle bounding boxes.
+        self._grid: list[list[int]] | None = None
+        self._grid_min: np.ndarray | None = None
+        self._grid_cell: np.ndarray | None = None
+        self._grid_n: int = 0
 
     def name(self) -> str:
         return "PythonTAStar"
@@ -180,7 +186,9 @@ class PythonTAStarRoutingEngine(RoutingEngine):
     def _set_mesh(self, verts, polys) -> None:
         self._vertices = np.asarray(verts, dtype=float)
         self._polygons = [list(p) for p in polys]
+        self._tri_pts = np.array([self._vertices[p] for p in self._polygons])
         self._build_adjacency()
+        self._build_locator()
 
     def mesh(self) -> tuple[list[tuple[float, float]], list[list[int]]]:
         if self._vertices is None:
@@ -206,19 +214,51 @@ class PythonTAStarRoutingEngine(RoutingEngine):
             self._neighbors[t0][i0] = t1
             self._neighbors[t1][i1] = t0
 
+    def _build_locator(self) -> None:
+        """Uniform grid bucketing each triangle into the cells its bbox spans."""
+        pts = self._tri_pts  # (T, 3, 2)
+        flat = pts.reshape(-1, 2)
+        self._grid_min = flat.min(axis=0)
+        span = np.maximum(flat.max(axis=0) - self._grid_min, 1e-9)
+        # ~sqrt(T) cells per axis keeps average bucket occupancy small.
+        n = max(1, int(np.sqrt(len(pts))))
+        self._grid_n = n
+        self._grid_cell = span / n
+
+        lo = np.clip(
+            ((pts.min(axis=1) - self._grid_min) / self._grid_cell).astype(int),
+            0,
+            n - 1,
+        )
+        hi = np.clip(
+            ((pts.max(axis=1) - self._grid_min) / self._grid_cell).astype(int),
+            0,
+            n - 1,
+        )
+        grid: list[list[int]] = [[] for _ in range(n * n)]
+        for t in range(len(pts)):
+            for cx in range(lo[t, 0], hi[t, 0] + 1):
+                for cy in range(lo[t, 1], hi[t, 1] + 1):
+                    grid[cx * n + cy].append(t)
+        self._grid = grid
+
+    def _contains(self, p: np.ndarray, t: int) -> bool:
+        ring = self._tri_pts[t]
+        edges = np.roll(ring, -1, axis=0) - ring
+        rel = p - ring
+        cross = edges[:, 0] * rel[:, 1] - edges[:, 1] * rel[:, 0]
+        return bool(np.all(cross >= -1e-9))
+
     def _locate(self, point: tuple[float, float]) -> int | None:
-        """Index of the polygon containing *point*, or ``None``."""
+        """Index of the triangle containing *point*, or ``None``."""
         p = np.asarray(point, dtype=float)
-        verts = self._vertices
-        eps = 1e-9
-        for poly_idx, poly in enumerate(self._polygons):
-            ring = verts[poly]
-            # CCW convex polygon: inside iff point is left-of every edge.
-            edges = np.roll(ring, -1, axis=0) - ring
-            rel = p - ring
-            cross = edges[:, 0] * rel[:, 1] - edges[:, 1] * rel[:, 0]
-            if np.all(cross >= -eps):
-                return poly_idx
+        n = self._grid_n
+        cell = ((p - self._grid_min) / self._grid_cell).astype(int)
+        cx = min(max(int(cell[0]), 0), n - 1)
+        cy = min(max(int(cell[1]), 0), n - 1)
+        for t in self._grid[cx * n + cy]:
+            if self._contains(p, t):
+                return t
         return None
 
     def _orient(
