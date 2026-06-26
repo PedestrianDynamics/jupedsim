@@ -646,10 +646,6 @@
 <span class="sd">                Id of the added agent.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="c1"># Helper function to allow not passing orientation to models not requiring it.</span>
-        <span class="k">def</span><span class="w"> </span><span class="nf">orientation_or_zero</span><span class="p">(</span><span class="n">param</span><span class="p">):</span>
-            <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="s2">&quot;orientation&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">))</span>
-
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span>
             <span class="n">parameters</span><span class="p">,</span> <span class="n">GeneralizedCentrifugalForceModelAgentParameters</span>
         <span class="p">):</span>
@@ -667,14 +663,14 @@
             <span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">CollisionFreeSpeedModelAgentParameters</span><span class="p">):</span>
             <span class="n">model</span> <span class="o">=</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">CollisionFreeSpeedModelState</span><span class="p">(</span>
-                <span class="n">orientation</span><span class="o">=</span><span class="n">orientation_or_zero</span><span class="p">(</span><span class="n">parameters</span><span class="p">),</span>
+                <span class="n">orientation</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">orientation</span><span class="p">,</span>
                 <span class="n">time_gap</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">time_gap</span><span class="p">,</span>
                 <span class="n">desired_speed</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">desired_speed</span><span class="p">,</span>
                 <span class="n">radius</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">CollisionFreeSpeedModelV2AgentParameters</span><span class="p">):</span>
             <span class="n">model</span> <span class="o">=</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">CollisionFreeSpeedModelV2State</span><span class="p">(</span>
-                <span class="n">orientation</span><span class="o">=</span><span class="n">orientation_or_zero</span><span class="p">(</span><span class="n">parameters</span><span class="p">),</span>
+                <span class="n">orientation</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">orientation</span><span class="p">,</span>
                 <span class="n">strength_neighbor_repulsion</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">strength_neighbor_repulsion</span><span class="p">,</span>
                 <span class="n">range_neighbor_repulsion</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">range_neighbor_repulsion</span><span class="p">,</span>
                 <span class="n">strength_geometry_repulsion</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">strength_geometry_repulsion</span><span class="p">,</span>
@@ -685,7 +681,7 @@
             <span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">CollisionFreeSpeedModelV3AgentParameters</span><span class="p">):</span>
             <span class="n">model</span> <span class="o">=</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">CollisionFreeSpeedModelV3State</span><span class="p">(</span>
-                <span class="n">orientation</span><span class="o">=</span><span class="n">orientation_or_zero</span><span class="p">(</span><span class="n">parameters</span><span class="p">),</span>
+                <span class="n">orientation</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">orientation</span><span class="p">,</span>
                 <span class="n">strength_neighbor_repulsion</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">strength_neighbor_repulsion</span><span class="p">,</span>
                 <span class="n">range_neighbor_repulsion</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">range_neighbor_repulsion</span><span class="p">,</span>
                 <span class="n">strength_geometry_repulsion</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">strength_geometry_repulsion</span><span class="p">,</span>
@@ -700,7 +696,7 @@
             <span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">AnticipationVelocityModelAgentParameters</span><span class="p">):</span>
             <span class="n">model</span> <span class="o">=</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">AnticipationVelocityModelState</span><span class="p">(</span>
-                <span class="n">orientation</span><span class="o">=</span><span class="n">orientation_or_zero</span><span class="p">(</span><span class="n">parameters</span><span class="p">),</span>
+                <span class="n">orientation</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">orientation</span><span class="p">,</span>
                 <span class="n">strength_neighbor_repulsion</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">strength_neighbor_repulsion</span><span class="p">,</span>
                 <span class="n">range_neighbor_repulsion</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">range_neighbor_repulsion</span><span class="p">,</span>
                 <span class="n">wall_buffer_distance</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">wall_buffer_distance</span><span class="p">,</span>
@@ -723,7 +719,7 @@
             <span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">WarpDriverModelAgentParameters</span><span class="p">):</span>
             <span class="n">model</span> <span class="o">=</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">WarpDriverModelState</span><span class="p">(</span>
-                <span class="n">orientation</span><span class="o">=</span><span class="n">orientation_or_zero</span><span class="p">(</span><span class="n">parameters</span><span class="p">),</span>
+                <span class="n">orientation</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">orientation</span><span class="p">,</span>
                 <span class="n">desired_speed</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">desired_speed</span><span class="p">,</span>
                 <span class="n">radius</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span>
             <span class="p">)</span>
