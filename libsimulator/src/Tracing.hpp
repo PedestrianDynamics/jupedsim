@@ -51,4 +51,5 @@ private:
     void writeAndResetSession(const std::string& filename);
     bool enabled{false};
     std::unique_ptr<perfetto::TracingSession> tracing_session{};
+    std::string temp_trace_path{};
 };
