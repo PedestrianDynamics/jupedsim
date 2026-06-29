@@ -37,23 +37,23 @@ OperationalModelUpdate SocialForceModelIPP::ComputeNewPosition(
 
     // vector from ground support toward upper body
     // When co-located, use the driving direction as fallback
-    const Point vec_ub_leg = ped.pos - model.ground_support_position;
-    Point e_ub_leg;
-    if(vec_ub_leg.Norm() > 1e-10) {
-        e_ub_leg = vec_ub_leg.Normalized();
+    const Point vec_gs_ub = ped.pos - model.ground_support_position;
+    Point e_gs_ub;
+    if(vec_gs_ub.Norm() > 1e-10) {
+        e_gs_ub = vec_gs_ub.Normalized();
     } else {
         // Fallback: use direction toward destination 
         const Point toGoal = ped.destination - ped.pos;
-        e_ub_leg = (toGoal.Norm() > 1e-10) ? toGoal.Normalized() : Point(0, 0);
+        e_gs_ub = (toGoal.Norm() > 1e-10) ? toGoal.Normalized() : Point(0, 0);
     }
 
     // --- Upper body acceleration ---
     // Driving force: (v0 * e0 - v) / tau
     auto acc_ub = DrivingForce(ped);
 
-    // Unbalancing: lambda_u * (v_s * e_ub_leg - v_n)
+    // Unbalancing: lambda_u * (v_s * e_gs_ub - v_n)
     // Upper body "falls" further in the direction it's already leaning (away from legs)
-    acc_ub += (e_ub_leg * model.balanceSpeed - model.velocity) * model.lambdaU;
+    acc_ub += (e_gs_ub * model.balanceSpeed - model.velocity) * model.lambdaU;
 
     // Damping: -lambda * v_n
     acc_ub += - model.velocity * model.damping;
@@ -77,9 +77,9 @@ OperationalModelUpdate SocialForceModelIPP::ComputeNewPosition(
     }
 
     // --- Ground support (leg) acceleration ---
-    // Balance recovery: lambda_b * (v_s * e_ub_leg - v_leg)
-    // Legs "chase" the upper body (positive e_ub_leg direction)
-    auto acc_gs = (e_ub_leg * model.balanceSpeed - model.ground_support_velocity) * model.lambdaB;
+    // Balance recovery: lambda_b * (v_s * e_gs_ub - v_leg)
+    // Legs "chase" the upper body (positive e_gs_ub direction)
+    auto acc_gs = (e_gs_ub * model.balanceSpeed - model.ground_support_velocity) * model.lambdaB;
 
     // Leg repulsion from other agents' legs (Social + hard contact)
     for(const auto& neighbor : neighborhood) {
@@ -121,14 +121,18 @@ OperationalModelUpdate SocialForceModelIPP::ComputeNewPosition(
     const double dist = separation.Norm();
     if(dist > maxSeparation && dist > 1e-10) {
         // Pull upper body back toward legs
-        update.position = update.ground_support_position + separation.Normalized() * maxSeparation;
+        // update.position = update.ground_support_position + separation.Normalized() * maxSeparation;
+
+        // Reset legs under the body with a slight tilt in the same direction as previously 
+        update.ground_support_position = update.position - e_gs_ub  * model.radius * GS_SCALING_FACTOR * model.height;
+
+
     }
 
 
     // --- Wall crossing prevention ---
     // If a wall crosses the segment between upper body and ground support,
-    // teleport ground support directly under the upper body and copy its
-    // velocity to prevent re-crossing and avoid lagging legs.
+    // Reset legs under the body with a slight tilt in the same direction as previously 
     {
         for(const auto& wall : walls) {
             const LineSegment bodySegment(
@@ -137,7 +141,6 @@ OperationalModelUpdate SocialForceModelIPP::ComputeNewPosition(
                 continue;
             }
             update.ground_support_position = update.position;
-            update.ground_support_velocity = update.velocity;
             break;
         }
     }
