@@ -7,6 +7,7 @@ set_target_properties(fmt PROPERTIES
     POSITION_INDEPENDENT_CODE ON
     SYSTEM ON
 )
+target_compile_definitions(fmt PRIVATE "FMT_CONSTEVAL=")
 
 ################################################################################
 # boost
