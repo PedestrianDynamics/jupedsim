@@ -5,6 +5,7 @@
 #include "Journey.hpp"
 #include "OperationalModel.hpp"
 #include "Polygon.hpp"
+#include "RoutingEngine.hpp"
 #include "Stage.hpp"
 #include "StageDescription.hpp"
 #include "conversion.hpp"
@@ -31,18 +32,24 @@ void init_simulation(py::module_& m)
             // The model is moved out of the Python object into Simulation. After this constructor
             // returns, the Python model object passed here is disowned/invalid and must not be
             // reused.
-            py::init(
-                [](std::unique_ptr<OperationalModel> model, CollisionGeometry geometry, double dT) {
-                    if(!model) {
-                        throw std::invalid_argument("model must not be None");
-                    }
-                    return std::make_unique<Simulation>(
-                        std::move(model), std::make_unique<CollisionGeometry>(geometry), dT);
-                }),
+            py::init([](std::unique_ptr<OperationalModel> model,
+                        CollisionGeometry geometry,
+                        double dT,
+                        std::unique_ptr<RoutingEngine> routing_engine) {
+                if(!model) {
+                    throw std::invalid_argument("model must not be None");
+                }
+                return std::make_unique<Simulation>(
+                    std::move(model),
+                    std::make_unique<CollisionGeometry>(geometry),
+                    dT,
+                    std::move(routing_engine));
+            }),
             py::kw_only(),
             py::arg("model"),
             py::arg("geometry"),
-            py::arg("dt"))
+            py::arg("dt"),
+            py::arg("routing_engine") = nullptr)
         .def(
             "add_waypoint_stage",
             [](Simulation& sim, std::tuple<double, double> position, double distance) {
@@ -153,5 +160,16 @@ void init_simulation(py::module_& m)
         .def(
             "get_duration",
             [](Simulation& sim, const std::string_view name) { return sim.GetTimerDuration(name); })
-        .def("get_durations", [](Simulation& sim) { return sim.GetTimerDurations(); });
+        .def("get_durations", [](Simulation& sim) { return sim.GetTimerDurations(); })
+        .def_property_readonly(
+            "routing_engine_name", [](const Simulation& sim) { return sim.RoutingEngineName(); })
+        .def(
+            "switch_routing_engine",
+            [](Simulation& sim, std::unique_ptr<RoutingEngine> engine) {
+                if(!engine) {
+                    throw std::invalid_argument("engine must not be None");
+                }
+                sim.SwitchRoutingEngine(std::move(engine));
+            },
+            py::arg("engine"));
 }
