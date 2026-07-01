@@ -18,6 +18,7 @@ add_library(py_jupedsim MODULE
     python_model.cpp
     python_model.hpp
     routing.cpp
+    routing_3d.cpp
     simulation.cpp
     social_force_model.cpp
     stage.cpp

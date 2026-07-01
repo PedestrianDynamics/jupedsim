@@ -46,6 +46,8 @@ target_sources(simulator PRIVATE
     src/Routing.hpp
     src/RoutingEngine.cpp
     src/RoutingEngine.hpp
+    src/RoutingEngine3D.cpp
+    src/RoutingEngine3D.hpp
     src/Simulation.cpp
     src/Simulation.hpp
     src/SimulationClock.cpp
@@ -59,6 +61,8 @@ target_sources(simulator PRIVATE
     src/StageSystem.cpp
     src/StageSystem.hpp
     src/StrategicalDesicionSystem.hpp
+    src/SurfaceMeshShortestPathRoutingEngine.cpp
+    src/SurfaceMeshShortestPathRoutingEngine.hpp
     src/TacticalDecisionSystem.hpp
     src/TemplateHelper.hpp
     src/Timing.cpp

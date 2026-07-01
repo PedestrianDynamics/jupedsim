@@ -11,9 +11,6 @@
 #include <variant>
 #include <vector>
 
-using LocationID = size_t;
-using Location = std::variant<Point, LocationID>;
-
 class RoutingEngine : public Clonable<RoutingEngine>
 {
     CDT cdt{};
