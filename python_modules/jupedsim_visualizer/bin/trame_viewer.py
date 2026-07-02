@@ -77,7 +77,8 @@ def build_app(obj_path: str | None):
     state.route_target = "—"
     state.route_cost = 0.0
     state.route_corners = 0
-    state.route_us = 0
+    state.route_setup_us = 0  # set_target() precompute time
+    state.route_query_us = 0  # get_shortest_path() query time
 
     # Holds the currently loaded mesh + its height range; swapped out by load_mesh().
     current: dict = {"mesh": None, "marker_r": 0.1}
@@ -216,7 +217,8 @@ def build_app(obj_path: str | None):
         with state:
             state.route_status = "idle"
             state.route_start = state.route_target = "—"
-            state.route_cost, state.route_corners, state.route_us = 0.0, 0, 0
+            state.route_cost, state.route_corners = 0.0, 0
+            state.route_setup_us, state.route_query_us = 0, 0
 
     def _fmt(p) -> str:
         return f"{p[0]:.3f}, {p[1]:.3f}, {p[2]:.3f}"
@@ -241,18 +243,19 @@ def build_app(obj_path: str | None):
         if start_pos is None:
             return
         prev = route["target_pos"]
-        # The MMP geodesic re-runs on every hover; skip negligible target moves.
+        # Check whether "close" to previous target to make live-updates not feel too sloppy.
         if (
             prev is not None
             and float(np.linalg.norm(target_pos - prev))
             < 0.25 * current["marker_r"]
         ):
             return
-        start_t = tuple(float(v) for v in start_pos)
-        target_t = tuple(float(v) for v in target_pos)
+        # The fixed start is CGAL's source (set via set_target); the live hovered
+        # point is the query source. The returned path runs hover -> start.
+        query_t = tuple(float(v) for v in target_pos)
         t0 = time.perf_counter()
         try:
-            path, cost = engine.get_shortest_path(start_t, target_t)
+            path, cost = engine.get_shortest_path(query_t)
         except Exception:
             return  # off-surface pick or no path
         elapsed_us = (time.perf_counter() - t0) * 1e6
@@ -272,11 +275,19 @@ def build_app(obj_path: str | None):
             state.route_target = _fmt(target_pos)
             state.route_cost = round(cost, 3)
             state.route_corners = int(len(pts))
-            state.route_us = int(elapsed_us)
+            state.route_query_us = int(elapsed_us)
         if ctrl.view_update:
             ctrl.view_update()
 
     def set_start(start_pos) -> None:
+        # The fixed start becomes the engine's target: set_target() runs the
+        # (expensive) per-target precompute here, once, so live hovers are cheap.
+        t0 = time.perf_counter()
+        try:
+            engine.set_target(tuple(float(v) for v in start_pos))
+        except Exception:
+            return  # off-surface pick
+        setup_us = (time.perf_counter() - t0) * 1e6
         route.update(
             start_pos=np.asarray(start_pos, dtype=float),
             tracking=True,
@@ -291,7 +302,12 @@ def build_app(obj_path: str | None):
             state.route_status = "tracking"
             state.route_start = _fmt(start_pos)
             state.route_target = "—"
-            state.route_cost, state.route_corners, state.route_us = 0.0, 0, 0
+            state.route_cost, state.route_corners, state.route_query_us = (
+                0.0,
+                0,
+                0,
+            )
+            state.route_setup_us = int(setup_us)
         if ctrl.view_update:
             ctrl.view_update()
 
@@ -361,7 +377,12 @@ def build_app(obj_path: str | None):
                     "{{ route_cost.toFixed(2) }}", subtitle="Path cost"
                 )
                 v3.VListItem("{{ route_corners }}", subtitle="Waypoints")
-                v3.VListItem("{{ route_us }} µs", subtitle="Compute time")
+                v3.VListItem(
+                    "{{ route_setup_us }} µs", subtitle="set_target time"
+                )
+                v3.VListItem(
+                    "{{ route_query_us }} µs", subtitle="get_shortest_path time"
+                )
         with layout.toolbar:
             with v3.VMenu(close_on_content_click=False):
                 with v3.Template(v_slot_activator="{ props }"):

@@ -33,6 +33,7 @@ void init_routing_3d(py::module_& m)
                 engine.set_geometry(std::move(mesh));
             })
         .def("is_valid_location", &RoutingEngine3D::is_valid_location)
+        .def("set_target", &RoutingEngine3D::set_target)
         .def("get_shortest_path", &RoutingEngine3D::get_shortest_path)
         .def("get_orientation", &RoutingEngine3D::get_orientation);
 

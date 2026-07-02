@@ -3,47 +3,47 @@
 
 #include "SimulationError.hpp"
 
-#include <CGAL/Surface_mesh_shortest_path.h>
-
 #include <iterator>
 #include <tuple>
 #include <utility>
 #include <vector>
 
-namespace
-{
-using Traits = CGAL::Surface_mesh_shortest_path_traits<SurfaceKernel, SurfaceMesh>;
-using ShortestPath = CGAL::Surface_mesh_shortest_path<Traits>;
-} // namespace
-
 ////////////////////////////////////////////////////////////////////////////////
 // SurfaceMeshShortestPathRoutingEngine
 ////////////////////////////////////////////////////////////////////////////////
-std::tuple<std::vector<Point3D>, double>
-SurfaceMeshShortestPathRoutingEngine::get_shortest_path(const Point3D& from, const Location& to)
+void SurfaceMeshShortestPathRoutingEngine::set_target(const Location& target)
 {
-    const auto from_below = face_below(from);
-    const auto to_below = face_below(to);
-    if(from_below.face == SurfaceMesh::null_face() || to_below.face == SurfaceMesh::null_face()) {
-        throw SimulationError(
-            "get_shortest_path(): start or destination does not project onto the walkable "
-            "surface.");
+    const auto target_below = face_below(target);
+    if(target_below.face == SurfaceMesh::null_face()) {
+        throw SimulationError("set_target(): target does not project onto the walkable surface.");
     }
 
-    ShortestPath shortest_path(_mesh);
+    // Set cache for sub-sequent get_shortest_path() calls.
+    _shortestPath = std::make_unique<ShortestPath>(_mesh);
+    // CGAL needs barycentric coordinates
+    const auto to_loc = _shortestPath->locate(target_below.point, *_aabbTree);
+    _shortestPath->add_source_point(to_loc);
+    _shortestPath->build_sequence_tree();
+}
 
-    // CGAL needs barycentric coordinates.
-    const auto from_loc = shortest_path.locate(from_below.point, *_aabbTree);
-    const auto to_loc = shortest_path.locate(to_below.point, *_aabbTree);
+std::tuple<std::vector<Point3D>, double>
+SurfaceMeshShortestPathRoutingEngine::get_shortest_path(const Point3D& source)
+{
+    if(!_shortestPath) {
+        throw SimulationError("get_shortest_path(): no target set; call set_target() first.");
+    }
 
-    // target location is used as source point for CGAL's pre-calculation.
-    shortest_path.add_source_point(to_loc);
+    const auto from_below = face_below(source);
+    if(from_below.face == SurfaceMesh::null_face()) {
+        throw SimulationError(
+            "get_shortest_path(): source does not project onto the walkable "
+            "surface.");
+    }
+    const auto from_loc = _shortestPath->locate(from_below.point, *_aabbTree);
 
-    // The point-sequence query also returns the geodesic distance to the source
-    // (`.first`), so the cost comes for free -- no separate distance query.
     std::vector<Point3D> path;
-    const auto result = shortest_path.shortest_path_points_to_source_points(
+    const auto result = _shortestPath->shortest_path_points_to_source_points(
         from_loc.first, from_loc.second, std::back_inserter(path));
-    const double cost = result.first;
-    return {std::move(path), cost};
+    // CGAL returns the cost directly. No separate claculation needed.
+    return {std::move(path), result.first};
 }

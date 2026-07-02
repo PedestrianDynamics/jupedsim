@@ -31,35 +31,33 @@ class RoutingEngine3D
 public:
     virtual ~RoutingEngine3D() = default;
 
-    /// Load the walkable surface from a Wavefront OBJ file. The mesh is
-    /// triangulated on load (OBJ faces may be arbitrary polygons).
-    void set_geometry(SurfaceMesh&& mesh)
-    {
-        _mesh = std::move(mesh);
-        _aabbTree = std::make_unique<AABBTree>(faces(_mesh).begin(), faces(_mesh).end(), _mesh);
-    }
+    /// Set geometry.
+    /// @param mesh surface mesh to set geometry to
+    void set_geometry(SurfaceMesh&& mesh);
 
     /// Checks whether the provided location (3D-point or polygon)
     /// is on walkable surface taking wall clearance into account.
     /// @param loc location (Point or Polygon) to check
-    /// @return path between from and to, includes from as
-    ///         first element and to as last element
+    /// @return true if the location projects onto the walkable surface
     virtual bool is_valid_location(const Location& loc) const;
 
-    /// Compute shortest path on walkable surface.
-    /// @param from where to route (Point)
-    /// @param to route to (Location: Point or Polygon)
-    /// @return tuple of (path, cost): the path includes from as first element
-    ///         and to as last element; cost is typically geodesic distance along it,
-    ///         but not necessarily (e.g. floor fields with slowness field).
-    virtual std::tuple<std::vector<Point3D>, double>
-    get_shortest_path(const Point3D& from, const Location& to) = 0;
+    /// Set the routing target and run any per-target precomputation. This allows e.g.
+    // to  run a floor field pre-computation and re-use this in get_shortest_path()
+    /// @param target the destination all subsequent get_shortest_path() route to
+    virtual void set_target(const Location& target) = 0;
 
-    /// Get orientation to next point of shortest path on walkable surface projectted to x/y.
-    /// @param from where to route
-    /// @param to route to (Location: Point or Polygon)
-    /// @return 2D orientation to next point of shortest path between from and to
-    virtual Point get_orientation(const Point3D& from, const Location& to);
+    /// Compute the shortest path from @p source to the target set via set_target().
+    /// @param source where to route from
+    /// @return tuple of (path, cost): the path includes source as first element
+    ///         and the target as last element; cost is typically geodesic distance
+    ///         along it, but not necessarily (e.g. floor fields with slowness field).
+    virtual std::tuple<std::vector<Point3D>, double> get_shortest_path(const Point3D& source) = 0;
+
+    /// Get orientation to next point of the shortest path from @p source to the
+    /// current target, projected to x/y.
+    /// @param source where to route from
+    /// @return 2D orientation to the next waypoint
+    virtual Point get_orientation(const Point3D& source);
 
 protected:
     /// Result of projecting a query point onto the surface.
@@ -71,6 +69,11 @@ protected:
     /// Find face and point on face projecting via -z onto mesh.
     /// `SurfaceMesh::null_face()` in `face` if no such point is found.
     FaceLocation face_below(const Point3D& p) const;
+
+    /// Drop any per-target precomputation, e.g. when the geometry changes.
+    /// Engines with target-related cache have to override it, engines like
+    /// polyanya/TA* will not as they typically do not run any pre-computation.
+    virtual void invalidate_target() {}
 
     SurfaceMesh _mesh{};
     std::unique_ptr<AABBTree> _aabbTree{};

@@ -10,6 +10,13 @@
 ////////////////////////////////////////////////////////////////////////////////
 // RoutingEngine3D
 ////////////////////////////////////////////////////////////////////////////////
+void RoutingEngine3D::set_geometry(SurfaceMesh&& mesh)
+{
+    _mesh = std::move(mesh);
+    _aabbTree = std::make_unique<AABBTree>(faces(_mesh).begin(), faces(_mesh).end(), _mesh);
+    invalidate_target(); // inform engine to clear target cache
+}
+
 RoutingEngine3D::FaceLocation RoutingEngine3D::face_below(const Point3D& p) const
 {
     if(!_aabbTree) {
@@ -37,9 +44,9 @@ bool RoutingEngine3D::is_valid_location(const Location& loc) const
     return face_below(loc).face != SurfaceMesh::null_face();
 }
 
-Point RoutingEngine3D::get_orientation(const Point3D& from, const Location& to)
+Point RoutingEngine3D::get_orientation(const Point3D& source)
 {
-    const auto result = get_shortest_path(from, to);
+    const auto result = get_shortest_path(source);
     const auto& path = std::get<0>(result);
     if(path.size() < 2) {
         // Already at the destination (or no next waypoint) -> no direction.
