@@ -4,6 +4,7 @@
 #include "CollisionFreeSpeedModelV2Update.hpp"
 #include "CollisionFreeSpeedModelV3Update.hpp"
 #include "GeneralizedCentrifugalForceModelUpdate.hpp"
+#include "OperationalModels/CustomModel/CustomModelUpdate.hpp"
 #include "SocialForceModelUpdate.hpp"
 #include "WarpDriverModelUpdate.hpp"
 
@@ -16,4 +17,5 @@ using OperationalModelUpdate = std::variant<
     CollisionFreeSpeedModelV3Update,
     AnticipationVelocityModelUpdate,
     SocialForceModelUpdate,
-    WarpDriverModelUpdate>;
+    WarpDriverModelUpdate,
+    CustomModelUpdate>;

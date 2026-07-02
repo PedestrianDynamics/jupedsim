@@ -16,7 +16,6 @@ namespace py = pybind11;
 
 void init_generalized_centrifugal_force_model(py::module_& m)
 {
-    py::class_<OperationalModel, py::smart_holder>(m, "OperationalModel");
     py::class_<GeneralizedCentrifugalForceModel, OperationalModel, py::smart_holder>(
         m, "GeneralizedCentrifugalForceModel");
     py::class_<GeneralizedCentrifugalForceModelBuilder>(
