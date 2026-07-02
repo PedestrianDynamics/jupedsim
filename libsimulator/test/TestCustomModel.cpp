@@ -176,3 +176,29 @@ TEST(CustomModel, RunsThroughOperationalDecisionSystem)
     ASSERT_EQ(state.applications, 1);
 }
 
+TEST(ModelTypeOf, MapsEveryAgentModelDataToItsOperationalModelType)
+{
+    ASSERT_EQ(
+        ModelTypeOf(GenericAgent::Model{GeneralizedCentrifugalForceModelData{}}),
+        OperationalModelType::GENERALIZED_CENTRIFUGAL_FORCE);
+    ASSERT_EQ(
+        ModelTypeOf(GenericAgent::Model{CollisionFreeSpeedModelData{}}),
+        OperationalModelType::COLLISION_FREE_SPEED);
+    ASSERT_EQ(
+        ModelTypeOf(GenericAgent::Model{CollisionFreeSpeedModelV2Data{}}),
+        OperationalModelType::COLLISION_FREE_SPEED_V2);
+    ASSERT_EQ(
+        ModelTypeOf(GenericAgent::Model{CollisionFreeSpeedModelV3Data{}}),
+        OperationalModelType::COLLISION_FREE_SPEED_V3);
+    ASSERT_EQ(
+        ModelTypeOf(GenericAgent::Model{AnticipationVelocityModelData{}}),
+        OperationalModelType::ANTICIPATION_VELOCITY_MODEL);
+    ASSERT_EQ(
+        ModelTypeOf(GenericAgent::Model{SocialForceModelData{}}),
+        OperationalModelType::SOCIAL_FORCE);
+    ASSERT_EQ(
+        ModelTypeOf(GenericAgent::Model{WarpDriverModelData{}}), OperationalModelType::WARP_DRIVER);
+    ASSERT_EQ(
+        ModelTypeOf(GenericAgent::Model{CustomModelData{MinimalState{}}}),
+        OperationalModelType::CUSTOM_MODEL);
+}
