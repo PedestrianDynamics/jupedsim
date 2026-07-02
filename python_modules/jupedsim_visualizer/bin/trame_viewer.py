@@ -89,6 +89,7 @@ def build_app(obj_path: str | None):
         "target_pos": None,
         "tracking": False,
         "hover_t": 0.0,
+        "line": None,  # persistent polyline dataset, updated in place per hover
     }
     # Exact any-angle geodesic engine (CGAL MMP), fed the same OBJ as the displayed mesh.
     engine = SurfaceMeshShortestPathRoutingEngine()
@@ -211,7 +212,7 @@ def build_app(obj_path: str | None):
     # -- routing via JuPedSim routing engine----------------------------
 
     def clear_route() -> None:
-        route.update(start_pos=None, target_pos=None, tracking=False)
+        route.update(start_pos=None, target_pos=None, tracking=False, line=None)
         for actor_name in ("route_path", "route_start", "route_target"):
             plotter.remove_actor(actor_name, render=False)
         with state:
@@ -223,13 +224,38 @@ def build_app(obj_path: str | None):
     def _fmt(p) -> str:
         return f"{p[0]:.3f}, {p[1]:.3f}, {p[2]:.3f}"
 
-    def _add_marker(actor_name: str, center, color: str) -> None:
-        plotter.add_mesh(
-            pv.Sphere(radius=current["marker_r"], center=center),
-            name=actor_name,
-            color=color,
-            pickable=False,  # never let a marker intercept the pick ray meant for the surface
-        )
+    def _place_marker(actor_name: str, center, color: str) -> None:
+        # Create the marker sphere once, then just move it. add_mesh() rebuilds
+        # the actor/mapper (~1 ms); SetPosition on the existing actor is ~µs.
+        actor = plotter.actors.get(actor_name)
+        if actor is None:
+            actor = plotter.add_mesh(
+                pv.Sphere(
+                    radius=current["marker_r"],
+                    theta_resolution=12,
+                    phi_resolution=12,
+                ),
+                name=actor_name,
+                color=color,
+                pickable=False,  # never intercept the pick ray meant for the surface
+            )
+        actor.SetPosition(float(center[0]), float(center[1]), float(center[2]))
+
+    def _draw_path(pts) -> None:
+        # Update the polyline dataset in place (copy_from ~0.1 ms) rather than
+        # re-adding the actor every hover (add_mesh ~1 ms + mapper rebuild).
+        new = pv.lines_from_points(pts)
+        if route["line"] is None:
+            route["line"] = new
+            plotter.add_mesh(
+                new, name="route_path", color="red", line_width=6, pickable=False
+            )
+        else:
+            route["line"].copy_from(new)
+
+    def _reset_path() -> None:
+        plotter.remove_actor("route_path", render=False)
+        route["line"] = None
 
     def _pick_world(x, y):
         """Ray-pick at display coords (x, y) -> exact surface world position, or None if off-mesh."""
@@ -263,14 +289,8 @@ def build_app(obj_path: str | None):
             return
         pts = np.asarray(path, dtype=float)
         route["target_pos"] = np.asarray(target_pos, dtype=float)
-        plotter.add_mesh(
-            pv.lines_from_points(pts),
-            name="route_path",
-            color="red",
-            line_width=6,
-            pickable=False,
-        )
-        _add_marker("route_target", target_pos, "red")
+        _draw_path(pts)
+        _place_marker("route_target", target_pos, "red")
         with state:
             state.route_target = _fmt(target_pos)
             state.route_cost = round(cost, 3)
@@ -293,11 +313,11 @@ def build_app(obj_path: str | None):
             tracking=True,
             target_pos=None,
         )
-        plotter.remove_actor("route_path", render=False)
+        _reset_path()
         plotter.remove_actor(
             "route_target", render=False
         )  # drop the previous run's endpoint
-        _add_marker("route_start", start_pos, "limegreen")
+        _place_marker("route_start", start_pos, "limegreen")
         with state:
             state.route_status = "tracking"
             state.route_start = _fmt(start_pos)
@@ -321,11 +341,11 @@ def build_app(obj_path: str | None):
 
     @ctrl.trigger("route_hover")
     def _route_hover(fx, fy):
-        # Throttled so we don't pick/recompute faster than ~30 ms regardless of mousemove rate.
+        # Throttled so we don't pick/recompute faster than ~16 ms regardless of mousemove rate.
         if current["mesh"] is None:
             return
         now = time.perf_counter()
-        if now - route["hover_t"] < 0.03:
+        if now - route["hover_t"] < 0.016:
             return
         route["hover_t"] = now
         pos = _pick_world_fraction(fx, fy)
