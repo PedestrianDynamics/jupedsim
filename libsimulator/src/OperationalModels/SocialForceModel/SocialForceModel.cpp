@@ -23,48 +23,40 @@ OperationalModelType SocialForceModel::Type() const
     return OperationalModelType::SOCIAL_FORCE;
 }
 
-OperationalModelUpdate SocialForceModel::ComputeNewPosition(
+void SocialForceModel::ComputeNextState(
     double dT,
-    const GenericAgent& ped,
+    const GenericAgent& current,
+    GenericAgent& next,
     const CollisionGeometry& geometry,
-    const NeighborhoodSearchType& neighborhoodSearch) const
+    const NeighborhoodSearch<GenericAgent>& neighborhoodSearch) const
 {
-    const auto& model = std::get<SocialForceModelData>(ped.model);
-    SocialForceModelUpdate update{};
-    auto forces = DrivingForce(ped);
+    const auto& model = std::get<SocialForceModelData>(current.model);
+    auto forces = DrivingForce(current);
 
-    const auto neighborhood = neighborhoodSearch.GetNeighboringAgents(ped.pos, this->_cutOffRadius);
+    const auto neighborhood =
+        neighborhoodSearch.GetNeighboringAgents(current.pos, this->_cutOffRadius);
     Point F_rep;
     for(const auto& neighbor : neighborhood) {
-        if(neighbor.id == ped.id) {
+        if(neighbor.id == current.id) {
             continue;
         }
-        F_rep += AgentForce(ped, neighbor);
+        F_rep += AgentForce(current, neighbor);
     }
     forces += F_rep / model.mass;
-    const auto& walls = geometry.LineSegmentsInApproxDistanceTo(ped.pos);
+    const auto& walls = geometry.LineSegmentsInApproxDistanceTo(current.pos);
 
     const auto obstacle_f = std::accumulate(
         walls.cbegin(),
         walls.cend(),
         Point(0, 0),
-        [this, &ped](const auto& acc, const auto& element) {
-            return acc + ObstacleForce(ped, element);
+        [this, &current](const auto& acc, const auto& element) {
+            return acc + ObstacleForce(current, element);
         });
     forces += obstacle_f / model.mass;
 
-    update.velocity = model.velocity + forces * dT;
-    update.position = ped.pos + update.velocity * dT;
-
-    return update;
-}
-
-void SocialForceModel::ApplyUpdate(const OperationalModelUpdate& update, GenericAgent& agent) const
-{
-    auto& model = std::get<SocialForceModelData>(agent.model);
-    const auto& upd = std::get<SocialForceModelUpdate>(update);
-    agent.pos = upd.position;
-    model.velocity = upd.velocity;
+    const auto velocity = model.velocity + forces * dT;
+    next.pos = current.pos + velocity * dT;
+    std::get<SocialForceModelData>(next.model).velocity = velocity;
 }
 
 void SocialForceModel::CheckModelConstraint(

@@ -5,7 +5,6 @@
 #include "OperationalDecisionSystem.hpp"
 #include "OperationalModels/CustomModel/CustomModel.hpp"
 #include "OperationalModels/CustomModel/CustomModelData.hpp"
-#include "OperationalModels/CustomModel/CustomModelUpdate.hpp"
 
 #include <fmt/format.h>
 #include <gtest/gtest.h>
@@ -18,13 +17,6 @@
 namespace
 {
 struct MinimalState {
-    Point velocity{};
-    int applications{};
-};
-
-struct MinimalUpdate {
-    Point position{};
-    Point orientation{};
     Point velocity{};
     int applications{};
 };
@@ -44,27 +36,19 @@ struct ConstCharPointerToStringPayload {
 class MinimalCustomModel : public CustomModel
 {
 public:
-    OperationalModelUpdate ComputeNewPosition(
+    void ComputeNextState(
         double dT,
-        const GenericAgent& agent,
+        const GenericAgent& current,
+        GenericAgent& next,
         const CollisionGeometry&,
         const NeighborhoodSearch<GenericAgent>&) const override
     {
-        const auto& state = std::get<CustomModelData>(agent.model).Get<MinimalState>();
-        const auto position = agent.pos + state.velocity * dT;
-        const auto orientation = state.velocity.Normalized();
-        return CustomModelUpdate{
-            MinimalUpdate{position, orientation, state.velocity, state.applications + 1}};
-    }
+        const auto& state = std::get<CustomModelData>(current.model).Get<MinimalState>();
+        auto& nextState = std::get<CustomModelData>(next.model).Get<MinimalState>();
 
-    void ApplyUpdate(const OperationalModelUpdate& update, GenericAgent& agent) const override
-    {
-        const auto& customUpdate = std::get<CustomModelUpdate>(update).Get<MinimalUpdate>();
-        auto& state = std::get<CustomModelData>(agent.model).Get<MinimalState>();
-
-        agent.pos = customUpdate.position;
-        state.velocity = customUpdate.velocity;
-        state.applications = customUpdate.applications;
+        next.pos = current.pos + state.velocity * dT;
+        nextState.velocity = state.velocity;
+        nextState.applications = state.applications + 1;
     }
 
     void CheckModelConstraint(
@@ -117,34 +101,6 @@ TEST(CustomModelData, FormatsPayloadWithToString)
         fmt::format("{}", CustomModelData{StringViewToStringPayload{}}), "string_view tostring");
     ASSERT_EQ(
         fmt::format("{}", CustomModelData{ConstCharPointerToStringPayload{}}),
-        "const char pointer tostring");
-}
-
-TEST(CustomModelUpdate, StoresAndUpdatesTypedPayload)
-{
-    CustomModelUpdate update{13};
-
-    ASSERT_EQ(update.Get<int>(), 13);
-
-    update.Set(17);
-    ASSERT_EQ(update.Get<int>(), 17);
-    ASSERT_THROW((void) update.Get<double>(), std::bad_any_cast);
-}
-
-TEST(CustomModelUpdate, FormatsPayload)
-{
-    const CustomModelUpdate update{std::string{"custom update"}};
-
-    ASSERT_EQ(fmt::format("{}", update), "custom update");
-}
-
-TEST(CustomModelUpdate, FormatsPayloadWithToString)
-{
-    ASSERT_EQ(fmt::format("{}", CustomModelUpdate{StringToStringPayload{}}), "string tostring");
-    ASSERT_EQ(
-        fmt::format("{}", CustomModelUpdate{StringViewToStringPayload{}}), "string_view tostring");
-    ASSERT_EQ(
-        fmt::format("{}", CustomModelUpdate{ConstCharPointerToStringPayload{}}),
         "const char pointer tostring");
 }
 

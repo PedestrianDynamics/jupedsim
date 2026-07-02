@@ -2,7 +2,6 @@
 #include "CollisionFreeSpeedModel.hpp"
 
 #include "CollisionFreeSpeedModelData.hpp"
-#include "CollisionFreeSpeedModelUpdate.hpp"
 #include "CollisionGeometry.hpp"
 #include "GenericAgent.hpp"
 #include "GeometricFunctions.hpp"
@@ -36,14 +35,15 @@ OperationalModelType CollisionFreeSpeedModel::Type() const
     return OperationalModelType::COLLISION_FREE_SPEED;
 }
 
-OperationalModelUpdate CollisionFreeSpeedModel::ComputeNewPosition(
+void CollisionFreeSpeedModel::ComputeNextState(
     double dT,
-    const GenericAgent& ped,
+    const GenericAgent& current,
+    GenericAgent& next,
     const CollisionGeometry& geometry,
-    const NeighborhoodSearchType& neighborhoodSearch) const
+    const NeighborhoodSearch<GenericAgent>& neighborhoodSearch) const
 {
-    auto neighborhood = neighborhoodSearch.GetNeighboringAgents(ped.pos, _cutOffRadius);
-    const auto& boundary = geometry.LineSegmentsInApproxDistanceTo(ped.pos);
+    auto neighborhood = neighborhoodSearch.GetNeighboringAgents(current.pos, _cutOffRadius);
+    const auto& boundary = geometry.LineSegmentsInApproxDistanceTo(current.pos);
 
     // Remove any agent from the neighborhood that is obstructed by geometry and the current
     // agent
@@ -51,11 +51,11 @@ OperationalModelUpdate CollisionFreeSpeedModel::ComputeNewPosition(
         std::remove_if(
             std::begin(neighborhood),
             std::end(neighborhood),
-            [&ped, &boundary](const auto& neighbor) {
-                if(ped.id == neighbor.id) {
+            [&current, &boundary](const auto& neighbor) {
+                if(current.id == neighbor.id) {
                     return true;
                 }
-                const auto agent_to_neighbor = LineSegment(ped.pos, neighbor.pos);
+                const auto agent_to_neighbor = LineSegment(current.pos, neighbor.pos);
                 if(std::find_if(
                        boundary.cbegin(),
                        boundary.cend(),
@@ -73,21 +73,21 @@ OperationalModelUpdate CollisionFreeSpeedModel::ComputeNewPosition(
         std::begin(neighborhood),
         std::end(neighborhood),
         Point{},
-        [&ped, this](const auto& res, const auto& neighbor) {
-            return res + NeighborRepulsion(ped, neighbor);
+        [&current, this](const auto& res, const auto& neighbor) {
+            return res + NeighborRepulsion(current, neighbor);
         });
 
     const auto boundaryRepulsion = std::accumulate(
         boundary.cbegin(),
         boundary.cend(),
         Point(0, 0),
-        [this, &ped](const auto& acc, const auto& element) {
-            return acc + BoundaryRepulsion(ped, element);
+        [this, &current](const auto& acc, const auto& element) {
+            return acc + BoundaryRepulsion(current, element);
         });
 
-    const auto desired_direction = (ped.destination - ped.pos).Normalized();
+    const auto desired_direction = (current.destination - current.pos).Normalized();
     auto direction = (desired_direction + neighborRepulsion + boundaryRepulsion).Normalized();
-    const auto& model = std::get<CollisionFreeSpeedModelData>(ped.model);
+    const auto& model = std::get<CollisionFreeSpeedModelData>(current.model);
     if(direction == Point{}) {
         direction = model.orientation;
     }
@@ -95,23 +95,15 @@ OperationalModelUpdate CollisionFreeSpeedModel::ComputeNewPosition(
         std::begin(neighborhood),
         std::end(neighborhood),
         std::numeric_limits<double>::max(),
-        [&ped, &direction, this](const auto& res, const auto& neighbor) {
-            return std::min(res, GetSpacing(ped, neighbor, direction));
+        [&current, &direction, this](const auto& res, const auto& neighbor) {
+            return std::min(res, GetSpacing(current, neighbor, direction));
         });
 
-    const auto optimal_speed = OptimalSpeed(ped, spacing, model.timeGap);
+    const auto optimal_speed = OptimalSpeed(current, spacing, model.timeGap);
     const auto velocity = direction * optimal_speed;
-    return CollisionFreeSpeedModelUpdate{ped.pos + velocity * dT, direction};
+    next.pos = current.pos + velocity * dT;
+    std::get<CollisionFreeSpeedModelData>(next.model).orientation = direction;
 };
-
-void CollisionFreeSpeedModel::ApplyUpdate(const OperationalModelUpdate& upd, GenericAgent& agent)
-    const
-{
-    const auto& update = std::get<CollisionFreeSpeedModelUpdate>(upd);
-    auto& model = std::get<CollisionFreeSpeedModelData>(agent.model);
-    agent.pos = update.position;
-    model.orientation = update.orientation;
-}
 
 void CollisionFreeSpeedModel::CheckModelConstraint(
     const GenericAgent& agent,

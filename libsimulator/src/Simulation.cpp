@@ -88,6 +88,10 @@ void Simulation::Iterate()
         JPS_SCOPED_TIMER_AND_TRACE(_timer, "Operational Decision System", General);
         _operationalDecisionSystem.Run(
             _clock.dT(), _clock.ElapsedTime(), _neighborhoodSearch, *_geometry, _agents);
+        // Agents moved during the operational step; rebuild the grid so cell membership
+        // reflects the new positions for queries before the next iteration (AgentsInRange,
+        // AddAgent validation).
+        _neighborhoodSearch.Update(_agents);
     }
     _clock.Advance();
 }

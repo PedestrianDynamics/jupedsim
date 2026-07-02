@@ -7,9 +7,8 @@
 
 namespace py = pybind11;
 
-/// GIL-safe owner of a py::object, used as the type-erased payload for both
-/// CustomModelData (per-agent custom state) and CustomModelUpdate (the transient
-/// update produced each step).
+/// GIL-safe owner of a py::object, used as the type-erased payload for
+/// CustomModelData (per-agent custom state).
 ///
 /// Copy and copy-assignment SHARE the wrapped object by reference: they incref
 /// the same Python object, they do NOT clone it. This is what makes per-step
@@ -44,13 +43,12 @@ class PythonModel final : public CustomModel
 public:
     explicit PythonModel(py::object model);
 
-    OperationalModelUpdate ComputeNewPosition(
+    void ComputeNextState(
         double dT,
-        const GenericAgent& agent,
+        const GenericAgent& current,
+        GenericAgent& next,
         const CollisionGeometry& geometry,
         const NeighborhoodSearch<GenericAgent>& neighborhoodSearch) const override;
-
-    void ApplyUpdate(const OperationalModelUpdate& update, GenericAgent& agent) const override;
 
     void CheckModelConstraint(
         const GenericAgent& agent,

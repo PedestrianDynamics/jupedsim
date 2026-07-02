@@ -2,7 +2,6 @@
 #include "AnticipationVelocityModel.hpp"
 
 #include "AnticipationVelocityModelData.hpp"
-#include "AnticipationVelocityModelUpdate.hpp"
 #include "CollisionGeometry.hpp"
 #include "GenericAgent.hpp"
 #include "GeometricFunctions.hpp"
@@ -31,14 +30,15 @@ OperationalModelType AnticipationVelocityModel::Type() const
     return OperationalModelType::ANTICIPATION_VELOCITY_MODEL;
 }
 
-OperationalModelUpdate AnticipationVelocityModel::ComputeNewPosition(
+void AnticipationVelocityModel::ComputeNextState(
     double dT,
-    const GenericAgent& ped,
+    const GenericAgent& current,
+    GenericAgent& next,
     const CollisionGeometry& geometry,
-    const NeighborhoodSearchType& neighborhoodSearch) const
+    const NeighborhoodSearch<GenericAgent>& neighborhoodSearch) const
 {
-    auto neighborhood = neighborhoodSearch.GetNeighboringAgents(ped.pos, _cutOffRadius);
-    const auto& boundary = geometry.LineSegmentsInApproxDistanceTo(ped.pos);
+    auto neighborhood = neighborhoodSearch.GetNeighboringAgents(current.pos, _cutOffRadius);
+    const auto& boundary = geometry.LineSegmentsInApproxDistanceTo(current.pos);
 
     // Remove any agent from the neighborhood that is obstructed by geometry and the current
     // agent
@@ -46,11 +46,11 @@ OperationalModelUpdate AnticipationVelocityModel::ComputeNewPosition(
         std::remove_if(
             std::begin(neighborhood),
             std::end(neighborhood),
-            [&ped, &boundary](const auto& neighbor) {
-                if(ped.id == neighbor.id) {
+            [&current, &boundary](const auto& neighbor) {
+                if(current.id == neighbor.id) {
                     return true;
                 }
-                const auto agent_to_neighbor = LineSegment(ped.pos, neighbor.pos);
+                const auto agent_to_neighbor = LineSegment(current.pos, neighbor.pos);
                 if(std::find_if(
                        boundary.cbegin(),
                        boundary.cend(),
@@ -68,13 +68,13 @@ OperationalModelUpdate AnticipationVelocityModel::ComputeNewPosition(
         std::begin(neighborhood),
         std::end(neighborhood),
         Point{},
-        [&ped, this](const auto& res, const auto& neighbor) {
-            return res + NeighborRepulsion(ped, neighbor);
+        [&current, this](const auto& res, const auto& neighbor) {
+            return res + NeighborRepulsion(current, neighbor);
         });
 
-    const auto desiredDirection = (ped.destination - ped.pos).Normalized();
+    const auto desiredDirection = (current.destination - current.pos).Normalized();
     auto direction = (desiredDirection + neighborRepulsion).Normalized();
-    const auto& model = std::get<AnticipationVelocityModelData>(ped.model);
+    const auto& model = std::get<AnticipationVelocityModelData>(current.model);
     if(direction == Point{}) {
         direction = model.orientation;
     }
@@ -83,32 +83,25 @@ OperationalModelUpdate AnticipationVelocityModel::ComputeNewPosition(
     // Wall sliding behavior
 
     // update direction towards the newly calculated direction
-    direction = UpdateDirection(ped, direction, dT);
+    direction = UpdateDirection(current, direction, dT);
     const auto spacing = std::accumulate(
         std::begin(neighborhood),
         std::end(neighborhood),
         std::numeric_limits<double>::max(),
-        [&ped, &direction, this](const auto& res, const auto& neighbor) {
-            return std::min(res, GetSpacing(ped, neighbor, direction));
+        [&current, &direction, this](const auto& res, const auto& neighbor) {
+            return std::min(res, GetSpacing(current, neighbor, direction));
         });
 
-    const auto optimal_speed = OptimalSpeed(ped, spacing, model.timeGap);
-    direction = HandleWallAvoidance(direction, ped.pos, model.radius, boundary, wallBufferDistance);
+    const auto optimal_speed = OptimalSpeed(current, spacing, model.timeGap);
+    direction =
+        HandleWallAvoidance(direction, current.pos, model.radius, boundary, wallBufferDistance);
 
     const auto velocity = direction * optimal_speed;
-    return AnticipationVelocityModelUpdate{
-        .position = ped.pos + velocity * dT, .velocity = velocity, .orientation = direction};
+    next.pos = current.pos + velocity * dT;
+    auto& nextModel = std::get<AnticipationVelocityModelData>(next.model);
+    nextModel.orientation = direction;
+    nextModel.velocity = velocity;
 };
-
-void AnticipationVelocityModel::ApplyUpdate(const OperationalModelUpdate& upd, GenericAgent& agent)
-    const
-{
-    const auto& update = std::get<AnticipationVelocityModelUpdate>(upd);
-    auto& model = std::get<AnticipationVelocityModelData>(agent.model);
-    agent.pos = update.position;
-    model.orientation = update.orientation;
-    model.velocity = update.velocity;
-}
 
 Point AnticipationVelocityModel::UpdateDirection(
     const GenericAgent& ped,

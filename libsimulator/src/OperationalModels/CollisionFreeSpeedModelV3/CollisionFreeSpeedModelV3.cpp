@@ -2,7 +2,6 @@
 #include "CollisionFreeSpeedModelV3.hpp"
 
 #include "CollisionFreeSpeedModelV3Data.hpp"
-#include "CollisionFreeSpeedModelV3Update.hpp"
 #include "CollisionGeometry.hpp"
 #include "GenericAgent.hpp"
 #include "GeometricFunctions.hpp"
@@ -68,20 +67,21 @@ OperationalModelType CollisionFreeSpeedModelV3::Type() const
     return OperationalModelType::COLLISION_FREE_SPEED_V3;
 }
 
-OperationalModelUpdate CollisionFreeSpeedModelV3::ComputeNewPosition(
+void CollisionFreeSpeedModelV3::ComputeNextState(
     double dT,
-    const GenericAgent& ped,
+    const GenericAgent& current,
+    GenericAgent& next,
     const CollisionGeometry& geometry,
-    const NeighborhoodSearchType& neighborhoodSearch) const
+    const NeighborhoodSearch<GenericAgent>& neighborhoodSearch) const
 {
-    auto neighborhood = neighborhoodSearch.GetNeighboringAgents(ped.pos, _cutOffRadius);
-    const auto& boundary = geometry.LineSegmentsInApproxDistanceTo(ped.pos);
+    auto neighborhood = neighborhoodSearch.GetNeighboringAgents(current.pos, _cutOffRadius);
+    const auto& boundary = geometry.LineSegmentsInApproxDistanceTo(current.pos);
 
-    std::erase_if(neighborhood, [&ped, &boundary](const auto& neighbor) {
-        if(ped.id == neighbor.id) {
+    std::erase_if(neighborhood, [&current, &boundary](const auto& neighbor) {
+        if(current.id == neighbor.id) {
             return true;
         }
-        const auto agent_to_neighbor = LineSegment(ped.pos, neighbor.pos);
+        const auto agent_to_neighbor = LineSegment(current.pos, neighbor.pos);
         return std::any_of(
             boundary.cbegin(), boundary.cend(), [&agent_to_neighbor](const auto& segment) {
                 return intersects(agent_to_neighbor, segment);
@@ -92,19 +92,19 @@ OperationalModelUpdate CollisionFreeSpeedModelV3::ComputeNewPosition(
         boundary.cbegin(),
         boundary.cend(),
         Point(0, 0),
-        [this, &ped](const auto& acc, const auto& element) {
-            return acc + BoundaryRepulsion(ped, element);
+        [this, &current](const auto& acc, const auto& element) {
+            return acc + BoundaryRepulsion(current, element);
         });
 
-    const auto& model = std::get<CollisionFreeSpeedModelV3Data>(ped.model);
-    const auto desired_direction = (ped.destination - ped.pos).Normalized();
+    const auto& model = std::get<CollisionFreeSpeedModelV3Data>(current.model);
+    const auto desired_direction = (current.destination - current.pos).Normalized();
     auto reference_direction = (desired_direction + boundaryRepulsion).Normalized();
     if(reference_direction == Point{}) {
         reference_direction = model.orientation;
     }
 
     const auto heading_target =
-        NeighborInfluence(neighborhood, ped.pos, reference_direction, model);
+        NeighborInfluence(neighborhood, current.pos, reference_direction, model);
     const auto alpha = std::clamp(dT / TauTheta, 0.0, 1.0);
     const auto heading_angle = model.headingAngle + alpha * (heading_target - model.headingAngle);
     auto direction =
@@ -117,8 +117,8 @@ OperationalModelUpdate CollisionFreeSpeedModelV3::ComputeNewPosition(
         std::begin(neighborhood),
         std::end(neighborhood),
         std::numeric_limits<double>::max(),
-        [&ped, &direction, this](const auto& res, const auto& neighbor) {
-            return std::min(res, GetSpacing(ped, neighbor, direction));
+        [&current, &direction, this](const auto& res, const auto& neighbor) {
+            return std::min(res, GetSpacing(current, neighbor, direction));
         });
 
     const auto goal_direction =
@@ -127,26 +127,19 @@ OperationalModelUpdate CollisionFreeSpeedModelV3::ComputeNewPosition(
         std::begin(neighborhood),
         std::end(neighborhood),
         std::numeric_limits<double>::max(),
-        [&ped, &goal_direction, this](const auto& res, const auto& neighbor) {
-            return std::min(res, GetSpacing(ped, neighbor, goal_direction));
+        [&current, &goal_direction, this](const auto& res, const auto& neighbor) {
+            return std::min(res, GetSpacing(current, neighbor, goal_direction));
         });
 
     const auto spacing =
         spacing_move * (1.0 - SpacingBlendWeight) + spacing_goal * SpacingBlendWeight;
 
-    const auto optimal_speed = OptimalSpeed(ped, spacing, model.timeGap);
+    const auto optimal_speed = OptimalSpeed(current, spacing, model.timeGap);
     const auto velocity = direction * optimal_speed;
-    return CollisionFreeSpeedModelV3Update{ped.pos + velocity * dT, direction, heading_angle};
-};
-
-void CollisionFreeSpeedModelV3::ApplyUpdate(const OperationalModelUpdate& upd, GenericAgent& agent)
-    const
-{
-    const auto& update = std::get<CollisionFreeSpeedModelV3Update>(upd);
-    agent.pos = update.position;
-    auto& model = std::get<CollisionFreeSpeedModelV3Data>(agent.model);
-    model.orientation = update.orientation;
-    model.headingAngle = update.headingAngle;
+    next.pos = current.pos + velocity * dT;
+    auto& nextModel = std::get<CollisionFreeSpeedModelV3Data>(next.model);
+    nextModel.orientation = direction;
+    nextModel.headingAngle = heading_angle;
 }
 
 void CollisionFreeSpeedModelV3::CheckModelConstraint(

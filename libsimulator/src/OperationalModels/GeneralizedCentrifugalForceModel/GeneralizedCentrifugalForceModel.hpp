@@ -37,12 +37,12 @@ public:
     ~GeneralizedCentrifugalForceModel() override = default;
 
     OperationalModelType Type() const override;
-    OperationalModelUpdate ComputeNewPosition(
+    void ComputeNextState(
         double dT,
-        const GenericAgent& agent,
+        const GenericAgent& current,
+        GenericAgent& next,
         const CollisionGeometry& geometry,
         const NeighborhoodSearchType& neighborhoodSearch) const override;
-    void ApplyUpdate(const OperationalModelUpdate& upate, GenericAgent& agent) const override;
     void CheckModelConstraint(
         const GenericAgent& agent,
         const NeighborhoodSearchType& neighborhoodSearch,
@@ -63,7 +63,7 @@ private:
         double mass,
         double tau,
         double deltaT,
-        GeneralizedCentrifugalForceModelUpdate& update) const;
+        Point& e0update) const;
     /**
      * Repulsive force between two pedestrians ped1 and ped2 according to
      * the Generalized Centrifugal Force Model (chraibi2010a)

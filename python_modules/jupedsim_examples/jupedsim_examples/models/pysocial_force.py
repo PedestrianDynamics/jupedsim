@@ -182,7 +182,7 @@ class PythonSocialForceModel(CustomOperationalModel):
 
         return (fx, fy)
 
-    def compute_new_position(
+    def compute_next_state(
         self, dt: float, agent, geometry, neighborhood_search
     ):
         """

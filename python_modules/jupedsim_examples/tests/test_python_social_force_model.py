@@ -176,7 +176,7 @@ def test_obstacle_force_keeps_agents_from_walls():
 def test_per_agent_state_survives_iterations(corridor_simulation):
     """Non-default per-agent parameters must survive the state round-trip.
 
-    Guards against compute_new_position rebuilding the state from defaults
+    Guards against compute_next_state rebuilding the state from defaults
     instead of carrying the current state forward (dataclasses.replace).
     """
     sim, exit_id, journey_id = corridor_simulation
