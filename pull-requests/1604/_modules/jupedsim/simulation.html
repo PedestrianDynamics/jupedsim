@@ -354,6 +354,11 @@
     <span class="n">CollisionFreeSpeedModelV3</span><span class="p">,</span>
     <span class="n">CollisionFreeSpeedModelV3AgentParameters</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.models.custom_model</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">CustomModelAgentParameters</span><span class="p">,</span>
+    <span class="n">CustomModelAgentState</span><span class="p">,</span>
+    <span class="n">CustomOperationalModel</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.models.generalized_centrifugal_force</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">GeneralizedCentrifugalForceModel</span><span class="p">,</span>
     <span class="n">GeneralizedCentrifugalForceModelAgentParameters</span><span class="p">,</span>
@@ -398,6 +403,7 @@
             <span class="o">|</span> <span class="n">AnticipationVelocityModel</span>
             <span class="o">|</span> <span class="n">SocialForceModel</span>
             <span class="o">|</span> <span class="n">WarpDriverModel</span>
+            <span class="o">|</span> <span class="n">CustomOperationalModel</span>
         <span class="p">),</span>
         <span class="n">geometry</span><span class="p">:</span> <span class="p">(</span>
             <span class="nb">str</span>
@@ -490,6 +496,8 @@
                 <span class="n">velocity_uncertainty_y</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">velocity_uncertainty_y</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="n">py_jps_model</span> <span class="o">=</span> <span class="n">model_builder</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">CustomOperationalModel</span><span class="p">):</span>
+            <span class="n">py_jps_model</span> <span class="o">=</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">_PythonModel</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown model type supplied&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_writer</span> <span class="o">=</span> <span class="n">trajectory_writer</span>
@@ -637,6 +645,7 @@
             <span class="o">|</span> <span class="n">AnticipationVelocityModelAgentParameters</span>
             <span class="o">|</span> <span class="n">SocialForceModelAgentParameters</span>
             <span class="o">|</span> <span class="n">WarpDriverModelAgentParameters</span>
+            <span class="o">|</span> <span class="n">CustomModelAgentParameters</span>
         <span class="p">),</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Add an agent to the simulation.</span>
@@ -727,6 +736,19 @@
                 <span class="n">desired_speed</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">desired_speed</span><span class="p">,</span>
                 <span class="n">radius</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span>
             <span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">CustomModelAgentParameters</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parameters</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">CustomModelAgentState</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                    <span class="s2">&quot;&#39;CustomModelAgentParameters.model&#39; must satisfy &quot;</span>
+                    <span class="s2">&quot;CustomModelAgentState protocol.&quot;</span>
+                <span class="p">)</span>
+            <span class="n">agent</span> <span class="o">=</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">Agent</span><span class="p">(</span>
+                <span class="n">journey_id</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">journey_id</span><span class="p">,</span>
+                <span class="n">stage_id</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">stage_id</span><span class="p">,</span>
+                <span class="n">position</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">position</span><span class="p">,</span>
+                <span class="n">model</span><span class="o">=</span><span class="n">py_jps</span><span class="o">.</span><span class="n">_CustomModelData</span><span class="p">(</span><span class="n">parameters</span><span class="o">.</span><span class="n">model</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">add_agent</span><span class="p">(</span><span class="n">agent</span><span class="p">)</span>
 
         <span class="n">agent</span> <span class="o">=</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">Agent</span><span class="p">(</span>
             <span class="n">journey_id</span><span class="o">=</span><span class="n">parameters</span><span class="o">.</span><span class="n">journey_id</span><span class="p">,</span>

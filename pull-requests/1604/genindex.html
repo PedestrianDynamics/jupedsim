@@ -476,6 +476,8 @@
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/jupedsim/index.html#jupedsim.CustomOperationalModel.check_model_constraint">check_model_constraint() (CustomOperationalModel method)</a>
+</li>
       <li><a href="api/jupedsim/index.html#jupedsim.SqliteTrajectoryWriter.close">close() (SqliteTrajectoryWriter method)</a>
 </li>
       <li><a href="api/jupedsim/index.html#jupedsim.LineSegment.closest_point">closest_point() (LineSegment method)</a>
@@ -500,10 +502,12 @@
 </li>
       <li><a href="api/jupedsim/index.html#jupedsim.BuildInfo.compiler">compiler (BuildInfo property)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/jupedsim/index.html#jupedsim.BuildInfo.compiler_version">compiler_version (BuildInfo property)</a>
 </li>
+      <li><a href="api/jupedsim/index.html#jupedsim.CustomOperationalModel.compute_new_position">compute_new_position() (CustomOperationalModel method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/jupedsim/index.html#jupedsim.RoutingEngine.compute_waypoints">compute_waypoints() (RoutingEngine method)</a>
 </li>
       <li><a href="api/jupedsim/index.html#jupedsim.SqliteTrajectoryWriter.connection">connection() (SqliteTrajectoryWriter method)</a>
@@ -529,6 +533,12 @@
       <li><a href="api/jupedsim/index.html#jupedsim.Transition.create_none_transition">create_none_transition() (Transition static method)</a>
 </li>
       <li><a href="api/jupedsim/index.html#jupedsim.Transition.create_round_robin_transition">create_round_robin_transition() (Transition static method)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.CustomModelAgentParameters">CustomModelAgentParameters (class in jupedsim)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.CustomModelAgentState">CustomModelAgentState (class in jupedsim)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.CustomOperationalModel">CustomOperationalModel (class in jupedsim)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -745,6 +755,8 @@
 </li>
         <li><a href="api/jupedsim/index.html#id38">(CollisionFreeSpeedModelV3AgentParameters attribute)</a>, <a href="api/jupedsim/index.html#jupedsim.CollisionFreeSpeedModelV3AgentParameters.journey_id">[1]</a>
 </li>
+        <li><a href="api/jupedsim/index.html#jupedsim.CustomModelAgentParameters.journey_id">(CustomModelAgentParameters attribute)</a>
+</li>
         <li><a href="api/jupedsim/index.html#id65">(GeneralizedCentrifugalForceModelAgentParameters attribute)</a>, <a href="api/jupedsim/index.html#jupedsim.GeneralizedCentrifugalForceModelAgentParameters.journey_id">[1]</a>
 </li>
         <li><a href="api/jupedsim/index.html#id77">(SocialForceModelAgentParameters attribute)</a>, <a href="api/jupedsim/index.html#jupedsim.SocialForceModelAgentParameters.journey_id">[1]</a>
@@ -810,10 +822,10 @@
 </li>
       <li><a href="api/jupedsim/index.html#id55">max_neighbor_interpolation_distance (GeneralizedCentrifugalForceModel attribute)</a>, <a href="api/jupedsim/index.html#jupedsim.GeneralizedCentrifugalForceModel.max_neighbor_interpolation_distance">[1]</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/jupedsim/index.html#id56">max_neighbor_repulsion_force (GeneralizedCentrifugalForceModel attribute)</a>, <a href="api/jupedsim/index.html#jupedsim.GeneralizedCentrifugalForceModel.max_neighbor_repulsion_force">[1]</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/jupedsim/index.html#jupedsim.RoutingEngine.mesh">mesh() (RoutingEngine method)</a>
 </li>
       <li><a href="api/jupedsim/index.html#jupedsim.AgentNumberError.message">message (AgentNumberError attribute)</a>
@@ -827,7 +839,11 @@
 </li>
       </ul></li>
       <li><a href="api/jupedsim/index.html#jupedsim.Agent.model">model (Agent property)</a>
+
+      <ul>
+        <li><a href="api/jupedsim/index.html#jupedsim.CustomModelAgentParameters.model">(CustomModelAgentParameters attribute)</a>
 </li>
+      </ul></li>
       <li>
     module
 
@@ -923,6 +939,8 @@
         <li><a href="api/jupedsim/index.html#id28">(CollisionFreeSpeedModelV2AgentParameters attribute)</a>, <a href="api/jupedsim/index.html#jupedsim.CollisionFreeSpeedModelV2AgentParameters.position">[1]</a>
 </li>
         <li><a href="api/jupedsim/index.html#id40">(CollisionFreeSpeedModelV3AgentParameters attribute)</a>, <a href="api/jupedsim/index.html#jupedsim.CollisionFreeSpeedModelV3AgentParameters.position">[1]</a>
+</li>
+        <li><a href="api/jupedsim/index.html#jupedsim.CustomModelAgentState.position">(CustomModelAgentState attribute)</a>
 </li>
         <li><a href="api/jupedsim/index.html#id68">(GeneralizedCentrifugalForceModelAgentParameters attribute)</a>, <a href="api/jupedsim/index.html#jupedsim.GeneralizedCentrifugalForceModelAgentParameters.position">[1]</a>
 </li>
@@ -1083,6 +1101,8 @@
         <li><a href="api/jupedsim/index.html#id32">(CollisionFreeSpeedModelV2AgentParameters attribute)</a>, <a href="api/jupedsim/index.html#jupedsim.CollisionFreeSpeedModelV2AgentParameters.stage_id">[1]</a>
 </li>
         <li><a href="api/jupedsim/index.html#id46">(CollisionFreeSpeedModelV3AgentParameters attribute)</a>, <a href="api/jupedsim/index.html#jupedsim.CollisionFreeSpeedModelV3AgentParameters.stage_id">[1]</a>
+</li>
+        <li><a href="api/jupedsim/index.html#jupedsim.CustomModelAgentParameters.stage_id">(CustomModelAgentParameters attribute)</a>
 </li>
         <li><a href="api/jupedsim/index.html#id70">(GeneralizedCentrifugalForceModelAgentParameters attribute)</a>, <a href="api/jupedsim/index.html#jupedsim.GeneralizedCentrifugalForceModelAgentParameters.stage_id">[1]</a>
 </li>

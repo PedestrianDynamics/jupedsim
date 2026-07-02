@@ -26,6 +26,9 @@ Classes
    jupedsim.CollisionFreeSpeedModelV3
    jupedsim.CollisionFreeSpeedModelV3AgentParameters
    jupedsim.CollisionFreeSpeedModelV3State
+   jupedsim.CustomModelAgentParameters
+   jupedsim.CustomModelAgentState
+   jupedsim.CustomOperationalModel
    jupedsim.ExitStage
    jupedsim.GeneralizedCentrifugalForceModel
    jupedsim.GeneralizedCentrifugalForceModelAgentParameters
@@ -173,7 +176,7 @@ Attributes
 
 
    .. py:property:: model
-      :type: jupedsim.models.generalized_centrifugal_force.GeneralizedCentrifugalForceModelState | jupedsim.models.collision_free_speed.CollisionFreeSpeedModelState | jupedsim.models.collision_free_speed_v2.CollisionFreeSpeedModelV2State | jupedsim.models.collision_free_speed_v3.CollisionFreeSpeedModelV3State | jupedsim.models.anticipation_velocity_model.AnticipationVelocityModelState | jupedsim.models.social_force.SocialForceModelState | jupedsim.models.warp_driver.WarpDriverModelState
+      :type: jupedsim.models.generalized_centrifugal_force.GeneralizedCentrifugalForceModelState | jupedsim.models.collision_free_speed.CollisionFreeSpeedModelState | jupedsim.models.collision_free_speed_v2.CollisionFreeSpeedModelV2State | jupedsim.models.collision_free_speed_v3.CollisionFreeSpeedModelV3State | jupedsim.models.anticipation_velocity_model.AnticipationVelocityModelState | jupedsim.models.social_force.SocialForceModelState | jupedsim.models.warp_driver.WarpDriverModelState | object
 
 
       Access model specific state of this agent.
@@ -1192,6 +1195,101 @@ Attributes
 
 
 
+.. py:class:: CustomModelAgentParameters
+
+   Parameters required to create an agent for a custom model.
+
+   ``model`` is the agent's initial per-agent model state and is **required**:
+   you must set it to your own object satisfying :class:`CustomModelAgentState`
+   -- by subclassing it or simply by exposing a ``position`` attribute -- which
+   carries the agent's ``position``, from which the agent is spawned. It should be an immutable object -- a ``@dataclass(frozen=True)`` is
+   strongly recommended -- because the simulation shares it live with your model
+   during each step (see :class:`CustomOperationalModel`). ``model`` has no
+   default; omitting it raises a ``TypeError`` at construction.
+
+
+   .. py:attribute:: journey_id
+      :type:  int
+      :value: 0
+
+
+
+   .. py:attribute:: model
+      :type:  CustomModelAgentState
+
+
+   .. py:attribute:: stage_id
+      :type:  int
+      :value: 0
+
+
+
+.. py:class:: CustomModelAgentState
+
+   Bases: :py:obj:`Protocol`
+
+
+   Structural interface for per-agent model state of custom models.
+
+   Any object exposing a ``position`` attribute of type ``tuple[float, float]``
+   satisfies this protocol -- explicitly subclassing it is supported but not
+   required. The runtime check performed when adding an agent verifies
+   attribute presence only; value types are validated by the simulation
+   itself.
+
+
+   .. py:attribute:: position
+      :type:  tuple[float, float]
+
+
+.. py:class:: CustomOperationalModel
+
+   Bases: :py:obj:`abc.ABC`
+
+
+   Base class for operational models implemented in Python.
+
+   Subclasses implement :meth:`compute_new_position` and optionally
+   :meth:`check_model_constraint`. Constraint violations should be reported by
+   raising an exception.
+
+   .. warning::
+
+       **Per-agent model state is live and shared -- never mutate it in place.**
+
+       The ``ped.model`` object you receive (and every neighbor's ``.model``
+       returned from a neighborhood query) is the agent's *live* state, shared
+       by reference with the running simulation for performance. JuPedSim
+       advances agents in two phases per step: it first *computes* every
+       agent's update from the current state of all agents, then *applies* all
+       updates together. Mutating ``ped.model`` (or a neighbor's) during the
+       compute phase changes state that other agents are still reading in the
+       same step, silently breaking the compute-then-apply ordering and
+       producing order-dependent results.
+
+       The only correct way to change state is to return a new state object
+       from :meth:`compute_new_position` -- returning ``ped.model`` itself
+       (even unchanged) raises an error; use
+       ``dataclasses.replace(ped.model, ...)``. Make your state type
+       immutable -- a ``@dataclass(frozen=True)`` -- so accidental in-place
+       writes raise immediately instead of silently corrupting the
+       simulation.
+
+
+   .. py:method:: check_model_constraint(ped: jupedsim.agent.Agent, neighborhood_search: jupedsim.neighborhood.NeighborhoodSearch, geometry: jupedsim.geometry.Geometry) -> None
+
+      Raise an exception when ``ped`` violates this model's constraints.
+
+
+
+   .. py:method:: compute_new_position(dt: float, ped: jupedsim.agent.Agent, geometry: jupedsim.geometry.Geometry, neighborhood_search: jupedsim.neighborhood.NeighborhoodSearch) -> CustomModelAgentState
+      :abstractmethod:
+
+
+      Compute one update for ``ped``.
+
+
+
 .. py:class:: ExitStage(backing)
 
    Models an exit.
@@ -1904,7 +2002,7 @@ Attributes
 
 
 
-.. py:class:: Simulation(*, model: jupedsim.models.collision_free_speed.CollisionFreeSpeedModel | jupedsim.models.generalized_centrifugal_force.GeneralizedCentrifugalForceModel | jupedsim.models.collision_free_speed_v2.CollisionFreeSpeedModelV2 | jupedsim.models.collision_free_speed_v3.CollisionFreeSpeedModelV3 | jupedsim.models.anticipation_velocity_model.AnticipationVelocityModel | jupedsim.models.social_force.SocialForceModel | jupedsim.models.warp_driver.WarpDriverModel, geometry: str | shapely.GeometryCollection | shapely.Polygon | shapely.MultiPolygon | shapely.MultiPoint | list[tuple[float, float]], dt: float = 0.01, trajectory_writer: jupedsim.serialization.TrajectoryWriter | None = None, timer_log_level: int = 1, **kwargs: Any)
+.. py:class:: Simulation(*, model: jupedsim.models.collision_free_speed.CollisionFreeSpeedModel | jupedsim.models.generalized_centrifugal_force.GeneralizedCentrifugalForceModel | jupedsim.models.collision_free_speed_v2.CollisionFreeSpeedModelV2 | jupedsim.models.collision_free_speed_v3.CollisionFreeSpeedModelV3 | jupedsim.models.anticipation_velocity_model.AnticipationVelocityModel | jupedsim.models.social_force.SocialForceModel | jupedsim.models.warp_driver.WarpDriverModel | jupedsim.models.custom_model.CustomOperationalModel, geometry: str | shapely.GeometryCollection | shapely.Polygon | shapely.MultiPolygon | shapely.MultiPoint | list[tuple[float, float]], dt: float = 0.01, trajectory_writer: jupedsim.serialization.TrajectoryWriter | None = None, timer_log_level: int = 1, **kwargs: Any)
 
    Defines a simulation of pedestrian movement over a continuous walkable area.
 
@@ -1915,7 +2013,7 @@ Attributes
    simulation.
 
 
-   .. py:method:: add_agent(parameters: jupedsim.models.generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters | jupedsim.models.collision_free_speed.CollisionFreeSpeedModelAgentParameters | jupedsim.models.collision_free_speed_v2.CollisionFreeSpeedModelV2AgentParameters | jupedsim.models.collision_free_speed_v3.CollisionFreeSpeedModelV3AgentParameters | jupedsim.models.anticipation_velocity_model.AnticipationVelocityModelAgentParameters | jupedsim.models.social_force.SocialForceModelAgentParameters | jupedsim.models.warp_driver.WarpDriverModelAgentParameters) -> int
+   .. py:method:: add_agent(parameters: jupedsim.models.generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters | jupedsim.models.collision_free_speed.CollisionFreeSpeedModelAgentParameters | jupedsim.models.collision_free_speed_v2.CollisionFreeSpeedModelV2AgentParameters | jupedsim.models.collision_free_speed_v3.CollisionFreeSpeedModelV3AgentParameters | jupedsim.models.anticipation_velocity_model.AnticipationVelocityModelAgentParameters | jupedsim.models.social_force.SocialForceModelAgentParameters | jupedsim.models.warp_driver.WarpDriverModelAgentParameters | jupedsim.models.custom_model.CustomModelAgentParameters) -> int
 
       Add an agent to the simulation.
 

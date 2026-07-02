@@ -403,6 +403,10 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Position of the agent.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">position</span>
 
+    <span class="nd">@position</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">position</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">position</span>
+
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">target</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Current target of the agent.</span>
@@ -441,6 +445,7 @@
         <span class="o">|</span> <span class="n">AnticipationVelocityModelState</span>
         <span class="o">|</span> <span class="n">SocialForceModelState</span>
         <span class="o">|</span> <span class="n">WarpDriverModelState</span>
+        <span class="o">|</span> <span class="nb">object</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Access model specific state of this agent.&quot;&quot;&quot;</span>
         <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">model</span>
@@ -458,6 +463,8 @@
             <span class="k">return</span> <span class="n">SocialForceModelState</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">WarpDriverModelState</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">WarpDriverModelState</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">_CustomModelData</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">model</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Internal error&quot;</span><span class="p">)</span></div>
 
