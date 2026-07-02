@@ -3,43 +3,16 @@
 
 #include "CollisionGeometry.hpp"
 #include "OperationalModelType.hpp"
-#include "OperationalModelUpdate.hpp"
-#include "Point.hpp"
 #include "SimulationError.hpp"
 
 #include <fmt/core.h>
 
-#include <optional>
 #include <string>
 
 template <typename T>
 class NeighborhoodSearch;
 
 struct GenericAgent;
-
-struct PedestrianUpdate {
-    std::optional<Point> position{};
-    std::optional<Point> velocity{};
-    Point e0{}; // desired direction
-    bool resetTurning{false};
-};
-
-template <>
-struct fmt::formatter<PedestrianUpdate> {
-    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
-
-    template <typename FormatContext>
-    auto format(const PedestrianUpdate& u, FormatContext& ctx) const
-    {
-        return fmt::format_to(
-            ctx.out(),
-            "Upd[position={}, velocity={}, e0={}, resetTurning={}]",
-            u.position.value_or(Point{}),
-            u.velocity.value_or(Point{}),
-            u.e0,
-            u.resetTurning);
-    }
-};
 
 template <typename T>
 void validateConstraint(
@@ -82,13 +55,18 @@ public:
     virtual ~OperationalModel() = default;
 
     virtual OperationalModelType Type() const = 0;
-    virtual OperationalModelUpdate ComputeNewPosition(
+
+    /// Computes the agent state for the next iteration.
+    /// "next" arrives as an exact copy of "current"; implementations overwrite only the fields
+    /// they change. Other agents must be read exclusively from the frozen current generation,
+    /// i.e. via "current" and the neighborhood search, never via "next".
+    virtual void ComputeNextState(
         double dT,
-        const GenericAgent& ped,
+        const GenericAgent& current,
+        GenericAgent& next,
         const CollisionGeometry& geometry,
         const NeighborhoodSearch<GenericAgent>& neighborhoodSearch) const = 0;
 
-    virtual void ApplyUpdate(const OperationalModelUpdate& update, GenericAgent& agent) const = 0;
     virtual void CheckModelConstraint(
         const GenericAgent& agent,
         const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,

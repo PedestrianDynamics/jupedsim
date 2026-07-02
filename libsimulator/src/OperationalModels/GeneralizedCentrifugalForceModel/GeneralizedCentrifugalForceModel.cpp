@@ -14,6 +14,7 @@
 
 #include <Logger.hpp>
 
+#include <optional>
 #include <stdexcept>
 
 GeneralizedCentrifugalForceModel::GeneralizedCentrifugalForceModel(
@@ -41,53 +42,51 @@ OperationalModelType GeneralizedCentrifugalForceModel::Type() const
     return OperationalModelType::GENERALIZED_CENTRIFUGAL_FORCE;
 }
 
-OperationalModelUpdate GeneralizedCentrifugalForceModel::ComputeNewPosition(
+void GeneralizedCentrifugalForceModel::ComputeNextState(
     double dT,
-    const GenericAgent& agent,
+    const GenericAgent& current,
+    GenericAgent& next,
     const CollisionGeometry& geometry,
-    const NeighborhoodSearchType& neighborhoodSearch) const
+    const NeighborhoodSearch<GenericAgent>& neighborhoodSearch) const
 {
     const double radius = 4.0; // TODO (MC) check this free parameter
-    const auto neighborhood = neighborhoodSearch.GetNeighboringAgents(agent.pos, radius);
-    const auto p1 = agent.pos;
+    const auto neighborhood = neighborhoodSearch.GetNeighboringAgents(current.pos, radius);
+    const auto p1 = current.pos;
     Point F_rep;
     for(const auto& neighbor : neighborhood) {
         // TODO(schroedtert): Only use neighbors who have an unobstructed line of sight to the
         // current agent
-        if(neighbor.id == agent.id) {
+        if(neighbor.id == current.id) {
             continue;
         }
         if(!geometry.IntersectsAny(LineSegment(p1, neighbor.pos))) {
-            F_rep += ForceRepPed(agent, neighbor);
+            F_rep += ForceRepPed(current, neighbor);
         }
     }
 
-    GeneralizedCentrifugalForceModelUpdate update{};
+    // e0 stays default constructed when ForceDriv does not overwrite it, matching the old
+    // update struct semantics.
+    Point e0{};
+    std::optional<Point> position{};
+    std::optional<Point> velocity{};
     // repulsive forces to the walls and transitions that are not my target
-    Point repwall = ForceRepRoom(agent, geometry);
-    const auto& model = std::get<GeneralizedCentrifugalForceModelData>(agent.model);
-    Point fd = ForceDriv(agent, agent.destination, model.mass, model.tau, dT, update);
+    Point repwall = ForceRepRoom(current, geometry);
+    const auto& model = std::get<GeneralizedCentrifugalForceModelData>(current.model);
+    Point fd = ForceDriv(current, current.destination, model.mass, model.tau, dT, e0);
     Point acc = (fd + F_rep + repwall) / model.mass;
 
-    update.velocity = (model.orientation * model.speed) + acc * dT;
-    update.position = agent.pos + *update.velocity * dT;
-    return update;
-}
+    velocity = (model.orientation * model.speed) + acc * dT;
+    position = current.pos + *velocity * dT;
 
-void GeneralizedCentrifugalForceModel::ApplyUpdate(
-    const OperationalModelUpdate& upd,
-    GenericAgent& agent) const
-{
-    auto& model = std::get<GeneralizedCentrifugalForceModelData>(agent.model);
-    const auto& update = std::get<GeneralizedCentrifugalForceModelUpdate>(upd);
-    model.e0 = update.e0;
-    ++model.orientationDelay;
-    if(update.position) {
-        agent.pos = *update.position;
+    auto& nextModel = std::get<GeneralizedCentrifugalForceModelData>(next.model);
+    nextModel.e0 = e0;
+    ++nextModel.orientationDelay;
+    if(position) {
+        next.pos = *position;
     }
-    if(update.velocity) {
-        model.orientation = (*update.velocity).Normalized();
-        model.speed = (*update.velocity).Norm();
+    if(velocity) {
+        nextModel.orientation = (*velocity).Normalized();
+        nextModel.speed = (*velocity).Norm();
     }
 }
 
@@ -174,7 +173,7 @@ Point GeneralizedCentrifugalForceModel::ForceDriv(
     double mass,
     double tau,
     double deltaT,
-    GeneralizedCentrifugalForceModelUpdate& update) const
+    Point& e0update) const
 {
     Point F_driv;
     const auto pos = ped.pos;
@@ -184,7 +183,7 @@ Point GeneralizedCentrifugalForceModel::ForceDriv(
     if(dist > J_EPS_GOAL) {
 
         const Point e0 = mollify_e0(target, pos, deltaT, model.orientationDelay, model.e0);
-        update.e0 = e0;
+        e0update = e0;
         F_driv = ((e0 * model.v0 - (model.orientation * model.speed)) * mass) / tau;
     } else {
         const Point e0 = model.e0;

@@ -6,7 +6,6 @@
 #include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"
 #include "OperationalModels/CustomModel/CustomModelData.hpp"
-#include "OperationalModels/CustomModel/CustomModelUpdate.hpp"
 #include "SimulationError.hpp"
 #include "conversion.hpp"
 
@@ -80,41 +79,36 @@ PythonModel::PythonModel(py::object model) : _model(std::move(model))
     if(!_model || _model.is_none()) {
         throw std::invalid_argument("_PythonModel requires a CustomOperationalModel instance");
     }
-    if(!py::hasattr(_model, "_compute_new_position") ||
+    if(!py::hasattr(_model, "_compute_next_state") ||
        !py::hasattr(_model, "_check_model_constraint")) {
         throw std::invalid_argument("_PythonModel requires a CustomOperationalModel instance");
     }
 }
 
-OperationalModelUpdate PythonModel::ComputeNewPosition(
+void PythonModel::ComputeNextState(
     double dT,
-    const GenericAgent& agent,
+    const GenericAgent& current,
+    GenericAgent& next,
     const CollisionGeometry& geometry,
     const NeighborhoodSearch<GenericAgent>& neighborhoodSearch) const
 {
     py::gil_scoped_acquire gil;
 
-    py::object pythonAgent = py::cast(agent);
+    py::object pythonAgent = py::cast(current);
     py::object pythonGeometry = py::cast(&geometry, py::return_value_policy::reference);
     py::object pythonNeighborhoodSearch =
         py::cast((&neighborhoodSearch), py::return_value_policy::reference);
 
-    py::object update = _model.attr("_compute_new_position")(
+    py::object pythonUpdate = _model.attr("_compute_next_state")(
         dT, pythonAgent, pythonGeometry, pythonNeighborhoodSearch);
 
-    return CustomModelUpdate{GilSafePyObject{std::move(update)}};
-}
-
-void PythonModel::ApplyUpdate(const OperationalModelUpdate& update, GenericAgent& agent) const
-{
-    py::gil_scoped_acquire gil;
-
-    const auto& pythonUpdate = std::get<CustomModelUpdate>(update).Get<GilSafePyObject>().Get();
-    auto& customModelData = std::get<CustomModelData>(agent.model).Get<GilSafePyObject>();
+    // "next" shares the Python state object with "current" (GilSafePyObject copies are
+    // refcounted, not cloned), so this also rejects returning the current state instance.
+    auto& customModelData = std::get<CustomModelData>(next.model).Get<GilSafePyObject>();
     if(pythonUpdate.is(customModelData.Get())) {
         throw SimulationError(
             "Current and updated model state are the same instance. "
-            "compute_new_position() must return a new state object, "
+            "compute_next_state() must return a new state object, "
             "e.g. dataclasses.replace(ped.model, ...).");
     }
 
@@ -125,14 +119,14 @@ void PythonModel::ApplyUpdate(const OperationalModelUpdate& update, GenericAgent
     } catch(const py::error_already_set& ex) {
         if(ex.matches(PyExc_AttributeError)) {
             throw SimulationError(
-                "State returned by compute_new_position() is missing the '{}' attribute.",
+                "State returned by compute_next_state() is missing the '{}' attribute.",
                 attr_name);
         }
         throw;
     }
 
     try {
-        agent.pos = intoPoint(py::cast<std::tuple<double, double>>(attr));
+        next.pos = intoPoint(py::cast<std::tuple<double, double>>(attr));
     } catch(const py::cast_error&) {
         // Diagnostics run Python code on the offending object; they must not
         // be able to replace the error they describe.
@@ -148,7 +142,7 @@ void PythonModel::ApplyUpdate(const OperationalModelUpdate& update, GenericAgent
         }
 
         throw SimulationError(
-            "State returned by compute_new_position() has attribute '{}' of wrong type: "
+            "State returned by compute_next_state() has attribute '{}' of wrong type: "
             "expected tuple[float, float], got {} ({})",
             attr_name,
             actualType,

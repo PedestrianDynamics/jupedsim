@@ -7,19 +7,15 @@
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
 
-#include <boost/iterator/zip_iterator.hpp>
-#include <boost/tuple/tuple.hpp>
-
 #include <algorithm>
 #include <iterator>
 #include <memory>
-#include <optional>
 #include <utility>
-#include <vector>
 
 class OperationalDecisionSystem
 {
     std::unique_ptr<OperationalModel> _model{};
+    AgentContainer<GenericAgent> _next{};
 
 public:
     OperationalDecisionSystem(std::unique_ptr<OperationalModel>&& model) : _model(std::move(model))
@@ -38,28 +34,17 @@ public:
         double /*t_in_sec*/,
         const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
         const CollisionGeometry& geometry,
-        AgentContainer<GenericAgent>& agents) const
+        AgentContainer<GenericAgent>& agents)
     {
-        std::vector<std::optional<OperationalModelUpdate>> updates{};
-        updates.reserve(agents.size());
-
-        std::transform(
-            std::begin(agents),
-            std::end(agents),
-            std::back_inserter(updates),
-            [this, &dT, &geometry, &neighborhoodSearch](const auto& agent) {
-                return _model->ComputeNewPosition(dT, agent, geometry, neighborhoodSearch);
-            });
-
-        std::for_each(
-            boost::make_zip_iterator(boost::make_tuple(std::begin(agents), std::begin(updates))),
-            boost::make_zip_iterator(boost::make_tuple(std::end(agents), std::end(updates))),
-            [this](auto tup) {
-                auto& [agent, update] = tup;
-                if(update) {
-                    _model->ApplyUpdate(*update, agent);
-                }
-            });
+        _next.clear();
+        std::copy(std::begin(agents), std::end(agents), std::back_inserter(_next));
+        for(size_t index = 0; index < agents.size(); ++index) {
+            _model->ComputeNextState(dT, agents[index], _next[index], geometry, neighborhoodSearch);
+        }
+        // Copy results back instead of swapping buffers: a swap would re-seat references
+        // held by callers (the Python bindings expose agents by reference) into the retired
+        // scratch buffer, invalidating them after one iteration.
+        std::copy(std::begin(_next), std::end(_next), std::begin(agents));
     }
 
     void ValidateAgent(

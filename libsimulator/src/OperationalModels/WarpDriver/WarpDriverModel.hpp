@@ -72,13 +72,12 @@ public:
 
     OperationalModelType Type() const override;
 
-    OperationalModelUpdate ComputeNewPosition(
+    void ComputeNextState(
         double dT,
-        const GenericAgent& ped,
+        const GenericAgent& current,
+        GenericAgent& next,
         const CollisionGeometry& geometry,
-        const NeighborhoodSearchType& neighborhoodSearch) const override;
-
-    void ApplyUpdate(const OperationalModelUpdate& update, GenericAgent& agent) const override;
+        const NeighborhoodSearch<GenericAgent>& neighborhoodSearch) const override;
 
     void CheckModelConstraint(
         const GenericAgent& agent,
