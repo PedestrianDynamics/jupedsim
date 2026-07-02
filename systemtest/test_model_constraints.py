@@ -1053,3 +1053,104 @@ def test_anticipation_velocity_model_can_not_add_agent_too_close_to_wall(
                 radius=radius,
             )
         )
+
+
+class _MinimalCustomState:
+    def __init__(self, position):
+        self.position = position
+
+
+class _MinimalCustomModel(jps.CustomOperationalModel):
+    def compute_new_position(self, dt, ped, geometry, neighborhood_search):
+        return _MinimalCustomState(ped.position)
+
+
+def test_add_agent_rejects_params_of_different_model_on_custom_simulation():
+    simulation = jps.Simulation(
+        model=_MinimalCustomModel(),
+        geometry=[(-50, -50), (50, -50), (50, 50), (-50, 50)],
+    )
+    exit_id = simulation.add_exit_stage([(49, -3), (49, 3), (50, 3), (50, -3)])
+    journey_id = simulation.add_journey(jps.JourneyDescription([exit_id]))
+
+    with pytest.raises(
+        RuntimeError,
+        match="does not match the simulation's operational model",
+    ):
+        simulation.add_agent(
+            jps.SocialForceModelAgentParameters(
+                position=(0, 0), journey_id=journey_id, stage_id=exit_id
+            )
+        )
+
+
+def test_add_agent_rejects_custom_params_on_builtin_model_simulation():
+    simulation = jps.Simulation(
+        model=jps.SocialForceModel(),
+        geometry=[(-50, -50), (50, -50), (50, 50), (-50, 50)],
+    )
+    exit_id = simulation.add_exit_stage([(49, -3), (49, 3), (50, 3), (50, -3)])
+    journey_id = simulation.add_journey(jps.JourneyDescription([exit_id]))
+
+    with pytest.raises(
+        RuntimeError,
+        match="does not match the simulation's operational model",
+    ):
+        simulation.add_agent(
+            jps.CustomModelAgentParameters(
+                journey_id=journey_id,
+                stage_id=exit_id,
+                model=_MinimalCustomState((0, 0)),
+            )
+        )
+
+
+class _NoPositionState:
+    pass
+
+
+class _NoPositionModel(jps.CustomOperationalModel):
+    def compute_new_position(self, dt, ped, geometry, neighborhood_search):
+        return _NoPositionState()
+
+
+class _WrongPositionTypeModel(jps.CustomOperationalModel):
+    def compute_new_position(self, dt, ped, geometry, neighborhood_search):
+        return _MinimalCustomState("not-a-tuple")
+
+
+def _custom_model_simulation_with_agent(model):
+    simulation = jps.Simulation(
+        model=model,
+        geometry=[(-50, -50), (50, -50), (50, 50), (-50, 50)],
+    )
+    exit_id = simulation.add_exit_stage([(49, -3), (49, 3), (50, 3), (50, -3)])
+    journey_id = simulation.add_journey(jps.JourneyDescription([exit_id]))
+    simulation.add_agent(
+        jps.CustomModelAgentParameters(
+            journey_id=journey_id,
+            stage_id=exit_id,
+            model=_MinimalCustomState((0, 0)),
+        )
+    )
+    return simulation
+
+
+def test_custom_model_update_missing_position_names_source():
+    simulation = _custom_model_simulation_with_agent(_NoPositionModel())
+
+    with pytest.raises(
+        RuntimeError,
+        match=r"State returned by compute_new_position\(\) is missing the 'position' attribute",
+    ):
+        simulation.iterate()
+
+
+def test_custom_model_update_wrong_position_type_names_source():
+    simulation = _custom_model_simulation_with_agent(_WrongPositionTypeModel())
+
+    with pytest.raises(
+        RuntimeError,
+        match=r"State returned by compute_new_position\(\) has attribute 'position' of wrong type",
+    ):
+        simulation.iterate()

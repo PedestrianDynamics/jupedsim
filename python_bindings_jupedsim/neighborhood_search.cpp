@@ -13,7 +13,7 @@ void init_neighborhood_search(py::module_& m)
     py::class_<NeighborhoodSearch<GenericAgent>>(m, "NeighborhoodSearch")
         .def(
             "get_neighboring_agents",
-            [](NeighborhoodSearch<GenericAgent>& self,
+            [](const NeighborhoodSearch<GenericAgent>& self,
                const std::tuple<double, double>& pos,
                double radius) { return self.GetNeighboringAgents(intoPoint(pos), radius); },
             py::arg("pos"),

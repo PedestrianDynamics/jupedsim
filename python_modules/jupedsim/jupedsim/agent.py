@@ -73,6 +73,10 @@ class Agent:
         """Position of the agent."""
         return self._obj.position
 
+    @position.setter
+    def position(self, position: tuple[float, float]):
+        self._obj.position = position
+
     @property
     def target(self) -> tuple[float, float]:
         """Current target of the agent.
@@ -111,6 +115,7 @@ class Agent:
         | AnticipationVelocityModelState
         | SocialForceModelState
         | WarpDriverModelState
+        | object
     ):
         """Access model specific state of this agent."""
         model = self._obj.model
@@ -128,5 +133,7 @@ class Agent:
             return SocialForceModelState(model)
         elif isinstance(model, py_jps.WarpDriverModelState):
             return WarpDriverModelState(model)
+        elif isinstance(model, py_jps._CustomModelData):
+            return model.model
         else:
             raise Exception("Internal error")

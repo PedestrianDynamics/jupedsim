@@ -53,6 +53,11 @@ from jupedsim.models.collision_free_speed_v3 import (
     CollisionFreeSpeedModelV3AgentParameters,
     CollisionFreeSpeedModelV3State,
 )
+from jupedsim.models.custom_model import (
+    CustomModelAgentParameters,
+    CustomModelAgentState,
+    CustomOperationalModel,
+)
 from jupedsim.models.generalized_centrifugal_force import (
     GeneralizedCentrifugalForceModel,
     GeneralizedCentrifugalForceModelAgentParameters,
@@ -149,6 +154,9 @@ __all__ = [
     "WarpDriverModelAgentParameters",
     "WarpDriverModel",
     "WarpDriverModelState",
+    "CustomModelAgentParameters",
+    "CustomModelAgentState",
+    "CustomOperationalModel",
     "WaitingSetStage",
     "WaitingSetState",
     "WaypointStage",
