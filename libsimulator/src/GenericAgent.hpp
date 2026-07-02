@@ -7,9 +7,11 @@
 #include "GeneralizedCentrifugalForceModelData.hpp"
 #include "OperationalModel.hpp"
 #include "OperationalModels/CustomModel/CustomModelData.hpp"
+#include "OperationalModels/OperationalModelType.hpp"
 #include "Point.hpp"
 #include "SocialForceModelData.hpp"
 #include "UniqueID.hpp"
+#include "Visitor.hpp"
 #include "WarpDriverModelData.hpp"
 
 #include <fmt/core.h>
@@ -60,6 +62,34 @@ struct GenericAgent {
     {
     }
 };
+
+/// Maps agent model data to the operational model type it belongs to. Kept
+/// exhaustive on purpose: adding a model type will not compile until the
+/// mapping is extended.
+inline OperationalModelType ModelTypeOf(const GenericAgent::Model& model)
+{
+    return std::visit(
+        overloaded{
+            [](const GeneralizedCentrifugalForceModelData&) {
+                return OperationalModelType::GENERALIZED_CENTRIFUGAL_FORCE;
+            },
+            [](const CollisionFreeSpeedModelData&) {
+                return OperationalModelType::COLLISION_FREE_SPEED;
+            },
+            [](const CollisionFreeSpeedModelV2Data&) {
+                return OperationalModelType::COLLISION_FREE_SPEED_V2;
+            },
+            [](const CollisionFreeSpeedModelV3Data&) {
+                return OperationalModelType::COLLISION_FREE_SPEED_V3;
+            },
+            [](const AnticipationVelocityModelData&) {
+                return OperationalModelType::ANTICIPATION_VELOCITY_MODEL;
+            },
+            [](const SocialForceModelData&) { return OperationalModelType::SOCIAL_FORCE; },
+            [](const WarpDriverModelData&) { return OperationalModelType::WARP_DRIVER; },
+            [](const CustomModelData&) { return OperationalModelType::CUSTOM_MODEL; }},
+        model);
+}
 
 template <class Agent>
 using AgentContainer = std::deque<Agent>;
