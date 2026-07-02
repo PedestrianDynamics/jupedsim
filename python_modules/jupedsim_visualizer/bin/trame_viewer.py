@@ -7,6 +7,7 @@ in a native desktop window (``--native``, via pywebview's WebKitGTK).
 """
 
 import argparse
+import asyncio
 import os
 import socket
 import tempfile
@@ -88,7 +89,8 @@ def build_app(obj_path: str | None):
         "start_pos": None,
         "target_pos": None,
         "tracking": False,
-        "hover_t": 0.0,
+        "pending": None,  # latest un-processed hover (fx, fy); coalesced, not queued
+        "busy": False,  # a hover compute/render is currently in flight
         "line": None,  # persistent polyline dataset, updated in place per hover
     }
     # Exact any-angle geodesic engine (CGAL MMP), fed the same OBJ as the displayed mesh.
@@ -339,21 +341,36 @@ def build_app(obj_path: str | None):
         w, h = plotter.window_size
         return _pick_world(int(fx * w), int(fy * h))
 
-    @ctrl.trigger("route_hover")
-    def _route_hover(fx, fy):
-        # Throttled so we don't pick/recompute faster than ~16 ms regardless of mousemove rate.
-        if current["mesh"] is None:
-            return
-        now = time.perf_counter()
-        if now - route["hover_t"] < 0.016:
-            return
-        route["hover_t"] = now
+    def _do_hover(fx, fy) -> None:
         pos = _pick_world_fraction(fx, fy)
         # Live, unsnapped cursor readout -- handy to sanity-check the pick (esp. the z / floor).
         state.cursor_pos = _fmt(pos) if pos is not None else "—"
         if pos is None or not route["tracking"]:
             return
         update_route(pos)
+
+    @ctrl.trigger("route_hover")
+    async def _route_hover(fx, fy):
+        # Backpressure by coalescing: record only the *latest* hover and, while a
+        # compute/render is in flight, let further hovers collapse onto it instead
+        # of queuing. Otherwise, on slow/large geometry, a backlog of stale
+        # positions replays for seconds after the mouse has stopped.
+        if current["mesh"] is None:
+            return
+        route["pending"] = (fx, fy)
+        if route["busy"]:
+            return
+        route["busy"] = True
+        try:
+            while route["pending"] is not None:
+                hx, hy = route["pending"]
+                route["pending"] = None
+                _do_hover(hx, hy)
+                # Yield so hover triggers that arrived during the (blocking) render
+                # get dispatched now -- they just overwrite `pending` with the latest.
+                await asyncio.sleep(0)
+        finally:
+            route["busy"] = False
 
     @ctrl.trigger("route_click")
     def _route_click(fx, fy):
