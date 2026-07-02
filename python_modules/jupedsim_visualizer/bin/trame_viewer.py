@@ -24,15 +24,14 @@ from vtkmodules.vtkRenderingCore import vtkCellPicker  # noqa: E402
 
 pv.OFF_SCREEN = True
 
+from jupedsim.internal.routing_3d import (  # noqa: E402
+    SurfaceMeshShortestPathRoutingEngine,
+)
 from pyvista.trame.ui import plotter_ui  # noqa: E402
 from trame.app import get_server  # noqa: E402
 from trame.app.file_upload import ClientFile  # noqa: E402
 from trame.ui.vuetify3 import SinglePageWithDrawerLayout  # noqa: E402
 from trame.widgets import vuetify3 as v3  # noqa: E402
-
-from jupedsim.internal.routing_3d import (  # noqa: E402
-    SurfaceMeshShortestPathRoutingEngine,
-)
 
 TITLE = "JuPedSim - Multi-Level Viewer"
 
