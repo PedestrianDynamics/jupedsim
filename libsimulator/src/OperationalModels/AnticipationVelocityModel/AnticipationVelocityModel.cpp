@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "AnticipationVelocityModel.hpp"
 
-#include "AnticipationVelocityModelData.hpp"
 #include "CollisionGeometry.hpp"
 #include "GenericAgent.hpp"
 #include "GeometricFunctions.hpp"
 #include "LineSegment.hpp"
 #include "Macros.hpp"
+#include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
 #include "Point.hpp"
@@ -74,7 +74,7 @@ void AnticipationVelocityModel::ComputeNextState(
 
     const auto desiredDirection = (current.destination - current.pos).Normalized();
     auto direction = (desiredDirection + neighborRepulsion).Normalized();
-    const auto& model = std::get<AnticipationVelocityModelData>(current.model);
+    const auto& model = std::get<State>(current.model);
     if(direction == Point{}) {
         direction = model.orientation;
     }
@@ -93,12 +93,12 @@ void AnticipationVelocityModel::ComputeNextState(
         });
 
     const auto optimal_speed = OptimalSpeed(current, spacing, model.timeGap);
-    direction =
-        HandleWallAvoidance(direction, current.pos, model.radius, boundary, wallBufferDistance);
+    direction = HandleWallAvoidance(
+        direction, current.pos, model.radius, boundary, wallBufferDistance, _pushoutStrength);
 
     const auto velocity = direction * optimal_speed;
     next.pos = current.pos + velocity * dT;
-    auto& nextModel = std::get<AnticipationVelocityModelData>(next.model);
+    auto& nextModel = std::get<State>(next.model);
     nextModel.orientation = direction;
     nextModel.velocity = velocity;
 };
@@ -108,7 +108,7 @@ Point AnticipationVelocityModel::UpdateDirection(
     const Point& calculatedDirection,
     double dt) const
 {
-    const auto& model = std::get<AnticipationVelocityModelData>(ped.model);
+    const auto& model = std::get<State>(ped.model);
     const Point desiredDirection = (ped.destination - ped.pos).Normalized();
     const Point actualDirection = model.orientation;
     Point updatedDirection;
@@ -129,10 +129,10 @@ Point AnticipationVelocityModel::UpdateDirection(
 
 void AnticipationVelocityModel::CheckModelConstraint(
     const GenericAgent& agent,
-    const NeighborhoodSearchType& neighborhoodSearch,
+    const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
     const CollisionGeometry& geometry) const
 {
-    const auto& model = std::get<AnticipationVelocityModelData>(agent.model);
+    const auto& model = std::get<State>(agent.model);
     const auto r = model.radius;
     constexpr double rMin = 0.;
     constexpr double rMax = 2.;
@@ -179,7 +179,7 @@ void AnticipationVelocityModel::CheckModelConstraint(
         if(agent.id == neighbor.id) {
             continue;
         }
-        const auto& neighbor_model = std::get<AnticipationVelocityModelData>(neighbor.model);
+        const auto& neighbor_model = std::get<State>(neighbor.model);
         const auto contanctdDist = r + neighbor_model.radius;
         const auto distance = (agent.pos - neighbor.pos).Norm();
         if(contanctdDist >= distance) {
@@ -206,7 +206,7 @@ double AnticipationVelocityModel::OptimalSpeed(
     double spacing,
     double time_gap) const
 {
-    const auto& model = std::get<AnticipationVelocityModelData>(ped.model);
+    const auto& model = std::get<State>(ped.model);
     constexpr double creep_speed = 0.01;
 
     double speed = spacing / time_gap;
@@ -224,8 +224,8 @@ double AnticipationVelocityModel::GetSpacing(
     const GenericAgent& ped2,
     const Point& direction) const
 {
-    const auto& model1 = std::get<AnticipationVelocityModelData>(ped1.model);
-    const auto& model2 = std::get<AnticipationVelocityModelData>(ped2.model);
+    const auto& model1 = std::get<State>(ped1.model);
+    const auto& model2 = std::get<State>(ped2.model);
     const auto distp12 = ped2.pos - ped1.pos;
     const auto inFront = direction.ScalarProduct(distp12) >= 0;
     if(!inFront) {
@@ -265,8 +265,8 @@ Point AnticipationVelocityModel::NeighborRepulsion(
     const GenericAgent& ped1,
     const GenericAgent& ped2) const
 {
-    const auto& model1 = std::get<AnticipationVelocityModelData>(ped1.model);
-    const auto& model2 = std::get<AnticipationVelocityModelData>(ped2.model);
+    const auto& model1 = std::get<State>(ped1.model);
+    const auto& model2 = std::get<State>(ped2.model);
 
     const auto distp12 = ped2.pos - ped1.pos;
     const auto [distance, ep12] = distp12.NormAndNormalized();
@@ -305,7 +305,8 @@ Point AnticipationVelocityModel::HandleWallAvoidance(
     const Point& agentPosition,
     double agentRadius,
     const std::vector<LineSegment>& boundary,
-    double wallBufferDistance) const
+    double wallBufferDistance,
+    double pushoutStrength) const
 {
     const double criticalWallDistance = wallBufferDistance + agentRadius;
 
@@ -327,7 +328,7 @@ Point AnticipationVelocityModel::HandleWallAvoidance(
             // Direction points into wall - need to project it out
             // Remove the component pointing into the wall
             const auto projectedDirection = modifiedDirection - normalTowardAgent * dotProduct;
-            modifiedDirection = projectedDirection + normalTowardAgent * _pushoutStrength;
+            modifiedDirection = projectedDirection + normalTowardAgent * pushoutStrength;
         }
     }
 

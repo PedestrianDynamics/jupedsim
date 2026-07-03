@@ -4,6 +4,5 @@ target_sources(simulator PRIVATE
     AnticipationVelocityModel.hpp
     AnticipationVelocityModelBuilder.cpp
     AnticipationVelocityModelBuilder.hpp
-    AnticipationVelocityModelData.hpp
 )
 target_include_directories(simulator PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

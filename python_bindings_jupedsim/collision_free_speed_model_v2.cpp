@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "CollisionFreeSpeedModelV2.hpp"
 #include "CollisionFreeSpeedModelV2Builder.hpp"
-#include "CollisionFreeSpeedModelV2Data.hpp"
 #include "OperationalModel.hpp"
 #include "conversion.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep
@@ -20,8 +19,8 @@ void init_collision_free_speed_model_v2(py::module_& m)
         .def(py::init<>())
         .def("build", &CollisionFreeSpeedModelV2Builder::Build);
 
-    py::class_<CollisionFreeSpeedModelV2Data>(m, "CollisionFreeSpeedModelV2State")
-        .def_static("_defaults", []() { return CollisionFreeSpeedModelV2Data{}; })
+    py::class_<CollisionFreeSpeedModelV2::State>(m, "CollisionFreeSpeedModelV2State")
+        .def_static("_defaults", []() { return CollisionFreeSpeedModelV2::State{}; })
         .def(
             py::init([](std::tuple<double, double> orientation,
                         double strengthNeighborRepulsion,
@@ -31,7 +30,7 @@ void init_collision_free_speed_model_v2(py::module_& m)
                         double timeGap,
                         double desiredSpeed,
                         double radius) {
-                return CollisionFreeSpeedModelV2Data{
+                return CollisionFreeSpeedModelV2::State{
                     .orientation = intoPoint(orientation),
                     .strengthNeighborRepulsion = strengthNeighborRepulsion,
                     .rangeNeighborRepulsion = rangeNeighborRepulsion,
@@ -50,18 +49,18 @@ void init_collision_free_speed_model_v2(py::module_& m)
             py::arg("time_gap"),
             py::arg("desired_speed"),
             py::arg("radius"))
-        .def_readwrite("orientation", &CollisionFreeSpeedModelV2Data::orientation)
+        .def_readwrite("orientation", &CollisionFreeSpeedModelV2::State::orientation)
         .def_readwrite(
             "strength_neighbor_repulsion",
-            &CollisionFreeSpeedModelV2Data::strengthNeighborRepulsion)
+            &CollisionFreeSpeedModelV2::State::strengthNeighborRepulsion)
         .def_readwrite(
-            "range_neighbor_repulsion", &CollisionFreeSpeedModelV2Data::rangeNeighborRepulsion)
+            "range_neighbor_repulsion", &CollisionFreeSpeedModelV2::State::rangeNeighborRepulsion)
         .def_readwrite(
             "strength_geometry_repulsion",
-            &CollisionFreeSpeedModelV2Data::strengthGeometryRepulsion)
+            &CollisionFreeSpeedModelV2::State::strengthGeometryRepulsion)
         .def_readwrite(
-            "range_geometry_repulsion", &CollisionFreeSpeedModelV2Data::rangeGeometryRepulsion)
-        .def_readwrite("time_gap", &CollisionFreeSpeedModelV2Data::timeGap)
-        .def_readwrite("desired_speed", &CollisionFreeSpeedModelV2Data::v0)
-        .def_readwrite("radius", &CollisionFreeSpeedModelV2Data::radius);
+            "range_geometry_repulsion", &CollisionFreeSpeedModelV2::State::rangeGeometryRepulsion)
+        .def_readwrite("time_gap", &CollisionFreeSpeedModelV2::State::timeGap)
+        .def_readwrite("desired_speed", &CollisionFreeSpeedModelV2::State::v0)
+        .def_readwrite("radius", &CollisionFreeSpeedModelV2::State::radius);
 }

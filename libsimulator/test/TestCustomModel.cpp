@@ -4,7 +4,6 @@
 #include "NeighborhoodSearch.hpp"
 #include "OperationalDecisionSystem.hpp"
 #include "OperationalModels/CustomModel/CustomModel.hpp"
-#include "OperationalModels/CustomModel/CustomModelData.hpp"
 
 #include <fmt/format.h>
 #include <gtest/gtest.h>
@@ -43,8 +42,8 @@ public:
         const CollisionGeometry&,
         const NeighborhoodSearch<GenericAgent>&) const override
     {
-        const auto& state = std::get<CustomModelData>(current.model).Get<MinimalState>();
-        auto& nextState = std::get<CustomModelData>(next.model).Get<MinimalState>();
+        const auto& state = std::get<CustomModel::State>(current.model).Get<MinimalState>();
+        auto& nextState = std::get<CustomModel::State>(next.model).Get<MinimalState>();
 
         next.pos = current.pos + state.velocity * dT;
         nextState.velocity = state.velocity;
@@ -59,7 +58,7 @@ public:
     }
 };
 
-GenericAgent MakeAgent(GenericAgent::Model model)
+GenericAgent MakeAgent(GenericAgent::ModelState model)
 {
     return GenericAgent(
         GenericAgent::ID::Invalid,
@@ -76,9 +75,9 @@ TEST(CustomModel, TypeIsCustomModel)
     ASSERT_EQ(model.Type(), OperationalModelType::CUSTOM_MODEL);
 }
 
-TEST(CustomModelData, StoresAndUpdatesTypedPayload)
+TEST(CustomModelState, StoresAndUpdatesTypedPayload)
 {
-    CustomModelData data{7};
+    CustomModel::State data{7};
 
     ASSERT_EQ(data.Get<int>(), 7);
 
@@ -87,26 +86,26 @@ TEST(CustomModelData, StoresAndUpdatesTypedPayload)
     ASSERT_THROW((void) data.Get<double>(), std::bad_any_cast);
 }
 
-TEST(CustomModelData, FormatsPayload)
+TEST(CustomModelState, FormatsPayload)
 {
-    const CustomModelData data{std::string{"custom state"}};
+    const CustomModel::State data{std::string{"custom state"}};
 
     ASSERT_EQ(fmt::format("{}", data), "custom state");
 }
 
-TEST(CustomModelData, FormatsPayloadWithToString)
+TEST(CustomModelState, FormatsPayloadWithToString)
 {
-    ASSERT_EQ(fmt::format("{}", CustomModelData{StringToStringPayload{}}), "string tostring");
+    ASSERT_EQ(fmt::format("{}", CustomModel::State{StringToStringPayload{}}), "string tostring");
     ASSERT_EQ(
-        fmt::format("{}", CustomModelData{StringViewToStringPayload{}}), "string_view tostring");
+        fmt::format("{}", CustomModel::State{StringViewToStringPayload{}}), "string_view tostring");
     ASSERT_EQ(
-        fmt::format("{}", CustomModelData{ConstCharPointerToStringPayload{}}),
+        fmt::format("{}", CustomModel::State{ConstCharPointerToStringPayload{}}),
         "const char pointer tostring");
 }
 
-TEST(CustomModel, FormatsAgentWithCustomModelData)
+TEST(CustomModel, FormatsAgentWithCustomModelState)
 {
-    const auto agent = MakeAgent(CustomModelData{std::string{"custom state"}});
+    const auto agent = MakeAgent(CustomModel::State{std::string{"custom state"}});
 
     ASSERT_NO_THROW((void) fmt::format("{}", agent));
 }
@@ -118,7 +117,7 @@ TEST(CustomModel, RunsThroughOperationalDecisionSystem)
     const auto geometry = builder.Build();
 
     AgentContainer<GenericAgent> agents{};
-    agents.emplace_back(MakeAgent(CustomModelData{MinimalState{Point{2.0, 0.0}, 0}}));
+    agents.emplace_back(MakeAgent(CustomModel::State{MinimalState{Point{2.0, 0.0}, 0}}));
 
     NeighborhoodSearch<GenericAgent> neighborhoodSearch{2.2};
     neighborhoodSearch.Update(agents);
@@ -127,7 +126,7 @@ TEST(CustomModel, RunsThroughOperationalDecisionSystem)
     system.Run(0.5, 0.0, neighborhoodSearch, geometry, agents);
 
     const auto& agent = agents.front();
-    const auto& state = std::get<CustomModelData>(agent.model).Get<MinimalState>();
+    const auto& state = std::get<CustomModel::State>(agent.model).Get<MinimalState>();
     ASSERT_EQ(agent.pos, Point(1.0, 0.0));
     ASSERT_EQ(state.applications, 1);
 }
@@ -135,26 +134,27 @@ TEST(CustomModel, RunsThroughOperationalDecisionSystem)
 TEST(ModelTypeOf, MapsEveryAgentModelDataToItsOperationalModelType)
 {
     ASSERT_EQ(
-        ModelTypeOf(GenericAgent::Model{GeneralizedCentrifugalForceModelData{}}),
+        ModelTypeOf(GenericAgent::ModelState{GeneralizedCentrifugalForceModel::State{}}),
         OperationalModelType::GENERALIZED_CENTRIFUGAL_FORCE);
     ASSERT_EQ(
-        ModelTypeOf(GenericAgent::Model{CollisionFreeSpeedModelData{}}),
+        ModelTypeOf(GenericAgent::ModelState{CollisionFreeSpeedModel::State{}}),
         OperationalModelType::COLLISION_FREE_SPEED);
     ASSERT_EQ(
-        ModelTypeOf(GenericAgent::Model{CollisionFreeSpeedModelV2Data{}}),
+        ModelTypeOf(GenericAgent::ModelState{CollisionFreeSpeedModelV2::State{}}),
         OperationalModelType::COLLISION_FREE_SPEED_V2);
     ASSERT_EQ(
-        ModelTypeOf(GenericAgent::Model{CollisionFreeSpeedModelV3Data{}}),
+        ModelTypeOf(GenericAgent::ModelState{CollisionFreeSpeedModelV3::State{}}),
         OperationalModelType::COLLISION_FREE_SPEED_V3);
     ASSERT_EQ(
-        ModelTypeOf(GenericAgent::Model{AnticipationVelocityModelData{}}),
+        ModelTypeOf(GenericAgent::ModelState{AnticipationVelocityModel::State{}}),
         OperationalModelType::ANTICIPATION_VELOCITY_MODEL);
     ASSERT_EQ(
-        ModelTypeOf(GenericAgent::Model{SocialForceModelData{}}),
+        ModelTypeOf(GenericAgent::ModelState{SocialForceModel::State{}}),
         OperationalModelType::SOCIAL_FORCE);
     ASSERT_EQ(
-        ModelTypeOf(GenericAgent::Model{WarpDriverModelData{}}), OperationalModelType::WARP_DRIVER);
+        ModelTypeOf(GenericAgent::ModelState{WarpDriverModel::State{}}),
+        OperationalModelType::WARP_DRIVER);
     ASSERT_EQ(
-        ModelTypeOf(GenericAgent::Model{CustomModelData{MinimalState{}}}),
+        ModelTypeOf(GenericAgent::ModelState{CustomModel::State{MinimalState{}}}),
         OperationalModelType::CUSTOM_MODEL);
 }

@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "CollisionFreeSpeedModelV3.hpp"
 #include "CollisionFreeSpeedModelV3Builder.hpp"
-#include "CollisionFreeSpeedModelV3Data.hpp"
 #include "OperationalModel.hpp"
 #include "conversion.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep
@@ -20,7 +19,7 @@ void init_collision_free_speed_model_v3(py::module_& m)
         .def(py::init<>())
         .def("build", &CollisionFreeSpeedModelV3Builder::Build);
 
-    py::class_<CollisionFreeSpeedModelV3Data>(m, "CollisionFreeSpeedModelV3State")
+    py::class_<CollisionFreeSpeedModelV3::State>(m, "CollisionFreeSpeedModelV3State")
         .def(
             py::init([](std::tuple<double, double> orientation,
                         double strengthNeighborRepulsion,
@@ -34,7 +33,7 @@ void init_collision_free_speed_model_v3(py::module_& m)
                         double rangeYScale,
                         double thetaMaxUpperBound,
                         double agentBuffer) {
-                return CollisionFreeSpeedModelV3Data{
+                return CollisionFreeSpeedModelV3::State{
                     .orientation = intoPoint(orientation),
                     .strengthNeighborRepulsion = strengthNeighborRepulsion,
                     .rangeNeighborRepulsion = rangeNeighborRepulsion,
@@ -61,22 +60,23 @@ void init_collision_free_speed_model_v3(py::module_& m)
             py::arg("range_y_scale") = 8.0,
             py::arg("theta_max_upper_bound") = 1.57,
             py::arg("agent_buffer") = 0.0)
-        .def_readwrite("orientation", &CollisionFreeSpeedModelV3Data::orientation)
+        .def_readwrite("orientation", &CollisionFreeSpeedModelV3::State::orientation)
         .def_readwrite(
             "strength_neighbor_repulsion",
-            &CollisionFreeSpeedModelV3Data::strengthNeighborRepulsion)
+            &CollisionFreeSpeedModelV3::State::strengthNeighborRepulsion)
         .def_readwrite(
-            "range_neighbor_repulsion", &CollisionFreeSpeedModelV3Data::rangeNeighborRepulsion)
+            "range_neighbor_repulsion", &CollisionFreeSpeedModelV3::State::rangeNeighborRepulsion)
         .def_readwrite(
             "strength_geometry_repulsion",
-            &CollisionFreeSpeedModelV3Data::strengthGeometryRepulsion)
+            &CollisionFreeSpeedModelV3::State::strengthGeometryRepulsion)
         .def_readwrite(
-            "range_geometry_repulsion", &CollisionFreeSpeedModelV3Data::rangeGeometryRepulsion)
-        .def_readwrite("range_x_scale", &CollisionFreeSpeedModelV3Data::rangeXScale)
-        .def_readwrite("range_y_scale", &CollisionFreeSpeedModelV3Data::rangeYScale)
-        .def_readwrite("theta_max_upper_bound", &CollisionFreeSpeedModelV3Data::thetaMaxUpperBound)
-        .def_readwrite("agent_buffer", &CollisionFreeSpeedModelV3Data::agentBuffer)
-        .def_readwrite("time_gap", &CollisionFreeSpeedModelV3Data::timeGap)
-        .def_readwrite("desired_speed", &CollisionFreeSpeedModelV3Data::v0)
-        .def_readwrite("radius", &CollisionFreeSpeedModelV3Data::radius);
+            "range_geometry_repulsion", &CollisionFreeSpeedModelV3::State::rangeGeometryRepulsion)
+        .def_readwrite("range_x_scale", &CollisionFreeSpeedModelV3::State::rangeXScale)
+        .def_readwrite("range_y_scale", &CollisionFreeSpeedModelV3::State::rangeYScale)
+        .def_readwrite(
+            "theta_max_upper_bound", &CollisionFreeSpeedModelV3::State::thetaMaxUpperBound)
+        .def_readwrite("agent_buffer", &CollisionFreeSpeedModelV3::State::agentBuffer)
+        .def_readwrite("time_gap", &CollisionFreeSpeedModelV3::State::timeGap)
+        .def_readwrite("desired_speed", &CollisionFreeSpeedModelV3::State::v0)
+        .def_readwrite("radius", &CollisionFreeSpeedModelV3::State::radius);
 }

@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "CollisionFreeSpeedModelV2.hpp"
 
-#include "CollisionFreeSpeedModelV2Data.hpp"
 #include "CollisionGeometry.hpp"
 #include "GenericAgent.hpp"
 #include "GeometricFunctions.hpp"
 #include "LineSegment.hpp"
+#include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
 #include "Point.hpp"
@@ -75,7 +75,7 @@ void CollisionFreeSpeedModelV2::ComputeNextState(
 
     const auto desired_direction = (current.destination - current.pos).Normalized();
     auto direction = (desired_direction + neighborRepulsion + boundaryRepulsion).Normalized();
-    const auto& model = std::get<CollisionFreeSpeedModelV2Data>(current.model);
+    const auto& model = std::get<State>(current.model);
     if(direction == Point{}) {
         direction = model.orientation;
     }
@@ -90,15 +90,15 @@ void CollisionFreeSpeedModelV2::ComputeNextState(
     const auto optimal_speed = OptimalSpeed(current, spacing, model.timeGap);
     const auto velocity = direction * optimal_speed;
     next.pos = current.pos + velocity * dT;
-    std::get<CollisionFreeSpeedModelV2Data>(next.model).orientation = direction;
+    std::get<State>(next.model).orientation = direction;
 };
 
 void CollisionFreeSpeedModelV2::CheckModelConstraint(
     const GenericAgent& agent,
-    const NeighborhoodSearchType& neighborhoodSearch,
+    const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
     const CollisionGeometry& geometry) const
 {
-    const auto& model = std::get<CollisionFreeSpeedModelV2Data>(agent.model);
+    const auto& model = std::get<State>(agent.model);
 
     const auto r = model.radius;
     constexpr double rMin = 0.;
@@ -120,7 +120,7 @@ void CollisionFreeSpeedModelV2::CheckModelConstraint(
         if(agent.id == neighbor.id) {
             continue;
         }
-        const auto& neighbor_model = std::get<CollisionFreeSpeedModelV2Data>(neighbor.model);
+        const auto& neighbor_model = std::get<State>(neighbor.model);
         const auto contanctdDist = r + neighbor_model.radius;
         const auto distance = (agent.pos - neighbor.pos).Norm();
         if(contanctdDist >= distance) {
@@ -147,7 +147,7 @@ double CollisionFreeSpeedModelV2::OptimalSpeed(
     double spacing,
     double time_gap) const
 {
-    const auto& model = std::get<CollisionFreeSpeedModelV2Data>(ped.model);
+    const auto& model = std::get<State>(ped.model);
     return std::min(std::max(spacing / time_gap, 0.0), model.v0);
 }
 
@@ -156,8 +156,8 @@ double CollisionFreeSpeedModelV2::GetSpacing(
     const GenericAgent& ped2,
     const Point& direction) const
 {
-    const auto& model1 = std::get<CollisionFreeSpeedModelV2Data>(ped1.model);
-    const auto& model2 = std::get<CollisionFreeSpeedModelV2Data>(ped2.model);
+    const auto& model1 = std::get<State>(ped1.model);
+    const auto& model2 = std::get<State>(ped2.model);
     const auto distp12 = ped2.pos - ped1.pos;
     const auto inFront = direction.ScalarProduct(distp12) >= 0;
     if(!inFront) {
@@ -178,8 +178,8 @@ Point CollisionFreeSpeedModelV2::NeighborRepulsion(
 {
     const auto distp12 = ped2.pos - ped1.pos;
     const auto [distance, direction] = distp12.NormAndNormalized();
-    const auto& model1 = std::get<CollisionFreeSpeedModelV2Data>(ped1.model);
-    const auto& model2 = std::get<CollisionFreeSpeedModelV2Data>(ped2.model);
+    const auto& model1 = std::get<State>(ped1.model);
+    const auto& model2 = std::get<State>(ped2.model);
     const auto l = model1.radius + model2.radius;
     return direction * -(model1.strengthNeighborRepulsion *
                          exp((l - distance) / model1.rangeNeighborRepulsion));
@@ -192,7 +192,7 @@ Point CollisionFreeSpeedModelV2::BoundaryRepulsion(
     const auto pt = boundary_segment.ShortestPoint(ped.pos);
     const auto dist_vec = pt - ped.pos;
     const auto [dist, e_iw] = dist_vec.NormAndNormalized();
-    const auto& model = std::get<CollisionFreeSpeedModelV2Data>(ped.model);
+    const auto& model = std::get<State>(ped.model);
     const auto l = model.radius;
     const auto R_iw =
         -model.strengthGeometryRepulsion * exp((l - dist) / model.rangeGeometryRepulsion);

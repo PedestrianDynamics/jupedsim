@@ -2,21 +2,31 @@
 #pragma once
 
 #include "CollisionGeometry.hpp"
-#include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
 #include "Point.hpp"
 
+#include <fmt/core.h>
+
 #include <cstdint>
 #include <random>
+#include <utility>
 #include <vector>
-
-struct GenericAgent;
 
 class WarpDriverModel : public OperationalModel
 {
 public:
-    using NeighborhoodSearchType = NeighborhoodSearch<GenericAgent>;
+    /// Per-agent state of the warp driver model.
+    struct State {
+        Point orientation{0.0, 0.0};
+        double radius{0.15};
+        double v0{1.2};
+        double stuckTime{0.0}; // elapsed time since anchor was set
+        double anchorX{0.0}; // position when stuck tracking began
+        double anchorY{0.0};
+        double detourTime{0.0}; // remaining time in detour mode
+        int detourSide{1}; // +1 = left, -1 = right of desired direction
+    };
 
     /// 3-component space-time point/vector used internally
     struct SpaceTimePoint {
@@ -45,13 +55,14 @@ private:
         std::pair<double, Point> Sample(double x, double y) const;
     };
 
-    // Model-level parameters
+    // Builder-configured, simulation-wide values used by ComputeNextState
     double _timeHorizon;
     double _stepSize;
     double _timeUncertainty;
     double _velocityUncertaintyX;
     double _velocityUncertaintyY;
     int _numSamples;
+    // Genuinely simulation-global state
     double _cutOffRadius;
 
     IntrinsicField _intrinsicField;
@@ -81,6 +92,23 @@ public:
 
     void CheckModelConstraint(
         const GenericAgent& agent,
-        const NeighborhoodSearchType& neighborhoodSearch,
+        const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
         const CollisionGeometry& geometry) const override;
+};
+
+template <>
+struct fmt::formatter<WarpDriverModel::State> {
+
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+
+    template <typename FormatContext>
+    auto format(const WarpDriverModel::State& m, FormatContext& ctx) const
+    {
+        return fmt::format_to(
+            ctx.out(),
+            "WarpDriver[orientation={}, radius={}, v0={}]",
+            m.orientation,
+            m.radius,
+            m.v0);
+    }
 };

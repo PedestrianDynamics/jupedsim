@@ -8,7 +8,7 @@
 namespace py = pybind11;
 
 /// GIL-safe owner of a py::object, used as the type-erased payload for
-/// CustomModelData (per-agent custom state).
+/// CustomModel::State (per-agent custom state).
 ///
 /// Copy and copy-assignment SHARE the wrapped object by reference: they incref
 /// the same Python object, they do NOT clone it. This is what makes per-step

@@ -2,19 +2,32 @@
 #pragma once
 #include "CollisionGeometry.hpp"
 #include "LineSegment.hpp"
-#include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
 #include "Point.hpp"
 
-struct GenericAgent;
+#include <fmt/core.h>
 
 class GeneralizedCentrifugalForceModel : public OperationalModel
 {
 public:
-    using NeighborhoodSearchType = NeighborhoodSearch<GenericAgent>;
+    /// Per-agent state of the generalized centrifugal force model.
+    struct State {
+        Point orientation{0.0, 0.0};
+        double speed{};
+        Point e0{};
+        int orientationDelay{};
+        double mass{1.0};
+        double tau{0.5};
+        double v0{1.2};
+        double Av{1.0};
+        double AMin{0.2};
+        double BMin{0.2};
+        double BMax{0.4};
+    };
 
 private:
+    double _cutOffRadius{4.0}; // TODO (MC) check this free parameter
     double strengthNeighborRepulsion;
     double strengthGeometryRepulsion;
     double maxNeighborInteractionDistance;
@@ -42,10 +55,10 @@ public:
         const GenericAgent& current,
         GenericAgent& next,
         const CollisionGeometry& geometry,
-        const NeighborhoodSearchType& neighborhoodSearch) const override;
+        const NeighborhoodSearch<GenericAgent>& neighborhoodSearch) const override;
     void CheckModelConstraint(
         const GenericAgent& agent,
-        const NeighborhoodSearchType& neighborhoodSearch,
+        const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
         const CollisionGeometry& geometry) const override;
 
 private:
@@ -95,4 +108,16 @@ private:
         double r,
         double l) const;
     double AgentToAgentSpacing(const GenericAgent& agent, const GenericAgent& otherAgent) const;
+};
+
+template <>
+struct fmt::formatter<GeneralizedCentrifugalForceModel::State> {
+
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+
+    template <typename FormatContext>
+    auto format(const GeneralizedCentrifugalForceModel::State& m, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "GCFM[orientation={}, speed={}])", m.orientation, m.speed);
+    }
 };

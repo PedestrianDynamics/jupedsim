@@ -4,6 +4,5 @@ target_sources(simulator PRIVATE
     SocialForceModel.hpp
     SocialForceModelBuilder.cpp
     SocialForceModelBuilder.hpp
-    SocialForceModelData.hpp
 )
 target_include_directories(simulator PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

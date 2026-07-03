@@ -2,7 +2,6 @@
 #include "Simulation.hpp"
 
 #include "CollisionGeometry.hpp"
-#include "GeneralizedCentrifugalForceModelData.hpp"
 #include "GenericAgent.hpp"
 #include "IteratorPair.hpp"
 #include "Journey.hpp"

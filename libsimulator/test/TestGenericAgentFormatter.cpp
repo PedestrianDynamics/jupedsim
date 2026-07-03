@@ -4,7 +4,7 @@
 #include <fmt/format.h>
 #include <gtest/gtest.h>
 
-static GenericAgent make_agent(GenericAgent::Model model)
+static GenericAgent make_agent(GenericAgent::ModelState model)
 {
     return GenericAgent(
         GenericAgent::ID{},
@@ -14,32 +14,32 @@ static GenericAgent make_agent(GenericAgent::Model model)
         std::move(model));
 }
 
-TEST(GenericAgentFormatter, FormatsGeneralizedCentrifugalForceModelData)
+TEST(GenericAgentFormatter, FormatsGeneralizedCentrifugalForceModelAgent)
 {
-    auto agent = make_agent(GeneralizedCentrifugalForceModelData{});
+    auto agent = make_agent(GeneralizedCentrifugalForceModel::State{});
     ASSERT_NO_THROW((void) fmt::format("{}", agent));
 }
 
-TEST(GenericAgentFormatter, FormatsCollisionFreeSpeedModelData)
+TEST(GenericAgentFormatter, FormatsCollisionFreeSpeedModelAgent)
 {
-    auto agent = make_agent(CollisionFreeSpeedModelData{});
+    auto agent = make_agent(CollisionFreeSpeedModel::State{});
     ASSERT_NO_THROW((void) fmt::format("{}", agent));
 }
 
-TEST(GenericAgentFormatter, FormatsCollisionFreeSpeedModelV2Data)
+TEST(GenericAgentFormatter, FormatsCollisionFreeSpeedModelV2Agent)
 {
-    auto agent = make_agent(CollisionFreeSpeedModelV2Data{});
+    auto agent = make_agent(CollisionFreeSpeedModelV2::State{});
     ASSERT_NO_THROW((void) fmt::format("{}", agent));
 }
 
-TEST(GenericAgentFormatter, FormatsAnticipationVelocityModelData)
+TEST(GenericAgentFormatter, FormatsAnticipationVelocityModelAgent)
 {
-    auto agent = make_agent(AnticipationVelocityModelData{});
+    auto agent = make_agent(AnticipationVelocityModel::State{});
     ASSERT_NO_THROW((void) fmt::format("{}", agent));
 }
 
-TEST(GenericAgentFormatter, FormatsSocialForceModelData)
+TEST(GenericAgentFormatter, FormatsSocialForceModelAgent)
 {
-    auto agent = make_agent(SocialForceModelData{});
+    auto agent = make_agent(SocialForceModel::State{});
     ASSERT_NO_THROW((void) fmt::format("{}", agent));
 }

@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "CollisionFreeSpeedModelV3.hpp"
 
-#include "CollisionFreeSpeedModelV3Data.hpp"
 #include "CollisionGeometry.hpp"
 #include "GenericAgent.hpp"
 #include "GeometricFunctions.hpp"
 #include "LineSegment.hpp"
+#include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
 #include "Point.hpp"
@@ -31,7 +31,7 @@ double NeighborInfluence(
     const std::vector<GenericAgent>& neighborhood,
     const Point& pos,
     const Point& reference_direction,
-    const CollisionFreeSpeedModelV3Data& model)
+    const CollisionFreeSpeedModelV3::State& model)
 {
     const auto range_x = std::max(Eps, model.rangeNeighborRepulsion * model.rangeXScale);
     const auto range_y = std::max(Eps, model.rangeNeighborRepulsion * model.rangeYScale);
@@ -96,7 +96,7 @@ void CollisionFreeSpeedModelV3::ComputeNextState(
             return acc + BoundaryRepulsion(current, element);
         });
 
-    const auto& model = std::get<CollisionFreeSpeedModelV3Data>(current.model);
+    const auto& model = std::get<State>(current.model);
     const auto desired_direction = (current.destination - current.pos).Normalized();
     auto reference_direction = (desired_direction + boundaryRepulsion).Normalized();
     if(reference_direction == Point{}) {
@@ -137,17 +137,17 @@ void CollisionFreeSpeedModelV3::ComputeNextState(
     const auto optimal_speed = OptimalSpeed(current, spacing, model.timeGap);
     const auto velocity = direction * optimal_speed;
     next.pos = current.pos + velocity * dT;
-    auto& nextModel = std::get<CollisionFreeSpeedModelV3Data>(next.model);
+    auto& nextModel = std::get<State>(next.model);
     nextModel.orientation = direction;
     nextModel.headingAngle = heading_angle;
 }
 
 void CollisionFreeSpeedModelV3::CheckModelConstraint(
     const GenericAgent& agent,
-    const NeighborhoodSearchType& neighborhoodSearch,
+    const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
     const CollisionGeometry& geometry) const
 {
-    const auto& model = std::get<CollisionFreeSpeedModelV3Data>(agent.model);
+    const auto& model = std::get<State>(agent.model);
 
     validateConstraint(model.radius, 0.0, 2.0, "radius", true);
     validateConstraint(model.v0, 0.0, 10.0, "v0");
@@ -184,7 +184,7 @@ void CollisionFreeSpeedModelV3::CheckModelConstraint(
         if(agent.id == neighbor.id) {
             continue;
         }
-        const auto& neighbor_model = std::get<CollisionFreeSpeedModelV3Data>(neighbor.model);
+        const auto& neighbor_model = std::get<State>(neighbor.model);
         const auto contactDist = model.radius + neighbor_model.radius;
         const auto distance = (agent.pos - neighbor.pos).Norm();
         if(contactDist >= distance) {
@@ -211,7 +211,7 @@ double CollisionFreeSpeedModelV3::OptimalSpeed(
     double spacing,
     double time_gap) const
 {
-    const auto& model = std::get<CollisionFreeSpeedModelV3Data>(ped.model);
+    const auto& model = std::get<State>(ped.model);
     const auto effective_spacing = spacing - model.agentBuffer;
     return std::min(std::max(effective_spacing / time_gap, MinReverseSpeed), model.v0);
 }
@@ -221,8 +221,8 @@ double CollisionFreeSpeedModelV3::GetSpacing(
     const GenericAgent& ped2,
     const Point& direction) const
 {
-    const auto& model1 = std::get<CollisionFreeSpeedModelV3Data>(ped1.model);
-    const auto& model2 = std::get<CollisionFreeSpeedModelV3Data>(ped2.model);
+    const auto& model1 = std::get<State>(ped1.model);
+    const auto& model2 = std::get<State>(ped2.model);
     const auto distp12 = ped2.pos - ped1.pos;
     if(direction.ScalarProduct(distp12) < 0.0) {
         return std::numeric_limits<double>::max();
@@ -245,7 +245,7 @@ Point CollisionFreeSpeedModelV3::BoundaryRepulsion(
     const auto pt = boundary_segment.ShortestPoint(ped.pos);
     const auto dist_vec = pt - ped.pos;
     const auto [dist, e_iw] = dist_vec.NormAndNormalized();
-    const auto& model = std::get<CollisionFreeSpeedModelV3Data>(ped.model);
+    const auto& model = std::get<State>(ped.model);
     const auto l = model.radius;
     const auto R_iw =
         -model.strengthGeometryRepulsion * std::exp((l - dist) / model.rangeGeometryRepulsion);

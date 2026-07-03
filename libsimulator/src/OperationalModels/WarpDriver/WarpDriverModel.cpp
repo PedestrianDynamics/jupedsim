@@ -28,10 +28,10 @@
 #include "WarpDriverModel.hpp"
 
 #include "GenericAgent.hpp"
+#include "NeighborhoodSearch.hpp"
 #include "OperationalModelType.hpp"
 #include "Point.hpp"
 #include "SimulationError.hpp"
-#include "WarpDriverModelData.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -350,13 +350,13 @@ OperationalModelType WarpDriverModel::Type() const
 
 void WarpDriverModel::CheckModelConstraint(
     const GenericAgent& agent,
-    const NeighborhoodSearchType& /*neighborhoodSearch*/,
+    const NeighborhoodSearch<GenericAgent>& /*neighborhoodSearch*/,
     const CollisionGeometry& /*geometry*/) const
 {
-    const auto* data = std::get_if<WarpDriverModelData>(&agent.model);
+    const auto* data = std::get_if<State>(&agent.model);
     if(!data) {
         throw SimulationError(
-            "WarpDriverModel constraint check: agent {} does not have WarpDriverModelData",
+            "WarpDriverModel constraint check: agent {} does not have WarpDriverModel data",
             agent.id);
     }
     if(data->radius <= 0.0) {
@@ -378,11 +378,11 @@ void WarpDriverModel::ComputeNextState(
     const CollisionGeometry& geometry,
     const NeighborhoodSearch<GenericAgent>& neighborhoodSearch) const
 {
-    const auto& agentData = std::get<WarpDriverModelData>(current.model);
-    auto& nextData = std::get<WarpDriverModelData>(next.model);
+    const auto& agentData = std::get<State>(current.model);
+    auto& nextData = std::get<State>(next.model);
     const double speed = agentData.v0;
 
-    // Agent orientation (unit vector). If zero, default to +x.
+    // State orientation (unit vector). If zero, default to +x.
     Point orient = agentData.orientation;
     if(orient.Norm() < 1e-9) {
         orient = Point{1.0, 0.0};
@@ -427,7 +427,7 @@ void WarpDriverModel::ComputeNextState(
         if(neighbor.id == current.id) {
             continue;
         }
-        const auto* nbData = std::get_if<WarpDriverModelData>(&neighbor.model);
+        const auto* nbData = std::get_if<State>(&neighbor.model);
         if(!nbData) {
             continue;
         }
@@ -468,7 +468,7 @@ void WarpDriverModel::ComputeNextState(
             continue;
         }
 
-        const auto* nbData = std::get_if<WarpDriverModelData>(&neighbor.model);
+        const auto* nbData = std::get_if<State>(&neighbor.model);
         if(!nbData) {
             continue;
         }
@@ -591,7 +591,7 @@ void WarpDriverModel::ComputeNextState(
         newVelWorld = desiredDir * agentData.v0 * 0.01; // tiny push towards goal
     }
 
-    // Agent repulsion
+    // State repulsion
     newVelWorld = newVelWorld + repulsion;
 
     // Boundary avoidance: steer agents away from walls
