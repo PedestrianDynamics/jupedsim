@@ -170,6 +170,21 @@ TEST_F(FlatSquare, OrientationPointsToTarget)
     EXPECT_NEAR(dir.y, inv_sqrt2, 1e-6);
 }
 
+TEST_F(FlatSquare, OrientationRobustWhenSourceOnEdge)
+{
+    // source sits exactly on the shared diagonal (y=x). CGAL then emits a
+    // duplicate leading waypoint; get_orientation must skip it and still return
+    // the real heading instead of a spurious (0,0).
+    const Point3D source{4, 4, 1};
+    engine.set_target({8, 7, 1});
+
+    const Point dir = engine.get_orientation(source);
+
+    // Heading towards (8,7) from (4,4): (4,3) normalized = (0.8, 0.6).
+    EXPECT_NEAR(dir.x, 0.8, 1e-6);
+    EXPECT_NEAR(dir.y, 0.6, 1e-6);
+}
+
 TEST(RoutingEngine3DFold, GeodesicCarriesLengthAcrossSeam)
 {
     SurfaceMeshShortestPathRoutingEngine engine{};

@@ -48,14 +48,16 @@ Point RoutingEngine3D::get_orientation(const Point3D& source)
 {
     const auto result = get_shortest_path(source);
     const auto& path = std::get<0>(result);
-    if(path.size() < 2) {
-        // Already at the destination (or no next waypoint) -> no direction.
-        return {0, 0};
-    }
     // Direction towards the next waypoint, projected onto x/y (z dropped).
-    const Point dir(path[1].x() - path[0].x(), path[1].y() - path[0].y());
-    if(dir.isZeroLength()) { // can this happen? just for safety
-        return {0, 0};
+    // A query point sitting exactly on a triangle edge makes CGAL emit a
+    // duplicate leading waypoint, so skip any waypoints coinciding with the
+    // start and steer towards the first one that actually differs.
+    for(std::size_t i = 1; i < path.size(); ++i) {
+        const Point dir(path[i].x() - path[0].x(), path[i].y() - path[0].y());
+        if(!dir.isZeroLength()) {
+            return dir.Normalized();
+        }
     }
-    return dir.Normalized();
+    // Already at the destination (or degenerate) -> no direction.
+    return {0, 0};
 }
