@@ -29,7 +29,14 @@ using AABBTree = CGAL::AABB_tree<AABBTraits>;
 class RoutingEngine3D
 {
 public:
+    RoutingEngine3D() = default;
     virtual ~RoutingEngine3D() = default;
+
+    // Non-copyable and non-movable
+    RoutingEngine3D(const RoutingEngine3D&) = delete;
+    RoutingEngine3D& operator=(const RoutingEngine3D&) = delete;
+    RoutingEngine3D(RoutingEngine3D&&) = delete;
+    RoutingEngine3D& operator=(RoutingEngine3D&&) = delete;
 
     /// Set geometry.
     /// @param mesh surface mesh to set geometry to

@@ -15,17 +15,6 @@ public:
     SurfaceMeshShortestPathRoutingEngine() = default;
     ~SurfaceMeshShortestPathRoutingEngine() override = default;
 
-    // no copy and assignments
-    SurfaceMeshShortestPathRoutingEngine(const SurfaceMeshShortestPathRoutingEngine& other) =
-        delete;
-    SurfaceMeshShortestPathRoutingEngine&
-    operator=(const SurfaceMeshShortestPathRoutingEngine& other) = delete;
-
-    // move is supported
-    SurfaceMeshShortestPathRoutingEngine(SurfaceMeshShortestPathRoutingEngine&& other) = default;
-    SurfaceMeshShortestPathRoutingEngine&
-    operator=(SurfaceMeshShortestPathRoutingEngine&& other) = default;
-
     void set_target(const Location& target) override;
     std::tuple<std::vector<Point3D>, double> get_shortest_path(const Point3D& source) override;
 
