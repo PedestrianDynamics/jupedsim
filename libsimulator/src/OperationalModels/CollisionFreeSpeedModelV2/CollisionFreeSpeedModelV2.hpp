@@ -3,17 +3,27 @@
 
 #include "CollisionGeometry.hpp"
 #include "LineSegment.hpp"
-#include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
 #include "Point.hpp"
 
-struct GenericAgent;
+#include <fmt/core.h>
 
 class CollisionFreeSpeedModelV2 : public OperationalModel
 {
 public:
-    using NeighborhoodSearchType = NeighborhoodSearch<GenericAgent>;
+    /// Per-agent state of the collision free speed model v2.
+    struct State {
+        Point orientation{0.0, 0.0};
+        double strengthNeighborRepulsion{8.0};
+        double rangeNeighborRepulsion{0.1};
+        double strengthGeometryRepulsion{5.0};
+        double rangeGeometryRepulsion{0.02};
+
+        double timeGap{1};
+        double v0{1.2};
+        double radius{0.2};
+    };
 
 private:
     double _cutOffRadius{3};
@@ -30,7 +40,7 @@ public:
         const NeighborhoodSearch<GenericAgent>& neighborhoodSearch) const override;
     void CheckModelConstraint(
         const GenericAgent& agent,
-        const NeighborhoodSearchType& neighborhoodSearch,
+        const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
         const CollisionGeometry& geometry) const override;
 
 private:
@@ -39,4 +49,28 @@ private:
     GetSpacing(const GenericAgent& ped1, const GenericAgent& ped2, const Point& direction) const;
     Point NeighborRepulsion(const GenericAgent& ped1, const GenericAgent& ped2) const;
     Point BoundaryRepulsion(const GenericAgent& ped, const LineSegment& boundary_segment) const;
+};
+
+template <>
+struct fmt::formatter<CollisionFreeSpeedModelV2::State> {
+
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+
+    template <typename FormatContext>
+    auto format(const CollisionFreeSpeedModelV2::State& m, FormatContext& ctx) const
+    {
+        return fmt::format_to(
+            ctx.out(),
+            "CollisionFreeSpeedModelV2[orientation={}, strengthNeighborRepulsion={}, "
+            "rangeNeighborRepulsion={}, strengthGeometryRepulsion={}, rangeGeometryRepulsion={}, "
+            "timeGap={}, v0={}, radius={}])",
+            m.orientation,
+            m.strengthNeighborRepulsion,
+            m.rangeNeighborRepulsion,
+            m.strengthGeometryRepulsion,
+            m.rangeGeometryRepulsion,
+            m.timeGap,
+            m.v0,
+            m.radius);
+    }
 };

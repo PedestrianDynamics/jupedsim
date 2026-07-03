@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
-#include "AnticipationVelocityModelData.hpp"
-#include "CollisionFreeSpeedModelData.hpp"
-#include "CollisionFreeSpeedModelV2Data.hpp"
-#include "CollisionFreeSpeedModelV3Data.hpp"
-#include "GeneralizedCentrifugalForceModelData.hpp"
+#include "AnticipationVelocityModel.hpp"
+#include "CollisionFreeSpeedModel.hpp"
+#include "CollisionFreeSpeedModelV2.hpp"
+#include "CollisionFreeSpeedModelV3.hpp"
+#include "GeneralizedCentrifugalForceModel.hpp"
 #include "OperationalModel.hpp"
-#include "OperationalModels/CustomModel/CustomModelData.hpp"
+#include "OperationalModels/CustomModel/CustomModel.hpp"
 #include "OperationalModels/OperationalModelType.hpp"
 #include "Point.hpp"
-#include "SocialForceModelData.hpp"
+#include "SocialForceModel.hpp"
 #include "UniqueID.hpp"
 #include "Visitor.hpp"
-#include "WarpDriverModelData.hpp"
+#include "WarpDriver/WarpDriverModel.hpp"
 
 #include <fmt/core.h>
 
@@ -36,23 +36,23 @@ struct GenericAgent {
     // Agent fields common for all models
     Point pos{};
 
-    using Model = std::variant<
-        GeneralizedCentrifugalForceModelData,
-        CollisionFreeSpeedModelData,
-        CollisionFreeSpeedModelV2Data,
-        CollisionFreeSpeedModelV3Data,
-        AnticipationVelocityModelData,
-        SocialForceModelData,
-        WarpDriverModelData,
-        CustomModelData>;
-    Model model{};
+    using ModelState = std::variant<
+        GeneralizedCentrifugalForceModel::State,
+        CollisionFreeSpeedModel::State,
+        CollisionFreeSpeedModelV2::State,
+        CollisionFreeSpeedModelV3::State,
+        AnticipationVelocityModel::State,
+        SocialForceModel::State,
+        WarpDriverModel::State,
+        CustomModel::State>;
+    ModelState model{};
 
     GenericAgent(
         ID id_,
         jps::UniqueID<Journey> journeyId_,
         jps::UniqueID<BaseStage> stageId_,
         Point pos_,
-        Model model_)
+        ModelState model_)
         : id(id_ != ID::Invalid ? id_ : ID{})
         , journeyId(journeyId_)
         , stageId(stageId_)
@@ -66,28 +66,28 @@ struct GenericAgent {
 /// Maps agent model data to the operational model type it belongs to. Kept
 /// exhaustive on purpose: adding a model type will not compile until the
 /// mapping is extended.
-inline OperationalModelType ModelTypeOf(const GenericAgent::Model& model)
+inline OperationalModelType ModelTypeOf(const GenericAgent::ModelState& model)
 {
     return std::visit(
         overloaded{
-            [](const GeneralizedCentrifugalForceModelData&) {
+            [](const GeneralizedCentrifugalForceModel::State&) {
                 return OperationalModelType::GENERALIZED_CENTRIFUGAL_FORCE;
             },
-            [](const CollisionFreeSpeedModelData&) {
+            [](const CollisionFreeSpeedModel::State&) {
                 return OperationalModelType::COLLISION_FREE_SPEED;
             },
-            [](const CollisionFreeSpeedModelV2Data&) {
+            [](const CollisionFreeSpeedModelV2::State&) {
                 return OperationalModelType::COLLISION_FREE_SPEED_V2;
             },
-            [](const CollisionFreeSpeedModelV3Data&) {
+            [](const CollisionFreeSpeedModelV3::State&) {
                 return OperationalModelType::COLLISION_FREE_SPEED_V3;
             },
-            [](const AnticipationVelocityModelData&) {
+            [](const AnticipationVelocityModel::State&) {
                 return OperationalModelType::ANTICIPATION_VELOCITY_MODEL;
             },
-            [](const SocialForceModelData&) { return OperationalModelType::SOCIAL_FORCE; },
-            [](const WarpDriverModelData&) { return OperationalModelType::WARP_DRIVER; },
-            [](const CustomModelData&) { return OperationalModelType::CUSTOM_MODEL; }},
+            [](const SocialForceModel::State&) { return OperationalModelType::SOCIAL_FORCE; },
+            [](const WarpDriverModel::State&) { return OperationalModelType::WARP_DRIVER; },
+            [](const CustomModel::State&) { return OperationalModelType::CUSTOM_MODEL; }},
         model);
 }
 

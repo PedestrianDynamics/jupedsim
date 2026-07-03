@@ -20,7 +20,7 @@ void init_agent(py::module_& m)
             py::init([](uint64_t journeyId,
                         uint64_t stageId,
                         std::tuple<double, double> position,
-                        GenericAgent::Model model) {
+                        GenericAgent::ModelState model) {
                 return GenericAgent(
                     GenericAgent::ID::Invalid, journeyId, stageId, intoPoint(position), model);
             }),

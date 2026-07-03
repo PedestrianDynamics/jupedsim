@@ -4,11 +4,11 @@
 #include "CollisionGeometry.hpp"
 #include "GenericAgent.hpp"
 #include "LineSegment.hpp"
+#include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
 #include "Point.hpp"
 #include "SimulationError.hpp"
-#include "SocialForceModelData.hpp"
 
 #include <cmath>
 #include <iterator>
@@ -30,7 +30,7 @@ void SocialForceModel::ComputeNextState(
     const CollisionGeometry& geometry,
     const NeighborhoodSearch<GenericAgent>& neighborhoodSearch) const
 {
-    const auto& model = std::get<SocialForceModelData>(current.model);
+    const auto& model = std::get<State>(current.model);
     auto forces = DrivingForce(current);
 
     const auto neighborhood =
@@ -56,12 +56,12 @@ void SocialForceModel::ComputeNextState(
 
     const auto velocity = model.velocity + forces * dT;
     next.pos = current.pos + velocity * dT;
-    std::get<SocialForceModelData>(next.model).velocity = velocity;
+    std::get<State>(next.model).velocity = velocity;
 }
 
 void SocialForceModel::CheckModelConstraint(
     const GenericAgent& agent,
-    const NeighborhoodSearchType& neighborhoodSearch,
+    const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
     const CollisionGeometry& geometry) const
 {
     // none of these constraint are given by the paper but are useful to create a simulation that
@@ -77,7 +77,7 @@ void SocialForceModel::CheckModelConstraint(
         }
     };
 
-    const auto& model = std::get<SocialForceModelData>(agent.model);
+    const auto& model = std::get<State>(agent.model);
 
     const auto mass = model.mass;
     throwIfNegative(mass, "mass");
@@ -118,7 +118,7 @@ void SocialForceModel::CheckModelConstraint(
 
 Point SocialForceModel::DrivingForce(const GenericAgent& agent)
 {
-    const auto& model = std::get<SocialForceModelData>(agent.model);
+    const auto& model = std::get<State>(agent.model);
     const Point e0 = (agent.destination - agent.pos).Normalized();
     return (e0 * model.desiredSpeed - model.velocity) / model.reactionTime;
 };
@@ -129,8 +129,8 @@ double SocialForceModel::PushingForceLength(double A, double B, double r, double
 
 Point SocialForceModel::AgentForce(const GenericAgent& ped1, const GenericAgent& ped2) const
 {
-    const auto& model1 = std::get<SocialForceModelData>(ped1.model);
-    const auto& model2 = std::get<SocialForceModelData>(ped2.model);
+    const auto& model1 = std::get<State>(ped1.model);
+    const auto& model2 = std::get<State>(ped2.model);
 
     const double total_radius = model1.radius + model2.radius;
 
@@ -140,15 +140,24 @@ Point SocialForceModel::AgentForce(const GenericAgent& ped1, const GenericAgent&
         model1.agentScale,
         model1.forceDistance,
         total_radius,
-        model2.velocity - model1.velocity);
+        model2.velocity - model1.velocity,
+        this->bodyForce,
+        this->friction);
 };
 
 Point SocialForceModel::ObstacleForce(const GenericAgent& agent, const LineSegment& segment) const
 {
-    const auto& model = std::get<SocialForceModelData>(agent.model);
+    const auto& model = std::get<State>(agent.model);
     const Point pt = segment.ShortestPoint(agent.pos);
     return ForceBetweenPoints(
-        agent.pos, pt, model.obstacleScale, model.forceDistance, model.radius, model.velocity);
+        agent.pos,
+        pt,
+        model.obstacleScale,
+        model.forceDistance,
+        model.radius,
+        model.velocity,
+        this->bodyForce,
+        this->friction);
 }
 
 Point SocialForceModel::ForceBetweenPoints(
@@ -157,7 +166,9 @@ Point SocialForceModel::ForceBetweenPoints(
     const double A,
     const double B,
     const double radius,
-    const Point velocity) const
+    const Point velocity,
+    const double bodyForce,
+    const double friction)
 {
     // todo reduce range of force to 180 degrees
     const double dist = (pt1 - pt2).Norm();
@@ -166,9 +177,8 @@ Point SocialForceModel::ForceBetweenPoints(
     const Point n_ij = (pt1 - pt2).Normalized();
     const Point tangent = n_ij.Rotate90Deg();
     if(dist < radius) {
-        pushing_force_length += this->bodyForce * (radius - dist);
-        friction_force_length =
-            this->friction * (radius - dist) * (velocity.ScalarProduct(tangent));
+        pushing_force_length += bodyForce * (radius - dist);
+        friction_force_length = friction * (radius - dist) * (velocity.ScalarProduct(tangent));
     }
     return n_ij * pushing_force_length + tangent * friction_force_length;
 }

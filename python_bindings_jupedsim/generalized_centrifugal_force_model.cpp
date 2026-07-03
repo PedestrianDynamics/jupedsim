@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "GeneralizedCentrifugalForceModel.hpp"
 #include "GeneralizedCentrifugalForceModelBuilder.hpp"
-#include "GeneralizedCentrifugalForceModelData.hpp"
 #include "OperationalModel.hpp"
 #include "conversion.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep
@@ -32,8 +31,9 @@ void init_generalized_centrifugal_force_model(py::module_& m)
             py::arg("max_neighbor_repulsion_force"),
             py::arg("max_geometry_repulsion_force"))
         .def("build", &GeneralizedCentrifugalForceModelBuilder::Build);
-    py::class_<GeneralizedCentrifugalForceModelData>(m, "GeneralizedCentrifugalForceModelState")
-        .def_static("_defaults", []() { return GeneralizedCentrifugalForceModelData{}; })
+    py::class_<GeneralizedCentrifugalForceModel::State>(
+        m, "GeneralizedCentrifugalForceModelState")
+        .def_static("_defaults", []() { return GeneralizedCentrifugalForceModel::State{}; })
         .def(
             py::init([](std::tuple<double, double> orientation,
                         double speed,
@@ -45,7 +45,7 @@ void init_generalized_centrifugal_force_model(py::module_& m)
                         double amin,
                         double bmin,
                         double bmax) {
-                return GeneralizedCentrifugalForceModelData{
+                return GeneralizedCentrifugalForceModel::State{
                     .orientation = intoPoint(orientation),
                     .speed = speed,
                     .e0 = intoPoint(desiredOrientation),
@@ -68,20 +68,21 @@ void init_generalized_centrifugal_force_model(py::module_& m)
             py::arg("a_min"),
             py::arg("b_min"),
             py::arg("b_max"))
-        .def_readwrite("orientation", &GeneralizedCentrifugalForceModelData::orientation)
-        .def_readwrite("speed", &GeneralizedCentrifugalForceModelData::speed)
+        .def_readwrite("orientation", &GeneralizedCentrifugalForceModel::State::orientation)
+        .def_readwrite("speed", &GeneralizedCentrifugalForceModel::State::speed)
         .def_property(
             "desired_direction",
-            [](const GeneralizedCentrifugalForceModelData& obj) { return intoTuple(obj.e0); },
-            [](GeneralizedCentrifugalForceModelData& obj, std::tuple<double, double> pt) {
+            [](const GeneralizedCentrifugalForceModel::State& obj) { return intoTuple(obj.e0); },
+            [](GeneralizedCentrifugalForceModel::State& obj, std::tuple<double, double> pt) {
                 obj.e0 = intoPoint(pt);
             })
-        .def_readwrite("orientation_delay", &GeneralizedCentrifugalForceModelData::orientationDelay)
-        .def_readwrite("mass", &GeneralizedCentrifugalForceModelData::mass)
-        .def_readwrite("tau", &GeneralizedCentrifugalForceModelData::tau)
-        .def_readwrite("desired_speed", &GeneralizedCentrifugalForceModelData::v0)
-        .def_readwrite("a_v", &GeneralizedCentrifugalForceModelData::Av)
-        .def_readwrite("a_min", &GeneralizedCentrifugalForceModelData::AMin)
-        .def_readwrite("b_min", &GeneralizedCentrifugalForceModelData::BMin)
-        .def_readwrite("b_max", &GeneralizedCentrifugalForceModelData::BMax);
+        .def_readwrite(
+            "orientation_delay", &GeneralizedCentrifugalForceModel::State::orientationDelay)
+        .def_readwrite("mass", &GeneralizedCentrifugalForceModel::State::mass)
+        .def_readwrite("tau", &GeneralizedCentrifugalForceModel::State::tau)
+        .def_readwrite("desired_speed", &GeneralizedCentrifugalForceModel::State::v0)
+        .def_readwrite("a_v", &GeneralizedCentrifugalForceModel::State::Av)
+        .def_readwrite("a_min", &GeneralizedCentrifugalForceModel::State::AMin)
+        .def_readwrite("b_min", &GeneralizedCentrifugalForceModel::State::BMin)
+        .def_readwrite("b_max", &GeneralizedCentrifugalForceModel::State::BMax);
 }

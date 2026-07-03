@@ -3,17 +3,26 @@
 
 #include "CollisionGeometry.hpp"
 #include "LineSegment.hpp"
-#include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
 #include "Point.hpp"
 
-struct GenericAgent;
+#include <fmt/core.h>
 
 class SocialForceModel : public OperationalModel
 {
 public:
-    using NeighborhoodSearchType = NeighborhoodSearch<GenericAgent>;
+    /// Per-agent state of the social force model.
+    struct State {
+        Point velocity{}; // v
+        double mass{80.0}; // m
+        double desiredSpeed{0.8}; // v0
+        double reactionTime{0.5}; // tau
+        double agentScale{2000.0}; // A for other agents
+        double obstacleScale{2000.0}; // A for obstacles
+        double forceDistance{0.08}; // B
+        double radius{0.3}; // r
+    };
 
 private:
     double _cutOffRadius{2.5};
@@ -32,7 +41,7 @@ public:
         const NeighborhoodSearch<GenericAgent>& neighborhoodSearch) const override;
     void CheckModelConstraint(
         const GenericAgent& agent,
-        const NeighborhoodSearchType& neighborhoodSearch,
+        const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
         const CollisionGeometry& geometry) const override;
 
 private:
@@ -61,26 +70,51 @@ private:
      * calculates the pushing and friction forces acting between <pt1> and <pt2>
      * @param pt1 Point on which the forces act
      * @param pt2 Point from which the forces originate
-     * @param A Agent scale
+     * @param A State scale
      * @param B force distance
      * @param r radius
      * @param velocity velocity difference
+     * @param bodyForce body force parameter (k) of the agent the force acts on
+     * @param friction friction parameter (kappa) of the agent the force acts on
      */
-    Point ForceBetweenPoints(
+    static Point ForceBetweenPoints(
         const Point pt1,
         const Point pt2,
         const double A,
-
         const double B,
         const double radius,
-        const Point velocity) const;
+        const Point velocity,
+        const double bodyForce,
+        const double friction);
     /**
      *  exponential function that specifies the length of the pushing force between two points
-     * @param A Agent scale
+     * @param A State scale
      * @param B force distance
      * @param r radius
      * @param distance distance between the two points
      * @return length of pushing force between the two points
      */
     static double PushingForceLength(double A, double B, double r, double distance);
+};
+
+template <>
+struct fmt::formatter<SocialForceModel::State> {
+
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+
+    template <typename FormatContext>
+    auto format(const SocialForceModel::State& m, FormatContext& ctx) const
+    {
+        return fmt::format_to(
+            ctx.out(),
+            "SFM[velocity={}, m={}, v0={}, tau={}, A_ped={}, A_obst={}, B={}, r={}])",
+            m.velocity,
+            m.mass,
+            m.desiredSpeed,
+            m.reactionTime,
+            m.agentScale,
+            m.obstacleScale,
+            m.forceDistance,
+            m.radius);
+    }
 };

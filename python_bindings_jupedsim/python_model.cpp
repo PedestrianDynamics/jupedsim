@@ -5,7 +5,7 @@
 #include "GenericAgent.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"
-#include "OperationalModels/CustomModel/CustomModelData.hpp"
+#include "OperationalModels/CustomModel/CustomModel.hpp"
 #include "SimulationError.hpp"
 #include "conversion.hpp"
 
@@ -104,7 +104,7 @@ void PythonModel::ComputeNextState(
 
     // "next" shares the Python state object with "current" (GilSafePyObject copies are
     // refcounted, not cloned), so this also rejects returning the current state instance.
-    auto& customModelData = std::get<CustomModelData>(next.model).Get<GilSafePyObject>();
+    auto& customModelData = std::get<CustomModel::State>(next.model).Get<GilSafePyObject>();
     if(pythonUpdate.is(customModelData.Get())) {
         throw SimulationError(
             "Current and updated model state are the same instance. "
@@ -170,12 +170,12 @@ void init_python_model(py::module_& m)
 {
     py::class_<OperationalModel, py::smart_holder>(m, "OperationalModel");
 
-    py::class_<CustomModelData>(m, "_CustomModelData")
+    py::class_<CustomModel::State>(m, "_CustomModelData")
         .def(py::init([](py::object model) {
-            return CustomModelData{GilSafePyObject{std::move(model)}};
+            return CustomModel::State{GilSafePyObject{std::move(model)}};
         }))
         .def_property_readonly(
-            "model", [](CustomModelData& data) { return data.Get<GilSafePyObject>().Get(); });
+            "model", [](CustomModel::State& data) { return data.Get<GilSafePyObject>().Get(); });
 
     py::class_<PythonModel, OperationalModel, py::smart_holder>(m, "_PythonModel")
         .def(py::init<py::object>(), py::arg("model"));
