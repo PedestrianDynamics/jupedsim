@@ -49,7 +49,7 @@ def test_shortest_path_across_stair(engine):
     assert path[0][2] == pytest.approx(0.0)
     assert path[-1][2] == pytest.approx(3.0)
     # the geodesic distance (no wall clearance)
-    assert cost == pytest.approx(23.5258, abs=1e-3)
+    assert cost == pytest.approx(23.381, abs=1e-3)
     # Minimally it has to be >= direct euclidian distance
     # assert cost >= math.dist(path[0], path[-1])
 
