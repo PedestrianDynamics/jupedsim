@@ -4,26 +4,12 @@
 #include "CfgCgal.hpp"
 #include "Point.hpp"
 
-#include <CGAL/AABB_face_graph_triangle_primitive.h>
-#include <CGAL/AABB_traits_3.h>
-#include <CGAL/AABB_tree.h>
-#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-#include <CGAL/Surface_mesh.h>
-
 #include <memory>
 #include <string_view>
 #include <tuple>
 #include <vector>
 
-// Surface_mesh_shortest_path is designed for EPICK
-using SurfaceKernel = CGAL::Exact_predicates_inexact_constructions_kernel;
-using SurfaceMesh = CGAL::Surface_mesh<SurfaceKernel::Point_3>;
-using Point3D = SurfaceKernel::Point_3;
 using Location = Point3D; // [RL] TODO: Support more than just points
-
-using AABBPrimitive = CGAL::AABB_face_graph_triangle_primitive<SurfaceMesh>;
-using AABBTraits = CGAL::AABB_traits_3<SurfaceKernel, AABBPrimitive>;
-using AABBTree = CGAL::AABB_tree<AABBTraits>;
 
 /// Base for routing engines.
 class RoutingEngine3D
