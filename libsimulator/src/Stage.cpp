@@ -88,7 +88,7 @@ Waypoint::Waypoint(Point position_, double distance_) : position(position_), dis
 
 bool Waypoint::IsCompleted(const GenericAgent& agent)
 {
-    const auto actual_distance = (agent.pos - position).Norm();
+    const auto actual_distance = (agent.position() - position).Norm();
     return actual_distance <= distance;
 }
 
@@ -115,7 +115,7 @@ Exit::Exit(Polygon area_, std::vector<GenericAgent::ID>& toRemove_)
 
 bool Exit::IsCompleted(const GenericAgent& agent)
 {
-    const bool hasReachedExit = area.IsInside(agent.pos);
+    const bool hasReachedExit = area.IsInside(agent.position());
     if(hasReachedExit) {
         toRemove.push_back(agent.id);
     }
@@ -149,7 +149,7 @@ bool NotifiableWaitingSet::IsCompleted(const GenericAgent& agent)
     if(find_iter != std::end(occupants)) {
         return true;
     }
-    const auto distance = (agent.pos - slots[0]).Norm();
+    const auto distance = (agent.position() - slots[0]).Norm();
     return distance <= 1;
 }
 

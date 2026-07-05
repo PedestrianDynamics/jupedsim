@@ -14,6 +14,7 @@ class SocialForceModel : public OperationalModel
 public:
     /// Per-agent state of the social force model.
     struct State {
+        Point position{};
         Point velocity{}; // v
         double mass{80.0}; // m
         double desiredSpeed{0.8}; // v0
