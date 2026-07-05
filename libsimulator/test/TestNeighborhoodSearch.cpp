@@ -13,6 +13,8 @@ template <typename T>
 struct ValueWithPos {
     Point pos{};
     T val;
+
+    const Point& position() const { return pos; }
 };
 
 TEST(NeighborhoodSearch, ReturnsEmptyOnEmpty)

@@ -4,6 +4,7 @@
 #include "NeighborhoodSearch.hpp"
 #include "OperationalDecisionSystem.hpp"
 #include "OperationalModels/CustomModel/CustomModel.hpp"
+#include "OperationalModels/CustomModel/CustomModel.hpp"
 
 #include <fmt/format.h>
 #include <gtest/gtest.h>
@@ -42,10 +43,12 @@ public:
         const CollisionGeometry&,
         const NeighborhoodSearch<GenericAgent>&) const override
     {
-        const auto& state = std::get<CustomModel::State>(current.model).Get<MinimalState>();
-        auto& nextState = std::get<CustomModel::State>(next.model).Get<MinimalState>();
+        const auto& currentModelData = std::get<CustomModel::State>(current.model);
+        const auto& state = currentModelData.Get<MinimalState>();
+        auto& nextModelData = std::get<CustomModel::State>(next.model);
+        auto& nextState = nextModelData.Get<MinimalState>();
 
-        next.pos = current.pos + state.velocity * dT;
+        nextModelData.position = currentModelData.position + state.velocity * dT;
         nextState.velocity = state.velocity;
         nextState.applications = state.applications + 1;
     }
@@ -127,7 +130,7 @@ TEST(CustomModel, RunsThroughOperationalDecisionSystem)
 
     const auto& agent = agents.front();
     const auto& state = std::get<CustomModel::State>(agent.model).Get<MinimalState>();
-    ASSERT_EQ(agent.pos, Point(1.0, 0.0));
+    ASSERT_EQ(agent.position(), Point(1.0, 0.0));
     ASSERT_EQ(state.applications, 1);
 }
 

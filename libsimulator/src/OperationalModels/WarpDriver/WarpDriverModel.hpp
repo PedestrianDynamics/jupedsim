@@ -18,6 +18,7 @@ class WarpDriverModel : public OperationalModel
 public:
     /// Per-agent state of the warp driver model.
     struct State {
+        Point position{};
         Point orientation{0.0, 0.0};
         double radius{0.15};
         double v0{1.2};

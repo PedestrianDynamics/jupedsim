@@ -207,7 +207,7 @@ void NotifiableWaitingSet::Update(
                 std::begin(candidates),
                 std::end(candidates),
                 [&slot_pos, &boundary](const auto& neighbor) {
-                    const auto agent_to_neighbor = LineSegment(slot_pos, neighbor.pos);
+                    const auto agent_to_neighbor = LineSegment(slot_pos, neighbor.position());
                     if(std::find_if(
                            boundary.cbegin(),
                            boundary.cend(),
@@ -227,7 +227,7 @@ void NotifiableWaitingSet::Update(
             if(agent.stageId == id) {
                 if(std::find(std::begin(occupants), std::end(occupants), agent.id) ==
                    std::end(occupants)) {
-                    const auto distance = (agent.pos - slots[index]).Norm();
+                    const auto distance = (agent.position() - slots[index]).Norm();
                     if(distance < min_distance) {
                         min_distance = distance;
                         occupant = agent.id;
@@ -283,7 +283,7 @@ void NotifiableQueue::Update(
                 std::begin(candidates),
                 std::end(candidates),
                 [&slot_pos, &boundary](const auto& neighbor) {
-                    const auto agent_to_neighbor = LineSegment(slot_pos, neighbor.pos);
+                    const auto agent_to_neighbor = LineSegment(slot_pos, neighbor.position());
                     if(std::find_if(
                            boundary.cbegin(),
                            boundary.cend(),
@@ -304,7 +304,7 @@ void NotifiableQueue::Update(
                exitingThisUpdate.contains(agent.id)) {
                 continue;
             }
-            const auto distance = (agent.pos - slots[index]).Norm();
+            const auto distance = (agent.position() - slots[index]).Norm();
             if(distance < min_distance) {
                 min_distance = distance;
                 occupant = agent.id;
