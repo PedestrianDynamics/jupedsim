@@ -9,14 +9,16 @@ target_sources(simulator PRIVATE
     src/AABB.cpp
     src/AABB.hpp
     src/AgentRemovalSystem.hpp
-    src/Clonable.hpp
     src/CfgCgal.hpp
+    src/Clonable.hpp
     src/CollisionGeometry.cpp
     src/CollisionGeometry.hpp
     src/Ellipse.cpp
     src/Ellipse.hpp
     src/GenericAgent.hpp
     src/GeometricFunctions.hpp
+    src/Geometry/Validation.cpp
+    src/Geometry/Validation.hpp
     src/GeometryBuilder.cpp
     src/GeometryBuilder.hpp
     src/Graph.hpp
