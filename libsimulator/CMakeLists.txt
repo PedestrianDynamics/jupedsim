@@ -16,6 +16,8 @@ target_sources(simulator PRIVATE
     src/Ellipse.hpp
     src/GenericAgent.hpp
     src/GeometricFunctions.hpp
+    src/Geometry/Validation.cpp
+    src/Geometry/Validation.hpp
     src/GeometryBuilder.cpp
     src/GeometryBuilder.hpp
     src/Graph.hpp
