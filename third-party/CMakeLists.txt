@@ -35,7 +35,7 @@ set(CGAL_DATA_DIR "none")
 set(WITH_CGAL_ImageIO OFF)
 set(WITH_CGAL_Qt5 OFF)
 set(CGAL_DISABLE_GMP ON)
-find_package(CGAL 6.1
+find_package(CGAL 6.1.2
     REQUIRED
     CONFIG
     NO_DEFAULT_PATH
