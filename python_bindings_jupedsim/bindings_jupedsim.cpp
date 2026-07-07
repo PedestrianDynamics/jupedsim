@@ -1,4 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
+#include "SimulationError.hpp"
+
 #include <pybind11/detail/common.h>
 #include <pybind11/pybind11.h>
 
@@ -27,6 +29,7 @@ void init_python_model(py::module_& m);
 
 PYBIND11_MODULE(py_jupedsim, m)
 {
+    py::register_exception<SimulationError>(m, "SimulationError");
     init_logging(m);
     init_build_info(m);
     init_journey(m);

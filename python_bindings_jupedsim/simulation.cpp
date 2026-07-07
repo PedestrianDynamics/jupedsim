@@ -2,12 +2,14 @@
 #include "Simulation.hpp"
 
 #include "CollisionGeometry.hpp"
+#include "GenericAgent.hpp"
 #include "Journey.hpp"
 #include "OperationalModel.hpp"
 #include "Polygon.hpp"
 #include "Stage.hpp"
 #include "StageDescription.hpp"
 #include "conversion.hpp"
+#include "type_casters.hpp" // IWYU pragma: keep
 
 #include <pybind11/attr.h>
 #include <pybind11/cast.h>
@@ -78,7 +80,16 @@ void init_simulation(py::module_& m)
             })
         .def(
             "add_agent",
-            [](Simulation& sim, GenericAgent& agent) { return sim.AddAgent(agent).getID(); })
+            [](Simulation& sim, uint64_t journeyId, uint64_t stageId, GenericAgent::ModelState state) {
+                return sim
+                    .AddAgent(GenericAgent(
+                        GenericAgent::ID::Invalid, journeyId, stageId, std::move(state)))
+                    .getID();
+            },
+            py::kw_only(),
+            py::arg("journey_id"),
+            py::arg("stage_id"),
+            py::arg("state"))
         .def(
             "mark_agent_for_removal",
             [](Simulation& sim, uint64_t id) { sim.MarkAgentForRemoval(id); })
@@ -112,6 +123,10 @@ void init_simulation(py::module_& m)
             [](Simulation& sim) { return py::make_iterator(sim.Agents()); },
             py::keep_alive<0, 1>())
         .def(
+            // TRANSIENT ONLY: the returned object wraps a raw reference into the
+            // simulation's agent storage. It must not be stored across iterate();
+            // callers (Python agent handles) resolve it freshly inside every
+            // property access.
             "agent",
             [](Simulation& sim, uint64_t agentId) -> auto& { return sim.Agent(agentId); },
             py::arg("agent_id"),

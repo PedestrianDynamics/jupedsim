@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
+import jupedsim.native as py_jps
 from jupedsim.agent import Agent
 from jupedsim.distributions import (
     AgentNumberError,
@@ -35,42 +36,34 @@ from jupedsim.library import (
 from jupedsim.linesegment import LineSegment
 from jupedsim.models.anticipation_velocity_model import (
     AnticipationVelocityModel,
-    AnticipationVelocityModelAgentParameters,
     AnticipationVelocityModelState,
 )
 from jupedsim.models.collision_free_speed import (
     CollisionFreeSpeedModel,
-    CollisionFreeSpeedModelAgentParameters,
     CollisionFreeSpeedModelState,
 )
 from jupedsim.models.collision_free_speed_v2 import (
     CollisionFreeSpeedModelV2,
-    CollisionFreeSpeedModelV2AgentParameters,
     CollisionFreeSpeedModelV2State,
 )
 from jupedsim.models.collision_free_speed_v3 import (
     CollisionFreeSpeedModelV3,
-    CollisionFreeSpeedModelV3AgentParameters,
     CollisionFreeSpeedModelV3State,
 )
 from jupedsim.models.custom_model import (
-    CustomModelAgentParameters,
     CustomModelAgentState,
     CustomOperationalModel,
 )
 from jupedsim.models.generalized_centrifugal_force import (
     GeneralizedCentrifugalForceModel,
-    GeneralizedCentrifugalForceModelAgentParameters,
     GeneralizedCentrifugalForceModelState,
 )
 from jupedsim.models.social_force import (
     SocialForceModel,
-    SocialForceModelAgentParameters,
     SocialForceModelState,
 )
 from jupedsim.models.warp_driver import (
     WarpDriverModel,
-    WarpDriverModelAgentParameters,
     WarpDriverModelState,
 )
 from jupedsim.neighborhood import NeighborhoodSearch
@@ -91,6 +84,11 @@ from jupedsim.stages import (
     WaitingSetState,
     WaypointStage,
 )
+
+SimulationError = py_jps.SimulationError
+"""Raised for simulation errors, e.g. when accessing an agent handle whose
+agent no longer exists or when calling mutating simulation methods from a
+custom-model callback."""
 
 __version__ = get_build_info().library_version
 """
@@ -113,15 +111,25 @@ Id of the compiler used to build the native portion of this module.
 __all__ = [
     "Agent",
     "AgentNumberError",
+    "AnticipationVelocityModel",
+    "AnticipationVelocityModelState",
     "BuildInfo",
+    "CollisionFreeSpeedModel",
+    "CollisionFreeSpeedModelState",
+    "CollisionFreeSpeedModelV2",
+    "CollisionFreeSpeedModelV2State",
+    "CollisionFreeSpeedModelV3",
+    "CollisionFreeSpeedModelV3State",
+    "CustomModelAgentState",
+    "CustomOperationalModel",
     "ExitStage",
-    "GeneralizedCentrifugalForceModelAgentParameters",
     "GeneralizedCentrifugalForceModel",
     "GeneralizedCentrifugalForceModelState",
     "Geometry",
-    "LineSegment",
+    "Hdf5TrajectoryWriter",
     "IncorrectParameterError",
     "JourneyDescription",
+    "LineSegment",
     "NegativeValueError",
     "NeighborhoodSearch",
     "NotifiableQueueStage",
@@ -131,53 +139,36 @@ __all__ = [
     "RecordingFrame",
     "RoutingEngine",
     "Simulation",
+    "SimulationError",
+    "SocialForceModel",
+    "SocialForceModelState",
     "SqliteTrajectoryWriter",
-    "Hdf5TrajectoryWriter",
     "Timer",
     "TrajectoryWriter",
     "Transition",
-    "CollisionFreeSpeedModelAgentParameters",
-    "CollisionFreeSpeedModel",
-    "CollisionFreeSpeedModelState",
-    "CollisionFreeSpeedModelV2AgentParameters",
-    "CollisionFreeSpeedModelV2",
-    "CollisionFreeSpeedModelV2State",
-    "CollisionFreeSpeedModelV3AgentParameters",
-    "CollisionFreeSpeedModelV3",
-    "CollisionFreeSpeedModelV3State",
-    "AnticipationVelocityModelAgentParameters",
-    "AnticipationVelocityModel",
-    "AnticipationVelocityModelState",
-    "SocialForceModelAgentParameters",
-    "SocialForceModel",
-    "SocialForceModelState",
-    "WarpDriverModelAgentParameters",
-    "WarpDriverModel",
-    "WarpDriverModelState",
-    "CustomModelAgentParameters",
-    "CustomModelAgentState",
-    "CustomOperationalModel",
     "WaitingSetStage",
     "WaitingSetState",
+    "WarpDriverModel",
+    "WarpDriverModelState",
     "WaypointStage",
     "__commit__",
     "__compiler__",
     "__version__",
+    "disable_tracing",
     "distribute_by_density",
     "distribute_by_number",
     "distribute_by_percentage",
     "distribute_in_circles_by_density",
     "distribute_in_circles_by_number",
     "distribute_until_filled",
+    "dump_traces",
+    "enable_tracing",
+    "end_trace_event",
     "get_build_info",
     "set_debug_callback",
     "set_error_callback",
     "set_info_callback",
     "set_warning_callback",
-    "enable_tracing",
-    "disable_tracing",
-    "dump_traces",
-    "trace_event",
     "start_trace_event",
-    "end_trace_event",
+    "trace_event",
 ]

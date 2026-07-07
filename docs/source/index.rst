@@ -7,6 +7,7 @@ JuPedSim
    :hidden:
 
    Getting started <notebooks/getting_started>
+   Migrating to 2.0 <migration_2_0>
    Concepts <concepts/index>
    Pedestrian Models <pedestrian_models/index>
    Notebooks <notebooks/index>

@@ -21,12 +21,11 @@ def corridor_simulation():
 
 
 def _add_agent(sim, journey_id, stage_id, position, velocity=(0.0, 0.0)):
-    params = jps.CustomModelAgentParameters(
+    return sim.add_agent(
         journey_id=journey_id,
         stage_id=stage_id,
-        model=PythonSocialForceModelState(position=position, velocity=velocity),
+        state=PythonSocialForceModelState(position=position, velocity=velocity),
     )
-    return sim.add_agent(params)
 
 
 def test_simulation_can_be_created_with_python_social_force_model():
@@ -125,24 +124,22 @@ def test_custom_desired_speed_affects_movement():
     journey_id = sim.add_journey(journey)
 
     # Slow agent
-    slow = jps.CustomModelAgentParameters(
+    slow_id = sim.add_agent(
         journey_id=journey_id,
         stage_id=exit_id,
-        model=PythonSocialForceModelState(
+        state=PythonSocialForceModelState(
             position=(2.0, 8.0), velocity=(0.0, 0.0), desired_speed=0.5
         ),
     )
-    slow_id = sim.add_agent(slow)
 
     # Fast agent
-    fast = jps.CustomModelAgentParameters(
+    fast_id = sim.add_agent(
         journey_id=journey_id,
         stage_id=exit_id,
-        model=PythonSocialForceModelState(
+        state=PythonSocialForceModelState(
             position=(2.0, 12.0), velocity=(0.0, 0.0), desired_speed=2.0
         ),
     )
-    fast_id = sim.add_agent(fast)
 
     for _ in range(100):
         sim.iterate()
@@ -180,17 +177,16 @@ def test_per_agent_state_survives_iterations(corridor_simulation):
     instead of carrying the current state forward (dataclasses.replace).
     """
     sim, exit_id, journey_id = corridor_simulation
-    params = jps.CustomModelAgentParameters(
+    agent_id = sim.add_agent(
         journey_id=journey_id,
         stage_id=exit_id,
-        model=PythonSocialForceModelState(
+        state=PythonSocialForceModelState(
             position=(2.0, 10.0),
             velocity=(0.0, 0.0),
             desired_speed=2.0,
             reaction_time=0.25,
         ),
     )
-    agent_id = sim.add_agent(params)
 
     for _ in range(20):
         sim.iterate()

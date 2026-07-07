@@ -27,12 +27,14 @@ def grid_positions():
     ]
 
 
-def run(model, make_agent_params, out_path):
+def run(model, make_state, out_path):
     sim = jps.Simulation(model=model, geometry=ROOM, dt=DT)
     exit_id = sim.add_exit_stage(EXIT_POLY)
     journey_id = sim.add_journey(jps.JourneyDescription([exit_id]))
     for pos in grid_positions():
-        sim.add_agent(make_agent_params(pos, journey_id, exit_id))
+        sim.add_agent(
+            journey_id=journey_id, stage_id=exit_id, state=make_state(pos)
+        )
 
     lines = []
     for it in range(1, MAX_ITERATIONS + 1):
@@ -50,61 +52,43 @@ def scenarios():
     yield (
         "CollisionFreeSpeedModel",
         jps.CollisionFreeSpeedModel(),
-        lambda pos, j, s: jps.CollisionFreeSpeedModelAgentParameters(
-            position=pos, journey_id=j, stage_id=s
-        ),
+        lambda pos: jps.CollisionFreeSpeedModelState(position=pos),
     )
     yield (
         "CollisionFreeSpeedModelV2",
         jps.CollisionFreeSpeedModelV2(),
-        lambda pos, j, s: jps.CollisionFreeSpeedModelV2AgentParameters(
-            position=pos, journey_id=j, stage_id=s
-        ),
+        lambda pos: jps.CollisionFreeSpeedModelV2State(position=pos),
     )
     yield (
         "CollisionFreeSpeedModelV3",
         jps.CollisionFreeSpeedModelV3(),
-        lambda pos, j, s: jps.CollisionFreeSpeedModelV3AgentParameters(
-            position=pos, journey_id=j, stage_id=s
-        ),
+        lambda pos: jps.CollisionFreeSpeedModelV3State(position=pos),
     )
     yield (
         "GeneralizedCentrifugalForceModel",
         jps.GeneralizedCentrifugalForceModel(),
-        lambda pos, j, s: jps.GeneralizedCentrifugalForceModelAgentParameters(
-            position=pos, journey_id=j, stage_id=s
-        ),
+        lambda pos: jps.GeneralizedCentrifugalForceModelState(position=pos),
     )
     yield (
         "AnticipationVelocityModel",
         jps.AnticipationVelocityModel(rng_seed=1234),
-        lambda pos, j, s: jps.AnticipationVelocityModelAgentParameters(
-            position=pos, journey_id=j, stage_id=s
-        ),
+        lambda pos: jps.AnticipationVelocityModelState(position=pos),
     )
     yield (
         "SocialForceModel",
         jps.SocialForceModel(),
-        lambda pos, j, s: jps.SocialForceModelAgentParameters(
-            position=pos, journey_id=j, stage_id=s
-        ),
+        lambda pos: jps.SocialForceModelState(position=pos),
     )
     yield (
         "WarpDriverModel",
         jps.WarpDriverModel(),
-        lambda pos, j, s: jps.WarpDriverModelAgentParameters(
-            position=pos, journey_id=j, stage_id=s
-        ),
+        lambda pos: jps.WarpDriverModelState(position=pos),
     )
     yield (
         "PythonSocialForceModel",
         PythonSocialForceModel(),
-        lambda pos, j, s: jps.CustomModelAgentParameters(
-            journey_id=j,
-            stage_id=s,
-            model=PythonSocialForceModelState(
-                position=pos, velocity=(0.0, 0.0)
-            ),
+        lambda pos: PythonSocialForceModelState(
+            position=pos, velocity=(0.0, 0.0)
         ),
     )
 
@@ -112,9 +96,9 @@ def scenarios():
 def main():
     out_dir = sys.argv[1]
     os.makedirs(out_dir, exist_ok=True)
-    for name, model, make_params in scenarios():
+    for name, model, make_state in scenarios():
         out_path = os.path.join(out_dir, f"{name}.txt")
-        run(model, make_params, out_path)
+        run(model, make_state, out_path)
         print(f"{name}: wrote {out_path}")
 
 

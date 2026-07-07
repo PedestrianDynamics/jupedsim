@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING, List, Tuple
 import jupedsim.native as py_jps
 
 if TYPE_CHECKING:
-    from jupedsim.agent import Agent
+    from jupedsim.agent import _TransientAgent
 
 
 class NeighborhoodSearch:
@@ -41,7 +41,7 @@ class NeighborhoodSearch:
 
     def get_neighboring_agents(
         self, position: Tuple[float, float], radius: float
-    ) -> "List[Agent]":
+    ) -> "List[_TransientAgent]":
         """
         Get all agents within a certain radius of a position.
 
@@ -53,8 +53,10 @@ class NeighborhoodSearch:
             radius: Search radius [m]
 
         Returns:
-            List of GenericAgent objects within the radius.
-            Empty list if no agents found.
+            List of transient agent views within the radius. Empty list if no
+            agents found. The returned objects are only valid for the duration
+            of the custom-model callback they were created in; never store
+            them.
 
         Raises:
             ValueError: If radius < 0
@@ -66,10 +68,10 @@ class NeighborhoodSearch:
             ... )
             >>> print(f"Found {len(neighbors)} neighbors")
         """
-        from jupedsim.agent import Agent
+        from jupedsim.agent import _TransientAgent
 
         if radius < 0:
             raise ValueError(f"radius must be non-negative, got {radius}")
 
         neighbors = self._obj.get_neighboring_agents(position, radius)
-        return [Agent(x) for x in neighbors]
+        return [_TransientAgent(x) for x in neighbors]

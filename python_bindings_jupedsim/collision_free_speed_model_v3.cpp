@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "CollisionFreeSpeedModelV3.hpp"
-#include "CollisionFreeSpeedModelV3Builder.hpp"
 #include "OperationalModel.hpp"
-#include "conversion.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep
 
 #include <pybind11/cast.h>
@@ -14,27 +12,28 @@ namespace py = pybind11;
 void init_collision_free_speed_model_v3(py::module_& m)
 {
     py::class_<CollisionFreeSpeedModelV3, OperationalModel, py::smart_holder>(
-        m, "CollisionFreeSpeedModelV3");
-    py::class_<CollisionFreeSpeedModelV3Builder>(m, "CollisionFreeSpeedModelV3Builder")
-        .def(py::init<>())
-        .def("build", &CollisionFreeSpeedModelV3Builder::Build);
-
+        m, "CollisionFreeSpeedModelV3")
+        .def(py::init<>());
+    const CollisionFreeSpeedModelV3::State d{};
     py::class_<CollisionFreeSpeedModelV3::State>(m, "CollisionFreeSpeedModelV3State")
         .def(
-            py::init([](std::tuple<double, double> orientation,
+            py::init([](Point position,
+                        Point orientation,
                         double strengthNeighborRepulsion,
                         double rangeNeighborRepulsion,
                         double strengthGeometryRepulsion,
                         double rangeGeometryRepulsion,
-                        double timeGap,
-                        double desiredSpeed,
-                        double radius,
                         double rangeXScale,
                         double rangeYScale,
                         double thetaMaxUpperBound,
-                        double agentBuffer) {
+                        double agentBuffer,
+                        double timeGap,
+                        double desiredSpeed,
+                        double radius,
+                        double headingAngle) {
                 return CollisionFreeSpeedModelV3::State{
-                    .orientation = intoPoint(orientation),
+                    .position = position,
+                    .orientation = orientation,
                     .strengthNeighborRepulsion = strengthNeighborRepulsion,
                     .rangeNeighborRepulsion = rangeNeighborRepulsion,
                     .strengthGeometryRepulsion = strengthGeometryRepulsion,
@@ -45,21 +44,25 @@ void init_collision_free_speed_model_v3(py::module_& m)
                     .agentBuffer = agentBuffer,
                     .timeGap = timeGap,
                     .v0 = desiredSpeed,
-                    .radius = radius};
+                    .radius = radius,
+                    .headingAngle = headingAngle};
             }),
             py::kw_only(),
-            py::arg("orientation"),
-            py::arg("strength_neighbor_repulsion"),
-            py::arg("range_neighbor_repulsion"),
-            py::arg("strength_geometry_repulsion"),
-            py::arg("range_geometry_repulsion"),
-            py::arg("time_gap"),
-            py::arg("desired_speed"),
-            py::arg("radius"),
-            py::arg("range_x_scale") = 20.0,
-            py::arg("range_y_scale") = 8.0,
-            py::arg("theta_max_upper_bound") = 1.57,
-            py::arg("agent_buffer") = 0.0)
+            py::arg("position") = d.position,
+            py::arg("orientation") = d.orientation,
+            py::arg("strength_neighbor_repulsion") = d.strengthNeighborRepulsion,
+            py::arg("range_neighbor_repulsion") = d.rangeNeighborRepulsion,
+            py::arg("strength_geometry_repulsion") = d.strengthGeometryRepulsion,
+            py::arg("range_geometry_repulsion") = d.rangeGeometryRepulsion,
+            py::arg("range_x_scale") = d.rangeXScale,
+            py::arg("range_y_scale") = d.rangeYScale,
+            py::arg("theta_max_upper_bound") = d.thetaMaxUpperBound,
+            py::arg("agent_buffer") = d.agentBuffer,
+            py::arg("time_gap") = d.timeGap,
+            py::arg("desired_speed") = d.v0,
+            py::arg("radius") = d.radius,
+            py::arg("heading_angle") = d.headingAngle)
+        .def_readwrite("position", &CollisionFreeSpeedModelV3::State::position)
         .def_readwrite("orientation", &CollisionFreeSpeedModelV3::State::orientation)
         .def_readwrite(
             "strength_neighbor_repulsion",
@@ -78,5 +81,6 @@ void init_collision_free_speed_model_v3(py::module_& m)
         .def_readwrite("agent_buffer", &CollisionFreeSpeedModelV3::State::agentBuffer)
         .def_readwrite("time_gap", &CollisionFreeSpeedModelV3::State::timeGap)
         .def_readwrite("desired_speed", &CollisionFreeSpeedModelV3::State::v0)
-        .def_readwrite("radius", &CollisionFreeSpeedModelV3::State::radius);
+        .def_readwrite("radius", &CollisionFreeSpeedModelV3::State::radius)
+        .def_readwrite("heading_angle", &CollisionFreeSpeedModelV3::State::headingAngle);
 }

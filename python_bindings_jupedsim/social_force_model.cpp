@@ -1,27 +1,27 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "OperationalModel.hpp"
 #include "SocialForceModel.hpp"
-#include "SocialForceModelBuilder.hpp"
-#include "conversion.hpp"
+#include "type_casters.hpp" // IWYU pragma: keep
 
 #include <pybind11/cast.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h> // IWYU pragma: keep
 
-#include <tuple>
-
 namespace py = pybind11;
 
 void init_social_force_model(py::module_& m)
 {
-    py::class_<SocialForceModel, OperationalModel, py::smart_holder>(m, "SocialForceModel");
-    py::class_<SocialForceModelBuilder>(m, "SocialForceModelBuilder")
-        .def(py::init<double, double>(), py::kw_only(), py::arg("body_force"), py::arg("friction"))
-        .def("build", &SocialForceModelBuilder::Build);
-    py::class_<SocialForceModel::State>(m, "SocialForceModelState")
-        .def_static("_defaults", []() { return SocialForceModel::State{}; })
+    py::class_<SocialForceModel, OperationalModel, py::smart_holder>(m, "SocialForceModel")
         .def(
-            py::init([](std::tuple<double, double> velocity,
+            py::init<double, double>(),
+            py::kw_only(),
+            py::arg("body_force") = 120000,
+            py::arg("friction") = 240000);
+    const SocialForceModel::State d{};
+    py::class_<SocialForceModel::State>(m, "SocialForceModelState")
+        .def(
+            py::init([](Point position,
+                        Point velocity,
                         double mass,
                         double desiredSpeed,
                         double reactionTime,
@@ -30,7 +30,8 @@ void init_social_force_model(py::module_& m)
                         double forceDistance,
                         double radius) {
                 return SocialForceModel::State{
-                    .velocity = intoPoint(velocity),
+                    .position = position,
+                    .velocity = velocity,
                     .mass = mass,
                     .desiredSpeed = desiredSpeed,
                     .reactionTime = reactionTime,
@@ -40,25 +41,20 @@ void init_social_force_model(py::module_& m)
                     .radius = radius};
             }),
             py::kw_only(),
-            py::arg("velocity"),
-            py::arg("mass"),
-            py::arg("desired_speed"),
-            py::arg("reaction_time"),
-            py::arg("agent_scale"),
-            py::arg("obstacle_scale"),
-            py::arg("force_distance"),
-            py::arg("radius"))
+            py::arg("position") = d.position,
+            py::arg("velocity") = d.velocity,
+            py::arg("mass") = d.mass,
+            py::arg("desired_speed") = d.desiredSpeed,
+            py::arg("reaction_time") = d.reactionTime,
+            py::arg("agent_scale") = d.agentScale,
+            py::arg("obstacle_scale") = d.obstacleScale,
+            py::arg("force_distance") = d.forceDistance,
+            py::arg("radius") = d.radius)
         .def_property_readonly(
             "orientation",
-            [](const SocialForceModel::State& obj) {
-                return intoTuple(obj.velocity.Normalized());
-            })
-        .def_property(
-            "velocity",
-            [](const SocialForceModel::State& obj) { return intoTuple(obj.velocity); },
-            [](SocialForceModel::State& obj, std::tuple<double, double> pt) {
-                obj.velocity = intoPoint(pt);
-            })
+            [](const SocialForceModel::State& obj) { return obj.velocity.Normalized(); })
+        .def_readwrite("position", &SocialForceModel::State::position)
+        .def_readwrite("velocity", &SocialForceModel::State::velocity)
         .def_readwrite("mass", &SocialForceModel::State::mass)
         .def_readwrite("desired_speed", &SocialForceModel::State::desiredSpeed)
         .def_readwrite("reaction_time", &SocialForceModel::State::reactionTime)

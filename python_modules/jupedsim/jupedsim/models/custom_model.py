@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
 from typing import (
     TYPE_CHECKING,
     Protocol,
@@ -10,7 +9,7 @@ from typing import (
 )
 
 if TYPE_CHECKING:
-    from jupedsim.agent import Agent
+    from jupedsim.agent import _TransientAgent
     from jupedsim.geometry import Geometry
     from jupedsim.neighborhood import NeighborhoodSearch
 
@@ -24,27 +23,15 @@ class CustomModelAgentState(Protocol):
     required. The runtime check performed when adding an agent verifies
     attribute presence only; value types are validated by the simulation
     itself.
+
+    Objects satisfying this protocol are passed directly to
+    :meth:`~jupedsim.simulation.Simulation.add_agent` as the agent's initial
+    state. It should be an immutable object -- a ``@dataclass(frozen=True)``
+    is strongly recommended -- because the simulation shares it live with your
+    model during each step (see :class:`CustomOperationalModel`).
     """
 
     position: tuple[float, float]
-
-
-@dataclass(kw_only=True)
-class CustomModelAgentParameters:
-    """Parameters required to create an agent for a custom model.
-
-    ``model`` is the agent's initial per-agent model state and is **required**:
-    you must set it to your own object satisfying :class:`CustomModelAgentState`
-    -- by subclassing it or simply by exposing a ``position`` attribute -- which
-    carries the agent's ``position``, from which the agent is spawned. It should be an immutable object -- a ``@dataclass(frozen=True)`` is
-    strongly recommended -- because the simulation shares it live with your model
-    during each step (see :class:`CustomOperationalModel`). ``model`` has no
-    default; omitting it raises a ``TypeError`` at construction.
-    """
-
-    journey_id: int = 0
-    stage_id: int = 0
-    model: CustomModelAgentState
 
 
 class CustomOperationalModel(ABC):
@@ -75,13 +62,22 @@ class CustomOperationalModel(ABC):
         immutable -- a ``@dataclass(frozen=True)`` -- so accidental in-place
         writes raise immediately instead of silently corrupting the
         simulation.
+
+    .. warning::
+
+        The ``ped`` object passed to the callbacks (and the neighbor objects
+        returned from neighborhood queries) are transient views that are only
+        valid for the duration of the callback. Never store them. Calling
+        mutating methods on the simulation (``add_agent``,
+        ``mark_agent_for_removal``, journey or stage mutation) from within a
+        callback raises :class:`~jupedsim.SimulationError`.
     """
 
     @abstractmethod
     def compute_next_state(
         self,
         dt: float,
-        ped: Agent,
+        ped: _TransientAgent,
         geometry: Geometry,
         neighborhood_search: NeighborhoodSearch,
     ) -> CustomModelAgentState:
@@ -89,7 +85,7 @@ class CustomOperationalModel(ABC):
 
     def check_model_constraint(
         self,
-        ped: Agent,
+        ped: _TransientAgent,
         neighborhood_search: NeighborhoodSearch,
         geometry: Geometry,
     ) -> None:
@@ -103,13 +99,13 @@ class CustomOperationalModel(ABC):
         geometry,
         neighborhood_search,
     ) -> CustomModelAgentState:
-        from jupedsim.agent import Agent
+        from jupedsim.agent import _TransientAgent
         from jupedsim.geometry import Geometry
         from jupedsim.neighborhood import NeighborhoodSearch
 
         return self.compute_next_state(
             dt,
-            Agent(ped),
+            _TransientAgent(ped),
             Geometry(geometry),
             NeighborhoodSearch(neighborhood_search),
         )
@@ -120,12 +116,12 @@ class CustomOperationalModel(ABC):
         neighborhood_search,
         geometry,
     ) -> None:
-        from jupedsim.agent import Agent
+        from jupedsim.agent import _TransientAgent
         from jupedsim.geometry import Geometry
         from jupedsim.neighborhood import NeighborhoodSearch
 
         self.check_model_constraint(
-            Agent(ped),
+            _TransientAgent(ped),
             NeighborhoodSearch(neighborhood_search),
             Geometry(geometry),
         )

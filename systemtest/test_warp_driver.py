@@ -14,11 +14,22 @@ def warp_driver_corridor():
 
 
 def test_default_model_construction():
-    """Test that WarpDriver model can be created with defaults."""
-    model = jps.WarpDriverModel()
-    assert model.time_horizon == 2.0
-    assert model.step_size == 0.5
-    assert model.sigma == 0.3
+    """Test that the WarpDriver model constructs with its C++ defaults.
+
+    The model-level parameters ``time_horizon`` and ``step_size`` are
+    consumed by the constructor and are no longer part of the per-agent
+    state; they default to 2.0 and 0.5 respectively.
+    """
+    jps.WarpDriverModel()
+    jps.WarpDriverModel(time_horizon=2.0, step_size=0.5)
+
+
+def test_default_state_construction():
+    """Test that the WarpDriver agent state exposes the C++ defaults."""
+    state = jps.WarpDriverModelState(position=(1, 2))
+    assert state.position == (1, 2)
+    assert math.isclose(state.radius, 0.15)
+    assert math.isclose(state.desired_speed, 1.2)
 
 
 def test_simulation_runs(warp_driver_corridor):
@@ -29,13 +40,13 @@ def test_simulation_runs(warp_driver_corridor):
     journey_id = sim.add_journey(jps.JourneyDescription([exit_id]))
 
     aid = sim.add_agent(
-        jps.WarpDriverModelAgentParameters(
+        journey_id=journey_id,
+        stage_id=exit_id,
+        state=jps.WarpDriverModelState(
             position=(2, 2),
-            journey_id=journey_id,
-            stage_id=exit_id,
             desired_speed=1.2,
             radius=0.15,
-        )
+        ),
     )
 
     initial_x = sim.agent(aid).position[0]
@@ -54,13 +65,13 @@ def test_single_agent_straight_path(warp_driver_corridor):
     journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
     aid = sim.add_agent(
-        jps.WarpDriverModelAgentParameters(
+        journey_id=journey_id,
+        stage_id=wp,
+        state=jps.WarpDriverModelState(
             position=(2, 2),
-            journey_id=journey_id,
-            stage_id=wp,
             desired_speed=1.0,
             radius=0.15,
-        )
+        ),
     )
 
     for _ in range(100):
@@ -87,24 +98,24 @@ def test_two_agents_head_on_avoid(warp_driver_corridor):
     journey_left = sim.add_journey(jps.JourneyDescription([exit_left_id]))
 
     sim.add_agent(
-        jps.WarpDriverModelAgentParameters(
+        journey_id=journey_right,
+        stage_id=exit_right_id,
+        state=jps.WarpDriverModelState(
             position=(3, 2),
             orientation=(1, 0),
-            journey_id=journey_right,
-            stage_id=exit_right_id,
             desired_speed=1.2,
             radius=0.15,
-        )
+        ),
     )
     sim.add_agent(
-        jps.WarpDriverModelAgentParameters(
+        journey_id=journey_left,
+        stage_id=exit_left_id,
+        state=jps.WarpDriverModelState(
             position=(17, 2),
             orientation=(-1, 0),
-            journey_id=journey_left,
-            stage_id=exit_left_id,
             desired_speed=1.2,
             radius=0.15,
-        )
+        ),
     )
 
     max_steps = 3000
@@ -127,13 +138,13 @@ def test_agent_parameters():
     journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
     aid = sim.add_agent(
-        jps.WarpDriverModelAgentParameters(
+        journey_id=journey_id,
+        stage_id=wp,
+        state=jps.WarpDriverModelState(
             position=(1, 2),
-            journey_id=journey_id,
-            stage_id=wp,
             desired_speed=1.0,
             radius=0.2,
-        )
+        ),
     )
 
     state = sim.agent(aid).model
@@ -147,20 +158,24 @@ def test_agent_parameters():
     assert math.isclose(sim.agent(aid).model.desired_speed, 1.5)
 
 
-def test_invalid_parameters():
-    """Invalid model parameters raise errors at simulation creation."""
+def test_invalid_agent_state():
+    """Invalid per-agent state raises errors when adding the agent."""
     area = shapely.Polygon([(0, 0), (10, 0), (10, 4), (0, 4)])
+    sim = jps.Simulation(model=jps.WarpDriverModel(), geometry=area, dt=0.01)
 
-    with pytest.raises(RuntimeError, match="timeHorizon"):
-        jps.Simulation(
-            model=jps.WarpDriverModel(time_horizon=-1.0),
-            geometry=area,
-            dt=0.01,
+    wp = sim.add_waypoint_stage((5, 2), 0.5)
+    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
+
+    with pytest.raises(jps.SimulationError, match="radius"):
+        sim.add_agent(
+            journey_id=journey_id,
+            stage_id=wp,
+            state=jps.WarpDriverModelState(position=(1, 2), radius=-1.0),
         )
 
-    with pytest.raises(RuntimeError, match="sigma"):
-        jps.Simulation(
-            model=jps.WarpDriverModel(sigma=0.0),
-            geometry=area,
-            dt=0.01,
+    with pytest.raises(jps.SimulationError, match="v0"):
+        sim.add_agent(
+            journey_id=journey_id,
+            stage_id=wp,
+            state=jps.WarpDriverModelState(position=(1, 2), desired_speed=-1.0),
         )

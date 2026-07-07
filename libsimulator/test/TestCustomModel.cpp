@@ -4,7 +4,6 @@
 #include "NeighborhoodSearch.hpp"
 #include "OperationalDecisionSystem.hpp"
 #include "OperationalModels/CustomModel/CustomModel.hpp"
-#include "OperationalModels/CustomModel/CustomModel.hpp"
 
 #include <fmt/format.h>
 #include <gtest/gtest.h>
@@ -67,7 +66,6 @@ GenericAgent MakeAgent(GenericAgent::ModelState model)
         GenericAgent::ID::Invalid,
         jps::UniqueID<Journey>::Invalid,
         jps::UniqueID<BaseStage>::Invalid,
-        Point{0.0, 0.0},
         std::move(model));
 }
 } // namespace

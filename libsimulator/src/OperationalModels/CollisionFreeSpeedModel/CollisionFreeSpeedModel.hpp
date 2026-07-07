@@ -23,10 +23,10 @@ public:
 
 private:
     double _cutOffRadius{3};
-    double strengthNeighborRepulsion;
-    double rangeNeighborRepulsion;
-    double strengthGeometryRepulsion;
-    double rangeGeometryRepulsion;
+    double strengthNeighborRepulsion{8.0};
+    double rangeNeighborRepulsion{0.1};
+    double strengthGeometryRepulsion{5.0};
+    double rangeGeometryRepulsion{0.02};
 
 public:
     CollisionFreeSpeedModel(

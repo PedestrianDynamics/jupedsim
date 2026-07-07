@@ -27,11 +27,11 @@ public:
 
 private:
     double _cutOffRadius{2.5};
-    double bodyForce;
-    double friction;
+    double bodyForce{120000}; // k
+    double friction{240000}; // kappa
 
 public:
-    SocialForceModel(double bodyForce_, double friction_);
+    SocialForceModel(double bodyForce, double friction);
     ~SocialForceModel() override = default;
     OperationalModelType Type() const override;
     void ComputeNextState(

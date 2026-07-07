@@ -29,6 +29,32 @@
 #include <variant>
 #include <vector>
 
+namespace
+{
+/// RAII setter for Simulation::_iterating: set on construction, cleared on scope exit
+/// (including exception unwinding out of the iteration pipeline).
+class IterationScope
+{
+    bool& _flag;
+
+public:
+    explicit IterationScope(bool& flag) : _flag(flag) { _flag = true; }
+    ~IterationScope() { _flag = false; }
+    IterationScope(const IterationScope&) = delete;
+    IterationScope& operator=(const IterationScope&) = delete;
+};
+} // namespace
+
+void Simulation::ThrowIfIterating(const char* operation) const
+{
+    if(_iterating) {
+        throw SimulationError(
+            "{} is not allowed during iteration, e.g. from a custom model callback while "
+            "Iterate() is running",
+            operation);
+    }
+}
+
 Simulation::Simulation(
     std::unique_ptr<OperationalModel>&& operationalModel,
     std::unique_ptr<CollisionGeometry>&& geometry,
@@ -56,6 +82,8 @@ void Simulation::SetTracing(bool status)
 
 void Simulation::Iterate()
 {
+    ThrowIfIterating("Iterate");
+    IterationScope iterationScope(_iterating);
     JPS_SCOPED_TIMER_AND_TRACE(_timer, "Total Iteration", General);
 
     {
@@ -97,6 +125,7 @@ void Simulation::Iterate()
 
 Journey::ID Simulation::AddJourney(const std::map<BaseStage::ID, TransitionDescription>& stages)
 {
+    ThrowIfIterating("AddJourney");
     JPS_SCOPED_TIMER_AND_TRACE(_timer, "Add Journey", Detailed);
     std::map<BaseStage::ID, JourneyNode> nodes;
     bool containsDirectSteering =
@@ -173,6 +202,7 @@ Journey::ID Simulation::AddJourney(const std::map<BaseStage::ID, TransitionDescr
 
 BaseStage::ID Simulation::AddStage(const StageDescription stageDescription)
 {
+    ThrowIfIterating("AddStage");
     JPS_SCOPED_TIMER_AND_TRACE(_timer, "Add Stage", Detailed);
     std::visit(
         overloaded{
@@ -212,6 +242,7 @@ BaseStage::ID Simulation::AddStage(const StageDescription stageDescription)
 
 GenericAgent::ID Simulation::AddAgent(GenericAgent agent)
 {
+    ThrowIfIterating("AddAgent");
     JPS_SCOPED_TIMER_AND_TRACE(_timer, "Add Agent", Detailed);
     if(!_geometry->InsideGeometry(agent.position())) {
         throw SimulationError("Agent {} not inside walkable area", agent.position());
@@ -247,6 +278,7 @@ GenericAgent::ID Simulation::AddAgent(GenericAgent agent)
 
 void Simulation::MarkAgentForRemoval(GenericAgent::ID id)
 {
+    ThrowIfIterating("MarkAgentForRemoval");
     JPS_TRACE_FUNC;
     const auto iter = std::find_if(
         std::begin(_agents), std::end(_agents), [id](auto& agent) { return agent.id == id; });
@@ -314,6 +346,7 @@ void Simulation::SwitchAgentJourney(
     Journey::ID journey_id,
     BaseStage::ID stage_id)
 {
+    ThrowIfIterating("SwitchAgentJourney");
     JPS_TRACE_FUNC;
     const auto find_iter = _journeys.find(journey_id);
     if(find_iter == std::end(_journeys)) {

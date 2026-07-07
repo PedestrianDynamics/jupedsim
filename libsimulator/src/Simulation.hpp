@@ -45,7 +45,12 @@ class Simulation
     std::vector<GenericAgent::ID> _removedAgentsInLastIteration;
     std::unordered_map<Journey::ID, std::unique_ptr<Journey>> _journeys;
     Timer _timer{};
+    /// Set for the duration of Iterate(); mutating entry points must not run while the
+    /// iteration pipeline works on the agent containers.
+    bool _iterating{false};
     enum LogLevel { General = 1, Detailed = 2, Debug = 3 };
+
+    void ThrowIfIterating(const char* operation) const;
 
 public:
     Simulation(

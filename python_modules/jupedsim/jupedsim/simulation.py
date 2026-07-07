@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
-from typing import Any, Iterable
+from typing import Any, Iterator
 
 import shapely
 
@@ -12,36 +12,35 @@ from jupedsim.internal.tracing import Timer
 from jupedsim.journey import JourneyDescription
 from jupedsim.models.anticipation_velocity_model import (
     AnticipationVelocityModel,
-    AnticipationVelocityModelAgentParameters,
+    AnticipationVelocityModelState,
 )
 from jupedsim.models.collision_free_speed import (
     CollisionFreeSpeedModel,
-    CollisionFreeSpeedModelAgentParameters,
+    CollisionFreeSpeedModelState,
 )
 from jupedsim.models.collision_free_speed_v2 import (
     CollisionFreeSpeedModelV2,
-    CollisionFreeSpeedModelV2AgentParameters,
+    CollisionFreeSpeedModelV2State,
 )
 from jupedsim.models.collision_free_speed_v3 import (
     CollisionFreeSpeedModelV3,
-    CollisionFreeSpeedModelV3AgentParameters,
+    CollisionFreeSpeedModelV3State,
 )
 from jupedsim.models.custom_model import (
-    CustomModelAgentParameters,
     CustomModelAgentState,
     CustomOperationalModel,
 )
 from jupedsim.models.generalized_centrifugal_force import (
     GeneralizedCentrifugalForceModel,
-    GeneralizedCentrifugalForceModelAgentParameters,
+    GeneralizedCentrifugalForceModelState,
 )
 from jupedsim.models.social_force import (
     SocialForceModel,
-    SocialForceModelAgentParameters,
+    SocialForceModelState,
 )
 from jupedsim.models.warp_driver import (
     WarpDriverModel,
-    WarpDriverModelAgentParameters,
+    WarpDriverModelState,
 )
 from jupedsim.serialization import TrajectoryWriter
 from jupedsim.stages import (
@@ -49,6 +48,16 @@ from jupedsim.stages import (
     NotifiableQueueStage,
     WaitingSetStage,
     WaypointStage,
+)
+
+_STATE_TYPES = (
+    GeneralizedCentrifugalForceModelState,
+    CollisionFreeSpeedModelState,
+    CollisionFreeSpeedModelV2State,
+    CollisionFreeSpeedModelV3State,
+    AnticipationVelocityModelState,
+    SocialForceModelState,
+    WarpDriverModelState,
 )
 
 
@@ -67,11 +76,11 @@ class Simulation:
         *,
         model: (
             CollisionFreeSpeedModel
-            | GeneralizedCentrifugalForceModel
             | CollisionFreeSpeedModelV2
             | CollisionFreeSpeedModelV3
-            | AnticipationVelocityModel
+            | GeneralizedCentrifugalForceModel
             | SocialForceModel
+            | AnticipationVelocityModel
             | WarpDriverModel
             | CustomOperationalModel
         ),
@@ -91,8 +100,19 @@ class Simulation:
         """Creates a Simulation.
 
         Arguments:
-            model (CollisionFreeSpeedModel | GeneralizedCentrifugalForceModel | CollisionFreeSpeedModelV2 | CollisionFreeSpeedModelV3):
-                Defines the operational model used in the simulation.
+            model:
+                Defines the operational model used in the simulation. Every
+                built-in model is passed as a configured instance carrying its
+                model-level parameters, e.g.
+                :class:`~jupedsim.CollisionFreeSpeedModel` or
+                :class:`~jupedsim.SocialForceModel`. Custom Python models are
+                passed as instances of a
+                :class:`~jupedsim.CustomOperationalModel` subclass.
+
+                .. warning::
+
+                    Model instances are consumed by this constructor and must
+                    not be reused afterwards.
             geometry:
                 Data to create the geometry out of. Data may be supplied as:
 
@@ -120,56 +140,16 @@ class Simulation:
                 from the walkable area. Only use this argument if `geometry` was
                 provided as list[tuple[float, float]].
         """
-        if isinstance(model, CollisionFreeSpeedModel):
-            model_builder = py_jps.CollisionFreeSpeedModelBuilder(
-                strength_neighbor_repulsion=model.strength_neighbor_repulsion,
-                range_neighbor_repulsion=model.range_neighbor_repulsion,
-                strength_geometry_repulsion=model.strength_geometry_repulsion,
-                range_geometry_repulsion=model.range_geometry_repulsion,
-            )
-            py_jps_model = model_builder.build()
-        elif isinstance(model, CollisionFreeSpeedModelV2):
-            model_builder = py_jps.CollisionFreeSpeedModelV2Builder()
-            py_jps_model = model_builder.build()
-        elif isinstance(model, CollisionFreeSpeedModelV3):
-            model_builder = py_jps.CollisionFreeSpeedModelV3Builder()
-            py_jps_model = model_builder.build()
-        elif isinstance(model, AnticipationVelocityModel):
-            model_builder = py_jps.AnticipationVelocityModelBuilder(
-                pushout_strength=model.pushout_strength, rng_seed=model.rng_seed
-            )
-            py_jps_model = model_builder.build()
-        elif isinstance(model, GeneralizedCentrifugalForceModel):
-            model_builder = py_jps.GeneralizedCentrifugalForceModelBuilder(
-                strength_neighbor_repulsion=model.strength_neighbor_repulsion,
-                strength_geometry_repulsion=model.strength_geometry_repulsion,
-                max_neighbor_interaction_distance=model.max_neighbor_interaction_distance,
-                max_geometry_interaction_distance=model.max_geometry_interaction_distance,
-                max_neighbor_interpolation_distance=model.max_neighbor_interpolation_distance,
-                max_geometry_interpolation_distance=model.max_geometry_interpolation_distance,
-                max_neighbor_repulsion_force=model.max_neighbor_repulsion_force,
-                max_geometry_repulsion_force=model.max_geometry_repulsion_force,
-            )
-            py_jps_model = model_builder.build()
-        elif isinstance(model, SocialForceModel):
-            model_builder = py_jps.SocialForceModelBuilder(
-                body_force=model.body_force, friction=model.friction
-            )
-            py_jps_model = model_builder.build()
-        elif isinstance(model, WarpDriverModel):
-            model_builder = py_jps.WarpDriverModelBuilder(
-                time_horizon=model.time_horizon,
-                step_size=model.step_size,
-                sigma=model.sigma,
-                time_uncertainty=model.time_uncertainty,
-                velocity_uncertainty_x=model.velocity_uncertainty_x,
-                velocity_uncertainty_y=model.velocity_uncertainty_y,
-            )
-            py_jps_model = model_builder.build()
+        if isinstance(model, py_jps.OperationalModel):
+            py_jps_model = model
         elif isinstance(model, CustomOperationalModel):
             py_jps_model = py_jps._PythonModel(model)
         else:
-            raise Exception("Unknown model type supplied")
+            raise TypeError(
+                "model must be a built-in operational model instance or a "
+                "CustomOperationalModel instance, got "
+                f"{type(model).__name__}"
+            )
         self._writer = trajectory_writer
         self._obj = py_jps.Simulation(
             model=py_jps_model, geometry=build_geometry(geometry)._obj, dt=dt
@@ -287,126 +267,56 @@ class Simulation:
 
     def add_agent(
         self,
-        parameters: (
-            GeneralizedCentrifugalForceModelAgentParameters
-            | CollisionFreeSpeedModelAgentParameters
-            | CollisionFreeSpeedModelV2AgentParameters
-            | CollisionFreeSpeedModelV3AgentParameters
-            | AnticipationVelocityModelAgentParameters
-            | SocialForceModelAgentParameters
-            | WarpDriverModelAgentParameters
-            | CustomModelAgentParameters
+        *,
+        journey_id: int,
+        stage_id: int,
+        state: (
+            GeneralizedCentrifugalForceModelState
+            | CollisionFreeSpeedModelState
+            | CollisionFreeSpeedModelV2State
+            | CollisionFreeSpeedModelV3State
+            | AnticipationVelocityModelState
+            | SocialForceModelState
+            | WarpDriverModelState
+            | CustomModelAgentState
         ),
     ) -> int:
         """Add an agent to the simulation.
 
+        The agent is spawned at ``state.position``.
+
         Arguments:
-                parameters: Agent Parameters of the newly added model. The parameters have to
-                    match the model used in this simulation. When adding agents with invalid parameters,
-                    or too close to the boundary or other agents, this will cause an error.
+            journey_id: Id of the journey the agent follows.
+            stage_id: Id of the stage the agent initially targets.
+            state: Initial per-agent model state. For built-in models this is
+                the matching ``XModelState`` instance, e.g.
+                :class:`~jupedsim.CollisionFreeSpeedModelState`. For custom
+                models this is your own object satisfying
+                :class:`~jupedsim.CustomModelAgentState`, i.e. exposing a
+                ``position`` attribute. The state type has to match the model
+                used in this simulation. When adding agents with invalid
+                parameters, or too close to the boundary or other agents, this
+                will cause an error.
 
-            Returns:
-                Id of the added agent.
+        Returns:
+            Id of the added agent.
         """
-
-        if isinstance(
-            parameters, GeneralizedCentrifugalForceModelAgentParameters
-        ):
-            model = py_jps.GeneralizedCentrifugalForceModelState(
-                orientation=parameters.orientation,
-                speed=parameters.speed,
-                desired_direction=parameters.desired_direction,
-                mass=parameters.mass,
-                tau=parameters.tau,
-                desired_speed=parameters.desired_speed,
-                a_v=parameters.a_v,
-                a_min=parameters.a_min,
-                b_min=parameters.b_min,
-                b_max=parameters.b_max,
+        if isinstance(state, _STATE_TYPES):
+            return self._obj.add_agent(
+                journey_id=journey_id, stage_id=stage_id, state=state
             )
-        elif isinstance(parameters, CollisionFreeSpeedModelAgentParameters):
-            model = py_jps.CollisionFreeSpeedModelState(
-                orientation=parameters.orientation,
-                time_gap=parameters.time_gap,
-                desired_speed=parameters.desired_speed,
-                radius=parameters.radius,
+        if isinstance(state, CustomModelAgentState):
+            return self._obj.add_agent(
+                journey_id=journey_id,
+                stage_id=stage_id,
+                state=py_jps._CustomModelState(state),
             )
-        elif isinstance(parameters, CollisionFreeSpeedModelV2AgentParameters):
-            model = py_jps.CollisionFreeSpeedModelV2State(
-                orientation=parameters.orientation,
-                strength_neighbor_repulsion=parameters.strength_neighbor_repulsion,
-                range_neighbor_repulsion=parameters.range_neighbor_repulsion,
-                strength_geometry_repulsion=parameters.strength_geometry_repulsion,
-                range_geometry_repulsion=parameters.range_geometry_repulsion,
-                time_gap=parameters.time_gap,
-                desired_speed=parameters.desired_speed,
-                radius=parameters.radius,
-            )
-        elif isinstance(parameters, CollisionFreeSpeedModelV3AgentParameters):
-            model = py_jps.CollisionFreeSpeedModelV3State(
-                orientation=parameters.orientation,
-                strength_neighbor_repulsion=parameters.strength_neighbor_repulsion,
-                range_neighbor_repulsion=parameters.range_neighbor_repulsion,
-                strength_geometry_repulsion=parameters.strength_geometry_repulsion,
-                range_geometry_repulsion=parameters.range_geometry_repulsion,
-                range_x_scale=parameters.range_x_scale,
-                range_y_scale=parameters.range_y_scale,
-                theta_max_upper_bound=parameters.theta_max_upper_bound,
-                agent_buffer=parameters.agent_buffer,
-                time_gap=parameters.time_gap,
-                desired_speed=parameters.desired_speed,
-                radius=parameters.radius,
-            )
-        elif isinstance(parameters, AnticipationVelocityModelAgentParameters):
-            model = py_jps.AnticipationVelocityModelState(
-                orientation=parameters.orientation,
-                strength_neighbor_repulsion=parameters.strength_neighbor_repulsion,
-                range_neighbor_repulsion=parameters.range_neighbor_repulsion,
-                wall_buffer_distance=parameters.wall_buffer_distance,
-                anticipation_time=parameters.anticipation_time,
-                reaction_time=parameters.reaction_time,
-                time_gap=parameters.time_gap,
-                desired_speed=parameters.desired_speed,
-                radius=parameters.radius,
-            )
-        elif isinstance(parameters, SocialForceModelAgentParameters):
-            model = py_jps.SocialForceModelState(
-                velocity=parameters.velocity,
-                mass=parameters.mass,
-                desired_speed=parameters.desired_speed,
-                reaction_time=parameters.reaction_time,
-                agent_scale=parameters.agent_scale,
-                obstacle_scale=parameters.obstacle_scale,
-                force_distance=parameters.force_distance,
-                radius=parameters.radius,
-            )
-        elif isinstance(parameters, WarpDriverModelAgentParameters):
-            model = py_jps.WarpDriverModelState(
-                orientation=parameters.orientation,
-                desired_speed=parameters.desired_speed,
-                radius=parameters.radius,
-            )
-        elif isinstance(parameters, CustomModelAgentParameters):
-            if not isinstance(parameters.model, CustomModelAgentState):
-                raise TypeError(
-                    "'CustomModelAgentParameters.model' must satisfy "
-                    "CustomModelAgentState protocol."
-                )
-            agent = py_jps.Agent(
-                journey_id=parameters.journey_id,
-                stage_id=parameters.stage_id,
-                position=parameters.model.position,
-                model=py_jps._CustomModelData(parameters.model),
-            )
-            return self._obj.add_agent(agent)
-
-        agent = py_jps.Agent(
-            journey_id=parameters.journey_id,
-            stage_id=parameters.stage_id,
-            position=parameters.position,
-            model=model,
+        raise TypeError(
+            "state must be one of the built-in model states "
+            f"({', '.join(t.__name__ for t in _STATE_TYPES)}) or an object "
+            "satisfying CustomModelAgentState (exposing a 'position' "
+            f"attribute), got {type(state).__name__}"
         )
-        return self._obj.add_agent(agent)
 
     def mark_agent_for_removal(self, agent_id: int):
         """Marks an agent for removal.
@@ -494,18 +404,20 @@ class Simulation:
         """
         return self._obj.iteration_count()
 
-    def agents(self) -> Iterable[Agent]:
+    def agents(self) -> Iterator[Agent]:
         """Agents in the simulation.
 
+        The set of agents is snapshot when this method is called; agents
+        added or removed afterwards are not reflected by the returned
+        iterator.
+
         Returns:
-            Iterator over all agents in the simulation.
+            Iterator over handles to all agents in the simulation. The
+            handles resolve the agent on every attribute access and stay
+            valid across :func:`iterate` as long as the agent exists.
         """
-
-        def wrap_iter(agents):
-            for agent in agents:
-                yield Agent(agent)
-
-        return wrap_iter(self._obj.agents())
+        ids = [agent.id for agent in self._obj.agents()]
+        return iter(Agent(self, agent_id) for agent_id in ids)
 
     def agent(self, agent_id) -> Agent:
         """Access specific agent in the simulation.
@@ -514,23 +426,34 @@ class Simulation:
             agent_id: Id of the agent to access
 
         Returns:
-            Agent instance
+            Handle to the agent. The handle resolves the agent on every
+            attribute access and stays valid across :func:`iterate` as long
+            as the agent exists.
+
+        Raises:
+            SimulationError: if no agent with this id exists.
         """
-        return Agent(self._obj.agent(agent_id))
+        # Resolve once to fail fast on unknown ids.
+        self._obj.agent(agent_id)
+        return Agent(self, agent_id)
 
     def agents_in_range(
         self, pos: tuple[float, float], distance: float
-    ) -> list[int]:
-        """Ids of agents within the given distance to the given position.
+    ) -> list[Agent]:
+        """Handles to all agents within the given distance to the given position.
 
         Arguments:
              pos:  point around which to search for agents
              distance: search radius
 
         Returns:
-            List of ids of agents within the given distance to the given position.
+            List of handles to all agents within the given distance to the
+            given position.
         """
-        return self._obj.agents_in_range(pos, distance)
+        return [
+            Agent(self, agent_id)
+            for agent_id in self._obj.agents_in_range(pos, distance)
+        ]
 
     def agents_in_polygon(
         self,
@@ -543,7 +466,7 @@ class Simulation:
             | list[tuple[float, float]]
         ),
     ) -> list[Agent]:
-        """Return all ids for agents inside the given polygon.
+        """Handles to all agents inside the given polygon.
 
         Args:
             poly:
@@ -562,12 +485,17 @@ class Simulation:
                 * str with a valid Well Known Text. In this format the same WKT types as mentioned for the shapely types are supported: GEOMETRYCOLLETION, MULTIPOLYGON, POLYGON, MULTIPOINT. The same restrictions as mentioned for the shapely types apply.
 
         Returns:
-            All ids for agents inside given polygon.
+            List of handles to all agents inside the given polygon.
 
         """
         polygon_geometry = build_geometry(poly)
 
-        return self._obj.agents_in_polygon(polygon_geometry.boundary())
+        return [
+            Agent(self, agent_id)
+            for agent_id in self._obj.agents_in_polygon(
+                polygon_geometry.boundary()
+            )
+        ]
 
     def get_stage(self, stage_id: int):
         """Specific stage in the simulation.

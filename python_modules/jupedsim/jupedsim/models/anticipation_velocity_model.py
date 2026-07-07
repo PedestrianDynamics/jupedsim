@@ -1,176 +1,50 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
+"""Anticipation Velocity Model (AVM).
 
-from dataclasses import dataclass
-from random import randint
+The AVM incorporates pedestrian anticipation, divided into three phases:
+perception of the current situation, prediction of future situations and
+strategy selection leading to action. A general description of the AVM can be
+found in the originating publication
+https://doi.org/10.1016/j.trc.2021.103464
 
+The model-level parameters (``pushout_strength`` and ``rng_seed``) are carried
+by the model instance, which is passed to the simulation:
 
-@dataclass(kw_only=True)
-class AnticipationVelocityModel:
-    """Anticipation Velocity Model (AVM).
+.. code:: python
 
-    The AVM incorporates pedestrian anticipation, divided into three phases:
-    1. Perception of the current situation.
-    2. Prediction of future situations.
-    3. Strategy selection leading to action.
+    sim = jupedsim.Simulation(
+        model=jupedsim.AnticipationVelocityModel(rng_seed=1234),
+        geometry=...,
+    )
+    sim.add_agent(
+        journey_id=journey_id,
+        stage_id=stage_id,
+        state=jupedsim.AnticipationVelocityModelState(position=(1.0, 1.0)),
+    )
 
-    This model quantitatively reproduces bidirectional pedestrian flow by accounting for:
-    - Anticipation of changes in neighboring pedestrians' positions.
-    - The strategy of following others' movement. The AVM is a model that takes into consideration
-      the anticipation of pedestrians. For this, the process of anticipation is divided into three parts:
-      - perception of the actual situation,
-      - prediction of a future situation and
-      - selection of a strategy leading to action.
+.. warning::
 
+    The model instance is consumed by the ``Simulation`` constructor and must
+    not be reused afterwards.
 
-    A general description of the AVM can be found in the originating publication
-    https://doi.org/10.1016/j.trc.2021.103464
+:class:`AnticipationVelocityModel` exposes the model-level parameters as
+keyword-only constructor arguments with sensible defaults:
+``pushout_strength`` and ``rng_seed``.
 
-    Attributes:
-        pushout_strength: The pushout mechanism ensures agents maintain a safe distance
-        from walls by adding a small outward component to their movement when within the
-        critical wall distance. This outward component, scaled by `pushoutStrength`,
-        combines with the parallel component of the agent's direction to create smooth,
-        gliding behavior along walls.
-        rng_seed: seed value of internally used rng. If not explicitly set this
-            value will be chosen randomly.
-    """
+:class:`AnticipationVelocityModelState` exposes the complete per-agent state
+of the model as keyword-only constructor arguments with sensible defaults:
+``position``, ``orientation``, ``strength_neighbor_repulsion``,
+``range_neighbor_repulsion``, ``wall_buffer_distance``,
+``anticipation_time``, ``reaction_time``, ``velocity``, ``time_gap``,
+``desired_speed`` and ``radius``.
+"""
 
-    pushout_strength: float = 0.3
-    rng_seed: int = randint(0, 2**64 - 1)
+import jupedsim.native as py_jps
 
+AnticipationVelocityModel = py_jps.AnticipationVelocityModel
+AnticipationVelocityModelState = py_jps.AnticipationVelocityModelState
 
-@dataclass(kw_only=True)
-class AnticipationVelocityModelAgentParameters:
-    """
-    Agent parameters for Anticipation Velocity Model (AVM).
-
-    See publication for more details about this model
-    https://doi.org/10.1016/j.trc.2021.103464
-
-    .. note::
-
-        Instances of this type are copied when creating the agent, you can safely
-        create one instance of this type and modify it between calls to `add_agent`
-
-        E.g.:
-
-        .. code:: python
-
-            positions = [...] # List of initial agent positions
-            params = AnticipationVelocityModelAgentParameters(desired_speed=0.9) # all agents are slower
-            for p in positions:
-                params.position = p
-                sim.add_agent(params)
-
-    Attributes:
-        position: Position of the agent.
-        orientation: Orientation of the agent.
-        time_gap: Time constant that describe how fast pedestrian close gaps.
-        desired_speed: Maximum speed of the agent.
-        radius: Radius of the agent.
-        journey_id: Id of the journey the agent follows.
-        stage_id: Id of the stage the agent targets.
-        strength_neighbor_repulsion: Strength of the repulsion from neighbors
-        range_neighbor_repulsion: Range of the repulsion from neighbors
-        wall_buffer_distance: Buffer distance of agents to the walls.
-        anticipation_time: Anticipation time of an agent.
-        reaction_time: reaction time of an agent to change its direction.
-    """
-
-    position: tuple[float, float] = (0.0, 0.0)
-    orientation: tuple[float, float] = (0.0, 0.0)
-    time_gap: float = 1.06
-    desired_speed: float = 1.2
-    radius: float = 0.2
-    journey_id: int = 0
-    stage_id: int = 0
-    strength_neighbor_repulsion: float = 8.0
-    range_neighbor_repulsion: float = 0.1
-    wall_buffer_distance: float = 0.1
-    anticipation_time: float = 1.0
-    reaction_time: float = 0.3
-
-
-class AnticipationVelocityModelState:
-    def __init__(self, backing):
-        self._obj = backing
-
-    @property
-    def orientation(self) -> tuple[float, float]:
-        """Orientation of this agent."""
-        return self._obj.orientation
-
-    @orientation.setter
-    def orientation(self, orientation):
-        self._obj.orientation = orientation
-
-    @property
-    def time_gap(self) -> float:
-        return self._obj.time_gap
-
-    @time_gap.setter
-    def time_gap(self, time_gap):
-        self._obj.time_gap = time_gap
-
-    @property
-    def desired_speed(self) -> float:
-        """desired Speed of this agent."""
-        return self._obj.desired_speed
-
-    @desired_speed.setter
-    def desired_speed(self, desired_speed):
-        self._obj.desired_speed = desired_speed
-
-    @property
-    def radius(self) -> float:
-        """Radius of this agent."""
-        return self._obj.radius
-
-    @radius.setter
-    def radius(self, radius):
-        self._obj.radius = radius
-
-    @property
-    def strength_neighbor_repulsion(self) -> float:
-        """Strength of the repulsion from neighbors of this agent."""
-        return self._obj.strength_neighbor_repulsion
-
-    @strength_neighbor_repulsion.setter
-    def strength_neighbor_repulsion(self, strength_neighbor_repulsion):
-        self._obj.strength_neighbor_repulsion = strength_neighbor_repulsion
-
-    @property
-    def range_neighbor_repulsion(self) -> float:
-        """Range of the repulsion from neighbors of this agent."""
-        return self._obj.range_neighbor_repulsion
-
-    @range_neighbor_repulsion.setter
-    def range_neighbor_repulsion(self, range_neighbor_repulsion):
-        self._obj.range_neighbor_repulsion = range_neighbor_repulsion
-
-    @property
-    def wall_buffer_distance(self):
-        """Wall buffer distance of agent to walls."""
-        return self._obj.wall_buffer_distance
-
-    @wall_buffer_distance.setter
-    def wall_buffer_distance(self, wall_buffer_distance):
-        self._obj.wall_buffer_distance = wall_buffer_distance
-
-    @property
-    def anticipation_time(self) -> float:
-        """Anticipation time of this agent."""
-        return self._obj.anticipation_time
-
-    @anticipation_time.setter
-    def anticipation_time(self, anticipation_time):
-        self._obj.anticipation_time = anticipation_time
-
-    @property
-    def reaction_time(self) -> float:
-        """Reaction time of this agent."""
-        return self._obj.reaction_time
-
-    @reaction_time.setter
-    def reaction_time(self, reaction_time):
-        self._obj.reaction_time = reaction_time
+__all__ = [
+    "AnticipationVelocityModel",
+    "AnticipationVelocityModelState",
+]

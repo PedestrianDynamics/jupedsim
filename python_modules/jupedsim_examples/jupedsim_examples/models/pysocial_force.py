@@ -2,7 +2,6 @@
 from dataclasses import dataclass, replace
 
 import numpy as np
-from jupedsim.agent import Agent
 from jupedsim.geometry import LineSegment
 from jupedsim.models.custom_model import (
     CustomModelAgentState,
@@ -147,7 +146,7 @@ class PythonSocialForceModel(CustomOperationalModel):
 
     @staticmethod
     def _obstacle_force(
-        agent: Agent,
+        agent,
         obstacle: LineSegment,
     ) -> tuple[float, float]:
         """

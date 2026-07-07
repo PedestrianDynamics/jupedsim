@@ -23,7 +23,7 @@ $$\mathbf{r}(t) = (v_0 \cdot t,\; 0,\; t), \quad t \in [0,\; T]$$
 
 where $v_0$ is the agent's desired speed and $T$ is the time horizon.
 This trajectory is sampled at a fixed number of evenly spaced points
-(20 in the current implementation).
+(`num_samples`, default 20).
 
 ### Step 2 — Perceive: collision probability via warped intrinsic fields
 
@@ -142,71 +142,95 @@ This mechanism reliably breaks deadlocks that velocity smoothing alone cannot re
 
 ### Model-level parameters
 
-Set once when creating the simulation. Shared by all agents.
+The model carries simulation-global state: the precomputed intrinsic
+collision-probability field (controlled by `sigma`), the random number
+generator used for symmetry-breaking perturbations (seeded via `rng_seed`),
+and the shared collision-prediction settings (look-ahead, sampling, and
+uncertainty parameters). These are therefore passed to the simulation as an
+*instance* of `jupedsim.WarpDriverModel`. All arguments are keyword-only.
+Because they are model-level, they apply to every agent uniformly and are
+fixed for the lifetime of the simulation — they cannot be changed per agent
+or mutated at runtime.
 
 | Parameter | Symbol | Default | Unit | Description |
 |---|---|---|---|---|
+| `sigma` | $\sigma$ | 0.3 | — | Gaussian spread of the intrinsic field. Larger values create smoother, wider collision zones. |
 | `time_horizon` | $T$ | 2.0 | s | Look-ahead time for collision prediction. Larger values detect collisions earlier but increase computation. |
 | `step_size` | $\alpha$ | 0.5 | — | Gradient descent step size. Controls how aggressively agents deviate from their projected trajectory. Larger = stronger avoidance. |
-| `sigma` | $\sigma$ | 0.3 | — | Gaussian spread of the intrinsic field. Larger values create smoother, wider collision zones. |
 | `time_uncertainty` | $\lambda$ | 0.5 | — | Time uncertainty parameter. Spreads the collision field along the time axis — collisions further in the future are treated as less certain. |
 | `velocity_uncertainty_x` | $\mu_x$ | 0.2 | — | Longitudinal velocity uncertainty. Compresses the collision field along the direction of motion via $\beta_1 = 1/(1 + \mu_x)$ (B.13, simplified for $v = v_\text{pref}$). |
 | `velocity_uncertainty_y` | $\mu_y$ | 0.2 | — | Lateral velocity uncertainty. Expands the collision field perpendicular to the direction of motion via $\beta_2 = 1 + \mu_y$ (B.13, simplified for $v = v_\text{pref}$). |
-
-The trajectory is sampled at a fixed internal count (20 points) and the
-random number generator used for symmetry-breaking perturbations is
-seeded with a fixed value for reproducibility; both are
-implementation-internal and not exposed through the public API.
+| `num_samples` | $K$ | 20 | — | Number of evenly spaced sample points on the projected trajectory. |
+| `rng_seed` | | 42 | — | Seed for the random number generator used for symmetry-breaking perturbations and detour side selection. Fixed seed gives reproducible runs. |
 
 ### Agent-level parameters
 
-Set per agent. Can be modified at runtime.
+The remaining parameters live in the per-agent state
+`jupedsim.WarpDriverModelState`. They are set when the agent is added and can
+be modified at runtime through the agent handle.
 
-| Parameter | Default | Unit | Description |
-|---|---|---|---|
-| `desired_speed` ($v_0$) | 1.2 | m/s | Free-flow speed the agent tries to maintain. |
-| `radius` ($r$) | 0.15 | m | Physical radius of the agent. Used in the Minkowski sum for collision detection ($r_a + r_b$) and in the short-range repulsion. |
+| Parameter | Symbol | Default | Unit | Description |
+|---|---|---|---|---|
+| `desired_speed` | $v_0$ | 1.2 | m/s | Free-flow speed the agent tries to maintain. |
+| `radius` | $r$ | 0.15 | m | Physical radius of the agent. Used in the Minkowski sum for collision detection ($r_a + r_b$) and in the short-range repulsion. |
+
+The state additionally exposes the per-agent bookkeeping used by the stuck
+detection (`stuck_time`, `anchor_x`, `anchor_y`, `detour_time`,
+`detour_side`); these are managed by the model and rarely need to be set by
+the user.
 
 ## Python API
 
 ```python
 import jupedsim as jps
 
-# Model-level parameters (shared by all agents)
+# Model-level parameters (simulation-global state); the instance is
+# consumed by the Simulation constructor and must not be reused. These
+# apply to every agent and are fixed for the lifetime of the simulation.
 model = jps.WarpDriverModel(
+    sigma=0.3,
     time_horizon=2.0,
     step_size=0.5,
-    sigma=0.3,
     time_uncertainty=0.5,
     velocity_uncertainty_x=0.2,
     velocity_uncertainty_y=0.2,
+    num_samples=20,
+    rng_seed=42,
 )
 
 sim = jps.Simulation(model=model, geometry=area, dt=0.01)
 
-# Agent-level parameters
-agent_id = sim.add_agent(jps.WarpDriverModelAgentParameters(
-    position=(2.0, 2.0),
-    orientation=(1.0, 0.0),
+# Agent-level parameters: pass a state object to add_agent
+agent_id = sim.add_agent(
     journey_id=journey_id,
     stage_id=stage_id,
-    desired_speed=1.2,
-    radius=0.15,
-))
+    state=jps.WarpDriverModelState(
+        position=(2.0, 2.0),
+        orientation=(1.0, 0.0),
+        desired_speed=1.2,
+        radius=0.15,
+    ),
+)
 
-# Runtime state access
+# Runtime state access through the agent handle. The handle resolves the
+# agent freshly on every access, so it stays valid across iterate() calls
+# and mutations take effect immediately.
 state = sim.agent(agent_id).model
 print(state.desired_speed)   # 1.2
 print(state.radius)          # 0.15
 
-# Mutable at runtime
+# Mutable at runtime — also mid-simulation, between iterate() calls.
+# Only per-agent state fields can be changed this way. The model-level
+# parameters (sigma, time_horizon, step_size, time_uncertainty,
+# velocity_uncertainty_x/y, num_samples, rng_seed) live on the model
+# instance and are fixed once the simulation is constructed.
 state.desired_speed = 0.8
 state.radius = 0.2
 ```
 
 ## Computational cost
 
-Per agent per timestep: $O(K \times N)$ where $K$ is the trajectory sample count (fixed at 20 in the current implementation) and $N$ is the number of neighbors within `cut_off_radius` (= $3T$).
+Per agent per timestep: $O(K \times N)$ where $K$ is the trajectory sample count (`num_samples`, default 20) and $N$ is the number of neighbors within the model's fixed neighbor cutoff radius (derived from the default time horizon and speed bounds).
 
 Each iteration involves:
 - $K \times N$ forward warp compositions (6 operators each)
