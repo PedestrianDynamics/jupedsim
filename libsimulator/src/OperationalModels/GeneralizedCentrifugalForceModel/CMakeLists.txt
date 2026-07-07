@@ -2,7 +2,5 @@
 target_sources(simulator PRIVATE
     GeneralizedCentrifugalForceModel.cpp
     GeneralizedCentrifugalForceModel.hpp
-    GeneralizedCentrifugalForceModelBuilder.cpp
-    GeneralizedCentrifugalForceModelBuilder.hpp
 )
 target_include_directories(simulator PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

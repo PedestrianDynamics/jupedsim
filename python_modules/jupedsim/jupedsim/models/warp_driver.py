@@ -1,82 +1,48 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
+"""WarpDriver Model.
 
-from dataclasses import dataclass
+Based on Wolinski, Lin, and Pettré (2016) -- probabilistic collision
+avoidance using warped intrinsic fields.
 
+The model-level parameters (the precomputed intrinsic collision-probability
+field controlled by ``sigma``, the sampling and look-ahead parameters and a
+random number generator seeded by ``rng_seed``) are carried by the model
+instance, which is passed to the simulation:
 
-@dataclass(kw_only=True)
-class WarpDriverModel:
-    r"""Parameters for WarpDriver Model.
+.. code:: python
 
-    Based on Wolinski, Lin, and Pettré (2016) — probabilistic collision
-    avoidance using warped intrinsic fields.
+    sim = jupedsim.Simulation(
+        model=jupedsim.WarpDriverModel(sigma=0.3, rng_seed=42),
+        geometry=...,
+    )
+    sim.add_agent(
+        journey_id=journey_id,
+        stage_id=stage_id,
+        state=jupedsim.WarpDriverModelState(position=(1.0, 1.0)),
+    )
 
-    Attributes:
-        time_horizon: look-ahead time for collision prediction [s].
-        step_size: gradient descent step size (alpha).
-        sigma: Gaussian spread of the intrinsic field.
-        time_uncertainty: time uncertainty parameter (lambda).
-        velocity_uncertainty_x: longitudinal velocity uncertainty parameter.
-        velocity_uncertainty_y: lateral velocity uncertainty parameter.
-    """
+.. warning::
 
-    time_horizon: float = 2.0
-    step_size: float = 0.5
-    sigma: float = 0.3
-    time_uncertainty: float = 0.5
-    velocity_uncertainty_x: float = 0.2
-    velocity_uncertainty_y: float = 0.2
+    The model instance is consumed by the ``Simulation`` constructor and must
+    not be reused afterwards.
 
+:class:`WarpDriverModel` exposes the model-level parameters as keyword-only
+constructor arguments with sensible defaults: ``sigma``, ``time_horizon``,
+``step_size``, ``time_uncertainty``, ``velocity_uncertainty_x``,
+``velocity_uncertainty_y``, ``num_samples`` and ``rng_seed``.
 
-@dataclass(kw_only=True)
-class WarpDriverModelAgentParameters:
-    """Parameters required to create an Agent in the WarpDriver Model.
+:class:`WarpDriverModelState` exposes the complete per-agent state of the
+model as keyword-only constructor arguments with sensible defaults:
+``position``, ``orientation``, ``radius``, ``desired_speed``, ``stuck_time``,
+``anchor_x``, ``anchor_y``, ``detour_time`` and ``detour_side``.
+"""
 
-    Attributes:
-        position: Position of the agent.
-        orientation: Orientation of the agent.
-        journey_id: Id of the journey the agent follows.
-        stage_id: Id of the stage the agent targets.
-        desired_speed: desired speed of the agent [m/s].
-        radius: radius of the agent [m].
-    """
+import jupedsim.native as py_jps
 
-    position: tuple[float, float] = (0.0, 0.0)
-    orientation: tuple[float, float] = (0.0, 0.0)
-    journey_id: int = -1
-    stage_id: int = -1
-    desired_speed: float = 1.2
-    radius: float = 0.15
+WarpDriverModel = py_jps.WarpDriverModel
+WarpDriverModelState = py_jps.WarpDriverModelState
 
-
-class WarpDriverModelState:
-    """State of an agent using the WarpDriver Model."""
-
-    def __init__(self, backing) -> None:
-        self._obj = backing
-
-    @property
-    def orientation(self) -> tuple[float, float]:
-        """Orientation of this agent."""
-        return self._obj.orientation
-
-    @orientation.setter
-    def orientation(self, orientation):
-        self._obj.orientation = orientation
-
-    @property
-    def radius(self) -> float:
-        """Radius of this agent [m]."""
-        return self._obj.radius
-
-    @radius.setter
-    def radius(self, radius):
-        self._obj.radius = radius
-
-    @property
-    def desired_speed(self) -> float:
-        """Desired speed of this agent [m/s]."""
-        return self._obj.desired_speed
-
-    @desired_speed.setter
-    def desired_speed(self, desired_speed):
-        self._obj.desired_speed = desired_speed
+__all__ = [
+    "WarpDriverModel",
+    "WarpDriverModelState",
+]

@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "GeneralizedCentrifugalForceModel.hpp"
 #include "GenericAgent.hpp"
 #include "conversion.hpp"
 
@@ -8,27 +7,19 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h> // IWYU pragma: keep
 
-#include <cstdint>
 #include <tuple>
 
 namespace py = pybind11;
 
 void init_agent(py::module_& m)
 {
+    // TRANSIENT ONLY: this class wraps a reference to an agent owned by the
+    // simulation. Instances are only valid for the duration of a single
+    // property access on a Python agent handle or a single custom-model
+    // callback. They must never be stored across Simulation.iterate(). This is
+    // not the Python-visible Agent; the public Agent is a handle that resolves
+    // this wrapper freshly on every attribute access.
     py::class_<GenericAgent>(m, "Agent")
-        .def(
-            py::init([](uint64_t journeyId,
-                        uint64_t stageId,
-                        std::tuple<double, double> position,
-                        GenericAgent::ModelState model) {
-                return GenericAgent(
-                    GenericAgent::ID::Invalid, journeyId, stageId, intoPoint(position), model);
-            }),
-            py::kw_only(),
-            py::arg("journey_id"),
-            py::arg("stage_id"),
-            py::arg("position"),
-            py::arg("model"))
         .def_property_readonly("id", [](const GenericAgent& agent) { return agent.id.getID(); })
         .def_property_readonly(
             "journey_id", [](const GenericAgent& agent) { return agent.journeyId.getID(); })

@@ -318,9 +318,9 @@ STP ComposeGradientInverse(const Point& gradI, const STP& sOriginal, const WarpP
 // ============================================================================
 
 WarpDriverModel::WarpDriverModel(
+    double sigma,
     double timeHorizon,
     double stepSize,
-    double sigma,
     double timeUncertainty,
     double velocityUncertaintyX,
     double velocityUncertaintyY,
@@ -335,11 +335,13 @@ WarpDriverModel::WarpDriverModel(
     // Neighborhood cutoff: maximum distance at which a neighbor can still
     // collide with us within timeHorizon. Two agents closing head-on cover
     // 2 * v_max * timeHorizon, plus their combined radii, plus a small margin.
-    // v_max and r_max are hardcoded pedestrian defaults; promote to constructor
-    // parameters if mixed-speed populations need a tighter or wider cutoff.
+    // v_max and r_max are hardcoded pedestrian defaults.
     , _cutOffRadius(2.0 * 1.5 * timeHorizon + 2.0 * 0.3 + 0.5)
     , _rng(rngSeed)
 {
+    if(sigma <= 0.0) {
+        throw SimulationError("WarpDriverModel: sigma must be > 0, got {}", sigma);
+    }
     _intrinsicField.Compute(sigma);
 }
 
@@ -368,6 +370,45 @@ void WarpDriverModel::CheckModelConstraint(
     if(data->v0 < 0.0) {
         throw SimulationError(
             "WarpDriverModel constraint check: agent {} has invalid v0 {}", agent.id, data->v0);
+    }
+    if(this->_timeHorizon <= 0.0) {
+        throw SimulationError(
+            "WarpDriverModel constraint check: agent {} has invalid timeHorizon {}, must be > 0",
+            agent.id,
+            this->_timeHorizon);
+    }
+    if(this->_stepSize <= 0.0) {
+        throw SimulationError(
+            "WarpDriverModel constraint check: agent {} has invalid stepSize {}, must be > 0",
+            agent.id,
+            this->_stepSize);
+    }
+    if(this->_numSamples < 1) {
+        throw SimulationError(
+            "WarpDriverModel constraint check: agent {} has invalid numSamples {}, must be >= 1",
+            agent.id,
+            this->_numSamples);
+    }
+    if(this->_timeUncertainty < 0.0) {
+        throw SimulationError(
+            "WarpDriverModel constraint check: agent {} has invalid timeUncertainty {}, must be "
+            ">= 0",
+            agent.id,
+            this->_timeUncertainty);
+    }
+    if(this->_velocityUncertaintyX < 0.0) {
+        throw SimulationError(
+            "WarpDriverModel constraint check: agent {} has invalid velocityUncertaintyX {}, must "
+            "be >= 0",
+            agent.id,
+            this->_velocityUncertaintyX);
+    }
+    if(this->_velocityUncertaintyY < 0.0) {
+        throw SimulationError(
+            "WarpDriverModel constraint check: agent {} has invalid velocityUncertaintyY {}, must "
+            "be >= 0",
+            agent.id,
+            this->_velocityUncertaintyY);
     }
 }
 
@@ -412,7 +453,7 @@ void WarpDriverModel::ComputeNextState(
 
     // === Step 1: Projected trajectory in agent-centric space ===
     // r(t) = (speed * t, 0, t) for t in [0, timeHorizon]
-    const double dtSample = _timeHorizon / std::max(_numSamples - 1, 1);
+    const double dtSample = this->_timeHorizon / std::max(this->_numSamples - 1, 1);
 
     // === Step 2: Perceive - build collision probability field ===
     const auto neighbors =
@@ -455,9 +496,9 @@ void WarpDriverModel::ComputeNextState(
         double pTotal;
         STP gradTotal;
     };
-    std::vector<Sample> samples(static_cast<size_t>(_numSamples));
+    std::vector<Sample> samples(static_cast<size_t>(this->_numSamples));
 
-    for(int i = 0; i < _numSamples; ++i) {
+    for(int i = 0; i < this->_numSamples; ++i) {
         const double t = i * dtSample;
         const double lateralPerturbation = perturbDist(_rng);
         samples[static_cast<size_t>(i)] =
@@ -496,10 +537,10 @@ void WarpDriverModel::ComputeNextState(
         wp.orientB = nbOrient;
         wp.speedB = nbSpeed;
         wp.radiusB = agentData.radius + nbData->radius; // Minkowski sum
-        wp.lambda = _timeUncertainty;
-        wp.velocityUncertaintyX = _velocityUncertaintyX;
-        wp.velocityUncertaintyY = _velocityUncertaintyY;
-        wp.timeHorizon = _timeHorizon;
+        wp.lambda = this->_timeUncertainty;
+        wp.velocityUncertaintyX = this->_velocityUncertaintyX;
+        wp.velocityUncertaintyY = this->_velocityUncertaintyY;
+        wp.timeHorizon = this->_timeHorizon;
 
         for(auto& s : samples) {
             // Forward warp sample point to neighbor's Intrinsic Field space
@@ -564,9 +605,9 @@ void WarpDriverModel::ComputeNextState(
 
         // q = S - alpha * P * G  (Eq. 8)
         STP q{};
-        q.x = S.x - _stepSize * P * G.x;
-        q.y = S.y - _stepSize * P * G.y;
-        q.t = S.t - _stepSize * P * G.t;
+        q.x = S.x - this->_stepSize * P * G.x;
+        q.y = S.y - this->_stepSize * P * G.y;
+        q.t = S.t - this->_stepSize * P * G.t;
 
         if(q.t > 1e-9) {
             newVelLocal = Point{q.x / q.t, q.y / q.t};

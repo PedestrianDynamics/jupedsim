@@ -186,9 +186,26 @@ form persistent deadlocks.
 
 ## Per-agent parameters
 
-These are exposed via
-{class}`~jupedsim.models.CollisionFreeSpeedModelV3AgentParameters` and
-can be set or modified per agent at any time.
+These are exposed as keyword-only constructor arguments of
+{class}`~jupedsim.CollisionFreeSpeedModelV3State`, which is passed
+to `add_agent`, and can be modified per agent at any time through the
+agent handle (`sim.agent(id).model`).
+
+```python
+import jupedsim as jps
+
+sim = jps.Simulation(
+    model=jps.CollisionFreeSpeedModelV3(), geometry=area
+)
+agent_id = sim.add_agent(
+    journey_id=journey_id,
+    stage_id=stage_id,
+    state=jps.CollisionFreeSpeedModelV3State(position=(1.0, 1.0)),
+)
+
+# modify at runtime
+sim.agent(agent_id).model.desired_speed = 1.0
+```
 
 | Symbol | Parameter (Python) | Default | Unit | Role |
 |---|---|---:|---|---|
@@ -203,6 +220,7 @@ can be set or modified per agent at any time.
 | $\sigma_y$ | `range_y_scale` | `8.0` | - | Lateral aspect factor, $r_y = R\,\sigma_y$ |
 | $A_w$ | `strength_geometry_repulsion` | `5.0` | - | Wall repulsion strength |
 | $B_w$ | `range_geometry_repulsion` | `0.02` | m | Wall repulsion decay length |
+| $\theta$ | `heading_angle` | `0.0` | rad | Persistent heading state used by the relaxation (managed by the model) |
 
 ## Internal constants
 

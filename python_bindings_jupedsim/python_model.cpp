@@ -173,9 +173,15 @@ void init_python_model(py::module_& m)
 {
     py::class_<OperationalModel, py::smart_holder>(m, "OperationalModel");
 
-    py::class_<CustomModel::State>(m, "_CustomModelData")
+    py::class_<CustomModel::State>(m, "_CustomModelState")
         .def(py::init([](py::object model) {
-            return CustomModel::State{GilSafePyObject{std::move(model)}};
+            // Prime the GIL-free position cache from the wrapped state so the
+            // framework can spawn the agent at the state's position.
+            const auto position =
+                intoPoint(py::cast<std::tuple<double, double>>(model.attr("position")));
+            CustomModel::State data{GilSafePyObject{std::move(model)}};
+            data.position = position;
+            return data;
         }))
         .def_property_readonly(
             "model", [](CustomModel::State& data) { return data.Get<GilSafePyObject>().Get(); });

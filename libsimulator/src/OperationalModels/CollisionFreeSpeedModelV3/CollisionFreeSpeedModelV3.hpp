@@ -16,10 +16,10 @@ public:
     struct State {
         Point position{};
         Point orientation{1.0, 0.0};
-        double strengthNeighborRepulsion{}; // [rad] max steering authority before upper bound
-        double rangeNeighborRepulsion{}; // [m] base interaction range for neighbor influence
-        double strengthGeometryRepulsion{}; // [-] wall repulsion strength
-        double rangeGeometryRepulsion{}; // [m] wall repulsion decay length
+        double strengthNeighborRepulsion{8.0}; // [rad] max steering authority before upper bound
+        double rangeNeighborRepulsion{0.1}; // [m] base interaction range for neighbor influence
+        double strengthGeometryRepulsion{5.0}; // [-] wall repulsion strength
+        double rangeGeometryRepulsion{0.02}; // [m] wall repulsion decay length
 
         double rangeXScale{20.0}; // [-] forward interaction stretch multiplier
         double rangeYScale{8.0}; // [-] lateral interaction stretch multiplier
@@ -28,7 +28,7 @@ public:
 
         double timeGap{1};
         double v0{1.2};
-        double radius{0.15};
+        double radius{0.2};
         double headingAngle{0.0}; // [rad] persistent relaxed heading state
     };
 

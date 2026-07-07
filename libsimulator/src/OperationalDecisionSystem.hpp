@@ -41,10 +41,11 @@ public:
         for(size_t index = 0; index < agents.size(); ++index) {
             _model->ComputeNextState(dT, agents[index], _next[index], geometry, neighborhoodSearch);
         }
-        // Copy results back instead of swapping buffers: a swap would re-seat references
-        // held by callers (the Python bindings expose agents by reference) into the retired
-        // scratch buffer, invalidating them after one iteration.
-        std::copy(std::begin(_next), std::end(_next), std::begin(agents));
+        // Swap in the computed generation. This is safe because no caller retains
+        // pointers/references across an iteration (Python-side agent handles resolve per
+        // access) and Simulation::Iterate rebuilds the neighborhood grid right after this
+        // step.
+        agents.swap(_next);
     }
 
     void ValidateAgent(

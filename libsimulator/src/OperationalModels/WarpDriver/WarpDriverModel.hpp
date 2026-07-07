@@ -56,13 +56,14 @@ private:
         std::pair<double, Point> Sample(double x, double y) const;
     };
 
-    // Builder-configured, simulation-wide values used by ComputeNextState
+    // Model-level parameters
     double _timeHorizon;
     double _stepSize;
     double _timeUncertainty;
     double _velocityUncertaintyX;
     double _velocityUncertaintyY;
     int _numSamples;
+
     // Genuinely simulation-global state
     double _cutOffRadius;
 
@@ -71,13 +72,13 @@ private:
 
 public:
     WarpDriverModel(
-        double timeHorizon,
-        double stepSize,
         double sigma,
-        double timeUncertainty,
-        double velocityUncertaintyX,
-        double velocityUncertaintyY,
-        int numSamples,
+        double timeHorizon = 2.0,
+        double stepSize = 0.5,
+        double timeUncertainty = 0.5,
+        double velocityUncertaintyX = 0.2,
+        double velocityUncertaintyY = 0.2,
+        int numSamples = 20,
         uint64_t rngSeed = 42);
 
     ~WarpDriverModel() override = default;

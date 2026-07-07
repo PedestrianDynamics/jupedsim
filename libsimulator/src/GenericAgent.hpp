@@ -77,17 +77,14 @@ struct GenericAgent {
         ID id_,
         jps::UniqueID<Journey> journeyId_,
         jps::UniqueID<BaseStage> stageId_,
-        Point pos_,
         ModelState model_)
         : id(id_ != ID::Invalid ? id_ : ID{})
         , journeyId(journeyId_)
         , stageId(stageId_)
-        , target(pos_)
         , model(std::move(model_))
     {
-        // The model variant is initialized above, only then can the position
-        // be written through it.
-        position() = pos_;
+        // Position is owned by the model state; seed the initial waypoint from it.
+        target = position();
     }
 };
 

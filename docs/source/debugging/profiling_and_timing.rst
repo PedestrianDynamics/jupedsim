@@ -343,9 +343,9 @@ preserved even when the user presses :kbd:`Ctrl-C`:
 
     jps.dump_traces("full_trace.pftrace")
 
----------------------------
+----------------------------
 Combining Timing and Tracing
----------------------------
+----------------------------
 
 Both systems can be active simultaneously.  The timer gives you numbers;
 the profiler gives you a visual timeline with the same event boundaries.

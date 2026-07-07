@@ -14,7 +14,7 @@ public:
     /// Per-agent state of the generalized centrifugal force model.
     struct State {
         Point position{};
-        Point orientation{0.0, 0.0};
+        Point orientation{1.0, 0.0};
         double speed{};
         Point e0{};
         int orientationDelay{};
@@ -29,19 +29,19 @@ public:
 
 private:
     double _cutOffRadius{4.0}; // TODO (MC) check this free parameter
-    double strengthNeighborRepulsion;
-    double strengthGeometryRepulsion;
-    double maxNeighborInteractionDistance;
-    double maxGeometryInteractionDistance;
-    double maxNeighborInterpolationDistance;
-    double maxGeometryInterpolationDistance;
-    double maxNeighborRepulsionForce;
-    double maxGeometryRepulsionForce;
+    double strengthNeighborRepulsion{0.3};
+    double strengthGeometryRepulsion{0.2};
+    double maxNeighborInteractionDistance{2};
+    double maxGeometryInteractionDistance{2};
+    double maxNeighborInterpolationDistance{0.1};
+    double maxGeometryInterpolationDistance{0.1};
+    double maxNeighborRepulsionForce{9};
+    double maxGeometryRepulsionForce{3};
 
 public:
     GeneralizedCentrifugalForceModel(
         double strengthNeighborRepulsion,
-        double strengthWallRepulsion,
+        double strengthGeometryRepulsion,
         double maxNeighborInteractionDistance,
         double maxGeometryInteractionDistance,
         double maxNeighborInterpolationDistance,

@@ -32,9 +32,9 @@ def square_simulation(tmp_path: pathlib.Path):
     journey_id = sim.add_journey(jps.JourneyDescription([exit_id]))
     for x, y in [(2, 5), (3, 4), (3, 6)]:
         sim.add_agent(
-            jps.CollisionFreeSpeedModelV2AgentParameters(
-                position=(x, y), journey_id=journey_id, stage_id=exit_id
-            )
+            journey_id=journey_id,
+            stage_id=exit_id,
+            state=jps.CollisionFreeSpeedModelV2State(position=(x, y)),
         )
     for _ in range(50):
         sim.iterate()

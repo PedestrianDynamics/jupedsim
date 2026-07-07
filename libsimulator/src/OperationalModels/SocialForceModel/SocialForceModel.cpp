@@ -15,8 +15,10 @@
 #include <numeric>
 #include <string>
 
-SocialForceModel::SocialForceModel(double bodyForce_, double friction_)
-    : bodyForce(bodyForce_), friction(friction_) {};
+SocialForceModel::SocialForceModel(double bodyForce, double friction)
+    : bodyForce(bodyForce), friction(friction)
+{
+}
 
 OperationalModelType SocialForceModel::Type() const
 {

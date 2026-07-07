@@ -32,8 +32,9 @@ public:
     };
 
 private:
+    /// Add a small outward component to maintain minimum distance from walls.
+    double _pushoutStrength{0.3};
     double _cutOffRadius{3};
-    double _pushoutStrength;
     // Shared sequential RNG: draws must stay on the model to keep simulations deterministic.
     mutable std::mt19937 gen;
 

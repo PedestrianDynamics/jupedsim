@@ -31,25 +31,27 @@ speed of the agent. This simplified and computationally efficient model aims to
 mirror real-world pedestrian behaviors while maintaining smooth movement
 dynamics.
 
-The collision-free speed model is available in three variants in JuPedSim.
-:class:`~jupedsim.models.CollisionFreeSpeedModel` and
-:class:`~jupedsim.models.CollisionFreeSpeedModelV2` implement the same
-algorithm and differ only in whether model parameters are defined globally
-or per-agent. :class:`~jupedsim.models.CollisionFreeSpeedModelV3` uses a
-different steering approach (rotational steering with heading relaxation)
-in addition to per-agent parameters.
+The collision-free speed model is available in three variants in JuPedSim,
+constructed via :class:`~jupedsim.CollisionFreeSpeedModel`,
+:class:`~jupedsim.CollisionFreeSpeedModelV2` and
+:class:`~jupedsim.CollisionFreeSpeedModelV3`. V1 and V2 differ in whether the
+repulsion parameters are global or per-agent: in
+:class:`~jupedsim.CollisionFreeSpeedModel` (V1) the repulsion parameters
+(``strength_neighbor_repulsion``, ``range_neighbor_repulsion``,
+``strength_geometry_repulsion``, ``range_geometry_repulsion``) are model-level
+constructor arguments shared by all agents, whereas in V2 they are per-agent.
+V3 uses a different steering approach (rotational steering with heading
+relaxation).
 
-In :class:`~jupedsim.models.CollisionFreeSpeedModel` neighbor and geometry
-repulsion parameters are global parameters, i.e. all agents use the same values
-and the values are constant over the simulation.
+The per-agent parameters are set when adding an agent (via
+:class:`~jupedsim.CollisionFreeSpeedModelState`,
+:class:`~jupedsim.CollisionFreeSpeedModelV2State` or
+:class:`~jupedsim.CollisionFreeSpeedModelV3State`) and can be changed at any
+time through the agent handle.
 
-In :class:`~jupedsim.models.CollisionFreeSpeedModelV2` neighbor and geometry
-repulsion parameters are per-agent parameters that can be set individually via
-:class:`~jupedsim.models.CollisionFreeSpeedModelV2AgentParameters` and can be
-changed at any time.
-
-In :class:`~jupedsim.models.CollisionFreeSpeedModelV3` the same per-agent base
-parameters are available, plus rotational steering controls
+In :class:`~jupedsim.CollisionFreeSpeedModelV3` the same per-agent base
+parameters are available (via
+:class:`~jupedsim.CollisionFreeSpeedModelV3State`), plus rotational steering controls
 (``range_x_scale``, ``range_y_scale``, ``theta_max_upper_bound``)
 and ``agent_buffer``.
 V3 also uses temporal heading relaxation to damp rapid left-right turning
@@ -127,9 +129,9 @@ dynamics.
 
 The parameters of the anticipation velocity model can be defined per-agent.
 
-In :class:`~jupedsim.models.AnticipationVelocityModel` neighbor and wall
+In :class:`~jupedsim.AnticipationVelocityModel` neighbor and wall
 parameters are per-agent parameters that can be set individually via
-:class:`~jupedsim.models.AnticipationVelocityModelAgentParameters` and can be
+:class:`~jupedsim.AnticipationVelocityModelState` and can be
 changed at any time.
 
 For an in-depth explanation of the model, refer to the 
@@ -210,9 +212,12 @@ Key features:
 * Stuck detection with lateral detour to break narrow-passage deadlocks
 
 The parameters of the WarpDriver model include model-level parameters (shared
-by all agents: ``time_horizon``, ``step_size``, ``sigma``,
-``time_uncertainty``, ``velocity_uncertainty_x``, ``velocity_uncertainty_y``, ``num_samples``) and per-agent
-parameters (``desired_speed``, ``radius``) that can be modified at runtime.
+by all agents: ``sigma``, ``time_horizon``, ``step_size``,
+``time_uncertainty``, ``velocity_uncertainty_x``, ``velocity_uncertainty_y``,
+``num_samples`` and ``rng_seed``, passed to
+:class:`~jupedsim.WarpDriverModel`) and per-agent parameters
+(``desired_speed`` and ``radius``, set via
+:class:`~jupedsim.WarpDriverModelState`) that can be modified at runtime.
 
 See the `full WarpDriver model documentation <warp_driver_model.html>`_ for
 a detailed description of the algorithm, equations, warp operators, and

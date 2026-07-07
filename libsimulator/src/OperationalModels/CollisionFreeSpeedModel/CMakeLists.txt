@@ -2,7 +2,5 @@
 target_sources(simulator PRIVATE
     CollisionFreeSpeedModel.cpp
     CollisionFreeSpeedModel.hpp
-    CollisionFreeSpeedModelBuilder.cpp
-    CollisionFreeSpeedModelBuilder.hpp
 )
 target_include_directories(simulator PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
