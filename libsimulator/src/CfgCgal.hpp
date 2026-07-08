@@ -29,19 +29,19 @@ using PolyList = std::list<Poly>;
 using Vb = CGAL::Triangulation_vertex_base_2<K>;
 using CGALMesh = CGAL::Surface_mesh<Point3>;
 
-/// Convenienve alias for vertex descriptor types
+/// Convenience alias for vertex descriptor types
 template <class G>
 using VertexDescriptor = typename boost::graph_traits<G>::vertex_descriptor;
 
-/// Convenienve alias for face descriptor types
+/// Convenience alias for face descriptor types
 template <class G>
 using FaceDescriptor = typename boost::graph_traits<G>::face_descriptor;
 
-/// Convenienve alias for half edge descriptor types
+/// Convenience alias for half edge descriptor types
 template <class G>
 using HalfedgeDescriptor = typename boost::graph_traits<G>::halfedge_descriptor;
 
-/// Convenienve alias for face descriptor types
+/// Convenience alias for face descriptor types
 template <class G>
 using EdgeDescriptor = typename boost::graph_traits<G>::edge_descriptor;
 
