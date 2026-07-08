@@ -126,15 +126,38 @@ def top_level_modules(headers: set[str]) -> set[str]:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--cgal", required=True, type=Path, help="Path to third-party/cgal")
-    parser.add_argument("--boost", required=True, type=Path, help="Path to boost include dir (contains boost/)")
-    parser.add_argument("--src", nargs="+", required=True, type=Path, help="Source directories to scan")
-    parser.add_argument("--grep-only", action="store_true", help="Skip BFS, only run the fast grep scan")
+    parser = argparse.ArgumentParser(
+        description=__doc__,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument(
+        "--cgal", required=True, type=Path, help="Path to third-party/cgal"
+    )
+    parser.add_argument(
+        "--boost",
+        required=True,
+        type=Path,
+        help="Path to boost include dir (contains boost/)",
+    )
+    parser.add_argument(
+        "--src",
+        nargs="+",
+        required=True,
+        type=Path,
+        help="Source directories to scan",
+    )
+    parser.add_argument(
+        "--grep-only",
+        action="store_true",
+        help="Skip BFS, only run the fast grep scan",
+    )
     args = parser.parse_args()
 
     if not args.grep_only:
-        print("Running BFS scan (may be slow on large CGAL trees)…", file=sys.stderr)
+        print(
+            "Running BFS scan (may be slow on large CGAL trees)…",
+            file=sys.stderr,
+        )
         boost_headers, _ = bfs_scan(args.src, args.cgal, args.boost)
 
         modules = top_level_modules(boost_headers)
