@@ -6,12 +6,8 @@ Notebooks
     :maxdepth: 1
 
     model-comparison
+    lane-formation
+    single-file
+    motivation
     corner
     double-bottleneck
-    journey
-    lane-formation
-    motivation
-    queues_waiting
-    routing
-    direct_steering
-    single-file
