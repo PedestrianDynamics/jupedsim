@@ -11,12 +11,12 @@ set_target_properties(fmt PROPERTIES
 ################################################################################
 # boost
 ################################################################################
-find_package(Boost 1.82
+find_package(Boost 1.91
     REQUIRED
-    CONFIG
+    #CONFIG
     NO_DEFAULT_PATH
     PATHS
-    ${CMAKE_CURRENT_SOURCE_DIR}/boost-1.82.0
+    ${CMAKE_CURRENT_SOURCE_DIR}/boost-1.91.0
 )
 set_target_properties(Boost::boost PROPERTIES
 	IMPORTED_GLOBAL TRUE

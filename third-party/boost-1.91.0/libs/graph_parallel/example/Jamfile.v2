@@ -1,0 +1,17 @@
+# Copyright 2009 Vladimir Prus.
+#
+# Distributed under the Boost Software License, Version 1.0.
+#    (See accompanying file LICENSE_1_0.txt or copy at
+#          http://www.boost.org/LICENSE_1_0.txt)
+
+
+using python ;
+
+project : requirements <library>/boost/graph_parallel//boost_graph_parallel
+    <library>/boost/system//boost_system
+    <library>/boost/mpi//boost_mpi
+    <library>/python//python
+    ;
+
+exe breadth_first_search : breadth_first_search.cpp ;
+exe dijkstra_shortest_paths : dijkstra_shortest_paths.cpp ;
