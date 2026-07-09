@@ -4,14 +4,12 @@
 #include "CfgCgal.hpp"
 #include "Point.hpp"
 
-#include <memory>
-#include <string_view>
 #include <tuple>
 #include <vector>
 
 using Location = Point3D; // [RL] TODO: Support more than just points
 
-/// Base for routing engines.
+/// Pure interface for 3D routing engines.
 class RoutingEngine3D
 {
 public:
@@ -24,50 +22,25 @@ public:
     RoutingEngine3D(RoutingEngine3D&&) = delete;
     RoutingEngine3D& operator=(RoutingEngine3D&&) = delete;
 
-    /// Set geometry.
-    /// @param mesh surface mesh to set geometry to
-    void set_geometry(SurfaceMesh&& mesh);
-
     /// Checks whether the provided location (3D-point or polygon)
     /// is on walkable surface taking wall clearance into account.
     /// @param loc location (Point or Polygon) to check
     /// @return true if the location projects onto the walkable surface
-    virtual bool is_valid_location(const Location& loc) const;
+    virtual bool IsValidLocation(const Location& loc) const = 0;
 
-    /// Set the routing target and run any per-target precomputation. This allows e.g.
-    // to  run a floor field pre-computation and re-use this in get_shortest_path()
-    /// @param target the destination all subsequent get_shortest_path() route to
-    virtual void set_target(const Location& target) = 0;
-
-    /// Compute the shortest path from @p source to the target set via set_target().
+    /// Compute the shortest path from @p source to @p target.
     /// @param source where to route from
+    /// @param target where to route to
     /// @return tuple of (path, cost): the path includes source as first element
     ///         and the target as last element; cost is typically geodesic distance
     ///         along it, but not necessarily (e.g. floor fields with slowness field).
-    virtual std::tuple<std::vector<Point3D>, double> get_shortest_path(const Point3D& source) = 0;
+    virtual std::tuple<std::vector<Point3D>, double>
+    GetShortestPath(const Point3D& source, const Location& target) = 0;
 
-    /// Get orientation to next point of the shortest path from @p source to the
-    /// current target, projected to x/y.
+    /// Get orientation to next point of the shortest path from @p source to
+    /// @p target, projected to x/y.
     /// @param source where to route from
+    /// @param target where to route to
     /// @return 2D orientation to the next waypoint
-    virtual Point get_orientation(const Point3D& source);
-
-protected:
-    /// Result of projecting a query point onto the surface.
-    struct FaceLocation {
-        SurfaceMesh::Face_index face;
-        SurfaceKernel::Point_3 point;
-    };
-
-    /// Find face and point on face projecting via -z onto mesh.
-    /// `SurfaceMesh::null_face()` in `face` if no such point is found.
-    FaceLocation face_below(const Point3D& p) const;
-
-    /// Drop any per-target precomputation, e.g. when the geometry changes.
-    /// Engines with target-related cache have to override it, engines like
-    /// polyanya/TA* will not as they typically do not run any pre-computation.
-    virtual void invalidate_target() {}
-
-    SurfaceMesh _mesh{};
-    std::unique_ptr<AABBTree> _aabbTree{};
+    virtual Point GetOrientation(const Point3D& source, const Location& target) = 0;
 };

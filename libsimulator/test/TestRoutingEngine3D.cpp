@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "CfgCgal.hpp"
-#include "SimulationError.hpp"
 #include "SurfaceMeshShortestPathRoutingEngine.hpp"
 
 #include <CGAL/mark_domain_in_triangulation.h>
@@ -96,29 +95,26 @@ SurfaceMesh mesh_from_polygon(const std::vector<K::Point_2>& outer, double z = 0
 class FlatSquare : public ::testing::Test
 {
 public:
-    void SetUp() override { engine.set_geometry(unit_square_mesh()); }
+    void SetUp() override
+    {
+        engine = std::make_unique<SurfaceMeshShortestPathRoutingEngine>(unit_square_mesh());
+    }
 
 protected:
-    SurfaceMeshShortestPathRoutingEngine engine{};
+    std::unique_ptr<SurfaceMeshShortestPathRoutingEngine> engine{};
 };
-
-TEST(RoutingEngine3D, ThrowsWithoutGeometry)
-{
-    SurfaceMeshShortestPathRoutingEngine engine{};
-    EXPECT_THROW(engine.is_valid_location({5, 5, 1}), SimulationError);
-}
 
 TEST_F(FlatSquare, PointAboveSurfaceIsValid)
 {
     // z above the surface: the -z ray of face_below projects down onto z=0.
-    EXPECT_TRUE(engine.is_valid_location({5, 5, 1}));
-    EXPECT_TRUE(engine.is_valid_location({0.5, 0.5, 100}));
+    EXPECT_TRUE(engine->IsValidLocation({5, 5, 1}));
+    EXPECT_TRUE(engine->IsValidLocation({0.5, 0.5, 100}));
 }
 
 TEST_F(FlatSquare, PointOutsideFootprintIsInvalid)
 {
-    EXPECT_FALSE(engine.is_valid_location({20, 20, 1}));
-    EXPECT_FALSE(engine.is_valid_location({-1, 5, 1}));
+    EXPECT_FALSE(engine->IsValidLocation({20, 20, 1}));
+    EXPECT_FALSE(engine->IsValidLocation({-1, 5, 1}));
 }
 
 TEST_F(FlatSquare, StraightPathCostIsEuclidean)
@@ -127,9 +123,8 @@ TEST_F(FlatSquare, StraightPathCostIsEuclidean)
     // --> euclidian distance in 2D (flat)
     const Point3D source{6, 2, 1};
     const Point3D target{9, 5, 1};
-    engine.set_target(target);
 
-    const auto [path, cost] = engine.get_shortest_path(source);
+    const auto [path, cost] = engine->GetShortestPath(source, target);
 
     EXPECT_NEAR(cost, std::sqrt(3. * 3. + 3. * 3.), 1e-6);
     ASSERT_EQ(path.size(), 2u);
@@ -147,9 +142,8 @@ TEST_F(FlatSquare, CrossingInternalEdgeStaysStraight)
     // Still straight line (no obstacles), crossing triangle boundaries.
     const Point3D source{2, 3, 1};
     const Point3D target{8, 7, 1};
-    engine.set_target(target);
 
-    const auto [path, cost] = engine.get_shortest_path(source);
+    const auto [path, cost] = engine->GetShortestPath(source, target);
 
     EXPECT_NEAR(cost, std::sqrt(6. * 6. + 4. * 4.), 1e-6);
     // CGAL emits waypoints at each face edge it crosses, therefore not just 2 points returned.
@@ -160,9 +154,7 @@ TEST_F(FlatSquare, CrossingInternalEdgeStaysStraight)
 
 TEST_F(FlatSquare, OrientationPointsToTarget)
 {
-    engine.set_target({9, 5, 1});
-
-    const Point dir = engine.get_orientation({6, 2, 1});
+    const Point dir = engine->GetOrientation({6, 2, 1}, {9, 5, 1});
 
     // Direction to the target (3, 3) normalized.
     const double inv_sqrt2 = 1.0 / std::sqrt(2.0);
@@ -173,12 +165,11 @@ TEST_F(FlatSquare, OrientationPointsToTarget)
 TEST_F(FlatSquare, OrientationRobustWhenSourceOnEdge)
 {
     // source sits exactly on the shared diagonal (y=x). CGAL then emits a
-    // duplicate leading waypoint; get_orientation must skip it and still return
+    // duplicate leading waypoint; GetOrientation must skip it and still return
     // the real heading instead of a spurious (0,0).
     const Point3D source{4, 4, 1};
-    engine.set_target({8, 7, 1});
 
-    const Point dir = engine.get_orientation(source);
+    const Point dir = engine->GetOrientation(source, {8, 7, 1});
 
     // Heading towards (8,7) from (4,4): (4,3) normalized = (0.8, 0.6).
     EXPECT_NEAR(dir.x, 0.8, 1e-6);
@@ -187,14 +178,12 @@ TEST_F(FlatSquare, OrientationRobustWhenSourceOnEdge)
 
 TEST(RoutingEngine3DFold, GeodesicCarriesLengthAcrossSeam)
 {
-    SurfaceMeshShortestPathRoutingEngine engine{};
-    engine.set_geometry(folded_mesh());
+    SurfaceMeshShortestPathRoutingEngine engine{folded_mesh()};
 
     const Point3D source{3, 2, 1}; // on the floor
     const Point3D target{4, 13, 5}; // on the ramp, projects to z = 3
-    engine.set_target(target);
 
-    const auto [path, cost] = engine.get_shortest_path(source);
+    const auto [path, cost] = engine.GetShortestPath(source, target);
 
     // Unfold the ramp about the seam (y=10): the ramp point (4,13,3) lies at
     // surface distance (13-10)*sqrt(2) from the seam, so it maps to
@@ -230,14 +219,12 @@ TEST(RoutingEngine3DLShape, GeodesicBendsAroundReflexCorner)
     // L-shape (CCW) with a single reflex corner at (1, 1).
     const std::vector<K::Point_2> outer{{0, 0}, {3, 0}, {3, 1}, {1, 1}, {1, 3}, {0, 3}};
 
-    SurfaceMeshShortestPathRoutingEngine engine{};
-    engine.set_geometry(mesh_from_polygon(outer)); // flat z = 0
+    SurfaceMeshShortestPathRoutingEngine engine{mesh_from_polygon(outer)}; // flat z = 0
 
     const Point3D source{2.5, 0.5, 1};
     const Point3D target{0.5, 2.5, 1};
-    engine.set_target(target);
 
-    const auto [path, cost] = engine.get_shortest_path(source);
+    const auto [path, cost] = engine.GetShortestPath(source, target);
 
     // Straight line would cut the missing quadrant (x>1, y>1), so the any-angle
     // geodesic must pivot on the reflex corner (1,1):

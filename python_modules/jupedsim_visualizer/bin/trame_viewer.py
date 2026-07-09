@@ -77,8 +77,7 @@ def build_app(obj_path: str | None):
     state.route_target = "—"
     state.route_cost = 0.0
     state.route_corners = 0
-    state.route_setup_us = 0  # set_target() precompute time
-    state.route_query_us = 0  # get_shortest_path() query time
+    state.route_query_us = 0  # get_shortest_path() full solve time
 
     # Holds the currently loaded mesh + its height range; swapped out by load_mesh().
     current: dict = {"mesh": None, "marker_r": 0.1}
@@ -92,8 +91,7 @@ def build_app(obj_path: str | None):
         "busy": False,  # a hover compute/render is currently in flight
         "line": None,  # persistent polyline dataset, updated in place per hover
     }
-    # Exact any-angle geodesic engine (CGAL MMP), fed the same OBJ as the displayed mesh.
-    engine = SurfaceMeshShortestPathRoutingEngine()
+    engine = None  # Routing engine - populated in load_mesh()
     picker = vtkCellPicker()
     picker.SetTolerance(0.0005)
 
@@ -129,8 +127,9 @@ def build_app(obj_path: str | None):
         plotter.add_axes()
 
     def load_mesh(mesh, name: str, obj_path: str) -> None:
+        nonlocal engine
         # Feed the exact-geodesic engine the same OBJ (it builds its own triangulation + AABB tree).
-        engine.set_geometry_from_obj(obj_path)
+        engine = SurfaceMeshShortestPathRoutingEngine(obj_path)
         mesh["elevation"] = mesh.points[:, 2]  # colour + clip by height
         z_min = float(mesh.points[:, 2].min())
         z_max = float(mesh.points[:, 2].max())
@@ -220,7 +219,7 @@ def build_app(obj_path: str | None):
             state.route_status = "idle"
             state.route_start = state.route_target = "—"
             state.route_cost, state.route_corners = 0.0, 0
-            state.route_setup_us, state.route_query_us = 0, 0
+            state.route_query_us = 0
 
     def _fmt(p) -> str:
         return f"{p[0]:.3f}, {p[1]:.3f}, {p[2]:.3f}"
@@ -249,7 +248,11 @@ def build_app(obj_path: str | None):
         if route["line"] is None:
             route["line"] = new
             plotter.add_mesh(
-                new, name="route_path", color="red", line_width=6, pickable=False
+                new,
+                name="route_path",
+                color="red",
+                line_width=6,
+                pickable=False,
             )
         else:
             route["line"].copy_from(new)
@@ -277,12 +280,12 @@ def build_app(obj_path: str | None):
             < 0.25 * current["marker_r"]
         ):
             return
-        # The fixed start is CGAL's source (set via set_target); the live hovered
-        # point is the query source. The returned path runs hover -> start.
-        query_t = tuple(float(v) for v in target_pos)
+        # The fixed start is the geodesic source, the live hovered point the target.
+        src = tuple(float(v) for v in start_pos)
+        tgt = tuple(float(v) for v in target_pos)
         t0 = time.perf_counter()
         try:
-            path, cost = engine.get_shortest_path(query_t)
+            path, cost = engine.get_shortest_path(src, tgt)
         except Exception:
             return  # off-surface pick or no path
         elapsed_us = (time.perf_counter() - t0) * 1e6
@@ -301,14 +304,7 @@ def build_app(obj_path: str | None):
             ctrl.view_update()
 
     def set_start(start_pos) -> None:
-        # The fixed start becomes the engine's target: set_target() runs the
-        # (expensive) per-target precompute here, once, so live hovers are cheap.
-        t0 = time.perf_counter()
-        try:
-            engine.set_target(tuple(float(v) for v in start_pos))
-        except Exception:
-            return  # off-surface pick
-        setup_us = (time.perf_counter() - t0) * 1e6
+        # Just fix the start; the geodesic runs per hover in update_route()
         route.update(
             start_pos=np.asarray(start_pos, dtype=float),
             tracking=True,
@@ -328,7 +324,6 @@ def build_app(obj_path: str | None):
                 0,
                 0,
             )
-            state.route_setup_us = int(setup_us)
         if ctrl.view_update:
             ctrl.view_update()
 
@@ -413,9 +408,6 @@ def build_app(obj_path: str | None):
                     "{{ route_cost.toFixed(2) }}", subtitle="Path cost"
                 )
                 v3.VListItem("{{ route_corners }}", subtitle="Waypoints")
-                v3.VListItem(
-                    "{{ route_setup_us }} µs", subtitle="set_target time"
-                )
                 v3.VListItem(
                     "{{ route_query_us }} µs", subtitle="get_shortest_path time"
                 )

@@ -46,7 +46,6 @@ target_sources(simulator PRIVATE
     src/Routing.hpp
     src/RoutingEngine.cpp
     src/RoutingEngine.hpp
-    src/RoutingEngine3D.cpp
     src/RoutingEngine3D.hpp
     src/Simulation.cpp
     src/Simulation.hpp
