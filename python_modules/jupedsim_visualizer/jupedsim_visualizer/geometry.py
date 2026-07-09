@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 import sys
 
-from jupedsim import RoutingEngine
+from jupedsim import TAStarRoutingEngine
 from jupedsim.internal.aabb import AABB
 from PySide6.QtCore import QObject, Signal
 from vtkmodules.vtkCommonCore import vtkCommand, vtkPoints
@@ -18,7 +18,7 @@ from jupedsim_visualizer.config import Colors, ZLayers
 
 
 class Geometry:
-    def __init__(self, navi: RoutingEngine):
+    def __init__(self, navi: TAStarRoutingEngine):
         self.navi = navi
         vertices = vtkPoints()
         polygons = vtkCellArray()

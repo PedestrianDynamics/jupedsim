@@ -1,45 +1,37 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "CfgCgal.hpp"
-#include "Clonable.hpp"
-#include "Mesh.hpp"
 #include "Point.hpp"
+#include "UniqueID.hpp"
 
-#include <cstddef>
-#include <memory>
-#include <variant>
+#include <string>
 #include <vector>
 
-using LocationID = size_t;
-using Location = std::variant<Point, LocationID>;
+class CollisionGeometry;
 
-class RoutingEngine : public Clonable<RoutingEngine>
+class RoutingEngine
 {
-    CDT cdt{};
-    std::unique_ptr<Mesh> mesh{};
-
 public:
-    RoutingEngine();
-    explicit RoutingEngine(const PolyWithHoles& poly);
-    ~RoutingEngine() override = default;
-
-    RoutingEngine(const RoutingEngine& other) = delete;
-    RoutingEngine& operator=(const RoutingEngine& other) = delete;
-
-    RoutingEngine(RoutingEngine&& other) = default;
-    RoutingEngine& operator=(RoutingEngine&& other) = default;
-
-    std::unique_ptr<RoutingEngine> Clone() const override;
-    Point ComputeWaypoint(Point currentPosition, Point destination);
-    std::vector<Point> ComputeAllWaypoints(Point currentPosition, Point destination);
-    bool IsRoutable(Point p) const;
-    void Update();
-
-    const Mesh* MeshData() const { return mesh.get(); };
+    using ID = jps::UniqueID<RoutingEngine>;
 
 private:
-    CDT::Face_handle find_face(K::Point_2) const;
-    std::vector<Point>
-    straightenPath(Point from, Point to, const std::vector<CDT::Face_handle>& path);
+    ID _id{};
+
+public:
+    virtual ~RoutingEngine() = default;
+
+    RoutingEngine() = default;
+    RoutingEngine(const RoutingEngine&) = delete;
+    RoutingEngine& operator=(const RoutingEngine&) = delete;
+    RoutingEngine(RoutingEngine&&) = default;
+    RoutingEngine& operator=(RoutingEngine&&) = default;
+
+    ID Id() const { return _id; }
+
+    virtual std::string name() const = 0;
+    virtual void set_geometry(const CollisionGeometry& geometry) = 0;
+    virtual std::vector<Point> compute_waypoints(Point from, Point destination) = 0;
+    virtual bool is_routable(Point p) const = 0;
+
+    Point compute_waypoint(Point currentPosition, Point destination);
 };

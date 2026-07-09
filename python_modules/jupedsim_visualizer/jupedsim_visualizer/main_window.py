@@ -100,7 +100,11 @@ class MainWindow(QMainWindow):
     def _toggle_triangulation(self, state: bool) -> None:
         self.settings.setValue("show_triangulation", state)
         for idx in range(self.tabs.count()):
-            self.tabs.widget(idx).geo.show_triangulation(state)
+            tab = self.tabs.widget(idx)
+            if hasattr(tab, "set_triangulation_visible"):
+                tab.set_triangulation_visible(state)
+            else:
+                tab.geo.show_triangulation(state)
         self.repaint()
 
     def _toggle_grid(self, state: bool) -> None:
@@ -125,16 +129,17 @@ class MainWindow(QMainWindow):
         self.settings.setValue("files/last_wkt_location", str(file.parent))
         try:
             polygon = shapely.from_wkt(Path(file).read_text(encoding="UTF-8"))
-            navi = jps.RoutingEngine(polygon)
+            navi = jps.TAStarRoutingEngine()
+            navi.set_geometry(polygon)
             xmin, ymin, xmax, ymax = polygon.bounds
             info_text = f"Dimensions: {math.ceil(xmax - xmin)}m x {math.ceil(ymax - ymin)}m Polygons: {len(navi.mesh()[1])}"
             name_text = f"Geometry: {file}"
             self.setUpdatesEnabled(False)
             geo = Geometry(navi)
-            geo.show_triangulation(self._show_triangulation.isChecked())
             tab = ViewGeometryWidget(
                 navi, geo, name_text, info_text, parent=self
             )
+            tab.set_triangulation_visible(self._show_triangulation.isChecked())
             tab.render_widget.show_grid(self._show_grid.isChecked())
             tab_idx = self.tabs.insertTab(0, tab, file.name)
             self.tabs.setCurrentIndex(tab_idx)
@@ -164,7 +169,8 @@ class MainWindow(QMainWindow):
         try:
             rec = Recording(file.as_posix())
             self.setUpdatesEnabled(False)
-            navi = jps.RoutingEngine(rec.geometry())
+            navi = jps.TAStarRoutingEngine()
+            navi.set_geometry(rec.geometry())
             geo = Geometry(navi)
             geo.show_triangulation(self._show_triangulation.isChecked())
             trajectory = Trajectory(rec)

@@ -84,6 +84,7 @@ class Simulation:
             | list[tuple[float, float]]
         ),
         dt: float = 0.01,
+        routing_engine=None,
         trajectory_writer: TrajectoryWriter | None = None,
         timer_log_level: int = 1,
         **kwargs: Any,
@@ -110,6 +111,8 @@ class Simulation:
 
             dt: Iteration step size in seconds. It is recommended to
                 leave this at its default value.
+            routing_engine: Optional routing engine instance. Defaults to :class:`~jupedsim.TAStarRoutingEngine`.
+                 Ownership is transferred to the simulation.
             trajectory_writer: Any object implementing the
                 TrajectoryWriter interface. JuPedSim provides a writer that outputs trajectory data
                 in a sqlite database. If you want other formats such as CSV you need to provide
@@ -171,9 +174,14 @@ class Simulation:
         else:
             raise Exception("Unknown model type supplied")
         self._writer = trajectory_writer
-        self._obj = py_jps.Simulation(
-            model=py_jps_model, geometry=build_geometry(geometry)._obj, dt=dt
-        )
+        sim_kwargs = {
+            "model": py_jps_model,
+            "geometry": build_geometry(geometry)._obj,
+            "dt": dt,
+        }
+        if routing_engine is not None:
+            sim_kwargs["routing_engine"] = routing_engine
+        self._obj = py_jps.Simulation(**sim_kwargs)
         self._timer = Timer(self._obj, timer_log_level=timer_log_level)
 
     def add_waypoint_stage(
@@ -603,6 +611,26 @@ class Simulation:
             The geometry of the simulation.
         """
         return Geometry(self._obj.get_geometry())
+
+    @property
+    def routing_engine_name(self) -> str:
+        """Name of the currently active routing engine."""
+        return self._obj.routing_engine_name
+
+    def switch_routing_engine(self, engine) -> None:
+        """Switch to a different routing engine.
+
+        Ownership of *engine* is transferred to the simulation; do not use the
+        passed-in object afterwards.
+
+        Arguments:
+            engine: Routing engine like :class:`~jupedsim.TAStarRoutingEngine`.
+
+        Example::
+
+            sim.switch_routing_engine(jps.TAStarRoutingEngine())
+        """
+        self._obj.switch_routing_engine(engine)
 
     @property
     def timer(self) -> Timer:

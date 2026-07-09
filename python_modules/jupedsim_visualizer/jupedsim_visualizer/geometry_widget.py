@@ -19,7 +19,7 @@ class RenderWidget(QVTKRenderWindowInteractor):
     def __init__(
         self,
         geo: jps.Geometry,
-        navi: jps.RoutingEngine,
+        navi: jps.TAStarRoutingEngine,
         actor_sources,
         parent=None,
     ):
@@ -76,6 +76,11 @@ class RenderWidget(QVTKRenderWindowInteractor):
         cam.SetViewUp(0, 1, 0)
         cam.SetClippingRange(0, 200)
         self.iren.Render()
+
+    def set_routing_engine(self, navi) -> None:
+        self.navi = navi
+        self.move_controller.set_navi(navi)
+        self.move_controller.rerender_path()
 
     def show_grid(self, state: bool):
         self.grid.show(state)

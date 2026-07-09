@@ -10,11 +10,11 @@
 #include "OperationalModelType.hpp"
 #include "Point.hpp"
 #include "Polygon.hpp"
-#include "RoutingEngine.hpp"
 #include "SimulationClock.hpp"
 #include "SimulationError.hpp"
 #include "Stage.hpp"
 #include "StageDescription.hpp"
+#include "TAStarRoutingEngine.hpp"
 #include "Tracing.hpp"
 #include "Visitor.hpp"
 
@@ -25,7 +25,6 @@
 #include <map>
 #include <memory>
 #include <string>
-#include <tuple>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -33,12 +32,17 @@
 Simulation::Simulation(
     std::unique_ptr<OperationalModel>&& operationalModel,
     std::unique_ptr<CollisionGeometry>&& geometry,
-    double dT)
+    double dT,
+    std::unique_ptr<RoutingEngine>&& routingEngine)
     : _clock(dT)
     , _operationalDecisionSystem(std::move(operationalModel))
     , _geometry(std::move(geometry))
-    , _routingEngine(std::make_unique<RoutingEngine>(_geometry->Polygon()))
 {
+    if(!routingEngine) {
+        routingEngine = std::make_unique<TAStarRoutingEngine>();
+    }
+    routingEngine->set_geometry(*_geometry);
+    _routingEngine = std::move(routingEngine);
 }
 
 const SimulationClock& Simulation::Clock() const
@@ -374,6 +378,12 @@ StageProxy Simulation::Stage(BaseStage::ID stageId)
 CollisionGeometry Simulation::Geo() const
 {
     return *_geometry;
+}
+
+void Simulation::SwitchRoutingEngine(std::unique_ptr<RoutingEngine>&& engine)
+{
+    engine->set_geometry(*_geometry);
+    _routingEngine = std::move(engine);
 }
 
 void Simulation::PushTimer(const std::string_view name, size_t probe_log_level)

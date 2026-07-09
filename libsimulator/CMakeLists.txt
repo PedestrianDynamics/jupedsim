@@ -40,8 +40,6 @@ target_sources(simulator PRIVATE
     src/Point.hpp
     src/Polygon.cpp
     src/Polygon.hpp
-    src/Routing.cpp
-    src/Routing.hpp
     src/RoutingEngine.cpp
     src/RoutingEngine.hpp
     src/Simulation.cpp
@@ -57,6 +55,8 @@ target_sources(simulator PRIVATE
     src/StageSystem.cpp
     src/StageSystem.hpp
     src/StrategicalDesicionSystem.hpp
+    src/TAStarRoutingEngine.cpp
+    src/TAStarRoutingEngine.hpp
     src/TacticalDecisionSystem.hpp
     src/TemplateHelper.hpp
     src/Timing.cpp
