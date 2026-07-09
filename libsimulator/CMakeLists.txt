@@ -46,6 +46,7 @@ target_sources(simulator PRIVATE
     src/Routing.hpp
     src/RoutingEngine.cpp
     src/RoutingEngine.hpp
+    src/RoutingEngine3D.hpp
     src/Simulation.cpp
     src/Simulation.hpp
     src/SimulationClock.cpp
@@ -59,6 +60,8 @@ target_sources(simulator PRIVATE
     src/StageSystem.cpp
     src/StageSystem.hpp
     src/StrategicalDesicionSystem.hpp
+    src/SurfaceMeshShortestPathRoutingEngine.cpp
+    src/SurfaceMeshShortestPathRoutingEngine.hpp
     src/TacticalDecisionSystem.hpp
     src/TemplateHelper.hpp
     src/Timing.cpp
@@ -111,6 +114,7 @@ if (BUILD_TESTS)
         test/TestMesh.cpp
         test/TestNeighborhoodSearch.cpp
         test/TestPoint.cpp
+        test/TestRoutingEngine3D.cpp
         test/TestSimulationClock.cpp
         test/TestStage.cpp
         test/TestUniqueID.cpp
