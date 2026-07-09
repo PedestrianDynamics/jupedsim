@@ -138,6 +138,7 @@ __all__ = [
     "RecordingAgent",
     "RecordingFrame",
     "RoutingEngine",
+    "RoutingEngine3D",
     "Simulation",
     "SimulationError",
     "SocialForceModel",
