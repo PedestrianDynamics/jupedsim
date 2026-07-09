@@ -18,6 +18,7 @@ void init_social_force_model(py::module_& m);
 void init_warp_driver_model(py::module_& m);
 void init_geometry(py::module_& m);
 void init_routing(py::module_& m);
+void init_routing_3d(py::module_& m);
 void init_agent(py::module_& m);
 void init_transition(py::module_& m);
 void init_journey(py::module_& m);
@@ -46,6 +47,7 @@ PYBIND11_MODULE(py_jupedsim, m)
     init_agent_view(m);
     init_geometry(m);
     init_routing(m);
+    init_routing_3d(m);
     init_agent(m);
     init_transition(m);
     init_stage(m);
