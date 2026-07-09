@@ -6,9 +6,10 @@ shims**. This guide maps every 1.x construct to its 2.0 replacement.
 
 The three changes you will encounter in every script:
 
-1. **Simulation construction** — models are selected with a
-   {class}`~jupedsim.ModelType` enum member (stateless models) or a model
-   instance (models with simulation-global state, custom Python models).
+1. **Simulation construction** — every model is passed as a *configured
+   instance* carrying its model-level parameters (e.g.
+   `jps.SocialForceModel(body_force=..., friction=...)`). The
+   `ModelType` enum has been removed.
 2. **Adding agents** — `add_agent` now takes
    `(journey_id, stage_id, state)`, where `state` is a directly
    instantiated per-model state object such as
@@ -18,8 +19,8 @@ The three changes you will encounter in every script:
 
 ## Constructing a Simulation
 
-Stateless built-in models are selected with an enum member instead of a
-parameter-holder instance:
+Every built-in model is now constructed as an instance that carries its
+model-level parameters. The `ModelType` enum no longer exists:
 
 ```python
 import jupedsim as jps
@@ -27,29 +28,52 @@ import jupedsim as jps
 # 1.x
 sim = jps.Simulation(model=jps.CollisionFreeSpeedModel(), geometry=area)
 
-# 2.0
-sim = jps.Simulation(model=jps.ModelType.COLLISION_FREE_SPEED, geometry=area)
+# 2.0 — a configured model instance
+sim = jps.Simulation(model=jps.CollisionFreeSpeedModel(), geometry=area)
 ```
 
-Available enum members: `COLLISION_FREE_SPEED`, `COLLISION_FREE_SPEED_V2`,
-`COLLISION_FREE_SPEED_V3`, `GENERALIZED_CENTRIFUGAL_FORCE`, `SOCIAL_FORCE`.
-Enum-constructed models reproduce exactly the global configuration that the
-1.x defaults produced, so existing simulations remain byte-identical.
-
-Models that carry simulation-global state are passed as an instance:
+The model instance holds the parameters that govern the model globally.
+Constructed with their defaults they reproduce exactly the configuration that
+the 1.x defaults produced, so existing simulations remain byte-identical:
 
 ```python
-# AnticipationVelocityModel: the random number generator is global state.
-# rng_seed is keyword-only and required.
+# Model-level parameters are keyword-only; defaults shown reproduce 1.x.
 sim = jps.Simulation(
-    model=jps.AnticipationVelocityModel(rng_seed=1234), geometry=area
+    model=jps.SocialForceModel(body_force=120000, friction=240000),
+    geometry=area,
 )
 
-# WarpDriverModel: the precomputed intrinsic field (sigma) and the RNG are
-# global state. All arguments are keyword-only; defaults shown.
+# CollisionFreeSpeedModel: the repulsion parameters are model-level.
+sim = jps.Simulation(
+    model=jps.CollisionFreeSpeedModel(
+        strength_neighbor_repulsion=8.0,
+        range_neighbor_repulsion=0.1,
+        strength_geometry_repulsion=5.0,
+        range_geometry_repulsion=0.02,
+    ),
+    geometry=area,
+)
+
+# AnticipationVelocityModel: pushout strength and the RNG seed are model-level.
+sim = jps.Simulation(
+    model=jps.AnticipationVelocityModel(pushout_strength=0.3, rng_seed=1234),
+    geometry=area,
+)
+
+# WarpDriverModel: the intrinsic field (sigma), the collision-prediction
+# settings and the RNG are all model-level. All arguments are keyword-only.
 sim = jps.Simulation(
     model=jps.WarpDriverModel(sigma=0.3, rng_seed=42), geometry=area
 )
+```
+
+`CollisionFreeSpeedModelV2` and `CollisionFreeSpeedModelV3` keep all of their
+repulsion parameters per-agent by design, so their instances take no
+model-level arguments:
+
+```python
+sim = jps.Simulation(model=jps.CollisionFreeSpeedModelV2(), geometry=area)
+sim = jps.Simulation(model=jps.CollisionFreeSpeedModelV3(), geometry=area)
 ```
 
 ```{warning}
@@ -70,8 +94,9 @@ Passing a wrong `model` argument raises `TypeError`.
 
 `add_agent` takes the journey id, the stage id and a per-model state object.
 The agent spawns at `state.position`. All state constructors are
-keyword-only and expose *every* per-agent field — including the parameters
-that were global in 1.x — with defaults taken from the C++ implementation.
+keyword-only and expose the per-agent fields of the model, with defaults
+taken from the C++ implementation. Model-level parameters (see above) live on
+the model instance and are *not* part of the state.
 
 ```python
 # 1.x
@@ -108,19 +133,23 @@ sim.add_agent(journey_id, stage_id, MyState(position=(1.0, 1.0)))
 
 | 1.x (deleted) | 2.0 `Simulation(model=...)` | 2.0 `add_agent` state |
 |---|---|---|
-| `CollisionFreeSpeedModel` + `CollisionFreeSpeedModelAgentParameters` | `ModelType.COLLISION_FREE_SPEED` | {class}`~jupedsim.CollisionFreeSpeedModelState` |
-| `CollisionFreeSpeedModelV2` + `CollisionFreeSpeedModelV2AgentParameters` | `ModelType.COLLISION_FREE_SPEED_V2` | {class}`~jupedsim.CollisionFreeSpeedModelV2State` |
-| `CollisionFreeSpeedModelV3` + `CollisionFreeSpeedModelV3AgentParameters` | `ModelType.COLLISION_FREE_SPEED_V3` | {class}`~jupedsim.CollisionFreeSpeedModelV3State` |
-| `GeneralizedCentrifugalForceModel` + `GeneralizedCentrifugalForceModelAgentParameters` | `ModelType.GENERALIZED_CENTRIFUGAL_FORCE` | {class}`~jupedsim.GeneralizedCentrifugalForceModelState` |
-| `SocialForceModel` + `SocialForceModelAgentParameters` | `ModelType.SOCIAL_FORCE` | {class}`~jupedsim.SocialForceModelState` |
+| `CollisionFreeSpeedModel` + `CollisionFreeSpeedModelAgentParameters` | `jps.CollisionFreeSpeedModel(...)` instance | {class}`~jupedsim.CollisionFreeSpeedModelState` |
+| `CollisionFreeSpeedModelV2` + `CollisionFreeSpeedModelV2AgentParameters` | `jps.CollisionFreeSpeedModelV2()` instance | {class}`~jupedsim.CollisionFreeSpeedModelV2State` |
+| `CollisionFreeSpeedModelV3` + `CollisionFreeSpeedModelV3AgentParameters` | `jps.CollisionFreeSpeedModelV3()` instance | {class}`~jupedsim.CollisionFreeSpeedModelV3State` |
+| `GeneralizedCentrifugalForceModel` + `GeneralizedCentrifugalForceModelAgentParameters` | `jps.GeneralizedCentrifugalForceModel(...)` instance | {class}`~jupedsim.GeneralizedCentrifugalForceModelState` |
+| `SocialForceModel` + `SocialForceModelAgentParameters` | `jps.SocialForceModel(...)` instance | {class}`~jupedsim.SocialForceModelState` |
 | `AnticipationVelocityModel` (dataclass) + `AnticipationVelocityModelAgentParameters` | `jps.AnticipationVelocityModel(rng_seed=...)` instance | {class}`~jupedsim.AnticipationVelocityModelState` |
 | `WarpDriverModel` (parameter holder) + `WarpDriverModelAgentParameters` | `jps.WarpDriverModel(sigma=..., rng_seed=...)` instance | {class}`~jupedsim.WarpDriverModelState` |
 
 Parameters that were *global* in 1.x (e.g. the repulsion strengths of the
 Collision Free Speed Model, `body_force`/`friction` of the Social Force
-Model, or `time_horizon`/`step_size` of the WarpDriver model) are now
-*per-agent* fields of the corresponding state class and can differ between
-agents and change over time.
+Model, or `time_horizon`/`step_size` of the WarpDriver model) remain
+*model-level*: they are keyword-only constructor arguments of the
+corresponding model instance and are fixed for the lifetime of the
+simulation. `CollisionFreeSpeedModelV2` and `CollisionFreeSpeedModelV3` are
+the exception — by design they keep their repulsion parameters as *per-agent*
+fields of the state class, where they can differ between agents and change
+over time.
 
 ## Agent handles
 
@@ -163,6 +192,6 @@ calls.
 
 - All model builder classes (C++ and Python).
 - All `XModelAgentParameters` dataclasses.
-- The stateless model parameter-holder dataclasses
-  (`CollisionFreeSpeedModel`, `SocialForceModel`, ... as constructor
-  arguments); use {class}`~jupedsim.ModelType` instead.
+- The `ModelType` enum; every model is now constructed directly as a
+  configured instance (e.g.
+  `jps.SocialForceModel(body_force=..., friction=...)`).

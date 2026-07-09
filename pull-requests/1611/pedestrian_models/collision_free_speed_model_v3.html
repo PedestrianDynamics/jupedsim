@@ -526,7 +526,7 @@ agent handle (<code class="docutils literal notranslate"><span class="pre">sim.a
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">jupedsim</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jps</span>
 
 <span class="n">sim</span> <span class="o">=</span> <span class="n">jps</span><span class="o">.</span><span class="n">Simulation</span><span class="p">(</span>
-    <span class="n">model</span><span class="o">=</span><span class="n">jps</span><span class="o">.</span><span class="n">ModelType</span><span class="o">.</span><span class="n">COLLISION_FREE_SPEED_V3</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="n">area</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">jps</span><span class="o">.</span><span class="n">CollisionFreeSpeedModelV3</span><span class="p">(),</span> <span class="n">geometry</span><span class="o">=</span><span class="n">area</span>
 <span class="p">)</span>
 <span class="n">agent_id</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">add_agent</span><span class="p">(</span>
     <span class="n">journey_id</span><span class="p">,</span>

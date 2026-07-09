@@ -363,16 +363,20 @@
     <span class="n">set_warning_callback</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.linesegment</span><span class="w"> </span><span class="kn">import</span> <span class="n">LineSegment</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.models.anticipation_velocity_model</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">AnticipationVelocityModel</span><span class="p">,</span>
     <span class="n">AnticipationVelocityModelState</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.models.collision_free_speed</span><span class="w"> </span><span class="kn">import</span> <span class="n">CollisionFreeSpeedModelState</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.models.collision_free_speed</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">CollisionFreeSpeedModel</span><span class="p">,</span>
+    <span class="n">CollisionFreeSpeedModelState</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.models.collision_free_speed_v2</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">CollisionFreeSpeedModelV2</span><span class="p">,</span>
     <span class="n">CollisionFreeSpeedModelV2State</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.models.collision_free_speed_v3</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">CollisionFreeSpeedModelV3</span><span class="p">,</span>
     <span class="n">CollisionFreeSpeedModelV3State</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.models.custom_model</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
@@ -380,9 +384,13 @@
     <span class="n">CustomOperationalModel</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.models.generalized_centrifugal_force</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">GeneralizedCentrifugalForceModel</span><span class="p">,</span>
     <span class="n">GeneralizedCentrifugalForceModelState</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.models.social_force</span><span class="w"> </span><span class="kn">import</span> <span class="n">SocialForceModelState</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.models.social_force</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">SocialForceModel</span><span class="p">,</span>
+    <span class="n">SocialForceModelState</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.models.warp_driver</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">WarpDriverModel</span><span class="p">,</span>
     <span class="n">WarpDriverModelState</span><span class="p">,</span>
@@ -441,19 +449,22 @@
     <span class="s2">&quot;AnticipationVelocityModel&quot;</span><span class="p">,</span>
     <span class="s2">&quot;AnticipationVelocityModelState&quot;</span><span class="p">,</span>
     <span class="s2">&quot;BuildInfo&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CollisionFreeSpeedModel&quot;</span><span class="p">,</span>
     <span class="s2">&quot;CollisionFreeSpeedModelState&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CollisionFreeSpeedModelV2&quot;</span><span class="p">,</span>
     <span class="s2">&quot;CollisionFreeSpeedModelV2State&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CollisionFreeSpeedModelV3&quot;</span><span class="p">,</span>
     <span class="s2">&quot;CollisionFreeSpeedModelV3State&quot;</span><span class="p">,</span>
     <span class="s2">&quot;CustomModelAgentState&quot;</span><span class="p">,</span>
     <span class="s2">&quot;CustomOperationalModel&quot;</span><span class="p">,</span>
     <span class="s2">&quot;ExitStage&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;GeneralizedCentrifugalForceModel&quot;</span><span class="p">,</span>
     <span class="s2">&quot;GeneralizedCentrifugalForceModelState&quot;</span><span class="p">,</span>
     <span class="s2">&quot;Geometry&quot;</span><span class="p">,</span>
     <span class="s2">&quot;Hdf5TrajectoryWriter&quot;</span><span class="p">,</span>
     <span class="s2">&quot;IncorrectParameterError&quot;</span><span class="p">,</span>
     <span class="s2">&quot;JourneyDescription&quot;</span><span class="p">,</span>
     <span class="s2">&quot;LineSegment&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;ModelType&quot;</span><span class="p">,</span>
     <span class="s2">&quot;NegativeValueError&quot;</span><span class="p">,</span>
     <span class="s2">&quot;NeighborhoodSearch&quot;</span><span class="p">,</span>
     <span class="s2">&quot;NotifiableQueueStage&quot;</span><span class="p">,</span>
@@ -464,6 +475,7 @@
     <span class="s2">&quot;RoutingEngine&quot;</span><span class="p">,</span>
     <span class="s2">&quot;Simulation&quot;</span><span class="p">,</span>
     <span class="s2">&quot;SimulationError&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;SocialForceModel&quot;</span><span class="p">,</span>
     <span class="s2">&quot;SocialForceModelState&quot;</span><span class="p">,</span>
     <span class="s2">&quot;SqliteTrajectoryWriter&quot;</span><span class="p">,</span>
     <span class="s2">&quot;Timer&quot;</span><span class="p">,</span>

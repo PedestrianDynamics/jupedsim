@@ -339,16 +339,20 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.geometry_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">build_geometry</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.internal.tracing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Timer</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.journey</span><span class="w"> </span><span class="kn">import</span> <span class="n">JourneyDescription</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.models.anticipation_velocity_model</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">AnticipationVelocityModel</span><span class="p">,</span>
     <span class="n">AnticipationVelocityModelState</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.models.collision_free_speed</span><span class="w"> </span><span class="kn">import</span> <span class="n">CollisionFreeSpeedModelState</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.models.collision_free_speed</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">CollisionFreeSpeedModel</span><span class="p">,</span>
+    <span class="n">CollisionFreeSpeedModelState</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.models.collision_free_speed_v2</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">CollisionFreeSpeedModelV2</span><span class="p">,</span>
     <span class="n">CollisionFreeSpeedModelV2State</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.models.collision_free_speed_v3</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">CollisionFreeSpeedModelV3</span><span class="p">,</span>
     <span class="n">CollisionFreeSpeedModelV3State</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.models.custom_model</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
@@ -356,9 +360,13 @@
     <span class="n">CustomOperationalModel</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.models.generalized_centrifugal_force</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">GeneralizedCentrifugalForceModel</span><span class="p">,</span>
     <span class="n">GeneralizedCentrifugalForceModelState</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.models.social_force</span><span class="w"> </span><span class="kn">import</span> <span class="n">SocialForceModelState</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.models.social_force</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">SocialForceModel</span><span class="p">,</span>
+    <span class="n">SocialForceModelState</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.models.warp_driver</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">WarpDriverModel</span><span class="p">,</span>
     <span class="n">WarpDriverModelState</span><span class="p">,</span>
@@ -370,14 +378,6 @@
     <span class="n">WaitingSetStage</span><span class="p">,</span>
     <span class="n">WaypointStage</span><span class="p">,</span>
 <span class="p">)</span>
-
-<span class="n">_MODEL_FACTORIES</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="n">ModelType</span><span class="o">.</span><span class="n">COLLISION_FREE_SPEED</span><span class="p">:</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">CollisionFreeSpeedModel</span><span class="p">,</span>
-    <span class="n">ModelType</span><span class="o">.</span><span class="n">COLLISION_FREE_SPEED_V2</span><span class="p">:</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">CollisionFreeSpeedModelV2</span><span class="p">,</span>
-    <span class="n">ModelType</span><span class="o">.</span><span class="n">COLLISION_FREE_SPEED_V3</span><span class="p">:</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">CollisionFreeSpeedModelV3</span><span class="p">,</span>
-    <span class="n">ModelType</span><span class="o">.</span><span class="n">GENERALIZED_CENTRIFUGAL_FORCE</span><span class="p">:</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">GeneralizedCentrifugalForceModel</span><span class="p">,</span>
-    <span class="n">ModelType</span><span class="o">.</span><span class="n">SOCIAL_FORCE</span><span class="p">:</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">SocialForceModel</span><span class="p">,</span>
-<span class="p">}</span>
 
 <span class="n">_STATE_TYPES</span> <span class="o">=</span> <span class="p">(</span>
     <span class="n">GeneralizedCentrifugalForceModelState</span><span class="p">,</span>
@@ -406,7 +406,11 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">model</span><span class="p">:</span> <span class="p">(</span>
-            <span class="n">ModelType</span>
+            <span class="n">CollisionFreeSpeedModel</span>
+            <span class="o">|</span> <span class="n">CollisionFreeSpeedModelV2</span>
+            <span class="o">|</span> <span class="n">CollisionFreeSpeedModelV3</span>
+            <span class="o">|</span> <span class="n">GeneralizedCentrifugalForceModel</span>
+            <span class="o">|</span> <span class="n">SocialForceModel</span>
             <span class="o">|</span> <span class="n">AnticipationVelocityModel</span>
             <span class="o">|</span> <span class="n">WarpDriverModel</span>
             <span class="o">|</span> <span class="n">CustomOperationalModel</span>
@@ -428,21 +432,18 @@
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            model:</span>
-<span class="sd">                Defines the operational model used in the simulation.</span>
-<span class="sd">                Stateless built-in models are selected with a</span>
-<span class="sd">                :class:`~jupedsim.models.ModelType` member, e.g.</span>
-<span class="sd">                ``ModelType.COLLISION_FREE_SPEED``. Models with</span>
-<span class="sd">                simulation-global state are passed as instances:</span>
-<span class="sd">                :class:`~jupedsim.AnticipationVelocityModel` or</span>
-<span class="sd">                :class:`~jupedsim.WarpDriverModel`. Custom Python models are</span>
+<span class="sd">                Defines the operational model used in the simulation. Every</span>
+<span class="sd">                built-in model is passed as a configured instance carrying its</span>
+<span class="sd">                model-level parameters, e.g.</span>
+<span class="sd">                :class:`~jupedsim.CollisionFreeSpeedModel` or</span>
+<span class="sd">                :class:`~jupedsim.SocialForceModel`. Custom Python models are</span>
 <span class="sd">                passed as instances of a</span>
 <span class="sd">                :class:`~jupedsim.CustomOperationalModel` subclass.</span>
 
 <span class="sd">                .. warning::</span>
 
-<span class="sd">                    ``AnticipationVelocityModel`` and ``WarpDriverModel``</span>
-<span class="sd">                    instances are consumed by this constructor and must not be</span>
-<span class="sd">                    reused afterwards.</span>
+<span class="sd">                    Model instances are consumed by this constructor and must</span>
+<span class="sd">                    not be reused afterwards.</span>
 <span class="sd">            geometry:</span>
 <span class="sd">                Data to create the geometry out of. Data may be supplied as:</span>
 
@@ -470,16 +471,13 @@
 <span class="sd">                from the walkable area. Only use this argument if `geometry` was</span>
 <span class="sd">                provided as list[tuple[float, float]].</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">ModelType</span><span class="p">):</span>
-            <span class="n">py_jps_model</span> <span class="o">=</span> <span class="n">_MODEL_FACTORIES</span><span class="p">[</span><span class="n">model</span><span class="p">]()</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">OperationalModel</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">OperationalModel</span><span class="p">):</span>
             <span class="n">py_jps_model</span> <span class="o">=</span> <span class="n">model</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">CustomOperationalModel</span><span class="p">):</span>
             <span class="n">py_jps_model</span> <span class="o">=</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">_PythonModel</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                <span class="s2">&quot;model must be a ModelType member, an &quot;</span>
-                <span class="s2">&quot;AnticipationVelocityModel or WarpDriverModel instance, or a &quot;</span>
+                <span class="s2">&quot;model must be a built-in operational model instance or a &quot;</span>
                 <span class="s2">&quot;CustomOperationalModel instance, got &quot;</span>
                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">model</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>

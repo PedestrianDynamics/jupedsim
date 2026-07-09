@@ -369,20 +369,22 @@ speed of the agent. This simplified and computationally efficient model aims to
 mirror real-world pedestrian behaviors while maintaining smooth movement
 dynamics.</p>
 <p>The collision-free speed model is available in three variants in JuPedSim,
-selected via <code class="docutils literal notranslate"><span class="pre">ModelType.COLLISION_FREE_SPEED</span></code>,
-<code class="docutils literal notranslate"><span class="pre">ModelType.COLLISION_FREE_SPEED_V2</span></code> and
-<code class="docutils literal notranslate"><span class="pre">ModelType.COLLISION_FREE_SPEED_V3</span></code>. The first two are functionally
-identical: they historically differed only in whether the repulsion parameters
-were global or per-agent, a distinction that no longer exists since all
-parameters are per-agent — <code class="docutils literal notranslate"><span class="pre">COLLISION_FREE_SPEED</span></code> is kept for compatibility.
+constructed via <a class="reference internal" href="../api/jupedsim/index.html#jupedsim.CollisionFreeSpeedModel" title="jupedsim.CollisionFreeSpeedModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">CollisionFreeSpeedModel</span></code></a>,
+<a class="reference internal" href="../api/jupedsim/index.html#jupedsim.CollisionFreeSpeedModelV2" title="jupedsim.CollisionFreeSpeedModelV2"><code class="xref py py-class docutils literal notranslate"><span class="pre">CollisionFreeSpeedModelV2</span></code></a> and
+<a class="reference internal" href="../api/jupedsim/index.html#jupedsim.CollisionFreeSpeedModelV3" title="jupedsim.CollisionFreeSpeedModelV3"><code class="xref py py-class docutils literal notranslate"><span class="pre">CollisionFreeSpeedModelV3</span></code></a>. V1 and V2 differ in whether the
+repulsion parameters are global or per-agent: in
+<a class="reference internal" href="../api/jupedsim/index.html#jupedsim.CollisionFreeSpeedModel" title="jupedsim.CollisionFreeSpeedModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">CollisionFreeSpeedModel</span></code></a> (V1) the repulsion parameters
+(<code class="docutils literal notranslate"><span class="pre">strength_neighbor_repulsion</span></code>, <code class="docutils literal notranslate"><span class="pre">range_neighbor_repulsion</span></code>,
+<code class="docutils literal notranslate"><span class="pre">strength_geometry_repulsion</span></code>, <code class="docutils literal notranslate"><span class="pre">range_geometry_repulsion</span></code>) are model-level
+constructor arguments shared by all agents, whereas in V2 they are per-agent.
 V3 uses a different steering approach (rotational steering with heading
 relaxation).</p>
-<p>In all variants the model parameters are per-agent: they are set when adding
-an agent (via <a class="reference internal" href="../api/jupedsim/index.html#jupedsim.CollisionFreeSpeedModelState" title="jupedsim.CollisionFreeSpeedModelState"><code class="xref py py-class docutils literal notranslate"><span class="pre">CollisionFreeSpeedModelState</span></code></a>,
+<p>The per-agent parameters are set when adding an agent (via
+<a class="reference internal" href="../api/jupedsim/index.html#jupedsim.CollisionFreeSpeedModelState" title="jupedsim.CollisionFreeSpeedModelState"><code class="xref py py-class docutils literal notranslate"><span class="pre">CollisionFreeSpeedModelState</span></code></a>,
 <a class="reference internal" href="../api/jupedsim/index.html#jupedsim.CollisionFreeSpeedModelV2State" title="jupedsim.CollisionFreeSpeedModelV2State"><code class="xref py py-class docutils literal notranslate"><span class="pre">CollisionFreeSpeedModelV2State</span></code></a> or
 <a class="reference internal" href="../api/jupedsim/index.html#jupedsim.CollisionFreeSpeedModelV3State" title="jupedsim.CollisionFreeSpeedModelV3State"><code class="xref py py-class docutils literal notranslate"><span class="pre">CollisionFreeSpeedModelV3State</span></code></a>) and can be changed at any
 time through the agent handle.</p>
-<p>In <code class="docutils literal notranslate"><span class="pre">ModelType.COLLISION_FREE_SPEED_V3</span></code> the same per-agent base
+<p>In <a class="reference internal" href="../api/jupedsim/index.html#jupedsim.CollisionFreeSpeedModelV3" title="jupedsim.CollisionFreeSpeedModelV3"><code class="xref py py-class docutils literal notranslate"><span class="pre">CollisionFreeSpeedModelV3</span></code></a> the same per-agent base
 parameters are available (via
 <a class="reference internal" href="../api/jupedsim/index.html#jupedsim.CollisionFreeSpeedModelV3State" title="jupedsim.CollisionFreeSpeedModelV3State"><code class="xref py py-class docutils literal notranslate"><span class="pre">CollisionFreeSpeedModelV3State</span></code></a>), plus rotational steering controls
 (<code class="docutils literal notranslate"><span class="pre">range_x_scale</span></code>, <code class="docutils literal notranslate"><span class="pre">range_y_scale</span></code>, <code class="docutils literal notranslate"><span class="pre">theta_max_upper_bound</span></code>)
@@ -549,12 +551,12 @@ probability landscape).</p>
 <li><p>Stuck detection with lateral detour to break narrow-passage deadlocks</p></li>
 </ul>
 <p>The parameters of the WarpDriver model include model-level parameters (shared
-by all agents: <code class="docutils literal notranslate"><span class="pre">sigma</span></code> and <code class="docutils literal notranslate"><span class="pre">rng_seed</span></code>, passed to
-<a class="reference internal" href="../api/jupedsim/index.html#jupedsim.WarpDriverModel" title="jupedsim.WarpDriverModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">WarpDriverModel</span></code></a>) and per-agent parameters
-(<code class="docutils literal notranslate"><span class="pre">desired_speed</span></code>, <code class="docutils literal notranslate"><span class="pre">radius</span></code>, <code class="docutils literal notranslate"><span class="pre">time_horizon</span></code>, <code class="docutils literal notranslate"><span class="pre">step_size</span></code>,
+by all agents: <code class="docutils literal notranslate"><span class="pre">sigma</span></code>, <code class="docutils literal notranslate"><span class="pre">time_horizon</span></code>, <code class="docutils literal notranslate"><span class="pre">step_size</span></code>,
 <code class="docutils literal notranslate"><span class="pre">time_uncertainty</span></code>, <code class="docutils literal notranslate"><span class="pre">velocity_uncertainty_x</span></code>, <code class="docutils literal notranslate"><span class="pre">velocity_uncertainty_y</span></code>,
-<code class="docutils literal notranslate"><span class="pre">num_samples</span></code>, set via <a class="reference internal" href="../api/jupedsim/index.html#jupedsim.WarpDriverModelState" title="jupedsim.WarpDriverModelState"><code class="xref py py-class docutils literal notranslate"><span class="pre">WarpDriverModelState</span></code></a>) that
-can be modified at runtime.</p>
+<code class="docutils literal notranslate"><span class="pre">num_samples</span></code> and <code class="docutils literal notranslate"><span class="pre">rng_seed</span></code>, passed to
+<a class="reference internal" href="../api/jupedsim/index.html#jupedsim.WarpDriverModel" title="jupedsim.WarpDriverModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">WarpDriverModel</span></code></a>) and per-agent parameters
+(<code class="docutils literal notranslate"><span class="pre">desired_speed</span></code> and <code class="docutils literal notranslate"><span class="pre">radius</span></code>, set via
+<a class="reference internal" href="../api/jupedsim/index.html#jupedsim.WarpDriverModelState" title="jupedsim.WarpDriverModelState"><code class="xref py py-class docutils literal notranslate"><span class="pre">WarpDriverModelState</span></code></a>) that can be modified at runtime.</p>
 <p>See the <a class="reference external" href="warp_driver_model.html">full WarpDriver model documentation</a> for
 a detailed description of the algorithm, equations, warp operators, and
 parameters.</p>

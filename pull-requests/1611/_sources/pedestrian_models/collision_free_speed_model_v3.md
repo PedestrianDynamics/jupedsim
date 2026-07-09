@@ -195,7 +195,7 @@ agent handle (`sim.agent(id).model`).
 import jupedsim as jps
 
 sim = jps.Simulation(
-    model=jps.ModelType.COLLISION_FREE_SPEED_V3, geometry=area
+    model=jps.CollisionFreeSpeedModelV3(), geometry=area
 )
 agent_id = sim.add_agent(
     journey_id,

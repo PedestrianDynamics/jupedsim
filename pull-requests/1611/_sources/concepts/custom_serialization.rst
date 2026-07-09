@@ -187,7 +187,7 @@ Using the custom writer is identical to using the built-in SQLite writer:
     import jupedsim as jps
 
     simulation = jps.Simulation(
-        model=jps.ModelType.COLLISION_FREE_SPEED,
+        model=jps.CollisionFreeSpeedModel(),
         geometry=my_geometry,
         trajectory_writer=CsvTrajectoryWriter(
             output_file=Path("output.csv"),

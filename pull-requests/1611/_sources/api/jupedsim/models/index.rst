@@ -7,23 +7,14 @@
 
    Operational models of JuPedSim.
 
-   Stateless built-in models are selected with :class:`ModelType` when creating
-   a :class:`~jupedsim.simulation.Simulation`. Models with simulation-global
-   state (:class:`~jupedsim.models.anticipation_velocity_model.AnticipationVelocityModel`,
-   :class:`~jupedsim.models.warp_driver.WarpDriverModel`) and custom Python
-   models (:class:`~jupedsim.models.custom_model.CustomOperationalModel`
-   subclasses) are passed as instances instead.
+   Every operational model is passed to a
+   :class:`~jupedsim.simulation.Simulation` as a configured instance carrying its
+   model-level parameters, e.g.
+   :class:`~jupedsim.models.social_force.SocialForceModel`,
+   :class:`~jupedsim.models.collision_free_speed.CollisionFreeSpeedModel` or
+   :class:`~jupedsim.models.warp_driver.WarpDriverModel`. Custom Python models are
+   passed as instances of a
+   :class:`~jupedsim.models.custom_model.CustomOperationalModel` subclass.
 
 
-
-Package Contents
-----------------
-
-.. py:data:: ModelType
-
-   Selects one of the stateless built-in operational models.
-
-   Members: ``COLLISION_FREE_SPEED``, ``COLLISION_FREE_SPEED_V2``,
-   ``COLLISION_FREE_SPEED_V3``, ``GENERALIZED_CENTRIFUGAL_FORCE``,
-   ``SOCIAL_FORCE``.
 

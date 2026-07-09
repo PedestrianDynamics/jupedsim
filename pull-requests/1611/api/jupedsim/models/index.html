@@ -305,10 +305,6 @@
     <i class="fa-solid fa-magnifying-glass fa-lg"></i>
 </button></div>
       
-        <div class="header-article-item"><button class="sidebar-toggle secondary-toggle btn btn-sm pst-navbar-icon" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <span class="fa-solid fa-list"></span>
-</button></div>
-      
     </div>
   
 </div>
@@ -322,17 +318,6 @@
     <div id="print-main-content">
         <div id="jb-print-toc">
             
-            <div>
-                <h2> Contents </h2>
-            </div>
-            <nav aria-label="Page">
-                <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#package-contents">Package Contents</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.models.ModelType"><code class="docutils literal notranslate"><span class="pre">ModelType</span></code></a></li>
-</ul>
-</li>
-</ul>
-            </nav>
         </div>
     </div>
 </div>
@@ -345,24 +330,14 @@
   <section id="module-jupedsim.models">
 <span id="jupedsim-models"></span><h1><a class="reference internal" href="#module-jupedsim.models" title="jupedsim.models"><code class="xref py py-mod docutils literal notranslate"><span class="pre">jupedsim.models</span></code></a><a class="headerlink" href="#module-jupedsim.models" title="Link to this heading">#</a></h1>
 <p>Operational models of JuPedSim.</p>
-<p>Stateless built-in models are selected with <a class="reference internal" href="#jupedsim.models.ModelType" title="jupedsim.models.ModelType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelType</span></code></a> when creating
-a <code class="xref py py-class docutils literal notranslate"><span class="pre">Simulation</span></code>. Models with simulation-global
-state (<code class="xref py py-class docutils literal notranslate"><span class="pre">AnticipationVelocityModel</span></code>,
-<code class="xref py py-class docutils literal notranslate"><span class="pre">WarpDriverModel</span></code>) and custom Python
-models (<code class="xref py py-class docutils literal notranslate"><span class="pre">CustomOperationalModel</span></code>
-subclasses) are passed as instances instead.</p>
-<section id="package-contents">
-<h2>Package Contents<a class="headerlink" href="#package-contents" title="Link to this heading">#</a></h2>
-<dl class="py data">
-<dt class="sig sig-object py" id="jupedsim.models.ModelType">
-<span class="sig-name descname"><span class="pre">ModelType</span></span><a class="reference internal" href="../../../_modules/jupedsim/models.html#ModelType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jupedsim.models.ModelType" title="Link to this definition">#</a></dt>
-<dd><p>Selects one of the stateless built-in operational models.</p>
-<p>Members: <code class="docutils literal notranslate"><span class="pre">COLLISION_FREE_SPEED</span></code>, <code class="docutils literal notranslate"><span class="pre">COLLISION_FREE_SPEED_V2</span></code>,
-<code class="docutils literal notranslate"><span class="pre">COLLISION_FREE_SPEED_V3</span></code>, <code class="docutils literal notranslate"><span class="pre">GENERALIZED_CENTRIFUGAL_FORCE</span></code>,
-<code class="docutils literal notranslate"><span class="pre">SOCIAL_FORCE</span></code>.</p>
-</dd></dl>
-
-</section>
+<p>Every operational model is passed to a
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Simulation</span></code> as a configured instance carrying its
+model-level parameters, e.g.
+<code class="xref py py-class docutils literal notranslate"><span class="pre">SocialForceModel</span></code>,
+<code class="xref py py-class docutils literal notranslate"><span class="pre">CollisionFreeSpeedModel</span></code> or
+<code class="xref py py-class docutils literal notranslate"><span class="pre">WarpDriverModel</span></code>. Custom Python models are
+passed as instances of a
+<code class="xref py py-class docutils literal notranslate"><span class="pre">CustomOperationalModel</span></code> subclass.</p>
 </section>
 
 
@@ -382,26 +357,6 @@ subclasses) are passed as instances instead.</p>
             </div>
             
             
-              
-                <dialog id="pst-secondary-sidebar-modal"></dialog>
-                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
-
-
-  <div class="sidebar-secondary-item"><div
-    id="pst-page-navigation-heading-2"
-    class="page-toc tocsection onthispage">
-    <i class="fa-solid fa-list"></i> Contents
-  </div>
-  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
-    <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#package-contents">Package Contents</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.models.ModelType"><code class="docutils literal notranslate"><span class="pre">ModelType</span></code></a></li>
-</ul>
-</li>
-</ul>
-  </nav></div>
-
-</div></div>
               
             
           </div>

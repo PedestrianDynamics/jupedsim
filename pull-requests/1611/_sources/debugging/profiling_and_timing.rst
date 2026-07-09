@@ -54,7 +54,7 @@ Pass ``timer_log_level`` when creating the simulation:
     import jupedsim as jps
 
     sim = jps.Simulation(
-        model=jps.ModelType.COLLISION_FREE_SPEED,
+        model=jps.CollisionFreeSpeedModel(),
         geometry=geometry,
         timer_log_level=3,   # record everything including debug probes
     )
@@ -356,7 +356,7 @@ the profiler gives you a visual timeline with the same event boundaries.
     import pandas as pd
 
     sim = jps.Simulation(
-        model=jps.ModelType.COLLISION_FREE_SPEED,
+        model=jps.CollisionFreeSpeedModel(),
         geometry=geometry,
         timer_log_level=2,
     )

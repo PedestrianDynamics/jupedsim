@@ -62,13 +62,17 @@ Attributes
 
    jupedsim.AnticipationVelocityModel
    jupedsim.AnticipationVelocityModelState
+   jupedsim.CollisionFreeSpeedModel
    jupedsim.CollisionFreeSpeedModelState
+   jupedsim.CollisionFreeSpeedModelV2
    jupedsim.CollisionFreeSpeedModelV2State
+   jupedsim.CollisionFreeSpeedModelV3
    jupedsim.CollisionFreeSpeedModelV3State
+   jupedsim.GeneralizedCentrifugalForceModel
    jupedsim.GeneralizedCentrifugalForceModelState
    jupedsim.Hdf5TrajectoryWriter
-   jupedsim.ModelType
    jupedsim.SimulationError
+   jupedsim.SocialForceModel
    jupedsim.SocialForceModelState
    jupedsim.WarpDriverModel
    jupedsim.WarpDriverModelState
@@ -752,7 +756,7 @@ Attributes
 
 
 
-.. py:class:: Simulation(*, model: jupedsim.models.ModelType | jupedsim.models.anticipation_velocity_model.AnticipationVelocityModel | jupedsim.models.warp_driver.WarpDriverModel | jupedsim.models.custom_model.CustomOperationalModel, geometry: str | shapely.GeometryCollection | shapely.Polygon | shapely.MultiPolygon | shapely.MultiPoint | list[tuple[float, float]], dt: float = 0.01, trajectory_writer: jupedsim.serialization.TrajectoryWriter | None = None, timer_log_level: int = 1, **kwargs: Any)
+.. py:class:: Simulation(*, model: jupedsim.models.collision_free_speed.CollisionFreeSpeedModel | jupedsim.models.collision_free_speed_v2.CollisionFreeSpeedModelV2 | jupedsim.models.collision_free_speed_v3.CollisionFreeSpeedModelV3 | jupedsim.models.generalized_centrifugal_force.GeneralizedCentrifugalForceModel | jupedsim.models.social_force.SocialForceModel | jupedsim.models.anticipation_velocity_model.AnticipationVelocityModel | jupedsim.models.warp_driver.WarpDriverModel | jupedsim.models.custom_model.CustomOperationalModel, geometry: str | shapely.GeometryCollection | shapely.Polygon | shapely.MultiPolygon | shapely.MultiPoint | list[tuple[float, float]], dt: float = 0.01, trajectory_writer: jupedsim.serialization.TrajectoryWriter | None = None, timer_log_level: int = 1, **kwargs: Any)
 
    Defines a simulation of pedestrian movement over a continuous walkable area.
 
@@ -1543,11 +1547,19 @@ Attributes
 
 .. py:data:: AnticipationVelocityModelState
 
+.. py:data:: CollisionFreeSpeedModel
+
 .. py:data:: CollisionFreeSpeedModelState
+
+.. py:data:: CollisionFreeSpeedModelV2
 
 .. py:data:: CollisionFreeSpeedModelV2State
 
+.. py:data:: CollisionFreeSpeedModelV3
+
 .. py:data:: CollisionFreeSpeedModelV3State
+
+.. py:data:: GeneralizedCentrifugalForceModel
 
 .. py:data:: GeneralizedCentrifugalForceModelState
 
@@ -1555,19 +1567,13 @@ Attributes
    :value: None
 
 
-.. py:data:: ModelType
-
-   Selects one of the stateless built-in operational models.
-
-   Members: ``COLLISION_FREE_SPEED``, ``COLLISION_FREE_SPEED_V2``,
-   ``COLLISION_FREE_SPEED_V3``, ``GENERALIZED_CENTRIFUGAL_FORCE``,
-   ``SOCIAL_FORCE``.
-
 .. py:data:: SimulationError
 
    Raised for simulation errors, e.g. when accessing an agent handle whose
    agent no longer exists or when calling mutating simulation methods from a
    custom-model callback.
+
+.. py:data:: SocialForceModel
 
 .. py:data:: SocialForceModelState
 

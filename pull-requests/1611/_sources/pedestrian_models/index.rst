@@ -32,22 +32,24 @@ mirror real-world pedestrian behaviors while maintaining smooth movement
 dynamics.
 
 The collision-free speed model is available in three variants in JuPedSim,
-selected via ``ModelType.COLLISION_FREE_SPEED``,
-``ModelType.COLLISION_FREE_SPEED_V2`` and
-``ModelType.COLLISION_FREE_SPEED_V3``. The first two are functionally
-identical: they historically differed only in whether the repulsion parameters
-were global or per-agent, a distinction that no longer exists since all
-parameters are per-agent — ``COLLISION_FREE_SPEED`` is kept for compatibility.
+constructed via :class:`~jupedsim.CollisionFreeSpeedModel`,
+:class:`~jupedsim.CollisionFreeSpeedModelV2` and
+:class:`~jupedsim.CollisionFreeSpeedModelV3`. V1 and V2 differ in whether the
+repulsion parameters are global or per-agent: in
+:class:`~jupedsim.CollisionFreeSpeedModel` (V1) the repulsion parameters
+(``strength_neighbor_repulsion``, ``range_neighbor_repulsion``,
+``strength_geometry_repulsion``, ``range_geometry_repulsion``) are model-level
+constructor arguments shared by all agents, whereas in V2 they are per-agent.
 V3 uses a different steering approach (rotational steering with heading
 relaxation).
 
-In all variants the model parameters are per-agent: they are set when adding
-an agent (via :class:`~jupedsim.CollisionFreeSpeedModelState`,
+The per-agent parameters are set when adding an agent (via
+:class:`~jupedsim.CollisionFreeSpeedModelState`,
 :class:`~jupedsim.CollisionFreeSpeedModelV2State` or
 :class:`~jupedsim.CollisionFreeSpeedModelV3State`) and can be changed at any
 time through the agent handle.
 
-In ``ModelType.COLLISION_FREE_SPEED_V3`` the same per-agent base
+In :class:`~jupedsim.CollisionFreeSpeedModelV3` the same per-agent base
 parameters are available (via
 :class:`~jupedsim.CollisionFreeSpeedModelV3State`), plus rotational steering controls
 (``range_x_scale``, ``range_y_scale``, ``theta_max_upper_bound``)
@@ -210,12 +212,12 @@ Key features:
 * Stuck detection with lateral detour to break narrow-passage deadlocks
 
 The parameters of the WarpDriver model include model-level parameters (shared
-by all agents: ``sigma`` and ``rng_seed``, passed to
-:class:`~jupedsim.WarpDriverModel`) and per-agent parameters
-(``desired_speed``, ``radius``, ``time_horizon``, ``step_size``,
+by all agents: ``sigma``, ``time_horizon``, ``step_size``,
 ``time_uncertainty``, ``velocity_uncertainty_x``, ``velocity_uncertainty_y``,
-``num_samples``, set via :class:`~jupedsim.WarpDriverModelState`) that
-can be modified at runtime.
+``num_samples`` and ``rng_seed``, passed to
+:class:`~jupedsim.WarpDriverModel`) and per-agent parameters
+(``desired_speed`` and ``radius``, set via
+:class:`~jupedsim.WarpDriverModelState`) that can be modified at runtime.
 
 See the `full WarpDriver model documentation <warp_driver_model.html>`_ for
 a detailed description of the algorithm, equations, warp operators, and

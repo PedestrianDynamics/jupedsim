@@ -143,19 +143,29 @@ This mechanism reliably breaks deadlocks that velocity smoothing alone cannot re
 ### Model-level parameters
 
 The model carries simulation-global state: the precomputed intrinsic
-collision-probability field (controlled by `sigma`) and the random number
-generator used for symmetry-breaking perturbations (seeded via `rng_seed`).
-It is therefore passed to the simulation as an *instance* of
-`jupedsim.WarpDriverModel`. All arguments are keyword-only.
+collision-probability field (controlled by `sigma`), the random number
+generator used for symmetry-breaking perturbations (seeded via `rng_seed`),
+and the shared collision-prediction settings (look-ahead, sampling, and
+uncertainty parameters). These are therefore passed to the simulation as an
+*instance* of `jupedsim.WarpDriverModel`. All arguments are keyword-only.
+Because they are model-level, they apply to every agent uniformly and are
+fixed for the lifetime of the simulation — they cannot be changed per agent
+or mutated at runtime.
 
 | Parameter | Symbol | Default | Unit | Description |
 |---|---|---|---|---|
 | `sigma` | $\sigma$ | 0.3 | — | Gaussian spread of the intrinsic field. Larger values create smoother, wider collision zones. |
+| `time_horizon` | $T$ | 2.0 | s | Look-ahead time for collision prediction. Larger values detect collisions earlier but increase computation. |
+| `step_size` | $\alpha$ | 0.5 | — | Gradient descent step size. Controls how aggressively agents deviate from their projected trajectory. Larger = stronger avoidance. |
+| `time_uncertainty` | $\lambda$ | 0.5 | — | Time uncertainty parameter. Spreads the collision field along the time axis — collisions further in the future are treated as less certain. |
+| `velocity_uncertainty_x` | $\mu_x$ | 0.2 | — | Longitudinal velocity uncertainty. Compresses the collision field along the direction of motion via $\beta_1 = 1/(1 + \mu_x)$ (B.13, simplified for $v = v_\text{pref}$). |
+| `velocity_uncertainty_y` | $\mu_y$ | 0.2 | — | Lateral velocity uncertainty. Expands the collision field perpendicular to the direction of motion via $\beta_2 = 1 + \mu_y$ (B.13, simplified for $v = v_\text{pref}$). |
+| `num_samples` | $K$ | 20 | — | Number of evenly spaced sample points on the projected trajectory. |
 | `rng_seed` | | 42 | — | Seed for the random number generator used for symmetry-breaking perturbations and detour side selection. Fixed seed gives reproducible runs. |
 
 ### Agent-level parameters
 
-All remaining parameters live in the per-agent state
+The remaining parameters live in the per-agent state
 `jupedsim.WarpDriverModelState`. They are set when the agent is added and can
 be modified at runtime through the agent handle.
 
@@ -163,12 +173,6 @@ be modified at runtime through the agent handle.
 |---|---|---|---|---|
 | `desired_speed` | $v_0$ | 1.2 | m/s | Free-flow speed the agent tries to maintain. |
 | `radius` | $r$ | 0.15 | m | Physical radius of the agent. Used in the Minkowski sum for collision detection ($r_a + r_b$) and in the short-range repulsion. |
-| `time_horizon` | $T$ | 2.0 | s | Look-ahead time for collision prediction. Larger values detect collisions earlier but increase computation. |
-| `step_size` | $\alpha$ | 0.5 | — | Gradient descent step size. Controls how aggressively agents deviate from their projected trajectory. Larger = stronger avoidance. |
-| `time_uncertainty` | $\lambda$ | 0.5 | — | Time uncertainty parameter. Spreads the collision field along the time axis — collisions further in the future are treated as less certain. |
-| `velocity_uncertainty_x` | $\mu_x$ | 0.2 | — | Longitudinal velocity uncertainty. Compresses the collision field along the direction of motion via $\beta_1 = 1/(1 + \mu_x)$ (B.13, simplified for $v = v_\text{pref}$). |
-| `velocity_uncertainty_y` | $\mu_y$ | 0.2 | — | Lateral velocity uncertainty. Expands the collision field perpendicular to the direction of motion via $\beta_2 = 1 + \mu_y$ (B.13, simplified for $v = v_\text{pref}$). |
-| `num_samples` | $K$ | 20 | — | Number of evenly spaced sample points on the projected trajectory. |
 
 The state additionally exposes the per-agent bookkeeping used by the stuck
 detection (`stuck_time`, `anchor_x`, `anchor_y`, `detour_time`,
@@ -181,8 +185,18 @@ the user.
 import jupedsim as jps
 
 # Model-level parameters (simulation-global state); the instance is
-# consumed by the Simulation constructor and must not be reused.
-model = jps.WarpDriverModel(sigma=0.3, rng_seed=42)
+# consumed by the Simulation constructor and must not be reused. These
+# apply to every agent and are fixed for the lifetime of the simulation.
+model = jps.WarpDriverModel(
+    sigma=0.3,
+    time_horizon=2.0,
+    step_size=0.5,
+    time_uncertainty=0.5,
+    velocity_uncertainty_x=0.2,
+    velocity_uncertainty_y=0.2,
+    num_samples=20,
+    rng_seed=42,
+)
 
 sim = jps.Simulation(model=model, geometry=area, dt=0.01)
 
@@ -205,7 +219,11 @@ state = sim.agent(agent_id).model
 print(state.desired_speed)   # 1.2
 print(state.radius)          # 0.15
 
-# Mutable at runtime — also mid-simulation, between iterate() calls
+# Mutable at runtime — also mid-simulation, between iterate() calls.
+# Only per-agent state fields can be changed this way. The model-level
+# parameters (sigma, time_horizon, step_size, time_uncertainty,
+# velocity_uncertainty_x/y, num_samples, rng_seed) live on the model
+# instance and are fixed once the simulation is constructed.
 state.desired_speed = 0.8
 state.radius = 0.2
 ```

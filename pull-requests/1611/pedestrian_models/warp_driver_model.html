@@ -526,10 +526,14 @@ This expands the 2-component field gradient into a 3-component space-time gradie
 <section id="model-level-parameters">
 <h3>Model-level parameters<a class="headerlink" href="#model-level-parameters" title="Link to this heading">#</a></h3>
 <p>The model carries simulation-global state: the precomputed intrinsic
-collision-probability field (controlled by <code class="docutils literal notranslate"><span class="pre">sigma</span></code>) and the random number
-generator used for symmetry-breaking perturbations (seeded via <code class="docutils literal notranslate"><span class="pre">rng_seed</span></code>).
-It is therefore passed to the simulation as an <em>instance</em> of
-<code class="docutils literal notranslate"><span class="pre">jupedsim.WarpDriverModel</span></code>. All arguments are keyword-only.</p>
+collision-probability field (controlled by <code class="docutils literal notranslate"><span class="pre">sigma</span></code>), the random number
+generator used for symmetry-breaking perturbations (seeded via <code class="docutils literal notranslate"><span class="pre">rng_seed</span></code>),
+and the shared collision-prediction settings (look-ahead, sampling, and
+uncertainty parameters). These are therefore passed to the simulation as an
+<em>instance</em> of <code class="docutils literal notranslate"><span class="pre">jupedsim.WarpDriverModel</span></code>. All arguments are keyword-only.
+Because they are model-level, they apply to every agent uniformly and are
+fixed for the lifetime of the simulation — they cannot be changed per agent
+or mutated at runtime.</p>
 <div class="pst-scrollable-table-container"><table class="table">
 <thead>
 <tr class="row-odd"><th class="head"><p>Parameter</p></th>
@@ -546,6 +550,42 @@ It is therefore passed to the simulation as an <em>instance</em> of
 <td><p>—</p></td>
 <td><p>Gaussian spread of the intrinsic field. Larger values create smoother, wider collision zones.</p></td>
 </tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">time_horizon</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(T\)</span></p></td>
+<td><p>2.0</p></td>
+<td><p>s</p></td>
+<td><p>Look-ahead time for collision prediction. Larger values detect collisions earlier but increase computation.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">step_size</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(\alpha\)</span></p></td>
+<td><p>0.5</p></td>
+<td><p>—</p></td>
+<td><p>Gradient descent step size. Controls how aggressively agents deviate from their projected trajectory. Larger = stronger avoidance.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">time_uncertainty</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(\lambda\)</span></p></td>
+<td><p>0.5</p></td>
+<td><p>—</p></td>
+<td><p>Time uncertainty parameter. Spreads the collision field along the time axis — collisions further in the future are treated as less certain.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">velocity_uncertainty_x</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(\mu_x\)</span></p></td>
+<td><p>0.2</p></td>
+<td><p>—</p></td>
+<td><p>Longitudinal velocity uncertainty. Compresses the collision field along the direction of motion via <span class="math notranslate nohighlight">\(\beta_1 = 1/(1 + \mu_x)\)</span> (B.13, simplified for <span class="math notranslate nohighlight">\(v = v_\text{pref}\)</span>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">velocity_uncertainty_y</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(\mu_y\)</span></p></td>
+<td><p>0.2</p></td>
+<td><p>—</p></td>
+<td><p>Lateral velocity uncertainty. Expands the collision field perpendicular to the direction of motion via <span class="math notranslate nohighlight">\(\beta_2 = 1 + \mu_y\)</span> (B.13, simplified for <span class="math notranslate nohighlight">\(v = v_\text{pref}\)</span>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">num_samples</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(K\)</span></p></td>
+<td><p>20</p></td>
+<td><p>—</p></td>
+<td><p>Number of evenly spaced sample points on the projected trajectory.</p></td>
+</tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rng_seed</span></code></p></td>
 <td><p></p></td>
 <td><p>42</p></td>
@@ -558,7 +598,7 @@ It is therefore passed to the simulation as an <em>instance</em> of
 </section>
 <section id="agent-level-parameters">
 <h3>Agent-level parameters<a class="headerlink" href="#agent-level-parameters" title="Link to this heading">#</a></h3>
-<p>All remaining parameters live in the per-agent state
+<p>The remaining parameters live in the per-agent state
 <code class="docutils literal notranslate"><span class="pre">jupedsim.WarpDriverModelState</span></code>. They are set when the agent is added and can
 be modified at runtime through the agent handle.</p>
 <div class="pst-scrollable-table-container"><table class="table">
@@ -583,42 +623,6 @@ be modified at runtime through the agent handle.</p>
 <td><p>m</p></td>
 <td><p>Physical radius of the agent. Used in the Minkowski sum for collision detection (<span class="math notranslate nohighlight">\(r_a + r_b\)</span>) and in the short-range repulsion.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">time_horizon</span></code></p></td>
-<td><p><span class="math notranslate nohighlight">\(T\)</span></p></td>
-<td><p>2.0</p></td>
-<td><p>s</p></td>
-<td><p>Look-ahead time for collision prediction. Larger values detect collisions earlier but increase computation.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">step_size</span></code></p></td>
-<td><p><span class="math notranslate nohighlight">\(\alpha\)</span></p></td>
-<td><p>0.5</p></td>
-<td><p>—</p></td>
-<td><p>Gradient descent step size. Controls how aggressively agents deviate from their projected trajectory. Larger = stronger avoidance.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">time_uncertainty</span></code></p></td>
-<td><p><span class="math notranslate nohighlight">\(\lambda\)</span></p></td>
-<td><p>0.5</p></td>
-<td><p>—</p></td>
-<td><p>Time uncertainty parameter. Spreads the collision field along the time axis — collisions further in the future are treated as less certain.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">velocity_uncertainty_x</span></code></p></td>
-<td><p><span class="math notranslate nohighlight">\(\mu_x\)</span></p></td>
-<td><p>0.2</p></td>
-<td><p>—</p></td>
-<td><p>Longitudinal velocity uncertainty. Compresses the collision field along the direction of motion via <span class="math notranslate nohighlight">\(\beta_1 = 1/(1 + \mu_x)\)</span> (B.13, simplified for <span class="math notranslate nohighlight">\(v = v_\text{pref}\)</span>).</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">velocity_uncertainty_y</span></code></p></td>
-<td><p><span class="math notranslate nohighlight">\(\mu_y\)</span></p></td>
-<td><p>0.2</p></td>
-<td><p>—</p></td>
-<td><p>Lateral velocity uncertainty. Expands the collision field perpendicular to the direction of motion via <span class="math notranslate nohighlight">\(\beta_2 = 1 + \mu_y\)</span> (B.13, simplified for <span class="math notranslate nohighlight">\(v = v_\text{pref}\)</span>).</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">num_samples</span></code></p></td>
-<td><p><span class="math notranslate nohighlight">\(K\)</span></p></td>
-<td><p>20</p></td>
-<td><p>—</p></td>
-<td><p>Number of evenly spaced sample points on the projected trajectory.</p></td>
-</tr>
 </tbody>
 </table>
 </div>
@@ -633,8 +637,18 @@ the user.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">jupedsim</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jps</span>
 
 <span class="c1"># Model-level parameters (simulation-global state); the instance is</span>
-<span class="c1"># consumed by the Simulation constructor and must not be reused.</span>
-<span class="n">model</span> <span class="o">=</span> <span class="n">jps</span><span class="o">.</span><span class="n">WarpDriverModel</span><span class="p">(</span><span class="n">sigma</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">rng_seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+<span class="c1"># consumed by the Simulation constructor and must not be reused. These</span>
+<span class="c1"># apply to every agent and are fixed for the lifetime of the simulation.</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">jps</span><span class="o">.</span><span class="n">WarpDriverModel</span><span class="p">(</span>
+    <span class="n">sigma</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+    <span class="n">time_horizon</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span>
+    <span class="n">step_size</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+    <span class="n">time_uncertainty</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+    <span class="n">velocity_uncertainty_x</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+    <span class="n">velocity_uncertainty_y</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+    <span class="n">num_samples</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+    <span class="n">rng_seed</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
+<span class="p">)</span>
 
 <span class="n">sim</span> <span class="o">=</span> <span class="n">jps</span><span class="o">.</span><span class="n">Simulation</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="n">area</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
 
@@ -657,7 +671,11 @@ the user.</p>
 <span class="nb">print</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">desired_speed</span><span class="p">)</span>   <span class="c1"># 1.2</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">radius</span><span class="p">)</span>          <span class="c1"># 0.15</span>
 
-<span class="c1"># Mutable at runtime — also mid-simulation, between iterate() calls</span>
+<span class="c1"># Mutable at runtime — also mid-simulation, between iterate() calls.</span>
+<span class="c1"># Only per-agent state fields can be changed this way. The model-level</span>
+<span class="c1"># parameters (sigma, time_horizon, step_size, time_uncertainty,</span>
+<span class="c1"># velocity_uncertainty_x/y, num_samples, rng_seed) live on the model</span>
+<span class="c1"># instance and are fixed once the simulation is constructed.</span>
 <span class="n">state</span><span class="o">.</span><span class="n">desired_speed</span> <span class="o">=</span> <span class="mf">0.8</span>
 <span class="n">state</span><span class="o">.</span><span class="n">radius</span> <span class="o">=</span> <span class="mf">0.2</span>
 </pre></div>

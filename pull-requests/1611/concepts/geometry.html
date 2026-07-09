@@ -446,7 +446,7 @@ This can be done with:</p>
 <span class="n">walkable_area</span> <span class="o">=</span> <span class="o">...</span>
 
 <span class="n">simulation</span> <span class="o">=</span> <span class="n">jps</span><span class="o">.</span><span class="n">Simulation</span><span class="p">(</span>
-    <span class="n">model</span><span class="o">=</span><span class="n">jps</span><span class="o">.</span><span class="n">ModelType</span><span class="o">.</span><span class="n">COLLISION_FREE_SPEED</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">jps</span><span class="o">.</span><span class="n">CollisionFreeSpeedModel</span><span class="p">(),</span>
     <span class="n">geometry</span><span class="o">=</span><span class="n">area</span><span class="p">,</span>
     <span class="n">trajectory_writer</span><span class="o">=</span><span class="n">jps</span><span class="o">.</span><span class="n">SqliteTrajectoryWriter</span><span class="p">(</span>
         <span class="n">output_file</span><span class="o">=</span><span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;traj.sqlite&quot;</span><span class="p">)</span>

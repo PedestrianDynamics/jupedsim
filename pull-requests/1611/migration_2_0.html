@@ -351,9 +351,10 @@
 shims</strong>. This guide maps every 1.x construct to its 2.0 replacement.</p>
 <p>The three changes you will encounter in every script:</p>
 <ol class="arabic simple">
-<li><p><strong>Simulation construction</strong> — models are selected with a
-<a class="reference internal" href="api/jupedsim/index.html#jupedsim.ModelType" title="jupedsim.ModelType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelType</span></code></a> enum member (stateless models) or a model
-instance (models with simulation-global state, custom Python models).</p></li>
+<li><p><strong>Simulation construction</strong> — every model is passed as a <em>configured
+instance</em> carrying its model-level parameters (e.g.
+<code class="docutils literal notranslate"><span class="pre">jps.SocialForceModel(body_force=...,</span> <span class="pre">friction=...)</span></code>). The
+<code class="docutils literal notranslate"><span class="pre">ModelType</span></code> enum has been removed.</p></li>
 <li><p><strong>Adding agents</strong> — <code class="docutils literal notranslate"><span class="pre">add_agent</span></code> now takes
 <code class="docutils literal notranslate"><span class="pre">(journey_id,</span> <span class="pre">stage_id,</span> <span class="pre">state)</span></code>, where <code class="docutils literal notranslate"><span class="pre">state</span></code> is a directly
 instantiated per-model state object such as
@@ -363,33 +364,55 @@ instantiated per-model state object such as
 </ol>
 <section id="constructing-a-simulation">
 <h2>Constructing a Simulation<a class="headerlink" href="#constructing-a-simulation" title="Link to this heading">#</a></h2>
-<p>Stateless built-in models are selected with an enum member instead of a
-parameter-holder instance:</p>
+<p>Every built-in model is now constructed as an instance that carries its
+model-level parameters. The <code class="docutils literal notranslate"><span class="pre">ModelType</span></code> enum no longer exists:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">jupedsim</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jps</span>
 
 <span class="c1"># 1.x</span>
 <span class="n">sim</span> <span class="o">=</span> <span class="n">jps</span><span class="o">.</span><span class="n">Simulation</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">jps</span><span class="o">.</span><span class="n">CollisionFreeSpeedModel</span><span class="p">(),</span> <span class="n">geometry</span><span class="o">=</span><span class="n">area</span><span class="p">)</span>
 
-<span class="c1"># 2.0</span>
-<span class="n">sim</span> <span class="o">=</span> <span class="n">jps</span><span class="o">.</span><span class="n">Simulation</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">jps</span><span class="o">.</span><span class="n">ModelType</span><span class="o">.</span><span class="n">COLLISION_FREE_SPEED</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="n">area</span><span class="p">)</span>
+<span class="c1"># 2.0 — a configured model instance</span>
+<span class="n">sim</span> <span class="o">=</span> <span class="n">jps</span><span class="o">.</span><span class="n">Simulation</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">jps</span><span class="o">.</span><span class="n">CollisionFreeSpeedModel</span><span class="p">(),</span> <span class="n">geometry</span><span class="o">=</span><span class="n">area</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Available enum members: <code class="docutils literal notranslate"><span class="pre">COLLISION_FREE_SPEED</span></code>, <code class="docutils literal notranslate"><span class="pre">COLLISION_FREE_SPEED_V2</span></code>,
-<code class="docutils literal notranslate"><span class="pre">COLLISION_FREE_SPEED_V3</span></code>, <code class="docutils literal notranslate"><span class="pre">GENERALIZED_CENTRIFUGAL_FORCE</span></code>, <code class="docutils literal notranslate"><span class="pre">SOCIAL_FORCE</span></code>.
-Enum-constructed models reproduce exactly the global configuration that the
-1.x defaults produced, so existing simulations remain byte-identical.</p>
-<p>Models that carry simulation-global state are passed as an instance:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># AnticipationVelocityModel: the random number generator is global state.</span>
-<span class="c1"># rng_seed is keyword-only and required.</span>
+<p>The model instance holds the parameters that govern the model globally.
+Constructed with their defaults they reproduce exactly the configuration that
+the 1.x defaults produced, so existing simulations remain byte-identical:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Model-level parameters are keyword-only; defaults shown reproduce 1.x.</span>
 <span class="n">sim</span> <span class="o">=</span> <span class="n">jps</span><span class="o">.</span><span class="n">Simulation</span><span class="p">(</span>
-    <span class="n">model</span><span class="o">=</span><span class="n">jps</span><span class="o">.</span><span class="n">AnticipationVelocityModel</span><span class="p">(</span><span class="n">rng_seed</span><span class="o">=</span><span class="mi">1234</span><span class="p">),</span> <span class="n">geometry</span><span class="o">=</span><span class="n">area</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">jps</span><span class="o">.</span><span class="n">SocialForceModel</span><span class="p">(</span><span class="n">body_force</span><span class="o">=</span><span class="mi">120000</span><span class="p">,</span> <span class="n">friction</span><span class="o">=</span><span class="mi">240000</span><span class="p">),</span>
+    <span class="n">geometry</span><span class="o">=</span><span class="n">area</span><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="c1"># WarpDriverModel: the precomputed intrinsic field (sigma) and the RNG are</span>
-<span class="c1"># global state. All arguments are keyword-only; defaults shown.</span>
+<span class="c1"># CollisionFreeSpeedModel: the repulsion parameters are model-level.</span>
+<span class="n">sim</span> <span class="o">=</span> <span class="n">jps</span><span class="o">.</span><span class="n">Simulation</span><span class="p">(</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">jps</span><span class="o">.</span><span class="n">CollisionFreeSpeedModel</span><span class="p">(</span>
+        <span class="n">strength_neighbor_repulsion</span><span class="o">=</span><span class="mf">8.0</span><span class="p">,</span>
+        <span class="n">range_neighbor_repulsion</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+        <span class="n">strength_geometry_repulsion</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span>
+        <span class="n">range_geometry_repulsion</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">geometry</span><span class="o">=</span><span class="n">area</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># AnticipationVelocityModel: pushout strength and the RNG seed are model-level.</span>
+<span class="n">sim</span> <span class="o">=</span> <span class="n">jps</span><span class="o">.</span><span class="n">Simulation</span><span class="p">(</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">jps</span><span class="o">.</span><span class="n">AnticipationVelocityModel</span><span class="p">(</span><span class="n">pushout_strength</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">rng_seed</span><span class="o">=</span><span class="mi">1234</span><span class="p">),</span>
+    <span class="n">geometry</span><span class="o">=</span><span class="n">area</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># WarpDriverModel: the intrinsic field (sigma), the collision-prediction</span>
+<span class="c1"># settings and the RNG are all model-level. All arguments are keyword-only.</span>
 <span class="n">sim</span> <span class="o">=</span> <span class="n">jps</span><span class="o">.</span><span class="n">Simulation</span><span class="p">(</span>
     <span class="n">model</span><span class="o">=</span><span class="n">jps</span><span class="o">.</span><span class="n">WarpDriverModel</span><span class="p">(</span><span class="n">sigma</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">rng_seed</span><span class="o">=</span><span class="mi">42</span><span class="p">),</span> <span class="n">geometry</span><span class="o">=</span><span class="n">area</span>
 <span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">CollisionFreeSpeedModelV2</span></code> and <code class="docutils literal notranslate"><span class="pre">CollisionFreeSpeedModelV3</span></code> keep all of their
+repulsion parameters per-agent by design, so their instances take no
+model-level arguments:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">sim</span> <span class="o">=</span> <span class="n">jps</span><span class="o">.</span><span class="n">Simulation</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">jps</span><span class="o">.</span><span class="n">CollisionFreeSpeedModelV2</span><span class="p">(),</span> <span class="n">geometry</span><span class="o">=</span><span class="n">area</span><span class="p">)</span>
+<span class="n">sim</span> <span class="o">=</span> <span class="n">jps</span><span class="o">.</span><span class="n">Simulation</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">jps</span><span class="o">.</span><span class="n">CollisionFreeSpeedModelV3</span><span class="p">(),</span> <span class="n">geometry</span><span class="o">=</span><span class="n">area</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="admonition warning">
@@ -408,8 +431,9 @@ be reused for a second simulation.</p>
 <h2>Adding agents<a class="headerlink" href="#adding-agents" title="Link to this heading">#</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">add_agent</span></code> takes the journey id, the stage id and a per-model state object.
 The agent spawns at <code class="docutils literal notranslate"><span class="pre">state.position</span></code>. All state constructors are
-keyword-only and expose <em>every</em> per-agent field — including the parameters
-that were global in 1.x — with defaults taken from the C++ implementation.</p>
+keyword-only and expose the per-agent fields of the model, with defaults
+taken from the C++ implementation. Model-level parameters (see above) live on
+the model instance and are <em>not</em> part of the state.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 1.x</span>
 <span class="n">agent_id</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">add_agent</span><span class="p">(</span>
     <span class="n">jps</span><span class="o">.</span><span class="n">CollisionFreeSpeedModelAgentParameters</span><span class="p">(</span>
@@ -449,23 +473,23 @@ that were global in 1.x — with defaults taken from the C++ implementation.</p>
 </thead>
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">CollisionFreeSpeedModel</span></code> + <code class="docutils literal notranslate"><span class="pre">CollisionFreeSpeedModelAgentParameters</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">ModelType.COLLISION_FREE_SPEED</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">jps.CollisionFreeSpeedModel(...)</span></code> instance</p></td>
 <td><p><a class="reference internal" href="api/jupedsim/index.html#jupedsim.CollisionFreeSpeedModelState" title="jupedsim.CollisionFreeSpeedModelState"><code class="xref py py-class docutils literal notranslate"><span class="pre">CollisionFreeSpeedModelState</span></code></a></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">CollisionFreeSpeedModelV2</span></code> + <code class="docutils literal notranslate"><span class="pre">CollisionFreeSpeedModelV2AgentParameters</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">ModelType.COLLISION_FREE_SPEED_V2</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">jps.CollisionFreeSpeedModelV2()</span></code> instance</p></td>
 <td><p><a class="reference internal" href="api/jupedsim/index.html#jupedsim.CollisionFreeSpeedModelV2State" title="jupedsim.CollisionFreeSpeedModelV2State"><code class="xref py py-class docutils literal notranslate"><span class="pre">CollisionFreeSpeedModelV2State</span></code></a></p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">CollisionFreeSpeedModelV3</span></code> + <code class="docutils literal notranslate"><span class="pre">CollisionFreeSpeedModelV3AgentParameters</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">ModelType.COLLISION_FREE_SPEED_V3</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">jps.CollisionFreeSpeedModelV3()</span></code> instance</p></td>
 <td><p><a class="reference internal" href="api/jupedsim/index.html#jupedsim.CollisionFreeSpeedModelV3State" title="jupedsim.CollisionFreeSpeedModelV3State"><code class="xref py py-class docutils literal notranslate"><span class="pre">CollisionFreeSpeedModelV3State</span></code></a></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModel</span></code> + <code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">ModelType.GENERALIZED_CENTRIFUGAL_FORCE</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">jps.GeneralizedCentrifugalForceModel(...)</span></code> instance</p></td>
 <td><p><a class="reference internal" href="api/jupedsim/index.html#jupedsim.GeneralizedCentrifugalForceModelState" title="jupedsim.GeneralizedCentrifugalForceModelState"><code class="xref py py-class docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelState</span></code></a></p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">SocialForceModel</span></code> + <code class="docutils literal notranslate"><span class="pre">SocialForceModelAgentParameters</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">ModelType.SOCIAL_FORCE</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">jps.SocialForceModel(...)</span></code> instance</p></td>
 <td><p><a class="reference internal" href="api/jupedsim/index.html#jupedsim.SocialForceModelState" title="jupedsim.SocialForceModelState"><code class="xref py py-class docutils literal notranslate"><span class="pre">SocialForceModelState</span></code></a></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">AnticipationVelocityModel</span></code> (dataclass) + <code class="docutils literal notranslate"><span class="pre">AnticipationVelocityModelAgentParameters</span></code></p></td>
@@ -481,9 +505,13 @@ that were global in 1.x — with defaults taken from the C++ implementation.</p>
 </div>
 <p>Parameters that were <em>global</em> in 1.x (e.g. the repulsion strengths of the
 Collision Free Speed Model, <code class="docutils literal notranslate"><span class="pre">body_force</span></code>/<code class="docutils literal notranslate"><span class="pre">friction</span></code> of the Social Force
-Model, or <code class="docutils literal notranslate"><span class="pre">time_horizon</span></code>/<code class="docutils literal notranslate"><span class="pre">step_size</span></code> of the WarpDriver model) are now
-<em>per-agent</em> fields of the corresponding state class and can differ between
-agents and change over time.</p>
+Model, or <code class="docutils literal notranslate"><span class="pre">time_horizon</span></code>/<code class="docutils literal notranslate"><span class="pre">step_size</span></code> of the WarpDriver model) remain
+<em>model-level</em>: they are keyword-only constructor arguments of the
+corresponding model instance and are fixed for the lifetime of the
+simulation. <code class="docutils literal notranslate"><span class="pre">CollisionFreeSpeedModelV2</span></code> and <code class="docutils literal notranslate"><span class="pre">CollisionFreeSpeedModelV3</span></code> are
+the exception — by design they keep their repulsion parameters as <em>per-agent</em>
+fields of the state class, where they can differ between agents and change
+over time.</p>
 </section>
 <section id="agent-handles">
 <h2>Agent handles<a class="headerlink" href="#agent-handles" title="Link to this heading">#</a></h2>
@@ -526,9 +554,9 @@ calls.</p>
 <ul class="simple">
 <li><p>All model builder classes (C++ and Python).</p></li>
 <li><p>All <code class="docutils literal notranslate"><span class="pre">XModelAgentParameters</span></code> dataclasses.</p></li>
-<li><p>The stateless model parameter-holder dataclasses
-(<code class="docutils literal notranslate"><span class="pre">CollisionFreeSpeedModel</span></code>, <code class="docutils literal notranslate"><span class="pre">SocialForceModel</span></code>, … as constructor
-arguments); use <a class="reference internal" href="api/jupedsim/index.html#jupedsim.ModelType" title="jupedsim.ModelType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelType</span></code></a> instead.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">ModelType</span></code> enum; every model is now constructed directly as a
+configured instance (e.g.
+<code class="docutils literal notranslate"><span class="pre">jps.SocialForceModel(body_force=...,</span> <span class="pre">friction=...)</span></code>).</p></li>
 </ul>
 </section>
 </section>
