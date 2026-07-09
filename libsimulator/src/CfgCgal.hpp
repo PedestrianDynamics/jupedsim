@@ -1,9 +1,13 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
+#include <CGAL/AABB_face_graph_triangle_primitive.h>
+#include <CGAL/AABB_traits_3.h>
+#include <CGAL/AABB_tree.h>
 #include <CGAL/Constrained_Delaunay_triangulation_2.h>
 #include <CGAL/Constrained_triangulation_2.h>
 #include <CGAL/Constrained_triangulation_face_base_2.h>
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Polygon_2.h>
 #include <CGAL/Polygon_with_holes_2.h>
 #include <CGAL/Simple_cartesian.h>
@@ -44,6 +48,14 @@ using HalfedgeDescriptor = typename boost::graph_traits<G>::halfedge_descriptor;
 /// Convenience alias for face descriptor types
 template <class G>
 using EdgeDescriptor = typename boost::graph_traits<G>::edge_descriptor;
+
+// 3D - Surface_mesh_shortest_path is designed for EPICK
+using SurfaceKernel = CGAL::Exact_predicates_inexact_constructions_kernel;
+using SurfaceMesh = CGAL::Surface_mesh<SurfaceKernel::Point_3>;
+using Point3D = SurfaceKernel::Point_3;
+using AABBPrimitive = CGAL::AABB_face_graph_triangle_primitive<SurfaceMesh>;
+using AABBTraits = CGAL::AABB_traits_3<SurfaceKernel, AABBPrimitive>;
+using AABBTree = CGAL::AABB_tree<AABBTraits>;
 
 template <class Gt, class Fb = CGAL::Constrained_triangulation_face_base_2<Gt>>
 class MyFace : public Fb
