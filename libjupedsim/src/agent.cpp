@@ -94,7 +94,7 @@ JPS_ModelType JPS_Agent_GetModelType(JPS_Agent handle)
         case 4:
             return JPS_SocialForceModel;
         case 5:
-            return JPS_SocialForceModelIPP;
+            return JPS_SocialForceModel2LvlPed;
     }
     UNREACHABLE();
 }
@@ -204,14 +204,14 @@ JPS_Agent_GetSocialForceModelState(JPS_Agent handle, JPS_ErrorMessage* errorMess
     return nullptr;
 }
 
-JPS_SocialForceModelIPPState
-JPS_Agent_GetSocialForceModelIPPState(JPS_Agent handle, JPS_ErrorMessage* errorMessage)
+JPS_SocialForceModel2LvlPedState
+JPS_Agent_GetSocialForceModel2LvlPedState(JPS_Agent handle, JPS_ErrorMessage* errorMessage)
 {
     assert(handle);
     const auto agent = reinterpret_cast<GenericAgent*>(handle);
     try {
-        auto& model = std::get<SocialForceModelIPPData>(agent->model);
-        return reinterpret_cast<JPS_SocialForceModelIPPState>(&model);
+        auto& model = std::get<SocialForceModel2LvlPedData>(agent->model);
+        return reinterpret_cast<JPS_SocialForceModel2LvlPedState>(&model);
     } catch(const std::exception& ex) {
         if(errorMessage) {
             *errorMessage = reinterpret_cast<JPS_ErrorMessage>(new JPS_ErrorMessage_t{ex.what()});

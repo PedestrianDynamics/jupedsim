@@ -67,7 +67,7 @@ class Trajectory:
         self.rec = rec
         self.current_index = 0
         self.num_frames = rec.num_frames
-        self._has_ipp = rec.has_ipp_columns
+        self._has_2lvlped = rec.has_2lvlped_columns
 
         first_frame = rec.frame(0)
 
@@ -102,10 +102,10 @@ class Trajectory:
         self.gs_polydata = None
         self._link_polydata = None
 
-        if self._has_ipp:
-            self._init_ipp(first_frame)
+        if self._has_2lvlped:
+            self._init_2lvlped(first_frame)
 
-    def _init_ipp(self, first_frame: RecordingFrame):
+    def _init_2lvlped(self, first_frame: RecordingFrame):
         # Ground support circles (smaller, different color)
         gs_polydata = vtkPolyData()
         gs_polydata.SetPoints(to_vtk_gs_points(first_frame))
@@ -161,7 +161,7 @@ class Trajectory:
         self.polydata.SetPoints(to_vtk_points(frame))
         self.glyph2D.Update()
 
-        if self._has_ipp:
+        if self._has_2lvlped:
             self.gs_polydata.SetPoints(to_vtk_gs_points(frame))
             self.gs_glyph2D.Update()
             update_link_polydata(self._link_polydata, frame)

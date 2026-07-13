@@ -186,9 +186,9 @@ void init_simulation(py::module_& m)
         .def(
             "add_agent",
             [](JPS_Simulation_Wrapper& simulation,
-               JPS_SocialForceModelIPPAgentParameters& parameters) {
+               JPS_SocialForceModel2LvlPedAgentParameters& parameters) {
                 JPS_ErrorMessage errorMsg{};
-                auto result = JPS_Simulation_AddSocialForceModelIPPAgent(
+                auto result = JPS_Simulation_AddSocialForceModel2LvlPedAgent(
                     simulation.handle, parameters, &errorMsg);
                 if(result) {
                     return result;

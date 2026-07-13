@@ -12,7 +12,7 @@
 #include "journey.h"
 #include "operational_model.h"
 #include "social_force_model.h"
-#include "social_force_model_IPP.h"
+#include "social_force_model_2lvlped.h"
 #include "stage.h"
 #include "types.h"
 
@@ -232,9 +232,9 @@ JUPEDSIM_API JPS_AgentId JPS_Simulation_AddSocialForceModelAgent(
  * error.
  * @return id of the new agent or 0 if the agent could not be added due to an error.
  */
-JUPEDSIM_API JPS_AgentId JPS_Simulation_AddSocialForceModelIPPAgent(
+JUPEDSIM_API JPS_AgentId JPS_Simulation_AddSocialForceModel2LvlPedAgent(
     JPS_Simulation handle,
-    JPS_SocialForceModelIPPAgentParameters parameters,
+    JPS_SocialForceModel2LvlPedAgentParameters parameters,
     JPS_ErrorMessage* errorMessage);
 
 /**

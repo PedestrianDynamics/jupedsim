@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "SocialForceModelIPPData.hpp"
+#include "SocialForceModel2LvlPedData.hpp"
 #include "CollisionGeometry.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"
@@ -9,7 +9,7 @@
 
 struct GenericAgent;
 
-class SocialForceModelIPP : public OperationalModel
+class SocialForceModel2LvlPed : public OperationalModel
 {
 public:
     using NeighborhoodSearchType = NeighborhoodSearch<GenericAgent>;
@@ -27,8 +27,8 @@ public:
     // shank(0.2522) + thigh(0.2269) + ankle(0.0451)
     static constexpr double LEG_SCALING_FACTOR = 0.5242;
 
-    SocialForceModelIPP();
-    ~SocialForceModelIPP() override = default;
+    SocialForceModel2LvlPed();
+    ~SocialForceModel2LvlPed() override = default;
     OperationalModelType Type() const override;
     OperationalModelUpdate ComputeNewPosition(
         double dT,

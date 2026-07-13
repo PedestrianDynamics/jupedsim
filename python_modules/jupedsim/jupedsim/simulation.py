@@ -30,9 +30,9 @@ from jupedsim.models.social_force import (
     SocialForceModel,
     SocialForceModelAgentParameters,
 )
-from jupedsim.models.social_force_IPP import (
-    SocialForceModelIPP,
-    SocialForceModelIPPAgentParameters,
+from jupedsim.models.social_force_2lvlped import (
+    SocialForceModel2LvlPed,
+    SocialForceModel2LvlPedAgentParameters,
 )
 from jupedsim.serialization import TrajectoryWriter
 from jupedsim.stages import (
@@ -62,7 +62,7 @@ class Simulation:
             | CollisionFreeSpeedModelV2
             | AnticipationVelocityModel
             | SocialForceModel
-            | SocialForceModelIPP
+            | SocialForceModel2LvlPed
         ),
         geometry: (
             str
@@ -141,8 +141,8 @@ class Simulation:
                 body_force=model.body_force, friction=model.friction
             )
             py_jps_model = model_builder.build()
-        elif isinstance(model, SocialForceModelIPP):
-            model_builder = py_jps.SocialForceModelIPPBuilder()
+        elif isinstance(model, SocialForceModel2LvlPed):
+            model_builder = py_jps.SocialForceModel2LvlPedBuilder()
             py_jps_model = model_builder.build()
         else:
             raise Exception("Unknown model type supplied")
@@ -263,7 +263,7 @@ class Simulation:
             | CollisionFreeSpeedModelV2AgentParameters
             | AnticipationVelocityModelAgentParameters
             | SocialForceModelAgentParameters
-            | SocialForceModelIPPAgentParameters
+            | SocialForceModel2LvlPedAgentParameters
         ),
     ) -> int:
         """Add an agent to the simulation.

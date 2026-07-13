@@ -71,7 +71,7 @@ void init_agent(py::module_& m)
                     std::unique_ptr<JPS_CollisionFreeSpeedModelV2State_Wrapper>,
                     std::unique_ptr<JPS_AnticipationVelocityModelState_Wrapper>,
                     std::unique_ptr<JPS_SocialForceModelState_Wrapper>,
-                    std::unique_ptr<JPS_SocialForceModelIPPState_Wrapper>> {
+                    std::unique_ptr<JPS_SocialForceModel2LvlPedState_Wrapper>> {
                 switch(JPS_Agent_GetModelType(w.handle)) {
                     case JPS_GeneralizedCentrifugalForceModel:
                         return std::make_unique<JPS_GeneralizedCentrifugalForceModelState_Wrapper>(
@@ -88,9 +88,9 @@ void init_agent(py::module_& m)
                     case JPS_SocialForceModel:
                         return std::make_unique<JPS_SocialForceModelState_Wrapper>(
                             JPS_Agent_GetSocialForceModelState(w.handle, nullptr));
-                    case JPS_SocialForceModelIPP:
-                        return std::make_unique<JPS_SocialForceModelIPPState_Wrapper>(
-                            JPS_Agent_GetSocialForceModelIPPState(w.handle, nullptr));
+                    case JPS_SocialForceModel2LvlPed:
+                        return std::make_unique<JPS_SocialForceModel2LvlPedState_Wrapper>(
+                            JPS_Agent_GetSocialForceModel2LvlPedState(w.handle, nullptr));
                 }
 
                 UNREACHABLE();

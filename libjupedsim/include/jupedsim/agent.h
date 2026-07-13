@@ -8,7 +8,7 @@
 #include "export.h"
 #include "generalized_centrifugal_force_model.h"
 #include "social_force_model.h"
-#include "social_force_model_IPP.h"
+#include "social_force_model_2lvlped.h"
 #include "types.h"
 
 #include <stdbool.h> /*NOLINT(modernize-deprecated-headers)*/
@@ -114,8 +114,8 @@ JPS_Agent_GetSocialForceModelState(JPS_Agent handle, JPS_ErrorMessage* errorMess
  * @param[out] errorMessage if not NULL: will be set to a JPS_ErrorMessage in case of an error.
  * @return state or NULL on error
  */
-JUPEDSIM_API JPS_SocialForceModelIPPState
-JPS_Agent_GetSocialForceModelIPPState(JPS_Agent handle, JPS_ErrorMessage* errorMessage);
+JUPEDSIM_API JPS_SocialForceModel2LvlPedState
+JPS_Agent_GetSocialForceModel2LvlPedState(JPS_Agent handle, JPS_ErrorMessage* errorMessage);
 
 
 /**

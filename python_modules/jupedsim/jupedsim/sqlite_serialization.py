@@ -252,7 +252,7 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
         return self._value_or_default(cur, "ymax", float("-inf"))
 
 
-class SqliteIPPTrajectoryWriter(SqliteTrajectoryWriter):
+class Sqlite2LvlPedTrajectoryWriter(SqliteTrajectoryWriter):
     """Write trajectory data for IPP model agents.
 
     Extends SqliteTrajectoryWriter with ground support position,

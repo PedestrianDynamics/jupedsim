@@ -6,7 +6,7 @@ import jupedsim.native as py_jps
 
 
 @dataclass(kw_only=True)
-class SocialForceModelIPP:
+class SocialForceModel2LvlPed:
     r"""Two-level pedestrian model (Inverted Pendulum Paradigm).
 
     Each agent has an upper body and a ground support (legs) coupled
@@ -18,8 +18,8 @@ class SocialForceModelIPP:
 
 
 @dataclass(kw_only=True)
-class SocialForceModelIPPAgentParameters:
-    """Parameters required to create an Agent in the SocialForceModelIPP.
+class SocialForceModel2LvlPedAgentParameters:
+    """Parameters required to create an Agent in the SocialForceModel2LvlPed.
 
     Attributes:
         position: Position of the agent.
@@ -73,9 +73,9 @@ class SocialForceModelIPPAgentParameters:
 
     def as_native(
         self,
-    ) -> py_jps.SocialForceModelIPPAgentParameters:
+    ) -> py_jps.SocialForceModel2LvlPedAgentParameters:
         gs_pos = self.ground_support_position if self.ground_support_position is not None else self.position
-        return py_jps.SocialForceModelIPPAgentParameters(
+        return py_jps.SocialForceModel2LvlPedAgentParameters(
             position=self.position,
             orientation=self.orientation,
             journey_id=self.journey_id,
@@ -102,7 +102,7 @@ class SocialForceModelIPPAgentParameters:
         )
 
 
-class SocialForceModelIPPState:
+class SocialForceModel2LvlPedState:
     def __init__(self, backing) -> None:
         self._obj = backing
 

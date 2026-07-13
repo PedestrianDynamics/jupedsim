@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "SocialForceModelIPP.hpp"
+#include "SocialForceModel2LvlPed.hpp"
 
 #include "GenericAgent.hpp"
 #include "GeometricFunctions.hpp"
@@ -7,30 +7,30 @@
 #include "NeighborhoodSearch.hpp"
 #include "OperationalModelType.hpp"
 #include "SimulationError.hpp"
-#include "SocialForceModelIPPData.hpp"
+#include "SocialForceModel2LvlPedData.hpp"
 
 #include <stdexcept>
 
-SocialForceModelIPP::SocialForceModelIPP() {};
+SocialForceModel2LvlPed::SocialForceModel2LvlPed() {};
 
-OperationalModelType SocialForceModelIPP::Type() const
+OperationalModelType SocialForceModel2LvlPed::Type() const
 {
-    return OperationalModelType::SOCIAL_FORCE_IPP;
+    return OperationalModelType::SOCIAL_FORCE_2LVLPED;
 }
 
-std::unique_ptr<OperationalModel> SocialForceModelIPP::Clone() const
+std::unique_ptr<OperationalModel> SocialForceModel2LvlPed::Clone() const
 {
-    return std::make_unique<SocialForceModelIPP>(*this);
+    return std::make_unique<SocialForceModel2LvlPed>(*this);
 }
 
-OperationalModelUpdate SocialForceModelIPP::ComputeNewPosition(
+OperationalModelUpdate SocialForceModel2LvlPed::ComputeNewPosition(
     double dT,
     const GenericAgent& ped,
     const CollisionGeometry& geometry,
     const NeighborhoodSearchType& neighborhoodSearch) const
 {
-    const auto& model = std::get<SocialForceModelIPPData>(ped.model);
-    SocialForceModelIPPUpdate update{};
+    const auto& model = std::get<SocialForceModel2LvlPedData>(ped.model);
+    SocialForceModel2LvlPedUpdate update{};
 
     const auto neighborhood = neighborhoodSearch.GetNeighboringAgents(ped.pos, this->_cutOffRadius);
     const auto& walls = geometry.LineSegmentsInApproxDistanceTo(ped.pos);
@@ -63,7 +63,7 @@ OperationalModelUpdate SocialForceModelIPP::ComputeNewPosition(
         if(neighbor.id == ped.id) {
             continue;
         }
-        const auto& nmodel = std::get<SocialForceModelIPPData>(neighbor.model);
+        const auto& nmodel = std::get<SocialForceModel2LvlPedData>(neighbor.model);
         acc_ub += ExponentialRepulsion(
             ped.pos, neighbor.pos, model.agentScale, model.forceDistance, model.radius + nmodel.radius);
         acc_ub += AgentUpperBodyContactForce(ped, neighbor);
@@ -86,7 +86,7 @@ OperationalModelUpdate SocialForceModelIPP::ComputeNewPosition(
         if(neighbor.id == ped.id) {
             continue;
         }
-        const auto& nmodel = std::get<SocialForceModelIPPData>(neighbor.model);
+        const auto& nmodel = std::get<SocialForceModel2LvlPedData>(neighbor.model);
         acc_gs += ExponentialRepulsion(
             model.ground_support_position,
             nmodel.ground_support_position,
@@ -148,11 +148,11 @@ OperationalModelUpdate SocialForceModelIPP::ComputeNewPosition(
     return update;
 }
 
-void SocialForceModelIPP::ApplyUpdate(const OperationalModelUpdate& update, GenericAgent& agent)
+void SocialForceModel2LvlPed::ApplyUpdate(const OperationalModelUpdate& update, GenericAgent& agent)
     const
 {
-    auto& model = std::get<SocialForceModelIPPData>(agent.model);
-    const auto& upd = std::get<SocialForceModelIPPUpdate>(update);
+    auto& model = std::get<SocialForceModel2LvlPedData>(agent.model);
+    const auto& upd = std::get<SocialForceModel2LvlPedUpdate>(update);
     agent.pos = upd.position;
     agent.orientation = upd.velocity.Normalized();
     model.velocity = upd.velocity;
@@ -160,7 +160,7 @@ void SocialForceModelIPP::ApplyUpdate(const OperationalModelUpdate& update, Gene
     model.ground_support_velocity = upd.ground_support_velocity;
 }
 
-void SocialForceModelIPP::CheckModelConstraint(
+void SocialForceModel2LvlPed::CheckModelConstraint(
     const GenericAgent& agent,
     const NeighborhoodSearchType& neighborhoodSearch,
     const CollisionGeometry& geometry) const
@@ -186,7 +186,7 @@ void SocialForceModelIPP::CheckModelConstraint(
         }
     };
 
-    const auto& model = std::get<SocialForceModelIPPData>(agent.model);
+    const auto& model = std::get<SocialForceModel2LvlPedData>(agent.model);
 
     throwIfNegative(model.desiredSpeed, "desired speed");
     throwIfNotStrictlyPositive(model.reactionTime, "reaction time");
@@ -229,14 +229,14 @@ void SocialForceModelIPP::CheckModelConstraint(
     }
 }
 
-Point SocialForceModelIPP::DrivingForce(const GenericAgent& agent)
+Point SocialForceModel2LvlPed::DrivingForce(const GenericAgent& agent)
 {
-    const auto& model = std::get<SocialForceModelIPPData>(agent.model);
+    const auto& model = std::get<SocialForceModel2LvlPedData>(agent.model);
     const Point e0 = (agent.destination - agent.pos).Normalized();
     return (e0 * model.desiredSpeed - model.velocity) / model.reactionTime;
 }
 
-Point SocialForceModelIPP::ExponentialRepulsion(
+Point SocialForceModel2LvlPed::ExponentialRepulsion(
     const Point pt1,
     const Point pt2,
     const double A,
@@ -259,10 +259,10 @@ Point SocialForceModelIPP::ExponentialRepulsion(
 // Hard contact forces (pushing + friction) — active when bodies overlap
 // ---------------------------------------------------------------------------
 
-Point SocialForceModelIPP::AgentUpperBodyContactForce(const GenericAgent& ped1, const GenericAgent& ped2) const
+Point SocialForceModel2LvlPed::AgentUpperBodyContactForce(const GenericAgent& ped1, const GenericAgent& ped2) const
 {
-    const auto& model1 = std::get<SocialForceModelIPPData>(ped1.model);
-    const auto& model2 = std::get<SocialForceModelIPPData>(ped2.model);
+    const auto& model1 = std::get<SocialForceModel2LvlPedData>(ped1.model);
+    const auto& model2 = std::get<SocialForceModel2LvlPedData>(ped2.model);
 
     const double radiuses_sum = model1.radius + model2.radius;
 
@@ -276,10 +276,10 @@ Point SocialForceModelIPP::AgentUpperBodyContactForce(const GenericAgent& ped1, 
 };
 
 
-Point SocialForceModelIPP::AgentGroundSupportContactForce(const GenericAgent& ped1, const GenericAgent& ped2) const
+Point SocialForceModel2LvlPed::AgentGroundSupportContactForce(const GenericAgent& ped1, const GenericAgent& ped2) const
 {
-    const auto& model1 = std::get<SocialForceModelIPPData>(ped1.model);
-    const auto& model2 = std::get<SocialForceModelIPPData>(ped2.model);
+    const auto& model1 = std::get<SocialForceModel2LvlPedData>(ped1.model);
+    const auto& model2 = std::get<SocialForceModel2LvlPedData>(ped2.model);
 
     const double radiuses_sum = model1.radius * GS_SCALING_FACTOR * model1.height
                              + model2.radius * GS_SCALING_FACTOR * model2.height;
@@ -293,9 +293,9 @@ Point SocialForceModelIPP::AgentGroundSupportContactForce(const GenericAgent& pe
         model1.friction);
 };
 
-Point SocialForceModelIPP::ObstacleUpperBodyContactForce(const GenericAgent& agent, const LineSegment& segment) const
+Point SocialForceModel2LvlPed::ObstacleUpperBodyContactForce(const GenericAgent& agent, const LineSegment& segment) const
 {
-    const auto& model = std::get<SocialForceModelIPPData>(agent.model);
+    const auto& model = std::get<SocialForceModel2LvlPedData>(agent.model);
     const Point pt = segment.ShortestPoint(agent.pos);
     return ContactForceBetweenPoints(
         agent.pos,
@@ -306,9 +306,9 @@ Point SocialForceModelIPP::ObstacleUpperBodyContactForce(const GenericAgent& age
         model.friction);
 }
 
-Point SocialForceModelIPP::ObstacleGroundSupportContactForce(const GenericAgent& agent, const LineSegment& segment) const
+Point SocialForceModel2LvlPed::ObstacleGroundSupportContactForce(const GenericAgent& agent, const LineSegment& segment) const
 {
-    const auto& model = std::get<SocialForceModelIPPData>(agent.model);
+    const auto& model = std::get<SocialForceModel2LvlPedData>(agent.model);
     const Point pt = segment.ShortestPoint(model.ground_support_position);
     return ContactForceBetweenPoints(
         model.ground_support_position,
@@ -320,7 +320,7 @@ Point SocialForceModelIPP::ObstacleGroundSupportContactForce(const GenericAgent&
 }
 
 
-Point SocialForceModelIPP::ContactForceBetweenPoints(
+Point SocialForceModel2LvlPed::ContactForceBetweenPoints(
     const Point pt1,
     const Point pt2,
     const double radiuses_sum,

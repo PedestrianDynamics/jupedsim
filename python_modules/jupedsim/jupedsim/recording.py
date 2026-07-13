@@ -38,14 +38,14 @@ class Recording:
         )
         update_database_to_latest_version(self.db)
         self._check_version_compatible()
-        self._has_ipp_columns = self._detect_ipp_columns()
+        self._has_2lvlped_columns = self._detect_2lvlped_columns()
 
     @property
-    def has_ipp_columns(self) -> bool:
+    def has_2lvlped_columns(self) -> bool:
         """Whether the recording contains IPP model data."""
-        return self._has_ipp_columns
+        return self._has_2lvlped_columns
 
-    def _detect_ipp_columns(self) -> bool:
+    def _detect_2lvlped_columns(self) -> bool:
         cur = self.db.cursor()
         cur.execute("PRAGMA table_info(trajectory_data)")
         col_names = {row[1] for row in cur.fetchall()}
@@ -61,7 +61,7 @@ class Recording:
             A single frame.
 
         """
-        if self._has_ipp_columns:
+        if self._has_2lvlped_columns:
 
             def agent_row(cursor, row):
                 return RecordingAgent(

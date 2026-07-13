@@ -8,7 +8,7 @@ add_library(py_jupedsim MODULE
     collision_free_speed_model_v2.cpp
     anticipation_velocity_model.cpp
     social_force_model.cpp
-    social_force_model_IPP.cpp
+    social_force_model_2lvlped.cpp
     logging.cpp
     logging.hpp
     trace.cpp

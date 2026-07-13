@@ -73,12 +73,12 @@ add_library(simulator STATIC
     src/SocialForceModelBuilder.hpp
     src/SocialForceModelData.hpp
     src/SocialForceModelUpdate.hpp
-    src/SocialForceModelIPP.cpp
-    src/SocialForceModelIPP.hpp
-    src/SocialForceModelIPPBuilder.cpp
-    src/SocialForceModelIPPBuilder.hpp
-    src/SocialForceModelIPPData.hpp
-    src/SocialForceModelIPPUpdate.hpp
+    src/SocialForceModel2LvlPed.cpp
+    src/SocialForceModel2LvlPed.hpp
+    src/SocialForceModel2LvlPedBuilder.cpp
+    src/SocialForceModel2LvlPedBuilder.hpp
+    src/SocialForceModel2LvlPedData.hpp
+    src/SocialForceModel2LvlPedUpdate.hpp
     src/Stage.cpp
     src/Stage.hpp
     src/StageDescription.hpp
@@ -131,7 +131,7 @@ if (BUILD_TESTS)
         test/TestNeighborhoodSearch.cpp
         test/TestPoint.cpp
         test/TestSimulationClock.cpp
-        test/TestSocialForceModelIPP.cpp
+        test/TestSocialForceModel2LvlPed.cpp
         test/TestStage.cpp
         test/TestUniqueID.cpp
     )

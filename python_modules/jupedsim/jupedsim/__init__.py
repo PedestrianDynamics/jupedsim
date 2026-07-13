@@ -49,10 +49,10 @@ from jupedsim.models.social_force import (
     SocialForceModelAgentParameters,
     SocialForceModelState,
 )
-from jupedsim.models.social_force_IPP import (
-    SocialForceModelIPP,
-    SocialForceModelIPPAgentParameters,
-    SocialForceModelIPPState,
+from jupedsim.models.social_force_2lvlped import (
+    SocialForceModel2LvlPed,
+    SocialForceModel2LvlPedAgentParameters,
+    SocialForceModel2LvlPedState,
 )
 from jupedsim.recording import Recording, RecordingAgent, RecordingFrame
 from jupedsim.routing import RoutingEngine
@@ -60,7 +60,7 @@ from jupedsim.serialization import TrajectoryWriter
 from jupedsim.simulation import Simulation
 from jupedsim.sqlite_serialization import (
     SqliteTrajectoryWriter,
-    SqliteIPPTrajectoryWriter,
+    Sqlite2LvlPedTrajectoryWriter,
 )
 from jupedsim.stages import (
     ExitStage,
@@ -106,7 +106,7 @@ __all__ = [
     "RoutingEngine",
     "Simulation",
     "SqliteTrajectoryWriter",
-    "SqliteIPPTrajectoryWriter",
+    "Sqlite2LvlPedTrajectoryWriter",
     "Trace",
     "TrajectoryWriter",
     "Transition",
@@ -122,9 +122,9 @@ __all__ = [
     "SocialForceModelAgentParameters",
     "SocialForceModel",
     "SocialForceModelState",
-    "SocialForceModelIPPAgentParameters",
-    "SocialForceModelIPP",
-    "SocialForceModelIPPState",
+    "SocialForceModel2LvlPedAgentParameters",
+    "SocialForceModel2LvlPed",
+    "SocialForceModel2LvlPedState",
     "WaitingSetStage",
     "WaitingSetState",
     "WaypointStage",

@@ -1,4 +1,4 @@
-# Two-Level Pedestrian Model (SocialForceModelIPP)
+# Two-Level Pedestrian Model (SocialForceModel2LvlPed)
 
 Based on: *"When legs and bodies synchronize: Two-level collective dynamics in dense crowds"*
 (Chatagnon, Chraibi, Pettré, Seyfried, Tordeux, 2026)
@@ -149,19 +149,19 @@ single parameter `v_s`, not two separate `v_u`/`v_b`.
 
 ### C++ core (`libsimulator/src/`)
 
-- [x] `SocialForceModelIPPData.hpp`: replace params (removed mass, added lambdaU/lambdaB/balanceSpeed/damping/obstacleScale/obstacleForceDistance/legForceDistance)
-- [x] `SocialForceModelIPP.hpp`: parameterless constructor, removed contact forces, added LEG_SCALING_FACTOR
-- [x] `SocialForceModelIPP.cpp`: rewritten ComputeNewPosition() with paper equations, separate wall query for legs
-- [x] `SocialForceModelIPPBuilder.cpp/.hpp`: parameterless builder
+- [x] `SocialForceModel2LvlPedData.hpp`: replace params (removed mass, added lambdaU/lambdaB/balanceSpeed/damping/obstacleScale/obstacleForceDistance/legForceDistance)
+- [x] `SocialForceModel2LvlPed.hpp`: parameterless constructor, removed contact forces, added LEG_SCALING_FACTOR
+- [x] `SocialForceModel2LvlPed.cpp`: rewritten ComputeNewPosition() with paper equations, separate wall query for legs
+- [x] `SocialForceModel2LvlPedBuilder.cpp/.hpp`: parameterless builder
 
 ### pybind11 (`python_bindings_jupedsim/`)
 
-- [x] `social_force_model_IPP.cpp`: updated builder, agent params, state properties
+- [x] `social_force_model_2lvlped.cpp`: updated builder, agent params, state properties
 
 ### Python wrapper (`python_modules/jupedsim/`)
 
-- [x] `jupedsim/models/social_force_IPP.py`: updated classes and params
-- [x] `jupedsim/sqlite_serialization.py`: IPP trajectory writer with ground support columns
+- [x] `jupedsim/models/social_force_2LvlPed.py`: updated classes and params
+- [x] `jupedsim/sqlite_serialization.py`: 2LvlPed trajectory writer with ground support columns
 
 ### Example + tests
 

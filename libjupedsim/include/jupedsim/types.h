@@ -62,7 +62,7 @@ typedef enum JPS_ModelType {
     JPS_CollisionFreeSpeedModelV2,
     JPS_AnticipationVelocityModel,
     JPS_SocialForceModel,
-    JPS_SocialForceModelIPP
+    JPS_SocialForceModel2LvlPed
 } JPS_ModelType;
 
 /**

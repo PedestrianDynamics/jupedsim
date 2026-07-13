@@ -366,16 +366,16 @@ JPS_AgentId JPS_Simulation_AddSocialForceModelAgent(
     return result.getID();
 }
 
-JPS_AgentId JPS_Simulation_AddSocialForceModelIPPAgent(
+JPS_AgentId JPS_Simulation_AddSocialForceModel2LvlPedAgent(
     JPS_Simulation handle,
-    JPS_SocialForceModelIPPAgentParameters parameters,
+    JPS_SocialForceModel2LvlPedAgentParameters parameters,
     JPS_ErrorMessage* errorMessage)
 {
     assert(handle);
     auto result = GenericAgent::ID::Invalid;
     auto simulation = reinterpret_cast<Simulation*>(handle);
     try {
-        if(simulation->ModelType() != OperationalModelType::SOCIAL_FORCE_IPP) {
+        if(simulation->ModelType() != OperationalModelType::SOCIAL_FORCE_2LVLPED) {
             throw std::runtime_error("Simulation is not configured to use Social Force Model with IP agents");
         }
         GenericAgent agent{
@@ -384,7 +384,7 @@ JPS_AgentId JPS_Simulation_AddSocialForceModelIPPAgent(
             BaseStage::ID(parameters.stageId),
             intoPoint(parameters.position),
             intoPoint(parameters.orientation),
-            SocialForceModelIPPData{
+            SocialForceModel2LvlPedData{
                 intoPoint(parameters.velocity),
                 intoPoint(parameters.ground_support_position),
                 intoPoint(parameters.ground_support_velocity),
@@ -575,8 +575,8 @@ JPS_ModelType JPS_Simulation_ModelType(JPS_Simulation handle)
             return JPS_AnticipationVelocityModel;
         case OperationalModelType::SOCIAL_FORCE:
             return JPS_SocialForceModel;
-        case OperationalModelType::SOCIAL_FORCE_IPP:
-            return JPS_SocialForceModelIPP;
+        case OperationalModelType::SOCIAL_FORCE_2LVLPED:
+            return JPS_SocialForceModel2LvlPed;
     }
     UNREACHABLE();
 }

@@ -12,7 +12,7 @@ from jupedsim.models.generalized_centrifugal_force import (
     GeneralizedCentrifugalForceModelState,
 )
 from jupedsim.models.social_force import SocialForceModelState
-from jupedsim.models.social_force_IPP import SocialForceModelIPPState
+from jupedsim.models.social_force_2lvlped import SocialForceModel2LvlPedState
 
 
 class Agent:
@@ -111,7 +111,7 @@ class Agent:
         | CollisionFreeSpeedModelV2State
         | AnticipationVelocityModelState
         | SocialForceModelState
-        | SocialForceModelIPPState
+        | SocialForceModel2LvlPedState
     ):
         """Access model specific state of this agent."""
         model = self._obj.model
@@ -125,7 +125,7 @@ class Agent:
             return AnticipationVelocityModelState(model)
         elif isinstance(model, py_jps.SocialForceModelState):
             return SocialForceModelState(model)
-        elif isinstance(model, py_jps.SocialForceModelIPPState):
-            return SocialForceModelIPPState(model)
+        elif isinstance(model, py_jps.SocialForceModel2LvlPedState):
+            return SocialForceModel2LvlPedState(model)
         else:
             raise Exception("Internal error")

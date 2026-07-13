@@ -2,7 +2,7 @@
 #pragma once
 
 #include "Point.hpp"
-struct SocialForceModelIPPData {
+struct SocialForceModel2LvlPedData {
     Point velocity{}; // v
     Point ground_support_position{}; // position of ground support circle
     Point ground_support_velocity{}; // velocity of ground support circle
@@ -25,16 +25,16 @@ struct SocialForceModelIPPData {
 };
 
 template <>
-struct fmt::formatter<SocialForceModelIPPData> {
+struct fmt::formatter<SocialForceModel2LvlPedData> {
 
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
     template <typename FormatContext>
-    auto format(const SocialForceModelIPPData& m, FormatContext& ctx) const
+    auto format(const SocialForceModel2LvlPedData& m, FormatContext& ctx) const
     {
         return fmt::format_to(
             ctx.out(),
-            "IPP[velocity={}, gs_pos={}, gs_vel={}, h={}, v0={}, tau={}, "
+            "2LvlPed[velocity={}, gs_pos={}, gs_vel={}, h={}, v0={}, tau={}, "
             "lambda_u={}, lambda_b={}, v_s={}, lambda={}, A={}, A_w={}, A_leg={}, B={}, B_w={}, B_leg={}, "
             "r={}, k={}, mu={}])",
             m.velocity,

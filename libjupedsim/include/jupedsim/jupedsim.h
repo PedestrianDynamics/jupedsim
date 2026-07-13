@@ -16,7 +16,7 @@
 #include "routing.h"
 #include "simulation.h"
 #include "social_force_model.h"
-#include "social_force_model_IPP.h"
+#include "social_force_model_2lvlped.h"
 #include "stage.h"
 #include "transition.h"
 #include "types.h"

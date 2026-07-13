@@ -28,12 +28,12 @@ exit_area = Polygon([(27, -2), (28, -2), (28, 2), (27, 2)])
 
 
 ## Setup Simulation
-trajectory_file = "bottleneck_SocialForceModelIPP.sqlite"  # output file
-writer = jps.SqliteIPPTrajectoryWriter(
+trajectory_file = "bottleneck_SocialForceModel2LvlPed.sqlite"  # output file
+writer = jps.Sqlite2LvlPedTrajectoryWriter(
     output_file=pathlib.Path(trajectory_file)
 )
 simulation = jps.Simulation(
-    model=jps.SocialForceModelIPP(),
+    model=jps.SocialForceModel2LvlPed(),
     geometry=area,
     trajectory_writer=writer,
 )
@@ -47,7 +47,7 @@ v_distribution = normal(1.5, 0.2, num_agents)
 
 for pos, v0 in zip(pos_in_spawning_area, v_distribution):
     agent_id = simulation.add_agent(
-        jps.SocialForceModelIPPAgentParameters(
+        jps.SocialForceModel2LvlPedAgentParameters(
             position=pos,
             orientation=(0.0, 0.0),
             journey_id=journey_id,

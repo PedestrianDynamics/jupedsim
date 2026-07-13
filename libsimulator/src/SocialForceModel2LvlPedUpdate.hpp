@@ -3,7 +3,7 @@
 
 #include <optional>
 
-struct SocialForceModelIPPUpdate {
+struct SocialForceModel2LvlPedUpdate {
     Point position{};
     Point ground_support_position{};
     Point ground_support_velocity{};

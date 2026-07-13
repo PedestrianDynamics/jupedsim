@@ -8,7 +8,7 @@ import pytest
 def _make_simulation(model=None):
     """Create a simple corridor simulation with the IPP model."""
     if model is None:
-        model = jps.SocialForceModelIPP()
+        model = jps.SocialForceModel2LvlPed()
     sim = jps.Simulation(
         model=model,
         geometry=[(0, 0), (20, 0), (20, 4), (0, 4)],
@@ -24,12 +24,12 @@ def _add_journey(sim):
     return journey_id, exit_id
 
 
-def test_ipp_model_construction_defaults():
+def test_2lvlped_model_construction_defaults():
     """Model can be created with default parameters."""
     sim = _make_simulation()
     journey_id, exit_id = _add_journey(sim)
     agent_id = sim.add_agent(
-        jps.SocialForceModelIPPAgentParameters(
+        jps.SocialForceModel2LvlPedAgentParameters(
             position=(2, 2),
             journey_id=journey_id,
             stage_id=exit_id,
@@ -40,13 +40,13 @@ def test_ipp_model_construction_defaults():
         sim.iterate()
 
 
-def test_ipp_model_construction_custom():
+def test_2lvlped_model_construction_custom():
     """Model can be created with custom agent parameters."""
-    model = jps.SocialForceModelIPP()
+    model = jps.SocialForceModel2LvlPed()
     sim = _make_simulation(model)
     journey_id, exit_id = _add_journey(sim)
     sim.add_agent(
-        jps.SocialForceModelIPPAgentParameters(
+        jps.SocialForceModel2LvlPedAgentParameters(
             position=(2, 2),
             journey_id=journey_id,
             stage_id=exit_id,
@@ -64,12 +64,12 @@ def test_ipp_model_construction_custom():
     assert agent.position[0] > 2.0
 
 
-def test_ipp_agent_state_readable():
+def test_2lvlped_agent_state_readable():
     """Agent state properties are readable at runtime."""
     sim = _make_simulation()
     journey_id, exit_id = _add_journey(sim)
     sim.add_agent(
-        jps.SocialForceModelIPPAgentParameters(
+        jps.SocialForceModel2LvlPedAgentParameters(
             position=(2, 2),
             journey_id=journey_id,
             stage_id=exit_id,
@@ -93,12 +93,12 @@ def test_ipp_agent_state_readable():
     assert isinstance(state.leg_force_distance, float)
 
 
-def test_ipp_agent_state_writable():
+def test_2lvlped_agent_state_writable():
     """Agent state properties can be modified at runtime."""
     sim = _make_simulation()
     journey_id, exit_id = _add_journey(sim)
     sim.add_agent(
-        jps.SocialForceModelIPPAgentParameters(
+        jps.SocialForceModel2LvlPedAgentParameters(
             position=(2, 2),
             journey_id=journey_id,
             stage_id=exit_id,
@@ -114,13 +114,13 @@ def test_ipp_agent_state_writable():
     assert state.balance_speed == pytest.approx(1.5)
 
 
-def test_ipp_constraint_rejects_negative_desired_speed():
+def test_2lvlped_constraint_rejects_negative_desired_speed():
     """CheckModelConstraint rejects agents with negative desired speed."""
     sim = _make_simulation()
     journey_id, exit_id = _add_journey(sim)
     with pytest.raises(RuntimeError):
         sim.add_agent(
-            jps.SocialForceModelIPPAgentParameters(
+            jps.SocialForceModel2LvlPedAgentParameters(
                 position=(2, 2),
                 journey_id=journey_id,
                 stage_id=exit_id,
@@ -129,12 +129,12 @@ def test_ipp_constraint_rejects_negative_desired_speed():
         )
 
 
-def test_ipp_constraint_rejects_overlapping_agents():
+def test_2lvlped_constraint_rejects_overlapping_agents():
     """CheckModelConstraint rejects overlapping agents."""
     sim = _make_simulation()
     journey_id, exit_id = _add_journey(sim)
     sim.add_agent(
-        jps.SocialForceModelIPPAgentParameters(
+        jps.SocialForceModel2LvlPedAgentParameters(
             position=(2, 2),
             journey_id=journey_id,
             stage_id=exit_id,
@@ -142,7 +142,7 @@ def test_ipp_constraint_rejects_overlapping_agents():
     )
     with pytest.raises(RuntimeError):
         sim.add_agent(
-            jps.SocialForceModelIPPAgentParameters(
+            jps.SocialForceModel2LvlPedAgentParameters(
                 position=(2, 2),
                 journey_id=journey_id,
                 stage_id=exit_id,
@@ -150,12 +150,12 @@ def test_ipp_constraint_rejects_overlapping_agents():
         )
 
 
-def test_ipp_agents_reach_exit():
+def test_2lvlped_agents_reach_exit():
     """Agents using the IPP model can reach an exit."""
     sim = _make_simulation()
     journey_id, exit_id = _add_journey(sim)
     sim.add_agent(
-        jps.SocialForceModelIPPAgentParameters(
+        jps.SocialForceModel2LvlPedAgentParameters(
             position=(2, 2),
             journey_id=journey_id,
             stage_id=exit_id,
@@ -170,9 +170,9 @@ def test_ipp_agents_reach_exit():
     assert sim.agent_count() == 0, "Agent did not reach exit"
 
 
-def test_ipp_bottleneck_scenario():
+def test_2lvlped_bottleneck_scenario():
     """Bottleneck with 20 agents completes without crash."""
-    model = jps.SocialForceModelIPP()
+    model = jps.SocialForceModel2LvlPed()
     sim = jps.Simulation(
         model=model,
         geometry=[
@@ -198,7 +198,7 @@ def test_ipp_bottleneck_scenario():
         x = 1.0 + (i % 5) * 1.5
         y = 0.8 + (i // 5) * 0.6
         sim.add_agent(
-            jps.SocialForceModelIPPAgentParameters(
+            jps.SocialForceModel2LvlPedAgentParameters(
                 position=(x, y),
                 journey_id=journey_id,
                 stage_id=exit_id,
@@ -219,16 +219,16 @@ def test_ipp_bottleneck_scenario():
     )
 
 
-def test_ipp_trajectory_writer(tmp_path):
-    """SqliteIPPTrajectoryWriter writes ground support columns."""
-    from jupedsim.sqlite_serialization import SqliteIPPTrajectoryWriter
+def test_2lvlped_trajectory_writer(tmp_path):
+    """Sqlite2LvlPedTrajectoryWriter writes ground support columns."""
+    from jupedsim.sqlite_serialization import Sqlite2LvlPedTrajectoryWriter
 
     output = tmp_path / "traj.sqlite"
-    writer = SqliteIPPTrajectoryWriter(output_file=output, every_nth_frame=1)
+    writer = Sqlite2LvlPedTrajectoryWriter(output_file=output, every_nth_frame=1)
     sim = _make_simulation()
     journey_id, exit_id = _add_journey(sim)
     sim.add_agent(
-        jps.SocialForceModelIPPAgentParameters(
+        jps.SocialForceModel2LvlPedAgentParameters(
             position=(2, 2),
             journey_id=journey_id,
             stage_id=exit_id,

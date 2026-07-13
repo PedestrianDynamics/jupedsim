@@ -7,7 +7,7 @@
 #include "OperationalModel.hpp"
 #include "Point.hpp"
 #include "SocialForceModelData.hpp"
-#include "SocialForceModelIPPData.hpp"
+#include "SocialForceModel2LvlPedData.hpp"
 #include "UniqueID.hpp"
 #include "Visitor.hpp"
 
@@ -36,7 +36,7 @@ struct GenericAgent {
         CollisionFreeSpeedModelV2Data,
         AnticipationVelocityModelData,
         SocialForceModelData,
-        SocialForceModelIPPData>;
+        SocialForceModel2LvlPedData>;
     Model model{};
 
     GenericAgent(
