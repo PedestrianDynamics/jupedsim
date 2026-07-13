@@ -202,9 +202,9 @@ sim = jps.Simulation(model=model, geometry=area, dt=0.01)
 
 # Agent-level parameters: pass a state object to add_agent
 agent_id = sim.add_agent(
-    journey_id,
-    stage_id,
-    jps.WarpDriverModelState(
+    journey_id=journey_id,
+    stage_id=stage_id,
+    state=jps.WarpDriverModelState(
         position=(2.0, 2.0),
         orientation=(1.0, 0.0),
         desired_speed=1.2,

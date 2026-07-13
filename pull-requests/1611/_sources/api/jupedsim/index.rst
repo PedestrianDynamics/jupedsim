@@ -314,7 +314,7 @@ Attributes
 
    Base class for operational models implemented in Python.
 
-   Subclasses implement :meth:`compute_new_position` and optionally
+   Subclasses implement :meth:`compute_next_state` and optionally
    :meth:`check_model_constraint`. Constraint violations should be reported by
    raising an exception.
 
@@ -333,7 +333,7 @@ Attributes
        producing order-dependent results.
 
        The only correct way to change state is to return a new state object
-       from :meth:`compute_new_position` -- returning ``ped.model`` itself
+       from :meth:`compute_next_state` -- returning ``ped.model`` itself
        (even unchanged) raises an error; use
        ``dataclasses.replace(ped.model, ...)``. Make your state type
        immutable -- a ``@dataclass(frozen=True)`` -- so accidental in-place
@@ -356,7 +356,7 @@ Attributes
 
 
 
-   .. py:method:: compute_new_position(dt: float, ped: jupedsim.agent._TransientAgent, geometry: jupedsim.geometry.Geometry, neighborhood_search: jupedsim.neighborhood.NeighborhoodSearch) -> CustomModelAgentState
+   .. py:method:: compute_next_state(dt: float, ped: jupedsim.agent._TransientAgent, geometry: jupedsim.geometry.Geometry, neighborhood_search: jupedsim.neighborhood.NeighborhoodSearch) -> CustomModelAgentState
       :abstractmethod:
 
 
@@ -767,7 +767,7 @@ Attributes
    simulation.
 
 
-   .. py:method:: add_agent(journey_id: int, stage_id: int, state: jupedsim.models.generalized_centrifugal_force.GeneralizedCentrifugalForceModelState | jupedsim.models.collision_free_speed.CollisionFreeSpeedModelState | jupedsim.models.collision_free_speed_v2.CollisionFreeSpeedModelV2State | jupedsim.models.collision_free_speed_v3.CollisionFreeSpeedModelV3State | jupedsim.models.anticipation_velocity_model.AnticipationVelocityModelState | jupedsim.models.social_force.SocialForceModelState | jupedsim.models.warp_driver.WarpDriverModelState | jupedsim.models.custom_model.CustomModelAgentState) -> int
+   .. py:method:: add_agent(*, journey_id: int, stage_id: int, state: jupedsim.models.generalized_centrifugal_force.GeneralizedCentrifugalForceModelState | jupedsim.models.collision_free_speed.CollisionFreeSpeedModelState | jupedsim.models.collision_free_speed_v2.CollisionFreeSpeedModelV2State | jupedsim.models.collision_free_speed_v3.CollisionFreeSpeedModelV3State | jupedsim.models.anticipation_velocity_model.AnticipationVelocityModelState | jupedsim.models.social_force.SocialForceModelState | jupedsim.models.warp_driver.WarpDriverModelState | jupedsim.models.custom_model.CustomModelAgentState) -> int
 
       Add an agent to the simulation.
 

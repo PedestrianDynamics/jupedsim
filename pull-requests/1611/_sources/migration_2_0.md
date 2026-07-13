@@ -10,8 +10,8 @@ The three changes you will encounter in every script:
    instance* carrying its model-level parameters (e.g.
    `jps.SocialForceModel(body_force=..., friction=...)`). The
    `ModelType` enum has been removed.
-2. **Adding agents** — `add_agent` now takes
-   `(journey_id, stage_id, state)`, where `state` is a directly
+2. **Adding agents** — `add_agent` now takes the keyword-only arguments
+   `journey_id`, `stage_id` and `state`, where `state` is a directly
    instantiated per-model state object such as
    {class}`~jupedsim.CollisionFreeSpeedModelState`.
 3. **Agent access** — {class}`~jupedsim.Agent` objects are lightweight
@@ -20,17 +20,14 @@ The three changes you will encounter in every script:
 ## Constructing a Simulation
 
 Every built-in model is now constructed as an instance that carries its
-model-level parameters. The `ModelType` enum no longer exists:
+model-level parameters. The `ModelType` enum no longer exists.
 
-```python
-import jupedsim as jps
-
-# 1.x
-sim = jps.Simulation(model=jps.CollisionFreeSpeedModel(), geometry=area)
-
-# 2.0 — a configured model instance
-sim = jps.Simulation(model=jps.CollisionFreeSpeedModel(), geometry=area)
-```
+Simulation construction is **source-compatible** with 1.x for the built-in
+models: `jps.Simulation(model=jps.CollisionFreeSpeedModel(...), geometry=area)`
+is written the same way. What changed underneath: the model argument is no
+longer a parameter-holding dataclass but the operational model itself, it is
+consumed by the constructor (see the warning below), and its keyword arguments
+are now the single place where model-level parameters are set.
 
 The model instance holds the parameters that govern the model globally.
 Constructed with their defaults they reproduce exactly the configuration that
@@ -92,7 +89,8 @@ Passing a wrong `model` argument raises `TypeError`.
 
 ## Adding agents
 
-`add_agent` takes the journey id, the stage id and a per-model state object.
+`add_agent` takes the journey id, the stage id and a per-model state object —
+**all three as keyword-only arguments**; positional calls raise `TypeError`.
 The agent spawns at `state.position`. All state constructors are
 keyword-only and expose the per-agent fields of the model, with defaults
 taken from the C++ implementation. Model-level parameters (see above) live on
@@ -111,9 +109,9 @@ agent_id = sim.add_agent(
 
 # 2.0
 agent_id = sim.add_agent(
-    journey_id,
-    stage_id,
-    jps.CollisionFreeSpeedModelState(position=(1.0, 1.0), desired_speed=1.4),
+    journey_id=journey_id,
+    stage_id=stage_id,
+    state=jps.CollisionFreeSpeedModelState(position=(1.0, 1.0), desired_speed=1.4),
 )
 ```
 
@@ -126,7 +124,7 @@ For custom models the state is your own object satisfying the
 `position` attribute; a frozen dataclass is recommended):
 
 ```python
-sim.add_agent(journey_id, stage_id, MyState(position=(1.0, 1.0)))
+sim.add_agent(journey_id=journey_id, stage_id=stage_id, state=MyState(position=(1.0, 1.0)))
 ```
 
 ## Old → new mapping per model

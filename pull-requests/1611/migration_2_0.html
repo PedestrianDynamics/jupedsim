@@ -355,8 +355,8 @@ shims</strong>. This guide maps every 1.x construct to its 2.0 replacement.</p>
 instance</em> carrying its model-level parameters (e.g.
 <code class="docutils literal notranslate"><span class="pre">jps.SocialForceModel(body_force=...,</span> <span class="pre">friction=...)</span></code>). The
 <code class="docutils literal notranslate"><span class="pre">ModelType</span></code> enum has been removed.</p></li>
-<li><p><strong>Adding agents</strong> — <code class="docutils literal notranslate"><span class="pre">add_agent</span></code> now takes
-<code class="docutils literal notranslate"><span class="pre">(journey_id,</span> <span class="pre">stage_id,</span> <span class="pre">state)</span></code>, where <code class="docutils literal notranslate"><span class="pre">state</span></code> is a directly
+<li><p><strong>Adding agents</strong> — <code class="docutils literal notranslate"><span class="pre">add_agent</span></code> now takes the keyword-only arguments
+<code class="docutils literal notranslate"><span class="pre">journey_id</span></code>, <code class="docutils literal notranslate"><span class="pre">stage_id</span></code> and <code class="docutils literal notranslate"><span class="pre">state</span></code>, where <code class="docutils literal notranslate"><span class="pre">state</span></code> is a directly
 instantiated per-model state object such as
 <a class="reference internal" href="api/jupedsim/index.html#jupedsim.CollisionFreeSpeedModelState" title="jupedsim.CollisionFreeSpeedModelState"><code class="xref py py-class docutils literal notranslate"><span class="pre">CollisionFreeSpeedModelState</span></code></a>.</p></li>
 <li><p><strong>Agent access</strong> — <a class="reference internal" href="api/jupedsim/index.html#jupedsim.Agent" title="jupedsim.Agent"><code class="xref py py-class docutils literal notranslate"><span class="pre">Agent</span></code></a> objects are lightweight
@@ -365,16 +365,13 @@ instantiated per-model state object such as
 <section id="constructing-a-simulation">
 <h2>Constructing a Simulation<a class="headerlink" href="#constructing-a-simulation" title="Link to this heading">#</a></h2>
 <p>Every built-in model is now constructed as an instance that carries its
-model-level parameters. The <code class="docutils literal notranslate"><span class="pre">ModelType</span></code> enum no longer exists:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">jupedsim</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jps</span>
-
-<span class="c1"># 1.x</span>
-<span class="n">sim</span> <span class="o">=</span> <span class="n">jps</span><span class="o">.</span><span class="n">Simulation</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">jps</span><span class="o">.</span><span class="n">CollisionFreeSpeedModel</span><span class="p">(),</span> <span class="n">geometry</span><span class="o">=</span><span class="n">area</span><span class="p">)</span>
-
-<span class="c1"># 2.0 — a configured model instance</span>
-<span class="n">sim</span> <span class="o">=</span> <span class="n">jps</span><span class="o">.</span><span class="n">Simulation</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">jps</span><span class="o">.</span><span class="n">CollisionFreeSpeedModel</span><span class="p">(),</span> <span class="n">geometry</span><span class="o">=</span><span class="n">area</span><span class="p">)</span>
-</pre></div>
-</div>
+model-level parameters. The <code class="docutils literal notranslate"><span class="pre">ModelType</span></code> enum no longer exists.</p>
+<p>Simulation construction is <strong>source-compatible</strong> with 1.x for the built-in
+models: <code class="docutils literal notranslate"><span class="pre">jps.Simulation(model=jps.CollisionFreeSpeedModel(...),</span> <span class="pre">geometry=area)</span></code>
+is written the same way. What changed underneath: the model argument is no
+longer a parameter-holding dataclass but the operational model itself, it is
+consumed by the constructor (see the warning below), and its keyword arguments
+are now the single place where model-level parameters are set.</p>
 <p>The model instance holds the parameters that govern the model globally.
 Constructed with their defaults they reproduce exactly the configuration that
 the 1.x defaults produced, so existing simulations remain byte-identical:</p>
@@ -429,7 +426,8 @@ be reused for a second simulation.</p>
 </section>
 <section id="adding-agents">
 <h2>Adding agents<a class="headerlink" href="#adding-agents" title="Link to this heading">#</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">add_agent</span></code> takes the journey id, the stage id and a per-model state object.
+<p><code class="docutils literal notranslate"><span class="pre">add_agent</span></code> takes the journey id, the stage id and a per-model state object —
+<strong>all three as keyword-only arguments</strong>; positional calls raise <code class="docutils literal notranslate"><span class="pre">TypeError</span></code>.
 The agent spawns at <code class="docutils literal notranslate"><span class="pre">state.position</span></code>. All state constructors are
 keyword-only and expose the per-agent fields of the model, with defaults
 taken from the C++ implementation. Model-level parameters (see above) live on
@@ -446,9 +444,9 @@ the model instance and are <em>not</em> part of the state.</p>
 
 <span class="c1"># 2.0</span>
 <span class="n">agent_id</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">add_agent</span><span class="p">(</span>
-    <span class="n">journey_id</span><span class="p">,</span>
-    <span class="n">stage_id</span><span class="p">,</span>
-    <span class="n">jps</span><span class="o">.</span><span class="n">CollisionFreeSpeedModelState</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="n">desired_speed</span><span class="o">=</span><span class="mf">1.4</span><span class="p">),</span>
+    <span class="n">journey_id</span><span class="o">=</span><span class="n">journey_id</span><span class="p">,</span>
+    <span class="n">stage_id</span><span class="o">=</span><span class="n">stage_id</span><span class="p">,</span>
+    <span class="n">state</span><span class="o">=</span><span class="n">jps</span><span class="o">.</span><span class="n">CollisionFreeSpeedModelState</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="n">desired_speed</span><span class="o">=</span><span class="mf">1.4</span><span class="p">),</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -458,7 +456,7 @@ the model instance and are <em>not</em> part of the state.</p>
 <p>For custom models the state is your own object satisfying the
 <a class="reference internal" href="api/jupedsim/index.html#jupedsim.CustomModelAgentState" title="jupedsim.CustomModelAgentState"><code class="xref py py-class docutils literal notranslate"><span class="pre">CustomModelAgentState</span></code></a> protocol (an object with a
 <code class="docutils literal notranslate"><span class="pre">position</span></code> attribute; a frozen dataclass is recommended):</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">sim</span><span class="o">.</span><span class="n">add_agent</span><span class="p">(</span><span class="n">journey_id</span><span class="p">,</span> <span class="n">stage_id</span><span class="p">,</span> <span class="n">MyState</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)))</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">sim</span><span class="o">.</span><span class="n">add_agent</span><span class="p">(</span><span class="n">journey_id</span><span class="o">=</span><span class="n">journey_id</span><span class="p">,</span> <span class="n">stage_id</span><span class="o">=</span><span class="n">stage_id</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="n">MyState</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)))</span>
 </pre></div>
 </div>
 </section>

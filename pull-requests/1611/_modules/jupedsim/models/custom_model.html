@@ -371,7 +371,7 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">CustomOperationalModel</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for operational models implemented in Python.</span>
 
-<span class="sd">    Subclasses implement :meth:`compute_new_position` and optionally</span>
+<span class="sd">    Subclasses implement :meth:`compute_next_state` and optionally</span>
 <span class="sd">    :meth:`check_model_constraint`. Constraint violations should be reported by</span>
 <span class="sd">    raising an exception.</span>
 
@@ -390,7 +390,7 @@
 <span class="sd">        producing order-dependent results.</span>
 
 <span class="sd">        The only correct way to change state is to return a new state object</span>
-<span class="sd">        from :meth:`compute_new_position` -- returning ``ped.model`` itself</span>
+<span class="sd">        from :meth:`compute_next_state` -- returning ``ped.model`` itself</span>
 <span class="sd">        (even unchanged) raises an error; use</span>
 <span class="sd">        ``dataclasses.replace(ped.model, ...)``. Make your state type</span>
 <span class="sd">        immutable -- a ``@dataclass(frozen=True)`` -- so accidental in-place</span>
@@ -407,10 +407,10 @@
 <span class="sd">        callback raises :class:`~jupedsim.SimulationError`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="CustomOperationalModel.compute_new_position">
-<a class="viewcode-back" href="../../../api/jupedsim/index.html#jupedsim.CustomOperationalModel.compute_new_position">[docs]</a>
+<div class="viewcode-block" id="CustomOperationalModel.compute_next_state">
+<a class="viewcode-back" href="../../../api/jupedsim/index.html#jupedsim.CustomOperationalModel.compute_next_state">[docs]</a>
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">compute_new_position</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_next_state</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">dt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
         <span class="n">ped</span><span class="p">:</span> <span class="n">_TransientAgent</span><span class="p">,</span>
@@ -432,7 +432,7 @@
         <span class="k">pass</span></div>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_compute_new_position</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_compute_next_state</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">dt</span><span class="p">,</span>
         <span class="n">ped</span><span class="p">,</span>
@@ -443,7 +443,7 @@
         <span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Geometry</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.neighborhood</span><span class="w"> </span><span class="kn">import</span> <span class="n">NeighborhoodSearch</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_new_position</span><span class="p">(</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_next_state</span><span class="p">(</span>
             <span class="n">dt</span><span class="p">,</span>
             <span class="n">_TransientAgent</span><span class="p">(</span><span class="n">ped</span><span class="p">),</span>
             <span class="n">Geometry</span><span class="p">(</span><span class="n">geometry</span><span class="p">),</span>

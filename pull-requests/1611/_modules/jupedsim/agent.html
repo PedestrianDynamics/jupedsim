@@ -501,7 +501,7 @@
 <span class="sd">        returns the user supplied state object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__resolve</span><span class="p">()</span><span class="o">.</span><span class="n">model</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">_CustomModelData</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">_CustomModelState</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">state</span><span class="o">.</span><span class="n">model</span>
         <span class="k">return</span> <span class="n">_ModelStateHandle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__simulation</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__id</span><span class="p">)</span>
 
@@ -514,7 +514,7 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Read-only view of an agent used inside custom-model callbacks.</span>
 
 <span class="sd">    Wraps the native transient agent reference handed to</span>
-<span class="sd">    :meth:`~jupedsim.models.custom_model.CustomOperationalModel.compute_new_position`</span>
+<span class="sd">    :meth:`~jupedsim.models.custom_model.CustomOperationalModel.compute_next_state`</span>
 <span class="sd">    and to neighborhood queries. Instances are only valid for the duration of</span>
 <span class="sd">    the callback they were created in and must never be stored.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -558,10 +558,10 @@
 
 <span class="sd">        For custom models this is the user supplied state object. Treat it as</span>
 <span class="sd">        read-only: state may only be changed by returning a new state object</span>
-<span class="sd">        from ``compute_new_position``.</span>
+<span class="sd">        from ``compute_next_state``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__obj</span><span class="o">.</span><span class="n">model</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">_CustomModelData</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">_CustomModelState</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">state</span><span class="o">.</span><span class="n">model</span>
         <span class="k">return</span> <span class="n">state</span>
 
