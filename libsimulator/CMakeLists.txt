@@ -17,6 +17,10 @@ target_sources(simulator PRIVATE
     src/Ellipse.hpp
     src/GenericAgent.hpp
     src/GeometricFunctions.hpp
+    src/Geometry/Geometry3D.cpp
+    src/Geometry/Geometry3D.hpp
+    src/Geometry/RegionSplit.cpp
+    src/Geometry/RegionSplit.hpp
     src/Geometry/Validation.cpp
     src/Geometry/Validation.hpp
     src/GeometryBuilder.cpp
@@ -108,12 +112,14 @@ if (BUILD_TESTS)
         test/TestCollisionGeometry.cpp
         test/TestCustomModel.cpp
         test/TestGenericAgentFormatter.cpp
+        test/TestGeometry3D.cpp
         test/TestGraph.cpp
         test/TestJourney.cpp
         test/TestLineSegment.cpp
         test/TestMesh.cpp
         test/TestNeighborhoodSearch.cpp
         test/TestPoint.cpp
+        test/TestRegionSplit.cpp
         test/TestRoutingEngine3D.cpp
         test/TestSimulationClock.cpp
         test/TestStage.cpp
