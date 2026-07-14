@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "CfgCgal.hpp"
+#include "Geometry/Geometry3D.hpp"
+#include "SimulationError.hpp"
 #include "SurfaceMeshShortestPathRoutingEngine.hpp"
 
 #include <CGAL/mark_domain_in_triangulation.h>
@@ -97,10 +99,12 @@ class FlatSquare : public ::testing::Test
 public:
     void SetUp() override
     {
-        engine = std::make_unique<SurfaceMeshShortestPathRoutingEngine>(unit_square_mesh());
+        geometry = std::make_unique<Geometry3D>(unit_square_mesh());
+        engine = std::make_unique<SurfaceMeshShortestPathRoutingEngine>(*geometry);
     }
 
 protected:
+    std::unique_ptr<Geometry3D> geometry{};
     std::unique_ptr<SurfaceMeshShortestPathRoutingEngine> engine{};
 };
 
@@ -178,7 +182,8 @@ TEST_F(FlatSquare, OrientationRobustWhenSourceOnEdge)
 
 TEST(RoutingEngine3DFold, GeodesicCarriesLengthAcrossSeam)
 {
-    SurfaceMeshShortestPathRoutingEngine engine{folded_mesh()};
+    Geometry3D geometry{folded_mesh()};
+    SurfaceMeshShortestPathRoutingEngine engine{geometry};
 
     const Point3D source{3, 2, 1}; // on the floor
     const Point3D target{4, 13, 5}; // on the ramp, projects to z = 3
@@ -219,7 +224,8 @@ TEST(RoutingEngine3DLShape, GeodesicBendsAroundReflexCorner)
     // L-shape (CCW) with a single reflex corner at (1, 1).
     const std::vector<K::Point_2> outer{{0, 0}, {3, 0}, {3, 1}, {1, 1}, {1, 3}, {0, 3}};
 
-    SurfaceMeshShortestPathRoutingEngine engine{mesh_from_polygon(outer)}; // flat z = 0
+    Geometry3D geometry{mesh_from_polygon(outer)}; // flat z = 0
+    SurfaceMeshShortestPathRoutingEngine engine{geometry};
 
     const Point3D source{2.5, 0.5, 1};
     const Point3D target{0.5, 2.5, 1};
@@ -233,4 +239,26 @@ TEST(RoutingEngine3DLShape, GeodesicBendsAroundReflexCorner)
     ASSERT_EQ(path.size(), 3u);
     EXPECT_NEAR(path[1].x(), 1.0, 1e-6);
     EXPECT_NEAR(path[1].y(), 1.0, 1e-6);
+}
+
+TEST(RoutingEngine3DLShape, OrientationBendsTowardsReflexCorner)
+{
+    const std::vector<K::Point_2> outer{{0, 0}, {3, 0}, {3, 1}, {1, 1}, {1, 3}, {0, 3}};
+
+    Geometry3D geometry{mesh_from_polygon(outer)}; // flat z = 0
+    SurfaceMeshShortestPathRoutingEngine engine{geometry};
+
+    // The geodesic pivots exactly on the reflex corner (1,1) -- no wall
+    // clearance (unlike the legacy 2D funnel, which keeps 0.2 m off). So the
+    // heading from (2.5,0.5) points straight at that corner, not direct to the
+    // target.
+    const Point dir = engine.GetOrientation({2.5, 0.5, 1}, {0.5, 2.5, 1});
+    const Point expected = (Point{1, 1} - Point{2.5, 0.5}).Normalized();
+    EXPECT_NEAR(dir.x, expected.x, 1e-6);
+    EXPECT_NEAR(dir.y, expected.y, 1e-6);
+
+    // Already at the target: no heading.
+    const Point at_goal = engine.GetOrientation({2.5, 0.5, 1}, {2.5, 0.5, 1});
+    EXPECT_EQ(at_goal.x, 0.0);
+    EXPECT_EQ(at_goal.y, 0.0);
 }
