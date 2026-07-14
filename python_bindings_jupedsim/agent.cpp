@@ -20,7 +20,7 @@ void init_agent(py::module_& m)
     // not the Python-visible Agent; the public Agent is a handle that resolves
     // this wrapper freshly on every attribute access.
     py::class_<GenericAgent>(m, "Agent")
-        .def_property_readonly("id", [](const GenericAgent& agent) { return agent.id.getID(); })
+        .def_property_readonly("id", [](const GenericAgent& agent) { return Id(agent).getID(); })
         .def_property_readonly(
             "journey_id", [](const GenericAgent& agent) { return agent.journeyId.getID(); })
         .def_property_readonly(
@@ -29,12 +29,12 @@ void init_agent(py::module_& m)
             "position", [](const GenericAgent& agent) { return intoTuple(agent.position()); })
         .def_property(
             "target",
-            [](const GenericAgent& agent) { return intoTuple(agent.target); },
+            [](const GenericAgent& agent) { return intoTuple(agent.journey.target); },
             [](GenericAgent& agent, std::tuple<double, double> target) {
-                agent.target = intoPoint(target);
+                agent.journey.target = intoPoint(target);
             })
         .def_property_readonly(
             "model",
-            [](GenericAgent& agent) -> auto& { return agent.model; },
+            [](GenericAgent& agent) -> auto& { return agent.state; },
             py::return_value_policy::reference);
 }

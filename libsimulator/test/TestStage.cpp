@@ -2,6 +2,7 @@
 #include "GenericAgent.hpp"
 #include "GeometryBuilder.hpp"
 #include "Journey.hpp"
+#include "OperationalModels/CollisionFreeSpeedModel/CollisionFreeSpeedModel.hpp"
 #include "Stage.hpp"
 #include "gtest/gtest.h"
 

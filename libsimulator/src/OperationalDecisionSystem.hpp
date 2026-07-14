@@ -38,8 +38,18 @@ public:
     {
         _next.clear();
         std::copy(std::begin(agents), std::end(agents), std::back_inserter(_next));
+        OperationalModel::StateContainer neighbor_states;
         for(size_t index = 0; index < agents.size(); ++index) {
-            _model->ComputeNextState(dT, agents[index], _next[index], geometry, neighborhoodSearch);
+            neighbor_states.clear();
+            _model->GetNeighbors(
+                agents[index].state, neighborhoodSearch, geometry, neighbor_states);
+            _model->ComputeNextState(
+                dT,
+                agents[index].state,
+                _next[index].state,
+                agents[index].journey,
+                geometry,
+                neighbor_states);
         }
         // Swap in the computed generation. This is safe because no caller retains
         // pointers/references across an iteration (Python-side agent handles resolve per

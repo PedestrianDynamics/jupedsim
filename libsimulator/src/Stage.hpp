@@ -225,12 +225,12 @@ void NotifiableWaitingSet::Update(
         double min_distance = std::numeric_limits<double>::max();
         for(const auto& agent : candidates) {
             if(agent.stageId == id) {
-                if(std::find(std::begin(occupants), std::end(occupants), agent.id) ==
+                if(std::find(std::begin(occupants), std::end(occupants), ::Id(agent)) ==
                    std::end(occupants)) {
                     const auto distance = (agent.position() - slots[index]).Norm();
                     if(distance < min_distance) {
                         min_distance = distance;
-                        occupant = agent.id;
+                        occupant = ::Id(agent);
                     }
                 }
             }
@@ -300,14 +300,14 @@ void NotifiableQueue::Update(
         GenericAgent::ID occupant = GenericAgent::ID::Invalid;
         double min_distance = std::numeric_limits<double>::max();
         for(const auto& agent : candidates) {
-            if(agent.stageId != id || Contains(occupants, agent.id) ||
-               exitingThisUpdate.contains(agent.id)) {
+            if(agent.stageId != id || Contains(occupants, ::Id(agent)) ||
+               exitingThisUpdate.contains(::Id(agent))) {
                 continue;
             }
             const auto distance = (agent.position() - slots[index]).Norm();
             if(distance < min_distance) {
                 min_distance = distance;
-                occupant = agent.id;
+                occupant = ::Id(agent);
             }
         }
         if(occupant != GenericAgent::ID::Invalid) {
@@ -324,7 +324,7 @@ public:
     DirectSteering() = default;
     ~DirectSteering() override = default;
     bool IsCompleted(const GenericAgent&) override { return false; };
-    Point Target(const GenericAgent& agent) override { return agent.target; };
+    Point Target(const GenericAgent& agent) override { return agent.journey.target; };
     StageProxy Proxy(Simulation* simulation) override
     {
         return DirectSteeringProxy(simulation, this);

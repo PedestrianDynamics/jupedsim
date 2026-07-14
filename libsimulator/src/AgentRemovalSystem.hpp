@@ -37,7 +37,7 @@ void AgentRemovalSystem<Agent>::Run(
         std::end(agents),
         [&removedAgentIds, &stageManager](const GenericAgent& agent) {
             auto found =
-                std::find(std::begin(removedAgentIds), std::end(removedAgentIds), agent.id) !=
+                std::find(std::begin(removedAgentIds), std::end(removedAgentIds), Id(agent)) !=
                 std::end(removedAgentIds);
             if(found) {
                 stageManager.HandleRemoveAgent(agent.stageId);

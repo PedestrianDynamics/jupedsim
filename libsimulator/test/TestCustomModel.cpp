@@ -3,7 +3,14 @@
 #include "GeometryBuilder.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalDecisionSystem.hpp"
+#include "OperationalModels/AnticipationVelocityModel/AnticipationVelocityModel.hpp"
+#include "OperationalModels/CollisionFreeSpeedModel/CollisionFreeSpeedModel.hpp"
+#include "OperationalModels/CollisionFreeSpeedModelV2/CollisionFreeSpeedModelV2.hpp"
+#include "OperationalModels/CollisionFreeSpeedModelV3/CollisionFreeSpeedModelV3.hpp"
 #include "OperationalModels/CustomModel/CustomModel.hpp"
+#include "OperationalModels/GeneralizedCentrifugalForceModel/GeneralizedCentrifugalForceModel.hpp"
+#include "OperationalModels/SocialForceModel/SocialForceModel.hpp"
+#include "OperationalModels/WarpDriver/WarpDriverModel.hpp"
 
 #include <fmt/format.h>
 #include <gtest/gtest.h>
@@ -35,19 +42,29 @@ struct ConstCharPointerToStringPayload {
 class MinimalCustomModel : public CustomModel
 {
 public:
+    void GetNeighbors(
+        const GenericState&,
+        const NeighborhoodSearch<GenericAgent>&,
+        const CollisionGeometry&,
+        StateContainer& neighbor_states) const override
+    {
+        neighbor_states.clear();
+    }
+
     void ComputeNextState(
         double dT,
-        const GenericAgent& current,
-        GenericAgent& next,
+        const GenericState& current,
+        GenericState& next,
+        const AgentJourney&,
         const CollisionGeometry&,
-        const NeighborhoodSearch<GenericAgent>&) const override
+        const StateContainer&) const override
     {
-        const auto& currentModelData = std::get<CustomModel::State>(current.model);
-        const auto& state = currentModelData.Get<MinimalState>();
-        auto& nextModelData = std::get<CustomModel::State>(next.model);
-        auto& nextState = nextModelData.Get<MinimalState>();
+        const auto& currentStateData = std::get<CustomModel::State>(current);
+        const auto& state = currentStateData.Get<MinimalState>();
+        auto& nextStateData = std::get<CustomModel::State>(next);
+        auto& nextState = nextStateData.Get<MinimalState>();
 
-        nextModelData.position = currentModelData.position + state.velocity * dT;
+        nextStateData.position = currentStateData.position + state.velocity * dT;
         nextState.velocity = state.velocity;
         nextState.applications = state.applications + 1;
     }
@@ -60,13 +77,13 @@ public:
     }
 };
 
-GenericAgent MakeAgent(GenericAgent::ModelState model)
+GenericAgent MakeAgent(GenericAgent::ModelState state)
 {
     return GenericAgent(
         GenericAgent::ID::Invalid,
         jps::UniqueID<Journey>::Invalid,
         jps::UniqueID<BaseStage>::Invalid,
-        std::move(model));
+        std::move(state));
 }
 } // namespace
 
@@ -127,7 +144,7 @@ TEST(CustomModel, RunsThroughOperationalDecisionSystem)
     system.Run(0.5, 0.0, neighborhoodSearch, geometry, agents);
 
     const auto& agent = agents.front();
-    const auto& state = std::get<CustomModel::State>(agent.model).Get<MinimalState>();
+    const auto& state = std::get<CustomModel::State>(agent.state).Get<MinimalState>();
     ASSERT_EQ(agent.position(), Point(1.0, 0.0));
     ASSERT_EQ(state.applications, 1);
 }

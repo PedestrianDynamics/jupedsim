@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
+#include "AgentJourney.hpp"
 #include "CollisionGeometry.hpp"
+#include "GenericAgentState.hpp"
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
-#include "Point.hpp"
 
 #include <fmt/core.h>
 
@@ -16,18 +17,7 @@
 class WarpDriverModel : public OperationalModel
 {
 public:
-    /// Per-agent state of the warp driver model.
-    struct State {
-        Point position{};
-        Point orientation{0.0, 0.0};
-        double radius{0.15};
-        double v0{1.2};
-        double stuckTime{0.0}; // elapsed time since anchor was set
-        double anchorX{0.0}; // position when stuck tracking began
-        double anchorY{0.0};
-        double detourTime{0.0}; // remaining time in detour mode
-        int detourSide{1}; // +1 = left, -1 = right of desired direction
-    };
+    using State = WdmState;
 
     /// 3-component space-time point/vector used internally
     struct SpaceTimePoint {
@@ -71,6 +61,9 @@ private:
     mutable std::mt19937 _rng;
 
 public:
+    using OperationalModel::GenericState;
+    using OperationalModel::StateContainer;
+
     WarpDriverModel(
         double sigma,
         double timeHorizon = 2.0,
@@ -85,32 +78,22 @@ public:
 
     OperationalModelType Type() const override;
 
+    void GetNeighbors(
+        const GenericState& current,
+        const NeighborhoodSearch<GenericAgent>& neighborhoodsearch,
+        const CollisionGeometry& geometry,
+        StateContainer& neighbor_states) const override;
+
     void ComputeNextState(
         double dT,
-        const GenericAgent& current,
-        GenericAgent& next,
+        const GenericState& current,
+        GenericState& next,
+        const AgentJourney& journey,
         const CollisionGeometry& geometry,
-        const NeighborhoodSearch<GenericAgent>& neighborhoodSearch) const override;
+        const StateContainer& neighborStates) const override;
 
     void CheckModelConstraint(
         const GenericAgent& agent,
         const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
         const CollisionGeometry& geometry) const override;
-};
-
-template <>
-struct fmt::formatter<WarpDriverModel::State> {
-
-    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
-
-    template <typename FormatContext>
-    auto format(const WarpDriverModel::State& m, FormatContext& ctx) const
-    {
-        return fmt::format_to(
-            ctx.out(),
-            "WarpDriver[orientation={}, radius={}, v0={}]",
-            m.orientation,
-            m.radius,
-            m.v0);
-    }
 };

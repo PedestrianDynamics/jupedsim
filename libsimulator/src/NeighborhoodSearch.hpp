@@ -88,15 +88,15 @@ public:
     {
         for(auto& [_, agents] : _grid) {
             const auto iter =
-                std::find_if(std::begin(agents), std::end(agents), [item](auto& agent) {
-                    return agent.id == item.id;
+                std::find_if(std::begin(agents), std::end(agents), [&item](auto& agent) {
+                    return Id(*agent) == Id(item);
                 });
             if(iter != std::end(agents)) {
                 agents.erase(iter);
                 return;
             }
         }
-        throw SimulationError("Unknown agent id {}", item.id);
+        throw SimulationError("Unknown agent id {}", Id(item));
     }
 
     void Update(const AgentContainer<Value>& items)
@@ -130,6 +130,37 @@ public:
                     for(const auto& item : it->second) {
                         if(DistanceSquared((*item).position(), pos) <= radiusSquared) {
                             result.emplace_back(*item);
+                        }
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    // Member template so the class also instantiates for value types without a ModelState.
+    template <typename V = Value>
+    std::vector<typename V::ModelState> GetNeighboringAgentStates(Point pos, double radius) const
+    {
+        std::vector<typename V::ModelState> result{};
+        result.reserve(128);
+
+        const auto posIdx = getIndex(pos);
+        const auto offset = static_cast<int32_t>(std::ceil(radius / _cellSize));
+        const int32_t xMin = posIdx.idx - offset;
+        const int32_t xMax = posIdx.idx + offset;
+        const int32_t yMin = posIdx.idy - offset;
+        const int32_t yMax = posIdx.idy + offset;
+
+        const auto radiusSquared = radius * radius;
+
+        for(int32_t x = xMin; x <= xMax; ++x) {
+            for(int32_t y = yMin; y <= yMax; ++y) {
+                auto it = _grid.find({x, y});
+                if(it != _grid.cend()) {
+                    for(const auto& item : it->second) {
+                        if(DistanceSquared(Pos(*item), pos) <= radiusSquared) {
+                            result.emplace_back(item->state);
                         }
                     }
                 }

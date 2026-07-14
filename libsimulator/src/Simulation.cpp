@@ -255,7 +255,7 @@ GenericAgent::ID Simulation::AddAgent(GenericAgent agent)
         throw SimulationError("Unknown stage id: {}", agent.stageId);
     }
 
-    if(const auto agentModelType = ModelTypeOf(agent.model);
+    if(const auto agentModelType = ModelTypeOf(agent.state);
        agentModelType != _operationalDecisionSystem.ModelType()) {
         throw SimulationError(
             "Agent model data of type '{}' does not match the simulation's operational model "
@@ -273,7 +273,7 @@ GenericAgent::ID Simulation::AddAgent(GenericAgent agent)
     auto v = IteratorPair(std::prev(std::end(_agents)), std::end(_agents));
     _stategicalDecisionSystem.Run(_journeys, v, _stageManager);
     _tacticalDecisionSystem.Run(*_routingEngine, v);
-    return _agents.back().id.getID();
+    return Id(_agents.back()).getID();
 }
 
 void Simulation::MarkAgentForRemoval(GenericAgent::ID id)
@@ -281,7 +281,7 @@ void Simulation::MarkAgentForRemoval(GenericAgent::ID id)
     ThrowIfIterating("MarkAgentForRemoval");
     JPS_TRACE_FUNC;
     const auto iter = std::find_if(
-        std::begin(_agents), std::end(_agents), [id](auto& agent) { return agent.id == id; });
+        std::begin(_agents), std::end(_agents), [id](auto& agent) { return Id(agent) == id; });
     if(iter == std::end(_agents)) {
         throw SimulationError("Unknown agent id {}", id);
     }
@@ -293,7 +293,7 @@ const GenericAgent& Simulation::Agent(GenericAgent::ID id) const
 {
     JPS_TRACE_FUNC;
     const auto iter =
-        std::find_if(_agents.begin(), _agents.end(), [id](auto& ped) { return id == ped.id; });
+        std::find_if(_agents.begin(), _agents.end(), [id](auto& ped) { return id == Id(ped); });
     if(iter == _agents.end()) {
         throw SimulationError("Trying to access unknown Agent {}", id);
     }
@@ -304,7 +304,7 @@ GenericAgent& Simulation::Agent(GenericAgent::ID id)
 {
     JPS_TRACE_FUNC;
     const auto iter =
-        std::find_if(_agents.begin(), _agents.end(), [id](auto& ped) { return id == ped.id; });
+        std::find_if(_agents.begin(), _agents.end(), [id](auto& ped) { return id == Id(ped); });
     if(iter == _agents.end()) {
         throw SimulationError("Trying to access unknown Agent {}", id);
     }
@@ -373,7 +373,7 @@ std::vector<GenericAgent::ID> Simulation::AgentsInRange(Point p, double distance
         std::begin(neighbors),
         std::end(neighbors),
         std::back_inserter(neighborIds),
-        [](const auto& agent) { return agent.id; });
+        [](const auto& agent) { return Id(agent); });
     return neighborIds;
 }
 
@@ -392,7 +392,7 @@ std::vector<GenericAgent::ID> Simulation::AgentsInPolygon(const std::vector<Poin
     std::for_each(
         std::begin(candidates), std::end(candidates), [&result, &poly](const auto& agent) {
             if(poly.IsInside(agent.position())) {
-                result.push_back(agent.id);
+                result.push_back(Id(agent));
             }
         });
     return result;

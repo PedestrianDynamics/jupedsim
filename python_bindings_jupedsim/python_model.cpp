@@ -85,28 +85,48 @@ PythonModel::PythonModel(py::object model) : _model(std::move(model))
     }
 }
 
+void PythonModel::GetNeighbors(
+    const GenericState& /*current*/,
+    const NeighborhoodSearch<GenericAgent>& neighborhoodsearch,
+    const CollisionGeometry& /*geometry*/,
+    StateContainer& neighbor_states) const
+{
+    _neighborhoodSearch = &neighborhoodsearch;
+    neighbor_states.clear();
+}
+
 void PythonModel::ComputeNextState(
     double dT,
-    const GenericAgent& current,
-    GenericAgent& next,
+    const GenericState& current,
+    GenericState& next,
+    const AgentJourney& journey,
     const CollisionGeometry& geometry,
-    const NeighborhoodSearch<GenericAgent>& neighborhoodSearch) const
+    const StateContainer& /*neighborStates*/) const
 {
     py::gil_scoped_acquire gil;
 
-    py::object pythonAgent = py::cast(current);
+    // Rebuild a transient agent view for the Python callback. Journey and stage ids are
+    // not part of the operational state and stay invalid here.
+    GenericAgent agent{
+        Id(current),
+        jps::UniqueID<Journey>::Invalid,
+        jps::UniqueID<BaseStage>::Invalid,
+        current};
+    agent.journey = journey;
+
+    py::object pythonAgent = py::cast(agent);
     py::object pythonGeometry = py::cast(&geometry, py::return_value_policy::reference);
     py::object pythonNeighborhoodSearch =
-        py::cast((&neighborhoodSearch), py::return_value_policy::reference);
+        py::cast(_neighborhoodSearch, py::return_value_policy::reference);
 
     py::object pythonUpdate = _model.attr("_compute_next_state")(
         dT, pythonAgent, pythonGeometry, pythonNeighborhoodSearch);
 
     // "next" shares the Python state object with "current" (GilSafePyObject copies are
     // refcounted, not cloned), so this also rejects returning the current state instance.
-    auto& nextModelData = std::get<CustomModel::State>(next.model);
-    auto& customModelData = nextModelData.Get<GilSafePyObject>();
-    if(pythonUpdate.is(customModelData.Get())) {
+    auto& nextStateData = std::get<CustomModel::State>(next);
+    auto& customStateData = nextStateData.Get<GilSafePyObject>();
+    if(pythonUpdate.is(customStateData.Get())) {
         throw SimulationError(
             "Current and updated model state are the same instance. "
             "compute_next_state() must return a new state object, "
@@ -129,7 +149,7 @@ void PythonModel::ComputeNextState(
     try {
         // Sync the GIL-free position cache from the returned Python state so the
         // framework can read the agent position without acquiring the GIL.
-        nextModelData.position = intoPoint(py::cast<std::tuple<double, double>>(attr));
+        nextStateData.position = intoPoint(py::cast<std::tuple<double, double>>(attr));
     } catch(const py::cast_error&) {
         // Diagnostics run Python code on the offending object; they must not
         // be able to replace the error they describe.
@@ -151,7 +171,7 @@ void PythonModel::ComputeNextState(
             actualType,
             valueRepr);
     }
-    customModelData.Set(pythonUpdate);
+    customStateData.Set(pythonUpdate);
 }
 
 void PythonModel::CheckModelConstraint(
