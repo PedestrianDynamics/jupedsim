@@ -59,10 +59,8 @@ private:
         const Point& desiredDirection,
         const Point& predictedDirection) const;
     double GetSpacing(const State& state1, const State& state2, const Point& direction) const;
-    Point NeighborRepulsion(
-        const State& state1,
-        const State& state2,
-        const AgentJourney& journey) const;
+    Point
+    NeighborRepulsion(const State& state1, const State& state2, const AgentJourney& journey) const;
 
     Point HandleWallAvoidance(
         const Point& direction,

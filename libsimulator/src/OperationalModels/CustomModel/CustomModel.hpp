@@ -65,4 +65,3 @@ public:
 
     OperationalModelType Type() const override { return OperationalModelType::CUSTOM_MODEL; }
 };
-

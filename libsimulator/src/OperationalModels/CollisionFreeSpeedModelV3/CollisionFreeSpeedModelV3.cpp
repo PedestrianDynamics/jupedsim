@@ -42,8 +42,7 @@ double NeighborInfluence(
     double best_influence = 0.0;
     double best_weight = 0.0;
     for(const auto& neighbor : neighborhood) {
-        const auto relative =
-            std::get<CollisionFreeSpeedModelV3::State>(neighbor).position - pos;
+        const auto relative = std::get<CollisionFreeSpeedModelV3::State>(neighbor).position - pos;
         const auto x = reference_direction.ScalarProduct(relative);
         if(x <= 0.0) {
             continue;

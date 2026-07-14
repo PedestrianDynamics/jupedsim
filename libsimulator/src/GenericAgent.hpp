@@ -60,9 +60,7 @@ struct GenericAgent {
         jps::UniqueID<Journey> journeyId_,
         jps::UniqueID<BaseStage> stageId_,
         ModelState state_)
-        : journeyId(journeyId_)
-        , stageId(stageId_)
-        , state(std::move(state_))
+        : journeyId(journeyId_), stageId(stageId_), state(std::move(state_))
     {
         // The position is owned by the state; prime the journey target with it.
         journey.target = Pos(*this);
