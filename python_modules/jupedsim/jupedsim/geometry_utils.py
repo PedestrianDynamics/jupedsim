@@ -167,3 +167,34 @@ def build_geometry(
         return _geometry_from_coordinates(
             geometry, excluded_areas=kwargs.get("excluded_areas")
         )
+
+
+def build_geometry_3d(
+    geometry: (
+        Geometry
+        | list[tuple[float, float]]
+        | shapely.GeometryCollection
+        | shapely.Polygon
+        | shapely.MultiPolygon
+        | shapely.MultiPoint
+        | str
+    ),
+    **kwargs: Any,
+) -> py_jps.Geometry3D:
+    """Lift a 2D geometry to a flat 3D geometry at z=0.
+
+    Accepts everything :func:`build_geometry` accepts, plus an already built
+    :class:`~jupedsim.geometry.Geometry`. The resulting surface mesh reuses
+    the 2D constrained Delaunay triangulation, so 2D and 3D navigation run on
+    the identical triangle set.
+
+    Arguments:
+        geometry: See :func:`build_geometry`, or a
+            :class:`~jupedsim.geometry.Geometry`.
+
+    Keyword Arguments:
+        excluded_areas: See :func:`build_geometry`.
+    """
+    if not isinstance(geometry, Geometry):
+        geometry = build_geometry(geometry, **kwargs)
+    return py_jps.Geometry3D.from_2d(geometry._obj)
