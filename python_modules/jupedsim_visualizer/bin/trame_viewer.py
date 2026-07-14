@@ -8,6 +8,7 @@ in a native desktop window (``--native``, via pywebview's WebKitGTK).
 
 import argparse
 import asyncio
+import math
 import os
 import socket
 import tempfile
@@ -25,6 +26,7 @@ from vtkmodules.vtkRenderingCore import vtkCellPicker  # noqa: E402
 pv.OFF_SCREEN = True
 
 from jupedsim.internal.routing_3d import (  # noqa: E402
+    Geometry3D,
     SurfaceMeshShortestPathRoutingEngine,
 )
 from pyvista.trame.ui import plotter_ui  # noqa: E402
@@ -48,6 +50,9 @@ def build_app(obj_path: str | None):
     plotter = pv.Plotter()
     plotter.set_background("white")
     plotter.enable_parallel_projection()
+    # Terrain-style interaction: keeps +z as a fixed "up" (no roll / flipping upside down), which
+    # is far easier to handle with our geometries than the default trackball.
+    plotter.enable_terrain_style(mouse_wheel_zooms=True, shift_pans=True)
 
     server = get_server(client_type="vue3")
     state, ctrl = server.state, server.controller
@@ -64,10 +69,14 @@ def build_app(obj_path: str | None):
         1.0  # an in-place clip_range[i] mutation would NOT sync to the server)
     )
     state.wireframe = True
+    state.color_by_region = (
+        False  # False -> colour by height, True -> by region id
+    )
     state.mesh_name = ""
     state.obj_file = None
     state.n_points = 0
     state.n_cells = 0
+    state.n_regions = 0
     # Routing: a right-click sets the start, then the hovered point is the live target, and the
     # next right-click freezes the path. Hover only tracks while no button is held, so the left
     # button and all modifier / wheel gestures stay pure camera (rotate / pan / spin / zoom).
@@ -79,8 +88,13 @@ def build_app(obj_path: str | None):
     state.route_corners = 0
     state.route_query_us = 0  # get_shortest_path() full solve time
 
-    # Holds the currently loaded mesh + its height range; swapped out by load_mesh().
-    current: dict = {"mesh": None, "marker_r": 0.1}
+    # Holds the currently loaded geometry + mesh + its height range; swapped out by load_mesh().
+    current: dict = {
+        "mesh": None,
+        "geometry": None,
+        "n_regions": 0,
+        "marker_r": 0.1,
+    }
     # Routing interaction state. Start/target are exact surface world positions (xyz), not mesh
     # vertices -- the geodesic is computed by the engine, not snapped to the triangulation.
     route: dict = {
@@ -110,29 +124,68 @@ def build_app(obj_path: str | None):
             if sub.n_cells == 0:  # empty band
                 sub = mesh.threshold((lo, lo + 1e-6), scalars="elevation")
         # Replace only the "mesh" actor by name (not plotter.clear()) so the route actors
-        # survive a clip/wireframe change; drop the old scalar bar to avoid stacking copies.
-        try:
-            plotter.remove_scalar_bar(title="Height z [m]")
-        except (KeyError, StopIteration):
-            pass
-        plotter.add_mesh(
-            sub,
-            name="mesh",
-            scalars="elevation",
-            cmap="viridis",
-            show_edges=bool(state.wireframe),
-            edge_color="black",
-            scalar_bar_args=dict(title="Height z [m]"),
-        )
+        # survive a clip/wireframe change; drop old scalar bars to avoid stacking copies.
+        for title in ("Height z [m]", "Region"):
+            try:
+                plotter.remove_scalar_bar(title=title)
+            except (KeyError, StopIteration):
+                pass
+        by_region = bool(state.color_by_region) and current["n_regions"] > 0
+        if by_region:
+            n = current["n_regions"]
+            # region id is a per-cell scalar; a qualitative map + discrete colours
+            # so adjacent regions stay visually distinct.
+            plotter.add_mesh(
+                sub,
+                name="mesh",
+                scalars="region",
+                cmap="tab20",
+                n_colors=max(n, 1),
+                clim=(0, max(n - 1, 1)),
+                show_edges=bool(state.wireframe),
+                edge_color="black",
+                scalar_bar_args=dict(title="Region"),
+            )
+        else:
+            plotter.add_mesh(
+                sub,
+                name="mesh",
+                scalars="elevation",
+                cmap="viridis",
+                show_edges=bool(state.wireframe),
+                edge_color="black",
+                scalar_bar_args=dict(title="Height z [m]"),
+            )
         plotter.add_axes()
 
-    def load_mesh(mesh, name: str, obj_path: str) -> None:
+    def load_mesh(obj_path: str, name: str) -> None:
         nonlocal engine
-        # Feed the exact-geodesic engine the same OBJ (it builds its own triangulation + AABB tree).
-        engine = SurfaceMeshShortestPathRoutingEngine(obj_path)
-        mesh["elevation"] = mesh.points[:, 2]  # colour + clip by height
-        z_min = float(mesh.points[:, 2].min())
-        z_max = float(mesh.points[:, 2].max())
+        # Geometry3D is the single source of truth: the rendered vertices/faces
+        # and the region colouring are read from it, and the engine borrows the
+        # SAME instance, so routing, picking and region colouring all agree.
+        geo = Geometry3D.from_obj(obj_path)
+        engine = SurfaceMeshShortestPathRoutingEngine(geo)
+
+        verts = np.asarray(geo.vertices(), dtype=float)
+        tris = np.asarray(geo.triangles(), dtype=np.int64)
+        # pyvista face stream: [3, i, j, k, 3, i, j, k, ...]
+        faces = np.hstack(
+            [np.full((len(tris), 1), 3, dtype=np.int64), tris]
+        ).ravel()
+        mesh = pv.PolyData(verts, faces)
+        mesh["elevation"] = verts[
+            :, 2
+        ]  # colour + clip by height (point scalar)
+        face_region_ids = np.asarray(geo.region_id_per_face(), dtype=float)
+        n_regions = int(geo.region_count())
+        if len(face_region_ids) == mesh.n_cells:
+            mesh.cell_data["region"] = face_region_ids  # per-face region id
+        else:  # face-count mismatch: disable region colouring rather than mislabel
+            mesh.cell_data["region"] = np.zeros(mesh.n_cells, dtype=float)
+            n_regions = 0
+
+        z_min = float(verts[:, 2].min())
+        z_max = float(verts[:, 2].max())
         if z_max <= z_min:  # flat mesh: keep the slider non-degenerate
             z_max = z_min + 1.0
         diag = float(
@@ -141,7 +194,12 @@ def build_app(obj_path: str | None):
             )
         )
         current.update(
-            mesh=mesh, z_min=z_min, z_max=z_max, marker_r=max(0.01 * diag, 0.05)
+            mesh=mesh,
+            geometry=geo,
+            n_regions=n_regions,
+            z_min=z_min,
+            z_max=z_max,
+            marker_r=max(0.01 * diag, 0.05),
         )
         clear_route()
         with state:
@@ -151,6 +209,7 @@ def build_app(obj_path: str | None):
             state.mesh_name = name
             state.n_points = int(mesh.n_points)
             state.n_cells = int(mesh.n_cells)
+            state.n_regions = n_regions
         draw()
         plotter.reset_camera()
         plotter.view_isometric()
@@ -168,7 +227,7 @@ def build_app(obj_path: str | None):
         # actually attached so the triangulation shows without the user toggling it off/on.
         _redraw()
 
-    @state.change("clip_range", "wireframe")
+    @state.change("clip_range", "wireframe", "color_by_region")
     def _on_range(clip_range, **_):
         # Mirror the slider into the number fields (skip if already equal -> no feedback loop).
         lo, hi = float(clip_range[0]), float(clip_range[1])
@@ -199,7 +258,7 @@ def build_app(obj_path: str | None):
             tmp.write(client_file.content)
             tmp_path = tmp.name
         try:
-            load_mesh(pv.read(tmp_path), client_file.name, tmp_path)
+            load_mesh(tmp_path, client_file.name)
         finally:
             os.unlink(tmp_path)
 
@@ -332,6 +391,10 @@ def build_app(obj_path: str | None):
     # wheel gestures stay pure camera (rotate / pan / spin / zoom) -- we touch none of them.
     def _pick_world_fraction(fx, fy):
         """Pick the exact surface position at fractional cursor coords (origin bottom-left)."""
+        # The client divides by the canvas size; before layout (or mid-detach) that
+        # size can be 0, making fx/fy inf/nan -> int() would overflow. Skip those.
+        if not (math.isfinite(fx) and math.isfinite(fy)):
+            return None
         w, h = plotter.window_size
         return _pick_world(int(fx * w), int(fy * h))
 
@@ -392,6 +455,7 @@ def build_app(obj_path: str | None):
                 )
                 v3.VListItem("{{ n_points }}", subtitle="Vertices")
                 v3.VListItem("{{ n_cells }}", subtitle="Faces")
+                v3.VListItem("{{ n_regions }}", subtitle="Regions")
                 v3.VListItem(
                     "{{ z_min.toFixed(2) }} … {{ z_max.toFixed(2) }} m",
                     subtitle="Height range z",
@@ -461,6 +525,13 @@ def build_app(obj_path: str | None):
                 hide_details=True,
                 classes="ml-4",
             )
+            # Toggle the surface colouring: off = height (viridis), on = region id.
+            v3.VSwitch(
+                v_model=("color_by_region", False),
+                label="Regions",
+                hide_details=True,
+                classes="ml-4",
+            )
             with v3.VBtn(icon=True, click=ctrl.reset_view, classes="ml-2"):
                 v3.VIcon("mdi-crop-free")
         # Routing input is captured here on the client and forwarded as fractional cursor coords
@@ -490,7 +561,7 @@ def build_app(obj_path: str | None):
     # No initial mesh: start with an empty scene and let the user pick one via the
     # toolbar's "File -> Load OBJ…" dialog.
     if obj_path:
-        load_mesh(pv.read(obj_path), os.path.basename(obj_path), obj_path)
+        load_mesh(obj_path, os.path.basename(obj_path))
     return server
 
 
