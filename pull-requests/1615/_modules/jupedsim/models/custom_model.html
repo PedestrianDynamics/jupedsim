@@ -371,23 +371,30 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">CustomOperationalModel</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for operational models implemented in Python.</span>
 
-<span class="sd">    Subclasses implement :meth:`compute_next_state` and optionally</span>
-<span class="sd">    :meth:`check_model_constraint`. Constraint violations should be reported by</span>
-<span class="sd">    raising an exception.</span>
+<span class="sd">    Subclasses implement :meth:`get_neighbors` and :meth:`compute_next_state`</span>
+<span class="sd">    and optionally :meth:`check_model_constraint`. Constraint violations</span>
+<span class="sd">    should be reported by raising an exception.</span>
+
+<span class="sd">    The simulation advances agents in two phases per step, mirroring the</span>
+<span class="sd">    native operational model interface: for every agent it first calls</span>
+<span class="sd">    :meth:`get_neighbors` to collect the frozen neighbor states, then calls</span>
+<span class="sd">    :meth:`compute_next_state` with exactly that collection. Neighbor state</span>
+<span class="sd">    must be read exclusively from the ``neighbor_states`` handed to</span>
+<span class="sd">    :meth:`compute_next_state`; the neighborhood search is only available</span>
+<span class="sd">    while collecting.</span>
 
 <span class="sd">    .. warning::</span>
 
 <span class="sd">        **Per-agent model state is live and shared -- never mutate it in place.**</span>
 
-<span class="sd">        The ``ped.model`` object you receive (and every neighbor&#39;s ``.model``</span>
-<span class="sd">        returned from a neighborhood query) is the agent&#39;s *live* state, shared</span>
-<span class="sd">        by reference with the running simulation for performance. JuPedSim</span>
-<span class="sd">        advances agents in two phases per step: it first *computes* every</span>
-<span class="sd">        agent&#39;s update from the current state of all agents, then *applies* all</span>
-<span class="sd">        updates together. Mutating ``ped.model`` (or a neighbor&#39;s) during the</span>
-<span class="sd">        compute phase changes state that other agents are still reading in the</span>
-<span class="sd">        same step, silently breaking the compute-then-apply ordering and</span>
-<span class="sd">        producing order-dependent results.</span>
+<span class="sd">        The ``ped.model`` object you receive (every state returned from</span>
+<span class="sd">        :meth:`get_neighbors` and every entry of ``neighbor_states``) is the</span>
+<span class="sd">        agent&#39;s *live* state, shared by reference with the running simulation</span>
+<span class="sd">        for performance. JuPedSim first *computes* every agent&#39;s update from</span>
+<span class="sd">        the current state of all agents, then *applies* all updates together.</span>
+<span class="sd">        Mutating a state during the compute phase changes data that other</span>
+<span class="sd">        agents are still reading in the same step, silently breaking the</span>
+<span class="sd">        compute-then-apply ordering and producing order-dependent results.</span>
 
 <span class="sd">        The only correct way to change state is to return a new state object</span>
 <span class="sd">        from :meth:`compute_next_state` -- returning ``ped.model`` itself</span>
@@ -415,9 +422,13 @@
         <span class="n">dt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
         <span class="n">ped</span><span class="p">:</span> <span class="n">_TransientAgent</span><span class="p">,</span>
         <span class="n">geometry</span><span class="p">:</span> <span class="n">Geometry</span><span class="p">,</span>
-        <span class="n">neighborhood_search</span><span class="p">:</span> <span class="n">NeighborhoodSearch</span><span class="p">,</span>
+        <span class="n">neighbor_states</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">CustomModelAgentState</span><span class="p">],</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CustomModelAgentState</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute one update for ``ped``.&quot;&quot;&quot;</span></div>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute one update for ``ped``.</span>
+
+<span class="sd">        ``neighbor_states`` is the frozen collection returned by</span>
+<span class="sd">        :meth:`get_neighbors` for this agent in this step.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="CustomOperationalModel.check_model_constraint">
@@ -437,17 +448,16 @@
         <span class="n">dt</span><span class="p">,</span>
         <span class="n">ped</span><span class="p">,</span>
         <span class="n">geometry</span><span class="p">,</span>
-        <span class="n">neighborhood_search</span><span class="p">,</span>
+        <span class="n">neighbor_states</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CustomModelAgentState</span><span class="p">:</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.agent</span><span class="w"> </span><span class="kn">import</span> <span class="n">_TransientAgent</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Geometry</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.neighborhood</span><span class="w"> </span><span class="kn">import</span> <span class="n">NeighborhoodSearch</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_next_state</span><span class="p">(</span>
             <span class="n">dt</span><span class="p">,</span>
             <span class="n">_TransientAgent</span><span class="p">(</span><span class="n">ped</span><span class="p">),</span>
             <span class="n">Geometry</span><span class="p">(</span><span class="n">geometry</span><span class="p">),</span>
-            <span class="n">NeighborhoodSearch</span><span class="p">(</span><span class="n">neighborhood_search</span><span class="p">),</span>
+            <span class="n">neighbor_states</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_check_model_constraint</span><span class="p">(</span>
