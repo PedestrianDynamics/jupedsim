@@ -15,7 +15,6 @@
 
 namespace
 {
-using T2 = K::Triangle_2;
 // The overlap classification must be exact: with inexact constructions,
 // CGAL::intersection has classified a mere vertex touch between two flat
 // slivers as a triangle-shaped overlap (e.g. BUW floorplan), fragmenting a
@@ -24,7 +23,7 @@ using EK = CGAL::Exact_predicates_exact_constructions_kernel;
 using ET2 = EK::Triangle_2;
 
 /// Orthogonal projection of a triangular face onto the x/y-plane (z dropped).
-T2 project(const SurfaceMesh& mesh, SurfaceMesh::Face_index f)
+Triangle2D project(const SurfaceMesh& mesh, SurfaceMesh::Face_index f)
 {
     std::array<Point2D, 3> p{};
     int i = 0;
@@ -32,10 +31,10 @@ T2 project(const SurfaceMesh& mesh, SurfaceMesh::Face_index f)
         const auto& q = mesh.point(v);
         p[i++] = Point2D(q.x(), q.y());
     }
-    return T2(p[0], p[1], p[2]);
+    return Triangle2D(p[0], p[1], p[2]);
 }
 
-ET2 exact(const T2& t)
+ET2 exact(const Triangle2D& t)
 {
     return ET2(
         EK::Point_2(t[0].x(), t[0].y()),
@@ -46,7 +45,7 @@ ET2 exact(const T2& t)
 /// True iff the two projected triangles share a positive-area region. Faces of
 /// one single-valued region only ever touch along shared edges/vertices, whose
 /// intersection is a segment/point -- those are deliberately NOT overlaps.
-bool overlaps(const T2& a, const T2& b)
+bool overlaps(const Triangle2D& a, const Triangle2D& b)
 {
     const auto result = CGAL::intersection(exact(a), exact(b));
     if(!result) {
@@ -90,7 +89,7 @@ RegionSplit split_into_regions(SurfaceMesh& mesh)
 
         // Projected triangles already accepted into this region, each with its
         // 2D bounding box for a cheap overlap pre-filter.
-        std::vector<std::pair<T2, CGAL::Bbox_2>> members{};
+        std::vector<std::pair<Triangle2D, CGAL::Bbox_2>> members{};
         std::queue<SurfaceMesh::Face_index> frontier{};
         const auto join = [&region, id, &members, &frontier, &mesh](SurfaceMesh::Face_index f) {
             region[f] = id;
