@@ -35,7 +35,6 @@ struct type_caster<Point> {
 };
 
 // Point3D <-> tuple[float, float, float]
-// (using SurfaceKernel::Point_3 with EPICK kernel)
 template <>
 struct type_caster<CGAL::Exact_predicates_inexact_constructions_kernel::Point_3> {
     using Point3D = CGAL::Exact_predicates_inexact_constructions_kernel::Point_3;
