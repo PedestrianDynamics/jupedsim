@@ -10,7 +10,7 @@ class Journey;
 class BaseStage;
 
 struct StrategicalModelState {
-    Point target;
+    Point target{};
     jps::UniqueID<Journey> journeyId{jps::UniqueID<Journey>::Invalid};
     jps::UniqueID<BaseStage> stageId{jps::UniqueID<BaseStage>::Invalid};
 };
