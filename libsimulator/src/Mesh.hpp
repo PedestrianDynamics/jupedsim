@@ -3,19 +3,17 @@
 
 #include "AABB.hpp"
 #include "CfgCgal.hpp"
-#include "Clonable.hpp"
 #include "glm/ext/vector_double2.hpp"
 #include "glm/ext/vector_float2.hpp"
 
 #include <cstddef>
 #include <cstdint>
 #include <limits>
-#include <memory>
 #include <sstream>
 #include <tuple>
 #include <vector>
 
-class Mesh : public Clonable<Mesh>
+class Mesh
 {
 public:
     static constexpr size_t InvalidIndex{std::numeric_limits<size_t>::max()};
@@ -37,12 +35,11 @@ private:
 
 public:
     explicit Mesh(const CDT& cdt);
-    ~Mesh() override = default;
+    ~Mesh() = default;
     Mesh(const Mesh& other) = default;
     Mesh& operator=(const Mesh& other) = default;
     Mesh(Mesh&& other) = default;
     Mesh& operator=(Mesh&& other) = default;
-    std::unique_ptr<Mesh> Clone() const override;
     void MergeGreedy();
     std::vector<glm::vec2> FVertices() const;
     std::vector<uint16_t> TriangleIndices() const;
