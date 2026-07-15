@@ -35,6 +35,10 @@ Polygon::Polygon(const std::vector<Point>& points)
     }
 }
 
+Polygon::Polygon(PolygonType polygon) : _polygon(std::move(polygon))
+{
+}
+
 bool Polygon::IsConvex() const
 {
     return _polygon.is_convex();
