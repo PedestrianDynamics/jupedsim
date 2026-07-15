@@ -23,7 +23,12 @@
 using K = CGAL::Exact_predicates_inexact_constructions_kernel;
 using Point2D = K::Point_2;
 using Point3D = K::Point_3;
-using Vector3 = K::Vector_3;
+using Triangle2D = K::Triangle_2;
+using Triangle3D = K::Triangle_3;
+using Vector3D = K::Vector_3;
+using Direction3D = K::Direction_3;
+using Line3D = K::Line_3;
+using Ray3D = K::Ray_3;
 
 using Poly = CGAL::Polygon_2<K>;
 using PolyWithHoles = CGAL::Polygon_with_holes_2<K>;

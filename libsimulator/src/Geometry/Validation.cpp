@@ -12,7 +12,7 @@
 #include <numbers>
 #include <vector>
 
-bool IsWalkableNormal(const Vector3& n)
+bool IsWalkableNormal(const Vector3D& n)
 {
     constexpr double max_incline_deg = 50.0;
     constexpr double max_incline_rad = max_incline_deg * std::numbers::pi / 180.0;
