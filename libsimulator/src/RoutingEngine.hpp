@@ -2,7 +2,6 @@
 #pragma once
 
 #include "CfgCgal.hpp"
-#include "Clonable.hpp"
 #include "Mesh.hpp"
 #include "Point.hpp"
 
@@ -14,7 +13,7 @@
 using LocationID = size_t;
 using Location = std::variant<Point, LocationID>;
 
-class RoutingEngine : public Clonable<RoutingEngine>
+class RoutingEngine
 {
     CDT cdt{};
     std::unique_ptr<Mesh> mesh{};
@@ -22,7 +21,7 @@ class RoutingEngine : public Clonable<RoutingEngine>
 public:
     RoutingEngine();
     explicit RoutingEngine(const PolyWithHoles& poly);
-    ~RoutingEngine() override = default;
+    ~RoutingEngine() = default;
 
     RoutingEngine(const RoutingEngine& other) = delete;
     RoutingEngine& operator=(const RoutingEngine& other) = delete;
@@ -30,7 +29,6 @@ public:
     RoutingEngine(RoutingEngine&& other) = default;
     RoutingEngine& operator=(RoutingEngine&& other) = default;
 
-    std::unique_ptr<RoutingEngine> Clone() const override;
     Point ComputeWaypoint(Point currentPosition, Point destination);
     std::vector<Point> ComputeAllWaypoints(Point currentPosition, Point destination);
     bool IsRoutable(Point p) const;

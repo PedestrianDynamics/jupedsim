@@ -40,14 +40,6 @@ RoutingEngine::RoutingEngine(const PolyWithHoles& poly)
     mesh = std::make_unique<Mesh>(cdt);
 }
 
-std::unique_ptr<RoutingEngine> RoutingEngine::Clone() const
-{
-    auto clone = std::make_unique<RoutingEngine>();
-    clone->cdt = cdt;
-    clone->mesh = mesh->Clone();
-    return clone;
-}
-
 Point RoutingEngine::ComputeWaypoint(Point currentPosition, Point destination)
 {
     return ComputeAllWaypoints(currentPosition, destination)[1];

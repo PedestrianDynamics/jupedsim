@@ -17,7 +17,6 @@
 #include <cstdint>
 #include <iterator>
 #include <limits>
-#include <memory>
 #include <optional>
 #include <queue>
 #include <set>
@@ -86,11 +85,6 @@ Mesh::Mesh(const CDT& cdt)
 
     updateBoundingBoxes();
 };
-
-std::unique_ptr<Mesh> Mesh::Clone() const
-{
-    return std::make_unique<Mesh>(*this);
-}
 
 void Mesh::MergeGreedy()
 {
