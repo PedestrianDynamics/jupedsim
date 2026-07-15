@@ -12,7 +12,7 @@
 /// @param n normal vector of the plane to test for walkability
 /// @pre #n needs to be normalized; otherwise the result is not reliable.
 /// @return true if the normal indicates that the plane is walkable.
-bool IsWalkableNormal(const Vector3& n);
+bool IsWalkableNormal(const Vector3D& n);
 
 /// Test if face in mesh is planar.
 /// Degenerate faces (2 or fewer vertices, or all vertices collinear) will return false.
