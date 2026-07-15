@@ -10,7 +10,6 @@
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Polygon_2.h>
 #include <CGAL/Polygon_with_holes_2.h>
-#include <CGAL/Simple_cartesian.h>
 #include <CGAL/Surface_mesh.h>
 #include <CGAL/Triangulation_data_structure_2.h>
 #include <CGAL/Triangulation_vertex_base_2.h>
@@ -21,9 +20,9 @@
 #include <sstream>
 #include <string>
 
-// using K = CGAL::Exact_predicates_exact_constructions_kernel;
-using K = CGAL::Simple_cartesian<double>;
-using Point3 = K::Point_3;
+using K = CGAL::Exact_predicates_inexact_constructions_kernel;
+using Point2D = K::Point_2;
+using Point3D = K::Point_3;
 using Vector3 = K::Vector_3;
 
 using Poly = CGAL::Polygon_2<K>;
@@ -31,7 +30,7 @@ using PolyWithHoles = CGAL::Polygon_with_holes_2<K>;
 using PolyWithHolesList = std::list<PolyWithHoles>;
 using PolyList = std::list<Poly>;
 using Vb = CGAL::Triangulation_vertex_base_2<K>;
-using CGALMesh = CGAL::Surface_mesh<Point3>;
+using SurfaceMesh = CGAL::Surface_mesh<Point3D>;
 
 /// Convenience alias for vertex descriptor types
 template <class G>
@@ -49,14 +48,8 @@ using HalfedgeDescriptor = typename boost::graph_traits<G>::halfedge_descriptor;
 template <class G>
 using EdgeDescriptor = typename boost::graph_traits<G>::edge_descriptor;
 
-// 3D - Surface_mesh_shortest_path is designed for EPICK
-using SurfaceKernel = CGAL::Exact_predicates_inexact_constructions_kernel;
-using SurfaceMesh = CGAL::Surface_mesh<SurfaceKernel::Point_3>;
-using Point3D = SurfaceKernel::Point_3;
-using Point2D = SurfaceKernel::Point_2;
-using Segment3D = SurfaceKernel::Segment_3;
 using AABBPrimitive = CGAL::AABB_face_graph_triangle_primitive<SurfaceMesh>;
-using AABBTraits = CGAL::AABB_traits_3<SurfaceKernel, AABBPrimitive>;
+using AABBTraits = CGAL::AABB_traits_3<K, AABBPrimitive>;
 using AABBTree = CGAL::AABB_tree<AABBTraits>;
 
 template <class Gt, class Fb = CGAL::Constrained_triangulation_face_base_2<Gt>>

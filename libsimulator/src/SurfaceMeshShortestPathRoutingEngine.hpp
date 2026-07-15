@@ -30,7 +30,7 @@ private:
     const Geometry3D& _geometry;
 
     // cache
-    using Traits = CGAL::Surface_mesh_shortest_path_traits<SurfaceKernel, SurfaceMesh>;
+    using Traits = CGAL::Surface_mesh_shortest_path_traits<K, SurfaceMesh>;
     using ShortestPath = CGAL::Surface_mesh_shortest_path<Traits>;
     std::map<Location, std::unique_ptr<ShortestPath>> _cache{};
 };

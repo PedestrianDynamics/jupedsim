@@ -15,8 +15,7 @@
 
 namespace
 {
-using P2 = SurfaceKernel::Point_2;
-using T2 = SurfaceKernel::Triangle_2;
+using T2 = K::Triangle_2;
 // The overlap classification must be exact: with inexact constructions,
 // CGAL::intersection has classified a mere vertex touch between two flat
 // slivers as a triangle-shaped overlap (e.g. BUW floorplan), fragmenting a
@@ -27,11 +26,11 @@ using ET2 = EK::Triangle_2;
 /// Orthogonal projection of a triangular face onto the x/y-plane (z dropped).
 T2 project(const SurfaceMesh& mesh, SurfaceMesh::Face_index f)
 {
-    std::array<P2, 3> p{};
+    std::array<Point2D, 3> p{};
     int i = 0;
     for(const auto v : CGAL::vertices_around_face(mesh.halfedge(f), mesh)) {
         const auto& q = mesh.point(v);
-        p[i++] = P2(q.x(), q.y());
+        p[i++] = Point2D(q.x(), q.y());
     }
     return T2(p[0], p[1], p[2]);
 }

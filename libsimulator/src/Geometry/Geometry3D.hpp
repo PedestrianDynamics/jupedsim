@@ -22,7 +22,7 @@ public:
     /// Result of projecting a query point onto the surface along -z.
     struct FaceLocation {
         SurfaceMesh::Face_index face;
-        SurfaceKernel::Point_3 point;
+        K::Point_3 point;
     };
 
     /// Take an already-built surface mesh (e.g. from a mesh builder or a test).
