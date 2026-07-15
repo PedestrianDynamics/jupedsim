@@ -247,12 +247,12 @@ GenericAgent::ID Simulation::AddAgent(GenericAgent agent)
     if(!_geometry->InsideGeometry(agent.position())) {
         throw SimulationError("Agent {} not inside walkable area", agent.position());
     }
-    if(_journeys.count(agent.journeyId) == 0) {
-        throw SimulationError("Unknown journey id: {}", agent.journeyId);
+    if(_journeys.count(agent.strategical.journeyId) == 0) {
+        throw SimulationError("Unknown journey id: {}", agent.strategical.journeyId);
     }
 
-    if(!_journeys.at(agent.journeyId)->ContainsStage(agent.stageId)) {
-        throw SimulationError("Unknown stage id: {}", agent.stageId);
+    if(!_journeys.at(agent.strategical.journeyId)->ContainsStage(agent.strategical.stageId)) {
+        throw SimulationError("Unknown stage id: {}", agent.strategical.stageId);
     }
 
     if(const auto agentModelType = ModelTypeOf(agent.state);
@@ -266,14 +266,14 @@ GenericAgent::ID Simulation::AddAgent(GenericAgent agent)
 
     _operationalDecisionSystem.ValidateAgent(agent, _neighborhoodSearch, *_geometry);
 
-    _stageManager.HandleNewAgent(agent.stageId);
+    _stageManager.HandleNewAgent(agent.strategical.stageId);
     _agents.emplace_back(std::move(agent));
     _neighborhoodSearch.AddAgent(_agents.back());
 
     auto v = IteratorPair(std::prev(std::end(_agents)), std::end(_agents));
     _stategicalDecisionSystem.Run(_journeys, v, _stageManager);
     _tacticalDecisionSystem.Run(*_routingEngine, v);
-    return Id(_agents.back()).getID();
+    return _agents.back().id.getID();
 }
 
 void Simulation::MarkAgentForRemoval(GenericAgent::ID id)
@@ -281,7 +281,7 @@ void Simulation::MarkAgentForRemoval(GenericAgent::ID id)
     ThrowIfIterating("MarkAgentForRemoval");
     JPS_TRACE_FUNC;
     const auto iter = std::find_if(
-        std::begin(_agents), std::end(_agents), [id](auto& agent) { return Id(agent) == id; });
+        std::begin(_agents), std::end(_agents), [id](auto& agent) { return agent.id == id; });
     if(iter == std::end(_agents)) {
         throw SimulationError("Unknown agent id {}", id);
     }
@@ -293,7 +293,7 @@ const GenericAgent& Simulation::Agent(GenericAgent::ID id) const
 {
     JPS_TRACE_FUNC;
     const auto iter =
-        std::find_if(_agents.begin(), _agents.end(), [id](auto& ped) { return id == Id(ped); });
+        std::find_if(_agents.begin(), _agents.end(), [id](auto& ped) { return id == ped.id; });
     if(iter == _agents.end()) {
         throw SimulationError("Trying to access unknown Agent {}", id);
     }
@@ -304,7 +304,7 @@ GenericAgent& Simulation::Agent(GenericAgent::ID id)
 {
     JPS_TRACE_FUNC;
     const auto iter =
-        std::find_if(_agents.begin(), _agents.end(), [id](auto& ped) { return id == Id(ped); });
+        std::find_if(_agents.begin(), _agents.end(), [id](auto& ped) { return id == ped.id; });
     if(iter == _agents.end()) {
         throw SimulationError("Trying to access unknown Agent {}", id);
     }
@@ -357,9 +357,9 @@ void Simulation::SwitchAgentJourney(
         throw SimulationError("Stage {} not part of Journey {}", stage_id, journey_id);
     }
     auto& agent = Agent(agent_id);
-    agent.journeyId = journey_id;
-    _stageManager.MigrateAgent(agent.stageId, stage_id);
-    agent.stageId = stage_id;
+    agent.strategical.journeyId = journey_id;
+    _stageManager.MigrateAgent(agent.strategical.stageId, stage_id);
+    agent.strategical.stageId = stage_id;
 }
 
 std::vector<GenericAgent::ID> Simulation::AgentsInRange(Point p, double distance)
@@ -373,7 +373,7 @@ std::vector<GenericAgent::ID> Simulation::AgentsInRange(Point p, double distance
         std::begin(neighbors),
         std::end(neighbors),
         std::back_inserter(neighborIds),
-        [](const auto& agent) { return Id(agent); });
+        [](const auto& agent) { return agent.id; });
     return neighborIds;
 }
 
@@ -392,7 +392,7 @@ std::vector<GenericAgent::ID> Simulation::AgentsInPolygon(const std::vector<Poin
     std::for_each(
         std::begin(candidates), std::end(candidates), [&result, &poly](const auto& agent) {
             if(poly.IsInside(agent.position())) {
-                result.push_back(Id(agent));
+                result.push_back(agent.id);
             }
         });
     return result;

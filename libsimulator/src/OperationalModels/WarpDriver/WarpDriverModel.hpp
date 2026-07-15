@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "AgentJourney.hpp"
 #include "CollisionGeometry.hpp"
-#include "GenericAgentState.hpp"
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
+#include "TacticalModelState.hpp"
+#include "WarpDriverModelState.hpp"
 
 #include <fmt/core.h>
 
@@ -17,7 +17,7 @@
 class WarpDriverModel : public OperationalModel
 {
 public:
-    using State = WdmState;
+    using State = WarpDriverModelState;
 
     /// 3-component space-time point/vector used internally
     struct SpaceTimePoint {
@@ -54,9 +54,6 @@ private:
     double _velocityUncertaintyY;
     int _numSamples;
 
-    // Genuinely simulation-global state
-    double _cutOffRadius;
-
     IntrinsicField _intrinsicField;
     mutable std::mt19937 _rng;
 
@@ -78,17 +75,11 @@ public:
 
     OperationalModelType Type() const override;
 
-    void GetNeighbors(
-        const GenericState& current,
-        const NeighborhoodSearch<GenericAgent>& neighborhoodsearch,
-        const CollisionGeometry& geometry,
-        StateContainer& neighbor_states) const override;
-
     void ComputeNextState(
         double dT,
         const GenericState& current,
         GenericState& next,
-        const AgentJourney& journey,
+        const TacticalModelState& tactical,
         const CollisionGeometry& geometry,
         const StateContainer& neighborStates) const override;
 

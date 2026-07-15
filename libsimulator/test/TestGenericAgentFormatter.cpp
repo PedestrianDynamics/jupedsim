@@ -4,12 +4,13 @@
 #include "OperationalModels/CollisionFreeSpeedModel/CollisionFreeSpeedModel.hpp"
 #include "OperationalModels/CollisionFreeSpeedModelV2/CollisionFreeSpeedModelV2.hpp"
 #include "OperationalModels/GeneralizedCentrifugalForceModel/GeneralizedCentrifugalForceModel.hpp"
+#include "OperationalModels/OperationalModelState.hpp"
 #include "OperationalModels/SocialForceModel/SocialForceModel.hpp"
 
 #include <fmt/format.h>
 #include <gtest/gtest.h>
 
-static GenericAgent make_agent(GenericAgent::ModelState state)
+static GenericAgent make_agent(OperationalModelState state)
 {
     return GenericAgent(
         GenericAgent::ID{},

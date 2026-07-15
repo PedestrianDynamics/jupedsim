@@ -183,7 +183,7 @@ public:
 
     std::tuple<Point, BaseStage::ID> Target(const GenericAgent& agent) const
     {
-        auto& node = stages.at(agent.stageId);
+        auto& node = stages.at(agent.strategical.stageId);
         auto stage = node.stage;
         const auto& transition = node.transition;
 

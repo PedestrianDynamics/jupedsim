@@ -1,22 +1,21 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "AgentJourney.hpp"
+#include "CollisionFreeSpeedModelState.hpp"
 #include "CollisionGeometry.hpp"
-#include "GenericAgentState.hpp"
 #include "LineSegment.hpp"
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
+#include "TacticalModelState.hpp"
 
 #include <fmt/core.h>
 
 class CollisionFreeSpeedModel : public OperationalModel
 {
 public:
-    using State = CfsmState;
+    using State = CollisionFreeSpeedModelState;
 
 private:
-    double _cutOffRadius{3};
     double strengthNeighborRepulsion{8.0};
     double rangeNeighborRepulsion{0.1};
     double strengthGeometryRepulsion{5.0};
@@ -26,7 +25,7 @@ public:
     using OperationalModel::GenericState;
     using OperationalModel::StateContainer;
 
-    CollisionFreeSpeedModel() = default;
+    CollisionFreeSpeedModel() { _cutOffRadius = 3; }
     CollisionFreeSpeedModel(
         double strengthNeighborRepulsion,
         double rangeNeighborRepulsion,
@@ -35,17 +34,11 @@ public:
     ~CollisionFreeSpeedModel() override = default;
     OperationalModelType Type() const override;
 
-    void GetNeighbors(
-        const GenericState& current,
-        const NeighborhoodSearch<GenericAgent>& neighborhoodsearch,
-        const CollisionGeometry& geometry,
-        StateContainer& neighbor_states) const override;
-
     void ComputeNextState(
         double dT,
         const GenericState& current,
         GenericState& next,
-        const AgentJourney& journey,
+        const TacticalModelState& tactical,
         const CollisionGeometry& geometry,
         const StateContainer& neighborStates) const override;
 

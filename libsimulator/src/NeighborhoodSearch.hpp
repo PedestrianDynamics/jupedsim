@@ -2,6 +2,7 @@
 #pragma once
 #include "GenericAgent.hpp"
 #include "HashCombine.hpp"
+#include "OperationalModels/OperationalModelState.hpp"
 #include "Point.hpp"
 
 #include <algorithm>
@@ -89,14 +90,14 @@ public:
         for(auto& [_, agents] : _grid) {
             const auto iter =
                 std::find_if(std::begin(agents), std::end(agents), [&item](auto& agent) {
-                    return Id(*agent) == Id(item);
+                    return (*agent).id == item.id;
                 });
             if(iter != std::end(agents)) {
                 agents.erase(iter);
                 return;
             }
         }
-        throw SimulationError("Unknown agent id {}", Id(item));
+        throw SimulationError("Unknown agent id {}", item.id);
     }
 
     void Update(const AgentContainer<Value>& items)
@@ -138,11 +139,15 @@ public:
         return result;
     }
 
-    // Member template so the class also instantiates for value types without a ModelState.
-    template <typename V = Value>
-    std::vector<typename V::ModelState> GetNeighboringAgentStates(Point pos, double radius) const
+    // Member templates so the class also instantiates for value types without a ModelState.
+
+    /// Collects the states of all agents within radius of pos for which the filter
+    /// predicate returns true. The filter receives the candidate neighbor state.
+    template <typename Filter, typename V = Value>
+    std::vector<OperationalModelState>
+    GetNeighboringAgentStates(Point pos, double radius, Filter&& filter) const
     {
-        std::vector<typename V::ModelState> result{};
+        std::vector<OperationalModelState> result{};
         result.reserve(128);
 
         const auto posIdx = getIndex(pos);
@@ -159,7 +164,7 @@ public:
                 auto it = _grid.find({x, y});
                 if(it != _grid.cend()) {
                     for(const auto& item : it->second) {
-                        if(DistanceSquared(Pos(*item), pos) <= radiusSquared) {
+                        if(DistanceSquared(Pos(*item), pos) <= radiusSquared && filter(*item)) {
                             result.emplace_back(item->state);
                         }
                     }

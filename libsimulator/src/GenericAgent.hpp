@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
-#include "AgentJourney.hpp"
-#include "GenericAgentState.hpp"
+#include "OperationalModels/OperationalModelState.hpp"
 #include "OperationalModels/OperationalModelType.hpp"
+#include "StrategicalModelState.hpp"
+#include "TacticalModelState.hpp"
 #include "UniqueID.hpp"
 #include "Visitor.hpp"
 
@@ -23,7 +24,6 @@ concept ModelAgentState = requires(T t) {
     // position() hands out mutable Point& into the state, so a convertible or const member
     // is not enough.
     { t.position } -> std::same_as<Point&>;
-    { t.id } -> std::same_as<jps::UniqueID<GenericAgent>&>;
 };
 
 template <typename Variant>
@@ -35,22 +35,18 @@ inline constexpr bool EachAlternativeIsModelAgentState<std::variant<Ts...>> =
 struct GenericAgent;
 const Point& Pos(const GenericAgent& agent);
 Point& Pos(GenericAgent& agent);
-const jps::UniqueID<GenericAgent>& Id(const GenericAgent& agent);
-jps::UniqueID<GenericAgent>& Id(GenericAgent& agent);
 
 struct GenericAgent {
     using ID = jps::UniqueID<GenericAgent>;
+    ID id{};
 
-    jps::UniqueID<Journey> journeyId{jps::UniqueID<Journey>::Invalid};
-    jps::UniqueID<BaseStage> stageId{jps::UniqueID<BaseStage>::Invalid};
+    StrategicalModelState strategical{};
+    TacticalModelState tactical{};
 
-    AgentJourney journey;
-
-    using ModelState = GenericAgentModel;
     static_assert(
-        EachAlternativeIsModelAgentState<ModelState>,
+        EachAlternativeIsModelAgentState<OperationalModelState>,
         "Every agent model state must provide a 'Point position' member");
-    ModelState state{};
+    OperationalModelState state{};
 
     Point& position() { return Pos(*this); }
     const Point& position() const { return Pos(*this); }
@@ -59,14 +55,14 @@ struct GenericAgent {
         ID id_,
         jps::UniqueID<Journey> journeyId_,
         jps::UniqueID<BaseStage> stageId_,
-        ModelState state_)
-        : journeyId(journeyId_), stageId(stageId_), state(std::move(state_))
+        OperationalModelState state_)
+        : strategical{.journeyId = journeyId_, .stageId = stageId_}, state(std::move(state_))
     {
-        // The position is owned by the state; prime the journey target with it.
-        journey.target = Pos(*this);
+        // The position is owned by the state; prime the strategical target with it.
+        strategical.target = Pos(*this);
         // Passing Invalid requests a fresh unique id. Copies of the same state must not
         // share an id, so the state's own id is not reused.
-        Id(*this) = id_ != ID::Invalid ? id_ : ID{};
+        id = id_ != ID::Invalid ? id_ : ID{};
     }
 };
 
@@ -80,50 +76,38 @@ inline Point& Pos(GenericAgent& agent)
     return std::visit([](auto& m) -> Point& { return m.position; }, agent.state);
 }
 
-inline const Point& Pos(const GenericAgentModel& state)
+inline const Point& Pos(const OperationalModelState& state)
 {
     return std::visit([](const auto& s) -> const Point& { return s.position; }, state);
 }
 
-inline Point& Pos(GenericAgentModel& state)
+inline Point& Pos(OperationalModelState& state)
 {
     return std::visit([](auto& s) -> Point& { return s.position; }, state);
 }
 
-inline const jps::UniqueID<GenericAgent>& Id(const GenericAgent& agent)
-{
-    return std::visit(
-        [](const auto& m) -> const jps::UniqueID<GenericAgent>& { return m.id; }, agent.state);
-}
-
-inline jps::UniqueID<GenericAgent>& Id(GenericAgent& agent)
-{
-    return std::visit([](auto& m) -> jps::UniqueID<GenericAgent>& { return m.id; }, agent.state);
-}
-
-inline const jps::UniqueID<GenericAgent>& Id(const GenericAgentModel& state)
-{
-    return std::visit(
-        [](const auto& s) -> const jps::UniqueID<GenericAgent>& { return s.id; }, state);
-}
-
-inline jps::UniqueID<GenericAgent>& Id(GenericAgentModel& state)
-{
-    return std::visit([](auto& s) -> jps::UniqueID<GenericAgent>& { return s.id; }, state);
-}
-
 /// Maps per-agent model state to the operational model type it belongs to.
-inline OperationalModelType ModelTypeOf(const GenericAgentModel& state)
+inline OperationalModelType ModelTypeOf(const OperationalModelState& state)
 {
     return std::visit(
         overloaded{
-            [](const GcfmState&) { return OperationalModelType::GENERALIZED_CENTRIFUGAL_FORCE; },
-            [](const CfsmState&) { return OperationalModelType::COLLISION_FREE_SPEED; },
-            [](const CfsmV2State&) { return OperationalModelType::COLLISION_FREE_SPEED_V2; },
-            [](const CfsmV3State&) { return OperationalModelType::COLLISION_FREE_SPEED_V3; },
-            [](const AvmState&) { return OperationalModelType::ANTICIPATION_VELOCITY_MODEL; },
-            [](const SfmState&) { return OperationalModelType::SOCIAL_FORCE; },
-            [](const WdmState&) { return OperationalModelType::WARP_DRIVER; },
+            [](const GeneralizedCentrifugalForceModelState&) {
+                return OperationalModelType::GENERALIZED_CENTRIFUGAL_FORCE;
+            },
+            [](const CollisionFreeSpeedModelState&) {
+                return OperationalModelType::COLLISION_FREE_SPEED;
+            },
+            [](const CollisionFreeSpeedModelV2State&) {
+                return OperationalModelType::COLLISION_FREE_SPEED_V2;
+            },
+            [](const CollisionFreeSpeedModelV3State&) {
+                return OperationalModelType::COLLISION_FREE_SPEED_V3;
+            },
+            [](const AnticipationVelocityModelState&) {
+                return OperationalModelType::ANTICIPATION_VELOCITY_MODEL;
+            },
+            [](const SocialForceModelState&) { return OperationalModelType::SOCIAL_FORCE; },
+            [](const WarpDriverModelState&) { return OperationalModelType::WARP_DRIVER; },
             [](const CustomModelState&) { return OperationalModelType::CUSTOM_MODEL; }},
         state);
 }
@@ -144,11 +128,11 @@ struct fmt::formatter<GenericAgent> {
                     ctx.out(),
                     "Agent[id={}, journey={}, stage={}, destination={}, target={}, pos={}, "
                     "state={}]",
-                    Id(agent),
-                    agent.journeyId,
-                    agent.stageId,
-                    agent.journey.destination,
-                    agent.journey.target,
+                    agent.id,
+                    agent.strategical.journeyId,
+                    agent.strategical.stageId,
+                    agent.tactical.destination,
+                    agent.strategical.target,
                     Pos(agent),
                     s);
             },

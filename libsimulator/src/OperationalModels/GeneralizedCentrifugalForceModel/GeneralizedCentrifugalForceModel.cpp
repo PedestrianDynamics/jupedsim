@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "GeneralizedCentrifugalForceModel.hpp"
 
-#include "AgentJourney.hpp"
 #include "Ellipse.hpp"
 #include "GenericAgent.hpp"
 #include "Macros.hpp"
@@ -11,6 +10,7 @@
 #include "OperationalModelType.hpp"
 #include "Simulation.hpp"
 #include "SimulationError.hpp"
+#include "TacticalModelState.hpp"
 
 #include <Logger.hpp>
 
@@ -37,6 +37,7 @@ GeneralizedCentrifugalForceModel::GeneralizedCentrifugalForceModel(
     , maxNeighborRepulsionForce(maxNeighborRepulsionForce_)
     , maxGeometryRepulsionForce(maxGeometryRepulsionForce_)
 {
+    _cutOffRadius = 4.0;
 }
 
 OperationalModelType GeneralizedCentrifugalForceModel::Type() const
@@ -44,26 +45,11 @@ OperationalModelType GeneralizedCentrifugalForceModel::Type() const
     return OperationalModelType::GENERALIZED_CENTRIFUGAL_FORCE;
 }
 
-void GeneralizedCentrifugalForceModel::GetNeighbors(
-    const GenericState& current,
-    const NeighborhoodSearch<GenericAgent>& neighborhoodsearch,
-    const CollisionGeometry& geometry,
-    StateContainer& neighbor_states) const
-{
-    neighbor_states = neighborhoodsearch.GetNeighboringAgentStates(Pos(current), _cutOffRadius);
-    std::erase_if(neighbor_states, [&current, &geometry](const auto& neighbor) {
-        if(Id(current) == Id(neighbor)) {
-            return true;
-        }
-        return geometry.IntersectsAny(LineSegment(Pos(current), Pos(neighbor)));
-    });
-}
-
 void GeneralizedCentrifugalForceModel::ComputeNextState(
     double dT,
     const GenericState& current,
     GenericState& next,
-    const AgentJourney& journey,
+    const TacticalModelState& tactical,
     const CollisionGeometry& geometry,
     const StateContainer& neighborStates) const
 {
@@ -78,7 +64,7 @@ void GeneralizedCentrifugalForceModel::ComputeNextState(
     Point e0{};
     // repulsive forces to the walls and transitions that are not my target
     Point repwall = ForceRepRoom(state, geometry);
-    Point fd = ForceDriv(state, journey.destination, state.mass, state.tau, dT, e0);
+    Point fd = ForceDriv(state, tactical.destination, state.mass, state.tau, dT, e0);
     Point acc = (fd + F_rep + repwall) / state.mass;
 
     const Point velocity = (state.orientation * state.speed) + acc * dT;
@@ -140,7 +126,7 @@ void GeneralizedCentrifugalForceModel::CheckModelConstraint(
 
     const auto neighbors = neighborhoodSearch.GetNeighboringAgents(state.position, 2);
     for(const auto& neighbor : neighbors) {
-        if(Id(agent) == Id(neighbor)) {
+        if(agent.id == neighbor.id) {
             continue;
         }
 
@@ -293,8 +279,8 @@ Point GeneralizedCentrifugalForceModel::ForceRepPed(const State& state1, const S
     if(F_rep.x != F_rep.x || F_rep.y != F_rep.y) {
         LOG_ERROR(
             "NAN return p1{} p2 {} Frepx={:f} Frepy={:f} K_ij={:f}",
-            state1.id,
-            state2.id,
+            state1,
+            state2,
             F_rep.x,
             F_rep.y,
             K_ij);

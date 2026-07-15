@@ -80,7 +80,7 @@ void init_simulation(py::module_& m)
             })
         .def(
             "add_agent",
-            [](Simulation& sim, uint64_t journeyId, uint64_t stageId, GenericAgent::ModelState state) {
+            [](Simulation& sim, uint64_t journeyId, uint64_t stageId, OperationalModelState state) {
                 return sim
                     .AddAgent(GenericAgent(
                         GenericAgent::ID::Invalid, journeyId, stageId, std::move(state)))

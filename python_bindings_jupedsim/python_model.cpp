@@ -13,6 +13,7 @@
 #include <pybind11/stl.h>
 
 #include <stdexcept>
+#include <string>
 #include <tuple>
 #include <utility>
 
@@ -85,42 +86,37 @@ PythonModel::PythonModel(py::object model) : _model(std::move(model))
     }
 }
 
-void PythonModel::GetNeighbors(
-    const GenericState& /*current*/,
-    const NeighborhoodSearch<GenericAgent>& neighborhoodsearch,
-    const CollisionGeometry& /*geometry*/,
-    StateContainer& neighbor_states) const
-{
-    _neighborhoodSearch = &neighborhoodsearch;
-    neighbor_states.clear();
-}
-
 void PythonModel::ComputeNextState(
     double dT,
     const GenericState& current,
     GenericState& next,
-    const AgentJourney& journey,
+    const TacticalModelState& tactical,
     const CollisionGeometry& geometry,
-    const StateContainer& /*neighborStates*/) const
+    const StateContainer& neighborStates) const
 {
     py::gil_scoped_acquire gil;
 
-    // Rebuild a transient agent view for the Python callback. Journey and stage ids are
-    // not part of the operational state and stay invalid here.
+    // Rebuild a transient agent view for the Python callback. Agent identity and journey /
+    // stage ids are not part of the operational state; the view gets a fresh id.
     GenericAgent agent{
-        Id(current),
+        GenericAgent::ID::Invalid,
         jps::UniqueID<Journey>::Invalid,
         jps::UniqueID<BaseStage>::Invalid,
         current};
-    agent.journey = journey;
+    agent.tactical = tactical;
 
     py::object pythonAgent = py::cast(agent);
     py::object pythonGeometry = py::cast(&geometry, py::return_value_policy::reference);
-    py::object pythonNeighborhoodSearch =
-        py::cast(_neighborhoodSearch, py::return_value_policy::reference);
+    // Unwrap the frozen neighbor states collected by GetNeighbors back into the Python
+    // state objects (shared by reference, not cloned).
+    py::list pythonNeighborStates;
+    for(const auto& neighbor : neighborStates) {
+        pythonNeighborStates.append(
+            std::get<CustomModel::State>(neighbor).Get<GilSafePyObject>().Get());
+    }
 
-    py::object pythonUpdate = _model.attr("_compute_next_state")(
-        dT, pythonAgent, pythonGeometry, pythonNeighborhoodSearch);
+    py::object pythonUpdate =
+        _model.attr("_compute_next_state")(dT, pythonAgent, pythonGeometry, pythonNeighborStates);
 
     // "next" shares the Python state object with "current" (GilSafePyObject copies are
     // refcounted, not cloned), so this also rejects returning the current state instance.
@@ -140,8 +136,7 @@ void PythonModel::ComputeNextState(
     } catch(const py::error_already_set& ex) {
         if(ex.matches(PyExc_AttributeError)) {
             throw SimulationError(
-                "State returned by compute_next_state() is missing the '{}' attribute.",
-                attr_name);
+                "State returned by compute_next_state() is missing the '{}' attribute.", attr_name);
         }
         throw;
     }
@@ -199,6 +194,7 @@ void init_python_model(py::module_& m)
             // framework can spawn the agent at the state's position.
             const auto position =
                 intoPoint(py::cast<std::tuple<double, double>>(model.attr("position")));
+
             CustomModel::State data{GilSafePyObject{std::move(model)}};
             data.position = position;
             return data;

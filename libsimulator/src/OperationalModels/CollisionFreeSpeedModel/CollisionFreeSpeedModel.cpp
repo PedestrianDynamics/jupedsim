@@ -28,6 +28,7 @@ CollisionFreeSpeedModel::CollisionFreeSpeedModel(
     , strengthGeometryRepulsion(strengthGeometryRepulsion_)
     , rangeGeometryRepulsion(rangeGeometryRepulsion_)
 {
+    _cutOffRadius = 3;
 }
 
 OperationalModelType CollisionFreeSpeedModel::Type() const
@@ -35,32 +36,11 @@ OperationalModelType CollisionFreeSpeedModel::Type() const
     return OperationalModelType::COLLISION_FREE_SPEED;
 }
 
-void CollisionFreeSpeedModel::GetNeighbors(
-    const GenericState& current,
-    const NeighborhoodSearch<GenericAgent>& neighborhoodsearch,
-    const CollisionGeometry& geometry,
-    StateContainer& neighbor_states) const
-{
-    neighbor_states = neighborhoodsearch.GetNeighboringAgentStates(Pos(current), _cutOffRadius);
-    const auto& boundary = geometry.LineSegmentsInApproxDistanceTo(Pos(current));
-    std::erase_if(neighbor_states, [&current, &boundary](const auto& neighbor) {
-        if(Id(current) == Id(neighbor)) {
-            return true;
-        }
-        const auto agent_to_neighbor =
-            LineSegment(Pos(current), std::get<State>(neighbor).position);
-        return std::any_of(
-            boundary.cbegin(), boundary.cend(), [&agent_to_neighbor](const auto& segment) {
-                return intersects(agent_to_neighbor, segment);
-            });
-    });
-}
-
 void CollisionFreeSpeedModel::ComputeNextState(
     double dT,
     const GenericState& current,
     GenericState& next,
-    const AgentJourney& journey,
+    const TacticalModelState& tactical,
     const CollisionGeometry& geometry,
     const StateContainer& neighborStates) const
 {
@@ -83,7 +63,7 @@ void CollisionFreeSpeedModel::ComputeNextState(
             return acc + BoundaryRepulsion(state, element);
         });
 
-    const auto desired_direction = (journey.destination - Pos(current)).Normalized();
+    const auto desired_direction = (tactical.destination - Pos(current)).Normalized();
     auto direction = (desired_direction + neighborRepulsion + boundaryRepulsion).Normalized();
     if(direction == Point{}) {
         direction = state.orientation;
@@ -127,7 +107,7 @@ void CollisionFreeSpeedModel::CheckModelConstraint(
 
     const auto neighbors = neighborhoodSearch.GetNeighboringAgents(state.position, 2);
     for(const auto& neighbor : neighbors) {
-        if(Id(agent) == Id(neighbor)) {
+        if(agent.id == neighbor.id) {
             continue;
         }
         const auto& neighbor_state = std::get<State>(neighbor.state);

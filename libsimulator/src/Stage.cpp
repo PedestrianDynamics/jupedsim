@@ -117,7 +117,7 @@ bool Exit::IsCompleted(const GenericAgent& agent)
 {
     const bool hasReachedExit = area.IsInside(agent.position());
     if(hasReachedExit) {
-        toRemove.push_back(::Id(agent));
+        toRemove.push_back(agent.id);
     }
     return hasReachedExit;
 }
@@ -145,7 +145,7 @@ bool NotifiableWaitingSet::IsCompleted(const GenericAgent& agent)
     if(state == WaitingSetState::Active) {
         return false;
     }
-    const auto find_iter = std::find(std::begin(occupants), std::end(occupants), ::Id(agent));
+    const auto find_iter = std::find(std::begin(occupants), std::end(occupants), agent.id);
     if(find_iter != std::end(occupants)) {
         return true;
     }
@@ -162,7 +162,7 @@ Point NotifiableWaitingSet::Target(const GenericAgent& agent)
     const auto next_slot_index = std::min(occupants.size(), slots.size() - 1);
 
     for(size_t index = 0; index < next_slot_index; ++index) {
-        if(::Id(agent) == occupants[index]) {
+        if(agent.id == occupants[index]) {
             return slots[index];
         }
     }
@@ -205,9 +205,9 @@ NotifiableQueue::NotifiableQueue(std::vector<Point> slots_) : slots(std::move(sl
 
 bool NotifiableQueue::IsCompleted(const GenericAgent& agent)
 {
-    const bool completed = exitingThisUpdate.contains(::Id(agent));
+    const bool completed = exitingThisUpdate.contains(agent.id);
     if(completed) {
-        exitingThisUpdate.erase(::Id(agent));
+        exitingThisUpdate.erase(agent.id);
     }
     return completed;
 }
@@ -215,7 +215,7 @@ bool NotifiableQueue::IsCompleted(const GenericAgent& agent)
 Point NotifiableQueue::Target(const GenericAgent& agent)
 {
 
-    if(const auto index_opt = IndexInContainer(occupants, ::Id(agent)); index_opt) {
+    if(const auto index_opt = IndexInContainer(occupants, agent.id); index_opt) {
         return slots[*index_opt];
     }
 

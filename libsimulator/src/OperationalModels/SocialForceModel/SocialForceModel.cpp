@@ -18,6 +18,7 @@
 SocialForceModel::SocialForceModel(double bodyForce, double friction)
     : bodyForce(bodyForce), friction(friction)
 {
+    _cutOffRadius = 2.5;
 }
 
 OperationalModelType SocialForceModel::Type() const
@@ -25,31 +26,16 @@ OperationalModelType SocialForceModel::Type() const
     return OperationalModelType::SOCIAL_FORCE;
 }
 
-void SocialForceModel::GetNeighbors(
-    const GenericState& current,
-    const NeighborhoodSearch<GenericAgent>& neighborhoodsearch,
-    const CollisionGeometry& /*geometry*/,
-    StateContainer& neighbor_states) const
-{
-    neighbor_states = neighborhoodsearch.GetNeighboringAgentStates(Pos(current), _cutOffRadius);
-    neighbor_states.erase(
-        std::remove_if(
-            std::begin(neighbor_states),
-            std::end(neighbor_states),
-            [&current](const auto& neighbor) { return Id(current) == Id(neighbor); }),
-        std::end(neighbor_states));
-}
-
 void SocialForceModel::ComputeNextState(
     double dT,
     const GenericState& current,
     GenericState& next,
-    const AgentJourney& journey,
+    const TacticalModelState& tactical,
     const CollisionGeometry& geometry,
     const StateContainer& neighborStates) const
 {
     const auto& state = std::get<State>(current);
-    auto forces = DrivingForce(state, journey);
+    auto forces = DrivingForce(state, tactical);
 
     Point F_rep;
     for(const auto& neighbor : neighborStates) {
@@ -132,9 +118,9 @@ void SocialForceModel::CheckModelConstraint(
     }
 }
 
-Point SocialForceModel::DrivingForce(const State& state, const AgentJourney& journey)
+Point SocialForceModel::DrivingForce(const State& state, const TacticalModelState& tactical)
 {
-    const Point e0 = (journey.destination - state.position).Normalized();
+    const Point e0 = (tactical.destination - state.position).Normalized();
     return (e0 * state.desiredSpeed - state.velocity) / state.reactionTime;
 }
 double SocialForceModel::PushingForceLength(double A, double B, double r, double distance)

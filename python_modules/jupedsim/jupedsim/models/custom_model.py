@@ -37,23 +37,30 @@ class CustomModelAgentState(Protocol):
 class CustomOperationalModel(ABC):
     """Base class for operational models implemented in Python.
 
-    Subclasses implement :meth:`compute_next_state` and optionally
-    :meth:`check_model_constraint`. Constraint violations should be reported by
-    raising an exception.
+    Subclasses implement :meth:`get_neighbors` and :meth:`compute_next_state`
+    and optionally :meth:`check_model_constraint`. Constraint violations
+    should be reported by raising an exception.
+
+    The simulation advances agents in two phases per step, mirroring the
+    native operational model interface: for every agent it first calls
+    :meth:`get_neighbors` to collect the frozen neighbor states, then calls
+    :meth:`compute_next_state` with exactly that collection. Neighbor state
+    must be read exclusively from the ``neighbor_states`` handed to
+    :meth:`compute_next_state`; the neighborhood search is only available
+    while collecting.
 
     .. warning::
 
         **Per-agent model state is live and shared -- never mutate it in place.**
 
-        The ``ped.model`` object you receive (and every neighbor's ``.model``
-        returned from a neighborhood query) is the agent's *live* state, shared
-        by reference with the running simulation for performance. JuPedSim
-        advances agents in two phases per step: it first *computes* every
-        agent's update from the current state of all agents, then *applies* all
-        updates together. Mutating ``ped.model`` (or a neighbor's) during the
-        compute phase changes state that other agents are still reading in the
-        same step, silently breaking the compute-then-apply ordering and
-        producing order-dependent results.
+        The ``ped.model`` object you receive (every state returned from
+        :meth:`get_neighbors` and every entry of ``neighbor_states``) is the
+        agent's *live* state, shared by reference with the running simulation
+        for performance. JuPedSim first *computes* every agent's update from
+        the current state of all agents, then *applies* all updates together.
+        Mutating a state during the compute phase changes data that other
+        agents are still reading in the same step, silently breaking the
+        compute-then-apply ordering and producing order-dependent results.
 
         The only correct way to change state is to return a new state object
         from :meth:`compute_next_state` -- returning ``ped.model`` itself
@@ -79,9 +86,13 @@ class CustomOperationalModel(ABC):
         dt: float,
         ped: _TransientAgent,
         geometry: Geometry,
-        neighborhood_search: NeighborhoodSearch,
+        neighbor_states: list[CustomModelAgentState],
     ) -> CustomModelAgentState:
-        """Compute one update for ``ped``."""
+        """Compute one update for ``ped``.
+
+        ``neighbor_states`` is the frozen collection returned by
+        :meth:`get_neighbors` for this agent in this step.
+        """
 
     def check_model_constraint(
         self,
@@ -97,17 +108,16 @@ class CustomOperationalModel(ABC):
         dt,
         ped,
         geometry,
-        neighborhood_search,
+        neighbor_states,
     ) -> CustomModelAgentState:
         from jupedsim.agent import _TransientAgent
         from jupedsim.geometry import Geometry
-        from jupedsim.neighborhood import NeighborhoodSearch
 
         return self.compute_next_state(
             dt,
             _TransientAgent(ped),
             Geometry(geometry),
-            NeighborhoodSearch(neighborhood_search),
+            neighbor_states,
         )
 
     def _check_model_constraint(

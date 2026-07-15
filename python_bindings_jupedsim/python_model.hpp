@@ -43,20 +43,11 @@ class PythonModel final : public CustomModel
 public:
     explicit PythonModel(py::object model);
 
-    /// The Python callback queries neighbors itself with arbitrary radii, so no neighbor
-    /// states are collected here; a handle to the neighborhood search is kept for the
-    /// ComputeNextState call instead.
-    void GetNeighbors(
-        const GenericState& current,
-        const NeighborhoodSearch<GenericAgent>& neighborhoodsearch,
-        const CollisionGeometry& geometry,
-        StateContainer& neighbor_states) const override;
-
     void ComputeNextState(
         double dT,
         const GenericState& current,
         GenericState& next,
-        const AgentJourney& journey,
+        const TacticalModelState& tactical,
         const CollisionGeometry& geometry,
         const StateContainer& neighborStates) const override;
 
@@ -67,7 +58,4 @@ public:
 
 private:
     py::object _model;
-    // Set by GetNeighbors immediately before each ComputeNextState call; the search outlives
-    // the simulation step, so the pointer stays valid for the paired ComputeNextState.
-    mutable const NeighborhoodSearch<GenericAgent>* _neighborhoodSearch{nullptr};
 };

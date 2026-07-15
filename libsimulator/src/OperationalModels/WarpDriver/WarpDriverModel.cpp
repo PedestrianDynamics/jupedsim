@@ -336,9 +336,9 @@ WarpDriverModel::WarpDriverModel(
     // collide with us within timeHorizon. Two agents closing head-on cover
     // 2 * v_max * timeHorizon, plus their combined radii, plus a small margin.
     // v_max and r_max are hardcoded pedestrian defaults.
-    , _cutOffRadius(2.0 * 1.5 * timeHorizon + 2.0 * 0.3 + 0.5)
     , _rng(rngSeed)
 {
+    _cutOffRadius = 2.0 * 1.5 * timeHorizon + 2.0 * 0.3 + 0.5;
     if(sigma <= 0.0) {
         throw SimulationError("WarpDriverModel: sigma must be > 0, got {}", sigma);
     }
@@ -359,79 +359,64 @@ void WarpDriverModel::CheckModelConstraint(
     if(!data) {
         throw SimulationError(
             "WarpDriverModel constraint check: agent {} does not have WarpDriverModel data",
-            Id(agent));
+            agent.id);
     }
     if(data->radius <= 0.0) {
         throw SimulationError(
             "WarpDriverModel constraint check: agent {} has invalid radius {}",
-            Id(agent),
+            agent.id,
             data->radius);
     }
     if(data->v0 < 0.0) {
         throw SimulationError(
-            "WarpDriverModel constraint check: agent {} has invalid v0 {}", Id(agent), data->v0);
+            "WarpDriverModel constraint check: agent {} has invalid v0 {}", agent.id, data->v0);
     }
     if(this->_timeHorizon <= 0.0) {
         throw SimulationError(
             "WarpDriverModel constraint check: agent {} has invalid timeHorizon {}, must be > 0",
-            Id(agent),
+            agent.id,
             data->timeHorizon);
     }
     if(this->_stepSize <= 0.0) {
         throw SimulationError(
             "WarpDriverModel constraint check: agent {} has invalid stepSize {}, must be > 0",
-            Id(agent),
+            agent.id,
             data->stepSize);
     }
     if(this->_numSamples < 1) {
         throw SimulationError(
             "WarpDriverModel constraint check: agent {} has invalid numSamples {}, must be >= 1",
-            Id(agent),
+            agent.id,
             data->numSamples);
     }
     if(this->_timeUncertainty < 0.0) {
         throw SimulationError(
             "WarpDriverModel constraint check: agent {} has invalid timeUncertainty {}, must be "
             ">= 0",
-            Id(agent),
+            agent.id,
             data->timeUncertainty);
     }
     if(this->_velocityUncertaintyX < 0.0) {
         throw SimulationError(
             "WarpDriverModel constraint check: agent {} has invalid velocityUncertaintyX {}, must "
             "be >= 0",
-            Id(agent),
+            agent.id,
             data->velocityUncertaintyX);
     }
     if(this->_velocityUncertaintyY < 0.0) {
         throw SimulationError(
             "WarpDriverModel constraint check: agent {} has invalid velocityUncertaintyY {}, must "
             "be >= 0",
-            Id(agent),
+            agent.id,
             data->velocityUncertaintyY);
     }
-}
-
-void WarpDriverModel::GetNeighbors(
-    const GenericState& current,
-    const NeighborhoodSearch<GenericAgent>& neighborhoodsearch,
-    const CollisionGeometry& /*geometry*/,
-    StateContainer& neighbor_states) const
-{
-    neighbor_states = neighborhoodsearch.GetNeighboringAgentStates(Pos(current), _cutOffRadius);
-    neighbor_states.erase(
-        std::remove_if(
-            std::begin(neighbor_states),
-            std::end(neighbor_states),
-            [&current](const auto& neighbor) { return Id(current) == Id(neighbor); }),
-        std::end(neighbor_states));
 }
 
 void WarpDriverModel::ComputeNextState(
     double dT,
     const GenericState& current,
     GenericState& next,
-    const AgentJourney& journey,
+    const TacticalModelState& tactical,
     const CollisionGeometry& geometry,
     const StateContainer& neighborStates) const
 {
@@ -448,7 +433,7 @@ void WarpDriverModel::ComputeNextState(
     }
 
     // Direction towards destination
-    Point toTarget = journey.destination - Pos(current);
+    Point toTarget = tactical.destination - Pos(current);
     const double distToTarget = toTarget.Norm();
     if(distToTarget < 1e-9) {
         // The old update carried default-initialized stuck/detour state here,

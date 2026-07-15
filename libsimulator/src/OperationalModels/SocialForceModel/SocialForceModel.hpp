@@ -1,22 +1,21 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "AgentJourney.hpp"
 #include "CollisionGeometry.hpp"
-#include "GenericAgentState.hpp"
 #include "LineSegment.hpp"
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
+#include "SocialForceModelState.hpp"
+#include "TacticalModelState.hpp"
 
 #include <fmt/core.h>
 
 class SocialForceModel : public OperationalModel
 {
 public:
-    using State = SfmState;
+    using State = SocialForceModelState;
 
 private:
-    double _cutOffRadius{2.5};
     double bodyForce{120000}; // k
     double friction{240000}; // kappa
 
@@ -28,17 +27,11 @@ public:
     ~SocialForceModel() override = default;
     OperationalModelType Type() const override;
 
-    void GetNeighbors(
-        const GenericState& current,
-        const NeighborhoodSearch<GenericAgent>& neighborhoodsearch,
-        const CollisionGeometry& geometry,
-        StateContainer& neighbor_states) const override;
-
     void ComputeNextState(
         double dT,
         const GenericState& current,
         GenericState& next,
-        const AgentJourney& journey,
+        const TacticalModelState& tactical,
         const CollisionGeometry& geometry,
         const StateContainer& neighborStates) const override;
 
@@ -48,7 +41,7 @@ public:
         const CollisionGeometry& geometry) const override;
 
 private:
-    static Point DrivingForce(const State& agent, const AgentJourney& journey);
+    static Point DrivingForce(const State& agent, const TacticalModelState& tactical);
     Point AgentForce(const State& ped1, const State& ped2) const;
     Point ObstacleForce(const State& agent, const LineSegment& segment) const;
     /**

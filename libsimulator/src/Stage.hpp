@@ -224,13 +224,13 @@ void NotifiableWaitingSet::Update(
         GenericAgent::ID occupant = GenericAgent::ID::Invalid;
         double min_distance = std::numeric_limits<double>::max();
         for(const auto& agent : candidates) {
-            if(agent.stageId == id) {
-                if(std::find(std::begin(occupants), std::end(occupants), ::Id(agent)) ==
+            if(agent.strategical.stageId == id) {
+                if(std::find(std::begin(occupants), std::end(occupants), agent.id) ==
                    std::end(occupants)) {
                     const auto distance = (agent.position() - slots[index]).Norm();
                     if(distance < min_distance) {
                         min_distance = distance;
-                        occupant = ::Id(agent);
+                        occupant = agent.id;
                     }
                 }
             }
@@ -300,14 +300,14 @@ void NotifiableQueue::Update(
         GenericAgent::ID occupant = GenericAgent::ID::Invalid;
         double min_distance = std::numeric_limits<double>::max();
         for(const auto& agent : candidates) {
-            if(agent.stageId != id || Contains(occupants, ::Id(agent)) ||
-               exitingThisUpdate.contains(::Id(agent))) {
+            if(agent.strategical.stageId != id || Contains(occupants, agent.id) ||
+               exitingThisUpdate.contains(agent.id)) {
                 continue;
             }
             const auto distance = (agent.position() - slots[index]).Norm();
             if(distance < min_distance) {
                 min_distance = distance;
-                occupant = ::Id(agent);
+                occupant = agent.id;
             }
         }
         if(occupant != GenericAgent::ID::Invalid) {
@@ -324,7 +324,7 @@ public:
     DirectSteering() = default;
     ~DirectSteering() override = default;
     bool IsCompleted(const GenericAgent&) override { return false; };
-    Point Target(const GenericAgent& agent) override { return agent.journey.target; };
+    Point Target(const GenericAgent& agent) override { return agent.strategical.target; };
     StageProxy Proxy(Simulation* simulation) override
     {
         return DirectSteeringProxy(simulation, this);

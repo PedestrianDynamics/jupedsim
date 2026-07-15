@@ -20,19 +20,24 @@ void init_agent(py::module_& m)
     // not the Python-visible Agent; the public Agent is a handle that resolves
     // this wrapper freshly on every attribute access.
     py::class_<GenericAgent>(m, "Agent")
-        .def_property_readonly("id", [](const GenericAgent& agent) { return Id(agent).getID(); })
+        .def_property_readonly("id", [](const GenericAgent& agent) { return agent.id.getID(); })
         .def_property_readonly(
-            "journey_id", [](const GenericAgent& agent) { return agent.journeyId.getID(); })
+            "journey_id",
+            [](const GenericAgent& agent) { return agent.strategical.journeyId.getID(); })
         .def_property_readonly(
-            "stage_id", [](const GenericAgent& agent) { return agent.stageId.getID(); })
+            "stage_id",
+            [](const GenericAgent& agent) { return agent.strategical.stageId.getID(); })
         .def_property_readonly(
             "position", [](const GenericAgent& agent) { return intoTuple(agent.position()); })
         .def_property(
             "target",
-            [](const GenericAgent& agent) { return intoTuple(agent.journey.target); },
+            [](const GenericAgent& agent) { return intoTuple(agent.strategical.target); },
             [](GenericAgent& agent, std::tuple<double, double> target) {
-                agent.journey.target = intoPoint(target);
+                agent.strategical.target = intoPoint(target);
             })
+        .def_property_readonly(
+            "destination",
+            [](const GenericAgent& agent) { return intoTuple(agent.tactical.destination); })
         .def_property_readonly(
             "model",
             [](GenericAgent& agent) -> auto& { return agent.state; },

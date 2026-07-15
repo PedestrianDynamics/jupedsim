@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
+#include "CustomModelState.hpp"
 #include "FormatAny.hpp"
-#include "GenericAgentState.hpp"
 #include "OperationalModel.hpp"
 #include "Point.hpp"
 #include "UniqueID.hpp"
@@ -42,7 +42,7 @@
 ///         double dT,
 ///         const GenericState& current,
 ///         GenericState& next,
-///         const AgentJourney& journey,
+///         const TacticalModelState& tactical,
 ///         const CollisionGeometry& geometry,
 ///         const StateContainer& neighborStates) const override;
 ///

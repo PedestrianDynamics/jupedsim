@@ -3,7 +3,6 @@
 
 #include "Point.hpp"
 
-struct AgentJourney {
-    Point target;
+struct TacticalModelState {
     Point destination{};
 };

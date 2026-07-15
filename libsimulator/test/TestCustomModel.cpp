@@ -9,6 +9,7 @@
 #include "OperationalModels/CollisionFreeSpeedModelV3/CollisionFreeSpeedModelV3.hpp"
 #include "OperationalModels/CustomModel/CustomModel.hpp"
 #include "OperationalModels/GeneralizedCentrifugalForceModel/GeneralizedCentrifugalForceModel.hpp"
+#include "OperationalModels/OperationalModelState.hpp"
 #include "OperationalModels/SocialForceModel/SocialForceModel.hpp"
 #include "OperationalModels/WarpDriver/WarpDriverModel.hpp"
 
@@ -42,20 +43,11 @@ struct ConstCharPointerToStringPayload {
 class MinimalCustomModel : public CustomModel
 {
 public:
-    void GetNeighbors(
-        const GenericState&,
-        const NeighborhoodSearch<GenericAgent>&,
-        const CollisionGeometry&,
-        StateContainer& neighbor_states) const override
-    {
-        neighbor_states.clear();
-    }
-
     void ComputeNextState(
         double dT,
         const GenericState& current,
         GenericState& next,
-        const AgentJourney&,
+        const TacticalModelState&,
         const CollisionGeometry&,
         const StateContainer&) const override
     {
@@ -77,7 +69,7 @@ public:
     }
 };
 
-GenericAgent MakeAgent(GenericAgent::ModelState state)
+GenericAgent MakeAgent(OperationalModelState state)
 {
     return GenericAgent(
         GenericAgent::ID::Invalid,
@@ -152,27 +144,27 @@ TEST(CustomModel, RunsThroughOperationalDecisionSystem)
 TEST(ModelTypeOf, MapsEveryAgentModelDataToItsOperationalModelType)
 {
     ASSERT_EQ(
-        ModelTypeOf(GenericAgent::ModelState{GeneralizedCentrifugalForceModel::State{}}),
+        ModelTypeOf(OperationalModelState{GeneralizedCentrifugalForceModel::State{}}),
         OperationalModelType::GENERALIZED_CENTRIFUGAL_FORCE);
     ASSERT_EQ(
-        ModelTypeOf(GenericAgent::ModelState{CollisionFreeSpeedModel::State{}}),
+        ModelTypeOf(OperationalModelState{CollisionFreeSpeedModel::State{}}),
         OperationalModelType::COLLISION_FREE_SPEED);
     ASSERT_EQ(
-        ModelTypeOf(GenericAgent::ModelState{CollisionFreeSpeedModelV2::State{}}),
+        ModelTypeOf(OperationalModelState{CollisionFreeSpeedModelV2::State{}}),
         OperationalModelType::COLLISION_FREE_SPEED_V2);
     ASSERT_EQ(
-        ModelTypeOf(GenericAgent::ModelState{CollisionFreeSpeedModelV3::State{}}),
+        ModelTypeOf(OperationalModelState{CollisionFreeSpeedModelV3::State{}}),
         OperationalModelType::COLLISION_FREE_SPEED_V3);
     ASSERT_EQ(
-        ModelTypeOf(GenericAgent::ModelState{AnticipationVelocityModel::State{}}),
+        ModelTypeOf(OperationalModelState{AnticipationVelocityModel::State{}}),
         OperationalModelType::ANTICIPATION_VELOCITY_MODEL);
     ASSERT_EQ(
-        ModelTypeOf(GenericAgent::ModelState{SocialForceModel::State{}}),
+        ModelTypeOf(OperationalModelState{SocialForceModel::State{}}),
         OperationalModelType::SOCIAL_FORCE);
     ASSERT_EQ(
-        ModelTypeOf(GenericAgent::ModelState{WarpDriverModel::State{}}),
+        ModelTypeOf(OperationalModelState{WarpDriverModel::State{}}),
         OperationalModelType::WARP_DRIVER);
     ASSERT_EQ(
-        ModelTypeOf(GenericAgent::ModelState{CustomModel::State{MinimalState{}}}),
+        ModelTypeOf(OperationalModelState{CustomModel::State{MinimalState{}}}),
         OperationalModelType::CUSTOM_MODEL);
 }

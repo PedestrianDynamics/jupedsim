@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "AnticipationVelocityModel.hpp"
 
-#include "AgentJourney.hpp"
 #include "CollisionGeometry.hpp"
 #include "GenericAgent.hpp"
 #include "GeometricFunctions.hpp"
@@ -12,6 +11,7 @@
 #include "OperationalModelType.hpp"
 #include "Point.hpp"
 #include "SimulationError.hpp"
+#include "TacticalModelState.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -24,6 +24,7 @@
 AnticipationVelocityModel::AnticipationVelocityModel(double pushoutStrength, uint64_t rng_seed)
     : _pushoutStrength(pushoutStrength), gen(rng_seed)
 {
+    _cutOffRadius = 3;
 }
 
 OperationalModelType AnticipationVelocityModel::Type() const
@@ -31,34 +32,11 @@ OperationalModelType AnticipationVelocityModel::Type() const
     return OperationalModelType::ANTICIPATION_VELOCITY_MODEL;
 }
 
-void AnticipationVelocityModel::GetNeighbors(
-    const GenericState& current,
-    const NeighborhoodSearch<GenericAgent>& neighborhoodsearch,
-    const CollisionGeometry& geometry,
-    StateContainer& neighbor_states) const
-{
-    neighbor_states = neighborhoodsearch.GetNeighboringAgentStates(Pos(current), _cutOffRadius);
-    const auto& boundary = geometry.LineSegmentsInApproxDistanceTo(Pos(current));
-    // Remove any agent from the neighborhood that is obstructed by geometry and the current
-    // agent
-    std::erase_if(neighbor_states, [&current, &boundary](const auto& neighbor) {
-        if(Id(current) == Id(neighbor)) {
-            return true;
-        }
-        const auto agent_to_neighbor =
-            LineSegment(Pos(current), std::get<State>(neighbor).position);
-        return std::any_of(
-            boundary.cbegin(), boundary.cend(), [&agent_to_neighbor](const auto& segment) {
-                return intersects(agent_to_neighbor, segment);
-            });
-    });
-}
-
 void AnticipationVelocityModel::ComputeNextState(
     double dT,
     const GenericState& current,
     GenericState& next,
-    const AgentJourney& journey,
+    const TacticalModelState& tactical,
     const CollisionGeometry& geometry,
     const StateContainer& neighborStates) const
 {
@@ -69,11 +47,11 @@ void AnticipationVelocityModel::ComputeNextState(
         std::begin(neighborStates),
         std::end(neighborStates),
         Point{},
-        [&state, &journey, this](const auto& res, const auto& neighbor) {
-            return res + NeighborRepulsion(state, std::get<State>(neighbor), journey);
+        [&state, &tactical, this](const auto& res, const auto& neighbor) {
+            return res + NeighborRepulsion(state, std::get<State>(neighbor), tactical);
         });
 
-    const auto desiredDirection = (journey.destination - Pos(current)).Normalized();
+    const auto desiredDirection = (tactical.destination - state.position).Normalized();
     auto direction = (desiredDirection + neighborRepulsion).Normalized();
     if(direction == Point{}) {
         direction = state.orientation;
@@ -82,7 +60,7 @@ void AnticipationVelocityModel::ComputeNextState(
     const double wallBufferDistance = state.wallBufferDistance;
     // Wall sliding behavior
 
-    direction = UpdateDirection(state, journey, direction, dT);
+    direction = UpdateDirection(state, tactical, direction, dT);
     const auto spacing = std::accumulate(
         std::begin(neighborStates),
         std::end(neighborStates),
@@ -104,11 +82,11 @@ void AnticipationVelocityModel::ComputeNextState(
 
 Point AnticipationVelocityModel::UpdateDirection(
     const State& state,
-    const AgentJourney& journey,
+    const TacticalModelState& tactical,
     const Point& calculatedDirection,
     double dt) const
 {
-    const Point desiredDirection = (journey.destination - state.position).Normalized();
+    const Point desiredDirection = (tactical.destination - state.position).Normalized();
     const Point actualDirection = state.orientation;
     Point updatedDirection;
 
@@ -175,7 +153,7 @@ void AnticipationVelocityModel::CheckModelConstraint(
 
     const auto neighbors = neighborhoodSearch.GetNeighboringAgents(state.position, 2);
     for(const auto& neighbor : neighbors) {
-        if(Id(agent) == Id(neighbor)) {
+        if(agent.id == neighbor.id) {
             continue;
         }
         const auto& neighbor_state = std::get<State>(neighbor.state);
@@ -259,7 +237,7 @@ Point AnticipationVelocityModel::CalculateInfluenceDirection(
 Point AnticipationVelocityModel::NeighborRepulsion(
     const State& state1,
     const State& state2,
-    const AgentJourney& journey) const
+    const TacticalModelState& tactical) const
 {
     const auto distp12 = state2.position - state1.position;
     const auto [distance, ep12] = distp12.NormAndNormalized();
@@ -267,7 +245,7 @@ Point AnticipationVelocityModel::NeighborRepulsion(
 
     // Pedestrian movement and desired directions
     const auto& e1 = state1.orientation;
-    const auto& d1 = (journey.destination - state1.position).Normalized();
+    const auto& d1 = (tactical.destination - state1.position).Normalized();
     const auto& e2 = state2.orientation;
 
     // Check perception range (Eq. 1)

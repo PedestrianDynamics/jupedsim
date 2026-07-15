@@ -41,13 +41,12 @@ public:
         OperationalModel::StateContainer neighbor_states;
         for(size_t index = 0; index < agents.size(); ++index) {
             neighbor_states.clear();
-            _model->GetNeighbors(
-                agents[index].state, neighborhoodSearch, geometry, neighbor_states);
+            _model->GetNeighbors(agents[index], neighborhoodSearch, geometry, neighbor_states);
             _model->ComputeNextState(
                 dT,
                 agents[index].state,
                 _next[index].state,
-                agents[index].journey,
+                agents[index].tactical,
                 geometry,
                 neighbor_states);
         }

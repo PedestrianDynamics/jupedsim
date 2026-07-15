@@ -1,21 +1,20 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
-#include "AgentJourney.hpp"
 #include "CollisionGeometry.hpp"
-#include "GenericAgentState.hpp"
+#include "GeneralizedCentrifugalForceModelState.hpp"
 #include "LineSegment.hpp"
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
+#include "TacticalModelState.hpp"
 
 #include <fmt/core.h>
 
 class GeneralizedCentrifugalForceModel : public OperationalModel
 {
 public:
-    using State = GcfmState;
+    using State = GeneralizedCentrifugalForceModelState;
 
 private:
-    double _cutOffRadius{4.0}; // TODO (MC) check this free parameter
     double strengthNeighborRepulsion{0.3};
     double strengthGeometryRepulsion{0.2};
     double maxNeighborInteractionDistance{2};
@@ -42,17 +41,11 @@ public:
 
     OperationalModelType Type() const override;
 
-    void GetNeighbors(
-        const GenericState& current,
-        const NeighborhoodSearch<GenericAgent>& neighborhoodsearch,
-        const CollisionGeometry& geometry,
-        StateContainer& neighbor_states) const override;
-
     void ComputeNextState(
         double dT,
         const GenericState& current,
         GenericState& next,
-        const AgentJourney& journey,
+        const TacticalModelState& tactical,
         const CollisionGeometry& geometry,
         const StateContainer& neighborStates) const override;
 

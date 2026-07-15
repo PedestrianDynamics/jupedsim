@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "AgentJourney.hpp"
+#include "AnticipationVelocityModelState.hpp"
 #include "CollisionGeometry.hpp"
-#include "GenericAgentState.hpp"
 #include "LineSegment.hpp"
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
+#include "TacticalModelState.hpp"
 
 #include <fmt/core.h>
 
@@ -17,12 +17,11 @@
 class AnticipationVelocityModel : public OperationalModel
 {
 public:
-    using State = AvmState;
+    using State = AnticipationVelocityModelState;
 
 private:
     /// Add a small outward component to maintain minimum distance from walls.
     double _pushoutStrength{0.3};
-    double _cutOffRadius{3};
     // Shared sequential RNG: draws must stay on the model to keep simulations deterministic.
     mutable std::mt19937 gen;
 
@@ -34,17 +33,11 @@ public:
     ~AnticipationVelocityModel() override = default;
     OperationalModelType Type() const override;
 
-    void GetNeighbors(
-        const GenericState& current,
-        const NeighborhoodSearch<GenericAgent>& neighborhoodsearch,
-        const CollisionGeometry& geometry,
-        StateContainer& neighbor_states) const override;
-
     void ComputeNextState(
         double dT,
         const GenericState& current,
         GenericState& next,
-        const AgentJourney& journey,
+        const TacticalModelState& tactical,
         const CollisionGeometry& geometry,
         const StateContainer& neighborStates) const override;
 
@@ -59,8 +52,10 @@ private:
         const Point& desiredDirection,
         const Point& predictedDirection) const;
     double GetSpacing(const State& state1, const State& state2, const Point& direction) const;
-    Point
-    NeighborRepulsion(const State& state1, const State& state2, const AgentJourney& journey) const;
+    Point NeighborRepulsion(
+        const State& state1,
+        const State& state2,
+        const TacticalModelState& tactical) const;
 
     Point HandleWallAvoidance(
         const Point& direction,
@@ -72,7 +67,7 @@ private:
 
     Point UpdateDirection(
         const State& state,
-        const AgentJourney& journey,
+        const TacticalModelState& tactical,
         const Point& calculatedDirection,
         double dt) const;
 };
