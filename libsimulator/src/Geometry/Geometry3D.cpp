@@ -51,7 +51,7 @@ bool face_covers(const SurfaceMesh& mesh, SurfaceMesh::Face_index f, const Point
         const auto& s = mesh.point(v);
         p[i++] = Point2D{s.x(), s.y()};
     }
-    return SurfaceKernel::Triangle_2(p[0], p[1], p[2]).bounded_side(q) != CGAL::ON_UNBOUNDED_SIDE;
+    return K::Triangle_2(p[0], p[1], p[2]).bounded_side(q) != CGAL::ON_UNBOUNDED_SIDE;
 }
 } // namespace
 
@@ -127,13 +127,12 @@ Geometry3D::FaceLocation Geometry3D::face_below(const Point3D& p) const
     // above p: a query point sitting exactly on the surface may round minimally
     // below its face's plane, and the strictly-downward ray would miss it.
     constexpr double onSurfaceTolerance = 1e-9;
-    const SurfaceKernel::Ray_3 ray(
-        Point3D{p.x(), p.y(), p.z() + onSurfaceTolerance}, SurfaceKernel::Direction_3(0, 0, -1));
+    const K::Ray_3 ray(Point3D{p.x(), p.y(), p.z() + onSurfaceTolerance}, K::Direction_3(0, 0, -1));
     const auto hit = aabb_tree().first_intersection(ray);
     if(!hit) {
-        return {SurfaceMesh::null_face(), SurfaceKernel::Point_3{}};
+        return {SurfaceMesh::null_face(), K::Point_3{}};
     }
-    const auto* projected = std::get_if<SurfaceKernel::Point_3>(&hit->first);
+    const auto* projected = std::get_if<K::Point_3>(&hit->first);
     // Assert against vertical faces.
     assert(projected && "FATAL: vertical face hit by the face_below line");
     return {hit->second, *projected};
@@ -182,9 +181,8 @@ Geometry3D::FaceLocation
 Geometry3D::locate_in_region(std::size_t region_id, const Point2D& xy) const
 {
     // All intersections along z. Search for the one with the region_id.
-    const SurfaceKernel::Line_3 vertical(
-        Point3D{xy.x(), xy.y(), 0}, SurfaceKernel::Direction_3(0, 0, 1));
-    std::vector<AABBTree::Intersection_and_primitive_id<SurfaceKernel::Line_3>::Type> hits{};
+    const K::Line_3 vertical(Point3D{xy.x(), xy.y(), 0}, K::Direction_3(0, 0, 1));
+    std::vector<AABBTree::Intersection_and_primitive_id<K::Line_3>::Type> hits{};
     aabb_tree().all_intersections(vertical, std::back_inserter(hits));
 
     for(const auto& [where, face] : hits) {
@@ -202,9 +200,8 @@ Geometry3D::locate_in_region(std::size_t region_id, const Point2D& xy) const
 Geometry3D::FaceLocation
 Geometry3D::locate_near_z(const Point2D& xy, double z, double tolerance) const
 {
-    const SurfaceKernel::Line_3 vertical(
-        Point3D{xy.x(), xy.y(), 0}, SurfaceKernel::Direction_3(0, 0, 1));
-    std::vector<AABBTree::Intersection_and_primitive_id<SurfaceKernel::Line_3>::Type> hits{};
+    const K::Line_3 vertical(Point3D{xy.x(), xy.y(), 0}, K::Direction_3(0, 0, 1));
+    std::vector<AABBTree::Intersection_and_primitive_id<K::Line_3>::Type> hits{};
     aabb_tree().all_intersections(vertical, std::back_inserter(hits));
 
     FaceLocation best{SurfaceMesh::null_face(), Point3D{}};

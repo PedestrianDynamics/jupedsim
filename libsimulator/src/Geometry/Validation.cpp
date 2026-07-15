@@ -22,9 +22,9 @@ bool IsWalkableNormal(const Vector3& n)
 }
 
 bool IsFaceInMeshPlanar(
-    const CGALMesh& mesh,
-    FaceDescriptor<CGALMesh> face,
-    std::vector<VertexDescriptor<CGALMesh>>& buffer)
+    const SurfaceMesh& mesh,
+    FaceDescriptor<SurfaceMesh> face,
+    std::vector<VertexDescriptor<SurfaceMesh>>& buffer)
 {
     buffer.clear();
     for(auto half_edge : CGAL::halfedges_around_face(CGAL::halfedge(face, mesh), mesh)) {
@@ -48,9 +48,9 @@ bool IsFaceInMeshPlanar(
     });
 }
 
-bool AllFacesInMeshPlanar(const CGALMesh& mesh)
+bool AllFacesInMeshPlanar(const SurfaceMesh& mesh)
 {
-    std::vector<VertexDescriptor<CGALMesh>> buffer{};
+    std::vector<VertexDescriptor<SurfaceMesh>> buffer{};
     buffer.reserve(3);
     return std::all_of(
         std::begin(CGAL::faces(mesh)), std::end(CGAL::faces(mesh)), [&buffer, &mesh](auto face) {
@@ -58,10 +58,10 @@ bool AllFacesInMeshPlanar(const CGALMesh& mesh)
         });
 }
 
-void NormaliseAndValidateMesh(CGALMesh& mesh)
+void NormaliseAndValidateMesh(SurfaceMesh& mesh)
 {
     namespace PMP = CGAL::Polygon_mesh_processing;
-    auto fcc = mesh.add_property_map<CGALMesh::Face_index, size_t>("f:cc").first;
+    auto fcc = mesh.add_property_map<SurfaceMesh::Face_index, size_t>("f:cc").first;
     const auto count = PMP::connected_components(mesh, fcc);
     mesh.remove_property_map(fcc);
     if(count != 1) {
