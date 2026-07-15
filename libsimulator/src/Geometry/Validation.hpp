@@ -22,14 +22,14 @@ bool IsWalkableNormal(const Vector3& n);
 ///        IsFaceInMeshPlanar repeatedly to reduce allocations.
 /// @return true if face is planar
 bool IsFaceInMeshPlanar(
-    const CGALMesh& mesh,
-    FaceDescriptor<CGALMesh> face,
-    std::vector<VertexDescriptor<CGALMesh>>& buffer);
+    const SurfaceMesh& mesh,
+    FaceDescriptor<SurfaceMesh> face,
+    std::vector<VertexDescriptor<SurfaceMesh>>& buffer);
 
 /// Test if all faces in the given #mesh are planar.
 /// @param mesh to test.
 /// @return true if all faces are planar
-bool AllFacesInMeshPlanar(const CGALMesh& mesh);
+bool AllFacesInMeshPlanar(const SurfaceMesh& mesh);
 
 /// Validate that the given mesh can be processed by jupedsim.
 /// Ensures the mesh is a single connected component, has no degenerate faces, all faces are
@@ -37,4 +37,4 @@ bool AllFacesInMeshPlanar(const CGALMesh& mesh);
 /// orientations are reversed, i.e. the mesh may be modified.
 /// @param mesh to check
 /// @throws SimulationError with a description of the issue encountered.
-void NormaliseAndValidateMesh(CGALMesh& mesh);
+void NormaliseAndValidateMesh(SurfaceMesh& mesh);
