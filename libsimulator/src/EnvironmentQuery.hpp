@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "CollisionGeometry.hpp"
 #include "GenericAgent.hpp"
 #include "GeometricFunctions.hpp"
+#include "Geometry/Geometry2D.hpp"
 #include "LineSegment.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "Point.hpp"
@@ -16,13 +16,11 @@
 
 class EnvironmentQuery
 {
-    const CollisionGeometry& _geometry;
+    const Geometry2D& _geometry;
     const NeighborhoodSearch<GenericAgent>& _nsearch;
 
 public:
-    EnvironmentQuery(
-        const CollisionGeometry& geometry,
-        const NeighborhoodSearch<GenericAgent>& nsearch)
+    EnvironmentQuery(const Geometry2D& geometry, const NeighborhoodSearch<GenericAgent>& nsearch)
         : _geometry(geometry), _nsearch(nsearch)
     {
     }
@@ -60,8 +58,7 @@ public:
         });
     }
 
-    CollisionGeometry::LineSegmentRange
-    LineSegmentsInRange(const Point& p, double distance = -1.0) const
+    Geometry2D::LineSegmentRange LineSegmentsInRange(const Point& p, double distance = -1.0) const
     {
         if(distance < 0.0) {
             return _geometry.LineSegmentsInApproxDistanceTo(p);
@@ -72,5 +69,5 @@ public:
 
     bool InsideGeometry(const Point& p) const { return _geometry.InsideGeometry(p); }
 
-    const CollisionGeometry& Geometry() const { return _geometry; }
+    const Geometry2D& Geometry() const { return _geometry; }
 };

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "CollisionGeometry.hpp"
+#include "Geometry/Geometry2D.hpp"
 #include "Geometry/Geometry3D.hpp"
 #include "SimulationError.hpp"
 #include "SurfaceMeshShortestPathRoutingEngine.hpp"
@@ -38,9 +38,9 @@ void init_routing_3d(py::module_& m)
             },
             py::arg("obj_path"))
         .def_static(
-            // Lift a 2D CollisionGeometry to a flat surface at z=0.
+            // Lift a Geometry2D to a flat surface at z=0.
             "from_2d",
-            [](const CollisionGeometry& geometry) {
+            [](const Geometry2D& geometry) {
                 return std::make_unique<Geometry3D>(geometry.Polygon());
             },
             py::arg("geometry"))

@@ -28,7 +28,7 @@ GenericAgent MakeAgent(Point pos, double radius = 0.2)
         std::move(s));
 }
 
-CollisionGeometry OpenGeometry()
+Geometry2D OpenGeometry()
 {
     GeometryBuilder b{};
     b.AddAccessibleArea({{-100, -100}, {100, -100}, {100, 100}, {-100, 100}});
@@ -36,7 +36,7 @@ CollisionGeometry OpenGeometry()
 }
 
 // Geometry with a thin wall at x≈1 that blocks line-of-sight across it.
-CollisionGeometry WalledGeometry()
+Geometry2D WalledGeometry()
 {
     GeometryBuilder b{};
     b.AddAccessibleArea({{-100, -100}, {100, -100}, {100, 100}, {-100, 100}});
@@ -50,7 +50,7 @@ struct Environment {
 
     void add_agent(Point pos, double radius = 0.2) { agents.push_back(MakeAgent(pos, radius)); }
 
-    EnvironmentQuery query(const CollisionGeometry& geo)
+    EnvironmentQuery query(const Geometry2D& geo)
     {
         neighborhood_search.Update(agents);
         return {geo, neighborhood_search};
