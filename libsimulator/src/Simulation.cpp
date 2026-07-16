@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Simulation.hpp"
 
-#include "CollisionGeometry.hpp"
 #include "GenericAgent.hpp"
+#include "Geometry/Geometry2D.hpp"
 #include "IteratorPair.hpp"
 #include "Journey.hpp"
 #include "OperationalModel.hpp"
@@ -57,7 +57,7 @@ void Simulation::ThrowIfIterating(const char* operation) const
 
 Simulation::Simulation(
     std::unique_ptr<OperationalModel>&& operationalModel,
-    std::unique_ptr<CollisionGeometry>&& geometry,
+    std::unique_ptr<Geometry2D>&& geometry,
     double dT)
     : _clock(dT)
     , _operationalDecisionSystem(std::move(operationalModel))
@@ -407,7 +407,7 @@ StageProxy Simulation::Stage(BaseStage::ID stageId)
 {
     return _stageManager.Stage(stageId)->Proxy(this);
 }
-CollisionGeometry Simulation::Geo() const
+Geometry2D Simulation::Geo() const
 {
     return *_geometry;
 }

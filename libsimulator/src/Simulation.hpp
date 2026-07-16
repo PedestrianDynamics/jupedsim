@@ -2,8 +2,8 @@
 #pragma once
 
 #include "AgentRemovalSystem.hpp"
-#include "CollisionGeometry.hpp"
 #include "GenericAgent.hpp"
+#include "Geometry/Geometry2D.hpp"
 #include "Journey.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalDecisionSystem.hpp"
@@ -39,7 +39,7 @@ class Simulation
     StageManager _stageManager{};
     StageSystem _stageSystem{};
     NeighborhoodSearch<GenericAgent> _neighborhoodSearch{2.2};
-    std::unique_ptr<CollisionGeometry> _geometry{};
+    std::unique_ptr<Geometry2D> _geometry{};
     std::unique_ptr<RoutingEngine> _routingEngine{};
     AgentContainer<GenericAgent> _agents;
     std::vector<GenericAgent::ID> _removedAgentsInLastIteration;
@@ -55,7 +55,7 @@ class Simulation
 public:
     Simulation(
         std::unique_ptr<OperationalModel>&& operationalModel,
-        std::unique_ptr<CollisionGeometry>&& geometry,
+        std::unique_ptr<Geometry2D>&& geometry,
         double dT);
     Simulation(const Simulation& other) = delete;
     Simulation& operator=(const Simulation& other) = delete;
@@ -85,7 +85,7 @@ public:
     AgentContainer<GenericAgent>& Agents();
     OperationalModelType ModelType() const;
     StageProxy Stage(BaseStage::ID stageId);
-    CollisionGeometry Geo() const;
+    Geometry2D Geo() const;
     void PushTimer(const std::string_view name, size_t probe_log_level = 0);
     void PopTimer(const std::string_view name);
     void SetTimerLogLevel(int level) { _timer.setLogLevel(level); };

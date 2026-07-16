@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "CollisionGeometry.hpp"
+#include "Geometry/Geometry2D.hpp"
 #include "buildGeometries.hpp"
 
 #include <benchmark/benchmark.h>
@@ -9,7 +9,7 @@ template <class... Args>
 void bmLineSegmentsInDistanceTo(benchmark::State& state, Args&&... args)
 {
     auto args_tuple = std::make_tuple(std::move(args)...);
-    auto geometry = std::move(std::get<CollisionGeometry>(args_tuple));
+    auto geometry = std::move(std::get<Geometry2D>(args_tuple));
 
     for(auto _ : state) {
         benchmark::DoNotOptimize(geometry.LineSegmentsInDistanceTo(5., {0, 0}));
@@ -21,7 +21,7 @@ template <class... Args>
 void bmLineSegmentsInApproxDistanceTo(benchmark::State& state, Args&&... args)
 {
     auto args_tuple = std::make_tuple(std::move(args)...);
-    auto geometry = std::move(std::get<CollisionGeometry>(args_tuple));
+    auto geometry = std::move(std::get<Geometry2D>(args_tuple));
 
     for(auto _ : state) {
         benchmark::DoNotOptimize(geometry.LineSegmentsInApproxDistanceTo({0, 0}));
