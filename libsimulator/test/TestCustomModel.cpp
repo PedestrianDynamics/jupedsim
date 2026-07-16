@@ -39,7 +39,7 @@ public:
         double dT,
         const GenericAgent& current,
         GenericAgent& next,
-        const CollisionGeometry&,
+        const Geometry2D&,
         const NeighborhoodSearch<GenericAgent>&) const override
     {
         const auto& currentModelData = std::get<CustomModel::State>(current.model);
@@ -55,7 +55,7 @@ public:
     void CheckModelConstraint(
         const GenericAgent&,
         const NeighborhoodSearch<GenericAgent>&,
-        const CollisionGeometry&) const override
+        const Geometry2D&) const override
     {
     }
 };

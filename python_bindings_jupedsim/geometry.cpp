@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "CollisionGeometry.hpp"
+#include "Geometry/Geometry2D.hpp"
 #include "GeometryBuilder.hpp"
 #include "conversion.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep
@@ -14,15 +14,15 @@ namespace py = pybind11;
 
 void init_geometry(py::module_& m)
 {
-    py::class_<CollisionGeometry>(m, "Geometry")
+    py::class_<Geometry2D>(m, "Geometry")
         .def(
             "boundary",
-            [](const CollisionGeometry& geo) {
+            [](const Geometry2D& geo) {
                 return intoTuples(std::get<0>(geo.AccessibleArea()));
             })
         .def(
             "holes",
-            [](const CollisionGeometry& geo) {
+            [](const Geometry2D& geo) {
                 const auto holes = std::get<1>(geo.AccessibleArea());
                 std::vector<std::vector<std::tuple<double, double>>> res{};
                 res.reserve(holes.size());
@@ -31,10 +31,10 @@ void init_geometry(py::module_& m)
                 }
                 return res;
             })
-        .def("linesegments_close_to", &CollisionGeometry::LineSegmentsInApproxDistanceTo)
+        .def("linesegments_close_to", &Geometry2D::LineSegmentsInApproxDistanceTo)
         .def(
             "linesegments_in_distance_to",
-            [](const CollisionGeometry& geo, double distance, std::tuple<double, double> pos) {
+            [](const Geometry2D& geo, double distance, std::tuple<double, double> pos) {
                 return intoVec(geo.LineSegmentsInDistanceTo(distance, intoPoint(pos)));
             });
     py::class_<GeometryBuilder>(m, "GeometryBuilder")

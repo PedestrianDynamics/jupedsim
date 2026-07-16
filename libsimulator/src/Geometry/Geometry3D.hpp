@@ -2,7 +2,7 @@
 #pragma once
 
 #include "CfgCgal.hpp"
-#include "CollisionGeometry.hpp"
+#include "Geometry/Geometry2D.hpp"
 #include "Geometry/RegionSplit.hpp"
 #include "Point.hpp"
 
@@ -10,6 +10,7 @@
 #include <cstddef>
 #include <memory>
 #include <vector>
+
 
 /// The single source of truth for a 3D navigation geometry: owns the surface
 /// mesh, its AABB tree (for -z projection queries) and the single-valued region
@@ -31,7 +32,7 @@ public:
     /// Build from a 2D walkable area, lifted flat to z=0. Uses the same
     /// constrained Delaunay triangulation as the 2D RoutingEngine, so the 2D
     /// and 3D pipelines run on the identical triangle set -- the basis for
-    /// exact parity comparisons. Also keeps the 2D view (collision_geometry()).
+    /// exact parity comparisons. Also keeps the 2D view (geometry_2d()).
     explicit Geometry3D(PolyWithHoles poly);
 
     ~Geometry3D() = default;
@@ -48,7 +49,7 @@ public:
 
     /// The projected 2D view of the walkable area, present iff the geometry
     /// was built from a polygon. A mesh-built geometry returns a nullptr.
-    const CollisionGeometry* collision_geometry() const { return _collisionGeometry.get(); }
+    const Geometry2D* geometry_2d() const { return _geometry2D.get(); }
 
     /// Face and on-surface point hit by the -z ray through @p p, or
     /// `null_face()` if the ray misses the walkable surface.
@@ -98,7 +99,7 @@ private:
     void build();
 
     SurfaceMesh _mesh{};
-    std::unique_ptr<CollisionGeometry> _collisionGeometry{};
+    std::unique_ptr<Geometry2D> _geometry2D{};
     std::unique_ptr<AABBTree> _aabbTree{};
     RegionMap _region{};
     std::size_t _regionCount{0};

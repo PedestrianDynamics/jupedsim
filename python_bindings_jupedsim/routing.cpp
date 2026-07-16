@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "CollisionGeometry.hpp"
+#include "Geometry/Geometry2D.hpp"
 #include "RoutingEngine.hpp"
 #include "conversion.hpp"
 
@@ -18,7 +18,7 @@ namespace py = pybind11;
 void init_routing(py::module_& m)
 {
     py::class_<RoutingEngine>(m, "RoutingEngine")
-        .def(py::init([](const CollisionGeometry& geo) {
+        .def(py::init([](const Geometry2D& geo) {
             return std::make_unique<RoutingEngine>(geo.Polygon());
         }))
         .def(

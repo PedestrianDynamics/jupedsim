@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "CollisionGeometry.hpp"
 #include "GenericAgent.hpp"
+#include "Geometry/Geometry2D.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
@@ -33,7 +33,7 @@ public:
     Run(double dT,
         double /*t_in_sec*/,
         const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
-        const CollisionGeometry& geometry,
+        const Geometry2D& geometry,
         AgentContainer<GenericAgent>& agents)
     {
         _next.clear();
@@ -51,7 +51,7 @@ public:
     void ValidateAgent(
         const GenericAgent& agent,
         const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
-        const CollisionGeometry& geometry) const
+        const Geometry2D& geometry) const
     {
         _model->CheckModelConstraint(agent, neighborhoodSearch, geometry);
     }

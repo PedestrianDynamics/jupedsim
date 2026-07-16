@@ -9,13 +9,13 @@ class StagesTests : public ::testing::Test
 {
 public:
     NeighborhoodSearch<GenericAgent> neighborhoodSearch{2};
-    std::unique_ptr<CollisionGeometry> collisionGeometry{};
+    std::unique_ptr<Geometry2D> geometry{};
 
     void SetUp() override
     {
         GeometryBuilder b{};
         b.AddAccessibleArea({{-10, -10}, {10, -10}, {10, 10}, {-10, 10}});
-        collisionGeometry = std::make_unique<CollisionGeometry>(b.Build());
+        geometry = std::make_unique<Geometry2D>(b.Build());
     }
 
     void TearDown() override {}
@@ -39,7 +39,7 @@ TEST_F(StagesTests, NotifiableWaitingSetTargetIsCorrect)
         const auto& target = waitingSet.Target(agent);
         ASSERT_EQ(target, waitingPoints[i]);
 
-        waitingSet.Update(neighborhoodSearch, *collisionGeometry);
+        waitingSet.Update(neighborhoodSearch, *geometry);
     }
 
     // Each next agent gets the last slot
