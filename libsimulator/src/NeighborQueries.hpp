@@ -25,7 +25,7 @@ public:
         GenericAgent::ID idToExclude,
         const CollisionGeometry& geometry,
         const NeighborhoodSearch<GenericAgent>& neighborhoodSearch);
-    std::vector<GenericAgent> operator()(Point position, double radius) const override;
+    std::vector<OperationalModelState> operator()(Point position, double radius) const override;
 };
 
 /// Neighbor query for constraint checks: agents within radius, deliberately without
@@ -42,5 +42,5 @@ public:
     explicit ProximityNeighborQuery(
         GenericAgent::ID idToExclude,
         const NeighborhoodSearch<GenericAgent>& neighborhoodSearch);
-    std::vector<GenericAgent> operator()(Point position, double radius) const override;
+    std::vector<OperationalModelState> operator()(Point position, double radius) const override;
 };

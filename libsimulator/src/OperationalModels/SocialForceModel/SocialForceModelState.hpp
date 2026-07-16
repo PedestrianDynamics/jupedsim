@@ -16,6 +16,8 @@ struct SocialForceModelState {
     double obstacleScale{2000.0}; // A for obstacles
     double forceDistance{0.08}; // B
     double radius{0.3}; // r
+
+    bool operator==(const SocialForceModelState&) const = default;
 };
 
 template <>

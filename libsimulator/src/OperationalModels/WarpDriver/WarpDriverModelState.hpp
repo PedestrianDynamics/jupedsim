@@ -16,6 +16,8 @@ struct WarpDriverModelState {
     double anchorY{0.0};
     double detourTime{0.0}; // remaining time in detour mode
     int detourSide{1}; // +1 = left, -1 = right of desired direction
+
+    bool operator==(const WarpDriverModelState&) const = default;
 };
 
 template <>

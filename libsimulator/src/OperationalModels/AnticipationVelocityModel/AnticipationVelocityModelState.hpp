@@ -18,6 +18,8 @@ struct AnticipationVelocityModelState {
     double timeGap{1.06};
     double v0{1.2};
     double radius{0.2};
+
+    bool operator==(const AnticipationVelocityModelState&) const = default;
 };
 
 template <>

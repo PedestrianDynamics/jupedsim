@@ -23,6 +23,8 @@ struct CollisionFreeSpeedModelV3State {
     double v0{1.2};
     double radius{0.2};
     double headingAngle{0.0}; // [rad] persistent relaxed heading state
+
+    bool operator==(const CollisionFreeSpeedModelV3State&) const = default;
 };
 
 template <>

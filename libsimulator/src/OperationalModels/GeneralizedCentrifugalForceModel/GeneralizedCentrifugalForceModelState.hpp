@@ -19,6 +19,8 @@ struct GeneralizedCentrifugalForceModelState {
     double AMin{0.2};
     double BMin{0.2};
     double BMax{0.4};
+
+    bool operator==(const GeneralizedCentrifugalForceModelState&) const = default;
 };
 
 template <>
