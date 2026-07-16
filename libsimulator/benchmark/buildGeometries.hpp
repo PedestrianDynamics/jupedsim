@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "CollisionGeometry.hpp"
+#include "Geometry/Geometry2D.hpp"
 #include "GeometryBuilder.hpp"
 #include "Point.hpp"
 
 #include <vector>
 
-inline CollisionGeometry buildGrosserStern()
+inline Geometry2D buildGrosserStern()
 {
     GeometryBuilder builder;
     builder.AddAccessibleArea(
@@ -1459,7 +1459,7 @@ inline CollisionGeometry buildGrosserStern()
     return builder.Build();
 }
 
-inline CollisionGeometry buildLargeStreetNetwork()
+inline Geometry2D buildLargeStreetNetwork()
 {
 
     GeometryBuilder builder;

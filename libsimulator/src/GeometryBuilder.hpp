@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "CollisionGeometry.hpp"
+#include "Geometry/Geometry2D.hpp"
 #include "Point.hpp"
 #include "Polygon.hpp"
 
@@ -22,5 +22,5 @@ public:
 
     GeometryBuilder& AddAccessibleArea(const std::vector<Point>& lineLoop);
     GeometryBuilder& ExcludeFromAccessibleArea(const std::vector<Point>& lineLoop);
-    CollisionGeometry Build();
+    Geometry2D Build();
 };

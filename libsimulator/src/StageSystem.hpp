@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "CollisionGeometry.hpp"
 #include "EnvironmentQuery.hpp"
 #include "GenericAgent.hpp"
+#include "Geometry/Geometry2D.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "Stage.hpp"
 #include "StageManager.hpp"
@@ -22,7 +22,7 @@ public:
     void
     Run(StageManager& stageManager,
         const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
-        const CollisionGeometry& geometry)
+        const Geometry2D& geometry)
     {
         EnvironmentQuery envQuery(geometry, neighborhoodSearch);
         for(auto& [_, stage] : stageManager.Stages()) {

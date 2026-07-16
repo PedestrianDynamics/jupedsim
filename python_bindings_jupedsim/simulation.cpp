@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Simulation.hpp"
 
-#include "CollisionGeometry.hpp"
 #include "GenericAgent.hpp"
+#include "Geometry/Geometry2D.hpp"
 #include "Journey.hpp"
 #include "OperationalModel.hpp"
 #include "Polygon.hpp"
@@ -34,12 +34,12 @@ void init_simulation(py::module_& m)
             // returns, the Python model object passed here is disowned/invalid and must not be
             // reused.
             py::init(
-                [](std::unique_ptr<OperationalModel> model, CollisionGeometry geometry, double dT) {
+                [](std::unique_ptr<OperationalModel> model, Geometry2D geometry, double dT) {
                     if(!model) {
                         throw std::invalid_argument("model must not be None");
                     }
                     return std::make_unique<Simulation>(
-                        std::move(model), std::make_unique<CollisionGeometry>(geometry), dT);
+                        std::move(model), std::make_unique<Geometry2D>(geometry), dT);
                 }),
             py::kw_only(),
             py::arg("model"),

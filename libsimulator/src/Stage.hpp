@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "CollisionGeometry.hpp"
 #include "EnvironmentQuery.hpp"
 #include "GenericAgent.hpp"
 #include "GeometricFunctions.hpp"
+#include "Geometry/Geometry2D.hpp"
 #include "LineSegment.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "Point.hpp"

@@ -212,7 +212,7 @@ TEST(Geometry3DFromPolygon, OwnsTheProjected2DView)
 {
     Geometry3D geo{square_with_hole()};
 
-    const auto* view = geo.collision_geometry();
+    const auto* view = geo.geometry_2d();
     ASSERT_NE(view, nullptr);
     EXPECT_TRUE(view->InsideGeometry({1, 1}));
     EXPECT_FALSE(view->InsideGeometry({5, 5})); // inside the hole
@@ -222,7 +222,7 @@ TEST(Geometry3DFromMesh, HasNoProjected2DView)
 {
     Geometry3D geo{flat_room()};
     // A mesh carries no 2D view -- unlike a polygon-built geometry.
-    EXPECT_EQ(geo.collision_geometry(), nullptr);
+    EXPECT_EQ(geo.geometry_2d(), nullptr);
 }
 
 TEST(Geometry3DFromPolygon, LiftReproducesThe2DTriangulation)

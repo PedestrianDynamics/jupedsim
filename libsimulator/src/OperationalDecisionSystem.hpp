@@ -33,7 +33,7 @@ public:
     Run(double dT,
         double /*t_in_sec*/,
         const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
-        const CollisionGeometry& geometry,
+        const Geometry2D& geometry,
         AgentContainer<GenericAgent>& agents)
     {
         const EnvironmentQuery envQuery{geometry, neighborhoodSearch};
@@ -56,7 +56,7 @@ public:
     void ValidateAgent(
         const GenericAgent& agent,
         const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
-        const CollisionGeometry& geometry) const
+        const Geometry2D& geometry) const
     {
         const EnvironmentQuery envQuery{geometry, neighborhoodSearch};
         _model->CheckModelConstraint(agent, AgentView{envQuery, agent});

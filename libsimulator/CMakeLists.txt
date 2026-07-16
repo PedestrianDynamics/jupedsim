@@ -11,12 +11,12 @@ target_sources(simulator PRIVATE
     src/AgentRemovalSystem.hpp
     src/AgentView.hpp
     src/CfgCgal.hpp
-    src/CollisionGeometry.cpp
-    src/CollisionGeometry.hpp
     src/Ellipse.cpp
     src/Ellipse.hpp
     src/GenericAgent.hpp
     src/GeometricFunctions.hpp
+    src/Geometry/Geometry2D.cpp
+    src/Geometry/Geometry2D.hpp
     src/Geometry/Geometry3D.cpp
     src/Geometry/Geometry3D.hpp
     src/Geometry/RegionSplit.cpp
@@ -106,9 +106,9 @@ if (BUILD_TESTS)
         test/TestAABB.cpp
         test/TestAgentView.cpp
         test/TestBasicPrimitiveTests.cpp
-        test/TestCollisionGeometry.cpp
         test/TestCustomModel.cpp
         test/TestGenericAgentFormatter.cpp
+        test/TestGeometry2D.cpp
         test/TestGeometry3D.cpp
         test/TestGraph.cpp
         test/TestJourney.cpp
@@ -141,7 +141,7 @@ if (BUILD_BENCHMARKS)
     add_executable(libsimulator-benchmarks
         benchmark/BenchmarkMain.cpp
         benchmark/benchmarkLineSegment.hpp
-        benchmark/benchmarkCollisionGeometry.hpp
+        benchmark/benchmarkGeometry2D.hpp
         benchmark/buildGeometries.hpp
     )
 

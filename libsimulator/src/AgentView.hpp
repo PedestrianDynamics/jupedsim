@@ -89,7 +89,7 @@ private:
     /// Must stay above WallsNearby() and WallsInRange() in code: an 'auto' return type is
     /// deduced from the body, so unlike other members this one cannot be called before it is
     /// defined.
-    auto AsSeenFromAgent(CollisionGeometry::LineSegmentRange segments) const
+    auto AsSeenFromAgent(Geometry2D::LineSegmentRange segments) const
     {
         return segments | std::views::transform([origin = _agent.Position()](const LineSegment& s) {
                    const LineSegment segment{s.p1 - origin, s.p2 - origin};
