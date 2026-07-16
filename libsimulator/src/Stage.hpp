@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "CollisionGeometry.hpp"
 #include "GenericAgent.hpp"
 #include "GeometricFunctions.hpp"
+#include "Geometry/Geometry2D.hpp"
 #include "LineSegment.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "Point.hpp"
@@ -180,7 +180,7 @@ public:
     void State(WaitingSetState s);
     WaitingSetState State() const;
     template <typename T>
-    void Update(const NeighborhoodSearch<T>& neighborhoodSearch, const CollisionGeometry& geometry);
+    void Update(const NeighborhoodSearch<T>& neighborhoodSearch, const Geometry2D& geometry);
     const std::vector<GenericAgent::ID>& Occupants() const;
     const std::vector<Point>& Slots() const { return slots; };
 };
@@ -188,7 +188,7 @@ public:
 template <typename T>
 void NotifiableWaitingSet::Update(
     const NeighborhoodSearch<T>& neighborhoodSearch,
-    const CollisionGeometry& geometry)
+    const Geometry2D& geometry)
 {
     if(state == WaitingSetState::Inactive) {
         return;
@@ -258,7 +258,7 @@ public:
     Point Target(const GenericAgent& agent) override;
     StageProxy Proxy(Simulation* simulation_) override;
     template <typename T>
-    void Update(const NeighborhoodSearch<T>& neighborhoodSearch, const CollisionGeometry& geometry);
+    void Update(const NeighborhoodSearch<T>& neighborhoodSearch, const Geometry2D& geometry);
     void Pop(size_t count);
     const std::vector<GenericAgent::ID>& Occupants() const;
     const std::vector<Point>& Slots() const { return slots; };
@@ -267,7 +267,7 @@ public:
 template <typename T>
 void NotifiableQueue::Update(
     const NeighborhoodSearch<T>& neighborhoodSearch,
-    const CollisionGeometry& geometry)
+    const Geometry2D& geometry)
 {
     const auto count_occupants = occupants.size();
     if(count_occupants == slots.size()) {

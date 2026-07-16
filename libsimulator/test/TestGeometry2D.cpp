@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "CollisionGeometry.hpp"
+#include "Geometry/Geometry2D.hpp"
 #include "LineSegment.hpp"
 #include "gtest/gtest.h"
 
@@ -154,10 +154,10 @@ PolyWithHoles constructPolyFromPoints(const std::vector<Point>& points)
 class ApproximateDistanceSimpleRectangle : public ::testing::Test
 {
 protected:
-    CollisionGeometry collisionGeometry;
+    Geometry2D geometry;
 
     ApproximateDistanceSimpleRectangle()
-        : collisionGeometry(constructPolyFromPoints({{1., 1.}, {3., 1.}, {3., 3.}, {1., 3.}}))
+        : geometry(constructPolyFromPoints({{1., 1.}, {3., 1.}, {3., 3.}, {1., 3.}}))
     {
     }
 };
@@ -171,7 +171,7 @@ TEST_F(ApproximateDistanceSimpleRectangle, InsideSingleCell)
         {{1., 3.}, {1., 1.}},
     };
 
-    const auto result = collisionGeometry.LineSegmentsInApproxDistanceTo({2., 2.});
+    const auto result = geometry.LineSegmentsInApproxDistanceTo({2., 2.});
     const std::set<LineSegment> actual(std::begin(result), std::end(result));
 
     ASSERT_EQ(actual, expected);
@@ -198,7 +198,7 @@ TEST_F(ApproximateDistanceSimpleRectangle, outsideInRange)
         {CELL_EXTEND, CELL_EXTEND}};
 
     for(const auto& point : candidates) {
-        const auto result = collisionGeometry.LineSegmentsInApproxDistanceTo(point);
+        const auto result = geometry.LineSegmentsInApproxDistanceTo(point);
         const std::set<LineSegment> actual(std::begin(result), std::end(result));
 
         ASSERT_EQ(actual, expected);
@@ -208,10 +208,10 @@ TEST_F(ApproximateDistanceSimpleRectangle, outsideInRange)
 class LongDiagonalRectangle : public ::testing::Test
 {
 protected:
-    CollisionGeometry collisionGeometry;
+    Geometry2D geometry;
 
     LongDiagonalRectangle()
-        : collisionGeometry(
+        : geometry(
               constructPolyFromPoints({{-11., -13.}, {5., 11.}, {6., 10.}, {-10., -14.}}))
     {
     }
@@ -225,7 +225,7 @@ TEST_F(LongDiagonalRectangle, FarCellsOutside)
         {4, -12},   {4, -8},  {8, -20}, {8, -16},  {8, -12},  {8, -8},  {8, -4}};
 
     for(const auto& point : candidates) {
-        const auto result = collisionGeometry.LineSegmentsInApproxDistanceTo(point);
+        const auto result = geometry.LineSegmentsInApproxDistanceTo(point);
         ASSERT_TRUE(result.empty());
     }
 }
@@ -248,7 +248,7 @@ TEST_F(LongDiagonalRectangle, CellsAtBottomLeft)
         {middleCell.x + CELL_EXTEND, middleCell.y + CELL_EXTEND}};
 
     for(const auto& point : candidates) {
-        const auto result = collisionGeometry.LineSegmentsInApproxDistanceTo(point);
+        const auto result = geometry.LineSegmentsInApproxDistanceTo(point);
         const std::set<LineSegment> actual(std::begin(result), std::end(result));
 
         ASSERT_EQ(actual, expected);
@@ -273,7 +273,7 @@ TEST_F(LongDiagonalRectangle, CellsAtTopRight)
         {middleCell.x + CELL_EXTEND, middleCell.y + CELL_EXTEND}};
 
     for(const auto& point : candidates) {
-        const auto result = collisionGeometry.LineSegmentsInApproxDistanceTo(point);
+        const auto result = geometry.LineSegmentsInApproxDistanceTo(point);
         const std::set<LineSegment> actual(std::begin(result), std::end(result));
 
         ASSERT_EQ(actual, expected);
@@ -287,7 +287,7 @@ TEST_F(LongDiagonalRectangle, CellsWithOneLSLeft)
     const std::vector<Cell> candidates = {{-12, 0}, {-4, 12}};
 
     for(const auto& point : candidates) {
-        const auto result = collisionGeometry.LineSegmentsInApproxDistanceTo(point);
+        const auto result = geometry.LineSegmentsInApproxDistanceTo(point);
         const std::set<LineSegment> actual(std::begin(result), std::end(result));
 
         ASSERT_EQ(actual, expected);
@@ -301,7 +301,7 @@ TEST_F(LongDiagonalRectangle, CellsWithOneLSRight)
     const std::vector<Cell> candidates = {{0, -12}, {8, 0}};
 
     for(const auto& point : candidates) {
-        const auto result = collisionGeometry.LineSegmentsInApproxDistanceTo(point);
+        const auto result = geometry.LineSegmentsInApproxDistanceTo(point);
         const std::set<LineSegment> actual(std::begin(result), std::end(result));
 
         ASSERT_EQ(actual, expected);
@@ -319,7 +319,7 @@ TEST_F(LongDiagonalRectangle, CellsWithTwoLSMiddle)
     };
 
     for(const auto& point : candidates) {
-        const auto result = collisionGeometry.LineSegmentsInApproxDistanceTo(point);
+        const auto result = geometry.LineSegmentsInApproxDistanceTo(point);
         const std::set<LineSegment> actual(std::begin(result), std::end(result));
 
         ASSERT_EQ(actual, expected);

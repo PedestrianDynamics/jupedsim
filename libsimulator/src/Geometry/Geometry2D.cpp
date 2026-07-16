@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "CollisionGeometry.hpp"
+#include "Geometry/Geometry2D.hpp"
 
 #include "AABB.hpp"
 #include "CfgCgal.hpp"
@@ -97,7 +97,7 @@ void ExtractSegmentsFromPolygon(const Poly& p, std::vector<LineSegment>& segment
     segments.emplace_back(fromPoint_2(boundary.back()), fromPoint_2(boundary.front()));
 }
 
-CollisionGeometry::CollisionGeometry(PolyWithHoles accessibleArea)
+Geometry2D::Geometry2D(PolyWithHoles accessibleArea)
     : _accessibleAreaPolygon(accessibleArea)
 {
     _segments.reserve(CountLineSegments(accessibleArea));
@@ -138,7 +138,7 @@ CollisionGeometry::CollisionGeometry(PolyWithHoles accessibleArea)
     _accessibleArea = std::make_tuple(exterior, holes);
 }
 
-const std::vector<LineSegment>& CollisionGeometry::LineSegmentsInApproxDistanceTo(Point p) const
+const std::vector<LineSegment>& Geometry2D::LineSegmentsInApproxDistanceTo(Point p) const
 {
     const auto cell = makeCell(p);
     if(const auto it = _approximateGrid.find(cell); it != _approximateGrid.end()) {
@@ -148,7 +148,7 @@ const std::vector<LineSegment>& CollisionGeometry::LineSegmentsInApproxDistanceT
     return empty;
 }
 
-void CollisionGeometry::insertIntoApproximateGrid(const LineSegment& ls)
+void Geometry2D::insertIntoApproximateGrid(const LineSegment& ls)
 {
     constexpr double searchRadius = 4.;
 
@@ -176,15 +176,15 @@ void CollisionGeometry::insertIntoApproximateGrid(const LineSegment& ls)
     }
 }
 
-CollisionGeometry::LineSegmentRange
-CollisionGeometry::LineSegmentsInDistanceTo(double distance, Point p) const
+Geometry2D::LineSegmentRange
+Geometry2D::LineSegmentsInDistanceTo(double distance, Point p) const
 {
     return LineSegmentRange{
         DistanceQueryIterator<LineSegment>{distance, p, _segments.cbegin(), _segments.cend()},
         DistanceQueryIterator<LineSegment>{distance, p, _segments.cend(), _segments.cend()}};
 }
 
-bool CollisionGeometry::IntersectsAny(const LineSegment& linesegment) const
+bool Geometry2D::IntersectsAny(const LineSegment& linesegment) const
 {
     const auto cellsToQuery = cellsFromLineSegment(linesegment);
     for(const auto& cell : cellsToQuery) {
@@ -202,14 +202,14 @@ bool CollisionGeometry::IntersectsAny(const LineSegment& linesegment) const
     return false;
 }
 
-bool CollisionGeometry::InsideGeometry(Point p) const
+bool Geometry2D::InsideGeometry(Point p) const
 {
     return CGAL::oriented_side(K::Point_2(p.x, p.y), _accessibleAreaPolygon) !=
            CGAL::ON_NEGATIVE_SIDE;
 }
 
 const std::tuple<std::vector<Point>, std::vector<std::vector<Point>>>&
-CollisionGeometry::AccessibleArea() const
+Geometry2D::AccessibleArea() const
 {
     return _accessibleArea;
 }

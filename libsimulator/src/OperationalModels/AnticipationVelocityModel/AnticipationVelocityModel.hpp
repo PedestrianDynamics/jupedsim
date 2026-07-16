@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "CollisionGeometry.hpp"
+#include "Geometry/Geometry2D.hpp"
 #include "LineSegment.hpp"
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
@@ -46,12 +46,12 @@ public:
         double dT,
         const GenericAgent& current,
         GenericAgent& next,
-        const CollisionGeometry& geometry,
+        const Geometry2D& geometry,
         const NeighborhoodSearch<GenericAgent>& neighborhoodSearch) const override;
     void CheckModelConstraint(
         const GenericAgent& agent,
         const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
-        const CollisionGeometry& geometry) const override;
+        const Geometry2D& geometry) const override;
 
 private:
     double OptimalSpeed(const GenericAgent& ped, double spacing, double time_gap) const;

@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "AnticipationVelocityModel.hpp"
 
-#include "CollisionGeometry.hpp"
 #include "GenericAgent.hpp"
 #include "GeometricFunctions.hpp"
+#include "Geometry/Geometry2D.hpp"
 #include "LineSegment.hpp"
 #include "Macros.hpp"
 #include "NeighborhoodSearch.hpp"
@@ -34,7 +34,7 @@ void AnticipationVelocityModel::ComputeNextState(
     double dT,
     const GenericAgent& current,
     GenericAgent& next,
-    const CollisionGeometry& geometry,
+    const Geometry2D& geometry,
     const NeighborhoodSearch<GenericAgent>& neighborhoodSearch) const
 {
     const auto& model = std::get<State>(current.model);
@@ -131,7 +131,7 @@ Point AnticipationVelocityModel::UpdateDirection(
 void AnticipationVelocityModel::CheckModelConstraint(
     const GenericAgent& agent,
     const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
-    const CollisionGeometry& geometry) const
+    const Geometry2D& geometry) const
 {
     const auto& model = std::get<State>(agent.model);
     const auto r = model.radius;

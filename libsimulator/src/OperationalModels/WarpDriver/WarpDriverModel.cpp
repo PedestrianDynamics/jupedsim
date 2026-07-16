@@ -353,7 +353,7 @@ OperationalModelType WarpDriverModel::Type() const
 void WarpDriverModel::CheckModelConstraint(
     const GenericAgent& agent,
     const NeighborhoodSearch<GenericAgent>& /*neighborhoodSearch*/,
-    const CollisionGeometry& /*geometry*/) const
+    const Geometry2D& /*geometry*/) const
 {
     const auto* data = std::get_if<State>(&agent.model);
     if(!data) {
@@ -416,7 +416,7 @@ void WarpDriverModel::ComputeNextState(
     double dT,
     const GenericAgent& current,
     GenericAgent& next,
-    const CollisionGeometry& geometry,
+    const Geometry2D& geometry,
     const NeighborhoodSearch<GenericAgent>& neighborhoodSearch) const
 {
     const auto& agentData = std::get<State>(current.model);

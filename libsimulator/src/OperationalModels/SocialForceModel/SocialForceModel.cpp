@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "SocialForceModel.hpp"
 
-#include "CollisionGeometry.hpp"
 #include "GenericAgent.hpp"
+#include "Geometry/Geometry2D.hpp"
 #include "LineSegment.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"
@@ -29,7 +29,7 @@ void SocialForceModel::ComputeNextState(
     double dT,
     const GenericAgent& current,
     GenericAgent& next,
-    const CollisionGeometry& geometry,
+    const Geometry2D& geometry,
     const NeighborhoodSearch<GenericAgent>& neighborhoodSearch) const
 {
     const auto& model = std::get<State>(current.model);
@@ -65,7 +65,7 @@ void SocialForceModel::ComputeNextState(
 void SocialForceModel::CheckModelConstraint(
     const GenericAgent& agent,
     const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
-    const CollisionGeometry& geometry) const
+    const Geometry2D& geometry) const
 {
     // none of these constraint are given by the paper but are useful to create a simulation that
     // does not break immediately

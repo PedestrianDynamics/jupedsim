@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "python_model.hpp"
 
-#include "CollisionGeometry.hpp"
 #include "GenericAgent.hpp"
+#include "Geometry/Geometry2D.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"
 #include "OperationalModels/CustomModel/CustomModel.hpp"
@@ -89,7 +89,7 @@ void PythonModel::ComputeNextState(
     double dT,
     const GenericAgent& current,
     GenericAgent& next,
-    const CollisionGeometry& geometry,
+    const Geometry2D& geometry,
     const NeighborhoodSearch<GenericAgent>& neighborhoodSearch) const
 {
     py::gil_scoped_acquire gil;
@@ -156,7 +156,7 @@ void PythonModel::ComputeNextState(
 void PythonModel::CheckModelConstraint(
     const GenericAgent& agent,
     const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
-    const CollisionGeometry& geometry) const
+    const Geometry2D& geometry) const
 {
     py::gil_scoped_acquire gil;
 

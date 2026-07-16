@@ -16,7 +16,7 @@
 #include <unordered_map>
 #include <vector>
 
-class CollisionGeometry;
+class Geometry2D;
 
 double dist(LineSegment l, Point p);
 
@@ -92,7 +92,7 @@ struct std::hash<Cell> {
 /// Creates all cells that are trouched by the linesegment
 std::set<Cell> cellsFromLineSegment(LineSegment ls);
 
-class CollisionGeometry
+class Geometry2D
 {
 private:
     PolyWithHoles _accessibleAreaPolygon;
@@ -105,17 +105,17 @@ public:
     using LineSegmentRange = IteratorPair<DistanceQueryIterator<LineSegment>>;
     /// Do not call constructor drectly use 'GeometryBuilder'
     /// @param segments line segments constituting the geometry
-    explicit CollisionGeometry(PolyWithHoles accessibleArea);
+    explicit Geometry2D(PolyWithHoles accessibleArea);
     /// Default destructor
-    ~CollisionGeometry() = default;
+    ~Geometry2D() = default;
     /// Copyable
-    CollisionGeometry(const CollisionGeometry& other) = default;
+    Geometry2D(const Geometry2D& other) = default;
     /// Copyable
-    CollisionGeometry& operator=(const CollisionGeometry& other) = default;
+    Geometry2D& operator=(const Geometry2D& other) = default;
     /// Movable
-    CollisionGeometry(CollisionGeometry&& other) = default;
+    Geometry2D(Geometry2D&& other) = default;
     /// Moveable
-    CollisionGeometry& operator=(CollisionGeometry&& other) = default;
+    Geometry2D& operator=(Geometry2D&& other) = default;
     /// Returns an iterator pair to all linesegments <= 'distance' away from 'p'
     /// @param distance from reference point
     /// @param p reference point

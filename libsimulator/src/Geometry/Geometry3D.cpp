@@ -97,7 +97,7 @@ Geometry3D::Geometry3D(SurfaceMesh mesh) : _mesh(std::move(mesh))
 
 Geometry3D::Geometry3D(PolyWithHoles poly) : Geometry3D(mesh_from_polygon(poly))
 {
-    _collisionGeometry = std::make_unique<CollisionGeometry>(std::move(poly));
+    _geometry2D = std::make_unique<Geometry2D>(std::move(poly));
 }
 
 void Geometry3D::build()
