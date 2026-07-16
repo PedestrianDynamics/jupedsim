@@ -7,16 +7,16 @@
 
 struct SocialForceModelState {
     Point position{};
-    Point velocity{};
-    double mass{80.0};
-    double desiredSpeed{0.8};
-    double reactionTime{0.5};
-    double agentScale{2000.0};
-    double obstacleScale{2000.0};
-    double forceDistance{0.08};
-    double radius{0.3};
-    double bodyForce{120000};
-    double friction{240000};
+    Point velocity{}; // v
+    double mass{80.0}; // m
+    double desiredSpeed{0.8}; // v0
+    double reactionTime{0.5}; // tau
+    double agentScale{2000.0}; // A for other agents
+    double obstacleScale{2000.0}; // A for obstacles
+    double forceDistance{0.08}; // B
+    double radius{0.3}; // r
+
+    bool operator==(const SocialForceModelState&) const = default;
 };
 
 template <>

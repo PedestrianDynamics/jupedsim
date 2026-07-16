@@ -13,14 +13,10 @@ struct WarpDriverModelState {
     double stuckTime{0.0};
     double anchorX{0.0};
     double anchorY{0.0};
-    double detourTime{0.0};
-    int detourSide{1};
-    double timeHorizon{2.0};
-    double stepSize{0.5};
-    double timeUncertainty{0.5};
-    double velocityUncertaintyX{0.2};
-    double velocityUncertaintyY{0.2};
-    int numSamples{20};
+    double detourTime{0.0}; // remaining time in detour mode
+    int detourSide{1}; // +1 = left, -1 = right of desired direction
+
+    bool operator==(const WarpDriverModelState&) const = default;
 };
 
 template <>

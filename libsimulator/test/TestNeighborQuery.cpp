@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "CollisionGeometry.hpp"
 #include "GenericAgent.hpp"
+#include "GeometricFunctions.hpp"
+#include "LineSegment.hpp"
 #include "NeighborQueries.hpp"
 #include "NeighborhoodSearch.hpp"
 
@@ -8,6 +10,7 @@
 
 #include <algorithm>
 #include <iterator>
+#include <variant>
 #include <vector>
 
 namespace
@@ -24,21 +27,16 @@ PolyWithHoles constructPolyFromPoints(const std::vector<Point>& points)
     return PolyWithHoles(Poly{cgalPoints.begin(), cgalPoints.end()});
 }
 
-GenericAgent makeAgent(Point position)
+GenericAgent makeAgent(Point position, double v0)
 {
     CollisionFreeSpeedModel::State state{};
     state.position = position;
+    state.v0 = v0;
     return GenericAgent{
         GenericAgent::ID::Invalid,
         jps::UniqueID<Journey>::Invalid,
         jps::UniqueID<BaseStage>::Invalid,
         state};
-}
-
-bool containsId(const std::vector<GenericAgent>& agents, GenericAgent::ID id)
-{
-    return std::any_of(
-        std::begin(agents), std::end(agents), [id](const auto& a) { return a.id == id; });
 }
 } // namespace
 
@@ -61,13 +59,72 @@ protected:
         : geometry(constructPolyFromPoints(
               {{0, 0}, {10, 0}, {10, 10}, {6, 10}, {6, 2}, {4, 2}, {4, 10}, {0, 10}}))
     {
-        agents.push_back(makeAgent(selfPosition)); // left arm
-        agents.push_back(makeAgent({2, 7})); // same arm, in sight
-        agents.push_back(makeAgent({8, 9})); // right arm, behind the slot
+        // Distinct v0 values so state comparisons cover more than the position.
+        agents.push_back(makeAgent(selfPosition, 1.0)); // left arm
+        agents.push_back(makeAgent({2, 7}, 1.1)); // same arm, in sight
+        agents.push_back(makeAgent({8, 9}, 1.3)); // right arm, behind the slot
         self = agents[0].id;
         visibleNeighbor = agents[1].id;
         occludedNeighbor = agents[2].id;
         neighborhoodSearch.Update(agents);
+    }
+
+    /// True when `result` contains the state of the fixture agent with `id`, matched by
+    /// position (returned states carry no identity).
+    bool containsId(const std::vector<OperationalModelState>& result, GenericAgent::ID id) const
+    {
+        const auto agent = std::find_if(
+            std::begin(agents), std::end(agents), [id](const auto& a) { return a.id == id; });
+        if(agent == std::end(agents)) {
+            return false;
+        }
+        const auto& pos = agent->position();
+        return std::any_of(std::begin(result), std::end(result), [&pos](const auto& state) {
+            return Pos(state) == pos;
+        });
+    }
+
+    /// Reference result: query the NeighborhoodSearch directly, filter manually (skip the
+    /// bound agent, optionally drop occluded neighbors), and extract the model states.
+    std::vector<OperationalModelState>
+    manuallyFilteredStates(Point position, double radius, bool filterVisibility) const
+    {
+        auto reference = neighborhoodSearch.GetNeighboringAgents(position, radius);
+        const auto& boundary = geometry.LineSegmentsInApproxDistanceTo(position);
+        std::erase_if(reference, [&, this](const auto& neighbor) {
+            if(neighbor.id == self) {
+                return true;
+            }
+            if(!filterVisibility) {
+                return false;
+            }
+            const auto sight_line = LineSegment(position, neighbor.position());
+            return std::any_of(
+                boundary.cbegin(), boundary.cend(), [&sight_line](const auto& boundary_segment) {
+                    return intersects(sight_line, boundary_segment);
+                });
+        });
+        std::vector<OperationalModelState> states;
+        states.reserve(reference.size());
+        std::transform(
+            std::begin(reference),
+            std::end(reference),
+            std::back_inserter(states),
+            [](const auto& agent) { return agent.model; });
+        return states;
+    }
+
+    static void expectSameStates(
+        const std::vector<OperationalModelState>& actual,
+        const std::vector<OperationalModelState>& expected)
+    {
+        ASSERT_EQ(actual.size(), expected.size());
+        for(size_t index = 0; index < actual.size(); ++index) {
+            EXPECT_EQ(
+                std::get<CollisionFreeSpeedModelState>(actual[index]),
+                std::get<CollisionFreeSpeedModelState>(expected[index]))
+                << "state mismatch at index " << index;
+        }
     }
 };
 
@@ -131,4 +188,24 @@ TEST_F(NeighborQueryInUShapedRoom, ProximityQueryWithInvalidIdExcludesNobody)
     const ProximityNeighborQuery query(GenericAgent::ID::Invalid, neighborhoodSearch);
     const auto result = query(selfPosition, 8);
     EXPECT_EQ(result.size(), agents.size());
+}
+
+TEST_F(NeighborQueryInUShapedRoom, VisibleQueryMatchesManuallyFilteredNeighborhoodSearch)
+{
+    const VisibleNeighborQuery query(self, geometry, neighborhoodSearch);
+    for(const double radius : {1.0, 3.0, 8.0}) {
+        expectSameStates(
+            query(selfPosition, radius),
+            manuallyFilteredStates(selfPosition, radius, /*filterVisibility=*/true));
+    }
+}
+
+TEST_F(NeighborQueryInUShapedRoom, ProximityQueryMatchesManuallyFilteredNeighborhoodSearch)
+{
+    const ProximityNeighborQuery query(self, neighborhoodSearch);
+    for(const double radius : {1.0, 3.0, 8.0}) {
+        expectSameStates(
+            query(selfPosition, radius),
+            manuallyFilteredStates(selfPosition, radius, /*filterVisibility=*/false));
+    }
 }

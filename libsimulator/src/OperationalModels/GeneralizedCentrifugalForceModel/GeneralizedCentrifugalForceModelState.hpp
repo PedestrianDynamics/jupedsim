@@ -18,14 +18,8 @@ struct GeneralizedCentrifugalForceModelState {
     double AMin{0.2};
     double BMin{0.2};
     double BMax{0.4};
-    double strengthNeighborRepulsion{0.3};
-    double strengthGeometryRepulsion{0.2};
-    double maxNeighborInteractionDistance{2};
-    double maxGeometryInteractionDistance{2};
-    double maxNeighborInterpolationDistance{0.1};
-    double maxGeometryInterpolationDistance{0.1};
-    double maxNeighborRepulsionForce{9};
-    double maxGeometryRepulsionForce{3};
+
+    bool operator==(const GeneralizedCentrifugalForceModelState&) const = default;
 };
 
 template <>

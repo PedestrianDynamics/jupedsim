@@ -7,6 +7,21 @@
 #include "NeighborhoodSearch.hpp"
 
 #include <algorithm>
+#include <iterator>
+
+namespace
+{
+std::vector<OperationalModelState> intoStates(const std::vector<GenericAgent>& agents)
+{
+    std::vector<OperationalModelState> states;
+    states.reserve(agents.size());
+    std::transform(
+        std::begin(agents), std::end(agents), std::back_inserter(states), [](const auto& agent) {
+            return agent.model;
+        });
+    return states;
+}
+} // namespace
 
 //==============================================================================
 // VisibleNeighborQuery
@@ -20,7 +35,8 @@ VisibleNeighborQuery::VisibleNeighborQuery(
 {
 }
 
-std::vector<GenericAgent> VisibleNeighborQuery::operator()(Point position, double radius) const
+std::vector<OperationalModelState>
+VisibleNeighborQuery::operator()(Point position, double radius) const
 {
     auto neighborhood = _neighborhoodSearch.GetNeighboringAgents(position, radius);
     const auto& boundary = _geometry.LineSegmentsInApproxDistanceTo(position);
@@ -37,7 +53,7 @@ std::vector<GenericAgent> VisibleNeighborQuery::operator()(Point position, doubl
                 return intersects(agent_to_neighbor, boundary_segment);
             });
     });
-    return neighborhood;
+    return intoStates(neighborhood);
 }
 
 //==============================================================================
@@ -51,10 +67,11 @@ ProximityNeighborQuery::ProximityNeighborQuery(
 {
 }
 
-std::vector<GenericAgent> ProximityNeighborQuery::operator()(Point position, double radius) const
+std::vector<OperationalModelState>
+ProximityNeighborQuery::operator()(Point position, double radius) const
 {
     auto neighborhood = _neighborhoodSearch.GetNeighboringAgents(position, radius);
     std::erase_if(
         neighborhood, [this](const auto& neighbor) { return _excludedId == neighbor.id; });
-    return neighborhood;
+    return intoStates(neighborhood);
 }

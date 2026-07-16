@@ -11,10 +11,8 @@ struct CollisionFreeSpeedModelState {
     double timeGap{1};
     double v0{1.2};
     double radius{0.2};
-    double strengthNeighborRepulsion{8.0};
-    double rangeNeighborRepulsion{0.1};
-    double strengthGeometryRepulsion{5.0};
-    double rangeGeometryRepulsion{0.02};
+
+    bool operator==(const CollisionFreeSpeedModelState&) const = default;
 };
 
 template <>

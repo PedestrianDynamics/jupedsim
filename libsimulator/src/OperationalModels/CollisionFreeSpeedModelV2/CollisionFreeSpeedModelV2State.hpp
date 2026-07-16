@@ -15,6 +15,8 @@ struct CollisionFreeSpeedModelV2State {
     double timeGap{1};
     double v0{1.2};
     double radius{0.2};
+
+    bool operator==(const CollisionFreeSpeedModelV2State&) const = default;
 };
 
 template <>
