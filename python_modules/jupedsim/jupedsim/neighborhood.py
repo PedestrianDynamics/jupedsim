@@ -71,8 +71,4 @@ class NeighborhoodSearch:
         if radius < 0:
             raise ValueError(f"radius must be non-negative, got {radius}")
 
-        neighbors = self._obj.get_neighboring_agents(position, radius)
-        return [
-            x.model if isinstance(x, py_jps._CustomModelState) else x
-            for x in neighbors
-        ]
+        return self._obj.get_neighboring_agents(position, radius)

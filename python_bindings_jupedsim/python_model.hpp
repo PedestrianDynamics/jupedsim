@@ -38,6 +38,9 @@ private:
     py::object _obj;
 };
 
+/// The user's Python state object stored in a CustomModel::State payload.
+py::object StateObject(const CustomModel::State& state);
+
 class PythonModel final : public CustomModel
 {
 public:

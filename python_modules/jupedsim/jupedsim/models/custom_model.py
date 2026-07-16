@@ -64,8 +64,11 @@ class CustomOperationalModel(ABC):
 
     .. warning::
 
-        The neighbor states returned from neighborhood queries are only valid
-        for the duration of the callback. Never store them. Calling mutating
+        The ``geometry`` and ``neighborhood_search`` arguments wrap native
+        objects that only live for the duration of the callback -- never store
+        them; using a stored handle after the callback returns is undefined
+        behavior. Neighbor states returned from queries belong to the frozen
+        current generation; never store or mutate them. Calling mutating
         methods on the simulation (``add_agent``, ``mark_agent_for_removal``,
         journey or stage mutation) from within a callback raises
         :class:`~jupedsim.SimulationError`.

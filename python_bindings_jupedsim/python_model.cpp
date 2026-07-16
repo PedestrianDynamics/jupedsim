@@ -73,6 +73,11 @@ void GilSafePyObject::Set(py::object obj)
     _obj = std::move(obj);
 }
 
+py::object StateObject(const CustomModel::State& state)
+{
+    return state.Get<GilSafePyObject>().Get();
+}
+
 PythonModel::PythonModel(py::object model) : _model(std::move(model))
 {
     py::gil_scoped_acquire gil;
@@ -96,7 +101,7 @@ void PythonModel::ComputeNextState(
     py::gil_scoped_acquire gil;
 
     // Python custom models operate on their own state object, not on framework agents.
-    py::object pythonState = std::get<CustomModel::State>(current).Get<GilSafePyObject>().Get();
+    py::object pythonState = StateObject(std::get<CustomModel::State>(current));
     py::object pythonDestination = py::cast(intoTuple(destination));
     py::object pythonGeometry = py::cast(&geometry, py::return_value_policy::reference);
     py::object pythonNeighborQuery = py::cast(&neighborQuery, py::return_value_policy::reference);
@@ -163,7 +168,7 @@ void PythonModel::CheckModelConstraint(
 {
     py::gil_scoped_acquire gil;
 
-    py::object pythonState = std::get<CustomModel::State>(state).Get<GilSafePyObject>().Get();
+    py::object pythonState = StateObject(std::get<CustomModel::State>(state));
     py::object pythonNeighborQuery = py::cast(&neighborQuery, py::return_value_policy::reference);
     py::object pythonGeometry = py::cast(&geometry, py::return_value_policy::reference);
 
@@ -185,7 +190,7 @@ void init_python_model(py::module_& m)
             return data;
         }))
         .def_property_readonly(
-            "model", [](CustomModel::State& data) { return data.Get<GilSafePyObject>().Get(); });
+            "model", [](const CustomModel::State& data) { return StateObject(data); });
 
     py::class_<PythonModel, OperationalModel, py::smart_holder>(m, "_PythonModel")
         .def(py::init<py::object>(), py::arg("model"));

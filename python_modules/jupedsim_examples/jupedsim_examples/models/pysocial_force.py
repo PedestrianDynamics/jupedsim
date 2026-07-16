@@ -2,11 +2,12 @@
 from dataclasses import dataclass, replace
 
 import numpy as np
-from jupedsim.geometry import LineSegment
+from jupedsim.geometry import Geometry, LineSegment
 from jupedsim.models.custom_model import (
     CustomModelAgentState,
     CustomOperationalModel,
 )
+from jupedsim.neighborhood import NeighborhoodSearch
 
 
 @dataclass(kw_only=True, frozen=True)
@@ -47,8 +48,8 @@ class PythonSocialForceModel(CustomOperationalModel):
 
     All force helpers are static: math utilities (_normalize, _distance,
     _desired_force) operate on plain values, while _social_force and
-    _obstacle_force take Agent wrappers and read per-agent parameters via
-    ``agent.model``.
+    _obstacle_force operate directly on per-agent
+    :class:`PythonSocialForceModelState` objects.
     """
 
     def __init__(
@@ -95,7 +96,10 @@ class PythonSocialForceModel(CustomOperationalModel):
         return (fx, fy)
 
     @staticmethod
-    def _social_force(state, other) -> tuple[float, float]:
+    def _social_force(
+        state: PythonSocialForceModelState,
+        other: PythonSocialForceModelState,
+    ) -> tuple[float, float]:
         """
         Compute repulsive social force between two agent states.
 
@@ -146,7 +150,7 @@ class PythonSocialForceModel(CustomOperationalModel):
 
     @staticmethod
     def _obstacle_force(
-        state,
+        state: PythonSocialForceModelState,
         obstacle: LineSegment,
     ) -> tuple[float, float]:
         """
@@ -182,8 +186,13 @@ class PythonSocialForceModel(CustomOperationalModel):
         return (fx, fy)
 
     def compute_next_state(
-        self, dt: float, state, destination, geometry, neighborhood_search
-    ):
+        self,
+        dt: float,
+        state: PythonSocialForceModelState,
+        destination: tuple[float, float],
+        geometry: Geometry,
+        neighborhood_search: NeighborhoodSearch,
+    ) -> PythonSocialForceModelState:
         """
         Compute new position using Social Force Model.
 
@@ -245,6 +254,11 @@ class PythonSocialForceModel(CustomOperationalModel):
 
         return replace(state, position=new_position, velocity=new_velocity)
 
-    def check_model_constraint(self, state, neighborhood_search, geometry):
+    def check_model_constraint(
+        self,
+        state: PythonSocialForceModelState,
+        neighborhood_search: NeighborhoodSearch,
+        geometry: Geometry,
+    ) -> None:
         """Check model constraints (optional)."""
         pass
