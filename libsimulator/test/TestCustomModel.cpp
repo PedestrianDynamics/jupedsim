@@ -37,14 +37,15 @@ class MinimalCustomModel : public CustomModel
 public:
     void ComputeNextState(
         double dT,
-        const GenericAgent& current,
-        GenericAgent& next,
+        const OperationalModelState& current,
+        OperationalModelState& next,
+        Point /*destination*/,
         const CollisionGeometry&,
-        const NeighborhoodSearch<GenericAgent>&) const override
+        const NeighborQuery&) const override
     {
-        const auto& currentModelData = std::get<CustomModel::State>(current.model);
+        const auto& currentModelData = std::get<CustomModel::State>(current);
         const auto& state = currentModelData.Get<MinimalState>();
-        auto& nextModelData = std::get<CustomModel::State>(next.model);
+        auto& nextModelData = std::get<CustomModel::State>(next);
         auto& nextState = nextModelData.Get<MinimalState>();
 
         nextModelData.position = currentModelData.position + state.velocity * dT;
@@ -53,8 +54,8 @@ public:
     }
 
     void CheckModelConstraint(
-        const GenericAgent&,
-        const NeighborhoodSearch<GenericAgent>&,
+        const OperationalModelState&,
+        const NeighborQuery&,
         const CollisionGeometry&) const override
     {
     }

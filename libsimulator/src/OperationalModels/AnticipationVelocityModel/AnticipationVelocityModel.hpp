@@ -30,23 +30,23 @@ public:
     OperationalModelType Type() const override;
     void ComputeNextState(
         double dT,
-        const GenericAgent& current,
-        GenericAgent& next,
+        const OperationalModelState& current,
+        OperationalModelState& next,
+        Point destination,
         const CollisionGeometry& geometry,
-        const NeighborhoodSearch<GenericAgent>& neighborhoodSearch) const override;
+        const NeighborQuery& neighborQuery) const override;
     void CheckModelConstraint(
-        const GenericAgent& agent,
-        const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
+        const OperationalModelState& state,
+        const NeighborQuery& neighborQuery,
         const CollisionGeometry& geometry) const override;
 
 private:
-    double OptimalSpeed(const GenericAgent& ped, double spacing, double time_gap) const;
+    double OptimalSpeed(const State& model, double spacing, double time_gap) const;
     Point CalculateInfluenceDirection(
         const Point& desiredDirection,
         const Point& predictedDirection) const;
-    double
-    GetSpacing(const GenericAgent& ped1, const GenericAgent& ped2, const Point& direction) const;
-    Point NeighborRepulsion(const GenericAgent& ped1, const GenericAgent& ped2) const;
+    double GetSpacing(const State& model1, const State& model2, const Point& direction) const;
+    Point NeighborRepulsion(const State& model1, Point destination, const State& model2) const;
 
     Point HandleWallAvoidance(
         const Point& direction,
@@ -56,6 +56,9 @@ private:
         double wallBufferDistance,
         double pushoutStrength) const;
 
-    Point
-    UpdateDirection(const GenericAgent& ped, const Point& calculatedDirection, double dt) const;
+    Point UpdateDirection(
+        const State& model,
+        Point destination,
+        const Point& calculatedDirection,
+        double dt) const;
 };

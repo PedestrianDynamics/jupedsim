@@ -1022,8 +1022,10 @@ class _MinimalCustomState:
 
 
 class _MinimalCustomModel(jps.CustomOperationalModel):
-    def compute_next_state(self, dt, ped, geometry, neighborhood_search):
-        return _MinimalCustomState(position=ped.position)
+    def compute_next_state(
+        self, dt, state, destination, geometry, neighborhood_search
+    ):
+        return _MinimalCustomState(position=state.position)
 
 
 def test_add_agent_rejects_state_of_different_model_on_custom_simulation():
@@ -1083,12 +1085,16 @@ class _NoPositionState:
 
 
 class _NoPositionModel(jps.CustomOperationalModel):
-    def compute_next_state(self, dt, ped, geometry, neighborhood_search):
+    def compute_next_state(
+        self, dt, state, destination, geometry, neighborhood_search
+    ):
         return _NoPositionState()
 
 
 class _WrongPositionTypeModel(jps.CustomOperationalModel):
-    def compute_next_state(self, dt, ped, geometry, neighborhood_search):
+    def compute_next_state(
+        self, dt, state, destination, geometry, neighborhood_search
+    ):
         return _MinimalCustomState(position="not-a-tuple")
 
 
@@ -1136,7 +1142,9 @@ class _AddAgentDuringIterateModel(jps.CustomOperationalModel):
         self.stage_id = None
         self.error = None
 
-    def compute_next_state(self, dt, ped, geometry, neighborhood_search):
+    def compute_next_state(
+        self, dt, state, destination, geometry, neighborhood_search
+    ):
         try:
             self.simulation.add_agent(
                 journey_id=self.journey_id,
@@ -1145,7 +1153,7 @@ class _AddAgentDuringIterateModel(jps.CustomOperationalModel):
             )
         except Exception as e:
             self.error = e
-        return _MinimalCustomState(position=ped.position)
+        return _MinimalCustomState(position=state.position)
 
 
 def test_add_agent_during_iterate_raises_simulation_error():

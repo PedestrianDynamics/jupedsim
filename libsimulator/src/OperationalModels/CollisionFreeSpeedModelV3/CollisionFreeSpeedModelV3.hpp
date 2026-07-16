@@ -22,18 +22,18 @@ public:
     OperationalModelType Type() const override;
     void ComputeNextState(
         double dT,
-        const GenericAgent& current,
-        GenericAgent& next,
+        const OperationalModelState& current,
+        OperationalModelState& next,
+        Point destination,
         const CollisionGeometry& geometry,
-        const NeighborhoodSearch<GenericAgent>& neighborhoodSearch) const override;
+        const NeighborQuery& neighborQuery) const override;
     void CheckModelConstraint(
-        const GenericAgent& agent,
-        const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
+        const OperationalModelState& state,
+        const NeighborQuery& neighborQuery,
         const CollisionGeometry& geometry) const override;
 
 private:
-    double OptimalSpeed(const GenericAgent& ped, double spacing, double time_gap) const;
-    double
-    GetSpacing(const GenericAgent& ped1, const GenericAgent& ped2, const Point& direction) const;
-    Point BoundaryRepulsion(const GenericAgent& ped, const LineSegment& boundary_segment) const;
+    double OptimalSpeed(const State& model, double spacing, double time_gap) const;
+    double GetSpacing(const State& model1, const State& model2, const Point& direction) const;
+    Point BoundaryRepulsion(const State& model, const LineSegment& boundary_segment) const;
 };

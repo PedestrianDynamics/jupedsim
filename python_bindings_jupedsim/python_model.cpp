@@ -2,8 +2,7 @@
 #include "python_model.hpp"
 
 #include "CollisionGeometry.hpp"
-#include "GenericAgent.hpp"
-#include "NeighborhoodSearch.hpp"
+#include "NeighborQuery.hpp"
 #include "OperationalModel.hpp"
 #include "OperationalModels/CustomModel/CustomModel.hpp"
 #include "SimulationError.hpp"
@@ -15,6 +14,7 @@
 #include <stdexcept>
 #include <tuple>
 #include <utility>
+#include <variant>
 
 namespace py = pybind11;
 
@@ -87,24 +87,26 @@ PythonModel::PythonModel(py::object model) : _model(std::move(model))
 
 void PythonModel::ComputeNextState(
     double dT,
-    const GenericAgent& current,
-    GenericAgent& next,
+    const OperationalModelState& current,
+    OperationalModelState& next,
+    Point destination,
     const CollisionGeometry& geometry,
-    const NeighborhoodSearch<GenericAgent>& neighborhoodSearch) const
+    const NeighborQuery& neighborQuery) const
 {
     py::gil_scoped_acquire gil;
 
-    py::object pythonAgent = py::cast(current);
+    // Python custom models operate on their own state object, not on framework agents.
+    py::object pythonState = std::get<CustomModel::State>(current).Get<GilSafePyObject>().Get();
+    py::object pythonDestination = py::cast(intoTuple(destination));
     py::object pythonGeometry = py::cast(&geometry, py::return_value_policy::reference);
-    py::object pythonNeighborhoodSearch =
-        py::cast((&neighborhoodSearch), py::return_value_policy::reference);
+    py::object pythonNeighborQuery = py::cast(&neighborQuery, py::return_value_policy::reference);
 
     py::object pythonUpdate = _model.attr("_compute_next_state")(
-        dT, pythonAgent, pythonGeometry, pythonNeighborhoodSearch);
+        dT, pythonState, pythonDestination, pythonGeometry, pythonNeighborQuery);
 
     // "next" shares the Python state object with "current" (GilSafePyObject copies are
     // refcounted, not cloned), so this also rejects returning the current state instance.
-    auto& nextModelData = std::get<CustomModel::State>(next.model);
+    auto& nextModelData = std::get<CustomModel::State>(next);
     auto& customModelData = nextModelData.Get<GilSafePyObject>();
     if(pythonUpdate.is(customModelData.Get())) {
         throw SimulationError(
@@ -155,18 +157,17 @@ void PythonModel::ComputeNextState(
 }
 
 void PythonModel::CheckModelConstraint(
-    const GenericAgent& agent,
-    const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
+    const OperationalModelState& state,
+    const NeighborQuery& neighborQuery,
     const CollisionGeometry& geometry) const
 {
     py::gil_scoped_acquire gil;
 
-    py::object pythonAgent = py::cast(agent);
-    py::object pythonNeighborhoodSearch =
-        py::cast((&neighborhoodSearch), py::return_value_policy::reference);
+    py::object pythonState = std::get<CustomModel::State>(state).Get<GilSafePyObject>().Get();
+    py::object pythonNeighborQuery = py::cast(&neighborQuery, py::return_value_policy::reference);
     py::object pythonGeometry = py::cast(&geometry, py::return_value_policy::reference);
 
-    _model.attr("_check_model_constraint")(pythonAgent, pythonNeighborhoodSearch, pythonGeometry);
+    _model.attr("_check_model_constraint")(pythonState, pythonNeighborQuery, pythonGeometry);
 }
 
 void init_python_model(py::module_& m)
