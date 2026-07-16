@@ -33,6 +33,9 @@ target_sources(simulator PRIVATE
     src/Mathematics.hpp
     src/Mesh.cpp
     src/Mesh.hpp
+    src/NeighborQueries.cpp
+    src/NeighborQueries.hpp
+    src/NeighborQuery.hpp
     src/NeighborhoodSearch.hpp
     src/OperationalDecisionSystem.hpp
     src/Point.cpp
@@ -106,6 +109,7 @@ if (BUILD_TESTS)
         test/TestJourney.cpp
         test/TestLineSegment.cpp
         test/TestMesh.cpp
+        test/TestNeighborQuery.cpp
         test/TestNeighborhoodSearch.cpp
         test/TestPoint.cpp
         test/TestSimulationClock.cpp
