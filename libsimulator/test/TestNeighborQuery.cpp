@@ -26,7 +26,7 @@ PolyWithHoles constructPolyFromPoints(const std::vector<Point>& points)
 
 GenericAgent makeAgent(Point position)
 {
-    CollisionFreeSpeedModel::State state{};
+    CollisionFreeSpeedModelState state{};
     state.position = position;
     return GenericAgent{
         GenericAgent::ID::Invalid,
