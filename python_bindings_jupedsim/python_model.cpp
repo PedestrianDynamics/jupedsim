@@ -2,6 +2,7 @@
 #include "python_model.hpp"
 
 #include "CollisionGeometry.hpp"
+#include "NeighborQueries.hpp"
 #include "NeighborQuery.hpp"
 #include "OperationalModel.hpp"
 #include "OperationalModels/CustomModel/CustomModel.hpp"
@@ -15,6 +16,7 @@
 #include <tuple>
 #include <utility>
 #include <variant>
+#include <vector>
 
 namespace py = pybind11;
 
@@ -77,6 +79,29 @@ py::object StateObject(const CustomModel::State& state)
 {
     return state.Get<GilSafePyObject>().Get();
 }
+
+namespace
+{
+/// Adapts a Python callable "(position, radius) -> list of model states" to the
+/// NeighborQuery interface, so exposed operational models can be driven from Python
+/// without the caller knowing the model's query radius: the model invokes the callable
+/// with its own radius, and the Python side translates its neighborhood (e.g. mapping
+/// wrapped custom states to the embedded native states) into states the model consumes.
+class PyNeighborQuery final : public NeighborQuery
+{
+    py::object _callable;
+
+public:
+    explicit PyNeighborQuery(py::object callable) : _callable(std::move(callable)) {}
+
+    std::vector<OperationalModelState> operator()(Point position, double radius) const override
+    {
+        py::gil_scoped_acquire gil;
+        return _callable(intoTuple(position), radius)
+            .cast<std::vector<OperationalModelState>>();
+    }
+};
+} // namespace
 
 PythonModel::PythonModel(py::object model) : _model(std::move(model))
 {
@@ -177,7 +202,43 @@ void PythonModel::CheckModelConstraint(
 
 void init_python_model(py::module_& m)
 {
-    py::class_<OperationalModel, py::smart_holder>(m, "OperationalModel");
+    py::class_<OperationalModel, py::smart_holder>(m, "OperationalModel")
+        .def(
+            "compute_next_state",
+            [](const OperationalModel& self,
+               double dt,
+               const OperationalModelState& current,
+               std::tuple<double, double> destination,
+               py::object neighbor_query,
+               const CollisionGeometry& geometry) {
+                const PyNeighborQuery neighborQuery(std::move(neighbor_query));
+                OperationalModelState next = current;
+                self.ComputeNextState(
+                    dt, current, next, intoPoint(destination), geometry, neighborQuery);
+                return next;
+            },
+            py::arg("dt"),
+            py::arg("state"),
+            py::arg("destination"),
+            py::arg("neighbor_query"),
+            py::arg("geometry"),
+            "Compute the state for the next iteration from `state`. `neighbor_query` is a "
+            "callable `(position, radius) -> list of model states`; the model invokes it with "
+            "its own query radius, so the caller needs no per-model knowledge.")
+        .def(
+            "check_model_constraint",
+            [](const OperationalModel& self,
+               const OperationalModelState& state,
+               py::object neighbor_query,
+               const CollisionGeometry& geometry) {
+                const PyNeighborQuery neighborQuery(std::move(neighbor_query));
+                self.CheckModelConstraint(state, neighborQuery, geometry);
+            },
+            py::arg("state"),
+            py::arg("neighbor_query"),
+            py::arg("geometry"),
+            "Raise when `state` violates the model's constraints. `neighbor_query` is a "
+            "callable `(position, radius) -> list of model states` used for overlap checks.");
 
     py::class_<CustomModel::State>(m, "_CustomModelState")
         .def(py::init([](py::object model) {
