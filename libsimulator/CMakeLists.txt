@@ -40,6 +40,7 @@ target_sources(simulator PRIVATE
     src/Mesh.cpp
     src/Mesh.hpp
     src/NeighborhoodSearch.hpp
+    src/NeighborhoodSearch3D.hpp
     src/OperationalDecisionSystem.hpp
     src/Point.cpp
     src/Point.hpp
@@ -73,6 +74,8 @@ target_sources(simulator PRIVATE
     src/Tracing.hpp
     src/UniqueID.hpp
     src/Util.hpp
+    src/WallIndex.cpp
+    src/WallIndex.hpp
 )
 
 add_subdirectory(src/OperationalModels)
@@ -116,13 +119,16 @@ if (BUILD_TESTS)
         test/TestJourney.cpp
         test/TestLineSegment.cpp
         test/TestMesh.cpp
+        test/TestNeighbors3D.cpp
         test/TestNeighborhoodSearch.cpp
+        test/TestNeighborhoodSearch3D.cpp
         test/TestPoint.cpp
         test/TestRegionSplit.cpp
         test/TestRoutingEngine3D.cpp
         test/TestSimulationClock.cpp
         test/TestStage.cpp
         test/TestUniqueID.cpp
+        test/TestWallIndex.cpp
     )
 
     target_link_libraries(libsimulator-tests PRIVATE
