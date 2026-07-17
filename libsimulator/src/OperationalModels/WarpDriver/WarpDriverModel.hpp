@@ -5,8 +5,7 @@
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
 #include "Point.hpp"
-
-#include <fmt/core.h>
+#include "WarpDriverModelState.hpp"
 
 #include <cstdint>
 #include <random>
@@ -16,18 +15,7 @@
 class WarpDriverModel : public OperationalModel
 {
 public:
-    /// Per-agent state of the warp driver model.
-    struct State {
-        Point position{};
-        Point orientation{0.0, 0.0};
-        double radius{0.15};
-        double v0{1.2};
-        double stuckTime{0.0}; // elapsed time since anchor was set
-        double anchorX{0.0}; // position when stuck tracking began
-        double anchorY{0.0};
-        double detourTime{0.0}; // remaining time in detour mode
-        int detourSide{1}; // +1 = left, -1 = right of desired direction
-    };
+    using State = WarpDriverModelState;
 
     /// 3-component space-time point/vector used internally
     struct SpaceTimePoint {
@@ -87,30 +75,14 @@ public:
 
     void ComputeNextState(
         double dT,
-        const GenericAgent& current,
-        GenericAgent& next,
+        const OperationalModelState& current,
+        OperationalModelState& next,
+        Point destination,
         const CollisionGeometry& geometry,
-        const NeighborhoodSearch<GenericAgent>& neighborhoodSearch) const override;
+        const NeighborQuery& neighborQuery) const override;
 
     void CheckModelConstraint(
-        const GenericAgent& agent,
-        const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
+        const OperationalModelState& state,
+        const NeighborQuery& neighborQuery,
         const CollisionGeometry& geometry) const override;
-};
-
-template <>
-struct fmt::formatter<WarpDriverModel::State> {
-
-    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
-
-    template <typename FormatContext>
-    auto format(const WarpDriverModel::State& m, FormatContext& ctx) const
-    {
-        return fmt::format_to(
-            ctx.out(),
-            "WarpDriver[orientation={}, radius={}, v0={}]",
-            m.orientation,
-            m.radius,
-            m.v0);
-    }
 };

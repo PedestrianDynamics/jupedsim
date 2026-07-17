@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
+#include "AnticipationVelocityModelState.hpp"
 #include "CollisionGeometry.hpp"
 #include "LineSegment.hpp"
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
 #include "Point.hpp"
-
-#include <fmt/core.h>
 
 #include <cstdint>
 #include <random>
@@ -16,20 +15,7 @@
 class AnticipationVelocityModel : public OperationalModel
 {
 public:
-    /// Per-agent state of the anticipation velocity model.
-    struct State {
-        Point position{};
-        Point orientation{0.0, 0.0};
-        double strengthNeighborRepulsion{8.0};
-        double rangeNeighborRepulsion{0.1};
-        double wallBufferDistance{0.1}; // buff distance of agent to wall
-        double anticipationTime{1.0}; // anticipation time
-        double reactionTime{0.3}; // reaction time to update direction
-        Point velocity{};
-        double timeGap{1.06};
-        double v0{1.2};
-        double radius{0.2};
-    };
+    using State = AnticipationVelocityModelState;
 
 private:
     /// Add a small outward component to maintain minimum distance from walls.
@@ -44,23 +30,23 @@ public:
     OperationalModelType Type() const override;
     void ComputeNextState(
         double dT,
-        const GenericAgent& current,
-        GenericAgent& next,
+        const OperationalModelState& current,
+        OperationalModelState& next,
+        Point destination,
         const CollisionGeometry& geometry,
-        const NeighborhoodSearch<GenericAgent>& neighborhoodSearch) const override;
+        const NeighborQuery& neighborQuery) const override;
     void CheckModelConstraint(
-        const GenericAgent& agent,
-        const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
+        const OperationalModelState& state,
+        const NeighborQuery& neighborQuery,
         const CollisionGeometry& geometry) const override;
 
 private:
-    double OptimalSpeed(const GenericAgent& ped, double spacing, double time_gap) const;
+    double OptimalSpeed(const State& model, double spacing, double time_gap) const;
     Point CalculateInfluenceDirection(
         const Point& desiredDirection,
         const Point& predictedDirection) const;
-    double
-    GetSpacing(const GenericAgent& ped1, const GenericAgent& ped2, const Point& direction) const;
-    Point NeighborRepulsion(const GenericAgent& ped1, const GenericAgent& ped2) const;
+    double GetSpacing(const State& model1, const State& model2, const Point& direction) const;
+    Point NeighborRepulsion(const State& model1, Point destination, const State& model2) const;
 
     Point HandleWallAvoidance(
         const Point& direction,
@@ -70,32 +56,9 @@ private:
         double wallBufferDistance,
         double pushoutStrength) const;
 
-    Point
-    UpdateDirection(const GenericAgent& ped, const Point& calculatedDirection, double dt) const;
-};
-
-template <>
-struct fmt::formatter<AnticipationVelocityModel::State> {
-
-    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
-
-    template <typename FormatContext>
-    auto format(const AnticipationVelocityModel::State& m, FormatContext& ctx) const
-    {
-        return fmt::format_to(
-            ctx.out(),
-            "AnticipationVelocityModel[orientation={}, strengthNeighborRepulsion={}, "
-            "rangeNeighborRepulsion={}, wallBufferDistance={}, "
-            "timeGap={}, v0={}, radius={}, reactionTime={}, anticipationTime={}, velocity={}])",
-            m.orientation,
-            m.strengthNeighborRepulsion,
-            m.rangeNeighborRepulsion,
-            m.wallBufferDistance,
-            m.timeGap,
-            m.v0,
-            m.radius,
-            m.reactionTime,
-            m.anticipationTime,
-            m.velocity);
-    }
+    Point UpdateDirection(
+        const State& model,
+        Point destination,
+        const Point& calculatedDirection,
+        double dt) const;
 };

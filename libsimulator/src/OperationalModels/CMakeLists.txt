@@ -1,5 +1,6 @@
 target_sources(simulator PRIVATE
     OperationalModel.hpp
+    OperationalModelState.hpp
     OperationalModelType.hpp
 )
 target_include_directories(simulator PUBLIC

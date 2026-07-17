@@ -24,6 +24,7 @@ void init_journey(py::module_& m);
 void init_stage(py::module_& m);
 void init_simulation(py::module_& m);
 void init_neighborhood_search(py::module_& m);
+void init_neighbor_query(py::module_& m);
 void init_linesegment(py::module_& m);
 void init_python_model(py::module_& m);
 
@@ -50,4 +51,5 @@ PYBIND11_MODULE(py_jupedsim, m)
     init_stage(m);
     init_simulation(m);
     init_neighborhood_search(m);
+    init_neighbor_query(m);
 }
