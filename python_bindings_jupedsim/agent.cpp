@@ -29,12 +29,12 @@ void init_agent(py::module_& m)
             "position", [](const GenericAgent& agent) { return intoTuple(agent.position()); })
         .def_property(
             "end_target",
-            [](const GenericAgent& agent) { return intoTuple(agent.target); },
-            [](GenericAgent& agent, std::tuple<double, double> target) {
-                agent.target = intoPoint(target);
+            [](const GenericAgent& agent) { return intoTuple(agent.endTarget); },
+            [](GenericAgent& agent, std::tuple<double, double> endTarget) {
+                agent.endTarget = intoPoint(endTarget);
             })
         .def_property_readonly(
-            "next", [](const GenericAgent& agent) { return intoTuple(agent.destination); })
+            "next_target", [](const GenericAgent& agent) { return intoTuple(agent.nextTarget); })
         .def_property_readonly(
             "model",
             [](GenericAgent& agent) -> auto& { return agent.model; },

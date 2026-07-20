@@ -99,7 +99,7 @@ void CollisionFreeSpeedModelV3::ComputeNextState(
             return acc + BoundaryRepulsion(current, element);
         });
 
-    const auto desired_direction = (current.destination - model.position).Normalized();
+    const auto desired_direction = (current.nextTarget - model.position).Normalized();
     auto reference_direction = (desired_direction + boundaryRepulsion).Normalized();
     if(reference_direction == Point{}) {
         reference_direction = model.orientation;

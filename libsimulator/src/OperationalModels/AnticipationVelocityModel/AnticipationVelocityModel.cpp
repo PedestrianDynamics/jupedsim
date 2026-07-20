@@ -74,7 +74,7 @@ void AnticipationVelocityModel::ComputeNextState(
             return res + NeighborRepulsion(current, neighbor);
         });
 
-    const auto desiredDirection = (current.destination - model.position).Normalized();
+    const auto desiredDirection = (current.nextTarget - model.position).Normalized();
     auto direction = (desiredDirection + neighborRepulsion).Normalized();
     if(direction == Point{}) {
         direction = model.orientation;
@@ -110,7 +110,7 @@ Point AnticipationVelocityModel::UpdateDirection(
     double dt) const
 {
     const auto& model = std::get<State>(ped.model);
-    const Point desiredDirection = (ped.destination - model.position).Normalized();
+    const Point desiredDirection = (ped.nextTarget - model.position).Normalized();
     const Point actualDirection = model.orientation;
     Point updatedDirection;
 
@@ -275,7 +275,7 @@ Point AnticipationVelocityModel::NeighborRepulsion(
 
     // Pedestrian movement and desired directions
     const auto& e1 = model1.orientation;
-    const auto& d1 = (ped1.destination - model1.position).Normalized();
+    const auto& d1 = (ped1.nextTarget - model1.position).Normalized();
     const auto& e2 = model2.orientation;
 
     // Check perception range (Eq. 1)

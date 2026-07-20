@@ -133,8 +133,8 @@ class Agent:
         return self.__resolve().position
 
     @property
-    def end_destination(self) -> tuple[float, float]:
-        """Current end destination of the agent.
+    def end_target(self) -> tuple[float, float]:
+        """Current end target of the agent.
 
         Can be used to directly steer an agent towards the given coordinate.
         This will bypass the strategical and tactical level, but the
@@ -152,17 +152,17 @@ class Agent:
             iteration call.
 
         Returns:
-            Current end destination of the agent.
+            Current end target of the agent.
         """
-        return self.__resolve().end_destination
+        return self.__resolve().end_target
 
-    @end_destination.setter
-    def end_destination(self, end_destination: tuple[float, float]) -> None:
-        self.__resolve().end_destination = end_destination
+    @end_target.setter
+    def end_target(self, end_target: tuple[float, float]) -> None:
+        self.__resolve().end_target = end_target
 
     @property
-    def next_destination(self) -> tuple[float, float]:
-        """Current next destination of the agent.
+    def next_target(self) -> tuple[float, float]:
+        """Current next target of the agent.
 
         Next destination is the next waypoint of the current stage of the agent's journey.
         It is used by the operational model to compute the next state of the agent.
@@ -228,14 +228,14 @@ class _TransientAgent:
         return self.__obj.position
 
     @property
-    def end_destination(self) -> tuple[float, float]:
-        """Current end destination of the agent."""
-        return self.__obj.end_destination
+    def end_target(self) -> tuple[float, float]:
+        """Current end target of the agent."""
+        return self.__obj.end_target
 
     @property
-    def next_destination(self) -> tuple[float, float]:
-        """Current next destination of the agent."""
-        return self.__obj.next_destination
+    def next_target(self) -> tuple[float, float]:
+        """Current next target of the agent."""
+        return self.__obj.next_target
 
     @property
     def model(self) -> Any:
