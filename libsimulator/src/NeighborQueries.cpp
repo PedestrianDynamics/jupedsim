@@ -17,7 +17,7 @@ std::vector<OperationalModelState> intoStates(const std::vector<GenericAgent>& a
     states.reserve(agents.size());
     std::transform(
         std::begin(agents), std::end(agents), std::back_inserter(states), [](const auto& agent) {
-            return agent.model;
+            return agent.state;
         });
     return states;
 }

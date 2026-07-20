@@ -2,9 +2,12 @@
 #pragma once
 
 #include "CollisionGeometry.hpp"
+#include "GenericAgent.hpp"
 #include "LineSegment.hpp"
+#include "NeighborQuery.hpp"
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
+#include "Point.hpp"
 #include "SocialForceModelState.hpp"
 #include "TacticalModelState.hpp"
 
@@ -18,30 +21,27 @@ public:
 private:
     double bodyForce{120000}; // k
     double friction{240000}; // kappa
+    double _cutOffRadius{2.5};
 
 public:
-    using OperationalModel::GenericState;
-    using OperationalModel::StateContainer;
-
     SocialForceModel(double bodyForce, double friction);
     ~SocialForceModel() override = default;
     OperationalModelType Type() const override;
 
     void ComputeNextState(
         double dT,
-        const GenericState& current,
-        GenericState& next,
-        const TacticalModelState& tactical,
+        const OperationalModelState& current,
+        OperationalModelState& next,
+        const Point& destination,
         const CollisionGeometry& geometry,
-        const StateContainer& neighborStates) const override;
-
+        const NeighborQuery& neighborQuery) const override;
     void CheckModelConstraint(
-        const GenericAgent& agent,
-        const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
+        const OperationalModelState& generic_state,
+        const NeighborQuery& neighborQuery,
         const CollisionGeometry& geometry) const override;
 
 private:
-    static Point DrivingForce(const State& agent, const TacticalModelState& tactical);
+    static Point DrivingForce(const State& agent, const Point& destination);
     Point AgentForce(const State& ped1, const State& ped2) const;
     Point ObstacleForce(const State& agent, const LineSegment& segment) const;
     /**

@@ -3,9 +3,12 @@
 
 #include "CollisionFreeSpeedModelV2State.hpp"
 #include "CollisionGeometry.hpp"
+#include "GenericAgent.hpp"
 #include "LineSegment.hpp"
+#include "NeighborQuery.hpp"
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
+#include "Point.hpp"
 #include "TacticalModelState.hpp"
 
 #include <fmt/core.h>
@@ -15,25 +18,24 @@ class CollisionFreeSpeedModelV2 : public OperationalModel
 public:
     using State = CollisionFreeSpeedModelV2State;
 
-public:
-    using OperationalModel::GenericState;
-    using OperationalModel::StateContainer;
+private:
+    double _cutOffRadius{3.0};
 
-    CollisionFreeSpeedModelV2() { _cutOffRadius = 3; }
+public:
+    CollisionFreeSpeedModelV2() {}
     ~CollisionFreeSpeedModelV2() override = default;
     OperationalModelType Type() const override;
 
     void ComputeNextState(
         double dT,
-        const GenericState& current,
-        GenericState& next,
-        const TacticalModelState& tactical,
+        const OperationalModelState& current,
+        OperationalModelState& next,
+        const Point& destination,
         const CollisionGeometry& geometry,
-        const StateContainer& neighborStates) const override;
-
+        const NeighborQuery& neighborQuery) const override;
     void CheckModelConstraint(
-        const GenericAgent& agent,
-        const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
+        const OperationalModelState& state,
+        const NeighborQuery& neighborQuery,
         const CollisionGeometry& geometry) const override;
 
 private:

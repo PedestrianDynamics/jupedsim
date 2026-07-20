@@ -3,6 +3,7 @@
 
 #include "CollisionGeometry.hpp"
 #include "GenericAgent.hpp"
+#include "NeighborQueries.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
@@ -38,17 +39,16 @@ public:
     {
         _next.clear();
         std::copy(std::begin(agents), std::end(agents), std::back_inserter(_next));
-        OperationalModel::StateContainer neighbor_states;
         for(size_t index = 0; index < agents.size(); ++index) {
-            neighbor_states.clear();
-            _model->GetNeighbors(agents[index], neighborhoodSearch, geometry, neighbor_states);
+            const VisibleNeighborQuery neighborQuery(
+                agents[index].id, geometry, neighborhoodSearch);
             _model->ComputeNextState(
                 dT,
                 agents[index].state,
                 _next[index].state,
-                agents[index].tactical,
+                agents[index].tactical.destination,
                 geometry,
-                neighbor_states);
+                neighborQuery);
         }
         // Swap in the computed generation. This is safe because no caller retains
         // pointers/references across an iteration (Python-side agent handles resolve per
@@ -62,6 +62,7 @@ public:
         const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
         const CollisionGeometry& geometry) const
     {
-        _model->CheckModelConstraint(agent, neighborhoodSearch, geometry);
+        const ProximityNeighborQuery neighborQuery(agent.id, neighborhoodSearch);
+        _model->CheckModelConstraint(agent.state, neighborQuery, geometry);
     }
 };

@@ -70,14 +70,15 @@ OperationalModelType CollisionFreeSpeedModelV3::Type() const
 
 void CollisionFreeSpeedModelV3::ComputeNextState(
     double dT,
-    const GenericState& current,
-    GenericState& next,
-    const TacticalModelState& tactical,
+    const OperationalModelState& current,
+    OperationalModelState& next,
+    const Point& destination,
     const CollisionGeometry& geometry,
-    const StateContainer& neighborStates) const
+    const NeighborQuery& neighborQuery) const
 {
     const auto& boundary = geometry.LineSegmentsInApproxDistanceTo(Pos(current));
     const auto& state = std::get<State>(current);
+    const auto neighborStates = neighborQuery(state.position, _cutOffRadius);
 
     const auto boundaryRepulsion = std::accumulate(
         boundary.cbegin(),
@@ -87,7 +88,7 @@ void CollisionFreeSpeedModelV3::ComputeNextState(
             return acc + BoundaryRepulsion(state, element);
         });
 
-    const auto desired_direction = (tactical.destination - Pos(current)).Normalized();
+    const auto desired_direction = (destination - Pos(current)).Normalized();
     auto reference_direction = (desired_direction + boundaryRepulsion).Normalized();
     if(reference_direction == Point{}) {
         reference_direction = state.orientation;
@@ -133,12 +134,11 @@ void CollisionFreeSpeedModelV3::ComputeNextState(
 }
 
 void CollisionFreeSpeedModelV3::CheckModelConstraint(
-    const GenericAgent& agent,
-    const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
+    const OperationalModelState& generic_state,
+    const NeighborQuery& neighborQuery,
     const CollisionGeometry& geometry) const
 {
-    const auto& state = std::get<State>(agent.state);
-
+    const auto& state = std::get<State>(generic_state);
     validateConstraint(state.radius, 0.0, 2.0, "radius", true);
     validateConstraint(state.v0, 0.0, 10.0, "v0");
     validateConstraint(state.timeGap, 0.1, 10.0, "timeGap");
@@ -169,12 +169,9 @@ void CollisionFreeSpeedModelV3::CheckModelConstraint(
     validateConstraint(state.thetaMaxUpperBound, 0.0, std::acos(-1.0), "thetaMaxUpperBound");
     validateConstraint(state.agentBuffer, 0.0, 100.0, "agentBuffer");
 
-    const auto neighbors = neighborhoodSearch.GetNeighboringAgents(state.position, 2);
+    const auto neighbors = neighborQuery(state.position, 2);
     for(const auto& neighbor : neighbors) {
-        if(agent.id == neighbor.id) {
-            continue;
-        }
-        const auto& neighbor_state = std::get<State>(neighbor.state);
+        const auto& neighbor_state = std::get<State>(neighbor);
         const auto contactDist = state.radius + neighbor_state.radius;
         const auto distance = (state.position - neighbor_state.position).Norm();
         if(contactDist >= distance) {

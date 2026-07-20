@@ -45,15 +45,15 @@ public:
 
     void ComputeNextState(
         double dT,
-        const GenericState& current,
-        GenericState& next,
-        const TacticalModelState& tactical,
+        const OperationalModelState& current,
+        OperationalModelState& next,
+        const Point& destination,
         const CollisionGeometry& geometry,
-        const StateContainer& neighborStates) const override;
+        const NeighborQuery& neighborQuery) const override;
 
     void CheckModelConstraint(
-        const GenericAgent& agent,
-        const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
+        const OperationalModelState& state,
+        const NeighborQuery& neighborQuery,
         const CollisionGeometry& geometry) const override;
 
 private:

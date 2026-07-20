@@ -1,5 +1,4 @@
 target_sources(simulator PRIVATE
-    OperationalModel.cpp
     OperationalModel.hpp
     OperationalModelType.hpp
 )

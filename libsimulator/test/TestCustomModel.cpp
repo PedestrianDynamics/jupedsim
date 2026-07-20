@@ -3,15 +3,7 @@
 #include "GeometryBuilder.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalDecisionSystem.hpp"
-#include "OperationalModels/AnticipationVelocityModel/AnticipationVelocityModel.hpp"
-#include "OperationalModels/CollisionFreeSpeedModel/CollisionFreeSpeedModel.hpp"
-#include "OperationalModels/CollisionFreeSpeedModelV2/CollisionFreeSpeedModelV2.hpp"
-#include "OperationalModels/CollisionFreeSpeedModelV3/CollisionFreeSpeedModelV3.hpp"
 #include "OperationalModels/CustomModel/CustomModel.hpp"
-#include "OperationalModels/GeneralizedCentrifugalForceModel/GeneralizedCentrifugalForceModel.hpp"
-#include "OperationalModels/OperationalModelState.hpp"
-#include "OperationalModels/SocialForceModel/SocialForceModel.hpp"
-#include "OperationalModels/WarpDriver/WarpDriverModel.hpp"
 
 #include <fmt/format.h>
 #include <gtest/gtest.h>
@@ -45,37 +37,37 @@ class MinimalCustomModel : public CustomModel
 public:
     void ComputeNextState(
         double dT,
-        const GenericState& current,
-        GenericState& next,
-        const TacticalModelState&,
+        const OperationalModelState& current,
+        OperationalModelState& next,
+        const Point& /*destination*/,
         const CollisionGeometry&,
-        const StateContainer&) const override
+        const NeighborQuery&) const override
     {
-        const auto& currentStateData = std::get<CustomModel::State>(current);
-        const auto& state = currentStateData.Get<MinimalState>();
-        auto& nextStateData = std::get<CustomModel::State>(next);
-        auto& nextState = nextStateData.Get<MinimalState>();
+        const auto& currentModelData = std::get<CustomModel::State>(current);
+        const auto& state = currentModelData.Get<MinimalState>();
+        auto& nextModelData = std::get<CustomModel::State>(next);
+        auto& nextState = nextModelData.Get<MinimalState>();
 
-        nextStateData.position = currentStateData.position + state.velocity * dT;
+        nextModelData.position = currentModelData.position + state.velocity * dT;
         nextState.velocity = state.velocity;
         nextState.applications = state.applications + 1;
     }
 
     void CheckModelConstraint(
-        const GenericAgent&,
-        const NeighborhoodSearch<GenericAgent>&,
+        const OperationalModelState&,
+        const NeighborQuery&,
         const CollisionGeometry&) const override
     {
     }
 };
 
-GenericAgent MakeAgent(OperationalModelState state)
+GenericAgent MakeAgent(OperationalModelState model)
 {
     return GenericAgent(
         GenericAgent::ID::Invalid,
         jps::UniqueID<Journey>::Invalid,
         jps::UniqueID<BaseStage>::Invalid,
-        std::move(state));
+        std::move(model));
 }
 } // namespace
 
@@ -144,25 +136,25 @@ TEST(CustomModel, RunsThroughOperationalDecisionSystem)
 TEST(ModelTypeOf, MapsEveryAgentModelDataToItsOperationalModelType)
 {
     ASSERT_EQ(
-        ModelTypeOf(OperationalModelState{GeneralizedCentrifugalForceModel::State{}}),
+        ModelTypeOf(OperationalModelState{GeneralizedCentrifugalForceModelState{}}),
         OperationalModelType::GENERALIZED_CENTRIFUGAL_FORCE);
     ASSERT_EQ(
-        ModelTypeOf(OperationalModelState{CollisionFreeSpeedModel::State{}}),
+        ModelTypeOf(OperationalModelState{CollisionFreeSpeedModelState{}}),
         OperationalModelType::COLLISION_FREE_SPEED);
     ASSERT_EQ(
-        ModelTypeOf(OperationalModelState{CollisionFreeSpeedModelV2::State{}}),
+        ModelTypeOf(OperationalModelState{CollisionFreeSpeedModelV2State{}}),
         OperationalModelType::COLLISION_FREE_SPEED_V2);
     ASSERT_EQ(
-        ModelTypeOf(OperationalModelState{CollisionFreeSpeedModelV3::State{}}),
+        ModelTypeOf(OperationalModelState{CollisionFreeSpeedModelV3State{}}),
         OperationalModelType::COLLISION_FREE_SPEED_V3);
     ASSERT_EQ(
-        ModelTypeOf(OperationalModelState{AnticipationVelocityModel::State{}}),
+        ModelTypeOf(OperationalModelState{AnticipationVelocityModelState{}}),
         OperationalModelType::ANTICIPATION_VELOCITY_MODEL);
     ASSERT_EQ(
-        ModelTypeOf(OperationalModelState{SocialForceModel::State{}}),
+        ModelTypeOf(OperationalModelState{SocialForceModelState{}}),
         OperationalModelType::SOCIAL_FORCE);
     ASSERT_EQ(
-        ModelTypeOf(OperationalModelState{WarpDriverModel::State{}}),
+        ModelTypeOf(OperationalModelState{WarpDriverModelState{}}),
         OperationalModelType::WARP_DRIVER);
     ASSERT_EQ(
         ModelTypeOf(OperationalModelState{CustomModel::State{MinimalState{}}}),

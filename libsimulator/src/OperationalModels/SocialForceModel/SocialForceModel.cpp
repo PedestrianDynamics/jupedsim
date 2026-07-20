@@ -18,7 +18,6 @@
 SocialForceModel::SocialForceModel(double bodyForce, double friction)
     : bodyForce(bodyForce), friction(friction)
 {
-    _cutOffRadius = 2.5;
 }
 
 OperationalModelType SocialForceModel::Type() const
@@ -28,14 +27,15 @@ OperationalModelType SocialForceModel::Type() const
 
 void SocialForceModel::ComputeNextState(
     double dT,
-    const GenericState& current,
-    GenericState& next,
-    const TacticalModelState& tactical,
+    const OperationalModelState& current,
+    OperationalModelState& next,
+    const Point& destination,
     const CollisionGeometry& geometry,
-    const StateContainer& neighborStates) const
+    const NeighborQuery& neighborQuery) const
 {
     const auto& state = std::get<State>(current);
-    auto forces = DrivingForce(state, tactical);
+    auto forces = DrivingForce(state, destination);
+    const auto neighborStates = neighborQuery(state.position, _cutOffRadius);
 
     Point F_rep;
     for(const auto& neighbor : neighborStates) {
@@ -61,8 +61,8 @@ void SocialForceModel::ComputeNextState(
 }
 
 void SocialForceModel::CheckModelConstraint(
-    const GenericAgent& agent,
-    const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
+    const OperationalModelState& generic_state,
+    const NeighborQuery& neighborQuery,
     const CollisionGeometry& geometry) const
 {
     // none of these constraint are given by the paper but are useful to create a simulation that
@@ -78,7 +78,7 @@ void SocialForceModel::CheckModelConstraint(
         }
     };
 
-    const auto& state = std::get<State>(agent.state);
+    const auto& state = std::get<State>(generic_state);
 
     const auto mass = state.mass;
     throwIfNegative(mass, "mass");
@@ -92,9 +92,9 @@ void SocialForceModel::CheckModelConstraint(
     const auto radius = state.radius;
     throwIfNegative(radius, "radius");
 
-    const auto neighbors = neighborhoodSearch.GetNeighboringAgents(state.position, 2);
+    const auto neighbors = neighborQuery(state.position, 2);
     for(const auto& neighbor : neighbors) {
-        const auto& neighborPosition = std::get<State>(neighbor.state).position;
+        const auto& neighborPosition = std::get<State>(neighbor).position;
         const auto distance = (state.position - neighborPosition).Norm();
 
         if(state.radius >= distance) {
@@ -118,9 +118,9 @@ void SocialForceModel::CheckModelConstraint(
     }
 }
 
-Point SocialForceModel::DrivingForce(const State& state, const TacticalModelState& tactical)
+Point SocialForceModel::DrivingForce(const State& state, const Point& destination)
 {
-    const Point e0 = (tactical.destination - state.position).Normalized();
+    const Point e0 = (destination - state.position).Normalized();
     return (e0 * state.desiredSpeed - state.velocity) / state.reactionTime;
 }
 double SocialForceModel::PushingForceLength(double A, double B, double r, double distance)

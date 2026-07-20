@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
+#include "CollisionFreeSpeedModel.hpp"
 #include "CollisionGeometry.hpp"
 #include "GenericAgent.hpp"
 #include "GeometricFunctions.hpp"
@@ -110,7 +111,7 @@ protected:
             std::begin(reference),
             std::end(reference),
             std::back_inserter(states),
-            [](const auto& agent) { return agent.model; });
+            [](const auto& agent) { return agent.state; });
         return states;
     }
 

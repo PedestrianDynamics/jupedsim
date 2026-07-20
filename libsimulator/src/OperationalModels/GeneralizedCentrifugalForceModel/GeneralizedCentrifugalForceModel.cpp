@@ -37,7 +37,6 @@ GeneralizedCentrifugalForceModel::GeneralizedCentrifugalForceModel(
     , maxNeighborRepulsionForce(maxNeighborRepulsionForce_)
     , maxGeometryRepulsionForce(maxGeometryRepulsionForce_)
 {
-    _cutOffRadius = 4.0;
 }
 
 OperationalModelType GeneralizedCentrifugalForceModel::Type() const
@@ -47,14 +46,15 @@ OperationalModelType GeneralizedCentrifugalForceModel::Type() const
 
 void GeneralizedCentrifugalForceModel::ComputeNextState(
     double dT,
-    const GenericState& current,
-    GenericState& next,
-    const TacticalModelState& tactical,
+    const OperationalModelState& current,
+    OperationalModelState& next,
+    const Point& destination,
     const CollisionGeometry& geometry,
-    const StateContainer& neighborStates) const
+    const NeighborQuery& neighborQuery) const
 {
     const auto& state = std::get<State>(current);
     Point F_rep;
+    const auto neighborStates = neighborQuery(state.position, _cutOffRadius);
     for(const auto& neighbor : neighborStates) {
         F_rep += ForceRepPed(state, std::get<State>(neighbor));
     }
@@ -64,7 +64,7 @@ void GeneralizedCentrifugalForceModel::ComputeNextState(
     Point e0{};
     // repulsive forces to the walls and transitions that are not my target
     Point repwall = ForceRepRoom(state, geometry);
-    Point fd = ForceDriv(state, tactical.destination, state.mass, state.tau, dT, e0);
+    Point fd = ForceDriv(state, destination, state.mass, state.tau, dT, e0);
     Point acc = (fd + F_rep + repwall) / state.mass;
 
     const Point velocity = (state.orientation * state.speed) + acc * dT;
@@ -79,11 +79,11 @@ void GeneralizedCentrifugalForceModel::ComputeNextState(
 }
 
 void GeneralizedCentrifugalForceModel::CheckModelConstraint(
-    const GenericAgent& agent,
-    const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
+    const OperationalModelState& generic_state,
+    const NeighborQuery& neighborQuery,
     const CollisionGeometry& geometry) const
 {
-    const auto& state = std::get<State>(agent.state);
+    const auto& state = std::get<State>(generic_state);
 
     if(!state.orientation.IsUnitLength()) {
         throw SimulationError("Orientation is invalid: {}. Length should be 1.", state.orientation);
@@ -124,15 +124,12 @@ void GeneralizedCentrifugalForceModel::CheckModelConstraint(
     constexpr double BMaxMax = 2.;
     validateConstraint(BMax, BMaxMin, BMaxMax, "BMax");
 
-    const auto neighbors = neighborhoodSearch.GetNeighboringAgents(state.position, 2);
+    const auto neighbors = neighborQuery(state.position, 2);
     for(const auto& neighbor : neighbors) {
-        if(agent.id == neighbor.id) {
-            continue;
-        }
 
-        const auto& neighbor_state = std::get<State>(neighbor.state);
+        const auto& neighbor_state = std::get<State>(neighbor);
         const auto contanctDist = AgentToAgentSpacing(state, neighbor_state);
-        const auto distance = (Pos(agent) - Pos(neighbor)).Norm();
+        const auto distance = (Pos(generic_state) - Pos(neighbor)).Norm();
         if(contanctDist >= distance) {
             throw SimulationError(
                 "Model constraint violation: Agent {} too close to agent {}: distance {}, "

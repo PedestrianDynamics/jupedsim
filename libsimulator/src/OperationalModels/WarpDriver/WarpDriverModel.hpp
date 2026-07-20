@@ -2,8 +2,11 @@
 #pragma once
 
 #include "CollisionGeometry.hpp"
+#include "GenericAgent.hpp"
+#include "NeighborQuery.hpp"
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
+#include "Point.hpp"
 #include "TacticalModelState.hpp"
 #include "WarpDriverModelState.hpp"
 
@@ -56,11 +59,9 @@ private:
 
     IntrinsicField _intrinsicField;
     mutable std::mt19937 _rng;
+    double _cutOffRadius{}; // neighborhood cutoff radius for neighbor query
 
 public:
-    using OperationalModel::GenericState;
-    using OperationalModel::StateContainer;
-
     WarpDriverModel(
         double sigma,
         double timeHorizon = 2.0,
@@ -77,14 +78,13 @@ public:
 
     void ComputeNextState(
         double dT,
-        const GenericState& current,
-        GenericState& next,
-        const TacticalModelState& tactical,
+        const OperationalModelState& current,
+        OperationalModelState& next,
+        const Point& destination,
         const CollisionGeometry& geometry,
-        const StateContainer& neighborStates) const override;
-
+        const NeighborQuery& neighborQuery) const override;
     void CheckModelConstraint(
-        const GenericAgent& agent,
-        const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
+        const OperationalModelState& generic_state,
+        const NeighborQuery& neighborQuery,
         const CollisionGeometry& geometry) const override;
 };

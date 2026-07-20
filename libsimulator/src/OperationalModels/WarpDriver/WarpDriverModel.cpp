@@ -351,77 +351,69 @@ OperationalModelType WarpDriverModel::Type() const
 }
 
 void WarpDriverModel::CheckModelConstraint(
-    const GenericAgent& agent,
-    const NeighborhoodSearch<GenericAgent>& /*neighborhoodSearch*/,
+    const OperationalModelState& generic_state,
+    const NeighborQuery& /*neighborQuery*/,
     const CollisionGeometry& /*geometry*/) const
 {
-    const auto* data = std::get_if<State>(&agent.state);
+    const auto* data = std::get_if<State>(&generic_state);
     if(!data) {
         throw SimulationError(
-            "WarpDriverModel constraint check: agent {} does not have WarpDriverModel data",
-            agent.id);
+            "WarpDriverModel constraint check: agent does not have WarpDriverModel data");
     }
     if(data->radius <= 0.0) {
         throw SimulationError(
-            "WarpDriverModel constraint check: agent {} has invalid radius {}",
-            agent.id,
-            data->radius);
+            "WarpDriverModel constraint check: agent has invalid radius {}", data->radius);
     }
     if(data->v0 < 0.0) {
         throw SimulationError(
-            "WarpDriverModel constraint check: agent {} has invalid v0 {}", agent.id, data->v0);
+            "WarpDriverModel constraint check: agent has invalid v0 {}", data->v0);
     }
     if(this->_timeHorizon <= 0.0) {
         throw SimulationError(
-            "WarpDriverModel constraint check: agent {} has invalid timeHorizon {}, must be > 0",
-            agent.id,
-            data->timeHorizon);
+            "WarpDriverModel constraint check: agent has invalid timeHorizon {}, must be > 0",
+            this->_timeHorizon);
     }
     if(this->_stepSize <= 0.0) {
         throw SimulationError(
-            "WarpDriverModel constraint check: agent {} has invalid stepSize {}, must be > 0",
-            agent.id,
-            data->stepSize);
+            "WarpDriverModel constraint check: agent has invalid stepSize {}, must be > 0",
+            this->_stepSize);
     }
     if(this->_numSamples < 1) {
         throw SimulationError(
-            "WarpDriverModel constraint check: agent {} has invalid numSamples {}, must be >= 1",
-            agent.id,
-            data->numSamples);
+            "WarpDriverModel constraint check: agent has invalid numSamples {}, must be >= 1",
+            this->_numSamples);
     }
     if(this->_timeUncertainty < 0.0) {
         throw SimulationError(
-            "WarpDriverModel constraint check: agent {} has invalid timeUncertainty {}, must be "
+            "WarpDriverModel constraint check: agent has invalid timeUncertainty {}, must be "
             ">= 0",
-            agent.id,
-            data->timeUncertainty);
+            this->_timeUncertainty);
     }
     if(this->_velocityUncertaintyX < 0.0) {
         throw SimulationError(
-            "WarpDriverModel constraint check: agent {} has invalid velocityUncertaintyX {}, must "
+            "WarpDriverModel constraint check: agent has invalid velocityUncertaintyX {}, must "
             "be >= 0",
-            agent.id,
-            data->velocityUncertaintyX);
+            this->_velocityUncertaintyX);
     }
     if(this->_velocityUncertaintyY < 0.0) {
         throw SimulationError(
-            "WarpDriverModel constraint check: agent {} has invalid velocityUncertaintyY {}, must "
+            "WarpDriverModel constraint check: agent has invalid velocityUncertaintyY {}, must "
             "be >= 0",
-            agent.id,
-            data->velocityUncertaintyY);
+            this->_velocityUncertaintyY);
     }
 }
 
 void WarpDriverModel::ComputeNextState(
     double dT,
-    const GenericState& current,
-    GenericState& next,
-    const TacticalModelState& tactical,
+    const OperationalModelState& current,
+    OperationalModelState& next,
+    const Point& destination,
     const CollisionGeometry& geometry,
-    const StateContainer& neighborStates) const
+    const NeighborQuery& neighborQuery) const
 {
     const auto& state = std::get<State>(current);
     auto& nextState = std::get<State>(next);
+    const auto neighborStates = neighborQuery(state.position, _cutOffRadius);
     const double speed = state.v0;
 
     // State orientation (unit vector). If zero, default to +x.
@@ -433,7 +425,7 @@ void WarpDriverModel::ComputeNextState(
     }
 
     // Direction towards destination
-    Point toTarget = tactical.destination - Pos(current);
+    Point toTarget = destination - Pos(current);
     const double distToTarget = toTarget.Norm();
     if(distToTarget < 1e-9) {
         // The old update carried default-initialized stuck/detour state here,

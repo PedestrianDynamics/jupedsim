@@ -28,7 +28,6 @@ CollisionFreeSpeedModel::CollisionFreeSpeedModel(
     , strengthGeometryRepulsion(strengthGeometryRepulsion_)
     , rangeGeometryRepulsion(rangeGeometryRepulsion_)
 {
-    _cutOffRadius = 3;
 }
 
 OperationalModelType CollisionFreeSpeedModel::Type() const
@@ -38,14 +37,15 @@ OperationalModelType CollisionFreeSpeedModel::Type() const
 
 void CollisionFreeSpeedModel::ComputeNextState(
     double dT,
-    const GenericState& current,
-    GenericState& next,
-    const TacticalModelState& tactical,
+    const OperationalModelState& current,
+    OperationalModelState& next,
+    const Point& destination,
     const CollisionGeometry& geometry,
-    const StateContainer& neighborStates) const
+    const NeighborQuery& neighborQuery) const
 {
     const auto& boundary = geometry.LineSegmentsInApproxDistanceTo(Pos(current));
     const auto& state = std::get<State>(current);
+    const auto neighborStates = neighborQuery(state.position, _cutOffRadius);
 
     const auto neighborRepulsion = std::accumulate(
         std::begin(neighborStates),
@@ -63,7 +63,7 @@ void CollisionFreeSpeedModel::ComputeNextState(
             return acc + BoundaryRepulsion(state, element);
         });
 
-    const auto desired_direction = (tactical.destination - Pos(current)).Normalized();
+    const auto desired_direction = (destination - Pos(current)).Normalized();
     auto direction = (desired_direction + neighborRepulsion + boundaryRepulsion).Normalized();
     if(direction == Point{}) {
         direction = state.orientation;
@@ -84,12 +84,11 @@ void CollisionFreeSpeedModel::ComputeNextState(
 }
 
 void CollisionFreeSpeedModel::CheckModelConstraint(
-    const GenericAgent& agent,
-    const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
+    const OperationalModelState& generic_state,
+    const NeighborQuery& neighborQuery,
     const CollisionGeometry& geometry) const
 {
-    const auto& state = std::get<State>(agent.state);
-
+    const auto& state = std::get<State>(generic_state);
     const auto r = state.radius;
     constexpr double rMin = 0.;
     constexpr double rMax = 2.;
@@ -105,12 +104,9 @@ void CollisionFreeSpeedModel::CheckModelConstraint(
     constexpr double timeGapMax = 10.;
     validateConstraint(timeGap, timeGapMin, timeGapMax, "timeGap");
 
-    const auto neighbors = neighborhoodSearch.GetNeighboringAgents(state.position, 2);
+    const auto neighbors = neighborQuery(state.position, 2);
     for(const auto& neighbor : neighbors) {
-        if(agent.id == neighbor.id) {
-            continue;
-        }
-        const auto& neighbor_state = std::get<State>(neighbor.state);
+        const auto& neighbor_state = std::get<State>(neighbor);
         const auto contanctdDist = r + neighbor_state.radius;
         const auto distance = (state.position - neighbor_state.position).Norm();
         if(contanctdDist >= distance) {

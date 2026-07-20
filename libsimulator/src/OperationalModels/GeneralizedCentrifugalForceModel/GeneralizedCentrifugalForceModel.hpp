@@ -2,9 +2,12 @@
 #pragma once
 #include "CollisionGeometry.hpp"
 #include "GeneralizedCentrifugalForceModelState.hpp"
+#include "GenericAgent.hpp"
 #include "LineSegment.hpp"
+#include "NeighborQuery.hpp"
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
+#include "Point.hpp"
 #include "TacticalModelState.hpp"
 
 #include <fmt/core.h>
@@ -24,10 +27,9 @@ private:
     double maxNeighborRepulsionForce{9};
     double maxGeometryRepulsionForce{3};
 
-public:
-    using OperationalModel::GenericState;
-    using OperationalModel::StateContainer;
+    double _cutOffRadius{4.0};
 
+public:
     GeneralizedCentrifugalForceModel(
         double strengthNeighborRepulsion,
         double strengthGeometryRepulsion,
@@ -43,15 +45,14 @@ public:
 
     void ComputeNextState(
         double dT,
-        const GenericState& current,
-        GenericState& next,
-        const TacticalModelState& tactical,
+        const OperationalModelState& current,
+        OperationalModelState& next,
+        const Point& destination,
         const CollisionGeometry& geometry,
-        const StateContainer& neighborStates) const override;
-
+        const NeighborQuery& neighborQuery) const override;
     void CheckModelConstraint(
-        const GenericAgent& agent,
-        const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
+        const OperationalModelState& generic_state,
+        const NeighborQuery& neighborQuery,
         const CollisionGeometry& geometry) const override;
 
 private:
