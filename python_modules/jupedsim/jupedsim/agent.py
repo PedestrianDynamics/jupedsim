@@ -221,6 +221,11 @@ class _TransientAgent:
         return self.__obj.target
 
     @property
+    def destination(self) -> tuple[float, float]:
+        """Current routed waypoint of the agent (tactical level output)."""
+        return self.__obj.destination
+
+    @property
     def model(self) -> Any:
         """Model specific state of this agent.
 

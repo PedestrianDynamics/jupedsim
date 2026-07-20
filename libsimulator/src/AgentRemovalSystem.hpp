@@ -40,7 +40,7 @@ void AgentRemovalSystem<Agent>::Run(
                 std::find(std::begin(removedAgentIds), std::end(removedAgentIds), agent.id) !=
                 std::end(removedAgentIds);
             if(found) {
-                stageManager.HandleRemoveAgent(agent.stageId);
+                stageManager.HandleRemoveAgent(agent.strategical.stageId);
             }
             return found;
         });

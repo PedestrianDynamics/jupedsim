@@ -2,9 +2,13 @@
 #pragma once
 
 #include "CollisionGeometry.hpp"
+#include "GenericAgent.hpp"
+#include "NeighborQuery.hpp"
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
 #include "Point.hpp"
+#include "TacticalModelState.hpp"
+#include "WarpDriverModelState.hpp"
 
 #include <fmt/core.h>
 
@@ -16,18 +20,7 @@
 class WarpDriverModel : public OperationalModel
 {
 public:
-    /// Per-agent state of the warp driver model.
-    struct State {
-        Point position{};
-        Point orientation{0.0, 0.0};
-        double radius{0.15};
-        double v0{1.2};
-        double stuckTime{0.0}; // elapsed time since anchor was set
-        double anchorX{0.0}; // position when stuck tracking began
-        double anchorY{0.0};
-        double detourTime{0.0}; // remaining time in detour mode
-        int detourSide{1}; // +1 = left, -1 = right of desired direction
-    };
+    using State = WarpDriverModelState;
 
     /// 3-component space-time point/vector used internally
     struct SpaceTimePoint {
@@ -64,11 +57,9 @@ private:
     double _velocityUncertaintyY;
     int _numSamples;
 
-    // Genuinely simulation-global state
-    double _cutOffRadius;
-
     IntrinsicField _intrinsicField;
     mutable std::mt19937 _rng;
+    double _cutOffRadius{}; // neighborhood cutoff radius for neighbor query
 
 public:
     WarpDriverModel(
@@ -87,30 +78,13 @@ public:
 
     void ComputeNextState(
         double dT,
-        const GenericAgent& current,
-        GenericAgent& next,
+        const OperationalModelState& current,
+        OperationalModelState& next,
+        const Point& destination,
         const CollisionGeometry& geometry,
-        const NeighborhoodSearch<GenericAgent>& neighborhoodSearch) const override;
-
+        const NeighborQuery& neighborQuery) const override;
     void CheckModelConstraint(
-        const GenericAgent& agent,
-        const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
+        const OperationalModelState& generic_state,
+        const NeighborQuery& neighborQuery,
         const CollisionGeometry& geometry) const override;
-};
-
-template <>
-struct fmt::formatter<WarpDriverModel::State> {
-
-    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
-
-    template <typename FormatContext>
-    auto format(const WarpDriverModel::State& m, FormatContext& ctx) const
-    {
-        return fmt::format_to(
-            ctx.out(),
-            "WarpDriver[orientation={}, radius={}, v0={}]",
-            m.orientation,
-            m.radius,
-            m.v0);
-    }
 };

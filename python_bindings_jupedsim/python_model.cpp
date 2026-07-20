@@ -2,8 +2,8 @@
 #include "python_model.hpp"
 
 #include "CollisionGeometry.hpp"
-#include "GenericAgent.hpp"
-#include "NeighborhoodSearch.hpp"
+#include "NeighborQueries.hpp"
+#include "NeighborQuery.hpp"
 #include "OperationalModel.hpp"
 #include "OperationalModels/CustomModel/CustomModel.hpp"
 #include "SimulationError.hpp"
@@ -15,6 +15,8 @@
 #include <stdexcept>
 #include <tuple>
 #include <utility>
+#include <variant>
+#include <vector>
 
 namespace py = pybind11;
 
@@ -73,6 +75,33 @@ void GilSafePyObject::Set(py::object obj)
     _obj = std::move(obj);
 }
 
+py::object StateObject(const CustomModel::State& state)
+{
+    return state.Get<GilSafePyObject>().Get();
+}
+
+namespace
+{
+/// Adapts a Python callable "(position, radius) -> list of model states" to the
+/// NeighborQuery interface, so exposed operational models can be driven from Python
+/// without the caller knowing the model's query radius: the model invokes the callable
+/// with its own radius, and the Python side translates its neighborhood (e.g. mapping
+/// wrapped custom states to the embedded native states) into states the model consumes.
+class PyNeighborQuery final : public NeighborQuery
+{
+    py::object _callable;
+
+public:
+    explicit PyNeighborQuery(py::object callable) : _callable(std::move(callable)) {}
+
+    std::vector<OperationalModelState> operator()(Point position, double radius) const override
+    {
+        py::gil_scoped_acquire gil;
+        return _callable(intoTuple(position), radius).cast<std::vector<OperationalModelState>>();
+    }
+};
+} // namespace
+
 PythonModel::PythonModel(py::object model) : _model(std::move(model))
 {
     py::gil_scoped_acquire gil;
@@ -87,24 +116,26 @@ PythonModel::PythonModel(py::object model) : _model(std::move(model))
 
 void PythonModel::ComputeNextState(
     double dT,
-    const GenericAgent& current,
-    GenericAgent& next,
+    const OperationalModelState& current,
+    OperationalModelState& next,
+    const Point& destination,
     const CollisionGeometry& geometry,
-    const NeighborhoodSearch<GenericAgent>& neighborhoodSearch) const
+    const NeighborQuery& neighborQuery) const
 {
     py::gil_scoped_acquire gil;
 
-    py::object pythonAgent = py::cast(current);
+    // Python custom models operate on their own state object, not on framework agents.
+    py::object pythonState = StateObject(std::get<CustomModel::State>(current));
+    py::object pythonDestination = py::cast(intoTuple(destination));
     py::object pythonGeometry = py::cast(&geometry, py::return_value_policy::reference);
-    py::object pythonNeighborhoodSearch =
-        py::cast((&neighborhoodSearch), py::return_value_policy::reference);
+    py::object pythonNeighborQuery = py::cast(&neighborQuery, py::return_value_policy::reference);
 
     py::object pythonUpdate = _model.attr("_compute_next_state")(
-        dT, pythonAgent, pythonGeometry, pythonNeighborhoodSearch);
+        dT, pythonState, pythonDestination, pythonGeometry, pythonNeighborQuery);
 
     // "next" shares the Python state object with "current" (GilSafePyObject copies are
     // refcounted, not cloned), so this also rejects returning the current state instance.
-    auto& nextModelData = std::get<CustomModel::State>(next.model);
+    auto& nextModelData = std::get<CustomModel::State>(next);
     auto& customModelData = nextModelData.Get<GilSafePyObject>();
     if(pythonUpdate.is(customModelData.Get())) {
         throw SimulationError(
@@ -120,8 +151,7 @@ void PythonModel::ComputeNextState(
     } catch(const py::error_already_set& ex) {
         if(ex.matches(PyExc_AttributeError)) {
             throw SimulationError(
-                "State returned by compute_next_state() is missing the '{}' attribute.",
-                attr_name);
+                "State returned by compute_next_state() is missing the '{}' attribute.", attr_name);
         }
         throw;
     }
@@ -155,23 +185,58 @@ void PythonModel::ComputeNextState(
 }
 
 void PythonModel::CheckModelConstraint(
-    const GenericAgent& agent,
-    const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
+    const OperationalModelState& state,
+    const NeighborQuery& neighborQuery,
     const CollisionGeometry& geometry) const
 {
     py::gil_scoped_acquire gil;
 
-    py::object pythonAgent = py::cast(agent);
-    py::object pythonNeighborhoodSearch =
-        py::cast((&neighborhoodSearch), py::return_value_policy::reference);
+    py::object pythonState = StateObject(std::get<CustomModel::State>(state));
+    py::object pythonNeighborQuery = py::cast(&neighborQuery, py::return_value_policy::reference);
     py::object pythonGeometry = py::cast(&geometry, py::return_value_policy::reference);
 
-    _model.attr("_check_model_constraint")(pythonAgent, pythonNeighborhoodSearch, pythonGeometry);
+    _model.attr("_check_model_constraint")(pythonState, pythonNeighborQuery, pythonGeometry);
 }
 
 void init_python_model(py::module_& m)
 {
-    py::class_<OperationalModel, py::smart_holder>(m, "OperationalModel");
+    py::class_<OperationalModel, py::smart_holder>(m, "OperationalModel")
+        .def(
+            "compute_next_state",
+            [](const OperationalModel& self,
+               double dt,
+               const OperationalModelState& current,
+               std::tuple<double, double> destination,
+               py::object neighbor_query,
+               const CollisionGeometry& geometry) {
+                const PyNeighborQuery neighborQuery(std::move(neighbor_query));
+                OperationalModelState next = current;
+                self.ComputeNextState(
+                    dt, current, next, intoPoint(destination), geometry, neighborQuery);
+                return next;
+            },
+            py::arg("dt"),
+            py::arg("state"),
+            py::arg("destination"),
+            py::arg("neighbor_query"),
+            py::arg("geometry"),
+            "Compute the state for the next iteration from `state`. `neighbor_query` is a "
+            "callable `(position, radius) -> list of model states`; the model invokes it with "
+            "its own query radius, so the caller needs no per-model knowledge.")
+        .def(
+            "check_model_constraint",
+            [](const OperationalModel& self,
+               const OperationalModelState& state,
+               py::object neighbor_query,
+               const CollisionGeometry& geometry) {
+                const PyNeighborQuery neighborQuery(std::move(neighbor_query));
+                self.CheckModelConstraint(state, neighborQuery, geometry);
+            },
+            py::arg("state"),
+            py::arg("neighbor_query"),
+            py::arg("geometry"),
+            "Raise when `state` violates the model's constraints. `neighbor_query` is a "
+            "callable `(position, radius) -> list of model states` used for overlap checks.");
 
     py::class_<CustomModel::State>(m, "_CustomModelState")
         .def(py::init([](py::object model) {
@@ -184,7 +249,7 @@ void init_python_model(py::module_& m)
             return data;
         }))
         .def_property_readonly(
-            "model", [](CustomModel::State& data) { return data.Get<GilSafePyObject>().Get(); });
+            "model", [](const CustomModel::State& data) { return StateObject(data); });
 
     py::class_<PythonModel, OperationalModel, py::smart_holder>(m, "_PythonModel")
         .def(py::init<py::object>(), py::arg("model"));

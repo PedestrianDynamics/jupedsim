@@ -1,25 +1,18 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
-#include "AnticipationVelocityModel.hpp"
-#include "CollisionFreeSpeedModel.hpp"
-#include "CollisionFreeSpeedModelV2.hpp"
-#include "CollisionFreeSpeedModelV3.hpp"
-#include "GeneralizedCentrifugalForceModel.hpp"
-#include "OperationalModel.hpp"
-#include "OperationalModels/CustomModel/CustomModel.hpp"
+#include "OperationalModels/OperationalModelState.hpp"
 #include "OperationalModels/OperationalModelType.hpp"
-#include "Point.hpp"
-#include "SocialForceModel.hpp"
+#include "StrategicalModelState.hpp"
+#include "TacticalModelState.hpp"
 #include "UniqueID.hpp"
 #include "Visitor.hpp"
-#include "WarpDriver/WarpDriverModel.hpp"
 
 #include <fmt/core.h>
 
 #include <concepts>
 #include <deque>
 #include <utility>
-#include <variant>
+
 class Journey;
 class BaseStage;
 
@@ -39,81 +32,84 @@ template <typename... Ts>
 inline constexpr bool EachAlternativeIsModelAgentState<std::variant<Ts...>> =
     (ModelAgentState<Ts> && ...);
 
+struct GenericAgent;
+const Point& Pos(const GenericAgent& agent);
+Point& Pos(GenericAgent& agent);
+
 struct GenericAgent {
     using ID = jps::UniqueID<GenericAgent>;
     ID id{};
 
-    jps::UniqueID<Journey> journeyId{jps::UniqueID<Journey>::Invalid};
-    jps::UniqueID<BaseStage> stageId{jps::UniqueID<BaseStage>::Invalid};
+    StrategicalModelState strategical{};
+    TacticalModelState tactical{};
 
-    // This is evaluated by the "operational level"
-    Point destination{};
-    Point target{};
-
-    using ModelState = std::variant<
-        GeneralizedCentrifugalForceModel::State,
-        CollisionFreeSpeedModel::State,
-        CollisionFreeSpeedModelV2::State,
-        CollisionFreeSpeedModelV3::State,
-        AnticipationVelocityModel::State,
-        SocialForceModel::State,
-        WarpDriverModel::State,
-        CustomModel::State>;
     static_assert(
-        EachAlternativeIsModelAgentState<ModelState>,
+        EachAlternativeIsModelAgentState<OperationalModelState>,
         "Every agent model state must provide a 'Point position' member");
-    ModelState model{};
+    OperationalModelState state{};
 
-    Point& position()
-    {
-        return std::visit([](auto& m) -> Point& { return m.position; }, model);
-    }
-    const Point& position() const
-    {
-        return std::visit([](const auto& m) -> const Point& { return m.position; }, model);
-    }
+    Point& position() { return Pos(*this); }
+    const Point& position() const { return Pos(*this); }
 
     GenericAgent(
         ID id_,
         jps::UniqueID<Journey> journeyId_,
         jps::UniqueID<BaseStage> stageId_,
-        ModelState model_)
-        : id(id_ != ID::Invalid ? id_ : ID{})
-        , journeyId(journeyId_)
-        , stageId(stageId_)
-        , model(std::move(model_))
+        OperationalModelState state_)
+        : strategical{.journeyId = journeyId_, .stageId = stageId_}, state(std::move(state_))
     {
-        // Position is owned by the model state; seed the initial waypoint from it.
-        target = position();
+        // The position is owned by the state; prime the strategical target with it.
+        strategical.target = Pos(*this);
+        // Passing Invalid requests a fresh unique id. Copies of the same state must not
+        // share an id, so the state's own id is not reused.
+        id = id_ != ID::Invalid ? id_ : ID{};
     }
 };
 
-/// Maps agent model data to the operational model type it belongs to. Kept
-/// exhaustive on purpose: adding a model type will not compile until the
-/// mapping is extended.
-inline OperationalModelType ModelTypeOf(const GenericAgent::ModelState& model)
+inline const Point& Pos(const GenericAgent& agent)
+{
+    return std::visit([](const auto& m) -> const Point& { return m.position; }, agent.state);
+}
+
+inline Point& Pos(GenericAgent& agent)
+{
+    return std::visit([](auto& m) -> Point& { return m.position; }, agent.state);
+}
+
+inline const Point& Pos(const OperationalModelState& state)
+{
+    return std::visit([](const auto& s) -> const Point& { return s.position; }, state);
+}
+
+inline Point& Pos(OperationalModelState& state)
+{
+    return std::visit([](auto& s) -> Point& { return s.position; }, state);
+}
+
+/// Maps per-agent model state to the operational model type it belongs to.
+inline OperationalModelType ModelTypeOf(const OperationalModelState& state)
 {
     return std::visit(
         overloaded{
-            [](const GeneralizedCentrifugalForceModel::State&) {
+            [](const GeneralizedCentrifugalForceModelState&) {
                 return OperationalModelType::GENERALIZED_CENTRIFUGAL_FORCE;
             },
-            [](const CollisionFreeSpeedModel::State&) {
+            [](const CollisionFreeSpeedModelState&) {
                 return OperationalModelType::COLLISION_FREE_SPEED;
             },
-            [](const CollisionFreeSpeedModelV2::State&) {
+            [](const CollisionFreeSpeedModelV2State&) {
                 return OperationalModelType::COLLISION_FREE_SPEED_V2;
             },
-            [](const CollisionFreeSpeedModelV3::State&) {
+            [](const CollisionFreeSpeedModelV3State&) {
                 return OperationalModelType::COLLISION_FREE_SPEED_V3;
             },
-            [](const AnticipationVelocityModel::State&) {
+            [](const AnticipationVelocityModelState&) {
                 return OperationalModelType::ANTICIPATION_VELOCITY_MODEL;
             },
-            [](const SocialForceModel::State&) { return OperationalModelType::SOCIAL_FORCE; },
-            [](const WarpDriverModel::State&) { return OperationalModelType::WARP_DRIVER; },
-            [](const CustomModel::State&) { return OperationalModelType::CUSTOM_MODEL; }},
-        model);
+            [](const SocialForceModelState&) { return OperationalModelType::SOCIAL_FORCE; },
+            [](const WarpDriverModelState&) { return OperationalModelType::WARP_DRIVER; },
+            [](const CustomModelState&) { return OperationalModelType::CUSTOM_MODEL; }},
+        state);
 }
 
 template <class Agent>
@@ -127,19 +123,19 @@ struct fmt::formatter<GenericAgent> {
     auto format(const GenericAgent& agent, FormatContext& ctx) const
     {
         return std::visit(
-            [&ctx, &agent](const auto& m) {
+            [&ctx, &agent](const auto& s) {
                 return fmt::format_to(
                     ctx.out(),
-                    "Agent[id={}, journey={}, stage={}, destination={}, waypoint={}, pos={}, "
-                    "model={})",
+                    "Agent[id={}, journey={}, stage={}, destination={}, target={}, pos={}, "
+                    "state={}]",
                     agent.id,
-                    agent.journeyId,
-                    agent.stageId,
-                    agent.destination,
-                    agent.target,
-                    agent.position(),
-                    m);
+                    agent.strategical.journeyId,
+                    agent.strategical.stageId,
+                    agent.tactical.destination,
+                    agent.strategical.target,
+                    Pos(agent),
+                    s);
             },
-            agent.model);
+            agent.state);
     }
 };

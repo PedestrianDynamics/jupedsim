@@ -224,7 +224,7 @@ void NotifiableWaitingSet::Update(
         GenericAgent::ID occupant = GenericAgent::ID::Invalid;
         double min_distance = std::numeric_limits<double>::max();
         for(const auto& agent : candidates) {
-            if(agent.stageId == id) {
+            if(agent.strategical.stageId == id) {
                 if(std::find(std::begin(occupants), std::end(occupants), agent.id) ==
                    std::end(occupants)) {
                     const auto distance = (agent.position() - slots[index]).Norm();
@@ -300,7 +300,7 @@ void NotifiableQueue::Update(
         GenericAgent::ID occupant = GenericAgent::ID::Invalid;
         double min_distance = std::numeric_limits<double>::max();
         for(const auto& agent : candidates) {
-            if(agent.stageId != id || Contains(occupants, agent.id) ||
+            if(agent.strategical.stageId != id || Contains(occupants, agent.id) ||
                exitingThisUpdate.contains(agent.id)) {
                 continue;
             }
@@ -324,7 +324,7 @@ public:
     DirectSteering() = default;
     ~DirectSteering() override = default;
     bool IsCompleted(const GenericAgent&) override { return false; };
-    Point Target(const GenericAgent& agent) override { return agent.target; };
+    Point Target(const GenericAgent& agent) override { return agent.strategical.target; };
     StageProxy Proxy(Simulation* simulation) override
     {
         return DirectSteeringProxy(simulation, this);

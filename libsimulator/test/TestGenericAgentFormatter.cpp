@@ -1,16 +1,22 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "GenericAgent.hpp"
+#include "OperationalModels/AnticipationVelocityModel/AnticipationVelocityModel.hpp"
+#include "OperationalModels/CollisionFreeSpeedModel/CollisionFreeSpeedModel.hpp"
+#include "OperationalModels/CollisionFreeSpeedModelV2/CollisionFreeSpeedModelV2.hpp"
+#include "OperationalModels/GeneralizedCentrifugalForceModel/GeneralizedCentrifugalForceModel.hpp"
+#include "OperationalModels/OperationalModelState.hpp"
+#include "OperationalModels/SocialForceModel/SocialForceModel.hpp"
 
 #include <fmt/format.h>
 #include <gtest/gtest.h>
 
-static GenericAgent make_agent(GenericAgent::ModelState model)
+static GenericAgent make_agent(OperationalModelState state)
 {
     return GenericAgent(
         GenericAgent::ID{},
         jps::UniqueID<Journey>::Invalid,
         jps::UniqueID<BaseStage>::Invalid,
-        std::move(model));
+        std::move(state));
 }
 
 TEST(GenericAgentFormatter, FormatsGeneralizedCentrifugalForceModelAgent)

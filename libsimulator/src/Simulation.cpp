@@ -247,15 +247,15 @@ GenericAgent::ID Simulation::AddAgent(GenericAgent agent)
     if(!_geometry->InsideGeometry(agent.position())) {
         throw SimulationError("Agent {} not inside walkable area", agent.position());
     }
-    if(_journeys.count(agent.journeyId) == 0) {
-        throw SimulationError("Unknown journey id: {}", agent.journeyId);
+    if(_journeys.count(agent.strategical.journeyId) == 0) {
+        throw SimulationError("Unknown journey id: {}", agent.strategical.journeyId);
     }
 
-    if(!_journeys.at(agent.journeyId)->ContainsStage(agent.stageId)) {
-        throw SimulationError("Unknown stage id: {}", agent.stageId);
+    if(!_journeys.at(agent.strategical.journeyId)->ContainsStage(agent.strategical.stageId)) {
+        throw SimulationError("Unknown stage id: {}", agent.strategical.stageId);
     }
 
-    if(const auto agentModelType = ModelTypeOf(agent.model);
+    if(const auto agentModelType = ModelTypeOf(agent.state);
        agentModelType != _operationalDecisionSystem.ModelType()) {
         throw SimulationError(
             "Agent model data of type '{}' does not match the simulation's operational model "
@@ -266,7 +266,7 @@ GenericAgent::ID Simulation::AddAgent(GenericAgent agent)
 
     _operationalDecisionSystem.ValidateAgent(agent, _neighborhoodSearch, *_geometry);
 
-    _stageManager.HandleNewAgent(agent.stageId);
+    _stageManager.HandleNewAgent(agent.strategical.stageId);
     _agents.emplace_back(std::move(agent));
     _neighborhoodSearch.AddAgent(_agents.back());
 
@@ -357,9 +357,9 @@ void Simulation::SwitchAgentJourney(
         throw SimulationError("Stage {} not part of Journey {}", stage_id, journey_id);
     }
     auto& agent = Agent(agent_id);
-    agent.journeyId = journey_id;
-    _stageManager.MigrateAgent(agent.stageId, stage_id);
-    agent.stageId = stage_id;
+    agent.strategical.journeyId = journey_id;
+    _stageManager.MigrateAgent(agent.strategical.stageId, stage_id);
+    agent.strategical.stageId = stage_id;
 }
 
 std::vector<GenericAgent::ID> Simulation::AgentsInRange(Point p, double distance)

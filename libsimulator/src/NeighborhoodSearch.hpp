@@ -2,6 +2,7 @@
 #pragma once
 #include "GenericAgent.hpp"
 #include "HashCombine.hpp"
+#include "OperationalModels/OperationalModelState.hpp"
 #include "Point.hpp"
 
 #include <algorithm>
@@ -88,8 +89,8 @@ public:
     {
         for(auto& [_, agents] : _grid) {
             const auto iter =
-                std::find_if(std::begin(agents), std::end(agents), [item](auto& agent) {
-                    return agent.id == item.id;
+                std::find_if(std::begin(agents), std::end(agents), [&item](auto& agent) {
+                    return (*agent).id == item.id;
                 });
             if(iter != std::end(agents)) {
                 agents.erase(iter);
@@ -130,6 +131,41 @@ public:
                     for(const auto& item : it->second) {
                         if(DistanceSquared((*item).position(), pos) <= radiusSquared) {
                             result.emplace_back(*item);
+                        }
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    // Member templates so the class also instantiates for value types without a ModelState.
+
+    /// Collects the states of all agents within radius of pos for which the filter
+    /// predicate returns true. The filter receives the candidate neighbor state.
+    template <typename Filter, typename V = Value>
+    std::vector<OperationalModelState>
+    GetNeighboringAgentStates(Point pos, double radius, Filter&& filter) const
+    {
+        std::vector<OperationalModelState> result{};
+        result.reserve(128);
+
+        const auto posIdx = getIndex(pos);
+        const auto offset = static_cast<int32_t>(std::ceil(radius / _cellSize));
+        const int32_t xMin = posIdx.idx - offset;
+        const int32_t xMax = posIdx.idx + offset;
+        const int32_t yMin = posIdx.idy - offset;
+        const int32_t yMax = posIdx.idy + offset;
+
+        const auto radiusSquared = radius * radius;
+
+        for(int32_t x = xMin; x <= xMax; ++x) {
+            for(int32_t y = yMin; y <= yMax; ++y) {
+                auto it = _grid.find({x, y});
+                if(it != _grid.cend()) {
+                    for(const auto& item : it->second) {
+                        if(DistanceSquared(Pos(*item), pos) <= radiusSquared && filter(*item)) {
+                            result.emplace_back(item->state);
                         }
                     }
                 }

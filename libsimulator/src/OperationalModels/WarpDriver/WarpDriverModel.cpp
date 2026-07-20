@@ -336,9 +336,9 @@ WarpDriverModel::WarpDriverModel(
     // collide with us within timeHorizon. Two agents closing head-on cover
     // 2 * v_max * timeHorizon, plus their combined radii, plus a small margin.
     // v_max and r_max are hardcoded pedestrian defaults.
-    , _cutOffRadius(2.0 * 1.5 * timeHorizon + 2.0 * 0.3 + 0.5)
     , _rng(rngSeed)
 {
+    _cutOffRadius = 2.0 * 1.5 * timeHorizon + 2.0 * 0.3 + 0.5;
     if(sigma <= 0.0) {
         throw SimulationError("WarpDriverModel: sigma must be > 0, got {}", sigma);
     }
@@ -351,80 +351,73 @@ OperationalModelType WarpDriverModel::Type() const
 }
 
 void WarpDriverModel::CheckModelConstraint(
-    const GenericAgent& agent,
-    const NeighborhoodSearch<GenericAgent>& /*neighborhoodSearch*/,
+    const OperationalModelState& generic_state,
+    const NeighborQuery& /*neighborQuery*/,
     const CollisionGeometry& /*geometry*/) const
 {
-    const auto* data = std::get_if<State>(&agent.model);
+    const auto* data = std::get_if<State>(&generic_state);
     if(!data) {
         throw SimulationError(
-            "WarpDriverModel constraint check: agent {} does not have WarpDriverModel data",
-            agent.id);
+            "WarpDriverModel constraint check: agent does not have WarpDriverModel data");
     }
     if(data->radius <= 0.0) {
         throw SimulationError(
-            "WarpDriverModel constraint check: agent {} has invalid radius {}",
-            agent.id,
-            data->radius);
+            "WarpDriverModel constraint check: agent has invalid radius {}", data->radius);
     }
     if(data->v0 < 0.0) {
         throw SimulationError(
-            "WarpDriverModel constraint check: agent {} has invalid v0 {}", agent.id, data->v0);
+            "WarpDriverModel constraint check: agent has invalid v0 {}", data->v0);
     }
     if(this->_timeHorizon <= 0.0) {
         throw SimulationError(
-            "WarpDriverModel constraint check: agent {} has invalid timeHorizon {}, must be > 0",
-            agent.id,
+            "WarpDriverModel constraint check: agent has invalid timeHorizon {}, must be > 0",
             this->_timeHorizon);
     }
     if(this->_stepSize <= 0.0) {
         throw SimulationError(
-            "WarpDriverModel constraint check: agent {} has invalid stepSize {}, must be > 0",
-            agent.id,
+            "WarpDriverModel constraint check: agent has invalid stepSize {}, must be > 0",
             this->_stepSize);
     }
     if(this->_numSamples < 1) {
         throw SimulationError(
-            "WarpDriverModel constraint check: agent {} has invalid numSamples {}, must be >= 1",
-            agent.id,
+            "WarpDriverModel constraint check: agent has invalid numSamples {}, must be >= 1",
             this->_numSamples);
     }
     if(this->_timeUncertainty < 0.0) {
         throw SimulationError(
-            "WarpDriverModel constraint check: agent {} has invalid timeUncertainty {}, must be "
+            "WarpDriverModel constraint check: agent has invalid timeUncertainty {}, must be "
             ">= 0",
-            agent.id,
             this->_timeUncertainty);
     }
     if(this->_velocityUncertaintyX < 0.0) {
         throw SimulationError(
-            "WarpDriverModel constraint check: agent {} has invalid velocityUncertaintyX {}, must "
+            "WarpDriverModel constraint check: agent has invalid velocityUncertaintyX {}, must "
             "be >= 0",
-            agent.id,
             this->_velocityUncertaintyX);
     }
     if(this->_velocityUncertaintyY < 0.0) {
         throw SimulationError(
-            "WarpDriverModel constraint check: agent {} has invalid velocityUncertaintyY {}, must "
+            "WarpDriverModel constraint check: agent has invalid velocityUncertaintyY {}, must "
             "be >= 0",
-            agent.id,
             this->_velocityUncertaintyY);
     }
 }
 
 void WarpDriverModel::ComputeNextState(
     double dT,
-    const GenericAgent& current,
-    GenericAgent& next,
+    const OperationalModelState& current,
+    OperationalModelState& next,
+    const Point& destination,
     const CollisionGeometry& geometry,
-    const NeighborhoodSearch<GenericAgent>& neighborhoodSearch) const
+    const NeighborQuery& neighborQuery) const
 {
-    const auto& agentData = std::get<State>(current.model);
-    auto& nextData = std::get<State>(next.model);
-    const double speed = agentData.v0;
+    const auto& state = std::get<State>(current);
+    auto& nextState = std::get<State>(next);
+    const auto neighborStates = neighborQuery(state.position, _cutOffRadius);
+    const double speed = state.v0;
 
     // State orientation (unit vector). If zero, default to +x.
-    Point orient = agentData.orientation;
+    Point orient = state.orientation;
     if(orient.Norm() < 1e-9) {
         orient = Point{1.0, 0.0};
     } else {
@@ -432,18 +425,18 @@ void WarpDriverModel::ComputeNextState(
     }
 
     // Direction towards destination
-    Point toTarget = current.destination - agentData.position;
+    Point toTarget = destination - Pos(current);
     const double distToTarget = toTarget.Norm();
     if(distToTarget < 1e-9) {
         // The old update carried default-initialized stuck/detour state here,
         // so applying it reset that state; replicate that reset.
-        nextData.position = agentData.position;
-        nextData.orientation = orient;
-        nextData.stuckTime = 0.0;
-        nextData.anchorX = 0.0;
-        nextData.anchorY = 0.0;
-        nextData.detourTime = 0.0;
-        nextData.detourSide = 1;
+        nextState.position = state.position;
+        nextState.orientation = orient;
+        nextState.stuckTime = 0.0;
+        nextState.anchorX = 0.0;
+        nextState.anchorY = 0.0;
+        nextState.detourTime = 0.0;
+        nextState.detourSide = 1;
         return;
     }
     Point desiredDir = toTarget.Normalized();
@@ -456,26 +449,15 @@ void WarpDriverModel::ComputeNextState(
     const double dtSample = this->_timeHorizon / std::max(this->_numSamples - 1, 1);
 
     // === Step 2: Perceive - build collision probability field ===
-    const auto neighbors =
-        neighborhoodSearch.GetNeighboringAgents(agentData.position, _cutOffRadius);
-
-    // Short-range repulsion: not part of the original Wolinski et al. (2016)
-    // model, which is purely anticipatory. Added as a practical safety net
-    // because the collision probability field alone cannot guarantee separation
-    // when agents are already close (dense crowds, late reactions).
-    // Similar to the pushout mechanisms in CFS and AVM.
     Point repulsion{0.0, 0.0};
-    for(const auto& neighbor : neighbors) {
-        if(neighbor.id == current.id) {
+    for(const auto& neighbor : neighborStates) {
+        const auto* neighborState = std::get_if<State>(&neighbor);
+        if(!neighborState) {
             continue;
         }
-        const auto* nbData = std::get_if<State>(&neighbor.model);
-        if(!nbData) {
-            continue;
-        }
-        Point diff = agentData.position - nbData->position;
+        Point diff = state.position - neighborState->position;
         const double dist = diff.Norm();
-        const double combinedRadius = agentData.radius + nbData->radius;
+        const double combinedRadius = state.radius + neighborState->radius;
         if(dist < combinedRadius * 3.0 && dist > 1e-6) {
             const double overlap = combinedRadius * 3.0 - dist;
             repulsion = repulsion + diff.Normalized() * (speed * overlap / dist);
@@ -505,18 +487,14 @@ void WarpDriverModel::ComputeNextState(
             Sample{t, STP{speed * t, lateralPerturbation, t}, 0.0, STP{0, 0, 0}};
     }
 
-    for(const auto& neighbor : neighbors) {
-        if(neighbor.id == current.id) {
-            continue;
-        }
-
-        const auto* nbData = std::get_if<State>(&neighbor.model);
-        if(!nbData) {
+    for(const auto& neighbor : neighborStates) {
+        const auto* neighborState = std::get_if<State>(&neighbor);
+        if(!neighborState) {
             continue;
         }
 
         // Neighbor orientation
-        Point nbOrient = nbData->orientation;
+        Point nbOrient = neighborState->orientation;
         if(nbOrient.Norm() < 1e-9) {
             nbOrient = Point{1.0, 0.0};
         } else {
@@ -524,19 +502,19 @@ void WarpDriverModel::ComputeNextState(
         }
 
         // Neighbor speed (from v0)
-        const double nbSpeed = nbData->v0;
+        const double nbSpeed = neighborState->v0;
 
         // TODO(perf): WarpParams and all neighbor-derived constants (orientation,
         // speed, Minkowski radius, rotation matrix cos_ab/sin_ab used in the
         // gradient inverse) are loop-invariant w.r.t. the sample index. Hoist
         // them out of the sample loop and precompute once per (ped, neighbor).
         WarpParams wp{};
-        wp.posA = agentData.position;
+        wp.posA = state.position;
         wp.orientA = effectiveOrient;
-        wp.posB = nbData->position;
+        wp.posB = neighborState->position;
         wp.orientB = nbOrient;
         wp.speedB = nbSpeed;
-        wp.radiusB = agentData.radius + nbData->radius; // Minkowski sum
+        wp.radiusB = state.radius + neighborState->radius; // Minkowski sum
         wp.lambda = this->_timeUncertainty;
         wp.velocityUncertaintyX = this->_velocityUncertaintyX;
         wp.velocityUncertaintyY = this->_velocityUncertaintyY;
@@ -617,7 +595,7 @@ void WarpDriverModel::ComputeNextState(
     }
 
     // Clamp speed to [0, v0]
-    const double newSpeed = std::min(newVelLocal.Norm(), agentData.v0);
+    const double newSpeed = std::min(newVelLocal.Norm(), state.v0);
 
     // Convert to world coordinates: rotate by effectiveOrient
     Point newVelWorld;
@@ -630,64 +608,64 @@ void WarpDriverModel::ComputeNextState(
                 effectiveOrient.y * newDirLocal.x + effectiveOrient.x * newDirLocal.y} *
             newSpeed;
     } else {
-        newVelWorld = desiredDir * agentData.v0 * 0.01; // tiny push towards goal
+        newVelWorld = desiredDir * state.v0 * 0.01; // tiny push towards goal
     }
 
     // State repulsion
     newVelWorld = newVelWorld + repulsion;
 
     // Boundary avoidance: steer agents away from walls
-    const auto& walls = geometry.LineSegmentsInApproxDistanceTo(agentData.position);
+    const auto& walls = geometry.LineSegmentsInApproxDistanceTo(state.position);
     for(const auto& wall : walls) {
         const Point wallVec = wall.p2 - wall.p1;
         const double wallLen2 = wallVec.ScalarProduct(wallVec);
         if(wallLen2 < 1e-12) {
             continue; // degenerate wall segment
         }
-        const Point toAgent = agentData.position - wall.p1;
+        const Point toAgent = state.position - wall.p1;
         const double t = std::clamp(toAgent.ScalarProduct(wallVec) / wallLen2, 0.0, 1.0);
         const Point closest = wall.p1 + wallVec * t;
-        const Point diff = agentData.position - closest;
+        const Point diff = state.position - closest;
         const double dist = diff.Norm();
-        if(dist < agentData.radius * 3.0 && dist > 1e-6) {
-            const double steering = agentData.v0 * (agentData.radius * 3.0 - dist) / dist;
+        if(dist < state.radius * 3.0 && dist > 1e-6) {
+            const double steering = state.v0 * (state.radius * 3.0 - dist) / dist;
             newVelWorld = newVelWorld + diff.Normalized() * steering;
         }
     }
 
     // Re-clamp speed to v0 after wall steering
     double finalSpeed = newVelWorld.Norm();
-    if(finalSpeed > agentData.v0 && finalSpeed > 1e-9) {
-        newVelWorld = newVelWorld * (agentData.v0 / finalSpeed);
-        finalSpeed = agentData.v0;
+    if(finalSpeed > state.v0 && finalSpeed > 1e-9) {
+        newVelWorld = newVelWorld * (state.v0 / finalSpeed);
+        finalSpeed = state.v0;
     }
 
     // Stuck detection: measure net displacement from an anchor position over a
     // time window. Catches oscillating agents that periodically spike above the
     // speed threshold but make no real progress.
-    double stuckTime = agentData.stuckTime;
-    double anchorX = agentData.anchorX;
-    double anchorY = agentData.anchorY;
-    double detourTime = agentData.detourTime;
-    int detourSide = agentData.detourSide;
+    double stuckTime = state.stuckTime;
+    double anchorX = state.anchorX;
+    double anchorY = state.anchorY;
+    double detourTime = state.detourTime;
+    int detourSide = state.detourSide;
 
     // Detour mode: agent is currently on a lateral detour to break a deadlock
     if(detourTime > 0.0) {
         detourTime -= dT;
         Point lateral{-desiredDir.y * detourSide, desiredDir.x * detourSide};
         Point detourDir = (lateral * 0.8 + desiredDir * 0.2).Normalized();
-        Point detourVel = detourDir * agentData.v0 * 0.5;
-        Point newPos = agentData.position + detourVel * dT;
+        Point detourVel = detourDir * state.v0 * 0.5;
+        Point newPos = state.position + detourVel * dT;
         // If detour would leave the walkable area, try the other side
         if(!geometry.InsideGeometry(newPos)) {
             detourSide = -detourSide;
             lateral = Point{-desiredDir.y * detourSide, desiredDir.x * detourSide};
             detourDir = (lateral * 0.8 + desiredDir * 0.2).Normalized();
-            detourVel = detourDir * agentData.v0 * 0.5;
-            newPos = agentData.position + detourVel * dT;
+            detourVel = detourDir * state.v0 * 0.5;
+            newPos = state.position + detourVel * dT;
             // If both sides fail, just creep toward goal
             if(!geometry.InsideGeometry(newPos)) {
-                newPos = agentData.position + desiredDir * agentData.v0 * 0.1 * dT;
+                newPos = state.position + desiredDir * state.v0 * 0.1 * dT;
                 detourDir = desiredDir;
             }
         }
@@ -697,13 +675,13 @@ void WarpDriverModel::ComputeNextState(
             anchorX = newPos.x;
             anchorY = newPos.y;
         }
-        nextData.position = newPos;
-        nextData.orientation = detourDir;
-        nextData.stuckTime = stuckTime;
-        nextData.anchorX = anchorX;
-        nextData.anchorY = anchorY;
-        nextData.detourTime = detourTime;
-        nextData.detourSide = detourSide;
+        nextState.position = newPos;
+        nextState.orientation = detourDir;
+        nextState.stuckTime = stuckTime;
+        nextState.anchorX = anchorX;
+        nextState.anchorY = anchorY;
+        nextState.detourTime = detourTime;
+        nextState.detourSide = detourSide;
         return;
     }
 
@@ -714,13 +692,13 @@ void WarpDriverModel::ComputeNextState(
 
     stuckTime += dT;
     const double netDisplacement =
-        std::hypot(agentData.position.x - anchorX, agentData.position.y - anchorY);
+        std::hypot(state.position.x - anchorX, state.position.y - anchorY);
 
     if(netDisplacement > progressRadius) {
         // Real progress — reset anchor to current position
         stuckTime = 0.0;
-        anchorX = agentData.position.x;
-        anchorY = agentData.position.y;
+        anchorX = state.position.x;
+        anchorY = state.position.y;
     } else if(stuckTime >= stuckThreshold) {
         // Stuck: no net progress for stuckThreshold seconds — enter detour
         std::uniform_int_distribution<int> sideDist(0, 1);
@@ -734,18 +712,18 @@ void WarpDriverModel::ComputeNextState(
     const double smoothing = 0.5; // weight of new velocity (1.0 = no smoothing)
     Point smoothedVel = newVelWorld * smoothing + orient * (newVelWorld.Norm() * (1.0 - smoothing));
     double smoothedSpeed = smoothedVel.Norm();
-    if(smoothedSpeed > agentData.v0 && smoothedSpeed > 1e-9) {
-        smoothedVel = smoothedVel * (agentData.v0 / smoothedSpeed);
+    if(smoothedSpeed > state.v0 && smoothedSpeed > 1e-9) {
+        smoothedVel = smoothedVel * (state.v0 / smoothedSpeed);
     }
 
-    Point newPos = agentData.position + smoothedVel * dT;
+    Point newPos = state.position + smoothedVel * dT;
     Point newOrient = (smoothedVel.Norm() > 1e-9) ? smoothedVel.Normalized() : orient;
 
-    nextData.position = newPos;
-    nextData.orientation = newOrient;
-    nextData.stuckTime = stuckTime;
-    nextData.anchorX = anchorX;
-    nextData.anchorY = anchorY;
-    nextData.detourTime = detourTime;
-    nextData.detourSide = detourSide;
+    nextState.position = newPos;
+    nextState.orientation = newOrient;
+    nextState.stuckTime = stuckTime;
+    nextState.anchorX = anchorX;
+    nextState.anchorY = anchorY;
+    nextState.detourTime = detourTime;
+    nextState.detourSide = detourSide;
 }

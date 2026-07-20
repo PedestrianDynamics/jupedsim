@@ -95,18 +95,18 @@ class PythonSocialForceModel(CustomOperationalModel):
         return (fx, fy)
 
     @staticmethod
-    def _social_force(agent, other) -> tuple[float, float]:
+    def _social_force(state, other) -> tuple[float, float]:
         """
-        Compute repulsive social force between two agents.
+        Compute repulsive social force between two agent states.
 
         Based on Helbing's model with psychological and body contact forces.
         """
-        dx = agent.position[0] - other.position[0]
-        dy = agent.position[1] - other.position[1]
+        dx = state.position[0] - other.position[0]
+        dy = state.position[1] - other.position[1]
         dist = np.sqrt(dx**2 + dy**2)
 
         # Minimum distance (sum of radii)
-        min_dist = agent.model.radius + other.model.radius
+        min_dist = state.radius + other.radius
 
         if dist < 1e-3:  # Avoid division by zero
             return (0.0, 0.0)
@@ -120,23 +120,23 @@ class PythonSocialForceModel(CustomOperationalModel):
         t_y = n_x
 
         # Relative velocity
-        dvx = agent.model.velocity[0] - other.model.velocity[0]
-        dvy = agent.model.velocity[1] - other.model.velocity[1]
+        dvx = state.velocity[0] - other.velocity[0]
+        dvy = state.velocity[1] - other.velocity[1]
         dv_t = dvx * t_x + dvy * t_y  # tangential component
 
         # Distance-dependent factor
-        exp_factor = np.exp(-(dist - min_dist) / agent.model.force_distance)
+        exp_factor = np.exp(-(dist - min_dist) / state.force_distance)
 
         # Normal force (repulsive)
-        f_n = agent.model.agent_scale * exp_factor
+        f_n = state.agent_scale * exp_factor
 
         # Body contact force
         if dist < min_dist:
-            f_body = agent.model.body_force * (min_dist - dist)
+            f_body = state.body_force * (min_dist - dist)
             f_n = f_n + f_body
 
         # Friction (tangential)
-        f_t = agent.model.friction * exp_factor * dv_t if dist < min_dist else 0
+        f_t = state.friction * exp_factor * dv_t if dist < min_dist else 0
 
         # Total force components
         fx = (f_n + f_t * t_x) * n_x - f_t * t_x
@@ -146,7 +146,7 @@ class PythonSocialForceModel(CustomOperationalModel):
 
     @staticmethod
     def _obstacle_force(
-        agent,
+        state,
         obstacle: LineSegment,
     ) -> tuple[float, float]:
         """
@@ -155,25 +155,25 @@ class PythonSocialForceModel(CustomOperationalModel):
         Based on Helbing's model with psychological and body contact forces.
         """
         # Get closest point on obstacle to agent
-        closest_point = obstacle.closest_point(agent.position)
-        dist = PythonSocialForceModel._distance(agent.position, closest_point)
+        closest_point = obstacle.closest_point(state.position)
+        dist = PythonSocialForceModel._distance(state.position, closest_point)
 
         if dist < 1e-3:  # Avoid division by zero
             return (0.0, 0.0)
 
         # Normal direction (from obstacle to agent)
-        n_x = (agent.position[0] - closest_point[0]) / dist
-        n_y = (agent.position[1] - closest_point[1]) / dist
+        n_x = (state.position[0] - closest_point[0]) / dist
+        n_y = (state.position[1] - closest_point[1]) / dist
 
         # Distance-dependent factor
-        exp_factor = np.exp(-dist / agent.model.force_distance)
+        exp_factor = np.exp(-dist / state.force_distance)
 
         # Normal force (repulsive)
-        f_n = agent.model.obstacle_scale * exp_factor
+        f_n = state.obstacle_scale * exp_factor
 
         # Body contact force
-        if dist < agent.model.radius:
-            f_body = agent.model.body_force * (agent.model.radius - dist)
+        if dist < state.radius:
+            f_body = state.body_force * (state.radius - dist)
             f_n = f_n + f_body
 
         fx = f_n * n_x
@@ -182,14 +182,15 @@ class PythonSocialForceModel(CustomOperationalModel):
         return (fx, fy)
 
     def compute_next_state(
-        self, dt: float, agent, geometry, neighborhood_search
+        self, dt: float, state, destination, geometry, neighborhood_search
     ):
         """
         Compute new position using Social Force Model.
 
         Args:
             dt: time step [s]
-            agent: Agent (current agent, exposing position, target and model)
+            state: the agent's own PythonSocialForceModelState
+            destination: the agent's current routing waypoint as (x, y)
             geometry: Geometry for wall/obstacle queries
             neighborhood_search: NeighborhoodSearch for neighbor queries
 
@@ -200,13 +201,11 @@ class PythonSocialForceModel(CustomOperationalModel):
 
         # Get target direction (normalized)
         target_diff = (
-            agent.target[0] - agent.position[0],
-            agent.target[1] - agent.position[1],
+            destination[0] - state.position[0],
+            destination[1] - state.position[1],
         )
         # eq 1 in paper
         target_dir = self._normalize(target_diff)
-
-        state = agent.model
 
         # Initialize acceleration from desired force
         acc_x, acc_y = self._desired_force(
@@ -217,18 +216,18 @@ class PythonSocialForceModel(CustomOperationalModel):
         )
 
         ## Add social forces from neighboring agents
-        neighboring_agents = neighborhood_search.get_neighboring_agents(
-            agent.position, 2.0
+        neighboring_states = neighborhood_search.get_neighboring_agents(
+            state.position, 2.0
         )
 
-        for neighbor in neighboring_agents:
-            fx, fy = self._social_force(agent, neighbor)
+        for neighbor in neighboring_states:
+            fx, fy = self._social_force(state, neighbor)
             acc_x += fx / state.mass
             acc_y += fy / state.mass
 
         # Add obstacle forces (from geometry)
-        for wall in geometry.get_walls_in_distance_to(agent.position, 5.0):
-            fx, fy = self._obstacle_force(agent, wall)
+        for wall in geometry.get_walls_in_distance_to(state.position, 5.0):
+            fx, fy = self._obstacle_force(state, wall)
             acc_x += fx / state.mass
             acc_y += fy / state.mass
 
@@ -240,12 +239,12 @@ class PythonSocialForceModel(CustomOperationalModel):
 
         # Update position: x_new = x_old + v_new * dt
         new_position = (
-            agent.position[0] + new_velocity[0] * dt,
-            agent.position[1] + new_velocity[1] * dt,
+            state.position[0] + new_velocity[0] * dt,
+            state.position[1] + new_velocity[1] * dt,
         )
 
         return replace(state, position=new_position, velocity=new_velocity)
 
-    def check_model_constraint(self, ped, neighborhood_search, geometry):
+    def check_model_constraint(self, state, neighborhood_search, geometry):
         """Check model constraints (optional)."""
         pass
