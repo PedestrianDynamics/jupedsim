@@ -26,21 +26,21 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=90905a2f556bf617f1a9" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=90905a2f556bf617f1a9" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
-    <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=4418a689" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=d742c9ce" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <script defer src="../../_static/scripts/fontawesome.js?digest=90905a2f556bf617f1a9"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=90905a2f556bf617f1a9" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=90905a2f556bf617f1a9" />
 
     <script src="../../_static/documentation_options.js?v=9eb32ce0"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
@@ -50,32 +50,39 @@
     <script src="../../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/jupedsim/neighborhood';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_version = '0.20.0';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://www.jupedsim.org/versions.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'v2.0.0';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
             false;
         </script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="v2.0.0" />
+  
+    
+    <script src="../../_static/searchtools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="../../searchindex.js"></script>
+  
   </head>
-  
-  
-  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="light">
-
+  <body data-default-mode="light">
   
   
   <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
   
   <div id="pst-scroll-pixel-helper"></div>
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
-
+  
+  
+  
   
   <dialog id="pst-search-dialog">
     
@@ -101,7 +108,47 @@
 </div>
 
   
-    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
     </header>
   
 
@@ -156,8 +203,7 @@
           
           
           
-          <a href="https://github.com/PedestrianDynamics/jupedsim" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/PedestrianDynamics/jupedsim" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
         <li class="nav-item">
           
@@ -330,43 +376,42 @@
 <span></span><span class="c1"># SPDX-License-Identifier: LGPL-3.0-or-later</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Pure Python wrapper for neighborhood search C++ bindings.</span>
+<span class="sd">Pure Python wrapper for the neighbor query C++ bindings.</span>
 
-<span class="sd">This module provides a Pythonic interface to the underlying C++ NeighborhoodSearch</span>
+<span class="sd">This module provides a Pythonic interface to the underlying C++ NeighborQuery</span>
 <span class="sd">implementation, making it easier to work with spatial queries in operational models.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">jupedsim.native</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">py_jps</span>
-
-<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.agent</span><span class="w"> </span><span class="kn">import</span> <span class="n">_TransientAgent</span>
 
 
 <div class="viewcode-block" id="NeighborhoodSearch">
 <a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.NeighborhoodSearch">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">NeighborhoodSearch</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Pure Python wrapper for the C++ NeighborhoodSearch class.</span>
+<span class="sd">    Pure Python wrapper for the C++ NeighborQuery interface.</span>
 
-<span class="sd">    Provides efficient spatial queries for finding neighboring agents within</span>
-<span class="sd">    a given radius. Uses a grid-based data structure for O(1) cell lookups</span>
-<span class="sd">    with configurable cell size.</span>
-
+<span class="sd">    Provides efficient spatial queries for finding the model states of</span>
+<span class="sd">    neighboring agents within a given radius. The query is bound to the agent</span>
+<span class="sd">    whose callback received it: results never include that agent itself. In</span>
+<span class="sd">    :meth:`~jupedsim.models.custom_model.CustomOperationalModel.compute_next_state`</span>
+<span class="sd">    results are additionally filtered by line-of-sight visibility; in</span>
+<span class="sd">    ``check_model_constraint`` they are not.</span>
 
 <span class="sd">    Example:</span>
-<span class="sd">        &gt;&gt;&gt; neighbors = neighborhood.get_neighboring_agents(</span>
+<span class="sd">        &gt;&gt;&gt; neighbor_states = neighborhood.get_neighboring_agents(</span>
 <span class="sd">        ...     position=(5.0, 5.0),</span>
 <span class="sd">        ...     radius=2.0</span>
 <span class="sd">        ... )</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">NeighborhoodSearch</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">NeighborQuery</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Wrap an existing C++</span>
+<span class="sd">        Wrap an existing C++ NeighborQuery.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span> <span class="o">=</span> <span class="n">obj</span>
 
@@ -374,9 +419,9 @@
 <a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.NeighborhoodSearch.get_neighboring_agents">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_neighboring_agents</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">radius</span><span class="p">:</span> <span class="nb">float</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;List[_TransientAgent]&quot;</span><span class="p">:</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get all agents within a certain radius of a position.</span>
+<span class="sd">        Get the model states of all agents within a certain radius of a position.</span>
 
 <span class="sd">        Uses the underlying spatial grid for efficient O(1) average-case</span>
 <span class="sd">        lookup time (worst case depends on number of agents per cell).</span>
@@ -386,28 +431,30 @@
 <span class="sd">            radius: Search radius [m]</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            List of transient agent views within the radius. Empty list if no</span>
-<span class="sd">            agents found. The returned objects are only valid for the duration</span>
-<span class="sd">            of the custom-model callback they were created in; never store</span>
-<span class="sd">            them.</span>
+<span class="sd">            List of per-agent model states within the radius; for custom-model</span>
+<span class="sd">            simulations these are the user-defined state objects the neighbors</span>
+<span class="sd">            were added with. Empty list if no agents found. The returned states</span>
+<span class="sd">            belong to the frozen current generation and are only valid for the</span>
+<span class="sd">            duration of the custom-model callback; never store or mutate them.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            ValueError: If radius &lt; 0</span>
 
 <span class="sd">        Example:</span>
-<span class="sd">            &gt;&gt;&gt; neighbors = neighborhood.get_neighboring_agents(</span>
+<span class="sd">            &gt;&gt;&gt; neighbor_states = neighborhood.get_neighboring_agents(</span>
 <span class="sd">            ...     position=(5.0, 5.0),</span>
 <span class="sd">            ...     radius=2.5</span>
 <span class="sd">            ... )</span>
-<span class="sd">            &gt;&gt;&gt; print(f&quot;Found {len(neighbors)} neighbors&quot;)</span>
+<span class="sd">            &gt;&gt;&gt; print(f&quot;Found {len(neighbor_states)} neighbors&quot;)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">jupedsim.agent</span><span class="w"> </span><span class="kn">import</span> <span class="n">_TransientAgent</span>
-
         <span class="k">if</span> <span class="n">radius</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;radius must be non-negative, got </span><span class="si">{</span><span class="n">radius</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
         <span class="n">neighbors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">get_neighboring_agents</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">radius</span><span class="p">)</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">_TransientAgent</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">neighbors</span><span class="p">]</span></div>
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="n">x</span><span class="o">.</span><span class="n">model</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">_CustomModelState</span><span class="p">)</span> <span class="k">else</span> <span class="n">x</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">neighbors</span>
+        <span class="p">]</span></div>
 </div>
 
 </pre></div>
@@ -472,8 +519,8 @@ By The JuPedSim Development Team
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=90905a2f556bf617f1a9"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=90905a2f556bf617f1a9"></script>
 
   <footer class="bd-footer">
   </footer>

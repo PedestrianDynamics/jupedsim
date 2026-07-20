@@ -314,63 +314,62 @@ Attributes
 
    Base class for operational models implemented in Python.
 
-   Subclasses implement :meth:`get_neighbors` and :meth:`compute_next_state`
-   and optionally :meth:`check_model_constraint`. Constraint violations
-   should be reported by raising an exception.
-
-   The simulation advances agents in two phases per step, mirroring the
-   native operational model interface: for every agent it first calls
-   :meth:`get_neighbors` to collect the frozen neighbor states, then calls
-   :meth:`compute_next_state` with exactly that collection. Neighbor state
-   must be read exclusively from the ``neighbor_states`` handed to
-   :meth:`compute_next_state`; the neighborhood search is only available
-   while collecting.
+   Subclasses implement :meth:`compute_next_state` and optionally
+   :meth:`check_model_constraint`. Constraint violations should be reported by
+   raising an exception.
 
    .. warning::
 
        **Per-agent model state is live and shared -- never mutate it in place.**
 
-       The ``ped.model`` object you receive (every state returned from
-       :meth:`get_neighbors` and every entry of ``neighbor_states``) is the
-       agent's *live* state, shared by reference with the running simulation
-       for performance. JuPedSim first *computes* every agent's update from
-       the current state of all agents, then *applies* all updates together.
-       Mutating a state during the compute phase changes data that other
-       agents are still reading in the same step, silently breaking the
-       compute-then-apply ordering and producing order-dependent results.
+       The ``state`` object you receive (and every neighbor state returned
+       from a neighborhood query) is the agent's *live* state, shared by
+       reference with the running simulation for performance. JuPedSim
+       advances agents in two phases per step: it first *computes* every
+       agent's update from the current state of all agents, then *applies* all
+       updates together. Mutating ``state`` (or a neighbor's) during the
+       compute phase changes state that other agents are still reading in the
+       same step, silently breaking the compute-then-apply ordering and
+       producing order-dependent results.
 
        The only correct way to change state is to return a new state object
-       from :meth:`compute_next_state` -- returning ``ped.model`` itself
+       from :meth:`compute_next_state` -- returning ``state`` itself
        (even unchanged) raises an error; use
-       ``dataclasses.replace(ped.model, ...)``. Make your state type
+       ``dataclasses.replace(state, ...)``. Make your state type
        immutable -- a ``@dataclass(frozen=True)`` -- so accidental in-place
        writes raise immediately instead of silently corrupting the
        simulation.
 
    .. warning::
 
-       The ``ped`` object passed to the callbacks (and the neighbor objects
-       returned from neighborhood queries) are transient views that are only
-       valid for the duration of the callback. Never store them. Calling
-       mutating methods on the simulation (``add_agent``,
-       ``mark_agent_for_removal``, journey or stage mutation) from within a
-       callback raises :class:`~jupedsim.SimulationError`.
+       The neighbor states returned from neighborhood queries are only valid
+       for the duration of the callback. Never store them. Calling mutating
+       methods on the simulation (``add_agent``, ``mark_agent_for_removal``,
+       journey or stage mutation) from within a callback raises
+       :class:`~jupedsim.SimulationError`.
 
 
-   .. py:method:: check_model_constraint(ped: jupedsim.agent._TransientAgent, neighborhood_search: jupedsim.neighborhood.NeighborhoodSearch, geometry: jupedsim.geometry.Geometry) -> None
+   .. py:method:: check_model_constraint(state: CustomModelAgentState, neighborhood_search: jupedsim.neighborhood.NeighborhoodSearch, geometry: jupedsim.geometry.Geometry) -> None
 
-      Raise an exception when ``ped`` violates this model's constraints.
+      Raise an exception when ``state`` violates this model's constraints.
+
+      ``neighborhood_search`` is bound to the agent being validated and is
+      deliberately not visibility-filtered: overlap checks must see agents
+      through walls.
 
 
 
-   .. py:method:: compute_next_state(dt: float, ped: jupedsim.agent._TransientAgent, geometry: jupedsim.geometry.Geometry, neighbor_states: list[CustomModelAgentState]) -> CustomModelAgentState
+   .. py:method:: compute_next_state(dt: float, state: CustomModelAgentState, destination: tuple[float, float], geometry: jupedsim.geometry.Geometry, neighborhood_search: jupedsim.neighborhood.NeighborhoodSearch) -> CustomModelAgentState
       :abstractmethod:
 
 
-      Compute one update for ``ped``.
+      Compute one update for the agent in ``state``.
 
-      ``neighbor_states`` is the frozen collection returned by
-      :meth:`get_neighbors` for this agent in this step.
+      ``state`` is the agent's own state object as passed to ``add_agent``
+      (respectively as returned from the previous call). ``destination`` is
+      the agent's current routing waypoint. ``neighborhood_search`` queries
+      the frozen states of the current generation; results exclude the agent
+      itself and are filtered by line-of-sight visibility.
 
 
 
@@ -536,26 +535,28 @@ Attributes
       Get the second endpoint of the line segment.
 
 
-.. py:class:: NeighborhoodSearch(obj: jupedsim.native.NeighborhoodSearch)
+.. py:class:: NeighborhoodSearch(obj: jupedsim.native.NeighborQuery)
 
-   Pure Python wrapper for the C++ NeighborhoodSearch class.
+   Pure Python wrapper for the C++ NeighborQuery interface.
 
-   Provides efficient spatial queries for finding neighboring agents within
-   a given radius. Uses a grid-based data structure for O(1) cell lookups
-   with configurable cell size.
-
+   Provides efficient spatial queries for finding the model states of
+   neighboring agents within a given radius. The query is bound to the agent
+   whose callback received it: results never include that agent itself. In
+   :meth:`~jupedsim.models.custom_model.CustomOperationalModel.compute_next_state`
+   results are additionally filtered by line-of-sight visibility; in
+   ``check_model_constraint`` they are not.
 
    .. rubric:: Example
 
-   >>> neighbors = neighborhood.get_neighboring_agents(
+   >>> neighbor_states = neighborhood.get_neighboring_agents(
    ...     position=(5.0, 5.0),
    ...     radius=2.0
    ... )
 
 
-   .. py:method:: get_neighboring_agents(position: Tuple[float, float], radius: float) -> List[_TransientAgent]
+   .. py:method:: get_neighboring_agents(position: Tuple[float, float], radius: float) -> List[Any]
 
-      Get all agents within a certain radius of a position.
+      Get the model states of all agents within a certain radius of a position.
 
       Uses the underlying spatial grid for efficient O(1) average-case
       lookup time (worst case depends on number of agents per cell).
@@ -563,20 +564,21 @@ Attributes
       :param position: Query position as (x, y) tuple [m]
       :param radius: Search radius [m]
 
-      :returns: List of transient agent views within the radius. Empty list if no
-                agents found. The returned objects are only valid for the duration
-                of the custom-model callback they were created in; never store
-                them.
+      :returns: List of per-agent model states within the radius; for custom-model
+                simulations these are the user-defined state objects the neighbors
+                were added with. Empty list if no agents found. The returned states
+                belong to the frozen current generation and are only valid for the
+                duration of the custom-model callback; never store or mutate them.
 
       :raises ValueError: If radius < 0
 
       .. rubric:: Example
 
-      >>> neighbors = neighborhood.get_neighboring_agents(
+      >>> neighbor_states = neighborhood.get_neighboring_agents(
       ...     position=(5.0, 5.0),
       ...     radius=2.5
       ... )
-      >>> print(f"Found {len(neighbors)} neighbors")
+      >>> print(f"Found {len(neighbor_states)} neighbors")
 
 
 
