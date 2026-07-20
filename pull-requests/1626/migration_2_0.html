@@ -1,0 +1,719 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" data-theme="light">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="_static/logo.png" sizes="482x536" rel="icon" type="image/png">
+    <title>Migrating to JuPedSim 2.0 &#8212; JuPedSim  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=90905a2f556bf617f1a9" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=90905a2f556bf617f1a9" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=4418a689" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+    <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=d742c9ce" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="_static/scripts/fontawesome.js?digest=90905a2f556bf617f1a9"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=90905a2f556bf617f1a9" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=90905a2f556bf617f1a9" />
+
+    <script src="_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'migration_2_0';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.20.0';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://www.jupedsim.org/versions.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'v2.0.0';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Concepts" href="concepts/index.html" />
+    <link rel="prev" title="Getting started" href="notebooks/getting_started.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="v2.0.0" />
+  
+    
+    <script src="_static/searchtools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="light">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+    
+    
+    
+    <img src="_static/jupedsim.svg" class="logo__image only-light" alt="JuPedSim  documentation - Home"/>
+    <img src="_static/jupedsim.svg" class="logo__image only-dark pst-js-only" alt="JuPedSim  documentation - Home"/>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/PedestrianDynamics/jupedsim" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/jupedsim/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://img.shields.io/pypi/v/jupedsim" class="icon-link-image" alt="PyPI"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://doi.org/10.5281/zenodo.1293771" title="DOI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.1293771.svg" class="icon-link-image" alt="DOI"/></a>
+        </li>
+</ul></div>
+        <div class="sidebar-primary-item">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="notebooks/getting_started.html">Getting started</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Migrating to 2.0</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="concepts/index.html">Concepts</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="concepts/geometry.html">Geometry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="concepts/routing.html">Routing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="concepts/custom_serialization.html">Custom Serialization</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="pedestrian_models/index.html">Pedestrian Models</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="pedestrian_models/collision_free_speed_model_v3.html">CollisionFreeSpeedModelV3 (Rotational Steering)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pedestrian_models/warp_driver_model.html">WarpDriver Model</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="notebooks/index.html">Notebooks</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/model-comparison.html">Comparative Analysis of Pedestrian Dynamics Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/corner.html">Movement around Corners</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="notebooks/double-bottleneck.html">Movement through Bottlenecks</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="notebooks/journey.html">How to work with Journeys</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="notebooks/lane-formation.html">Lane formation in bi-directional flow</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="notebooks/motivation.html">Modelling Motivation</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="notebooks/queues_waiting.html">Waiting in Queues</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="notebooks/routing.html">How Route Choice can Impact Evacuation Times</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="notebooks/direct_steering.html">Leader–Follower Dynamics with Direct Steering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/single-file.html">Simulating Single-File Movement</a></li>
+
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="debugging/index.html">Debugging</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="debugging/profiling_and_timing.html">Profiling and Timing</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="history.html">History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="disclaimer.html">Disclaimer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/jupedsim/index.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citation/citation.html">Cite JuPedSim</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button></div>
+      
+        <div class="header-article-item"><button class="sidebar-toggle secondary-toggle btn btn-sm pst-navbar-icon" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Migrating to JuPedSim 2.0</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#constructing-a-simulation">Constructing a Simulation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adding-agents">Adding agents</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#old-new-mapping-per-model">Old → new mapping per model</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#agent-handles">Agent handles</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mutation-during-iterate-is-now-an-error">Mutation during iterate() is now an error</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#removed-apis-at-a-glance">Removed APIs at a glance</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="migrating-to-jupedsim-2-0">
+<h1>Migrating to JuPedSim 2.0<a class="headerlink" href="#migrating-to-jupedsim-2-0" title="Link to this heading">#</a></h1>
+<p>JuPedSim 2.0 is a clean break: the model builder classes and the
+<code class="docutils literal notranslate"><span class="pre">XModelAgentParameters</span></code> dataclasses have been <strong>removed without deprecation
+shims</strong>. This guide maps every 1.x construct to its 2.0 replacement.</p>
+<p>The three changes you will encounter in every script:</p>
+<ol class="arabic simple">
+<li><p><strong>Simulation construction</strong> — every model is passed as a <em>configured
+instance</em> carrying its model-level parameters (e.g.
+<code class="docutils literal notranslate"><span class="pre">jps.SocialForceModel(body_force=...,</span> <span class="pre">friction=...)</span></code>). The
+<code class="docutils literal notranslate"><span class="pre">ModelType</span></code> enum has been removed.</p></li>
+<li><p><strong>Adding agents</strong> — <code class="docutils literal notranslate"><span class="pre">add_agent</span></code> now takes the keyword-only arguments
+<code class="docutils literal notranslate"><span class="pre">journey_id</span></code>, <code class="docutils literal notranslate"><span class="pre">stage_id</span></code> and <code class="docutils literal notranslate"><span class="pre">state</span></code>, where <code class="docutils literal notranslate"><span class="pre">state</span></code> is a directly
+instantiated per-model state object such as
+<a class="reference internal" href="api/jupedsim/index.html#jupedsim.CollisionFreeSpeedModelState" title="jupedsim.CollisionFreeSpeedModelState"><code class="xref py py-class docutils literal notranslate"><span class="pre">CollisionFreeSpeedModelState</span></code></a>.</p></li>
+<li><p><strong>Agent access</strong> — <a class="reference internal" href="api/jupedsim/index.html#jupedsim.Agent" title="jupedsim.Agent"><code class="xref py py-class docutils literal notranslate"><span class="pre">Agent</span></code></a> objects are lightweight
+<em>handles by id</em> that resolve the agent freshly on every attribute access.</p></li>
+</ol>
+<section id="constructing-a-simulation">
+<h2>Constructing a Simulation<a class="headerlink" href="#constructing-a-simulation" title="Link to this heading">#</a></h2>
+<p>Every built-in model is now constructed as an instance that carries its
+model-level parameters. The <code class="docutils literal notranslate"><span class="pre">ModelType</span></code> enum no longer exists.</p>
+<p>Simulation construction is <strong>source-compatible</strong> with 1.x for the built-in
+models: <code class="docutils literal notranslate"><span class="pre">jps.Simulation(model=jps.CollisionFreeSpeedModel(...),</span> <span class="pre">geometry=area)</span></code>
+is written the same way. What changed underneath: the model argument is no
+longer a parameter-holding dataclass but the operational model itself, it is
+consumed by the constructor (see the warning below), and its keyword arguments
+are now the single place where model-level parameters are set.</p>
+<p>The model instance holds the parameters that govern the model globally.
+Constructed with their defaults they reproduce exactly the configuration that
+the 1.x defaults produced, so existing simulations remain byte-identical:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Model-level parameters are keyword-only; defaults shown reproduce 1.x.</span>
+<span class="n">sim</span> <span class="o">=</span> <span class="n">jps</span><span class="o">.</span><span class="n">Simulation</span><span class="p">(</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">jps</span><span class="o">.</span><span class="n">SocialForceModel</span><span class="p">(</span><span class="n">body_force</span><span class="o">=</span><span class="mi">120000</span><span class="p">,</span> <span class="n">friction</span><span class="o">=</span><span class="mi">240000</span><span class="p">),</span>
+    <span class="n">geometry</span><span class="o">=</span><span class="n">area</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># CollisionFreeSpeedModel: the repulsion parameters are model-level.</span>
+<span class="n">sim</span> <span class="o">=</span> <span class="n">jps</span><span class="o">.</span><span class="n">Simulation</span><span class="p">(</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">jps</span><span class="o">.</span><span class="n">CollisionFreeSpeedModel</span><span class="p">(</span>
+        <span class="n">strength_neighbor_repulsion</span><span class="o">=</span><span class="mf">8.0</span><span class="p">,</span>
+        <span class="n">range_neighbor_repulsion</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+        <span class="n">strength_geometry_repulsion</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span>
+        <span class="n">range_geometry_repulsion</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">geometry</span><span class="o">=</span><span class="n">area</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># AnticipationVelocityModel: pushout strength and the RNG seed are model-level.</span>
+<span class="n">sim</span> <span class="o">=</span> <span class="n">jps</span><span class="o">.</span><span class="n">Simulation</span><span class="p">(</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">jps</span><span class="o">.</span><span class="n">AnticipationVelocityModel</span><span class="p">(</span><span class="n">pushout_strength</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">rng_seed</span><span class="o">=</span><span class="mi">1234</span><span class="p">),</span>
+    <span class="n">geometry</span><span class="o">=</span><span class="n">area</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># WarpDriverModel: the intrinsic field (sigma), the collision-prediction</span>
+<span class="c1"># settings and the RNG are all model-level. All arguments are keyword-only.</span>
+<span class="n">sim</span> <span class="o">=</span> <span class="n">jps</span><span class="o">.</span><span class="n">Simulation</span><span class="p">(</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">jps</span><span class="o">.</span><span class="n">WarpDriverModel</span><span class="p">(</span><span class="n">sigma</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">rng_seed</span><span class="o">=</span><span class="mi">42</span><span class="p">),</span> <span class="n">geometry</span><span class="o">=</span><span class="n">area</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">CollisionFreeSpeedModelV2</span></code> and <code class="docutils literal notranslate"><span class="pre">CollisionFreeSpeedModelV3</span></code> keep all of their
+repulsion parameters per-agent by design, so their instances take no
+model-level arguments:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">sim</span> <span class="o">=</span> <span class="n">jps</span><span class="o">.</span><span class="n">Simulation</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">jps</span><span class="o">.</span><span class="n">CollisionFreeSpeedModelV2</span><span class="p">(),</span> <span class="n">geometry</span><span class="o">=</span><span class="n">area</span><span class="p">)</span>
+<span class="n">sim</span> <span class="o">=</span> <span class="n">jps</span><span class="o">.</span><span class="n">Simulation</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">jps</span><span class="o">.</span><span class="n">CollisionFreeSpeedModelV3</span><span class="p">(),</span> <span class="n">geometry</span><span class="o">=</span><span class="n">area</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Model instances are consumed by the <code class="docutils literal notranslate"><span class="pre">Simulation</span></code> constructor and must not
+be reused for a second simulation.</p>
+</div>
+<p>Custom Python models are passed as an instance of a
+<a class="reference internal" href="api/jupedsim/index.html#jupedsim.CustomOperationalModel" title="jupedsim.CustomOperationalModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">CustomOperationalModel</span></code></a> subclass:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">sim</span> <span class="o">=</span> <span class="n">jps</span><span class="o">.</span><span class="n">Simulation</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">MyCustomModel</span><span class="p">(),</span> <span class="n">geometry</span><span class="o">=</span><span class="n">area</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Passing a wrong <code class="docutils literal notranslate"><span class="pre">model</span></code> argument raises <code class="docutils literal notranslate"><span class="pre">TypeError</span></code>.</p>
+</section>
+<section id="adding-agents">
+<h2>Adding agents<a class="headerlink" href="#adding-agents" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">add_agent</span></code> takes the journey id, the stage id and a per-model state object —
+<strong>all three as keyword-only arguments</strong>; positional calls raise <code class="docutils literal notranslate"><span class="pre">TypeError</span></code>.
+The agent spawns at <code class="docutils literal notranslate"><span class="pre">state.position</span></code>. All state constructors are
+keyword-only and expose the per-agent fields of the model, with defaults
+taken from the C++ implementation. Model-level parameters (see above) live on
+the model instance and are <em>not</em> part of the state.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 1.x</span>
+<span class="n">agent_id</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">add_agent</span><span class="p">(</span>
+    <span class="n">jps</span><span class="o">.</span><span class="n">CollisionFreeSpeedModelAgentParameters</span><span class="p">(</span>
+        <span class="n">journey_id</span><span class="o">=</span><span class="n">journey_id</span><span class="p">,</span>
+        <span class="n">stage_id</span><span class="o">=</span><span class="n">stage_id</span><span class="p">,</span>
+        <span class="n">position</span><span class="o">=</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+        <span class="n">desired_speed</span><span class="o">=</span><span class="mf">1.4</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+<span class="c1"># 2.0</span>
+<span class="n">agent_id</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">add_agent</span><span class="p">(</span>
+    <span class="n">journey_id</span><span class="o">=</span><span class="n">journey_id</span><span class="p">,</span>
+    <span class="n">stage_id</span><span class="o">=</span><span class="n">stage_id</span><span class="p">,</span>
+    <span class="n">state</span><span class="o">=</span><span class="n">jps</span><span class="o">.</span><span class="n">CollisionFreeSpeedModelState</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="n">desired_speed</span><span class="o">=</span><span class="mf">1.4</span><span class="p">),</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Passing a state class that does not match the simulation’s model raises
+<a class="reference internal" href="api/jupedsim/index.html#jupedsim.SimulationError" title="jupedsim.SimulationError"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimulationError</span></code></a>; passing a non-state object raises
+<code class="docutils literal notranslate"><span class="pre">TypeError</span></code>.</p>
+<p>For custom models the state is your own object satisfying the
+<a class="reference internal" href="api/jupedsim/index.html#jupedsim.CustomModelAgentState" title="jupedsim.CustomModelAgentState"><code class="xref py py-class docutils literal notranslate"><span class="pre">CustomModelAgentState</span></code></a> protocol (an object with a
+<code class="docutils literal notranslate"><span class="pre">position</span></code> attribute; a frozen dataclass is recommended):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">sim</span><span class="o">.</span><span class="n">add_agent</span><span class="p">(</span><span class="n">journey_id</span><span class="o">=</span><span class="n">journey_id</span><span class="p">,</span> <span class="n">stage_id</span><span class="o">=</span><span class="n">stage_id</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="n">MyState</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)))</span>
+</pre></div>
+</div>
+</section>
+<section id="old-new-mapping-per-model">
+<h2>Old → new mapping per model<a class="headerlink" href="#old-new-mapping-per-model" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>1.x (deleted)</p></th>
+<th class="head"><p>2.0 <code class="docutils literal notranslate"><span class="pre">Simulation(model=...)</span></code></p></th>
+<th class="head"><p>2.0 <code class="docutils literal notranslate"><span class="pre">add_agent</span></code> state</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">CollisionFreeSpeedModel</span></code> + <code class="docutils literal notranslate"><span class="pre">CollisionFreeSpeedModelAgentParameters</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">jps.CollisionFreeSpeedModel(...)</span></code> instance</p></td>
+<td><p><a class="reference internal" href="api/jupedsim/index.html#jupedsim.CollisionFreeSpeedModelState" title="jupedsim.CollisionFreeSpeedModelState"><code class="xref py py-class docutils literal notranslate"><span class="pre">CollisionFreeSpeedModelState</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">CollisionFreeSpeedModelV2</span></code> + <code class="docutils literal notranslate"><span class="pre">CollisionFreeSpeedModelV2AgentParameters</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">jps.CollisionFreeSpeedModelV2()</span></code> instance</p></td>
+<td><p><a class="reference internal" href="api/jupedsim/index.html#jupedsim.CollisionFreeSpeedModelV2State" title="jupedsim.CollisionFreeSpeedModelV2State"><code class="xref py py-class docutils literal notranslate"><span class="pre">CollisionFreeSpeedModelV2State</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">CollisionFreeSpeedModelV3</span></code> + <code class="docutils literal notranslate"><span class="pre">CollisionFreeSpeedModelV3AgentParameters</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">jps.CollisionFreeSpeedModelV3()</span></code> instance</p></td>
+<td><p><a class="reference internal" href="api/jupedsim/index.html#jupedsim.CollisionFreeSpeedModelV3State" title="jupedsim.CollisionFreeSpeedModelV3State"><code class="xref py py-class docutils literal notranslate"><span class="pre">CollisionFreeSpeedModelV3State</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModel</span></code> + <code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">jps.GeneralizedCentrifugalForceModel(...)</span></code> instance</p></td>
+<td><p><a class="reference internal" href="api/jupedsim/index.html#jupedsim.GeneralizedCentrifugalForceModelState" title="jupedsim.GeneralizedCentrifugalForceModelState"><code class="xref py py-class docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelState</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">SocialForceModel</span></code> + <code class="docutils literal notranslate"><span class="pre">SocialForceModelAgentParameters</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">jps.SocialForceModel(...)</span></code> instance</p></td>
+<td><p><a class="reference internal" href="api/jupedsim/index.html#jupedsim.SocialForceModelState" title="jupedsim.SocialForceModelState"><code class="xref py py-class docutils literal notranslate"><span class="pre">SocialForceModelState</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">AnticipationVelocityModel</span></code> (dataclass) + <code class="docutils literal notranslate"><span class="pre">AnticipationVelocityModelAgentParameters</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">jps.AnticipationVelocityModel(rng_seed=...)</span></code> instance</p></td>
+<td><p><a class="reference internal" href="api/jupedsim/index.html#jupedsim.AnticipationVelocityModelState" title="jupedsim.AnticipationVelocityModelState"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnticipationVelocityModelState</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">WarpDriverModel</span></code> (parameter holder) + <code class="docutils literal notranslate"><span class="pre">WarpDriverModelAgentParameters</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">jps.WarpDriverModel(sigma=...,</span> <span class="pre">rng_seed=...)</span></code> instance</p></td>
+<td><p><a class="reference internal" href="api/jupedsim/index.html#jupedsim.WarpDriverModelState" title="jupedsim.WarpDriverModelState"><code class="xref py py-class docutils literal notranslate"><span class="pre">WarpDriverModelState</span></code></a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Parameters that were <em>global</em> in 1.x (e.g. the repulsion strengths of the
+Collision Free Speed Model, <code class="docutils literal notranslate"><span class="pre">body_force</span></code>/<code class="docutils literal notranslate"><span class="pre">friction</span></code> of the Social Force
+Model, or <code class="docutils literal notranslate"><span class="pre">time_horizon</span></code>/<code class="docutils literal notranslate"><span class="pre">step_size</span></code> of the WarpDriver model) remain
+<em>model-level</em>: they are keyword-only constructor arguments of the
+corresponding model instance and are fixed for the lifetime of the
+simulation. <code class="docutils literal notranslate"><span class="pre">CollisionFreeSpeedModelV2</span></code> and <code class="docutils literal notranslate"><span class="pre">CollisionFreeSpeedModelV3</span></code> are
+the exception — by design they keep their repulsion parameters as <em>per-agent</em>
+fields of the state class, where they can differ between agents and change
+over time.</p>
+</section>
+<section id="agent-handles">
+<h2>Agent handles<a class="headerlink" href="#agent-handles" title="Link to this heading">#</a></h2>
+<p><a class="reference internal" href="api/jupedsim/index.html#jupedsim.Agent" title="jupedsim.Agent"><code class="xref py py-class docutils literal notranslate"><span class="pre">Agent</span></code></a> objects returned by <code class="docutils literal notranslate"><span class="pre">sim.agent(id)</span></code>,
+<code class="docutils literal notranslate"><span class="pre">sim.agents()</span></code>, <code class="docutils literal notranslate"><span class="pre">sim.agents_in_range(...)</span></code> and <code class="docutils literal notranslate"><span class="pre">sim.agents_in_polygon(...)</span></code>
+are now lightweight handles storing only the agent id. Every attribute read
+and write resolves the agent freshly through the simulation:</p>
+<ul class="simple">
+<li><p><strong>No stale handles.</strong> A handle stays valid across <code class="docutils literal notranslate"><span class="pre">iterate()</span></code> calls; it
+never points at reallocated memory. You can keep a handle for the whole
+simulation.</p></li>
+<li><p><strong>Removed agents raise.</strong> Accessing any attribute of a handle whose agent
+has left the simulation raises <a class="reference internal" href="api/jupedsim/index.html#jupedsim.SimulationError" title="jupedsim.SimulationError"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimulationError</span></code></a>.</p></li>
+<li><p><strong>Property syntax keeps working, including mutation:</strong></p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">agent</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">agent</span><span class="p">(</span><span class="n">agent_id</span><span class="p">)</span>
+<span class="n">agent</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="p">(</span><span class="mf">10.0</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">)</span>
+<span class="n">agent</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">desired_speed</span> <span class="o">=</span> <span class="mf">0.8</span>   <span class="c1"># takes effect in the next iterate()</span>
+
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1000</span><span class="p">):</span>
+    <span class="n">sim</span><span class="o">.</span><span class="n">iterate</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">agent</span><span class="o">.</span><span class="n">position</span><span class="p">)</span>             <span class="c1"># still valid, freshly resolved</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">agent.model</span></code> returns a per-model state handle with the same semantics: it
+resolves per access and raises once the agent is gone.</p>
+</section>
+<section id="mutation-during-iterate-is-now-an-error">
+<h2>Mutation during iterate() is now an error<a class="headerlink" href="#mutation-during-iterate-is-now-an-error" title="Link to this heading">#</a></h2>
+<p>Calling mutating simulation methods — <code class="docutils literal notranslate"><span class="pre">add_agent</span></code>,
+<code class="docutils literal notranslate"><span class="pre">mark_agent_for_removal</span></code>, journey or stage mutation — while <code class="docutils literal notranslate"><span class="pre">iterate()</span></code> is
+running (e.g. from a custom-model callback or a trajectory writer invoked
+during iteration) now raises <a class="reference internal" href="api/jupedsim/index.html#jupedsim.SimulationError" title="jupedsim.SimulationError"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimulationError</span></code></a> instead of
+causing undefined behavior. Perform such mutations between <code class="docutils literal notranslate"><span class="pre">iterate()</span></code>
+calls.</p>
+</section>
+<section id="removed-apis-at-a-glance">
+<h2>Removed APIs at a glance<a class="headerlink" href="#removed-apis-at-a-glance" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>All model builder classes (C++ and Python).</p></li>
+<li><p>All <code class="docutils literal notranslate"><span class="pre">XModelAgentParameters</span></code> dataclasses.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">ModelType</span></code> enum; every model is now constructed directly as a
+configured instance (e.g.
+<code class="docutils literal notranslate"><span class="pre">jps.SocialForceModel(body_force=...,</span> <span class="pre">friction=...)</span></code>).</p></li>
+</ul>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="notebooks/getting_started.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Getting started</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="concepts/index.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Concepts</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item"><div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#constructing-a-simulation">Constructing a Simulation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adding-agents">Adding agents</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#old-new-mapping-per-model">Old → new mapping per model</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#agent-handles">Agent handles</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mutation-during-iterate-is-now-an-error">Mutation during iterate() is now an error</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#removed-apis-at-a-glance">Removed APIs at a glance</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By The JuPedSim Development Team
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2026, Forschungszentrum Jülich GmbH, IAS-7.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=90905a2f556bf617f1a9"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=90905a2f556bf617f1a9"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
