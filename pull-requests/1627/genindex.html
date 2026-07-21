@@ -1,0 +1,949 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" data-theme="light">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Index &#8212; JuPedSim  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=90905a2f556bf617f1a9" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=90905a2f556bf617f1a9" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=4418a689" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+    <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=d742c9ce" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="_static/scripts/fontawesome.js?digest=90905a2f556bf617f1a9"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=90905a2f556bf617f1a9" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=90905a2f556bf617f1a9" />
+
+    <script src="_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'genindex';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.20.0';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://www.jupedsim.org/versions.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'v2.0.0';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="index" title="Index" href="#" />
+    <link rel="search" title="Search" href="search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="v2.0.0" />
+  
+    
+    <script src="_static/searchtools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="light">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+    
+    
+    
+    <img src="_static/jupedsim.svg" class="logo__image only-light" alt="JuPedSim  documentation - Home"/>
+    <img src="_static/jupedsim.svg" class="logo__image only-dark pst-js-only" alt="JuPedSim  documentation - Home"/>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/PedestrianDynamics/jupedsim" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/jupedsim/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://img.shields.io/pypi/v/jupedsim" class="icon-link-image" alt="PyPI"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://doi.org/10.5281/zenodo.1293771" title="DOI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.1293771.svg" class="icon-link-image" alt="DOI"/></a>
+        </li>
+</ul></div>
+        <div class="sidebar-primary-item">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="notebooks/getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="migration_2_0.html">Migrating to 2.0</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="concepts/index.html">Concepts</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="concepts/geometry.html">Geometry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="concepts/routing.html">Routing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="concepts/custom_serialization.html">Custom Serialization</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="pedestrian_models/index.html">Pedestrian Models</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="pedestrian_models/collision_free_speed_model_v3.html">CollisionFreeSpeedModelV3 (Rotational Steering)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pedestrian_models/warp_driver_model.html">WarpDriver Model</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="notebooks/index.html">Notebooks</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/model-comparison.html">Comparative Analysis of Pedestrian Dynamics Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/corner.html">Movement around Corners</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="notebooks/double-bottleneck.html">Movement through Bottlenecks</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="notebooks/journey.html">How to work with Journeys</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="notebooks/lane-formation.html">Lane formation in bi-directional flow</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="notebooks/motivation.html">Modelling Motivation</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="notebooks/queues_waiting.html">Waiting in Queues</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="notebooks/routing.html">How Route Choice can Impact Evacuation Times</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="notebooks/direct_steering.html">Leader–Follower Dynamics with Direct Steering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/single-file.html">Simulating Single-File Movement</a></li>
+
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="debugging/index.html">Debugging</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="debugging/profiling_and_timing.html">Profiling and Timing</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="history.html">History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="disclaimer.html">Disclaimer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/jupedsim/index.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citation/citation.html">Cite JuPedSim</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+
+<h1 id="index">Index</h1>
+
+<div class="genindex-jumpbox">
+ <a href="#A"><strong>A</strong></a>
+ | <a href="#B"><strong>B</strong></a>
+ | <a href="#C"><strong>C</strong></a>
+ | <a href="#D"><strong>D</strong></a>
+ | <a href="#E"><strong>E</strong></a>
+ | <a href="#F"><strong>F</strong></a>
+ | <a href="#G"><strong>G</strong></a>
+ | <a href="#H"><strong>H</strong></a>
+ | <a href="#I"><strong>I</strong></a>
+ | <a href="#J"><strong>J</strong></a>
+ | <a href="#L"><strong>L</strong></a>
+ | <a href="#M"><strong>M</strong></a>
+ | <a href="#N"><strong>N</strong></a>
+ | <a href="#O"><strong>O</strong></a>
+ | <a href="#P"><strong>P</strong></a>
+ | <a href="#R"><strong>R</strong></a>
+ | <a href="#S"><strong>S</strong></a>
+ | <a href="#T"><strong>T</strong></a>
+ | <a href="#W"><strong>W</strong></a>
+ 
+</div>
+<h2 id="A">A</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/jupedsim/index.html#jupedsim.WaitingSetState.ACTIVE">ACTIVE (WaitingSetState attribute)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.JourneyDescription.add">add() (JourneyDescription method)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.Simulation.add_agent">add_agent() (Simulation method)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.Simulation.add_direct_steering_stage">add_direct_steering_stage() (Simulation method)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.Simulation.add_exit_stage">add_exit_stage() (Simulation method)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.Simulation.add_journey">add_journey() (Simulation method)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.Simulation.add_queue_stage">add_queue_stage() (Simulation method)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.Simulation.add_waiting_set_stage">add_waiting_set_stage() (Simulation method)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.Simulation.add_waypoint_stage">add_waypoint_stage() (Simulation method)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.Agent">Agent (class in jupedsim)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/jupedsim/index.html#jupedsim.Simulation.agent">agent() (Simulation method)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.Simulation.agent_count">agent_count() (Simulation method)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.AgentNumberError">AgentNumberError</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.RecordingFrame.agents">agents (RecordingFrame attribute)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.Simulation.agents">agents() (Simulation method)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.Simulation.agents_in_polygon">agents_in_polygon() (Simulation method)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.Simulation.agents_in_range">agents_in_range() (Simulation method)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.AnticipationVelocityModel">AnticipationVelocityModel (in module jupedsim)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.AnticipationVelocityModelState">AnticipationVelocityModelState (in module jupedsim)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.Geometry.as_wkt">as_wkt() (Geometry method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="B">B</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/jupedsim/index.html#jupedsim.SqliteTrajectoryWriter.begin_writing">begin_writing() (SqliteTrajectoryWriter method)</a>
+
+      <ul>
+        <li><a href="api/jupedsim/index.html#jupedsim.TrajectoryWriter.begin_writing">(TrajectoryWriter method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/jupedsim/index.html#jupedsim.Geometry.boundary">boundary() (Geometry method)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.Recording.bounds">bounds() (Recording method)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.BuildInfo">BuildInfo (class in jupedsim)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="C">C</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/jupedsim/index.html#jupedsim.CustomOperationalModel.check_model_constraint">check_model_constraint() (CustomOperationalModel method)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.SqliteTrajectoryWriter.close">close() (SqliteTrajectoryWriter method)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.LineSegment.closest_point">closest_point() (LineSegment method)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.CollisionFreeSpeedModel">CollisionFreeSpeedModel (in module jupedsim)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.CollisionFreeSpeedModelState">CollisionFreeSpeedModelState (in module jupedsim)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.CollisionFreeSpeedModelV2">CollisionFreeSpeedModelV2 (in module jupedsim)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.CollisionFreeSpeedModelV2State">CollisionFreeSpeedModelV2State (in module jupedsim)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.CollisionFreeSpeedModelV3">CollisionFreeSpeedModelV3 (in module jupedsim)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.CollisionFreeSpeedModelV3State">CollisionFreeSpeedModelV3State (in module jupedsim)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.BuildInfo.compiler">compiler (BuildInfo property)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.BuildInfo.compiler_version">compiler_version (BuildInfo property)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.CustomOperationalModel.compute_next_state">compute_next_state() (CustomOperationalModel method)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.RoutingEngine.compute_waypoints">compute_waypoints() (RoutingEngine method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/jupedsim/index.html#jupedsim.SqliteTrajectoryWriter.connection">connection() (SqliteTrajectoryWriter method)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.NotifiableQueueStage.count_enqueued">count_enqueued() (NotifiableQueueStage method)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.ExitStage.count_targeting">count_targeting() (ExitStage method)</a>
+
+      <ul>
+        <li><a href="api/jupedsim/index.html#jupedsim.NotifiableQueueStage.count_targeting">(NotifiableQueueStage method)</a>
+</li>
+        <li><a href="api/jupedsim/index.html#jupedsim.WaitingSetStage.count_targeting">(WaitingSetStage method)</a>
+</li>
+        <li><a href="api/jupedsim/index.html#jupedsim.WaypointStage.count_targeting">(WaypointStage method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/jupedsim/index.html#jupedsim.WaitingSetStage.count_waiting">count_waiting() (WaitingSetStage method)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.Transition.create_fixed_transition">create_fixed_transition() (Transition static method)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.Transition.create_least_targeted_transition">create_least_targeted_transition() (Transition static method)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.Transition.create_none_transition">create_none_transition() (Transition static method)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.Transition.create_round_robin_transition">create_round_robin_transition() (Transition static method)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.CustomModelAgentState">CustomModelAgentState (class in jupedsim)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.CustomOperationalModel">CustomOperationalModel (class in jupedsim)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="D">D</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/jupedsim/index.html#jupedsim.Recording.db">db (Recording attribute)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.Simulation.delta_time">delta_time() (Simulation method)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.LineSegment.distance_to_point">distance_to_point() (LineSegment method)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.distribute_by_density">distribute_by_density() (in module jupedsim)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/jupedsim/index.html#jupedsim.distribute_by_number">distribute_by_number() (in module jupedsim)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.distribute_by_percentage">distribute_by_percentage() (in module jupedsim)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.distribute_in_circles_by_density">distribute_in_circles_by_density() (in module jupedsim)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.distribute_in_circles_by_number">distribute_in_circles_by_number() (in module jupedsim)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.distribute_until_filled">distribute_until_filled() (in module jupedsim)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="E">E</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/jupedsim/index.html#jupedsim.RoutingEngine.edges_for">edges_for() (RoutingEngine method)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.Simulation.elapsed_time">elapsed_time() (Simulation method)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.NotifiableQueueStage.enqueued">enqueued() (NotifiableQueueStage method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/jupedsim/index.html#jupedsim.SqliteTrajectoryWriter.every_nth_frame">every_nth_frame() (SqliteTrajectoryWriter method)</a>
+
+      <ul>
+        <li><a href="api/jupedsim/index.html#jupedsim.TrajectoryWriter.every_nth_frame">(TrajectoryWriter method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/jupedsim/index.html#jupedsim.ExitStage">ExitStage (class in jupedsim)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="F">F</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/jupedsim/index.html#jupedsim.Agent.final_target">final_target (Agent property)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/jupedsim/index.html#jupedsim.Recording.fps">fps (Recording property)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.Recording.frame">frame() (Recording method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="G">G</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/jupedsim/index.html#jupedsim.GeneralizedCentrifugalForceModel">GeneralizedCentrifugalForceModel (in module jupedsim)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.GeneralizedCentrifugalForceModelState">GeneralizedCentrifugalForceModelState (in module jupedsim)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.Geometry">Geometry (class in jupedsim)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.Recording.geometry">geometry() (Recording method)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.Recording.geometry_id_for_frame">geometry_id_for_frame() (Recording method)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.get_build_info">get_build_info() (in module jupedsim)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.Simulation.get_geometry">get_geometry() (Simulation method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/jupedsim/index.html#jupedsim.NeighborhoodSearch.get_neighboring_agents">get_neighboring_agents() (NeighborhoodSearch method)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.Simulation.get_stage">get_stage() (Simulation method)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.Geometry.get_walls_close_to">get_walls_close_to() (Geometry method)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.Geometry.get_walls_in_distance_to">get_walls_in_distance_to() (Geometry method)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.BuildInfo.git_branch">git_branch (BuildInfo property)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.BuildInfo.git_commit_date">git_commit_date (BuildInfo property)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.BuildInfo.git_commit_hash">git_commit_hash (BuildInfo property)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="H">H</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/jupedsim/index.html#jupedsim.Hdf5TrajectoryWriter">Hdf5TrajectoryWriter (in module jupedsim)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/jupedsim/index.html#jupedsim.Geometry.holes">holes() (Geometry method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="I">I</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/jupedsim/index.html#jupedsim.Agent.id">id (Agent property)</a>
+
+      <ul>
+        <li><a href="api/jupedsim/index.html#jupedsim.RecordingAgent.id">(RecordingAgent attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="api/jupedsim/index.html#jupedsim.WaitingSetState.INACTIVE">INACTIVE (WaitingSetState attribute)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.IncorrectParameterError">IncorrectParameterError</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/jupedsim/index.html#jupedsim.RecordingFrame.index">index (RecordingFrame attribute)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.RoutingEngine.is_routable">is_routable() (RoutingEngine method)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.Simulation.iterate">iterate() (Simulation method)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.Simulation.iteration_count">iteration_count() (Simulation method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="J">J</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/jupedsim/index.html#jupedsim.Agent.journey_id">journey_id (Agent property)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.JourneyDescription">JourneyDescription (class in jupedsim)</a>
+</li>
+      <li>
+    jupedsim
+
+      <ul>
+        <li><a href="api/jupedsim/index.html#module-jupedsim">module</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    jupedsim.models
+
+      <ul>
+        <li><a href="api/jupedsim/models/index.html#module-jupedsim.models">module</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="L">L</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/jupedsim/index.html#jupedsim.BuildInfo.library_version">library_version (BuildInfo property)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/jupedsim/index.html#jupedsim.LineSegment">LineSegment (class in jupedsim)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.Geometry.linesegments_close_to">linesegments_close_to() (Geometry method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="M">M</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/jupedsim/index.html#jupedsim.Simulation.mark_agent_for_removal">mark_agent_for_removal() (Simulation method)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.RoutingEngine.mesh">mesh() (RoutingEngine method)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.AgentNumberError.message">message (AgentNumberError attribute)</a>
+
+      <ul>
+        <li><a href="api/jupedsim/index.html#jupedsim.IncorrectParameterError.message">(IncorrectParameterError attribute)</a>
+</li>
+        <li><a href="api/jupedsim/index.html#jupedsim.NegativeValueError.message">(NegativeValueError attribute)</a>
+</li>
+        <li><a href="api/jupedsim/index.html#jupedsim.OverlappingCirclesError.message">(OverlappingCirclesError attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/jupedsim/index.html#jupedsim.Agent.model">model (Agent property)</a>
+</li>
+      <li>
+    module
+
+      <ul>
+        <li><a href="api/jupedsim/index.html#module-jupedsim">jupedsim</a>
+</li>
+        <li><a href="api/jupedsim/models/index.html#module-jupedsim.models">jupedsim.models</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="N">N</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/jupedsim/index.html#jupedsim.NegativeValueError">NegativeValueError</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.NeighborhoodSearch">NeighborhoodSearch (class in jupedsim)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/jupedsim/index.html#jupedsim.Agent.next_target">next_target (Agent property)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.NotifiableQueueStage">NotifiableQueueStage (class in jupedsim)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.Recording.num_frames">num_frames (Recording property)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="O">O</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/jupedsim/index.html#jupedsim.OverlappingCirclesError">OverlappingCirclesError</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="P">P</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/jupedsim/index.html#jupedsim.LineSegment.p1">p1 (LineSegment property)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.LineSegment.p2">p2 (LineSegment property)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.NotifiableQueueStage.pop">pop() (NotifiableQueueStage method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/jupedsim/index.html#jupedsim.Agent.position">position (Agent property)</a>
+
+      <ul>
+        <li><a href="api/jupedsim/index.html#jupedsim.CustomModelAgentState.position">(CustomModelAgentState attribute)</a>
+</li>
+        <li><a href="api/jupedsim/index.html#jupedsim.RecordingAgent.position">(RecordingAgent attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="R">R</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/jupedsim/index.html#jupedsim.Recording">Recording (class in jupedsim)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.RecordingAgent">RecordingAgent (class in jupedsim)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/jupedsim/index.html#jupedsim.RecordingFrame">RecordingFrame (class in jupedsim)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.Simulation.removed_agents">removed_agents() (Simulation method)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.RoutingEngine">RoutingEngine (class in jupedsim)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="S">S</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/jupedsim/index.html#jupedsim.set_debug_callback">set_debug_callback() (in module jupedsim)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.set_error_callback">set_error_callback() (in module jupedsim)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.set_info_callback">set_info_callback() (in module jupedsim)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.JourneyDescription.set_transition_for_stage">set_transition_for_stage() (JourneyDescription method)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.set_warning_callback">set_warning_callback() (in module jupedsim)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.Simulation">Simulation (class in jupedsim)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/jupedsim/index.html#jupedsim.SimulationError">SimulationError (in module jupedsim)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.SocialForceModel">SocialForceModel (in module jupedsim)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.SocialForceModelState">SocialForceModelState (in module jupedsim)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.SqliteTrajectoryWriter">SqliteTrajectoryWriter (class in jupedsim)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.Agent.stage_id">stage_id (Agent property)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.WaitingSetStage.state">state (WaitingSetStage property)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.Simulation.switch_agent_journey">switch_agent_journey() (Simulation method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="T">T</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/jupedsim/index.html#jupedsim.Simulation.timer">timer (Simulation property)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.TrajectoryWriter">TrajectoryWriter (class in jupedsim)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/jupedsim/index.html#jupedsim.TrajectoryWriter.Exception">TrajectoryWriter.Exception</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.Transition">Transition (class in jupedsim)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="W">W</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/jupedsim/index.html#jupedsim.WaitingSetStage.waiting">waiting() (WaitingSetStage method)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.WaitingSetStage">WaitingSetStage (class in jupedsim)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.WaitingSetState">WaitingSetState (class in jupedsim)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.WarpDriverModel">WarpDriverModel (in module jupedsim)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/jupedsim/index.html#jupedsim.WarpDriverModelState">WarpDriverModelState (in module jupedsim)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.WaypointStage">WaypointStage (class in jupedsim)</a>
+</li>
+      <li><a href="api/jupedsim/index.html#jupedsim.SqliteTrajectoryWriter.write_iteration_state">write_iteration_state() (SqliteTrajectoryWriter method)</a>
+
+      <ul>
+        <li><a href="api/jupedsim/index.html#jupedsim.TrajectoryWriter.write_iteration_state">(TrajectoryWriter method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By The JuPedSim Development Team
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2026, Forschungszentrum Jülich GmbH, IAS-7.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=90905a2f556bf617f1a9"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=90905a2f556bf617f1a9"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
