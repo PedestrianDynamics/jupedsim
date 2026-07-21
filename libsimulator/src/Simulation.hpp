@@ -3,7 +3,7 @@
 
 #include "AgentRemovalSystem.hpp"
 #include "GenericAgent.hpp"
-#include "Geometry/Geometry2D.hpp"
+#include "Geometry/Geometry3D.hpp"
 #include "Journey.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalDecisionSystem.hpp"
@@ -39,7 +39,7 @@ class Simulation
     StageManager _stageManager{};
     StageSystem _stageSystem{};
     NeighborhoodSearch<GenericAgent> _neighborhoodSearch{2.2};
-    std::unique_ptr<Geometry2D> _geometry{};
+    std::unique_ptr<Geometry3D> _geometry{};
     std::unique_ptr<RoutingEngine> _routingEngine{};
     AgentContainer<GenericAgent> _agents;
     std::vector<GenericAgent::ID> _removedAgentsInLastIteration;
