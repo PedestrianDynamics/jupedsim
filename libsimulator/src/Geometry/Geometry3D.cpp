@@ -197,6 +197,21 @@ Geometry3D::locate_in_region(std::size_t region_id, const Point2D& xy) const
     return {SurfaceMesh::null_face(), Point3D{}};
 }
 
+std::optional<Location>
+Geometry3D::get_location(double x, double y, double z_hint, double tol) const
+{
+    const auto face_location = locate_near_z(Point2D{x, y}, z_hint, tol);
+    if(face_location.face == SurfaceMesh::null_face()) {
+        return std::nullopt;
+    }
+    return Location{
+        this,
+        Point{x, y},
+        region_of(face_location.face),
+        face_location.face,
+        face_location.point.z()};
+}
+
 Geometry3D::FaceLocation
 Geometry3D::locate_near_z(const Point2D& xy, double z, double tolerance) const
 {

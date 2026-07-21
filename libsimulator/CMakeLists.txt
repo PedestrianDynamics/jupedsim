@@ -18,6 +18,7 @@ target_sources(simulator PRIVATE
     src/Geometry/Geometry2D.hpp
     src/Geometry/Geometry3D.cpp
     src/Geometry/Geometry3D.hpp
+    src/Geometry/Location.hpp
     src/Geometry/RegionSplit.cpp
     src/Geometry/RegionSplit.hpp
     src/Geometry/Validation.cpp
@@ -115,6 +116,7 @@ if (BUILD_TESTS)
         test/TestGraph.cpp
         test/TestJourney.cpp
         test/TestLineSegment.cpp
+        test/TestLocation.cpp
         test/TestMesh.cpp
         test/TestNeighborhoodSearch.cpp
         test/TestPoint.cpp

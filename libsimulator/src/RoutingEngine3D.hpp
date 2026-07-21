@@ -7,7 +7,7 @@
 #include <tuple>
 #include <vector>
 
-using Location = Point3D; // [RL] TODO: Support more than just points
+using RoutingTarget = Point3D; // [RL] TODO: Support more than just points
 
 /// Pure interface for 3D routing engines.
 class RoutingEngine3D
@@ -26,7 +26,7 @@ public:
     /// is on walkable surface taking wall clearance into account.
     /// @param loc location (Point or Polygon) to check
     /// @return true if the location projects onto the walkable surface
-    virtual bool IsValidLocation(const Location& loc) const = 0;
+    virtual bool IsValidLocation(const RoutingTarget& loc) const = 0;
 
     /// Compute the shortest path from @p source to @p target.
     /// @param source where to route from
@@ -35,12 +35,12 @@ public:
     ///         and the target as last element; cost is typically geodesic distance
     ///         along it, but not necessarily (e.g. floor fields with slowness field).
     virtual std::tuple<std::vector<Point3D>, double>
-    GetShortestPath(const Point3D& source, const Location& target) = 0;
+    GetShortestPath(const Point3D& source, const RoutingTarget& target) = 0;
 
     /// Get orientation to next point of the shortest path from @p source to
     /// @p target, projected to x/y.
     /// @param source where to route from
     /// @param target where to route to
     /// @return 2D orientation to the next waypoint
-    virtual Point GetOrientation(const Point3D& source, const Location& target) = 0;
+    virtual Point GetOrientation(const Point3D& source, const RoutingTarget& target) = 0;
 };

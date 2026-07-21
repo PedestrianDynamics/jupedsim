@@ -3,13 +3,19 @@
 
 #include "CfgCgal.hpp"
 #include "Geometry/Geometry2D.hpp"
+#include "Geometry/Location.hpp"
 #include "Geometry/RegionSplit.hpp"
 #include "Point.hpp"
 
 #include <array>
 #include <cstddef>
 #include <memory>
+#include <optional>
 #include <vector>
+
+/// Default z-hint tolerance: When a `Location` is created, how far the z-value
+/// is allowed to be away from the surface to still be accepted.
+inline constexpr double ZHintTolerance = 0.1;
 
 /// The single source of truth for a 3D navigation geometry: owns the surface
 /// mesh, its AABB tree (for -z projection queries) and the single-valued region
@@ -63,6 +69,12 @@ public:
     /// faces stacked over @p xy pick the one whose on-surface z deviates least
     /// from the hint. `null_face()` if no sheet comes within @p tolerance.
     FaceLocation locate_near_z(const Point2D& xy, double z, double tolerance) const;
+
+    /// Creates a `Location` object by ray-casting the 3D point in z-direction and
+    /// finding the closest point to hit any part of the 3D surface. Only accepts
+    /// points at most @p tol away in terms of z-coordinate.
+    std::optional<Location>
+    get_location(double x, double y, double z_hint, double tol = ZHintTolerance) const;
 
     /// Re-anchor a horizontal move onto the 3D surface: @p from is in region
     /// @p from_region_id; return the face and on-surface point at @p to. The
