@@ -134,7 +134,7 @@ class Agent:
 
     @property
     def final_target(self) -> tuple[float, float]:
-        """Current end target of the agent.
+        """Current final target of the agent.
 
         Can be used to directly steer an agent towards the given coordinate.
         This will bypass the strategical and tactical level, but the
@@ -152,7 +152,7 @@ class Agent:
             iteration call.
 
         Returns:
-            Current end target of the agent.
+            Current final target of the agent.
         """
         return self.__resolve().final_target
 
@@ -229,7 +229,7 @@ class _TransientAgent:
 
     @property
     def final_target(self) -> tuple[float, float]:
-        """Current end target of the agent."""
+        """Current final target of the agent."""
         return self.__obj.final_target
 
     @property
