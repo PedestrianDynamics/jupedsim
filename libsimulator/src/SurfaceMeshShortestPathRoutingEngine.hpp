@@ -19,12 +19,12 @@ public:
     explicit SurfaceMeshShortestPathRoutingEngine(const Geometry3D& geometry);
     ~SurfaceMeshShortestPathRoutingEngine() override = default;
 
-    bool IsValidLocation(const Location& loc) const override;
+    bool IsValidLocation(const RoutingTarget& loc) const override;
 
     std::tuple<std::vector<Point3D>, double>
-    GetShortestPath(const Point3D& source, const Location& target) override;
+    GetShortestPath(const Point3D& source, const RoutingTarget& target) override;
 
-    Point GetOrientation(const Point3D& source, const Location& target) override;
+    Point GetOrientation(const Point3D& source, const RoutingTarget& target) override;
 
 private:
     const Geometry3D& _geometry;
@@ -32,5 +32,5 @@ private:
     // cache
     using Traits = CGAL::Surface_mesh_shortest_path_traits<K, SurfaceMesh>;
     using ShortestPath = CGAL::Surface_mesh_shortest_path<Traits>;
-    std::map<Location, std::unique_ptr<ShortestPath>> _cache{};
+    std::map<RoutingTarget, std::unique_ptr<ShortestPath>> _cache{};
 };

@@ -18,13 +18,14 @@ SurfaceMeshShortestPathRoutingEngine::SurfaceMeshShortestPathRoutingEngine(
 {
 }
 
-bool SurfaceMeshShortestPathRoutingEngine::IsValidLocation(const Location& loc) const
+bool SurfaceMeshShortestPathRoutingEngine::IsValidLocation(const RoutingTarget& loc) const
 {
     return _geometry.face_below(loc).face != SurfaceMesh::null_face();
 }
 
-std::tuple<std::vector<Point3D>, double>
-SurfaceMeshShortestPathRoutingEngine::GetShortestPath(const Point3D& source, const Location& target)
+std::tuple<std::vector<Point3D>, double> SurfaceMeshShortestPathRoutingEngine::GetShortestPath(
+    const Point3D& source,
+    const RoutingTarget& target)
 {
     const auto from_below = _geometry.face_below(source);
     if(from_below.face == SurfaceMesh::null_face()) {
@@ -56,7 +57,7 @@ SurfaceMeshShortestPathRoutingEngine::GetShortestPath(const Point3D& source, con
 
 Point SurfaceMeshShortestPathRoutingEngine::GetOrientation(
     const Point3D& source,
-    const Location& target)
+    const RoutingTarget& target)
 {
     const auto result = GetShortestPath(source, target);
     const auto& path = std::get<0>(result);
