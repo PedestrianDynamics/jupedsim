@@ -97,8 +97,7 @@ void ExtractSegmentsFromPolygon(const Poly& p, std::vector<LineSegment>& segment
     segments.emplace_back(fromPoint_2(boundary.back()), fromPoint_2(boundary.front()));
 }
 
-Geometry2D::Geometry2D(PolyWithHoles accessibleArea)
-    : _accessibleAreaPolygon(accessibleArea)
+Geometry2D::Geometry2D(PolyWithHoles accessibleArea) : _accessibleAreaPolygon(accessibleArea)
 {
     _segments.reserve(CountLineSegments(accessibleArea));
     ExtractSegmentsFromPolygon(accessibleArea.outer_boundary(), _segments);
@@ -176,8 +175,7 @@ void Geometry2D::insertIntoApproximateGrid(const LineSegment& ls)
     }
 }
 
-Geometry2D::LineSegmentRange
-Geometry2D::LineSegmentsInDistanceTo(double distance, Point p) const
+Geometry2D::LineSegmentRange Geometry2D::LineSegmentsInDistanceTo(double distance, Point p) const
 {
     return LineSegmentRange{
         DistanceQueryIterator<LineSegment>{distance, p, _segments.cbegin(), _segments.cend()},
