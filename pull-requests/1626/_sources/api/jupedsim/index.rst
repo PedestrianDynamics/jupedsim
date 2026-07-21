@@ -156,7 +156,7 @@ Attributes
 
    .. code:: python
 
-       agent.end_destination = (1.0, 2.0)
+       agent.final_target = (1.0, 2.0)
        agent.model.desired_speed = 1.5
 
    .. note ::
@@ -167,7 +167,7 @@ Attributes
        resulting in a crash.
 
 
-   .. py:property:: end_target
+   .. py:property:: final_target
       :type: tuple[float, float]
 
 

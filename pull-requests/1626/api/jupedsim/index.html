@@ -398,7 +398,7 @@
 </ul>
 </li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Agent"><code class="docutils literal notranslate"><span class="pre">Agent</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Agent.end_target"><code class="docutils literal notranslate"><span class="pre">Agent.end_target</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Agent.final_target"><code class="docutils literal notranslate"><span class="pre">Agent.final_target</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Agent.id"><code class="docutils literal notranslate"><span class="pre">Agent.id</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Agent.journey_id"><code class="docutils literal notranslate"><span class="pre">Agent.journey_id</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Agent.model"><code class="docutils literal notranslate"><span class="pre">Agent.model</span></code></a></li>
@@ -846,7 +846,7 @@ handles remain valid across calls to
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">iterate()</span></code>. Accessing a handle whose
 agent no longer exists raises <a class="reference internal" href="#jupedsim.SimulationError" title="jupedsim.SimulationError"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimulationError</span></code></a>.</p>
 <p>Mutation through properties is supported, e.g.:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">agent</span><span class="o">.</span><span class="n">end_destination</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">agent</span><span class="o">.</span><span class="n">final_target</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">)</span>
 <span class="n">agent</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">desired_speed</span> <span class="o">=</span> <span class="mf">1.5</span>
 </pre></div>
 </div>
@@ -858,8 +858,8 @@ set an Agent position outside the walkable area of the Simulation
 resulting in a crash.</p>
 </div>
 <dl class="py property">
-<dt class="sig sig-object py" id="jupedsim.Agent.end_target">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">end_target</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#jupedsim.Agent.end_target" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="jupedsim.Agent.final_target">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">final_target</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#jupedsim.Agent.final_target" title="Link to this definition">#</a></dt>
 <dd><p>Current end target of the agent.</p>
 <p>Can be used to directly steer an agent towards the given coordinate.
 This will bypass the strategical and tactical level, but the
@@ -2647,7 +2647,7 @@ custom-model callback.</p>
 </ul>
 </li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Agent"><code class="docutils literal notranslate"><span class="pre">Agent</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Agent.end_target"><code class="docutils literal notranslate"><span class="pre">Agent.end_target</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Agent.final_target"><code class="docutils literal notranslate"><span class="pre">Agent.final_target</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Agent.id"><code class="docutils literal notranslate"><span class="pre">Agent.id</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Agent.journey_id"><code class="docutils literal notranslate"><span class="pre">Agent.journey_id</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim.Agent.model"><code class="docutils literal notranslate"><span class="pre">Agent.model</span></code></a></li>

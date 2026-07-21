@@ -465,7 +465,7 @@
 
 <span class="sd">    .. code:: python</span>
 
-<span class="sd">        agent.end_destination = (1.0, 2.0)</span>
+<span class="sd">        agent.final_target = (1.0, 2.0)</span>
 <span class="sd">        agent.model.desired_speed = 1.5</span>
 
 <span class="sd">    .. note ::</span>
@@ -510,7 +510,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__resolve</span><span class="p">()</span><span class="o">.</span><span class="n">position</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">end_target</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">final_target</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Current end target of the agent.</span>
 
 <span class="sd">        Can be used to directly steer an agent towards the given coordinate.</span>
@@ -531,11 +531,11 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Current end target of the agent.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__resolve</span><span class="p">()</span><span class="o">.</span><span class="n">end_target</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__resolve</span><span class="p">()</span><span class="o">.</span><span class="n">final_target</span>
 
-    <span class="nd">@end_target</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">end_target</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">end_target</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__resolve</span><span class="p">()</span><span class="o">.</span><span class="n">end_target</span> <span class="o">=</span> <span class="n">end_target</span>
+    <span class="nd">@final_target</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">final_target</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">final_target</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__resolve</span><span class="p">()</span><span class="o">.</span><span class="n">final_target</span> <span class="o">=</span> <span class="n">final_target</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">next_target</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
@@ -606,9 +606,9 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__obj</span><span class="o">.</span><span class="n">position</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">end_target</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">final_target</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Current end target of the agent.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__obj</span><span class="o">.</span><span class="n">end_target</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__obj</span><span class="o">.</span><span class="n">final_target</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">next_target</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
