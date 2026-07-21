@@ -48,10 +48,7 @@ PolyWithHoles CombinePolygons(R1&& polygons, R2&& exclusions)
     auto combinedArea = *accessibleList.begin();
 
     PolyWithHolesList exclusionsList{};
-    CGAL::join(
-        std::begin(exclusions),
-        std::end(exclusions),
-        std::back_inserter(exclusionsList));
+    CGAL::join(std::begin(exclusions), std::end(exclusions), std::back_inserter(exclusionsList));
 
     for(const auto& ex : exclusionsList) {
         PolyWithHolesList res{};

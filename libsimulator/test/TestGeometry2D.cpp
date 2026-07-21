@@ -211,8 +211,7 @@ protected:
     Geometry2D geometry;
 
     LongDiagonalRectangle()
-        : geometry(
-              constructPolyFromPoints({{-11., -13.}, {5., 11.}, {6., 10.}, {-10., -14.}}))
+        : geometry(constructPolyFromPoints({{-11., -13.}, {5., 11.}, {6., 10.}, {-10., -14.}}))
     {
     }
 };
