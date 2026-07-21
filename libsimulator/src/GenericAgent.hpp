@@ -47,8 +47,8 @@ struct GenericAgent {
     jps::UniqueID<BaseStage> stageId{jps::UniqueID<BaseStage>::Invalid};
 
     // This is evaluated by the "operational level"
-    Point destination{};
-    Point target{};
+    Point nextTarget{};
+    Point finalTarget{};
 
     using ModelState = std::variant<
         GeneralizedCentrifugalForceModel::State,
@@ -84,7 +84,7 @@ struct GenericAgent {
         , model(std::move(model_))
     {
         // Position is owned by the model state; seed the initial waypoint from it.
-        target = position();
+        finalTarget = position();
     }
 };
 
@@ -135,8 +135,8 @@ struct fmt::formatter<GenericAgent> {
                     agent.id,
                     agent.journeyId,
                     agent.stageId,
-                    agent.destination,
-                    agent.target,
+                    agent.nextTarget,
+                    agent.finalTarget,
                     agent.position(),
                     m);
             },

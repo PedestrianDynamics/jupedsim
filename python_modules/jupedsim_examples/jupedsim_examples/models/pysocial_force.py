@@ -200,8 +200,8 @@ class PythonSocialForceModel(CustomOperationalModel):
 
         # Get target direction (normalized)
         target_diff = (
-            agent.target[0] - agent.position[0],
-            agent.target[1] - agent.position[1],
+            agent.next_target[0] - agent.position[0],
+            agent.next_target[1] - agent.position[1],
         )
         # eq 1 in paper
         target_dir = self._normalize(target_diff)

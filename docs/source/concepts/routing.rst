@@ -337,7 +337,7 @@ It will move towards the specified point and if the point is reached, it will co
 .. code:: python
 
     agent = simulation.agent(direct_steering_agent_id)
-    agent.target = (-10, -10)
+    agent.final_target = (-10, -10)
 
 .. note::
 

@@ -123,7 +123,7 @@ void SocialForceModel::CheckModelConstraint(
 Point SocialForceModel::DrivingForce(const GenericAgent& agent)
 {
     const auto& model = std::get<State>(agent.model);
-    const Point e0 = (agent.destination - model.position).Normalized();
+    const Point e0 = (agent.nextTarget - model.position).Normalized();
     return (e0 * model.desiredSpeed - model.velocity) / model.reactionTime;
 };
 double SocialForceModel::PushingForceLength(double A, double B, double r, double distance)

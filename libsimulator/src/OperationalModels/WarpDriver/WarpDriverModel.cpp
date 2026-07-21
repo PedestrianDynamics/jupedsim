@@ -432,7 +432,7 @@ void WarpDriverModel::ComputeNextState(
     }
 
     // Direction towards destination
-    Point toTarget = current.destination - agentData.position;
+    Point toTarget = current.nextTarget - agentData.position;
     const double distToTarget = toTarget.Norm();
     if(distToTarget < 1e-9) {
         // The old update carried default-initialized stuck/detour state here,
