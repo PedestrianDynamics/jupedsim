@@ -39,9 +39,8 @@ public:
         const GenericAgent& current,
         GenericAgent& next,
         const EnvironmentQuery& envQuery) const override;
-    void CheckModelConstraint(
-        const GenericAgent& agent,
-        const EnvironmentQuery& envQuery) const override;
+    void CheckModelConstraint(const GenericAgent& agent, const EnvironmentQuery& envQuery)
+        const override;
 
 private:
     double OptimalSpeed(const GenericAgent& ped, double spacing, double time_gap) const;

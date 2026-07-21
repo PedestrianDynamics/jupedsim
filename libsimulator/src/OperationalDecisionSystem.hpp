@@ -28,8 +28,8 @@ public:
 
     OperationalModelType ModelType() const { return _model->Type(); }
 
-    void Run(
-        double dT,
+    void
+    Run(double dT,
         double /*t_in_sec*/,
         const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
         const CollisionGeometry& geometry,

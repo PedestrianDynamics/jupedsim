@@ -92,9 +92,8 @@ public:
         GenericAgent& next,
         const EnvironmentQuery& envQuery) const override;
 
-    void CheckModelConstraint(
-        const GenericAgent& agent,
-        const EnvironmentQuery& envQuery) const override;
+    void CheckModelConstraint(const GenericAgent& agent, const EnvironmentQuery& envQuery)
+        const override;
 };
 
 template <>

@@ -95,8 +95,7 @@ void PythonModel::ComputeNextState(
     py::object pythonAgent = py::cast(current);
     py::object pythonEnvQuery = py::cast(&envQuery, py::return_value_policy::reference);
 
-    py::object pythonUpdate =
-        _model.attr("_compute_next_state")(dT, pythonAgent, pythonEnvQuery);
+    py::object pythonUpdate = _model.attr("_compute_next_state")(dT, pythonAgent, pythonEnvQuery);
 
     // "next" shares the Python state object with "current" (GilSafePyObject copies are
     // refcounted, not cloned), so this also rejects returning the current state instance.
@@ -149,9 +148,8 @@ void PythonModel::ComputeNextState(
     customModelData.Set(pythonUpdate);
 }
 
-void PythonModel::CheckModelConstraint(
-    const GenericAgent& agent,
-    const EnvironmentQuery& envQuery) const
+void PythonModel::CheckModelConstraint(const GenericAgent& agent, const EnvironmentQuery& envQuery)
+    const
 {
     py::gil_scoped_acquire gil;
 

@@ -42,13 +42,13 @@ void init_environment_query(py::module_& m)
             [](const EnvironmentQuery& self, std::tuple<double, double> pos) -> py::function {
                 const CollisionGeometry* geo = &self.Geometry();
                 const Point from = intoPoint(pos);
-                return py::cpp_function(
-                    [geo, from](const GenericAgent& candidate) -> bool {
-                        return !geo->IntersectsAny(LineSegment{from, candidate.position()});
-                    });
+                return py::cpp_function([geo, from](const GenericAgent& candidate) -> bool {
+                    return !geo->IntersectsAny(LineSegment{from, candidate.position()});
+                });
             },
             py::arg("position"),
-            "Returns a predicate: True when position has unobstructed line-of-sight to the candidate.")
+            "Returns a predicate: True when position has unobstructed line-of-sight to the "
+            "candidate.")
         .def(
             "line_segments_in_range",
             [](const EnvironmentQuery& self, std::tuple<double, double> p) {
