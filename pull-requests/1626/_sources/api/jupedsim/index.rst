@@ -171,7 +171,7 @@ Attributes
       :type: tuple[float, float]
 
 
-      Current end target of the agent.
+      Current final target of the agent.
 
       Can be used to directly steer an agent towards the given coordinate.
       This will bypass the strategical and tactical level, but the
@@ -188,7 +188,7 @@ Attributes
           walkable area. Otherwise, an error will be thrown at the next
           iteration call.
 
-      :returns: Current end target of the agent.
+      :returns: Current final target of the agent.
 
 
    .. py:property:: id
