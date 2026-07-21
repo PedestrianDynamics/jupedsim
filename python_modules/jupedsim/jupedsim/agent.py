@@ -88,7 +88,7 @@ class Agent:
 
     .. code:: python
 
-        agent.end_destination = (1.0, 2.0)
+        agent.final_target = (1.0, 2.0)
         agent.model.desired_speed = 1.5
 
     .. note ::
@@ -133,7 +133,7 @@ class Agent:
         return self.__resolve().position
 
     @property
-    def end_target(self) -> tuple[float, float]:
+    def final_target(self) -> tuple[float, float]:
         """Current end target of the agent.
 
         Can be used to directly steer an agent towards the given coordinate.
@@ -154,11 +154,11 @@ class Agent:
         Returns:
             Current end target of the agent.
         """
-        return self.__resolve().end_target
+        return self.__resolve().final_target
 
-    @end_target.setter
-    def end_target(self, end_target: tuple[float, float]) -> None:
-        self.__resolve().end_target = end_target
+    @final_target.setter
+    def final_target(self, final_target: tuple[float, float]) -> None:
+        self.__resolve().final_target = final_target
 
     @property
     def next_target(self) -> tuple[float, float]:
@@ -228,9 +228,9 @@ class _TransientAgent:
         return self.__obj.position
 
     @property
-    def end_target(self) -> tuple[float, float]:
+    def final_target(self) -> tuple[float, float]:
         """Current end target of the agent."""
-        return self.__obj.end_target
+        return self.__obj.final_target
 
     @property
     def next_target(self) -> tuple[float, float]:

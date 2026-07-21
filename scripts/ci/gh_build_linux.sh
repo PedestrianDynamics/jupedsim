@@ -1,6 +1,7 @@
 set -e
 echo Using ${CC} and ${CXX}
-numcpus=$(nproc)
+numcpus=4
+rm -rf build
 mkdir build && cd build
 cmake  .. -DBUILD_TESTS=ON -DWERROR=ON
 cmake --build . -- -j ${numcpus} -- VERBOSE=1

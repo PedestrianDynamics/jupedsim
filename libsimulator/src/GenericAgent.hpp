@@ -48,7 +48,7 @@ struct GenericAgent {
 
     // This is evaluated by the "operational level"
     Point nextTarget{};
-    Point endTarget{};
+    Point finalTarget{};
 
     using ModelState = std::variant<
         GeneralizedCentrifugalForceModel::State,
@@ -84,7 +84,7 @@ struct GenericAgent {
         , model(std::move(model_))
     {
         // Position is owned by the model state; seed the initial waypoint from it.
-        endTarget = position();
+        finalTarget = position();
     }
 };
 
@@ -136,7 +136,7 @@ struct fmt::formatter<GenericAgent> {
                     agent.journeyId,
                     agent.stageId,
                     agent.nextTarget,
-                    agent.endTarget,
+                    agent.finalTarget,
                     agent.position(),
                     m);
             },

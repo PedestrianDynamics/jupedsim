@@ -16,7 +16,7 @@ public:
     void Run(RoutingEngine& routingEngine, auto&& agents) const
     {
         for(auto& agent : agents) {
-            const auto dest = agent.endTarget;
+            const auto dest = agent.finalTarget;
             agent.nextTarget = routingEngine.ComputeWaypoint(agent.position(), dest);
         }
     }
