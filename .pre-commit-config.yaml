@@ -1,0 +1,16 @@
+# Pre-commit hooks. Enable once with:
+#
+#     pre-commit install
+repos:
+  - repo: https://github.com/pre-commit/mirrors-clang-format
+    rev: v21.1.8
+    hooks:
+      - id: clang-format
+        # As in CI: libcommon + libsimulator + python_bindings (+ all their subdirs)
+        files: ^(libcommon|libsimulator|python_bindings_jupedsim)/.*\.(c|cpp|h|hpp)$
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.14
+    hooks:
+      - id: ruff-check   # lint (report only)
+      - id: ruff-format  # format (auto-fixes, then fails so you re-stage)

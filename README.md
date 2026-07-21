@@ -64,6 +64,14 @@ plan.
 While we are very happy if you contribute we reserve us the right to
 decline your PR because it may not fit into our vision of JuPedSim.
 
+> [!NOTE]
+> It is recommended to install the pre-commit hooks via:
+> ```bash
+> pip install -r requirements.txt   # provides pre-commit
+> pre-commit install
+> ```
+
+
 ## License
 
 [GNU LGPLv3](LICENSE)
