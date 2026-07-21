@@ -11,7 +11,6 @@
 #include <memory>
 #include <vector>
 
-
 /// The single source of truth for a 3D navigation geometry: owns the surface
 /// mesh, its AABB tree (for -z projection queries) and the single-valued region
 /// overlay. Routing engines borrow it (non-owning), and the viewer reads its
