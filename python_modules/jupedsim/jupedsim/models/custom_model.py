@@ -115,7 +115,9 @@ class CustomOperationalModel(ABC):
         from jupedsim.agent import _TransientAgent
         from jupedsim.environment_query import EnvironmentQuery
 
-        return self.compute_next_state(dt, _TransientAgent(ped), EnvironmentQuery(env_query))
+        return self.compute_next_state(
+            dt, _TransientAgent(ped), EnvironmentQuery(env_query)
+        )
 
     def _check_model_constraint(
         self,
@@ -125,4 +127,6 @@ class CustomOperationalModel(ABC):
         from jupedsim.agent import _TransientAgent
         from jupedsim.environment_query import EnvironmentQuery
 
-        self.check_model_constraint(_TransientAgent(ped), EnvironmentQuery(env_query))
+        self.check_model_constraint(
+            _TransientAgent(ped), EnvironmentQuery(env_query)
+        )

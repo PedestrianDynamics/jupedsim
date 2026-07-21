@@ -51,9 +51,7 @@ public:
         nextState.applications = state.applications + 1;
     }
 
-    void CheckModelConstraint(const GenericAgent&, const EnvironmentQuery&) const override
-    {
-    }
+    void CheckModelConstraint(const GenericAgent&, const EnvironmentQuery&) const override {}
 };
 
 GenericAgent MakeAgent(GenericAgent::ModelState model)

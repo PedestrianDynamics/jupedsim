@@ -85,18 +85,18 @@ TEST(EnvironmentQuery, AgentsInRangeCustomFilterRejectsAll)
     const auto geo = OpenGeometry();
     const EnvironmentQuery q{geo, f.nsearch};
 
-    const auto result = q.AgentsInRange(
-        f.agents[0], 5.0, [](const GenericAgent&) { return false; });
+    const auto result =
+        q.AgentsInRange(f.agents[0], 5.0, [](const GenericAgent&) { return false; });
     EXPECT_TRUE(result.empty());
 }
 
 TEST(EnvironmentQuery, AgentsInRangeCustomFilterSelectsSubset)
 {
     Fixture f{};
-    f.add(MakeAgent({0, 0}));            // querying agent (radius 0.2)
-    f.add(MakeAgent({1, 0}, 0.2));       // small radius — filtered out
-    f.add(MakeAgent({0, 1}, 0.4));       // large radius — kept
-    f.add(MakeAgent({-1, 0}, 0.4));      // large radius — kept
+    f.add(MakeAgent({0, 0})); // querying agent (radius 0.2)
+    f.add(MakeAgent({1, 0}, 0.2)); // small radius — filtered out
+    f.add(MakeAgent({0, 1}, 0.4)); // large radius — kept
+    f.add(MakeAgent({-1, 0}, 0.4)); // large radius — kept
     f.commit();
 
     const auto geo = OpenGeometry();
@@ -145,7 +145,6 @@ TEST(EnvironmentQuery, AgentsInRangeOutOfRadiusNotReturned)
     const auto geo = OpenGeometry();
     const EnvironmentQuery q{geo, f.nsearch};
 
-    const auto result = q.AgentsInRange(
-        f.agents[0], 1.0, [](const GenericAgent&) { return true; });
+    const auto result = q.AgentsInRange(f.agents[0], 1.0, [](const GenericAgent&) { return true; });
     EXPECT_TRUE(result.empty());
 }

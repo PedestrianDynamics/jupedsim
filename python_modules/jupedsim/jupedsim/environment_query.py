@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 from __future__ import annotations
 
-from typing import Callable, TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable
 
 import jupedsim.native as py_jps
 
@@ -57,12 +57,18 @@ class EnvironmentQuery:
         raw_agent = agent._raw if isinstance(agent, _TransientAgent) else agent
 
         if predicate is None:
-            return [_TransientAgent(a) for a in self._obj.agents_in_range(raw_agent, radius)]
+            return [
+                _TransientAgent(a)
+                for a in self._obj.agents_in_range(raw_agent, radius)
+            ]
 
         def _wrapped(raw):
             return predicate(_TransientAgent(raw))
 
-        return [_TransientAgent(a) for a in self._obj.agents_in_range(raw_agent, radius, _wrapped)]
+        return [
+            _TransientAgent(a)
+            for a in self._obj.agents_in_range(raw_agent, radius, _wrapped)
+        ]
 
     def visible_from(
         self, position: tuple[float, float]
@@ -114,8 +120,14 @@ class EnvironmentQuery:
         from jupedsim.linesegment import LineSegment
 
         if distance is None:
-            return [LineSegment(ls) for ls in self._obj.line_segments_in_range(position)]
-        return [LineSegment(ls) for ls in self._obj.line_segments_in_range(position, distance)]
+            return [
+                LineSegment(ls)
+                for ls in self._obj.line_segments_in_range(position)
+            ]
+        return [
+            LineSegment(ls)
+            for ls in self._obj.line_segments_in_range(position, distance)
+        ]
 
     def intersects_any(self, line_segment) -> bool:
         """Return ``True`` when *line_segment* intersects any geometry boundary.
@@ -124,7 +136,9 @@ class EnvironmentQuery:
             line_segment: A :class:`~jupedsim.linesegment.LineSegment` or the
                 underlying ``py_jps.LineSegment``.
         """
-        raw = line_segment._obj if hasattr(line_segment, "_obj") else line_segment
+        raw = (
+            line_segment._obj if hasattr(line_segment, "_obj") else line_segment
+        )
         return self._obj.intersects_any(raw)
 
     def inside_geometry(self, position: tuple[float, float]) -> bool:

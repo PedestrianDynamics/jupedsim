@@ -61,7 +61,7 @@ void GeneralizedCentrifugalForceModel::ComputeNextState(
     std::optional<Point> position{};
     std::optional<Point> velocity{};
     // repulsive forces to the walls and transitions that are not my target
-    Point repwall = ForceRepRoom(current, geometry);
+    Point repwall = ForceRepRoom(current, envQuery);
     Point fd = ForceDriv(current, current.nextTarget, model.mass, model.tau, dT, e0);
     Point acc = (fd + F_rep + repwall) / model.mass;
 
