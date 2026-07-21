@@ -26,13 +26,15 @@ public:
     {
     }
 
+    struct AcceptAll {
+        bool operator()(const GenericAgent&) const { return true; }
+    };
+
     // Returns all agents within 'radius' of 'agent', excluding 'agent' itself.
     // An optional predicate 'include' further filters the result; it receives each
     // candidate agent and must return true to keep it. Example:
     //   query.AgentsInRange(self, r, query.VisibleFrom(self.position()))
-    template <std::predicate<const GenericAgent&> Pred = decltype([](const GenericAgent&) {
-                  return true;
-              })>
+    template <std::predicate<const GenericAgent&> Pred = AcceptAll>
     std::vector<GenericAgent>
     AgentsInRange(const GenericAgent& agent, double radius, Pred include = {}) const
     {
