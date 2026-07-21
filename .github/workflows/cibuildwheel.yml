@@ -177,6 +177,7 @@ jobs:
     env:
       CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
       CIBW_SKIP: "*musllinux*"
+      CIBW_ENVIRONMENT_MACOS: "CMAKE_ARGS=-DUSE_IPO=OFF"
       MACOSX_DEPLOYMENT_TARGET: 12.05
     strategy:
       matrix:
