@@ -7,11 +7,7 @@
 
 #include <cstddef>
 #include <memory>
-#include <variant>
 #include <vector>
-
-using LocationID = size_t;
-using Location = std::variant<Point, LocationID>;
 
 class RoutingEngine
 {
