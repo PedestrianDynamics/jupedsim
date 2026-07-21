@@ -2,6 +2,7 @@ add_library(py_jupedsim MODULE
     agent.cpp
     anticipation_velocity_model.cpp
     bindings_jupedsim.cpp
+    environment_query.cpp
     build_info.cpp
     collision_free_speed_model.cpp
     collision_free_speed_model_v2.cpp

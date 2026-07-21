@@ -10,8 +10,7 @@ from typing import (
 
 if TYPE_CHECKING:
     from jupedsim.agent import _TransientAgent
-    from jupedsim.geometry import Geometry
-    from jupedsim.neighborhood import NeighborhoodSearch
+    from jupedsim.environment_query import EnvironmentQuery
 
 
 @runtime_checkable
@@ -78,50 +77,52 @@ class CustomOperationalModel(ABC):
         self,
         dt: float,
         ped: _TransientAgent,
-        geometry: Geometry,
-        neighborhood_search: NeighborhoodSearch,
+        env_query: EnvironmentQuery,
     ) -> CustomModelAgentState:
-        """Compute one update for ``ped``."""
+        """Compute one update for ``ped``.
+
+        Args:
+            dt: Simulation time step in seconds.
+            ped: The agent being updated. Only valid for the duration of this call.
+            env_query: Spatial query object for the current step. Use it to
+                find neighboring agents and query geometry. Only valid for the
+                duration of this call.
+
+        Returns:
+            New agent state. Must be a new object -- returning ``ped.model``
+            unchanged raises an error.
+        """
 
     def check_model_constraint(
         self,
         ped: _TransientAgent,
-        neighborhood_search: NeighborhoodSearch,
-        geometry: Geometry,
+        env_query: EnvironmentQuery,
     ) -> None:
-        """Raise an exception when ``ped`` violates this model's constraints."""
+        """Raise an exception when ``ped`` violates this model's constraints.
+
+        Args:
+            ped: The agent to validate.
+            env_query: Spatial query object for the current step.
+        """
         pass
 
     def _compute_next_state(
         self,
         dt,
         ped,
-        geometry,
-        neighborhood_search,
+        env_query,
     ) -> CustomModelAgentState:
         from jupedsim.agent import _TransientAgent
-        from jupedsim.geometry import Geometry
-        from jupedsim.neighborhood import NeighborhoodSearch
+        from jupedsim.environment_query import EnvironmentQuery
 
-        return self.compute_next_state(
-            dt,
-            _TransientAgent(ped),
-            Geometry(geometry),
-            NeighborhoodSearch(neighborhood_search),
-        )
+        return self.compute_next_state(dt, _TransientAgent(ped), EnvironmentQuery(env_query))
 
     def _check_model_constraint(
         self,
         ped,
-        neighborhood_search,
-        geometry,
+        env_query,
     ) -> None:
         from jupedsim.agent import _TransientAgent
-        from jupedsim.geometry import Geometry
-        from jupedsim.neighborhood import NeighborhoodSearch
+        from jupedsim.environment_query import EnvironmentQuery
 
-        self.check_model_constraint(
-            _TransientAgent(ped),
-            NeighborhoodSearch(neighborhood_search),
-            Geometry(geometry),
-        )
+        self.check_model_constraint(_TransientAgent(ped), EnvironmentQuery(env_query))

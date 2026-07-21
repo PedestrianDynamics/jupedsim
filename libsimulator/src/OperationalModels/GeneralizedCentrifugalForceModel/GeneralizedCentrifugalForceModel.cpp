@@ -2,10 +2,10 @@
 #include "GeneralizedCentrifugalForceModel.hpp"
 
 #include "Ellipse.hpp"
+#include "EnvironmentQuery.hpp"
 #include "GenericAgent.hpp"
 #include "Macros.hpp"
 #include "Mathematics.hpp"
-#include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
 #include "Simulation.hpp"
@@ -45,23 +45,14 @@ void GeneralizedCentrifugalForceModel::ComputeNextState(
     double dT,
     const GenericAgent& current,
     GenericAgent& next,
-    const CollisionGeometry& geometry,
-    const NeighborhoodSearch<GenericAgent>& neighborhoodSearch) const
+    const EnvironmentQuery& envQuery) const
 {
     const auto& model = std::get<State>(current.model);
-    const auto neighborhood =
-        neighborhoodSearch.GetNeighboringAgents(model.position, _cutOffRadius);
-    const auto p1 = model.position;
+    auto neighborhood =
+        envQuery.AgentsInRange(current, _cutOffRadius, envQuery.VisibleFrom(model.position));
     Point F_rep;
     for(const auto& neighbor : neighborhood) {
-        // TODO(schroedtert): Only use neighbors who have an unobstructed line of sight to the
-        // current agent
-        if(neighbor.id == current.id) {
-            continue;
-        }
-        if(!geometry.IntersectsAny(LineSegment(p1, std::get<State>(neighbor.model).position))) {
-            F_rep += ForceRepPed(current, neighbor);
-        }
+        F_rep += ForceRepPed(current, neighbor);
     }
 
     // e0 stays default constructed when ForceDriv does not overwrite it, matching the old
@@ -91,8 +82,7 @@ void GeneralizedCentrifugalForceModel::ComputeNextState(
 
 void GeneralizedCentrifugalForceModel::CheckModelConstraint(
     const GenericAgent& agent,
-    const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
-    const CollisionGeometry& geometry) const
+    const EnvironmentQuery& envQuery) const
 {
     const auto& model = std::get<State>(agent.model);
 
@@ -135,12 +125,8 @@ void GeneralizedCentrifugalForceModel::CheckModelConstraint(
     constexpr double BMaxMax = 2.;
     validateConstraint(BMax, BMaxMin, BMaxMax, "BMax");
 
-    const auto neighbors = neighborhoodSearch.GetNeighboringAgents(model.position, 2);
+    const auto neighbors = envQuery.AgentsInRange(agent, 2.0);
     for(const auto& neighbor : neighbors) {
-        if(agent.id == neighbor.id) {
-            continue;
-        }
-
         const auto& neighborModel = std::get<State>(neighbor.model);
         const auto contanctDist = AgentToAgentSpacing(agent, neighbor);
         const auto distance = (model.position - neighborModel.position).Norm();
@@ -158,7 +144,7 @@ void GeneralizedCentrifugalForceModel::CheckModelConstraint(
     }
 
     const auto maxRadius = std::max(AMin, BMax) / 2.;
-    const auto lineSegments = geometry.LineSegmentsInDistanceTo(maxRadius, model.position);
+    const auto lineSegments = envQuery.LineSegmentsInRange(model.position, maxRadius);
     if(std::begin(lineSegments) != std::end(lineSegments)) {
         throw SimulationError(
             "Model constraint violation: Agent {} too close to geometry boundaries, distance <= {}",
@@ -315,10 +301,9 @@ Point GeneralizedCentrifugalForceModel::ForceRepPed(
 
 inline Point GeneralizedCentrifugalForceModel::ForceRepRoom(
     const GenericAgent& ped,
-    const CollisionGeometry& geometry) const
+    const EnvironmentQuery& envQuery) const
 {
-    const auto& walls =
-        geometry.LineSegmentsInApproxDistanceTo(std::get<State>(ped.model).position);
+    const auto& walls = envQuery.LineSegmentsInRange(std::get<State>(ped.model).position);
 
     auto f = std::accumulate(
         walls.cbegin(),

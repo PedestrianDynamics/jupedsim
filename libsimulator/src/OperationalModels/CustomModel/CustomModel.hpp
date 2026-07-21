@@ -34,13 +34,11 @@
 ///         double dT,
 ///         const GenericAgent& current,
 ///         GenericAgent& next,
-///         const CollisionGeometry& geometry,
-///         const NeighborhoodSearch<GenericAgent>& neighborhoodSearch) const override;
+///         const EnvironmentQuery& envQuery) const override;
 ///
 ///     void CheckModelConstraint(
 ///         const GenericAgent& agent,
-///         const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
-///         const CollisionGeometry& geometry) const override;
+///         const EnvironmentQuery& envQuery) const override;
 /// };
 /// @endcode
 ///

@@ -181,17 +181,14 @@ class PythonSocialForceModel(CustomOperationalModel):
 
         return (fx, fy)
 
-    def compute_next_state(
-        self, dt: float, agent, geometry, neighborhood_search
-    ):
+    def compute_next_state(self, dt: float, agent, env_query):
         """
         Compute new position using Social Force Model.
 
         Args:
             dt: time step [s]
             agent: Agent (current agent, exposing position, target and model)
-            geometry: Geometry for wall/obstacle queries
-            neighborhood_search: NeighborhoodSearch for neighbor queries
+            env_query: EnvironmentQuery for neighbor and geometry queries
 
         Returns:
             PythonSocialForceModelState carrying the full per-agent state with
@@ -216,18 +213,14 @@ class PythonSocialForceModel(CustomOperationalModel):
             reaction_time=state.reaction_time,
         )
 
-        ## Add social forces from neighboring agents
-        neighboring_agents = neighborhood_search.get_neighboring_agents(
-            agent.position, 2.0
-        )
-
-        for neighbor in neighboring_agents:
+        # Add social forces from neighboring agents
+        for neighbor in env_query.agents_in_range(agent, 2.0):
             fx, fy = self._social_force(agent, neighbor)
             acc_x += fx / state.mass
             acc_y += fy / state.mass
 
         # Add obstacle forces (from geometry)
-        for wall in geometry.get_walls_in_distance_to(agent.position, 5.0):
+        for wall in env_query.line_segments_in_range(agent.position, 5.0):
             fx, fy = self._obstacle_force(agent, wall)
             acc_x += fx / state.mass
             acc_y += fy / state.mass
@@ -245,7 +238,3 @@ class PythonSocialForceModel(CustomOperationalModel):
         )
 
         return replace(state, position=new_position, velocity=new_velocity)
-
-    def check_model_constraint(self, ped, neighborhood_search, geometry):
-        """Check model constraints (optional)."""
-        pass

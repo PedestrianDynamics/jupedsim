@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "python_model.hpp"
 
-#include "CollisionGeometry.hpp"
+#include "EnvironmentQuery.hpp"
 #include "GenericAgent.hpp"
-#include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"
 #include "OperationalModels/CustomModel/CustomModel.hpp"
 #include "SimulationError.hpp"
@@ -89,18 +88,15 @@ void PythonModel::ComputeNextState(
     double dT,
     const GenericAgent& current,
     GenericAgent& next,
-    const CollisionGeometry& geometry,
-    const NeighborhoodSearch<GenericAgent>& neighborhoodSearch) const
+    const EnvironmentQuery& envQuery) const
 {
     py::gil_scoped_acquire gil;
 
     py::object pythonAgent = py::cast(current);
-    py::object pythonGeometry = py::cast(&geometry, py::return_value_policy::reference);
-    py::object pythonNeighborhoodSearch =
-        py::cast((&neighborhoodSearch), py::return_value_policy::reference);
+    py::object pythonEnvQuery = py::cast(&envQuery, py::return_value_policy::reference);
 
-    py::object pythonUpdate = _model.attr("_compute_next_state")(
-        dT, pythonAgent, pythonGeometry, pythonNeighborhoodSearch);
+    py::object pythonUpdate =
+        _model.attr("_compute_next_state")(dT, pythonAgent, pythonEnvQuery);
 
     // "next" shares the Python state object with "current" (GilSafePyObject copies are
     // refcounted, not cloned), so this also rejects returning the current state instance.
@@ -155,17 +151,14 @@ void PythonModel::ComputeNextState(
 
 void PythonModel::CheckModelConstraint(
     const GenericAgent& agent,
-    const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
-    const CollisionGeometry& geometry) const
+    const EnvironmentQuery& envQuery) const
 {
     py::gil_scoped_acquire gil;
 
     py::object pythonAgent = py::cast(agent);
-    py::object pythonNeighborhoodSearch =
-        py::cast((&neighborhoodSearch), py::return_value_policy::reference);
-    py::object pythonGeometry = py::cast(&geometry, py::return_value_policy::reference);
+    py::object pythonEnvQuery = py::cast(&envQuery, py::return_value_policy::reference);
 
-    _model.attr("_check_model_constraint")(pythonAgent, pythonNeighborhoodSearch, pythonGeometry);
+    _model.attr("_check_model_constraint")(pythonAgent, pythonEnvQuery);
 }
 
 void init_python_model(py::module_& m)
