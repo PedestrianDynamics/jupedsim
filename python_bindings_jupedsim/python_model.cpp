@@ -120,8 +120,7 @@ void PythonModel::ComputeNextState(
     } catch(const py::error_already_set& ex) {
         if(ex.matches(PyExc_AttributeError)) {
             throw SimulationError(
-                "State returned by compute_next_state() is missing the '{}' attribute.",
-                attr_name);
+                "State returned by compute_next_state() is missing the '{}' attribute.", attr_name);
         }
         throw;
     }
