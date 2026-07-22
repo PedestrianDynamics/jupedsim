@@ -34,7 +34,7 @@ void SocialForceModel::ComputeNextState(
     auto forces = DrivingForce(current);
 
     auto neighborhood =
-        envQuery.AgentsInRange(current, _cutOffRadius, envQuery.VisibleFrom(model.position));
+        envQuery.AgentsInRange(current.model, _cutOffRadius, envQuery.VisibleFrom(model.position));
     Point F_rep;
     for(const auto& neighbor : neighborhood) {
         F_rep += AgentForce(current, neighbor);

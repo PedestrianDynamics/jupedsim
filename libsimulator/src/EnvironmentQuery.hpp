@@ -13,6 +13,8 @@
 #include <ranges>
 #include <vector>
 
+using OperationalModelState = GenericAgent::ModelState;
+
 class EnvironmentQuery
 {
     const CollisionGeometry& _geometry;
@@ -36,11 +38,11 @@ public:
     //   query.AgentsInRange(self, r, query.VisibleFrom(self.position()))
     template <std::predicate<const GenericAgent&> Pred = AcceptAll>
     std::vector<GenericAgent>
-    AgentsInRange(const GenericAgent& agent, double radius, Pred include = {}) const
+    AgentsInRange(const OperationalModelState& state, double radius, Pred include = {}) const
     {
-        auto neighbors = _nsearch.GetNeighboringAgents(agent.position(), radius);
+        auto neighbors = _nsearch.GetNeighboringAgents(Pos(state), radius);
         std::erase_if(neighbors, [&](const GenericAgent& candidate) {
-            return candidate.id == agent.id || !include(candidate);
+            return (candidate.position() == Pos(state)) || !include(candidate);
         });
         return neighbors;
     }

@@ -31,7 +31,7 @@ void CollisionFreeSpeedModelV2::ComputeNextState(
     const auto& model = std::get<State>(current.model);
     const auto& boundary = envQuery.LineSegmentsInRange(model.position);
     auto neighborhood =
-        envQuery.AgentsInRange(current, _cutOffRadius, envQuery.VisibleFrom(model.position));
+        envQuery.AgentsInRange(current.model, _cutOffRadius, envQuery.VisibleFrom(model.position));
 
     const auto neighborRepulsion = std::accumulate(
         std::begin(neighborhood),

@@ -54,7 +54,7 @@ TEST(EnvironmentQuery, AgentsInRangeExcludesSelf)
     const auto geo = OpenGeometry();
     const EnvironmentQuery q{geo, f.nsearch};
 
-    const auto result = q.AgentsInRange(f.agents[0], 100.0);
+    const auto result = q.AgentsInRange(f.agents[0].model, 100.0);
     EXPECT_TRUE(result.empty());
 }
 
@@ -70,7 +70,7 @@ TEST(EnvironmentQuery, AgentsInRangeNoFilterReturnsAllInRadius)
     const auto geo = OpenGeometry();
     const EnvironmentQuery q{geo, f.nsearch};
 
-    const auto result = q.AgentsInRange(f.agents[0], 5.0);
+    const auto result = q.AgentsInRange(f.agents[0].model, 5.0);
     EXPECT_EQ(result.size(), 3u);
 }
 
@@ -86,7 +86,7 @@ TEST(EnvironmentQuery, AgentsInRangeCustomFilterRejectsAll)
     const EnvironmentQuery q{geo, f.nsearch};
 
     const auto result =
-        q.AgentsInRange(f.agents[0], 5.0, [](const GenericAgent&) { return false; });
+        q.AgentsInRange(f.agents[0].model, 5.0, [](const GenericAgent&) { return false; });
     EXPECT_TRUE(result.empty());
 }
 
@@ -102,7 +102,7 @@ TEST(EnvironmentQuery, AgentsInRangeCustomFilterSelectsSubset)
     const auto geo = OpenGeometry();
     const EnvironmentQuery q{geo, f.nsearch};
 
-    const auto result = q.AgentsInRange(f.agents[0], 5.0, [](const GenericAgent& a) {
+    const auto result = q.AgentsInRange(f.agents[0].model, 5.0, [](const GenericAgent& a) {
         return std::get<State>(a.model).radius > 0.25;
     });
 
@@ -125,7 +125,7 @@ TEST(EnvironmentQuery, AgentsInRangeCustomFilterReceivesNoSelf)
 
     const auto selfId = f.agents[0].id;
     bool selfSeen = false;
-    q.AgentsInRange(f.agents[0], 5.0, [&](const GenericAgent& a) {
+    q.AgentsInRange(f.agents[0].model, 5.0, [&](const GenericAgent& a) {
         if(a.id == selfId) {
             selfSeen = true;
         }
@@ -145,6 +145,7 @@ TEST(EnvironmentQuery, AgentsInRangeOutOfRadiusNotReturned)
     const auto geo = OpenGeometry();
     const EnvironmentQuery q{geo, f.nsearch};
 
-    const auto result = q.AgentsInRange(f.agents[0], 1.0, [](const GenericAgent&) { return true; });
+    const auto result =
+        q.AgentsInRange(f.agents[0].model, 1.0, [](const GenericAgent&) { return true; });
     EXPECT_TRUE(result.empty());
 }

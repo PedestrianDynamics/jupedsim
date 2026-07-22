@@ -39,7 +39,7 @@ void AnticipationVelocityModel::ComputeNextState(
     const auto& boundary = envQuery.LineSegmentsInRange(model.position);
     // Exclude occluded and self agents
     auto neighborhood =
-        envQuery.AgentsInRange(current, _cutOffRadius, envQuery.VisibleFrom(model.position));
+        envQuery.AgentsInRange(current.model, _cutOffRadius, envQuery.VisibleFrom(model.position));
 
     const auto neighborRepulsion = std::accumulate(
         std::begin(neighborhood),

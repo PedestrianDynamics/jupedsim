@@ -17,7 +17,7 @@ void init_environment_query(py::module_& m)
         .def(
             "agents_in_range",
             [](const EnvironmentQuery& self, const GenericAgent& agent, double radius) {
-                return self.AgentsInRange(agent, radius);
+                return self.AgentsInRange(agent.model, radius);
             },
             py::arg("agent"),
             py::arg("radius"),
@@ -29,7 +29,7 @@ void init_environment_query(py::module_& m)
                double radius,
                py::function predicate) -> std::vector<GenericAgent> {
                 return self.AgentsInRange(
-                    agent, radius, [&predicate](const GenericAgent& candidate) -> bool {
+                    agent.model, radius, [&predicate](const GenericAgent& candidate) -> bool {
                         return predicate(py::cast(candidate)).cast<bool>();
                     });
             },
