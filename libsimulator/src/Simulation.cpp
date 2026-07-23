@@ -267,6 +267,10 @@ GenericAgent::ID Simulation::AddAgent(GenericAgent agent)
             ToString(_operationalDecisionSystem.ModelType()));
     }
 
+    // Set 3D location (with fixed z=0.0 for the time being), so that the OperationDecisionSystem
+    // will run through both the original + the 3D move. (This is temporary.)
+    agent.location = _geometry->get_location(agent.position().x, agent.position().y, 0.0);
+
     _operationalDecisionSystem.ValidateAgent(agent, _neighborhoodSearch, *_geometry->geometry_2d());
 
     _stageManager.HandleNewAgent(agent.stageId);

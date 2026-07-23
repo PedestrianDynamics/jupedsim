@@ -5,6 +5,7 @@
 #include "CollisionFreeSpeedModelV2.hpp"
 #include "CollisionFreeSpeedModelV3.hpp"
 #include "GeneralizedCentrifugalForceModel.hpp"
+#include "Geometry/Location.hpp"
 #include "OperationalModel.hpp"
 #include "OperationalModels/CustomModel/CustomModel.hpp"
 #include "OperationalModels/OperationalModelType.hpp"
@@ -18,6 +19,7 @@
 
 #include <concepts>
 #include <deque>
+#include <optional>
 #include <utility>
 #include <variant>
 class Journey;
@@ -63,6 +65,10 @@ struct GenericAgent {
         EachAlternativeIsModelAgentState<ModelState>,
         "Every agent model state must provide a 'Point position' member");
     ModelState model{};
+
+    /// The agent's on-surface Location (optional during the 2D->3D migration).
+    /// Invariant: `location->xy() == position()` after every pipeline stage.
+    std::optional<Location> location{};
 
     Point& position()
     {
