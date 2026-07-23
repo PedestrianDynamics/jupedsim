@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
+#include "Geometry/Location.hpp"
 #include "OperationalModels/OperationalModelState.hpp"
 #include "OperationalModels/OperationalModelType.hpp"
 #include "Point.hpp"
@@ -9,6 +10,7 @@
 #include <fmt/core.h>
 
 #include <deque>
+#include <optional>
 #include <utility>
 class Journey;
 class BaseStage;
@@ -25,6 +27,10 @@ struct GenericAgent {
     Point finalTarget{};
 
     OperationalModelState state{};
+
+    /// The agent's on-surface Location (optional during the 2D->3D migration).
+    /// Invariant: `location->xy() == Position()` after every pipeline stage.
+    std::optional<Location> location{};
 
     const Point Position() const { return _position; }
     void MoveAlongSurface(Point delta) { _position += delta; }
