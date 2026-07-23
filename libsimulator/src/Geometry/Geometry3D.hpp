@@ -76,16 +76,6 @@ public:
     std::optional<Location>
     get_location(double x, double y, double z_hint, double tol = ZHintTolerance) const;
 
-    /// Re-anchor a horizontal move onto the 3D surface: @p from is in region
-    /// @p from_region_id; return the face and on-surface point at @p to. The
-    /// move is always a direct step, never around corners. Because the agent
-    /// step is small relative to the triangle edge length, @p to lies in the
-    /// start face or one directly touching it (its vertex 1-ring). Throws if
-    /// @p to is in none of them (step too large for the mesh resolution, or off
-    /// the walkable area).
-    FaceLocation
-    walk_on_surface(std::size_t from_region_id, const Point2D& from, const Point2D& to) const;
-
     /// True iff @p p projects (along -z) onto the walkable surface.
     bool is_valid_location(const Point3D& p) const;
 

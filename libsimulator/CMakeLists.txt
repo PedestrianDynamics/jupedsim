@@ -18,6 +18,7 @@ target_sources(simulator PRIVATE
     src/Geometry/Geometry2D.hpp
     src/Geometry/Geometry3D.cpp
     src/Geometry/Geometry3D.hpp
+    src/Geometry/Location.cpp
     src/Geometry/Location.hpp
     src/Geometry/RegionSplit.cpp
     src/Geometry/RegionSplit.hpp
