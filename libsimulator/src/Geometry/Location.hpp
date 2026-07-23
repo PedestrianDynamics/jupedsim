@@ -23,6 +23,11 @@ public:
 
     Point3D position_3d() const { return Point3D{_xy.x, _xy.y, _z}; }
 
+    /// Move on surface along the provided horizontal @p xy_direction.
+    /// Throws if the path leaves the walkable area. On throw the
+    /// location is left unchanged.
+    void move_on_surface(Point xy_direction);
+
 private:
     // Location uses private constructor. Only Geometry3D can create Location objects.
     friend class Geometry3D;
@@ -40,6 +45,6 @@ private:
     const Geometry3D* _geometry;
     Point _xy;
     std::size_t _regionId;
-    SurfaceMesh::Face_index _face; // cache; null = stale
+    SurfaceMesh::Face_index _face; // cache; always valid (move throws before invalidating)
     double _z; // cache
 };
