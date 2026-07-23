@@ -42,9 +42,18 @@ public:
         for(size_t index = 0; index < agents.size(); ++index) {
             const auto& current = agents[index];
             auto& next = _next[index];
+            // `next` starts as a copy of the current agent, so its Location holds the
+            // pre-step (x,y) and cached face -- the straight walk starts from there.
+            const bool hasLocation = next.location.has_value();
             const AgentStep step{envQuery, current, dT};
             const Point movement = _model->ComputeNextState(current.state, next.state, step);
             next.MoveAlongSurface(movement);
+            if(hasLocation) {
+                // Advance the Location by the model's xy change.
+                // Basically we redo the walk on 3D mesh. This will get the real movement later,
+                // so that this part gets removed.
+                next.location->move_on_surface(movement);
+            }
         }
         // Swap in the computed generation. This is safe because no caller retains
         // pointers/references across an iteration (Python-side agent handles resolve per

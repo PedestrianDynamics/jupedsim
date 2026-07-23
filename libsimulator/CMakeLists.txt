@@ -118,6 +118,7 @@ if (BUILD_TESTS)
         test/TestLocation.cpp
         test/TestMesh.cpp
         test/TestNeighborhoodSearch.cpp
+        test/TestOperationalDecisionSystem.cpp
         test/TestPoint.cpp
         test/TestRegionSplit.cpp
         test/TestRoutingEngine3D.cpp
