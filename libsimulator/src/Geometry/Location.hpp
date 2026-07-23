@@ -5,6 +5,7 @@
 #include "Point.hpp"
 
 #include <cstddef>
+#include <optional>
 
 class Geometry3D;
 
@@ -24,9 +25,13 @@ public:
     Point3D position_3d() const { return Point3D{_xy.x, _xy.y, _z}; }
 
     /// Move on surface along the provided horizontal @p xy_direction.
-    /// Throws if the path leaves the walkable area. On throw the
-    /// location is left unchanged.
+    /// Throws if the path hits a wall. On throw the location is left unchanged.
     void move_on_surface(Point xy_direction);
+
+    /// Feasibility variant of `move_on_surface`: walk along @p xy_direction and
+    /// return the resulting Location, or `nullopt` if the straight path leaves
+    /// the walkable area. Does not modify `*this`.
+    std::optional<Location> try_move_on_surface(Point xy_direction) const;
 
 private:
     // Location uses private constructor. Only Geometry3D can create Location objects.
