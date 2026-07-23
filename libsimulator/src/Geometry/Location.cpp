@@ -7,6 +7,7 @@
 #include <array>
 #include <cassert>
 #include <cstddef>
+#include <optional>
 
 namespace
 {
@@ -77,9 +78,9 @@ fan_face(const SurfaceMesh& mesh, SurfaceMesh::Vertex_index v, const K::Vector_2
 /// Exact straight walk from @p from along @p direction across @p mesh to the
 /// target `from + direction` starting in @p start_face. Advances face by face
 /// through the xy-projected triangulation. Steps may be arbitrarily long (cost
-/// O(crossed faces)). Throws if the the walkable area is left. Assumes faces are
-/// CCW in the xy projection.
-Geometry3D::FaceLocation straight_walk(
+/// O(crossed faces)). Requires that faces are CCW in the xy projection.
+/// Returns `nullopt` if the walkable area is left.
+std::optional<Geometry3D::FaceLocation> straight_walk(
     const SurfaceMesh& mesh,
     SurfaceMesh::Face_index start_face,
     const Point2D& from,
@@ -116,7 +117,7 @@ Geometry3D::FaceLocation straight_walk(
     for(std::size_t step = 0; step < maxSteps; ++step) {
         if(covers(f)) {
             // Done: target is inside the triangle
-            return {f, point_on_face(mesh, f, to)};
+            return Geometry3D::FaceLocation{f, point_on_face(mesh, f, to)};
         }
 
         // 'to' lies outside f -> find the forward exit across f's boundary.
@@ -132,8 +133,8 @@ Geometry3D::FaceLocation straight_walk(
             if(CGAL::orientation(from, to, vp) == CGAL::COLLINEAR && (vp - from) * direction >= 0) {
                 const auto g = fan_face(mesh, v, direction);
                 if(g == SurfaceMesh::null_face()) {
-                    throw SimulationError(
-                        "straight_walk(): path leaves the walkable area at a vertex");
+                    // Left the walkable area crossing this vertex.
+                    return std::nullopt;
                 }
                 lastCrossedVertex = v;
                 f = g;
@@ -164,7 +165,8 @@ Geometry3D::FaceLocation straight_walk(
         }
         const auto neighbor = mesh.face(mesh.opposite(exit));
         if(neighbor == SurfaceMesh::null_face()) {
-            throw SimulationError("straight_walk(): path leaves the walkable area");
+            // Exit edge is a border edge: the path leaves the walkable area.
+            return std::nullopt;
         }
         f = neighbor;
     }
@@ -172,18 +174,31 @@ Geometry3D::FaceLocation straight_walk(
 }
 } // namespace
 
-void Location::move_on_surface(Point xy_direction)
+std::optional<Location> Location::try_move_on_surface(Point xy_direction) const
 {
-    // Walk from current Location along provided xy-direction.
-    const auto hit = straight_walk(
+    // Walk from current Location along the provided xy-direction. A null result
+    // means the straight path leaves the walkable area.
+    const auto new_face_location = straight_walk(
         _geometry->mesh(),
         _face,
         Point2D{_xy.x, _xy.y},
         K::Vector_2{xy_direction.x, xy_direction.y});
-    // Though not strictly required, we only update if previous function did not throw
-    // (e.g. by leaving the walkable area).
-    _xy = _xy + xy_direction;
-    _face = hit.face;
-    _z = hit.point.z();
-    _regionId = _geometry->region_of(hit.face);
+    if(new_face_location) {
+        return Location{
+            _geometry,
+            _xy + xy_direction,
+            _geometry->region_of(new_face_location->face),
+            new_face_location->face,
+            new_face_location->point.z()};
+    }
+    return std::nullopt;
+}
+
+void Location::move_on_surface(Point xy_direction)
+{
+    auto moved = try_move_on_surface(xy_direction);
+    if(!moved) {
+        throw SimulationError("move_on_surface(): path hit a wall");
+    }
+    *this = *moved;
 }

@@ -370,3 +370,43 @@ TEST(LocationMove, LongStepCrossesManyFaces)
     EXPECT_EQ(loc.region(), 0u);
     EXPECT_NEAR(loc.z(), 0.0, 1e-9);
 }
+
+// -- try_move_on_surface (feasibility variant, non-throwing) --
+
+TEST(LocationTryMove, SucceedsReturnsResultAndLeavesSourceUnchanged)
+{
+    Geometry3D geo{ramp()};
+
+    const auto loc = location_at(geo, 10, 2);
+    const auto moved = loc.try_move_on_surface(Point{1, 1}); // -> (11,3), z=1.2
+    ASSERT_TRUE(moved.has_value());
+    EXPECT_DOUBLE_EQ(moved->xy().x, 11.0);
+    EXPECT_DOUBLE_EQ(moved->xy().y, 3.0);
+    EXPECT_NEAR(moved->z(), 1.2, 1e-9);
+    EXPECT_EQ(moved->region(), 0u);
+    // The source Location is const and must be untouched.
+    EXPECT_DOUBLE_EQ(loc.xy().x, 10.0);
+    EXPECT_DOUBLE_EQ(loc.xy().y, 2.0);
+}
+
+TEST(LocationTryMove, LeavingAcrossBorderEdgeReturnsNullopt)
+{
+    Geometry3D geo{flat_room()};
+
+    const auto loc = location_at(geo, 3, 2);
+    // Straight path crosses a border edge -> no result (instead of throwing).
+    EXPECT_FALSE(loc.try_move_on_surface(Point{17, 18}).has_value()); // -> (20,20)
+    // Source unchanged.
+    EXPECT_DOUBLE_EQ(loc.xy().x, 3.0);
+    EXPECT_DOUBLE_EQ(loc.xy().y, 2.0);
+}
+
+TEST(LocationTryMove, LeavingOverBoundaryCornerReturnsNullopt)
+{
+    Geometry3D geo{flat_room()}; // [0,10]^2
+
+    // Straight path passes exactly through the boundary corner (10,10) and
+    // continues outward -> leaves the area at the vertex.
+    const auto loc = location_at(geo, 4, 3);
+    EXPECT_FALSE(loc.try_move_on_surface(Point{12, 14}).has_value()); // through (10,10)
+}
