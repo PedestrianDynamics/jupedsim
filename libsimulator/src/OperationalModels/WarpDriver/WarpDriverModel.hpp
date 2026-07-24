@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "CollisionGeometry.hpp"
 #include "OperationalModel.hpp"
+
+class EnvironmentQuery;
 #include "OperationalModelType.hpp"
 #include "Point.hpp"
 
@@ -89,13 +90,10 @@ public:
         double dT,
         const GenericAgent& current,
         GenericAgent& next,
-        const CollisionGeometry& geometry,
-        const NeighborhoodSearch<GenericAgent>& neighborhoodSearch) const override;
+        const EnvironmentQuery& envQuery) const override;
 
-    void CheckModelConstraint(
-        const GenericAgent& agent,
-        const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
-        const CollisionGeometry& geometry) const override;
+    void CheckModelConstraint(const GenericAgent& agent, const EnvironmentQuery& envQuery)
+        const override;
 };
 
 template <>

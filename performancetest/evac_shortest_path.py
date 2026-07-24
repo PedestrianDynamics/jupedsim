@@ -61,7 +61,6 @@ def main(
     number_of_iterations: int = 100,
     number_of_agents: int = 15000,
 ):
-
     logging.basicConfig(
         level=logging.DEBUG, format="%(levelname)s : %(message)s"
     )

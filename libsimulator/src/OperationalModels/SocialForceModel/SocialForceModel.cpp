@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "SocialForceModel.hpp"
 
-#include "CollisionGeometry.hpp"
+#include "EnvironmentQuery.hpp"
 #include "GenericAgent.hpp"
 #include "LineSegment.hpp"
-#include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
 #include "Point.hpp"
@@ -29,27 +28,25 @@ void SocialForceModel::ComputeNextState(
     double dT,
     const GenericAgent& current,
     GenericAgent& next,
-    const CollisionGeometry& geometry,
-    const NeighborhoodSearch<GenericAgent>& neighborhoodSearch) const
+    const EnvironmentQuery& envQuery) const
 {
     const auto& model = std::get<State>(current.model);
     auto forces = DrivingForce(current);
 
-    const auto neighborhood =
-        neighborhoodSearch.GetNeighboringAgents(model.position, this->_cutOffRadius);
+    auto neighborhood = envQuery.OtherAgentsInRange(
+        model, _cutOffRadius, [&envQuery, from = model.position](const Point& to) {
+            return envQuery.NoGeometryBetween(from, to);
+        });
     Point F_rep;
     for(const auto& neighbor : neighborhood) {
-        if(neighbor.id == current.id) {
-            continue;
-        }
         F_rep += AgentForce(current, neighbor);
     }
     forces += F_rep / model.mass;
-    const auto& walls = geometry.LineSegmentsInApproxDistanceTo(model.position);
+    const auto& walls = envQuery.LineSegmentsInRange(model.position);
 
     const auto obstacle_f = std::accumulate(
-        walls.cbegin(),
-        walls.cend(),
+        std::begin(walls),
+        std::end(walls),
         Point(0, 0),
         [this, &current](const auto& acc, const auto& element) {
             return acc + ObstacleForce(current, element);
@@ -64,8 +61,7 @@ void SocialForceModel::ComputeNextState(
 
 void SocialForceModel::CheckModelConstraint(
     const GenericAgent& agent,
-    const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
-    const CollisionGeometry& geometry) const
+    const EnvironmentQuery& envQuery) const
 {
     // none of these constraint are given by the paper but are useful to create a simulation that
     // does not break immediately
@@ -94,7 +90,7 @@ void SocialForceModel::CheckModelConstraint(
     const auto radius = model.radius;
     throwIfNegative(radius, "radius");
 
-    const auto neighbors = neighborhoodSearch.GetNeighboringAgents(model.position, 2);
+    const auto neighbors = envQuery.OtherAgentsInRange(agent.position(), 2.0);
     for(const auto& neighbor : neighbors) {
         const auto& neighborPosition = std::get<State>(neighbor.model).position;
         const auto distance = (model.position - neighborPosition).Norm();
@@ -110,7 +106,7 @@ void SocialForceModel::CheckModelConstraint(
         }
     }
     const auto maxRadius = model.radius / 2;
-    const auto lineSegments = geometry.LineSegmentsInDistanceTo(maxRadius, model.position);
+    const auto lineSegments = envQuery.LineSegmentsInRange(model.position, maxRadius);
     if(std::begin(lineSegments) != std::end(lineSegments)) {
         throw SimulationError(
             "Model constraint violation: Agent {} too close to geometry boundaries, distance <= "

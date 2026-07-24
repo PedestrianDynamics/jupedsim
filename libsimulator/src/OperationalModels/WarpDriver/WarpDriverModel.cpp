@@ -27,8 +27,8 @@
 //
 #include "WarpDriverModel.hpp"
 
+#include "EnvironmentQuery.hpp"
 #include "GenericAgent.hpp"
-#include "NeighborhoodSearch.hpp"
 #include "OperationalModelType.hpp"
 #include "Point.hpp"
 #include "SimulationError.hpp"
@@ -352,8 +352,7 @@ OperationalModelType WarpDriverModel::Type() const
 
 void WarpDriverModel::CheckModelConstraint(
     const GenericAgent& agent,
-    const NeighborhoodSearch<GenericAgent>& /*neighborhoodSearch*/,
-    const CollisionGeometry& /*geometry*/) const
+    const EnvironmentQuery& /*envQuery*/) const
 {
     const auto* data = std::get_if<State>(&agent.model);
     if(!data) {
@@ -416,8 +415,7 @@ void WarpDriverModel::ComputeNextState(
     double dT,
     const GenericAgent& current,
     GenericAgent& next,
-    const CollisionGeometry& geometry,
-    const NeighborhoodSearch<GenericAgent>& neighborhoodSearch) const
+    const EnvironmentQuery& envQuery) const
 {
     const auto& agentData = std::get<State>(current.model);
     auto& nextData = std::get<State>(next.model);
@@ -456,8 +454,7 @@ void WarpDriverModel::ComputeNextState(
     const double dtSample = this->_timeHorizon / std::max(this->_numSamples - 1, 1);
 
     // === Step 2: Perceive - build collision probability field ===
-    const auto neighbors =
-        neighborhoodSearch.GetNeighboringAgents(agentData.position, _cutOffRadius);
+    const auto neighbors = envQuery.OtherAgentsInRange(current.model, _cutOffRadius);
 
     // Short-range repulsion: not part of the original Wolinski et al. (2016)
     // model, which is purely anticipatory. Added as a practical safety net
@@ -466,9 +463,6 @@ void WarpDriverModel::ComputeNextState(
     // Similar to the pushout mechanisms in CFS and AVM.
     Point repulsion{0.0, 0.0};
     for(const auto& neighbor : neighbors) {
-        if(neighbor.id == current.id) {
-            continue;
-        }
         const auto* nbData = std::get_if<State>(&neighbor.model);
         if(!nbData) {
             continue;
@@ -506,10 +500,6 @@ void WarpDriverModel::ComputeNextState(
     }
 
     for(const auto& neighbor : neighbors) {
-        if(neighbor.id == current.id) {
-            continue;
-        }
-
         const auto* nbData = std::get_if<State>(&neighbor.model);
         if(!nbData) {
             continue;
@@ -637,7 +627,7 @@ void WarpDriverModel::ComputeNextState(
     newVelWorld = newVelWorld + repulsion;
 
     // Boundary avoidance: steer agents away from walls
-    const auto& walls = geometry.LineSegmentsInApproxDistanceTo(agentData.position);
+    const auto& walls = envQuery.LineSegmentsInRange(agentData.position);
     for(const auto& wall : walls) {
         const Point wallVec = wall.p2 - wall.p1;
         const double wallLen2 = wallVec.ScalarProduct(wallVec);
@@ -679,14 +669,14 @@ void WarpDriverModel::ComputeNextState(
         Point detourVel = detourDir * agentData.v0 * 0.5;
         Point newPos = agentData.position + detourVel * dT;
         // If detour would leave the walkable area, try the other side
-        if(!geometry.InsideGeometry(newPos)) {
+        if(!envQuery.InsideGeometry(newPos)) {
             detourSide = -detourSide;
             lateral = Point{-desiredDir.y * detourSide, desiredDir.x * detourSide};
             detourDir = (lateral * 0.8 + desiredDir * 0.2).Normalized();
             detourVel = detourDir * agentData.v0 * 0.5;
             newPos = agentData.position + detourVel * dT;
             // If both sides fail, just creep toward goal
-            if(!geometry.InsideGeometry(newPos)) {
+            if(!envQuery.InsideGeometry(newPos)) {
                 newPos = agentData.position + desiredDir * agentData.v0 * 0.1 * dT;
                 detourDir = desiredDir;
             }

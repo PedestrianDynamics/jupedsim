@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
+#include "EnvironmentQuery.hpp"
 #include "GenericAgent.hpp"
 #include "GeometryBuilder.hpp"
-#include "NeighborhoodSearch.hpp"
 #include "OperationalDecisionSystem.hpp"
 #include "OperationalModels/CustomModel/CustomModel.hpp"
 
@@ -39,8 +39,7 @@ public:
         double dT,
         const GenericAgent& current,
         GenericAgent& next,
-        const CollisionGeometry&,
-        const NeighborhoodSearch<GenericAgent>&) const override
+        const EnvironmentQuery&) const override
     {
         const auto& currentModelData = std::get<CustomModel::State>(current.model);
         const auto& state = currentModelData.Get<MinimalState>();
@@ -52,12 +51,7 @@ public:
         nextState.applications = state.applications + 1;
     }
 
-    void CheckModelConstraint(
-        const GenericAgent&,
-        const NeighborhoodSearch<GenericAgent>&,
-        const CollisionGeometry&) const override
-    {
-    }
+    void CheckModelConstraint(const GenericAgent&, const EnvironmentQuery&) const override {}
 };
 
 GenericAgent MakeAgent(GenericAgent::ModelState model)

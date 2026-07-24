@@ -250,5 +250,9 @@ class _TransientAgent:
             return state.model
         return state
 
+    @property
+    def _native(self):
+        return self.__obj
+
     def __repr__(self) -> str:
         return f"TransientAgent(id={self.__obj.id})"

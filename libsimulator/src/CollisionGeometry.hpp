@@ -122,7 +122,7 @@ public:
     /// @return iterator_pair to all linesegments in range
     LineSegmentRange LineSegmentsInDistanceTo(double distance, Point p) const;
 
-    const std::vector<LineSegment>& LineSegmentsInApproxDistanceTo(Point p) const;
+    LineSegmentRange LineSegmentsInApproxDistanceTo(Point p) const;
 
     /// Will perfrom a linesegment intersection versus the whole geometry, i.e. walls and closed
     /// doors.
@@ -135,6 +135,7 @@ public:
     const std::tuple<std::vector<Point>, std::vector<std::vector<Point>>>& AccessibleArea() const;
 
     const PolyWithHoles& Polygon() const { return _accessibleAreaPolygon; }
+    double MinApproxRadius() const { return CELL_EXTEND; }
 
 private:
     void insertIntoApproximateGrid(const LineSegment& ls);

@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "AnticipationVelocityModel.hpp"
 
-#include "CollisionGeometry.hpp"
+#include "EnvironmentQuery.hpp"
 #include "GenericAgent.hpp"
 #include "GeometricFunctions.hpp"
 #include "LineSegment.hpp"
 #include "Macros.hpp"
-#include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
 #include "Point.hpp"
@@ -34,37 +33,15 @@ void AnticipationVelocityModel::ComputeNextState(
     double dT,
     const GenericAgent& current,
     GenericAgent& next,
-    const CollisionGeometry& geometry,
-    const NeighborhoodSearch<GenericAgent>& neighborhoodSearch) const
+    const EnvironmentQuery& envQuery) const
 {
     const auto& model = std::get<State>(current.model);
-    auto neighborhood = neighborhoodSearch.GetNeighboringAgents(model.position, _cutOffRadius);
-    const auto& boundary = geometry.LineSegmentsInApproxDistanceTo(model.position);
-
-    // Remove any agent from the neighborhood that is obstructed by geometry and the current
-    // agent
-    neighborhood.erase(
-        std::remove_if(
-            std::begin(neighborhood),
-            std::end(neighborhood),
-            [&current, &model, &boundary](const auto& neighbor) {
-                if(current.id == neighbor.id) {
-                    return true;
-                }
-                const auto agent_to_neighbor =
-                    LineSegment(model.position, std::get<State>(neighbor.model).position);
-                if(std::find_if(
-                       boundary.cbegin(),
-                       boundary.cend(),
-                       [&agent_to_neighbor](const auto& boundary_segment) {
-                           return intersects(agent_to_neighbor, boundary_segment);
-                       }) != boundary.end()) {
-                    return true;
-                }
-
-                return false;
-            }),
-        std::end(neighborhood));
+    const auto& boundary = envQuery.LineSegmentsInRange(model.position);
+    // Exclude occluded and self agents
+    auto neighborhood = envQuery.OtherAgentsInRange(
+        model, _cutOffRadius, [&envQuery, from = model.position](const Point& to) {
+            return envQuery.NoGeometryBetween(from, to);
+        });
 
     const auto neighborRepulsion = std::accumulate(
         std::begin(neighborhood),
@@ -130,8 +107,7 @@ Point AnticipationVelocityModel::UpdateDirection(
 
 void AnticipationVelocityModel::CheckModelConstraint(
     const GenericAgent& agent,
-    const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
-    const CollisionGeometry& geometry) const
+    const EnvironmentQuery& envQuery) const
 {
     const auto& model = std::get<State>(agent.model);
     const auto r = model.radius;
@@ -175,11 +151,8 @@ void AnticipationVelocityModel::CheckModelConstraint(
     constexpr double reactionTimeMax = 1.0;
     validateConstraint(reactionTime, reactionTimeMin, reactionTimeMax, "reactionTime", true);
 
-    const auto neighbors = neighborhoodSearch.GetNeighboringAgents(model.position, 2);
+    const auto neighbors = envQuery.OtherAgentsInRange(agent.position(), 2.0);
     for(const auto& neighbor : neighbors) {
-        if(agent.id == neighbor.id) {
-            continue;
-        }
         const auto& neighbor_model = std::get<State>(neighbor.model);
         const auto contanctdDist = r + neighbor_model.radius;
         const auto distance = (model.position - neighbor_model.position).Norm();
@@ -192,7 +165,7 @@ void AnticipationVelocityModel::CheckModelConstraint(
         }
     }
 
-    const auto lineSegments = geometry.LineSegmentsInDistanceTo(r, model.position);
+    const auto lineSegments = envQuery.LineSegmentsInRange(model.position, r);
     if(std::begin(lineSegments) != std::end(lineSegments)) {
         throw SimulationError(
             "Model constraint violation: Agent {} too close to geometry boundaries, distance "
@@ -305,33 +278,36 @@ Point AnticipationVelocityModel::HandleWallAvoidance(
     const Point& direction,
     const Point& agentPosition,
     double agentRadius,
-    const std::vector<LineSegment>& boundary,
+    const auto& boundary,
     double wallBufferDistance,
     double pushoutStrength) const
 {
     const double criticalWallDistance = wallBufferDistance + agentRadius;
 
     Point modifiedDirection = direction;
+    std::for_each(
+        std::begin(boundary),
+        std::end(boundary),
+        [&agentPosition, &criticalWallDistance, &modifiedDirection, pushoutStrength](
+            const LineSegment& wall) {
+            const auto closestPoint = wall.ShortestPoint(agentPosition);
 
-    for(const auto& wall : boundary) {
-        const auto closestPoint = wall.ShortestPoint(agentPosition);
+            const auto distanceVector = agentPosition - closestPoint;
+            const auto [distance, normalTowardAgent] = distanceVector.NormAndNormalized();
 
-        const auto distanceVector = agentPosition - closestPoint;
-        const auto [distance, normalTowardAgent] = distanceVector.NormAndNormalized();
+            if(distance > criticalWallDistance) {
+                return;
+            }
 
-        if(distance > criticalWallDistance) {
-            continue;
-        }
+            const auto dotProduct = modifiedDirection.ScalarProduct(normalTowardAgent);
 
-        const auto dotProduct = modifiedDirection.ScalarProduct(normalTowardAgent);
-
-        if(dotProduct < 0) {
-            // Direction points into wall - need to project it out
-            // Remove the component pointing into the wall
-            const auto projectedDirection = modifiedDirection - normalTowardAgent * dotProduct;
-            modifiedDirection = projectedDirection + normalTowardAgent * pushoutStrength;
-        }
-    }
+            if(dotProduct < 0) {
+                // Direction points into wall - need to project it out
+                // Remove the component pointing into the wall
+                const auto projectedDirection = modifiedDirection - normalTowardAgent * dotProduct;
+                modifiedDirection = projectedDirection + normalTowardAgent * pushoutStrength;
+            }
+        });
 
     // Renormalize to maintain speed
     const auto finalDirection = modifiedDirection.Normalized();
