@@ -5,6 +5,7 @@
 #include "Geometry/Geometry2D.hpp"
 #include "Geometry/Location.hpp"
 #include "Geometry/RegionSplit.hpp"
+#include "Geometry/RegionView.hpp"
 #include "Point.hpp"
 
 #include <array>
@@ -89,6 +90,11 @@ public:
     /// One 0-based region id per triangle, in mesh face order.
     std::vector<std::size_t> region_id_per_face() const;
 
+    /// The 2D view of region @p region_id: its (merged) walls, its seams and
+    /// its seam-adjacent regions. Always present (also on the polygon path,
+    /// where there is exactly one, region 0). Indexable 0..region_count()-1.
+    const RegionView& region_view(std::size_t region_id) const { return _regionViews[region_id]; }
+
     /// Vertex coordinates (x, y, z), indexable 0..n-1.
     std::vector<std::array<double, 3>> vertices() const;
 
@@ -99,9 +105,14 @@ private:
     /// Compact indices, build the AABB tree and the region overlay.
     void build();
 
+    /// Build one RegionView per region: classify boundary halfedges into walls
+    /// and seams, merge collinear runs, record seam neighbours.
+    void build_region_views();
+
     SurfaceMesh _mesh{};
     std::unique_ptr<Geometry2D> _geometry2D{};
     std::unique_ptr<AABBTree> _aabbTree{};
     RegionMap _region{};
     std::size_t _regionCount{0};
+    std::vector<RegionView> _regionViews{};
 };
