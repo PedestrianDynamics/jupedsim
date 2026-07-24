@@ -2,7 +2,6 @@
 #include "Simulation.hpp"
 
 #include "GenericAgent.hpp"
-#include "Geometry/Geometry2D.hpp"
 #include "IteratorPair.hpp"
 #include "Journey.hpp"
 #include "OperationalModel.hpp"
@@ -61,8 +60,8 @@ Simulation::Simulation(
     double dT)
     : _clock(dT)
     , _operationalDecisionSystem(std::move(operationalModel))
-    , _geometry(std::move(geometry))
-    , _routingEngine(std::make_unique<RoutingEngine>(_geometry->Polygon()))
+    , _geometry(std::make_unique<Geometry3D>(geometry->Polygon()))
+    , _routingEngine(std::make_unique<RoutingEngine>(geometry->Polygon()))
 {
 }
 
@@ -98,7 +97,7 @@ void Simulation::Iterate()
 
     {
         JPS_SCOPED_TIMER_AND_TRACE(_timer, "Stage System", Detailed);
-        _stageSystem.Run(_stageManager, _neighborhoodSearch, *_geometry);
+        _stageSystem.Run(_stageManager, _neighborhoodSearch, *_geometry->geometry_2d());
     }
 
     {
@@ -114,7 +113,11 @@ void Simulation::Iterate()
     {
         JPS_SCOPED_TIMER_AND_TRACE(_timer, "Operational Decision System", General);
         _operationalDecisionSystem.Run(
-            _clock.dT(), _clock.ElapsedTime(), _neighborhoodSearch, *_geometry, _agents);
+            _clock.dT(),
+            _clock.ElapsedTime(),
+            _neighborhoodSearch,
+            *_geometry->geometry_2d(),
+            _agents);
         // Agents moved during the operational step; rebuild the grid so cell membership
         // reflects the new positions for queries before the next iteration (AgentsInRange,
         // AddAgent validation).
@@ -207,18 +210,18 @@ BaseStage::ID Simulation::AddStage(const StageDescription stageDescription)
     std::visit(
         overloaded{
             [this](const WaypointDescription& d) -> void {
-                if(!this->_geometry->InsideGeometry(d.position)) {
+                if(!this->_geometry->geometry_2d()->InsideGeometry(d.position)) {
                     throw SimulationError("WayPoint {} not inside walkable area", d.position);
                 }
             },
             [this](const ExitDescription& d) -> void {
-                if(!this->_geometry->InsideGeometry(d.polygon.Centroid())) {
+                if(!this->_geometry->geometry_2d()->InsideGeometry(d.polygon.Centroid())) {
                     throw SimulationError("Exit {} not inside walkable area", d.polygon.Centroid());
                 }
             },
             [this](const NotifiableWaitingSetDescription& d) -> void {
                 for(const auto& point : d.slots) {
-                    if(!this->_geometry->InsideGeometry(point)) {
+                    if(!this->_geometry->geometry_2d()->InsideGeometry(point)) {
                         throw SimulationError(
                             "NotifiableWaitingSet point {} not inside walkable area", point);
                     }
@@ -226,7 +229,7 @@ BaseStage::ID Simulation::AddStage(const StageDescription stageDescription)
             },
             [this](const NotifiableQueueDescription& d) -> void {
                 for(const auto& point : d.slots) {
-                    if(!this->_geometry->InsideGeometry(point)) {
+                    if(!this->_geometry->geometry_2d()->InsideGeometry(point)) {
                         throw SimulationError(
                             "NotifiableQueue point {} not inside walkable area", point);
                     }
@@ -244,7 +247,7 @@ GenericAgent::ID Simulation::AddAgent(GenericAgent agent)
 {
     ThrowIfIterating("AddAgent");
     JPS_SCOPED_TIMER_AND_TRACE(_timer, "Add Agent", Detailed);
-    if(!_geometry->InsideGeometry(agent.position())) {
+    if(!_geometry->geometry_2d()->InsideGeometry(agent.position())) {
         throw SimulationError("Agent {} not inside walkable area", agent.position());
     }
     if(_journeys.count(agent.journeyId) == 0) {
@@ -264,7 +267,11 @@ GenericAgent::ID Simulation::AddAgent(GenericAgent agent)
             ToString(_operationalDecisionSystem.ModelType()));
     }
 
-    _operationalDecisionSystem.ValidateAgent(agent, _neighborhoodSearch, *_geometry);
+    // Set 3D location (with fixed z=0.0 for the time being), so that the OperationDecisionSystem
+    // will run through both the original + the 3D move. (This is temporary.)
+    agent.location = _geometry->get_location(agent.position().x, agent.position().y, 0.0);
+
+    _operationalDecisionSystem.ValidateAgent(agent, _neighborhoodSearch, *_geometry->geometry_2d());
 
     _stageManager.HandleNewAgent(agent.stageId);
     _agents.emplace_back(std::move(agent));
@@ -409,7 +416,7 @@ StageProxy Simulation::Stage(BaseStage::ID stageId)
 }
 Geometry2D Simulation::Geo() const
 {
-    return *_geometry;
+    return *_geometry->geometry_2d();
 }
 
 void Simulation::PushTimer(const std::string_view name, size_t probe_log_level)

@@ -5,55 +5,18 @@
 
 #include <CGAL/mark_domain_in_triangulation.h>
 
+#include <algorithm>
 #include <array>
 #include <cassert>
 #include <cmath>
+#include <cstddef>
 #include <iterator>
+#include <limits>
 #include <map>
+#include <set>
 #include <utility>
 #include <variant>
 #include <vector>
-
-namespace
-{
-/// The on-surface 3D point of face @p f at (x,y) @p q. @p q is assumed inside
-/// f's (x,y) projection. z is the barycentric blend of the vertices' heights:
-/// find q's weights in the projected triangle, then interpolate z.
-/// Basically: (FaceId f, Point2D q) --> Point3D
-Point3D point_on_face(const SurfaceMesh& mesh, SurfaceMesh::Face_index f, const Point2D& q)
-{
-    std::array<Point3D, 3> v{};
-    int i = 0;
-    for(const auto vh : CGAL::vertices_around_face(mesh.halfedge(f), mesh)) {
-        v[i++] = mesh.point(vh);
-    }
-    const double e1x = v[1].x() - v[0].x();
-    const double e1y = v[1].y() - v[0].y();
-    const double e2x = v[2].x() - v[0].x();
-    const double e2y = v[2].y() - v[0].y();
-    const double qx = q.x() - v[0].x();
-    const double qy = q.y() - v[0].y();
-    const double denom = e1x * e2y - e2x * e1y; // 2*signed area; != 0 unless f is vertical
-    assert(denom != 0.0 && "FATAL: vertical face in point_on_face");
-    const double b1 = (qx * e2y - e2x * qy) / denom;
-    const double b2 = (e1x * qy - qx * e1y) / denom;
-    const double z = (1.0 - b1 - b2) * v[0].z() + b1 * v[1].z() + b2 * v[2].z();
-    return Point3D{q.x(), q.y(), z};
-}
-
-/// True iff (x,y) point @p q lies in face @p f's (x,y) footprint (inside or on
-/// its boundary).
-bool face_covers(const SurfaceMesh& mesh, SurfaceMesh::Face_index f, const Point2D& q)
-{
-    std::array<Point2D, 3> p{};
-    int i = 0;
-    for(const auto v : CGAL::vertices_around_face(mesh.halfedge(f), mesh)) {
-        const auto& s = mesh.point(v);
-        p[i++] = Point2D{s.x(), s.y()};
-    }
-    return Triangle2D(p[0], p[1], p[2]).bounded_side(q) != CGAL::ON_UNBOUNDED_SIDE;
-}
-} // namespace
 
 namespace
 {
@@ -88,6 +51,23 @@ SurfaceMesh mesh_from_polygon(const PolyWithHoles& poly)
     }
     return mesh;
 }
+
+/// Calculate an epsilon to be used for the merge of segments. The max error
+/// in float operation depends on the magnitude of numbers - therefore take
+/// those into account + an additiona safety factor.
+/// WARNING: this assumes the intermediate vertices were produced in double; an
+/// externally generated mesh authored in float would need a coarser epsilon.
+double collinear_merge_tolerance(const std::vector<LineSegment>& segments)
+{
+    double scale = 0.0;
+    for(const auto& s : segments) {
+        for(const auto& p : {s.p1, s.p2}) {
+            scale = std::max({scale, std::abs(p.x), std::abs(p.y)});
+        }
+    }
+    scale *= 64.0; // additional safety
+    return scale * std::numeric_limits<double>::epsilon();
+}
 } // namespace
 
 Geometry3D::Geometry3D(SurfaceMesh mesh) : _mesh(std::move(mesh))
@@ -110,6 +90,50 @@ void Geometry3D::build()
     const auto split = split_into_regions(_mesh);
     _region = split.region;
     _regionCount = split.count;
+    build_region_views();
+}
+
+void Geometry3D::build_region_views()
+{
+    const auto xy = [&](SurfaceMesh::Vertex_index v) {
+        const auto& p = _mesh.point(v);
+        return Point{p.x(), p.y()};
+    };
+
+    // Classify every region-boundary halfedge: opposite is a mesh border -> the
+    // edge is a WALL; opposite belongs to another region -> the edge is a SEAM
+    // (and the neighbour region is recorded). Interior edges (same region on
+    // both sides) are ignored. Seams never enter the wall grid.
+    std::vector<std::vector<LineSegment>> walls(_regionCount);
+    std::vector<std::vector<LineSegment>> seams(_regionCount);
+    std::vector<std::set<std::size_t>> neighbors(_regionCount);
+    for(const auto f : _mesh.faces()) {
+        const auto r = _region[f];
+        for(const auto h : CGAL::halfedges_around_face(_mesh.halfedge(f), _mesh)) {
+            const LineSegment seg{xy(_mesh.source(h)), xy(_mesh.target(h))};
+            const auto opp = _mesh.opposite(h);
+            if(_mesh.is_border(opp)) {
+                walls[r].push_back(seg);
+                continue;
+            }
+            const auto r2 = _region[_mesh.face(opp)];
+            if(r2 != r) {
+                seams[r].push_back(seg);
+                neighbors[r].insert(r2);
+            }
+        }
+    }
+
+    _regionViews.clear();
+    _regionViews.reserve(_regionCount);
+    for(std::size_t r = 0; r < _regionCount; ++r) {
+        _regionViews.emplace_back(
+            r,
+            this,
+            merge_collinear(walls[r], collinear_merge_tolerance(walls[r])),
+            merge_collinear(seams[r], collinear_merge_tolerance(seams[r])),
+            std::vector<std::size_t>(neighbors[r].begin(), neighbors[r].end()));
+    }
 }
 
 const AABBTree& Geometry3D::aabb_tree() const
@@ -138,40 +162,6 @@ Geometry3D::FaceLocation Geometry3D::face_below(const Point3D& p) const
     return {hit->second, *projected};
 }
 
-Geometry3D::FaceLocation Geometry3D::walk_on_surface(
-    std::size_t from_region_id,
-    const Point2D& from,
-    const Point2D& to) const
-{
-    const auto start = locate_in_region(from_region_id, from).face;
-    if(start == SurfaceMesh::null_face()) {
-        throw SimulationError("walk_on_surface(): Invalid 'from'");
-    }
-
-    // A single agent step is assumed small relative to the triangle edge length,
-    // so 'to' lies in the start face or one directly touching it (its vertex
-    // 1-ring). Restricting to that surface neighbourhood -- rather than any
-    // face whose (x,y) footprint contains 'to' -- is what keeps the agent on
-    // the right sheet where regions overlap.
-    if(face_covers(_mesh, start, to)) {
-        return {start, point_on_face(_mesh, start, to)};
-    }
-    for(const auto v : CGAL::vertices_around_face(_mesh.halfedge(start), _mesh)) {
-        for(const auto f : CGAL::faces_around_target(_mesh.halfedge(v), _mesh)) {
-            if(f == SurfaceMesh::null_face() || f == start) {
-                continue;
-            }
-            if(face_covers(_mesh, f, to)) {
-                return {f, point_on_face(_mesh, f, to)};
-            }
-        }
-    }
-    // TODO: 'to' is neither in the start face nor a direct neighbour.
-    //        This indicates a "manual" override to position that is larger than
-    //        expected. We need to see how to deal with this. Right now it is an error.
-    throw SimulationError("walk_on_surface(): 'to' is not in the start face or its neighbourhood");
-}
-
 bool Geometry3D::is_valid_location(const Point3D& p) const
 {
     return face_below(p).face != SurfaceMesh::null_face();
@@ -195,6 +185,21 @@ Geometry3D::locate_in_region(std::size_t region_id, const Point2D& xy) const
         return {face, *point};
     }
     return {SurfaceMesh::null_face(), Point3D{}};
+}
+
+std::optional<Location>
+Geometry3D::get_location(double x, double y, double z_hint, double tol) const
+{
+    const auto face_location = locate_near_z(Point2D{x, y}, z_hint, tol);
+    if(face_location.face == SurfaceMesh::null_face()) {
+        return std::nullopt;
+    }
+    return Location{
+        this,
+        Point{x, y},
+        region_of(face_location.face),
+        face_location.face,
+        face_location.point.z()};
 }
 
 Geometry3D::FaceLocation

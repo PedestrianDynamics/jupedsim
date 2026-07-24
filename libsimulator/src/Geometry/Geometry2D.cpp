@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Geometry/Geometry2D.hpp"
 
-#include "AABB.hpp"
 #include "CfgCgal.hpp"
-#include "GeometricFunctions.hpp"
 #include "LineSegment.hpp"
 #include "Point.hpp"
 
@@ -12,68 +10,13 @@
 #include <CGAL/number_utils.h>
 
 #include <algorithm>
-#include <cmath>
 #include <cstddef>
 #include <iterator>
-#include <set>
 #include <tuple>
 #include <vector>
 
-Cell makeCell(Point p)
+namespace
 {
-    return {floor(p.x / CELL_EXTEND) * CELL_EXTEND, floor(p.y / CELL_EXTEND) * CELL_EXTEND};
-}
-
-bool IsN8Adjacent(const Cell& a, const Cell& b)
-{
-    const auto dx = static_cast<int>(abs(a.x - b.x) / CELL_EXTEND);
-    const auto dy = static_cast<int>(abs(a.y - b.y) / CELL_EXTEND);
-    if((dx == 0 && dy == 0) || dx > 1 || dy > 1) {
-        return false;
-    }
-    return true;
-}
-
-std::set<Cell> cellsFromLineSegment(LineSegment ls)
-{
-    const auto firstCell = makeCell(ls.p1);
-    const auto lastCell = makeCell(ls.p2);
-    if(firstCell == lastCell) {
-        return {firstCell};
-    }
-
-    if(IsN8Adjacent(firstCell, lastCell)) {
-        return {firstCell, lastCell};
-    }
-
-    std::set<Cell> cells{firstCell, lastCell};
-
-    const auto toMultiple = [](double x) { return ceil(x / CELL_EXTEND) * CELL_EXTEND; };
-    const AABB bounds(ls.p1, ls.p2);
-    const auto vec_p1p2 = ls.p2 - ls.p1;
-    std::vector<Point> intersections{};
-    for(double x_intersect = toMultiple(bounds.xmin); x_intersect <= bounds.xmax;
-        x_intersect += CELL_EXTEND) {
-        const double fact = (x_intersect - ls.p1.x) / vec_p1p2.x;
-        intersections.emplace_back(x_intersect, ls.p1.y + fact * vec_p1p2.y);
-    }
-    for(double y_intersect = toMultiple(bounds.ymin); y_intersect <= bounds.ymax;
-        y_intersect += CELL_EXTEND) {
-        const double fact = (y_intersect - ls.p1.y) / vec_p1p2.y;
-        intersections.emplace_back(ls.p1.x + fact * vec_p1p2.x, y_intersect);
-    }
-    std::sort(std::begin(intersections), std::end(intersections));
-    for(size_t index = 1; index < intersections.size(); ++index) {
-        cells.insert(makeCell((intersections[index - 1] + intersections[index]) / 2));
-    }
-    return cells;
-}
-
-double dist(LineSegment l, Point p)
-{
-    return l.DistTo(p);
-}
-
 size_t CountLineSegments(const PolyWithHoles& poly)
 {
     auto count = poly.outer_boundary().size();
@@ -97,28 +40,21 @@ void ExtractSegmentsFromPolygon(const Poly& p, std::vector<LineSegment>& segment
     segments.emplace_back(fromPoint_2(boundary.back()), fromPoint_2(boundary.front()));
 }
 
-Geometry2D::Geometry2D(PolyWithHoles accessibleArea)
-    : _accessibleAreaPolygon(accessibleArea)
+std::vector<LineSegment> SegmentsFromPolygon(const PolyWithHoles& poly)
 {
-    _segments.reserve(CountLineSegments(accessibleArea));
-    ExtractSegmentsFromPolygon(accessibleArea.outer_boundary(), _segments);
-    for(const auto& hole : accessibleArea.holes()) {
-        ExtractSegmentsFromPolygon(hole, _segments);
+    std::vector<LineSegment> segments{};
+    segments.reserve(CountLineSegments(poly));
+    ExtractSegmentsFromPolygon(poly.outer_boundary(), segments);
+    for(const auto& hole : poly.holes()) {
+        ExtractSegmentsFromPolygon(hole, segments);
     }
+    return segments;
+}
+} // namespace
 
-    for(const auto& ls : _segments) {
-        const auto cells = cellsFromLineSegment(ls);
-        for(const auto& cell : cells) {
-            _grid[cell].insert(ls);
-        }
-
-        insertIntoApproximateGrid(ls);
-    }
-
-    for(auto& [_, vec] : _approximateGrid) {
-        vec.shrink_to_fit();
-    }
-
+Geometry2D::Geometry2D(PolyWithHoles accessibleArea)
+    : _accessibleAreaPolygon(accessibleArea), _wallGrid(SegmentsFromPolygon(accessibleArea))
+{
     const auto cvt = [](const auto& c) {
         std::vector<Point> out{};
         out.reserve(c.size());
@@ -140,66 +76,17 @@ Geometry2D::Geometry2D(PolyWithHoles accessibleArea)
 
 const std::vector<LineSegment>& Geometry2D::LineSegmentsInApproxDistanceTo(Point p) const
 {
-    const auto cell = makeCell(p);
-    if(const auto it = _approximateGrid.find(cell); it != _approximateGrid.end()) {
-        return it->second;
-    }
-    static const std::vector<LineSegment> empty{};
-    return empty;
+    return _wallGrid.LineSegmentsInApproxDistanceTo(p);
 }
 
-void Geometry2D::insertIntoApproximateGrid(const LineSegment& ls)
+Geometry2D::LineSegmentRange Geometry2D::LineSegmentsInDistanceTo(double distance, Point p) const
 {
-    constexpr double searchRadius = 4.;
-
-    const auto searchExtend = Point(searchRadius, searchRadius);
-    const AABB lineSegmentBounds({ls.p1, ls.p2});
-    const AABB searchBounds(
-        lineSegmentBounds.BottomLeft() - searchExtend, lineSegmentBounds.TopRight() + searchExtend);
-
-    auto cellBottomLeft = makeCell(searchBounds.BottomLeft());
-    auto cellTopRight = makeCell(searchBounds.TopRight());
-
-    for(double x = cellBottomLeft.x; x <= cellTopRight.x; x += CELL_EXTEND) {
-        for(double y = cellBottomLeft.y; y <= cellTopRight.y; y += CELL_EXTEND) {
-            const auto cell = makeCell({x, y});
-
-            const AABB bbWithSearchRadius(
-                {cell.x - searchRadius, cell.y - searchRadius},
-                {cell.x + searchRadius + CELL_EXTEND, cell.y + searchRadius + CELL_EXTEND});
-
-            if(bbWithSearchRadius.Intersects(ls)) {
-                auto& vec = _approximateGrid[cell];
-                vec.push_back(ls);
-            }
-        }
-    }
-}
-
-Geometry2D::LineSegmentRange
-Geometry2D::LineSegmentsInDistanceTo(double distance, Point p) const
-{
-    return LineSegmentRange{
-        DistanceQueryIterator<LineSegment>{distance, p, _segments.cbegin(), _segments.cend()},
-        DistanceQueryIterator<LineSegment>{distance, p, _segments.cend(), _segments.cend()}};
+    return _wallGrid.LineSegmentsInDistanceTo(distance, p);
 }
 
 bool Geometry2D::IntersectsAny(const LineSegment& linesegment) const
 {
-    const auto cellsToQuery = cellsFromLineSegment(linesegment);
-    for(const auto& cell : cellsToQuery) {
-        const auto iter = _grid.find(cell);
-        if(iter == std::end(_grid)) {
-            continue;
-        }
-        if(std::find_if(
-               iter->second.cbegin(), iter->second.cend(), [&linesegment](const auto candidate) {
-                   return intersects(linesegment, candidate);
-               }) != iter->second.end()) {
-            return true;
-        }
-    }
-    return false;
+    return _wallGrid.IntersectsAny(linesegment);
 }
 
 bool Geometry2D::InsideGeometry(Point p) const

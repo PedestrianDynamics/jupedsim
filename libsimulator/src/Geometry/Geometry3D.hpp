@@ -3,14 +3,20 @@
 
 #include "CfgCgal.hpp"
 #include "Geometry/Geometry2D.hpp"
+#include "Geometry/Location.hpp"
 #include "Geometry/RegionSplit.hpp"
+#include "Geometry/RegionView.hpp"
 #include "Point.hpp"
 
 #include <array>
 #include <cstddef>
 #include <memory>
+#include <optional>
 #include <vector>
 
+/// Default z-hint tolerance: When a `Location` is created, how far the z-value
+/// is allowed to be away from the surface to still be accepted.
+inline constexpr double ZHintTolerance = 0.1;
 
 /// The single source of truth for a 3D navigation geometry: owns the surface
 /// mesh, its AABB tree (for -z projection queries) and the single-valued region
@@ -65,15 +71,11 @@ public:
     /// from the hint. `null_face()` if no sheet comes within @p tolerance.
     FaceLocation locate_near_z(const Point2D& xy, double z, double tolerance) const;
 
-    /// Re-anchor a horizontal move onto the 3D surface: @p from is in region
-    /// @p from_region_id; return the face and on-surface point at @p to. The
-    /// move is always a direct step, never around corners. Because the agent
-    /// step is small relative to the triangle edge length, @p to lies in the
-    /// start face or one directly touching it (its vertex 1-ring). Throws if
-    /// @p to is in none of them (step too large for the mesh resolution, or off
-    /// the walkable area).
-    FaceLocation
-    walk_on_surface(std::size_t from_region_id, const Point2D& from, const Point2D& to) const;
+    /// Creates a `Location` object by ray-casting the 3D point in z-direction and
+    /// finding the closest point to hit any part of the 3D surface. Only accepts
+    /// points at most @p tol away in terms of z-coordinate.
+    std::optional<Location>
+    get_location(double x, double y, double z_hint, double tol = ZHintTolerance) const;
 
     /// True iff @p p projects (along -z) onto the walkable surface.
     bool is_valid_location(const Point3D& p) const;
@@ -88,6 +90,11 @@ public:
     /// One 0-based region id per triangle, in mesh face order.
     std::vector<std::size_t> region_id_per_face() const;
 
+    /// The 2D view of region @p region_id: its (merged) walls, its seams and
+    /// its seam-adjacent regions. Always present (also on the polygon path,
+    /// where there is exactly one, region 0). Indexable 0..region_count()-1.
+    const RegionView& region_view(std::size_t region_id) const { return _regionViews[region_id]; }
+
     /// Vertex coordinates (x, y, z), indexable 0..n-1.
     std::vector<std::array<double, 3>> vertices() const;
 
@@ -98,9 +105,14 @@ private:
     /// Compact indices, build the AABB tree and the region overlay.
     void build();
 
+    /// Build one RegionView per region: classify boundary halfedges into walls
+    /// and seams, merge collinear runs, record seam neighbours.
+    void build_region_views();
+
     SurfaceMesh _mesh{};
     std::unique_ptr<Geometry2D> _geometry2D{};
     std::unique_ptr<AABBTree> _aabbTree{};
     RegionMap _region{};
     std::size_t _regionCount{0};
+    std::vector<RegionView> _regionViews{};
 };
