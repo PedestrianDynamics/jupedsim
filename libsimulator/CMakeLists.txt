@@ -22,6 +22,8 @@ target_sources(simulator PRIVATE
     src/Geometry/Location.hpp
     src/Geometry/RegionSplit.cpp
     src/Geometry/RegionSplit.hpp
+    src/Geometry/SegmentGrid.cpp
+    src/Geometry/SegmentGrid.hpp
     src/Geometry/Validation.cpp
     src/Geometry/Validation.hpp
     src/GeometryBuilder.cpp
@@ -124,6 +126,7 @@ if (BUILD_TESTS)
         test/TestPoint.cpp
         test/TestRegionSplit.cpp
         test/TestRoutingEngine3D.cpp
+        test/TestSegmentGrid.cpp
         test/TestSimulationClock.cpp
         test/TestStage.cpp
         test/TestUniqueID.cpp
