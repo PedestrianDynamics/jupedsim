@@ -15,6 +15,7 @@
 #include <cmath>
 #include <cstddef>
 #include <iterator>
+#include <limits>
 #include <set>
 #include <tuple>
 #include <vector>
@@ -138,14 +139,16 @@ CollisionGeometry::CollisionGeometry(PolyWithHoles accessibleArea)
     _accessibleArea = std::make_tuple(exterior, holes);
 }
 
-const std::vector<LineSegment>& CollisionGeometry::LineSegmentsInApproxDistanceTo(Point p) const
+CollisionGeometry::LineSegmentRange CollisionGeometry::LineSegmentsInApproxDistanceTo(Point p) const
 {
-    const auto cell = makeCell(p);
-    if(const auto it = _approximateGrid.find(cell); it != _approximateGrid.end()) {
-        return it->second;
-    }
+    constexpr double inf = std::numeric_limits<double>::infinity();
     static const std::vector<LineSegment> empty{};
-    return empty;
+    const auto cell = makeCell(p);
+    const auto it = _approximateGrid.find(cell);
+    const auto& vec = (it != _approximateGrid.end()) ? it->second : empty;
+    return {
+        DistanceQueryIterator<LineSegment>(inf, p, vec.begin(), vec.end()),
+        DistanceQueryIterator<LineSegment>(inf, p, vec.end(), vec.end())};
 }
 
 void CollisionGeometry::insertIntoApproximateGrid(const LineSegment& ls)

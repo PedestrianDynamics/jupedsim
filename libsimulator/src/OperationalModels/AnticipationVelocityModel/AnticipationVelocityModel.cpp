@@ -36,11 +36,12 @@ void AnticipationVelocityModel::ComputeNextState(
     const EnvironmentQuery& envQuery) const
 {
     const auto& model = std::get<State>(current.model);
-    const auto& boundary = envQuery.LineSegmentsInGridCellDistance(model.position);
+    const auto& boundary = envQuery.LineSegmentsInRange(model.position);
     // Exclude occluded and self agents
-    auto neighborhood = envQuery.AgentsInRange(model, _cutOffRadius, [&](const Point& to) {
-        return envQuery.NoGeometryBetween(model.position, to);
-    });
+    auto neighborhood = envQuery.OtherAgentsInRange(
+        model.position, _cutOffRadius, [&envQuery, from = model.position](const Point& to) {
+            return envQuery.NoGeometryBetween(from, to);
+        });
 
     const auto neighborRepulsion = std::accumulate(
         std::begin(neighborhood),
@@ -150,7 +151,7 @@ void AnticipationVelocityModel::CheckModelConstraint(
     constexpr double reactionTimeMax = 1.0;
     validateConstraint(reactionTime, reactionTimeMin, reactionTimeMax, "reactionTime", true);
 
-    const auto neighbors = envQuery.AgentsInRange(agent, 2.0);
+    const auto neighbors = envQuery.OtherAgentsInRange(agent.position(), 2.0);
     for(const auto& neighbor : neighbors) {
         const auto& neighbor_model = std::get<State>(neighbor.model);
         const auto contanctdDist = r + neighbor_model.radius;
@@ -277,33 +278,36 @@ Point AnticipationVelocityModel::HandleWallAvoidance(
     const Point& direction,
     const Point& agentPosition,
     double agentRadius,
-    const std::vector<LineSegment>& boundary,
+    const auto& boundary,
     double wallBufferDistance,
     double pushoutStrength) const
 {
     const double criticalWallDistance = wallBufferDistance + agentRadius;
 
     Point modifiedDirection = direction;
+    std::for_each(
+        std::begin(boundary),
+        std::end(boundary),
+        [&agentPosition, &criticalWallDistance, &modifiedDirection, pushoutStrength](
+            const LineSegment& wall) {
+            const auto closestPoint = wall.ShortestPoint(agentPosition);
 
-    for(const auto& wall : boundary) {
-        const auto closestPoint = wall.ShortestPoint(agentPosition);
+            const auto distanceVector = agentPosition - closestPoint;
+            const auto [distance, normalTowardAgent] = distanceVector.NormAndNormalized();
 
-        const auto distanceVector = agentPosition - closestPoint;
-        const auto [distance, normalTowardAgent] = distanceVector.NormAndNormalized();
+            if(distance > criticalWallDistance) {
+                return;
+            }
 
-        if(distance > criticalWallDistance) {
-            continue;
-        }
+            const auto dotProduct = modifiedDirection.ScalarProduct(normalTowardAgent);
 
-        const auto dotProduct = modifiedDirection.ScalarProduct(normalTowardAgent);
-
-        if(dotProduct < 0) {
-            // Direction points into wall - need to project it out
-            // Remove the component pointing into the wall
-            const auto projectedDirection = modifiedDirection - normalTowardAgent * dotProduct;
-            modifiedDirection = projectedDirection + normalTowardAgent * pushoutStrength;
-        }
-    }
+            if(dotProduct < 0) {
+                // Direction points into wall - need to project it out
+                // Remove the component pointing into the wall
+                const auto projectedDirection = modifiedDirection - normalTowardAgent * dotProduct;
+                modifiedDirection = projectedDirection + normalTowardAgent * pushoutStrength;
+            }
+        });
 
     // Renormalize to maintain speed
     const auto finalDirection = modifiedDirection.Normalized();

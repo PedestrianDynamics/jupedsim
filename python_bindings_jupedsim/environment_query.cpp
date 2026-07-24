@@ -17,7 +17,7 @@ void init_environment_query(py::module_& m)
         .def(
             "agents_in_range",
             [](const EnvironmentQuery& self, const GenericAgent& agent, double radius) {
-                return self.AgentsInRange(agent.model, radius);
+                return self.OtherAgentsInRange(agent.position(), radius);
             },
             py::arg("agent"),
             py::arg("radius"),
@@ -36,7 +36,7 @@ void init_environment_query(py::module_& m)
         .def(
             "line_segments_in_grid_cell_distance",
             [](const EnvironmentQuery& self, std::tuple<double, double> p) {
-                const auto& segs = self.LineSegmentsInGridCellDistance(intoPoint(p));
+                const auto& segs = self.LineSegmentsInRange(intoPoint(p));
                 return std::vector<LineSegment>(segs.begin(), segs.end());
             },
             py::arg("position"),

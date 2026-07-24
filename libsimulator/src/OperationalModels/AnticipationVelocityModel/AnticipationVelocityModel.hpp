@@ -2,7 +2,6 @@
 #pragma once
 
 #include "LineSegment.hpp"
-
 class EnvironmentQuery;
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
@@ -64,7 +63,7 @@ private:
         const Point& direction,
         const Point& agentPosition,
         double agentRadius,
-        const std::vector<LineSegment>& boundary,
+        const auto& boundary,
         double wallBufferDistance,
         double pushoutStrength) const;
 

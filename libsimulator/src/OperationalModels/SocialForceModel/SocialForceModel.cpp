@@ -33,19 +33,20 @@ void SocialForceModel::ComputeNextState(
     const auto& model = std::get<State>(current.model);
     auto forces = DrivingForce(current);
 
-    auto neighborhood = envQuery.AgentsInRange(current.model, _cutOffRadius, [&](const Point& to) {
-        return envQuery.NoGeometryBetween(model.position, to);
-    });
+    auto neighborhood = envQuery.OtherAgentsInRange(
+        model.position, _cutOffRadius, [&envQuery, from = model.position](const Point& to) {
+            return envQuery.NoGeometryBetween(from, to);
+        });
     Point F_rep;
     for(const auto& neighbor : neighborhood) {
         F_rep += AgentForce(current, neighbor);
     }
     forces += F_rep / model.mass;
-    const auto& walls = envQuery.LineSegmentsInGridCellDistance(model.position);
+    const auto& walls = envQuery.LineSegmentsInRange(model.position);
 
     const auto obstacle_f = std::accumulate(
-        walls.cbegin(),
-        walls.cend(),
+        std::begin(walls),
+        std::end(walls),
         Point(0, 0),
         [this, &current](const auto& acc, const auto& element) {
             return acc + ObstacleForce(current, element);
@@ -89,7 +90,7 @@ void SocialForceModel::CheckModelConstraint(
     const auto radius = model.radius;
     throwIfNegative(radius, "radius");
 
-    const auto neighbors = envQuery.AgentsInRange(agent, 2.0);
+    const auto neighbors = envQuery.OtherAgentsInRange(agent.position(), 2.0);
     for(const auto& neighbor : neighbors) {
         const auto& neighborPosition = std::get<State>(neighbor.model).position;
         const auto distance = (model.position - neighborPosition).Norm();

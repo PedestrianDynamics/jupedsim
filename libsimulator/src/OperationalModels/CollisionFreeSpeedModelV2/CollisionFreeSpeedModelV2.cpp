@@ -29,10 +29,11 @@ void CollisionFreeSpeedModelV2::ComputeNextState(
     const EnvironmentQuery& envQuery) const
 {
     const auto& model = std::get<State>(current.model);
-    const auto& boundary = envQuery.LineSegmentsInGridCellDistance(model.position);
-    auto neighborhood = envQuery.AgentsInRange(current.model, _cutOffRadius, [&](const Point& to) {
-        return envQuery.NoGeometryBetween(model.position, to);
-    });
+    const auto& boundary = envQuery.LineSegmentsInRange(model.position);
+    auto neighborhood = envQuery.OtherAgentsInRange(
+        model.position, _cutOffRadius, [&envQuery, from = model.position](const Point& to) {
+            return envQuery.NoGeometryBetween(from, to);
+        });
 
     const auto neighborRepulsion = std::accumulate(
         std::begin(neighborhood),
@@ -43,8 +44,8 @@ void CollisionFreeSpeedModelV2::ComputeNextState(
         });
 
     const auto boundaryRepulsion = std::accumulate(
-        boundary.cbegin(),
-        boundary.cend(),
+        std::begin(boundary),
+        std::end(boundary),
         Point(0, 0),
         [this, &current](const auto& acc, const auto& element) {
             return acc + BoundaryRepulsion(current, element);
@@ -91,7 +92,7 @@ void CollisionFreeSpeedModelV2::CheckModelConstraint(
     constexpr double timeGapMax = 10.;
     validateConstraint(timeGap, timeGapMin, timeGapMax, "timeGap");
 
-    const auto neighbors = envQuery.AgentsInRange(agent, 2.0);
+    const auto neighbors = envQuery.OtherAgentsInRange(agent.position(), 2.0);
     for(const auto& neighbor : neighbors) {
         const auto& neighbor_model = std::get<State>(neighbor.model);
         const auto contanctdDist = r + neighbor_model.radius;

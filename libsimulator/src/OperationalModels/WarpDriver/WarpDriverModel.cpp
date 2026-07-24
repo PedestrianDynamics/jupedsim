@@ -454,7 +454,7 @@ void WarpDriverModel::ComputeNextState(
     const double dtSample = this->_timeHorizon / std::max(this->_numSamples - 1, 1);
 
     // === Step 2: Perceive - build collision probability field ===
-    const auto neighbors = envQuery.AgentsInRange(current.model, _cutOffRadius);
+    const auto neighbors = envQuery.OtherAgentsInRange(current.position(), _cutOffRadius);
 
     // Short-range repulsion: not part of the original Wolinski et al. (2016)
     // model, which is purely anticipatory. Added as a practical safety net
@@ -627,7 +627,7 @@ void WarpDriverModel::ComputeNextState(
     newVelWorld = newVelWorld + repulsion;
 
     // Boundary avoidance: steer agents away from walls
-    const auto& walls = envQuery.LineSegmentsInGridCellDistance(agentData.position);
+    const auto& walls = envQuery.LineSegmentsInRange(agentData.position);
     for(const auto& wall : walls) {
         const Point wallVec = wall.p2 - wall.p1;
         const double wallLen2 = wallVec.ScalarProduct(wallVec);

@@ -74,14 +74,15 @@ void CollisionFreeSpeedModelV3::ComputeNextState(
     const EnvironmentQuery& envQuery) const
 {
     const auto& model = std::get<State>(current.model);
-    const auto& boundary = envQuery.LineSegmentsInGridCellDistance(model.position);
-    auto neighborhood = envQuery.AgentsInRange(current.model, _cutOffRadius, [&](const Point& to) {
-        return envQuery.NoGeometryBetween(model.position, to);
-    });
+    const auto& boundary = envQuery.LineSegmentsInRange(model.position);
+    auto neighborhood = envQuery.OtherAgentsInRange(
+        model.position, _cutOffRadius, [&envQuery, from = model.position](const Point& to) {
+            return envQuery.NoGeometryBetween(from, to);
+        });
 
     const auto boundaryRepulsion = std::accumulate(
-        boundary.cbegin(),
-        boundary.cend(),
+        std::begin(boundary),
+        std::end(boundary),
         Point(0, 0),
         [this, &current](const auto& acc, const auto& element) {
             return acc + BoundaryRepulsion(current, element);
@@ -168,7 +169,7 @@ void CollisionFreeSpeedModelV3::CheckModelConstraint(
     validateConstraint(model.thetaMaxUpperBound, 0.0, std::acos(-1.0), "thetaMaxUpperBound");
     validateConstraint(model.agentBuffer, 0.0, 100.0, "agentBuffer");
 
-    const auto neighbors = envQuery.AgentsInRange(agent, 2.0);
+    const auto neighbors = envQuery.OtherAgentsInRange(agent.position(), 2.0);
     for(const auto& neighbor : neighbors) {
         const auto& neighbor_model = std::get<State>(neighbor.model);
         const auto contactDist = model.radius + neighbor_model.radius;
