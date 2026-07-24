@@ -3,6 +3,7 @@
 
 #include "CollisionGeometry.hpp"
 #include "GenericAgent.hpp"
+#include "GeometricFunctions.hpp"
 #include "LineSegment.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "Point.hpp"
@@ -29,40 +30,42 @@ public:
     }
 
     struct AcceptAll {
-        bool operator()(const GenericAgent&) const { return true; }
+        bool operator()(const Point&) const { return true; }
     };
 
     // Returns all agents within 'radius' of 'agent', excluding 'agent' itself.
-    // An optional predicate 'include' further filters the result; it receives each
-    // candidate agent and must return true to keep it. Example:
-    //   query.AgentsInRange(self, r, query.VisibleFrom(self.position()))
-    template <std::predicate<const GenericAgent&> Pred = AcceptAll>
+    // An optional predicate 'filter' further filters the result; it receives the
+    // position for which neighbors are returned as well as the candidates. Example:
+    //   query.AgentsInRange(state, r, [&](const Point& to) {
+    //   return envQuery.NoGeometryBetween(model.position, to);})
+    template <std::predicate<const Point&> Pred = AcceptAll>
     std::vector<GenericAgent>
-    AgentsInRange(const OperationalModelState& state, double radius, Pred include = {}) const
+    AgentsInRange(const OperationalModelState& state, double radius, Pred filter = {}) const
     {
         auto neighbors = _nsearch.GetNeighboringAgents(Pos(state), radius);
         std::erase_if(neighbors, [&](const GenericAgent& candidate) {
-            return (candidate.position() == Pos(state)) || !include(candidate);
+            return (candidate.position() == Pos(state)) || !filter(candidate.position());
         });
         return neighbors;
     }
 
-    // Returns a predicate that is true when 'from' has an unobstructed line of sight
-    // to the candidate agent. Pass directly as the 'include' argument to AgentsInRange:
-    //   query.AgentsInRange(self, r, query.VisibleFrom(self.position()))
-    auto VisibleFrom(const Point& from) const
+    bool NoGeometryBetween(const Point& from, const Point& to) const
     {
-        return [this, from](const GenericAgent& candidate) {
-            return VisibilityBetween(from, candidate.position());
+        const LineSegment los{from, to};
+        const double dist = Distance(from, to);
+        auto blocked = [&los](const auto& boundaries) {
+            return std::any_of(boundaries.begin(), boundaries.end(), [&los](const auto& seg) {
+                return intersects(los, seg);
+            });
         };
+        if(dist <= _geometry.MinimalCellResolution()) {
+            return !blocked(LineSegmentsInGridCellDistance(from));
+        } else {
+            return !blocked(LineSegmentsInRange(from, dist));
+        }
     }
 
-    bool VisibilityBetween(const Point& from, const Point& to) const
-    {
-        return !_geometry.IntersectsAny(LineSegment{from, to});
-    }
-
-    const std::vector<LineSegment>& LineSegmentsInRange(const Point& p) const
+    const std::vector<LineSegment>& LineSegmentsInGridCellDistance(const Point& p) const
     {
         return _geometry.LineSegmentsInApproxDistanceTo(p);
     }

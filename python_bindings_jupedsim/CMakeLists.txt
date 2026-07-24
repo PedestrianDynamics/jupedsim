@@ -15,7 +15,6 @@ add_library(py_jupedsim MODULE
     linesegment.cpp
     logging.cpp
     logging.hpp
-    neighborhood_search.cpp
     python_model.cpp
     python_model.hpp
     routing.cpp

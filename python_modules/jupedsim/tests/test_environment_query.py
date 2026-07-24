@@ -28,7 +28,7 @@ def _make_sim(model, geometry=None):
     return sim, exit_id, journey_id
 
 
-def _add(sim, journey_id, stage_id, position, group=0):
+def _add_agent(sim, journey_id, stage_id, position, group=0):
     return sim.add_agent(
         journey_id=journey_id,
         stage_id=stage_id,
@@ -63,18 +63,13 @@ class _CapturingModel(CustomOperationalModel):
 
     def compute_next_state(self, dt, ped, env_query):
         if self._is_probe(ped):
-            if self._predicate is None:
-                neighbors = env_query.agents_in_range(ped, self._radius)
-            else:
-                called = self.predicate_positions
+            self.predicate_positions.clear()
 
-                def _tracking(neighbor):
-                    called.append(tuple(neighbor.position))
-                    return self._predicate(neighbor)
+            def _tracking(neighbor):
+                self.predicate_positions.append(tuple(neighbor.position))
+                return self._predicate(neighbor) if self._predicate else True
 
-                neighbors = env_query.agents_in_range(
-                    ped, self._radius, _tracking
-                )
+            neighbors = env_query.agents_in_range(ped, self._radius, _tracking)
             self.neighbor_positions = [tuple(n.position) for n in neighbors]
         return replace(ped.model, position=ped.model.position)
 
@@ -87,10 +82,12 @@ class _CapturingModel(CustomOperationalModel):
 def test_no_predicate_returns_all_in_radius():
     model = _CapturingModel((2.0, 10.0), radius=5.0)
     sim, exit_id, journey_id = _make_sim(model)
-    _add(sim, journey_id, exit_id, (2.0, 10.0))  # probe
-    _add(sim, journey_id, exit_id, (3.0, 10.0))  # 1.0 m away — in range
-    _add(sim, journey_id, exit_id, (4.0, 10.0))  # 2.0 m away — in range
-    _add(sim, journey_id, exit_id, (15.0, 10.0))  # 13.0 m away — out of range
+    _add_agent(sim, journey_id, exit_id, (2.0, 10.0))  # probe
+    _add_agent(sim, journey_id, exit_id, (3.0, 10.0))  # 1.0 m away — in range
+    _add_agent(sim, journey_id, exit_id, (4.0, 10.0))  # 2.0 m away — in range
+    _add_agent(
+        sim, journey_id, exit_id, (15.0, 10.0)
+    )  # 13.0 m away — out of range
 
     sim.iterate()
 
@@ -102,9 +99,9 @@ def test_no_predicate_returns_all_in_radius():
 def test_reject_all_predicate_returns_empty():
     model = _CapturingModel((2.0, 10.0), radius=5.0, predicate=lambda _: False)
     sim, exit_id, journey_id = _make_sim(model)
-    _add(sim, journey_id, exit_id, (2.0, 10.0))
-    _add(sim, journey_id, exit_id, (3.0, 10.0))
-    _add(sim, journey_id, exit_id, (4.0, 10.0))
+    _add_agent(sim, journey_id, exit_id, (2.0, 10.0))
+    _add_agent(sim, journey_id, exit_id, (3.0, 10.0))
+    _add_agent(sim, journey_id, exit_id, (4.0, 10.0))
 
     sim.iterate()
 
@@ -117,14 +114,18 @@ def test_group_filter_returns_only_matching_group():
 
     model = _CapturingModel((2.0, 10.0), radius=5.0, predicate=same_group)
     sim, exit_id, journey_id = _make_sim(model)
-    _add(
+    _add_agent(
         sim, journey_id, exit_id, (2.0, 10.0), group=1
     )  # probe — not a neighbor of itself
-    _add(sim, journey_id, exit_id, (3.0, 10.0), group=1)  # same group → kept
-    _add(
+    _add_agent(
+        sim, journey_id, exit_id, (3.0, 10.0), group=1
+    )  # same group → kept
+    _add_agent(
         sim, journey_id, exit_id, (4.0, 10.0), group=0
     )  # different group → filtered out
-    _add(sim, journey_id, exit_id, (2.0, 11.0), group=1)  # same group → kept
+    _add_agent(
+        sim, journey_id, exit_id, (2.0, 11.0), group=1
+    )  # same group → kept
 
     sim.iterate()
 
@@ -138,8 +139,8 @@ def test_predicate_never_called_with_self():
     # accept-all predicate — only here to trigger tracking
     model = _CapturingModel(probe_pos, radius=100.0, predicate=lambda _: True)
     sim, exit_id, journey_id = _make_sim(model)
-    _add(sim, journey_id, exit_id, probe_pos)
-    _add(sim, journey_id, exit_id, (3.0, 10.0))
+    _add_agent(sim, journey_id, exit_id, probe_pos)
+    _add_agent(sim, journey_id, exit_id, (3.0, 10.0))
 
     sim.iterate()
 
@@ -147,12 +148,12 @@ def test_predicate_never_called_with_self():
 
 
 # ---------------------------------------------------------------------------
-# visible_from tests
+# no_wall_between tests
 # ---------------------------------------------------------------------------
 
 
-def test_visible_from_filters_occluded_agents():
-    """Agents behind the wall should be excluded by visible_from."""
+def test_no_wall_between_filters_occluded_agents():
+    """Agents behind the wall should be excluded by no_wall_between."""
 
     class _VisModel(CustomOperationalModel):
         def __init__(self):
@@ -162,18 +163,23 @@ def test_visible_from_filters_occluded_agents():
         def compute_next_state(self, dt, ped, env_query):
             px, py = ped.position
             if abs(px - 5.0) < 1e-4 and abs(py - 10.0) < 1e-4:
-                visible = env_query.visible_from(ped.position)
                 self.neighbor_positions = [
                     tuple(n.position)
-                    for n in env_query.agents_in_range(ped, 20.0, visible)
+                    for n in env_query.agents_in_range(
+                        ped,
+                        20.0,
+                        lambda n: env_query.no_wall_between(
+                            ped.position, n.position
+                        ),
+                    )
                 ]
             return replace(ped.model, position=ped.model.position)
 
     model = _VisModel()
     sim, exit_id, journey_id = _make_sim(model, geometry=_walled_room())
-    _add(sim, journey_id, exit_id, (5.0, 10.0))  # probe
-    _add(sim, journey_id, exit_id, (5.0, 5.0))  # same side, visible
-    _add(sim, journey_id, exit_id, (15.0, 10.0))  # behind wall, occluded
+    _add_agent(sim, journey_id, exit_id, (5.0, 10.0))  # probe
+    _add_agent(sim, journey_id, exit_id, (5.0, 5.0))  # same side, visible
+    _add_agent(sim, journey_id, exit_id, (15.0, 10.0))  # behind wall, occluded
 
     sim.iterate()
 
@@ -181,7 +187,7 @@ def test_visible_from_filters_occluded_agents():
     assert (15.0, 10.0) not in model.neighbor_positions
 
 
-def test_visible_from_agent_above_wall_is_seen():
+def test_no_wall_between_agent_above_wall_is_seen():
     """Agents whose connecting line stays above the wall top (y>15) are visible.
 
     Probe is at (5, 18) and target at (15, 18): the horizontal path y=18 never
@@ -193,20 +199,25 @@ def test_visible_from_agent_above_wall_is_seen():
             super().__init__()
             self.neighbor_positions: list[tuple] = []
 
-        def compute_next_state(self, dt, ped, env_query):
+        def compute_next_state(self, _dt, ped, env_query):
             px, py = ped.position
             if abs(px - 5.0) < 1e-4 and abs(py - 18.0) < 1e-4:
-                visible = env_query.visible_from(ped.position)
                 self.neighbor_positions = [
                     tuple(n.position)
-                    for n in env_query.agents_in_range(ped, 20.0, visible)
+                    for n in env_query.agents_in_range(
+                        ped,
+                        20.0,
+                        lambda n: env_query.no_wall_between(
+                            ped.position, n.position
+                        ),
+                    )
                 ]
             return replace(ped.model, position=ped.model.position)
 
     model = _VisModel()
     sim, exit_id, journey_id = _make_sim(model, geometry=_walled_room())
-    _add(sim, journey_id, exit_id, (5.0, 18.0))  # probe — above wall top
-    _add(
+    _add_agent(sim, journey_id, exit_id, (5.0, 18.0))  # probe — above wall top
+    _add_agent(
         sim, journey_id, exit_id, (15.0, 18.0)
     )  # far side, same height → visible
 
@@ -215,25 +226,27 @@ def test_visible_from_agent_above_wall_is_seen():
     assert (15.0, 18.0) in model.neighbor_positions
 
 
-def test_composed_visible_from_and_group_filter():
-    """Combining visible_from with a group predicate using a lambda."""
+def test_composed_no_wall_between_and_group_filter():
+    """Combining no_wall_between with a group predicate using a lambda."""
 
     class _ComposedModel(CustomOperationalModel):
         def __init__(self):
             super().__init__()
             self.neighbor_positions: list[tuple] = []
 
-        def compute_next_state(self, dt, ped, env_query):
+        def compute_next_state(self, _dt, ped, env_query):
             px, py = ped.position
             if abs(px - 5.0) < 1e-4 and abs(py - 10.0) < 1e-4:
-                visible = env_query.visible_from(ped.position)
                 self.neighbor_positions = [
                     tuple(n.position)
                     for n in env_query.agents_in_range(
                         ped,
                         20.0,
                         lambda neighbor: (
-                            visible(neighbor) and neighbor.model.group == 1
+                            env_query.no_wall_between(
+                                ped.position, neighbor.position
+                            )
+                            and neighbor.model.group == 1
                         ),
                     )
                 ]
@@ -241,14 +254,14 @@ def test_composed_visible_from_and_group_filter():
 
     model = _ComposedModel()
     sim, exit_id, journey_id = _make_sim(model, geometry=_walled_room())
-    _add(sim, journey_id, exit_id, (5.0, 10.0), group=0)  # probe
-    _add(
+    _add_agent(sim, journey_id, exit_id, (5.0, 10.0), group=0)  # probe
+    _add_agent(
         sim, journey_id, exit_id, (5.0, 15.0), group=1
     )  # visible, group 1 → kept
-    _add(
+    _add_agent(
         sim, journey_id, exit_id, (5.0, 5.0), group=0
     )  # visible, group 0 → filtered
-    _add(
+    _add_agent(
         sim, journey_id, exit_id, (15.0, 10.0), group=1
     )  # occluded, group 1 → filtered
 

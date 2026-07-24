@@ -3,7 +3,6 @@
 
 #include "AgentRemovalSystem.hpp"
 #include "CollisionGeometry.hpp"
-#include "EnvironmentQuery.hpp"
 #include "GenericAgent.hpp"
 #include "Journey.hpp"
 #include "NeighborhoodSearch.hpp"

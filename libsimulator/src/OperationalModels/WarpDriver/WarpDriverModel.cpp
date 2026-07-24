@@ -627,7 +627,7 @@ void WarpDriverModel::ComputeNextState(
     newVelWorld = newVelWorld + repulsion;
 
     // Boundary avoidance: steer agents away from walls
-    const auto& walls = envQuery.LineSegmentsInRange(agentData.position);
+    const auto& walls = envQuery.LineSegmentsInGridCellDistance(agentData.position);
     for(const auto& wall : walls) {
         const Point wallVec = wall.p2 - wall.p1;
         const double wallLen2 = wallVec.ScalarProduct(wallVec);

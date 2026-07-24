@@ -48,8 +48,9 @@ void GeneralizedCentrifugalForceModel::ComputeNextState(
     const EnvironmentQuery& envQuery) const
 {
     const auto& model = std::get<State>(current.model);
-    auto neighborhood =
-        envQuery.AgentsInRange(current.model, _cutOffRadius, envQuery.VisibleFrom(model.position));
+    auto neighborhood = envQuery.AgentsInRange(current.model, _cutOffRadius, [&](const Point& to) {
+        return envQuery.NoGeometryBetween(model.position, to);
+    });
     Point F_rep;
     for(const auto& neighbor : neighborhood) {
         F_rep += ForceRepPed(current, neighbor);
@@ -303,7 +304,8 @@ inline Point GeneralizedCentrifugalForceModel::ForceRepRoom(
     const GenericAgent& ped,
     const EnvironmentQuery& envQuery) const
 {
-    const auto& walls = envQuery.LineSegmentsInRange(std::get<State>(ped.model).position);
+    const auto& walls =
+        envQuery.LineSegmentsInGridCellDistance(std::get<State>(ped.model).position);
 
     auto f = std::accumulate(
         walls.cbegin(),

@@ -23,36 +23,20 @@ void init_environment_query(py::module_& m)
             py::arg("radius"),
             "All agents within radius of agent (self excluded).")
         .def(
-            "agents_in_range",
+            "no_wall_between",
             [](const EnvironmentQuery& self,
-               const GenericAgent& agent,
-               double radius,
-               py::function predicate) -> std::vector<GenericAgent> {
-                return self.AgentsInRange(
-                    agent.model, radius, [&predicate](const GenericAgent& candidate) -> bool {
-                        return predicate(py::cast(candidate)).cast<bool>();
-                    });
+               std::tuple<double, double> from,
+               std::tuple<double, double> to) -> bool {
+                return self.NoGeometryBetween(intoPoint(from), intoPoint(to));
             },
-            py::arg("agent"),
-            py::arg("radius"),
-            py::arg("predicate"),
-            "All agents within radius passing predicate(agent)->bool (self excluded).")
+            py::arg("from"),
+            py::arg("to"),
+            "Returns a bool: True when position from has a line-of-sight unobstructed by wall to "
+            "the candidate position to.")
         .def(
-            "visible_from",
-            [](const EnvironmentQuery& self, std::tuple<double, double> pos) -> py::function {
-                const CollisionGeometry* geo = &self.Geometry();
-                const Point from = intoPoint(pos);
-                return py::cpp_function([geo, from](const GenericAgent& candidate) -> bool {
-                    return !geo->IntersectsAny(LineSegment{from, candidate.position()});
-                });
-            },
-            py::arg("position"),
-            "Returns a predicate: True when position has unobstructed line-of-sight to the "
-            "candidate.")
-        .def(
-            "line_segments_in_range",
+            "line_segments_in_grid_cell_distance",
             [](const EnvironmentQuery& self, std::tuple<double, double> p) {
-                const auto& segs = self.LineSegmentsInRange(intoPoint(p));
+                const auto& segs = self.LineSegmentsInGridCellDistance(intoPoint(p));
                 return std::vector<LineSegment>(segs.begin(), segs.end());
             },
             py::arg("position"),

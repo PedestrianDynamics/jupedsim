@@ -135,6 +135,7 @@ public:
     const std::tuple<std::vector<Point>, std::vector<std::vector<Point>>>& AccessibleArea() const;
 
     const PolyWithHoles& Polygon() const { return _accessibleAreaPolygon; }
+    double MinimalCellResolution() const { return CELL_EXTEND; }
 
 private:
     void insertIntoApproximateGrid(const LineSegment& ls);

@@ -33,14 +33,15 @@ void SocialForceModel::ComputeNextState(
     const auto& model = std::get<State>(current.model);
     auto forces = DrivingForce(current);
 
-    auto neighborhood =
-        envQuery.AgentsInRange(current.model, _cutOffRadius, envQuery.VisibleFrom(model.position));
+    auto neighborhood = envQuery.AgentsInRange(current.model, _cutOffRadius, [&](const Point& to) {
+        return envQuery.NoGeometryBetween(model.position, to);
+    });
     Point F_rep;
     for(const auto& neighbor : neighborhood) {
         F_rep += AgentForce(current, neighbor);
     }
     forces += F_rep / model.mass;
-    const auto& walls = envQuery.LineSegmentsInRange(model.position);
+    const auto& walls = envQuery.LineSegmentsInGridCellDistance(model.position);
 
     const auto obstacle_f = std::accumulate(
         walls.cbegin(),
