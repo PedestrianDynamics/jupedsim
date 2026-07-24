@@ -34,7 +34,7 @@ void SocialForceModel::ComputeNextState(
     auto forces = DrivingForce(current);
 
     auto neighborhood = envQuery.OtherAgentsInRange(
-        model.position, _cutOffRadius, [&envQuery, from = model.position](const Point& to) {
+        model, _cutOffRadius, [&envQuery, from = model.position](const Point& to) {
             return envQuery.NoGeometryBetween(from, to);
         });
     Point F_rep;

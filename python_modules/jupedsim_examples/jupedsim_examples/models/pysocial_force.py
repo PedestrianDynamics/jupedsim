@@ -214,7 +214,7 @@ class PythonSocialForceModel(CustomOperationalModel):
         )
 
         # Add social forces from neighboring agents
-        for neighbor in env_query.agents_in_range(agent, 2.0):
+        for neighbor in env_query.other_agents_in_range(agent, 2.0):
             fx, fy = self._social_force(agent, neighbor)
             acc_x += fx / state.mass
             acc_y += fy / state.mass

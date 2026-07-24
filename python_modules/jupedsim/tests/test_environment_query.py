@@ -46,7 +46,7 @@ def _walled_room():
 
 
 class _CapturingModel(CustomOperationalModel):
-    """Calls agents_in_range for one designated probe agent and records results."""
+    """Calls other_agents_in_range for one designated probe agent and records results."""
 
     def __init__(self, probe_position, *, radius=5.0, predicate=None):
         super().__init__()
@@ -69,7 +69,9 @@ class _CapturingModel(CustomOperationalModel):
                 self.predicate_positions.append(tuple(neighbor.position))
                 return self._predicate(neighbor) if self._predicate else True
 
-            neighbors = env_query.agents_in_range(ped, self._radius, _tracking)
+            neighbors = env_query.other_agents_in_range(
+                ped, self._radius, _tracking
+            )
             self.neighbor_positions = [tuple(n.position) for n in neighbors]
         return replace(ped.model, position=ped.model.position)
 
@@ -165,7 +167,7 @@ def test_no_wall_between_filters_occluded_agents():
             if abs(px - 5.0) < 1e-4 and abs(py - 10.0) < 1e-4:
                 self.neighbor_positions = [
                     tuple(n.position)
-                    for n in env_query.agents_in_range(
+                    for n in env_query.other_agents_in_range(
                         ped,
                         20.0,
                         lambda n: env_query.no_wall_between(
@@ -204,7 +206,7 @@ def test_no_wall_between_agent_above_wall_is_seen():
             if abs(px - 5.0) < 1e-4 and abs(py - 18.0) < 1e-4:
                 self.neighbor_positions = [
                     tuple(n.position)
-                    for n in env_query.agents_in_range(
+                    for n in env_query.other_agents_in_range(
                         ped,
                         20.0,
                         lambda n: env_query.no_wall_between(
@@ -239,7 +241,7 @@ def test_composed_no_wall_between_and_group_filter():
             if abs(px - 5.0) < 1e-4 and abs(py - 10.0) < 1e-4:
                 self.neighbor_positions = [
                     tuple(n.position)
-                    for n in env_query.agents_in_range(
+                    for n in env_query.other_agents_in_range(
                         ped,
                         20.0,
                         lambda neighbor: (

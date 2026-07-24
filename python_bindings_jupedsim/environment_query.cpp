@@ -15,9 +15,9 @@ void init_environment_query(py::module_& m)
 {
     py::class_<EnvironmentQuery>(m, "EnvironmentQuery")
         .def(
-            "agents_in_range",
+            "other_agents_in_range",
             [](const EnvironmentQuery& self, const GenericAgent& agent, double radius) {
-                return self.OtherAgentsInRange(agent.position(), radius);
+                return self.OtherAgentsInRange(agent.model, radius);
             },
             py::arg("agent"),
             py::arg("radius"),
@@ -34,14 +34,6 @@ void init_environment_query(py::module_& m)
             "Returns a bool: True when position from has a line-of-sight unobstructed by wall to "
             "the candidate position to.")
         .def(
-            "line_segments_in_grid_cell_distance",
-            [](const EnvironmentQuery& self, std::tuple<double, double> p) {
-                const auto& segs = self.LineSegmentsInRange(intoPoint(p));
-                return std::vector<LineSegment>(segs.begin(), segs.end());
-            },
-            py::arg("position"),
-            "Geometry segments near position (approximate distance).")
-        .def(
             "line_segments_in_range",
             [](const EnvironmentQuery& self, std::tuple<double, double> p, double distance) {
                 return intoVec(self.LineSegmentsInRange(intoPoint(p), distance));
@@ -49,13 +41,6 @@ void init_environment_query(py::module_& m)
             py::arg("position"),
             py::arg("distance"),
             "Geometry segments within exact distance of position.")
-        .def(
-            "intersects_any",
-            [](const EnvironmentQuery& self, const LineSegment& ls) {
-                return self.IntersectsAny(ls);
-            },
-            py::arg("line_segment"),
-            "True when line_segment intersects any geometry boundary.")
         .def(
             "inside_geometry",
             [](const EnvironmentQuery& self, std::tuple<double, double> p) {

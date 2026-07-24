@@ -63,7 +63,7 @@ TEST(EnvironmentQuery, AgentsInRangeExcludesSelf)
     const auto geo = OpenGeometry();
     const auto q = env.query(geo);
 
-    const auto result = q.OtherAgentsInRange(env.agents[0].position(), 100.0);
+    const auto result = q.OtherAgentsInRange(env.agents[0], 100.0);
     EXPECT_TRUE(result.empty());
 }
 
@@ -77,7 +77,7 @@ TEST(EnvironmentQuery, AgentsInRangeNoFilterReturnsAllInRadius)
     const auto geo = OpenGeometry();
     const auto q = env.query(geo);
 
-    const auto result = q.OtherAgentsInRange(env.agents[0].position(), 5.0);
+    const auto result = q.OtherAgentsInRange(env.agents[0], 5.0);
     EXPECT_EQ(result.size(), 3u);
 }
 
@@ -91,7 +91,7 @@ TEST(EnvironmentQuery, AgentsInRangeCustomFilterRejectsAll)
     const auto q = env.query(geo);
 
     const auto result =
-        q.OtherAgentsInRange(env.agents[0].position(), 5.0, [](const Point&) { return false; });
+        q.OtherAgentsInRange(env.agents[0], 5.0, [](const Point&) { return false; });
     EXPECT_TRUE(result.empty());
 }
 
@@ -105,8 +105,8 @@ TEST(EnvironmentQuery, AgentsInRangeCustomFilterSelectsSubset)
     const auto geo = OpenGeometry();
     const auto q = env.query(geo);
 
-    const auto result = q.OtherAgentsInRange(
-        env.agents[0].position(), 5.0, [](const Point& to) { return to.x >= 0.0; });
+    const auto result =
+        q.OtherAgentsInRange(env.agents[0], 5.0, [](const Point& to) { return to.x >= 0.0; });
 
     ASSERT_EQ(result.size(), 2u);
     for(const auto& neighbor : result) {
@@ -124,9 +124,8 @@ TEST(EnvironmentQuery, NoGeometryBetweenFiltersOccludedAgents)
     const auto q = env.query(geo);
 
     const auto from = env.agents[0].position();
-    const auto result = q.OtherAgentsInRange(env.agents[0].position(), 5.0, [&](const Point& to) {
-        return q.NoGeometryBetween(from, to);
-    });
+    const auto result = q.OtherAgentsInRange(
+        env.agents[0], 5.0, [&](const Point& to) { return q.NoGeometryBetween(from, to); });
 
     ASSERT_EQ(result.size(), 1u);
     EXPECT_EQ(std::get<State>(result[0].model).position, Point(0, 1));
@@ -142,7 +141,7 @@ TEST(EnvironmentQuery, AgentsInRangeCustomFilterReceivesNoSelf)
     const auto q = env.query(geo);
 
     const auto selfPos = env.agents[0].position();
-    q.OtherAgentsInRange(env.agents[0].position(), 5.0, [&](const Point& to) {
+    q.OtherAgentsInRange(env.agents[0], 5.0, [&](const Point& to) {
         if(to == selfPos) {
             ADD_FAILURE() << "filter was called with the querying agent's own position";
         }
@@ -158,7 +157,6 @@ TEST(EnvironmentQuery, AgentsInRangeOutOfRadiusNotReturned)
     const auto geo = OpenGeometry();
     const auto q = env.query(geo);
 
-    const auto result =
-        q.OtherAgentsInRange(env.agents[0].position(), 1.0, [](const Point&) { return true; });
+    const auto result = q.OtherAgentsInRange(env.agents[0], 1.0, [](const Point&) { return true; });
     EXPECT_TRUE(result.empty());
 }

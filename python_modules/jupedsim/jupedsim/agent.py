@@ -251,7 +251,7 @@ class _TransientAgent:
         return state
 
     @property
-    def _raw(self):
+    def _native(self):
         return self.__obj
 
     def __repr__(self) -> str:

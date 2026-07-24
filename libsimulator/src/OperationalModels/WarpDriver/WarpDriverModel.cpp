@@ -454,7 +454,7 @@ void WarpDriverModel::ComputeNextState(
     const double dtSample = this->_timeHorizon / std::max(this->_numSamples - 1, 1);
 
     // === Step 2: Perceive - build collision probability field ===
-    const auto neighbors = envQuery.OtherAgentsInRange(current.position(), _cutOffRadius);
+    const auto neighbors = envQuery.OtherAgentsInRange(current.model, _cutOffRadius);
 
     // Short-range repulsion: not part of the original Wolinski et al. (2016)
     // model, which is purely anticipatory. Added as a practical safety net

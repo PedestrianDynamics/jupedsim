@@ -14,6 +14,8 @@
 #include <ranges>
 #include <vector>
 
+using OperationalModelState = GenericAgent::ModelState;
+
 class EnvironmentQuery
 {
     const CollisionGeometry& _geometry;
@@ -31,15 +33,19 @@ public:
         bool operator()(const Point&) const { return true; }
     };
 
+    // Returns all agents within 'radius' of 'agent', excluding 'agent' itself.
+    // An optional predicate 'filter' further filters the result; it receives the
+    // position for which neighbors are returned as well as the candidates. Example:
+    //   query.AgentsInRange(state, r, [&envQuery, from=model.position](const Point& to) {
+    //   return envQuery.NoGeometryBetween(from, to);})
     template <std::predicate<const Point&> Pred = AcceptAll>
     std::vector<GenericAgent>
-    OtherAgentsInRange(const Point& from, double radius, Pred filter = {}) const
+    OtherAgentsInRange(const OperationalModelState& state, double radius, Pred filter = {}) const
     {
-        auto neighbors = _nsearch.GetNeighboringAgents(from, radius);
-        std::erase_if(neighbors, [&](const GenericAgent& candidate) {
-            return (candidate.position() == from) || !filter(candidate.position());
+        Point from = Pos(state);
+        return AgentsInRange(from, radius, [&from, &filter](const Point& to) {
+            return !(from == to || !filter(to));
         });
-        return neighbors;
     }
 
     template <std::predicate<const Point&> Pred = AcceptAll>
@@ -74,8 +80,6 @@ public:
             return _geometry.LineSegmentsInDistanceTo(distance, p);
         }
     }
-
-    bool IntersectsAny(const LineSegment& ls) const { return _geometry.IntersectsAny(ls); }
 
     bool InsideGeometry(const Point& p) const { return _geometry.InsideGeometry(p); }
 

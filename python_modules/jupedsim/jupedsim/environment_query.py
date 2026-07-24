@@ -20,7 +20,7 @@ class EnvironmentQuery:
     Example — visibility-filtered neighborhood::
 
         def compute_next_state(self, dt, ped, env_query):
-            neighbors = env_query.agents_in_range(
+            neighbors = env_query.other_agents_in_range(
                 ped, 5.0,
                 lambda n: env_query.no_wall_between(ped.position, n.position)
             )
@@ -29,7 +29,7 @@ class EnvironmentQuery:
     def __init__(self, obj: py_jps.EnvironmentQuery) -> None:
         self._obj = obj
 
-    def agents_in_range(
+    def other_agents_in_range(
         self,
         agent: _TransientAgent,
         radius: float,
@@ -50,10 +50,10 @@ class EnvironmentQuery:
         """
         from jupedsim.agent import _TransientAgent
 
-        raw_agent = agent._raw if isinstance(agent, _TransientAgent) else agent
+        raw_agent = agent._native if hasattr(agent, "_native") else agent
         neighbors = [
             _TransientAgent(a)
-            for a in self._obj.agents_in_range(raw_agent, radius)
+            for a in self._obj.other_agents_in_range(raw_agent, radius)
         ]
         if predicate is None:
             return neighbors
@@ -76,7 +76,7 @@ class EnvironmentQuery:
 
         Example::
 
-            neighbors = env_query.agents_in_range(
+            neighbors = env_query.other_agents_in_range(
                 ped, 5.0,
                 lambda n: env_query.no_wall_between(ped.position, n.position)
             )

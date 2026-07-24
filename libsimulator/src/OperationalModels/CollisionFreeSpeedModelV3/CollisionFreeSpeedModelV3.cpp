@@ -76,7 +76,7 @@ void CollisionFreeSpeedModelV3::ComputeNextState(
     const auto& model = std::get<State>(current.model);
     const auto& boundary = envQuery.LineSegmentsInRange(model.position);
     auto neighborhood = envQuery.OtherAgentsInRange(
-        model.position, _cutOffRadius, [&envQuery, from = model.position](const Point& to) {
+        model, _cutOffRadius, [&envQuery, from = model.position](const Point& to) {
             return envQuery.NoGeometryBetween(from, to);
         });
 
