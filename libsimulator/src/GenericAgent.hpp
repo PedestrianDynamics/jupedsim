@@ -88,6 +88,16 @@ struct GenericAgent {
     }
 };
 
+inline const Point& Pos(const GenericAgent::ModelState& state)
+{
+    return std::visit([](const auto& s) -> const Point& { return s.position; }, state);
+}
+
+inline Point& Pos(GenericAgent::ModelState& state)
+{
+    return std::visit([](auto& s) -> Point& { return s.position; }, state);
+}
+
 /// Maps agent model data to the operational model type it belongs to. Kept
 /// exhaustive on purpose: adding a model type will not compile until the
 /// mapping is extended.

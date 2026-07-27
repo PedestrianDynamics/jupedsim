@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "CollisionFreeSpeedModel.hpp"
 
-#include "CollisionGeometry.hpp"
+#include "EnvironmentQuery.hpp"
 #include "GenericAgent.hpp"
 #include "GeometricFunctions.hpp"
 #include "LineSegment.hpp"
-#include "NeighborhoodSearch.hpp"
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
 #include "Point.hpp"
@@ -39,37 +38,14 @@ void CollisionFreeSpeedModel::ComputeNextState(
     double dT,
     const GenericAgent& current,
     GenericAgent& next,
-    const CollisionGeometry& geometry,
-    const NeighborhoodSearch<GenericAgent>& neighborhoodSearch) const
+    const EnvironmentQuery& envQuery) const
 {
     const auto& model = std::get<State>(current.model);
-    auto neighborhood = neighborhoodSearch.GetNeighboringAgents(model.position, _cutOffRadius);
-    const auto& boundary = geometry.LineSegmentsInApproxDistanceTo(model.position);
-
-    // Remove any agent from the neighborhood that is obstructed by geometry and the current
-    // agent
-    neighborhood.erase(
-        std::remove_if(
-            std::begin(neighborhood),
-            std::end(neighborhood),
-            [&current, &model, &boundary](const auto& neighbor) {
-                if(current.id == neighbor.id) {
-                    return true;
-                }
-                const auto agent_to_neighbor =
-                    LineSegment(model.position, std::get<State>(neighbor.model).position);
-                if(std::find_if(
-                       boundary.cbegin(),
-                       boundary.cend(),
-                       [&agent_to_neighbor](const auto& boundary_segment) {
-                           return intersects(agent_to_neighbor, boundary_segment);
-                       }) != boundary.end()) {
-                    return true;
-                }
-
-                return false;
-            }),
-        std::end(neighborhood));
+    const auto& boundary = envQuery.LineSegmentsInRange(model.position);
+    auto neighborhood = envQuery.OtherAgentsInRange(
+        model, _cutOffRadius, [&envQuery, from = model.position](const Point& to) {
+            return envQuery.NoGeometryBetween(from, to);
+        });
 
     const auto neighborRepulsion = std::accumulate(
         std::begin(neighborhood),
@@ -80,8 +56,8 @@ void CollisionFreeSpeedModel::ComputeNextState(
         });
 
     const auto boundaryRepulsion = std::accumulate(
-        boundary.cbegin(),
-        boundary.cend(),
+        std::begin(boundary),
+        std::end(boundary),
         Point(0, 0),
         [this, &current](const auto& acc, const auto& element) {
             return acc + BoundaryRepulsion(current, element);
@@ -109,8 +85,7 @@ void CollisionFreeSpeedModel::ComputeNextState(
 
 void CollisionFreeSpeedModel::CheckModelConstraint(
     const GenericAgent& agent,
-    const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
-    const CollisionGeometry& geometry) const
+    const EnvironmentQuery& envQuery) const
 {
     const auto& model = std::get<State>(agent.model);
 
@@ -129,11 +104,8 @@ void CollisionFreeSpeedModel::CheckModelConstraint(
     constexpr double timeGapMax = 10.;
     validateConstraint(timeGap, timeGapMin, timeGapMax, "timeGap");
 
-    const auto neighbors = neighborhoodSearch.GetNeighboringAgents(model.position, 2);
+    const auto neighbors = envQuery.OtherAgentsInRange(agent.position(), 2.0);
     for(const auto& neighbor : neighbors) {
-        if(agent.id == neighbor.id) {
-            continue;
-        }
         const auto& neighbor_model = std::get<State>(neighbor.model);
         const auto contanctdDist = r + neighbor_model.radius;
         const auto distance = (model.position - neighbor_model.position).Norm();
@@ -146,7 +118,7 @@ void CollisionFreeSpeedModel::CheckModelConstraint(
         }
     }
 
-    const auto lineSegments = geometry.LineSegmentsInDistanceTo(r, model.position);
+    const auto lineSegments = envQuery.LineSegmentsInRange(model.position, r);
     if(std::begin(lineSegments) != std::end(lineSegments)) {
         throw SimulationError(
             "Model constraint violation: Agent {} too close to geometry boundaries, distance "

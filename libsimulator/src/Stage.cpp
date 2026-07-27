@@ -196,6 +196,43 @@ const std::vector<GenericAgent::ID>& NotifiableWaitingSet::Occupants() const
     return occupants;
 }
 
+void NotifiableWaitingSet::Update(const EnvironmentQuery& envQuery)
+{
+    if(state == WaitingSetState::Inactive) {
+        return;
+    }
+    const auto count_occupants = occupants.size();
+    if(count_occupants == slots.size()) {
+        return;
+    }
+
+    for(size_t index = count_occupants; index < slots.size(); ++index) {
+        const auto slot_pos = slots[index];
+        auto candidates = envQuery.AgentsInRange(
+            slot_pos, 2, [&](const Point& to) { return envQuery.NoGeometryBetween(slot_pos, to); });
+
+        GenericAgent::ID occupant = GenericAgent::ID::Invalid;
+        double min_distance = std::numeric_limits<double>::max();
+        for(const auto& agent : candidates) {
+            if(agent.stageId == id) {
+                if(std::find(std::begin(occupants), std::end(occupants), agent.id) ==
+                   std::end(occupants)) {
+                    const auto distance = (agent.position() - slots[index]).Norm();
+                    if(distance < min_distance) {
+                        min_distance = distance;
+                        occupant = agent.id;
+                    }
+                }
+            }
+        }
+        if(occupant != GenericAgent::ID::Invalid) {
+            occupants.push_back(occupant);
+        } else {
+            return;
+        }
+    }
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 /// NotifiablQueue
 ////////////////////////////////////////////////////////////////////////////////
@@ -242,4 +279,37 @@ StageProxy NotifiableQueue::Proxy(Simulation* simulation)
 const std::vector<GenericAgent::ID>& NotifiableQueue::Occupants() const
 {
     return occupants;
+}
+
+void NotifiableQueue::Update(const EnvironmentQuery& envQuery)
+{
+    const auto count_occupants = occupants.size();
+    if(count_occupants == slots.size()) {
+        return;
+    }
+
+    for(size_t index = count_occupants; index < slots.size(); ++index) {
+        const auto slot_pos = slots[index];
+        auto candidates = envQuery.AgentsInRange(
+            slot_pos, 2, [&](const Point& to) { return envQuery.NoGeometryBetween(slot_pos, to); });
+
+        GenericAgent::ID occupant = GenericAgent::ID::Invalid;
+        double min_distance = std::numeric_limits<double>::max();
+        for(const auto& agent : candidates) {
+            if(agent.stageId != id || Contains(occupants, agent.id) ||
+               exitingThisUpdate.contains(agent.id)) {
+                continue;
+            }
+            const auto distance = (agent.position() - slots[index]).Norm();
+            if(distance < min_distance) {
+                min_distance = distance;
+                occupant = agent.id;
+            }
+        }
+        if(occupant != GenericAgent::ID::Invalid) {
+            occupants.emplace_back(occupant);
+        } else {
+            return;
+        }
+    }
 }

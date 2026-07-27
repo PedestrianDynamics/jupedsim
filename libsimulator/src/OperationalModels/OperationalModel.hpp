@@ -1,16 +1,14 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "CollisionGeometry.hpp"
 #include "OperationalModelType.hpp"
+
+class EnvironmentQuery;
 #include "SimulationError.hpp"
 
 #include <fmt/core.h>
 
 #include <string>
-
-template <typename T>
-class NeighborhoodSearch;
 
 struct GenericAgent;
 
@@ -64,11 +62,8 @@ public:
         double dT,
         const GenericAgent& current,
         GenericAgent& next,
-        const CollisionGeometry& geometry,
-        const NeighborhoodSearch<GenericAgent>& neighborhoodSearch) const = 0;
+        const EnvironmentQuery& envQuery) const = 0;
 
-    virtual void CheckModelConstraint(
-        const GenericAgent& agent,
-        const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
-        const CollisionGeometry& geometry) const = 0;
+    virtual void
+    CheckModelConstraint(const GenericAgent& agent, const EnvironmentQuery& envQuery) const = 0;
 };

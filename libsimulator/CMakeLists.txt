@@ -101,6 +101,7 @@ if (BUILD_TESTS)
         test/TestBasicPrimitiveTests.cpp
         test/TestCollisionGeometry.cpp
         test/TestCustomModel.cpp
+        test/TestEnvironmentQuery.cpp
         test/TestGenericAgentFormatter.cpp
         test/TestGraph.cpp
         test/TestJourney.cpp
