@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Geometry/Geometry3D.hpp"
+#include "LineSegment.hpp"
 
 #include <CGAL/mark_domain_in_triangulation.h>
 #include <gtest/gtest.h>
@@ -46,6 +47,12 @@ SurfaceMesh stacked_floors()
     add_quad(mesh, {Point3D{0, 0, 0}, {10, 0, 0}, {10, 10, 0}, {0, 10, 0}});
     add_quad(mesh, {Point3D{0, 0, 3}, {10, 0, 3}, {10, 10, 3}, {0, 10, 3}});
     return mesh;
+}
+
+/// Gather a LineSegmentRange into a set for order-independent comparison.
+std::set<LineSegment> into_set(const Geometry2D::LineSegmentRange& range)
+{
+    return std::set<LineSegment>{range.begin(), range.end()};
 }
 
 } // namespace
@@ -173,4 +180,78 @@ TEST(Geometry3DFromPolygon, LiftReproducesThe2DTriangulation)
     EXPECT_EQ(actual, expected);
     // Exactly the triangulation's corner vertices.
     EXPECT_EQ(vertices.size(), cdt.number_of_vertices());
+}
+
+// Compare 3D queries to underlying 2D ones.
+TEST(Geometry3DModelQueries, LineSegmentsInRangeMatchesFlatView)
+{
+    Geometry3D geo{square_with_hole()};
+    const auto who = geo.get_location(2, 5, 0.0);
+    ASSERT_TRUE(who.has_value());
+
+    // No distance -> approximate grid neighbourhood.
+    EXPECT_EQ(
+        into_set(geo.line_segments_in_range(*who)),
+        into_set(geo.geometry_2d()->LineSegmentsInApproxDistanceTo(who->xy())));
+
+    // Explicit distance -> exact distance query.
+    EXPECT_EQ(
+        into_set(geo.line_segments_in_range(*who, 3.0)),
+        into_set(geo.geometry_2d()->LineSegmentsInDistanceTo(3.0, who->xy())));
+}
+
+TEST(Geometry3DModelQueries, NoGeometryBetweenMatchesFlatView)
+{
+    Geometry3D geo{square_with_hole()};
+    const auto left = geo.get_location(2, 5, 0.0);
+    const auto right = geo.get_location(8, 5, 0.0);
+    const auto below = geo.get_location(2, 2, 0.0);
+    ASSERT_TRUE(left.has_value() && right.has_value() && below.has_value());
+
+    // Straight line 2,5 -> 8,5 runs through the central hole: blocked.
+    EXPECT_FALSE(geo.no_geometry_between(*left, *right));
+    // 2,5 -> 2,2 stays clear of the hole: visible.
+    EXPECT_TRUE(geo.no_geometry_between(*left, *below));
+
+    // Delegation pinning against the 2D view.
+    EXPECT_EQ(
+        geo.no_geometry_between(*left, *right),
+        !geo.geometry_2d()->IntersectsAny(LineSegment{left->xy(), right->xy()}));
+    EXPECT_EQ(
+        geo.no_geometry_between(*left, *below),
+        !geo.geometry_2d()->IntersectsAny(LineSegment{left->xy(), below->xy()}));
+}
+
+TEST(Geometry3DModelQueries, InsideGeometryMatchesFlatView)
+{
+    Geometry3D geo{square_with_hole()};
+    const auto who = geo.get_location(2, 5, 0.0);
+    ASSERT_TRUE(who.has_value());
+
+    // The step endpoint who.xy() + direction is judged, not the location itself.
+    const Point to_free{1, 1}; // free
+    const Point to_hole{5, 5}; // inside the central hole
+    const Point to_outside{20, 20}; // outside geometry
+    EXPECT_TRUE(geo.inside_geometry(*who, to_free - who->xy()));
+    EXPECT_FALSE(geo.inside_geometry(*who, to_hole - who->xy()));
+    EXPECT_FALSE(geo.inside_geometry(*who, to_outside - who->xy()));
+
+    // Delegation pinning against the 2D view.
+    EXPECT_EQ(
+        geo.inside_geometry(*who, to_free - who->xy()), geo.geometry_2d()->InsideGeometry(to_free));
+    EXPECT_EQ(
+        geo.inside_geometry(*who, to_hole - who->xy()), geo.geometry_2d()->InsideGeometry(to_hole));
+}
+
+TEST(Geometry3DModelQueries, MeshBuiltThrows)
+{
+    // A mesh-built geometry has no 2D view; the queries are not implemented
+    // until M9 and must throw rather than dereference a null view.
+    Geometry3D mesh_geo{flat_room()};
+    const auto who = mesh_geo.get_location(2, 5, 0.0);
+    ASSERT_TRUE(who.has_value());
+
+    EXPECT_THROW(mesh_geo.line_segments_in_range(*who), std::exception);
+    EXPECT_THROW(mesh_geo.no_geometry_between(*who, *who), std::exception);
+    EXPECT_THROW(mesh_geo.inside_geometry(*who, {1, 1}), std::exception);
 }
