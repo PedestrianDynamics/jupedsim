@@ -43,9 +43,8 @@ public:
     OtherAgentsInRange(const OperationalModelState& state, double radius, Pred filter = {}) const
     {
         Point from = Pos(state);
-        return AgentsInRange(from, radius, [&from, &filter](const Point& to) {
-            return !(from == to || !filter(to));
-        });
+        return AgentsInRange(
+            from, radius, [&from, &filter](const Point& to) { return from != to && filter(to); });
     }
 
     template <std::predicate<const Point&> Pred = AcceptAll>
