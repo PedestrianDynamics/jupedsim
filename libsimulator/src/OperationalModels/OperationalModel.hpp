@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
+#include "OperationalModelState.hpp"
 #include "OperationalModelType.hpp"
-
-class EnvironmentQuery;
+#include "Point.hpp"
 #include "SimulationError.hpp"
 
 #include <fmt/core.h>
 
 #include <string>
 
-struct GenericAgent;
+class EnvironmentQuery;
 
 template <typename T>
 void validateConstraint(
@@ -57,13 +57,16 @@ public:
     /// Computes the agent state for the next iteration.
     /// "next" arrives as an exact copy of "current"; implementations overwrite only the fields
     /// they change. Other agents must be read exclusively from the frozen current generation,
-    /// i.e. via "current" and the neighborhood search, never via "next".
+    /// i.e. via the environment query, never via "next". "destination" is the agent's current
+    /// routing waypoint.
     virtual void ComputeNextState(
         double dT,
-        const GenericAgent& current,
-        GenericAgent& next,
+        const OperationalModelState& current,
+        OperationalModelState& next,
+        const Point& destination,
         const EnvironmentQuery& envQuery) const = 0;
 
-    virtual void
-    CheckModelConstraint(const GenericAgent& agent, const EnvironmentQuery& envQuery) const = 0;
+    virtual void CheckModelConstraint(
+        const OperationalModelState& state,
+        const EnvironmentQuery& envQuery) const = 0;
 };

@@ -3,6 +3,8 @@
 #include "EnvironmentQuery.hpp"
 #include "GenericAgent.hpp"
 #include "LineSegment.hpp"
+#include "OperationalModels/CustomModel/CustomModel.hpp"
+#include "OperationalModels/OperationalModelState.hpp"
 #include "conversion.hpp"
 
 #include <pybind11/functional.h>
@@ -16,12 +18,12 @@ void init_environment_query(py::module_& m)
     py::class_<EnvironmentQuery>(m, "EnvironmentQuery")
         .def(
             "other_agents_in_range",
-            [](const EnvironmentQuery& self, const GenericAgent& agent, double radius) {
-                return self.OtherAgentsInRange(agent.model, radius);
+            [](const EnvironmentQuery& self, const CustomModel::State& state, double radius) {
+                return self.OtherAgentsInRange(OperationalModelState{state}, radius);
             },
-            py::arg("agent"),
+            py::arg("state"),
             py::arg("radius"),
-            "All agents within radius of agent (self excluded).")
+            "All agents within radius of state (self excluded).")
         .def(
             "no_wall_between",
             [](const EnvironmentQuery& self,

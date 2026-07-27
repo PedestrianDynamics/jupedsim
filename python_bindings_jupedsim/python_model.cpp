@@ -5,6 +5,8 @@
 #include "GenericAgent.hpp"
 #include "OperationalModel.hpp"
 #include "OperationalModels/CustomModel/CustomModel.hpp"
+#include "OperationalModels/OperationalModelState.hpp"
+#include "Point.hpp"
 #include "SimulationError.hpp"
 #include "conversion.hpp"
 
@@ -86,21 +88,27 @@ PythonModel::PythonModel(py::object model) : _model(std::move(model))
 
 void PythonModel::ComputeNextState(
     double dT,
-    const GenericAgent& current,
-    GenericAgent& next,
+    const OperationalModelState& current,
+    OperationalModelState& next,
+    const Point& destination,
     const EnvironmentQuery& envQuery) const
 {
     py::gil_scoped_acquire gil;
 
-    py::object pythonAgent = py::cast(current);
+    const auto& currentState = std::get<CustomModel::State>(current);
+    auto& nextState = std::get<CustomModel::State>(next);
+
+    // Copy-construct the Python-facing state (shares GilSafePyObject by refcount, not clone).
+    py::object pythonState = py::cast(currentState);
+    py::object destTuple = py::make_tuple(destination.x, destination.y);
     py::object pythonEnvQuery = py::cast(&envQuery, py::return_value_policy::reference);
 
-    py::object pythonUpdate = _model.attr("_compute_next_state")(dT, pythonAgent, pythonEnvQuery);
+    py::object pythonUpdate =
+        _model.attr("_compute_next_state")(dT, pythonState, destTuple, pythonEnvQuery);
 
-    // "next" shares the Python state object with "current" (GilSafePyObject copies are
-    // refcounted, not cloned), so this also rejects returning the current state instance.
-    auto& nextModelData = std::get<CustomModel::State>(next.model);
-    auto& customModelData = nextModelData.Get<GilSafePyObject>();
+    // nextState shares Python payload with currentState initially; reject returning the same
+    // object.
+    auto& customModelData = nextState.Get<GilSafePyObject>();
     if(pythonUpdate.is(customModelData.Get())) {
         throw SimulationError(
             "Current and updated model state are the same instance. "
@@ -121,12 +129,8 @@ void PythonModel::ComputeNextState(
     }
 
     try {
-        // Sync the GIL-free position cache from the returned Python state so the
-        // framework can read the agent position without acquiring the GIL.
-        nextModelData.position = intoPoint(py::cast<std::tuple<double, double>>(attr));
+        nextState.position = intoPoint(py::cast<std::tuple<double, double>>(attr));
     } catch(const py::cast_error&) {
-        // Diagnostics run Python code on the offending object; they must not
-        // be able to replace the error they describe.
         std::string actualType = "<unknown>";
         std::string valueRepr = "<unprintable>";
         try {
@@ -137,7 +141,6 @@ void PythonModel::ComputeNextState(
             valueRepr = std::string(py::repr(attr));
         } catch(const py::error_already_set&) {
         }
-
         throw SimulationError(
             "State returned by compute_next_state() has attribute '{}' of wrong type: "
             "expected tuple[float, float], got {} ({})",
@@ -148,15 +151,17 @@ void PythonModel::ComputeNextState(
     customModelData.Set(pythonUpdate);
 }
 
-void PythonModel::CheckModelConstraint(const GenericAgent& agent, const EnvironmentQuery& envQuery)
-    const
+void PythonModel::CheckModelConstraint(
+    const OperationalModelState& state,
+    const EnvironmentQuery& envQuery) const
 {
     py::gil_scoped_acquire gil;
 
-    py::object pythonAgent = py::cast(agent);
+    const auto& customState = std::get<CustomModel::State>(state);
+    py::object pythonState = py::cast(customState);
     py::object pythonEnvQuery = py::cast(&envQuery, py::return_value_policy::reference);
 
-    _model.attr("_check_model_constraint")(pythonAgent, pythonEnvQuery);
+    _model.attr("_check_model_constraint")(pythonState, pythonEnvQuery);
 }
 
 void init_python_model(py::module_& m)
@@ -174,7 +179,10 @@ void init_python_model(py::module_& m)
             return data;
         }))
         .def_property_readonly(
-            "model", [](CustomModel::State& data) { return data.Get<GilSafePyObject>().Get(); });
+            "model", [](CustomModel::State& data) { return data.Get<GilSafePyObject>().Get(); })
+        .def_property_readonly("position", [](const CustomModel::State& data) {
+            return std::make_tuple(data.position.x, data.position.y);
+        });
 
     py::class_<PythonModel, OperationalModel, py::smart_holder>(m, "_PythonModel")
         .def(py::init<py::object>(), py::arg("model"));

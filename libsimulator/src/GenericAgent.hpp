@@ -1,18 +1,10 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
-#include "AnticipationVelocityModel.hpp"
-#include "CollisionFreeSpeedModel.hpp"
-#include "CollisionFreeSpeedModelV2.hpp"
-#include "CollisionFreeSpeedModelV3.hpp"
-#include "GeneralizedCentrifugalForceModel.hpp"
-#include "OperationalModel.hpp"
-#include "OperationalModels/CustomModel/CustomModel.hpp"
+#include "OperationalModels/OperationalModelState.hpp"
 #include "OperationalModels/OperationalModelType.hpp"
 #include "Point.hpp"
-#include "SocialForceModel.hpp"
 #include "UniqueID.hpp"
 #include "Visitor.hpp"
-#include "WarpDriver/WarpDriverModel.hpp"
 
 #include <fmt/core.h>
 
@@ -50,53 +42,35 @@ struct GenericAgent {
     Point nextTarget{};
     Point finalTarget{};
 
-    using ModelState = std::variant<
-        GeneralizedCentrifugalForceModel::State,
-        CollisionFreeSpeedModel::State,
-        CollisionFreeSpeedModelV2::State,
-        CollisionFreeSpeedModelV3::State,
-        AnticipationVelocityModel::State,
-        SocialForceModel::State,
-        WarpDriverModel::State,
-        CustomModel::State>;
+    using ModelState = OperationalModelState;
     static_assert(
         EachAlternativeIsModelAgentState<ModelState>,
         "Every agent model state must provide a 'Point position' member");
-    ModelState model{};
+    ModelState state{};
 
     Point& position()
     {
-        return std::visit([](auto& m) -> Point& { return m.position; }, model);
+        return std::visit([](auto& m) -> Point& { return m.position; }, state);
     }
     const Point& position() const
     {
-        return std::visit([](const auto& m) -> const Point& { return m.position; }, model);
+        return std::visit([](const auto& m) -> const Point& { return m.position; }, state);
     }
 
     GenericAgent(
         ID id_,
         jps::UniqueID<Journey> journeyId_,
         jps::UniqueID<BaseStage> stageId_,
-        ModelState model_)
+        ModelState state_)
         : id(id_ != ID::Invalid ? id_ : ID{})
         , journeyId(journeyId_)
         , stageId(stageId_)
-        , model(std::move(model_))
+        , state(std::move(state_))
     {
         // Position is owned by the model state; seed the initial waypoint from it.
         finalTarget = position();
     }
 };
-
-inline const Point& Pos(const GenericAgent::ModelState& state)
-{
-    return std::visit([](const auto& s) -> const Point& { return s.position; }, state);
-}
-
-inline Point& Pos(GenericAgent::ModelState& state)
-{
-    return std::visit([](auto& s) -> Point& { return s.position; }, state);
-}
 
 /// Maps agent model data to the operational model type it belongs to. Kept
 /// exhaustive on purpose: adding a model type will not compile until the
@@ -105,24 +79,24 @@ inline OperationalModelType ModelTypeOf(const GenericAgent::ModelState& model)
 {
     return std::visit(
         overloaded{
-            [](const GeneralizedCentrifugalForceModel::State&) {
+            [](const GeneralizedCentrifugalForceModelState&) {
                 return OperationalModelType::GENERALIZED_CENTRIFUGAL_FORCE;
             },
-            [](const CollisionFreeSpeedModel::State&) {
+            [](const CollisionFreeSpeedModelState&) {
                 return OperationalModelType::COLLISION_FREE_SPEED;
             },
-            [](const CollisionFreeSpeedModelV2::State&) {
+            [](const CollisionFreeSpeedModelV2State&) {
                 return OperationalModelType::COLLISION_FREE_SPEED_V2;
             },
-            [](const CollisionFreeSpeedModelV3::State&) {
+            [](const CollisionFreeSpeedModelV3State&) {
                 return OperationalModelType::COLLISION_FREE_SPEED_V3;
             },
-            [](const AnticipationVelocityModel::State&) {
+            [](const AnticipationVelocityModelState&) {
                 return OperationalModelType::ANTICIPATION_VELOCITY_MODEL;
             },
-            [](const SocialForceModel::State&) { return OperationalModelType::SOCIAL_FORCE; },
-            [](const WarpDriverModel::State&) { return OperationalModelType::WARP_DRIVER; },
-            [](const CustomModel::State&) { return OperationalModelType::CUSTOM_MODEL; }},
+            [](const SocialForceModelState&) { return OperationalModelType::SOCIAL_FORCE; },
+            [](const WarpDriverModelState&) { return OperationalModelType::WARP_DRIVER; },
+            [](const CustomModelState&) { return OperationalModelType::CUSTOM_MODEL; }},
         model);
 }
 
@@ -150,6 +124,6 @@ struct fmt::formatter<GenericAgent> {
                     agent.position(),
                     m);
             },
-            agent.model);
+            agent.state);
     }
 };

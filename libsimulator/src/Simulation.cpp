@@ -255,7 +255,7 @@ GenericAgent::ID Simulation::AddAgent(GenericAgent agent)
         throw SimulationError("Unknown stage id: {}", agent.stageId);
     }
 
-    if(const auto agentModelType = ModelTypeOf(agent.model);
+    if(const auto agentModelType = ModelTypeOf(agent.state);
        agentModelType != _operationalDecisionSystem.ModelType()) {
         throw SimulationError(
             "Agent model data of type '{}' does not match the simulation's operational model "

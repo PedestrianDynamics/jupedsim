@@ -9,7 +9,6 @@ from typing import (
 )
 
 if TYPE_CHECKING:
-    from jupedsim.agent import _TransientAgent
     from jupedsim.environment_query import EnvironmentQuery
 
 
@@ -76,32 +75,33 @@ class CustomOperationalModel(ABC):
     def compute_next_state(
         self,
         dt: float,
-        ped: _TransientAgent,
+        state: CustomModelAgentState,
+        destination: tuple[float, float],
         env_query: EnvironmentQuery,
     ) -> CustomModelAgentState:
-        """Compute one update for ``ped``.
+        """Compute one update for the agent with the given *state*.
 
         Args:
             dt: Simulation time step in seconds.
-            ped: The agent being updated. Only valid for the duration of this call.
-            env_query: Spatial query object for the current step. Use it to
-                find neighboring agents and query geometry. Only valid for the
-                duration of this call.
+            state: Current per-agent state. Only valid for the duration of this call.
+            destination: Current navigation waypoint as ``(x, y)`` in metres.
+            env_query: Spatial query object for the current step. Only valid for
+                the duration of this call.
 
         Returns:
-            New agent state. Must be a new object -- returning ``ped.model``
-            unchanged raises an error.
+            New agent state. Must be a new object -- returning *state* unchanged
+            raises an error. Use ``dataclasses.replace(state, ...)`` to derive it.
         """
 
     def check_model_constraint(
         self,
-        ped: _TransientAgent,
+        state: CustomModelAgentState,
         env_query: EnvironmentQuery,
     ) -> None:
-        """Raise an exception when ``ped`` violates this model's constraints.
+        """Raise an exception when *state* violates this model's constraints.
 
         Args:
-            ped: The agent to validate.
+            state: Per-agent state to validate.
             env_query: Spatial query object for the current step.
         """
         pass
@@ -109,24 +109,21 @@ class CustomOperationalModel(ABC):
     def _compute_next_state(
         self,
         dt,
-        ped,
+        state,
+        destination,
         env_query,
     ) -> CustomModelAgentState:
-        from jupedsim.agent import _TransientAgent
         from jupedsim.environment_query import EnvironmentQuery
 
         return self.compute_next_state(
-            dt, _TransientAgent(ped), EnvironmentQuery(env_query)
+            dt, state.model, destination, EnvironmentQuery(env_query)
         )
 
     def _check_model_constraint(
         self,
-        ped,
+        state,
         env_query,
     ) -> None:
-        from jupedsim.agent import _TransientAgent
         from jupedsim.environment_query import EnvironmentQuery
 
-        self.check_model_constraint(
-            _TransientAgent(ped), EnvironmentQuery(env_query)
-        )
+        self.check_model_constraint(state.model, EnvironmentQuery(env_query))

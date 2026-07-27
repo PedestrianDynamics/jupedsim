@@ -39,7 +39,8 @@ public:
         _next.clear();
         std::copy(std::begin(agents), std::end(agents), std::back_inserter(_next));
         for(size_t index = 0; index < agents.size(); ++index) {
-            _model->ComputeNextState(dT, agents[index], _next[index], envQuery);
+            _model->ComputeNextState(
+                dT, agents[index].state, _next[index].state, agents[index].nextTarget, envQuery);
         }
         // Swap in the computed generation. This is safe because no caller retains
         // pointers/references across an iteration (Python-side agent handles resolve per
@@ -54,6 +55,6 @@ public:
         const CollisionGeometry& geometry) const
     {
         const EnvironmentQuery envQuery{geometry, neighborhoodSearch};
-        _model->CheckModelConstraint(agent, envQuery);
+        _model->CheckModelConstraint(agent.state, envQuery);
     }
 };

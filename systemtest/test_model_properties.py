@@ -452,20 +452,20 @@ def test_agent_handle_raises_after_removal(
         state=jps.SocialForceModelState(position=(1, 1)),
     )
     agent = sim.agent(agent_id)
-    model = agent.model
+    state = agent.state
     assert agent.position == (1, 1)
 
     sim.mark_agent_for_removal(agent_id)
     sim.iterate()
 
     with pytest.raises(jps.SimulationError):
-        agent.position
+        state.position
     with pytest.raises(jps.SimulationError):
-        agent.model.desired_speed
+        state.model.desired_speed
     with pytest.raises(jps.SimulationError):
-        model.desired_speed
+        state.desired_speed
     with pytest.raises(jps.SimulationError):
-        model.desired_speed = 1.0
+        state.desired_speed = 1.0
     with pytest.raises(jps.SimulationError):
         sim.agent(agent_id)
 

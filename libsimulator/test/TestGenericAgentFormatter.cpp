@@ -15,30 +15,30 @@ static GenericAgent make_agent(GenericAgent::ModelState model)
 
 TEST(GenericAgentFormatter, FormatsGeneralizedCentrifugalForceModelAgent)
 {
-    auto agent = make_agent(GeneralizedCentrifugalForceModel::State{});
+    auto agent = make_agent(GeneralizedCentrifugalForceModelState{});
     ASSERT_NO_THROW((void) fmt::format("{}", agent));
 }
 
 TEST(GenericAgentFormatter, FormatsCollisionFreeSpeedModelAgent)
 {
-    auto agent = make_agent(CollisionFreeSpeedModel::State{});
+    auto agent = make_agent(CollisionFreeSpeedModelState{});
     ASSERT_NO_THROW((void) fmt::format("{}", agent));
 }
 
 TEST(GenericAgentFormatter, FormatsCollisionFreeSpeedModelV2Agent)
 {
-    auto agent = make_agent(CollisionFreeSpeedModelV2::State{});
+    auto agent = make_agent(CollisionFreeSpeedModelV2State{});
     ASSERT_NO_THROW((void) fmt::format("{}", agent));
 }
 
 TEST(GenericAgentFormatter, FormatsAnticipationVelocityModelAgent)
 {
-    auto agent = make_agent(AnticipationVelocityModel::State{});
+    auto agent = make_agent(AnticipationVelocityModelState{});
     ASSERT_NO_THROW((void) fmt::format("{}", agent));
 }
 
 TEST(GenericAgentFormatter, FormatsSocialForceModelAgent)
 {
-    auto agent = make_agent(SocialForceModel::State{});
+    auto agent = make_agent(SocialForceModelState{});
     ASSERT_NO_THROW((void) fmt::format("{}", agent));
 }

@@ -3,6 +3,7 @@
 
 #include "EnvironmentQuery.hpp"
 #include "OperationalModels/CustomModel/CustomModel.hpp"
+#include "Point.hpp"
 
 #include <pybind11/pybind11.h>
 
@@ -46,11 +47,12 @@ public:
 
     void ComputeNextState(
         double dT,
-        const GenericAgent& current,
-        GenericAgent& next,
+        const OperationalModelState& current,
+        OperationalModelState& next,
+        const Point& destination,
         const EnvironmentQuery& envQuery) const override;
 
-    void CheckModelConstraint(const GenericAgent& agent, const EnvironmentQuery& envQuery)
+    void CheckModelConstraint(const OperationalModelState& state, const EnvironmentQuery& envQuery)
         const override;
 
 private:

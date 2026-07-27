@@ -2,10 +2,10 @@
 #pragma once
 
 #include "CollisionGeometry.hpp"
-#include "GenericAgent.hpp"
 #include "GeometricFunctions.hpp"
 #include "LineSegment.hpp"
 #include "NeighborhoodSearch.hpp"
+#include "OperationalModelState.hpp"
 #include "Point.hpp"
 
 #include <algorithm>
@@ -13,8 +13,6 @@
 #include <iterator>
 #include <ranges>
 #include <vector>
-
-using OperationalModelState = GenericAgent::ModelState;
 
 class EnvironmentQuery
 {
@@ -33,18 +31,25 @@ public:
         bool operator()(const Point&) const { return true; }
     };
 
-    // Returns all agents within 'radius' of 'agent', excluding 'agent' itself.
-    // An optional predicate 'filter' further filters the result; it receives the
-    // position for which neighbors are returned as well as the candidates. Example:
-    //   query.AgentsInRange(state, r, [&envQuery, from=model.position](const Point& to) {
-    //   return envQuery.NoGeometryBetween(from, to);})
+    // Returns the model states of all agents within 'radius' of 'state', excluding the agent
+    // with the same position as 'state'. An optional predicate 'filter' further narrows
+    // the result; it receives the candidate's position.
+    // Example:
+    //   envQuery.OtherAgentsInRange(state, r, [&envQuery, from=model.position](const Point& to) {
+    //       return envQuery.NoGeometryBetween(from, to); })
     template <std::predicate<const Point&> Pred = AcceptAll>
-    std::vector<GenericAgent>
+    std::vector<OperationalModelState>
     OtherAgentsInRange(const OperationalModelState& state, double radius, Pred filter = {}) const
     {
-        Point from = Pos(state);
-        return AgentsInRange(
+        const Point from = Position(state);
+        auto agents = AgentsInRange(
             from, radius, [&from, &filter](const Point& to) { return from != to && filter(to); });
+        std::vector<OperationalModelState> states;
+        states.reserve(agents.size());
+        for(auto& a : agents) {
+            states.push_back(std::move(a.state));
+        }
+        return states;
     }
 
     template <std::predicate<const Point&> Pred = AcceptAll>

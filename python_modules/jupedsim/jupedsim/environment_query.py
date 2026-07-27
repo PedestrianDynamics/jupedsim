@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING, Callable
 import jupedsim.native as py_jps
 
 if TYPE_CHECKING:
-    from jupedsim.agent import _TransientAgent
     from jupedsim.linesegment import LineSegment
 
 
@@ -31,30 +30,24 @@ class EnvironmentQuery:
 
     def other_agents_in_range(
         self,
-        agent: _TransientAgent,
+        state,
         radius: float,
-        predicate: Callable[[_TransientAgent], bool] | None = None,
-    ) -> list[_TransientAgent]:
-        """Return agents within *radius* of *agent*, excluding *agent* itself.
+        predicate: Callable | None = None,
+    ) -> list:
+        """Return agents within *radius* of *state*, excluding the querying agent.
 
         Args:
-            agent: The querying agent (automatically excluded from results).
+            state: The querying agent's model state (``_CustomModelState``).
             radius: Search radius in metres.
-            predicate: Optional callable ``(neighbor) -> bool``. Only agents for
-                which the predicate returns ``True`` are included. Use
+            predicate: Optional callable ``(neighbor) -> bool``. Only neighbors
+                for which the predicate returns ``True`` are included. Use
                 :meth:`no_wall_between` to filter by line-of-sight, or compose
                 multiple predicates with ``lambda n: p1(n) and p2(n)``.
 
         Returns:
-            List of transient agent views. Only valid during the current callback.
+            List of ``_CustomModelState`` objects. Only valid during the current callback.
         """
-        from jupedsim.agent import _TransientAgent
-
-        raw_agent = agent._native if hasattr(agent, "_native") else agent
-        neighbors = [
-            _TransientAgent(a)
-            for a in self._obj.other_agents_in_range(raw_agent, radius)
-        ]
+        neighbors = self._obj.other_agents_in_range(state, radius)
         if predicate is None:
             return neighbors
         return [n for n in neighbors if predicate(n)]

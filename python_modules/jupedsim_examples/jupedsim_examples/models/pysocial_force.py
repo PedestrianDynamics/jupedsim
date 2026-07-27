@@ -3,7 +3,7 @@ from dataclasses import dataclass, replace
 
 import numpy as np
 from jupedsim.geometry import LineSegment
-from jupedsim.models.custom_model import (
+from jupedsim.states.custom_model import (
     CustomModelAgentState,
     CustomOperationalModel,
 )
@@ -48,7 +48,7 @@ class PythonSocialForceModel(CustomOperationalModel):
     All force helpers are static: math utilities (_normalize, _distance,
     _desired_force) operate on plain values, while _social_force and
     _obstacle_force take Agent wrappers and read per-agent parameters via
-    ``agent.model``.
+    ``agent.state``.
     """
 
     def __init__(
@@ -106,7 +106,7 @@ class PythonSocialForceModel(CustomOperationalModel):
         dist = np.sqrt(dx**2 + dy**2)
 
         # Minimum distance (sum of radii)
-        min_dist = agent.model.radius + other.model.radius
+        min_dist = agent.state.radius + other.state.radius
 
         if dist < 1e-3:  # Avoid division by zero
             return (0.0, 0.0)
@@ -120,23 +120,23 @@ class PythonSocialForceModel(CustomOperationalModel):
         t_y = n_x
 
         # Relative velocity
-        dvx = agent.model.velocity[0] - other.model.velocity[0]
-        dvy = agent.model.velocity[1] - other.model.velocity[1]
+        dvx = agent.state.velocity[0] - other.state.velocity[0]
+        dvy = agent.state.velocity[1] - other.state.velocity[1]
         dv_t = dvx * t_x + dvy * t_y  # tangential component
 
         # Distance-dependent factor
-        exp_factor = np.exp(-(dist - min_dist) / agent.model.force_distance)
+        exp_factor = np.exp(-(dist - min_dist) / agent.state.force_distance)
 
         # Normal force (repulsive)
-        f_n = agent.model.agent_scale * exp_factor
+        f_n = agent.state.agent_scale * exp_factor
 
         # Body contact force
         if dist < min_dist:
-            f_body = agent.model.body_force * (min_dist - dist)
+            f_body = agent.state.body_force * (min_dist - dist)
             f_n = f_n + f_body
 
         # Friction (tangential)
-        f_t = agent.model.friction * exp_factor * dv_t if dist < min_dist else 0
+        f_t = agent.state.friction * exp_factor * dv_t if dist < min_dist else 0
 
         # Total force components
         fx = (f_n + f_t * t_x) * n_x - f_t * t_x
@@ -166,14 +166,14 @@ class PythonSocialForceModel(CustomOperationalModel):
         n_y = (agent.position[1] - closest_point[1]) / dist
 
         # Distance-dependent factor
-        exp_factor = np.exp(-dist / agent.model.force_distance)
+        exp_factor = np.exp(-dist / agent.state.force_distance)
 
         # Normal force (repulsive)
-        f_n = agent.model.obstacle_scale * exp_factor
+        f_n = agent.state.obstacle_scale * exp_factor
 
         # Body contact force
-        if dist < agent.model.radius:
-            f_body = agent.model.body_force * (agent.model.radius - dist)
+        if dist < agent.state.radius:
+            f_body = agent.state.body_force * (agent.state.radius - dist)
             f_n = f_n + f_body
 
         fx = f_n * n_x
@@ -203,7 +203,7 @@ class PythonSocialForceModel(CustomOperationalModel):
         # eq 1 in paper
         target_dir = self._normalize(target_diff)
 
-        state = agent.model
+        state = agent.state
 
         # Initialize acceleration from desired force
         acc_x, acc_y = self._desired_force(
