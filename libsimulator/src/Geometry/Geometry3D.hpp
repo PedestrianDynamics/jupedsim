@@ -80,6 +80,20 @@ public:
     /// True iff @p p projects (along -z) onto the walkable surface.
     bool is_valid_location(const Point3D& p) const;
 
+    // -- `EnvironmentQuery` API -----------------------------------------------
+
+    /// Wall segments near @p who: within @p distance if given (>= 0), else the
+    /// approximate-grid neighbourhood.
+    Geometry2D::LineSegmentRange
+    line_segments_in_range(const Location& who, double distance = -1.0) const;
+
+    /// True iff the straight segment @p a -> @p b crosses no wall.
+    bool no_geometry_between(const Location& a, const Location& b) const;
+
+    /// True iff walking from @p who by the horizontal @p direction lands inside
+    /// the walkable area.
+    bool inside_geometry(const Location& who, Point direction) const;
+
     // -- region overlay & render data (see split_into_regions) --------------
 
     std::size_t region_count() const { return _regionCount; }

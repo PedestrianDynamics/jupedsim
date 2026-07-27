@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Geometry/Geometry3D.hpp"
 
+#include "LineSegment.hpp"
 #include "SimulationError.hpp"
 
 #include <CGAL/mark_domain_in_triangulation.h>
@@ -165,6 +166,36 @@ Geometry3D::FaceLocation Geometry3D::face_below(const Point3D& p) const
 bool Geometry3D::is_valid_location(const Point3D& p) const
 {
     return face_below(p).face != SurfaceMesh::null_face();
+}
+
+Geometry2D::LineSegmentRange
+Geometry3D::line_segments_in_range(const Location& who, double distance) const
+{
+    if(_geometry2D == nullptr) {
+        throw SimulationError(
+            "line_segments_in_range() on a mesh-built Geometry3D is not implemented yet.");
+    }
+    if(distance < 0.0) {
+        return _geometry2D->LineSegmentsInApproxDistanceTo(who.xy());
+    }
+    return _geometry2D->LineSegmentsInDistanceTo(distance, who.xy());
+}
+
+bool Geometry3D::no_geometry_between(const Location& a, const Location& b) const
+{
+    if(_geometry2D == nullptr) {
+        throw SimulationError(
+            "no_geometry_between() on a mesh-built Geometry3D is not implemented yet.");
+    }
+    return !_geometry2D->IntersectsAny(LineSegment{a.xy(), b.xy()});
+}
+
+bool Geometry3D::inside_geometry(const Location& who, Point direction) const
+{
+    if(_geometry2D == nullptr) {
+        throw SimulationError("inside_geometry on a mesh-built Geometry3D is not implemented yet.");
+    }
+    return _geometry2D->InsideGeometry(who.xy() + direction);
 }
 
 Geometry3D::FaceLocation
