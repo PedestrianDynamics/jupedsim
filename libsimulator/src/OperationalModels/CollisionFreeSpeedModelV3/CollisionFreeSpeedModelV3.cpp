@@ -73,7 +73,7 @@ void CollisionFreeSpeedModelV3::ComputeNextState(
 {
     const auto& state = std::get<State>(current);
     const auto& boundary = envQuery.LineSegmentsInRange(state.position);
-    const auto neighborStates = envQuery.OtherAgentsInRange(
+    const auto neighborStates = envQuery.OtherAgentStatesInRange(
         current, _cutOffRadius, [&envQuery, from = state.position](const Point& to) {
             return envQuery.NoGeometryBetween(from, to);
         });
@@ -167,7 +167,7 @@ void CollisionFreeSpeedModelV3::CheckModelConstraint(
     validateConstraint(state.thetaMaxUpperBound, 0.0, std::acos(-1.0), "thetaMaxUpperBound");
     validateConstraint(state.agentBuffer, 0.0, 100.0, "agentBuffer");
 
-    const auto neighbors = envQuery.OtherAgentsInRange(generic_state, 2.0);
+    const auto neighbors = envQuery.OtherAgentStatesInRange(generic_state, 2.0);
     for(const auto& neighbor : neighbors) {
         const auto& neighbor_state = std::get<State>(neighbor);
         const auto contactDist = state.radius + neighbor_state.radius;

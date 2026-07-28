@@ -36,7 +36,7 @@ void AnticipationVelocityModel::ComputeNextState(
 {
     const auto& state = std::get<State>(current);
     const auto& boundary = envQuery.LineSegmentsInRange(state.position);
-    const auto neighborStates = envQuery.OtherAgentsInRange(
+    const auto neighborStates = envQuery.OtherAgentStatesInRange(
         current, _cutOffRadius, [&envQuery, from = state.position](const Point& to) {
             return envQuery.NoGeometryBetween(from, to);
         });
@@ -149,7 +149,7 @@ void AnticipationVelocityModel::CheckModelConstraint(
     constexpr double reactionTimeMax = 1.0;
     validateConstraint(reactionTime, reactionTimeMin, reactionTimeMax, "reactionTime", true);
 
-    const auto neighbors = envQuery.OtherAgentsInRange(generic_state, 2.0);
+    const auto neighbors = envQuery.OtherAgentStatesInRange(generic_state, 2.0);
     for(const auto& neighbor : neighbors) {
         const auto& neighbor_state = std::get<State>(neighbor);
         const auto contanctdDist = r + neighbor_state.radius;

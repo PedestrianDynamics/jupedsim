@@ -47,7 +47,7 @@ void GeneralizedCentrifugalForceModel::ComputeNextState(
     const EnvironmentQuery& envQuery) const
 {
     const auto& state = std::get<State>(current);
-    const auto neighborStates = envQuery.OtherAgentsInRange(
+    const auto neighborStates = envQuery.OtherAgentStatesInRange(
         current, _cutOffRadius, [&envQuery, from = state.position](const Point& to) {
             return envQuery.NoGeometryBetween(from, to);
         });
@@ -118,7 +118,7 @@ void GeneralizedCentrifugalForceModel::CheckModelConstraint(
     constexpr double BMaxMax = 2.;
     validateConstraint(BMax, BMaxMin, BMaxMax, "BMax");
 
-    const auto neighbors = envQuery.OtherAgentsInRange(generic_state, 2.0);
+    const auto neighbors = envQuery.OtherAgentStatesInRange(generic_state, 2.0);
     for(const auto& neighbor : neighbors) {
         const auto& neighborState = std::get<State>(neighbor);
         const auto contanctDist = AgentToAgentSpacing(state, neighborState);

@@ -147,15 +147,15 @@ def test_agent_parameters():
         ),
     )
 
-    state = sim.agent(aid).model
+    state = sim.agent(aid).state
     assert math.isclose(state.radius, 0.2)
     assert math.isclose(state.desired_speed, 1.0)
 
     # Mutate radius and desired_speed
     state.radius = 0.3
     state.desired_speed = 1.5
-    assert math.isclose(sim.agent(aid).model.radius, 0.3)
-    assert math.isclose(sim.agent(aid).model.desired_speed, 1.5)
+    assert math.isclose(sim.agent(aid).state.radius, 0.3)
+    assert math.isclose(sim.agent(aid).state.desired_speed, 1.5)
 
 
 def test_invalid_agent_state():

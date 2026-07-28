@@ -90,7 +90,7 @@ def test_set_desired_speed(corridor):
     for _ in range(0, 100):
         sim.iterate()
     assert math.isclose(sim.agent(agent_id).position[0], 3)
-    sim.agent(agent_id).model.desired_speed = 2
+    sim.agent(agent_id).state.desired_speed = 2
     for _ in range(0, 100):
         sim.iterate()
     assert math.isclose(sim.agent(agent_id).position[0], 5)
@@ -127,7 +127,7 @@ def test_initial_parameters_collision_free_speed_model_v2(
     )
     agent_id = sim.add_agent(journey_id=journey_id, stage_id=wp, state=state)
 
-    agent_model = sim.agent(agent_id).model
+    agent_model = sim.agent(agent_id).state
     assert agent_model.time_gap == 0.1, (
         f"Expected time_gap to be 0.1, got {agent_model.time_gap}"
     )
@@ -164,29 +164,29 @@ def test_set_model_parameters_collision_free_speed_model_v2(
         state=jps.CollisionFreeSpeedModelV2State(position=(1, 1)),
     )
 
-    sim.agent(agent_id).model.desired_speed = 2.0
-    assert sim.agent(agent_id).model.desired_speed == 2.0
+    sim.agent(agent_id).state.desired_speed = 2.0
+    assert sim.agent(agent_id).state.desired_speed == 2.0
 
-    sim.agent(agent_id).model.desired_speed = 2.1
-    assert sim.agent(agent_id).model.desired_speed == 2.1
+    sim.agent(agent_id).state.desired_speed = 2.1
+    assert sim.agent(agent_id).state.desired_speed == 2.1
 
-    sim.agent(agent_id).model.time_gap = 3.0
-    assert sim.agent(agent_id).model.time_gap == 3.0
+    sim.agent(agent_id).state.time_gap = 3.0
+    assert sim.agent(agent_id).state.time_gap == 3.0
 
-    sim.agent(agent_id).model.radius = 4.0
-    assert sim.agent(agent_id).model.radius == 4.0
+    sim.agent(agent_id).state.radius = 4.0
+    assert sim.agent(agent_id).state.radius == 4.0
 
-    sim.agent(agent_id).model.strength_neighbor_repulsion = 5.0
-    assert sim.agent(agent_id).model.strength_neighbor_repulsion == 5.0
+    sim.agent(agent_id).state.strength_neighbor_repulsion = 5.0
+    assert sim.agent(agent_id).state.strength_neighbor_repulsion == 5.0
 
-    sim.agent(agent_id).model.range_neighbor_repulsion = 6.0
-    assert sim.agent(agent_id).model.range_neighbor_repulsion == 6.0
+    sim.agent(agent_id).state.range_neighbor_repulsion = 6.0
+    assert sim.agent(agent_id).state.range_neighbor_repulsion == 6.0
 
-    sim.agent(agent_id).model.range_geometry_repulsion = 7.0
-    assert sim.agent(agent_id).model.range_geometry_repulsion == 7.0
+    sim.agent(agent_id).state.range_geometry_repulsion = 7.0
+    assert sim.agent(agent_id).state.range_geometry_repulsion == 7.0
 
-    sim.agent(agent_id).model.range_geometry_repulsion = 8.0
-    assert sim.agent(agent_id).model.range_geometry_repulsion == 8.0
+    sim.agent(agent_id).state.range_geometry_repulsion = 8.0
+    assert sim.agent(agent_id).state.range_geometry_repulsion == 8.0
 
 
 @pytest.fixture
@@ -210,32 +210,32 @@ def test_set_model_parameters_anticipation_velocity_model(
         state=jps.AnticipationVelocityModelState(position=(1, 1)),
     )
 
-    sim.agent(agent_id).model.desired_speed = 2.0
-    assert sim.agent(agent_id).model.desired_speed == 2.0
+    sim.agent(agent_id).state.desired_speed = 2.0
+    assert sim.agent(agent_id).state.desired_speed == 2.0
 
-    sim.agent(agent_id).model.desired_speed = 2.1
-    assert sim.agent(agent_id).model.desired_speed == 2.1
+    sim.agent(agent_id).state.desired_speed = 2.1
+    assert sim.agent(agent_id).state.desired_speed == 2.1
 
-    sim.agent(agent_id).model.time_gap = 3.0
-    assert sim.agent(agent_id).model.time_gap == 3.0
+    sim.agent(agent_id).state.time_gap = 3.0
+    assert sim.agent(agent_id).state.time_gap == 3.0
 
-    sim.agent(agent_id).model.radius = 4.0
-    assert sim.agent(agent_id).model.radius == 4.0
+    sim.agent(agent_id).state.radius = 4.0
+    assert sim.agent(agent_id).state.radius == 4.0
 
-    sim.agent(agent_id).model.strength_neighbor_repulsion = 5.0
-    assert sim.agent(agent_id).model.strength_neighbor_repulsion == 5.0
+    sim.agent(agent_id).state.strength_neighbor_repulsion = 5.0
+    assert sim.agent(agent_id).state.strength_neighbor_repulsion == 5.0
 
-    sim.agent(agent_id).model.range_neighbor_repulsion = 6.0
-    assert sim.agent(agent_id).model.range_neighbor_repulsion == 6.0
+    sim.agent(agent_id).state.range_neighbor_repulsion = 6.0
+    assert sim.agent(agent_id).state.range_neighbor_repulsion == 6.0
 
-    sim.agent(agent_id).model.wall_buffer_distance = 1.1
-    assert sim.agent(agent_id).model.wall_buffer_distance == 1.1
+    sim.agent(agent_id).state.wall_buffer_distance = 1.1
+    assert sim.agent(agent_id).state.wall_buffer_distance == 1.1
 
-    sim.agent(agent_id).model.anticipation_time = 2.1
-    assert sim.agent(agent_id).model.anticipation_time == 2.1
+    sim.agent(agent_id).state.anticipation_time = 2.1
+    assert sim.agent(agent_id).state.anticipation_time == 2.1
 
-    sim.agent(agent_id).model.reaction_time = 0.31
-    assert sim.agent(agent_id).model.reaction_time == 0.31
+    sim.agent(agent_id).state.reaction_time = 0.31
+    assert sim.agent(agent_id).state.reaction_time == 0.31
 
 
 @pytest.fixture
@@ -259,17 +259,17 @@ def test_set_model_parameters_collision_free_speed_model(
         state=jps.CollisionFreeSpeedModelState(position=(1, 1)),
     )
 
-    sim.agent(agent_id).model.desired_speed = 2.0
-    assert sim.agent(agent_id).model.desired_speed == 2.0
+    sim.agent(agent_id).state.desired_speed = 2.0
+    assert sim.agent(agent_id).state.desired_speed == 2.0
 
-    sim.agent(agent_id).model.desired_speed = 2.1
-    assert sim.agent(agent_id).model.desired_speed == 2.1
+    sim.agent(agent_id).state.desired_speed = 2.1
+    assert sim.agent(agent_id).state.desired_speed == 2.1
 
-    sim.agent(agent_id).model.time_gap = 3.0
-    assert sim.agent(agent_id).model.time_gap == 3.0
+    sim.agent(agent_id).state.time_gap = 3.0
+    assert sim.agent(agent_id).state.time_gap == 3.0
 
-    sim.agent(agent_id).model.radius = 4.0
-    assert sim.agent(agent_id).model.radius == 4.0
+    sim.agent(agent_id).state.radius = 4.0
+    assert sim.agent(agent_id).state.radius == 4.0
 
 
 def test_collision_free_speed_model_repulsion_parameters_are_model_level():
@@ -293,7 +293,7 @@ def test_collision_free_speed_model_repulsion_parameters_are_model_level():
     )
 
     # The repulsion parameters no longer appear on the per-agent state.
-    agent_model = sim.agent(agent_id).model
+    agent_model = sim.agent(agent_id).state
     for field in (
         "strength_neighbor_repulsion",
         "range_neighbor_repulsion",
@@ -338,32 +338,32 @@ def test_set_model_parameters_generalized_centrifugal_force_model(
         ),
     )
 
-    sim.agent(agent_id).model.speed = 2.0
-    assert sim.agent(agent_id).model.speed == 2.0
+    sim.agent(agent_id).state.speed = 2.0
+    assert sim.agent(agent_id).state.speed == 2.0
 
-    sim.agent(agent_id).model.desired_direction = (3.0, -3.0)
-    assert sim.agent(agent_id).model.desired_direction == (3.0, -3.0)
+    sim.agent(agent_id).state.desired_direction = (3.0, -3.0)
+    assert sim.agent(agent_id).state.desired_direction == (3.0, -3.0)
 
-    sim.agent(agent_id).model.tau = 4.0
-    assert sim.agent(agent_id).model.tau == 4.0
+    sim.agent(agent_id).state.tau = 4.0
+    assert sim.agent(agent_id).state.tau == 4.0
 
-    sim.agent(agent_id).model.desired_speed = 5.0
-    assert sim.agent(agent_id).model.desired_speed == 5.0
+    sim.agent(agent_id).state.desired_speed = 5.0
+    assert sim.agent(agent_id).state.desired_speed == 5.0
 
-    sim.agent(agent_id).model.desired_speed = 5.1
-    assert sim.agent(agent_id).model.desired_speed == 5.1
+    sim.agent(agent_id).state.desired_speed = 5.1
+    assert sim.agent(agent_id).state.desired_speed == 5.1
 
-    sim.agent(agent_id).model.a_v = 6.0
-    assert sim.agent(agent_id).model.a_v == 6.0
+    sim.agent(agent_id).state.a_v = 6.0
+    assert sim.agent(agent_id).state.a_v == 6.0
 
-    sim.agent(agent_id).model.a_min = 7.0
-    assert sim.agent(agent_id).model.a_min == 7.0
+    sim.agent(agent_id).state.a_min = 7.0
+    assert sim.agent(agent_id).state.a_min == 7.0
 
-    sim.agent(agent_id).model.b_min = 8.0
-    assert sim.agent(agent_id).model.b_min == 8.0
+    sim.agent(agent_id).state.b_min = 8.0
+    assert sim.agent(agent_id).state.b_min == 8.0
 
-    sim.agent(agent_id).model.b_max = 9.0
-    assert sim.agent(agent_id).model.b_max == 9.0
+    sim.agent(agent_id).state.b_max = 9.0
+    assert sim.agent(agent_id).state.b_max == 9.0
 
 
 @pytest.fixture
@@ -388,29 +388,29 @@ def test_set_model_parameters_social_force_model(
         state=jps.SocialForceModelState(position=(1, 1)),
     )
 
-    sim.agent(agent_id).model.velocity = (2.0, -2.0)
-    assert sim.agent(agent_id).model.velocity == (2.0, -2.0)
+    sim.agent(agent_id).state.velocity = (2.0, -2.0)
+    assert sim.agent(agent_id).state.velocity == (2.0, -2.0)
 
-    sim.agent(agent_id).model.mass = 3.0
-    assert sim.agent(agent_id).model.mass == 3.0
+    sim.agent(agent_id).state.mass = 3.0
+    assert sim.agent(agent_id).state.mass == 3.0
 
-    sim.agent(agent_id).model.desired_speed = 4.0
-    assert sim.agent(agent_id).model.desired_speed == 4.0
+    sim.agent(agent_id).state.desired_speed = 4.0
+    assert sim.agent(agent_id).state.desired_speed == 4.0
 
-    sim.agent(agent_id).model.reaction_time = 5.0
-    assert sim.agent(agent_id).model.reaction_time == 5.0
+    sim.agent(agent_id).state.reaction_time = 5.0
+    assert sim.agent(agent_id).state.reaction_time == 5.0
 
-    sim.agent(agent_id).model.agent_scale = 6.0
-    assert sim.agent(agent_id).model.agent_scale == 6.0
+    sim.agent(agent_id).state.agent_scale = 6.0
+    assert sim.agent(agent_id).state.agent_scale == 6.0
 
-    sim.agent(agent_id).model.obstacle_scale = 7.0
-    assert sim.agent(agent_id).model.obstacle_scale == 7.0
+    sim.agent(agent_id).state.obstacle_scale = 7.0
+    assert sim.agent(agent_id).state.obstacle_scale == 7.0
 
-    sim.agent(agent_id).model.force_distance = 8.0
-    assert sim.agent(agent_id).model.force_distance == 8.0
+    sim.agent(agent_id).state.force_distance = 8.0
+    assert sim.agent(agent_id).state.force_distance == 8.0
 
-    sim.agent(agent_id).model.radius = 9.0
-    assert sim.agent(agent_id).model.radius == 9.0
+    sim.agent(agent_id).state.radius = 9.0
+    assert sim.agent(agent_id).state.radius == 9.0
 
 
 def test_social_force_model_body_force_and_friction_are_model_level():
@@ -429,7 +429,7 @@ def test_social_force_model_body_force_and_friction_are_model_level():
     )
 
     # body_force and friction no longer appear on the per-agent state.
-    agent_model = sim.agent(agent_id).model
+    agent_model = sim.agent(agent_id).state
     assert not hasattr(agent_model, "body_force")
     assert not hasattr(agent_model, "friction")
 
@@ -461,7 +461,7 @@ def test_agent_handle_raises_after_removal(
     with pytest.raises(jps.SimulationError):
         state.position
     with pytest.raises(jps.SimulationError):
-        state.model.desired_speed
+        state.state.desired_speed
     with pytest.raises(jps.SimulationError):
         state.desired_speed
     with pytest.raises(jps.SimulationError):
@@ -501,7 +501,7 @@ def test_initial_parameters_collision_free_speed_model_v3(
     )
     agent_id = sim.add_agent(journey_id=journey_id, stage_id=wp, state=state)
 
-    agent_model = sim.agent(agent_id).model
+    agent_model = sim.agent(agent_id).state
     assert agent_model.time_gap == 0.11
     assert agent_model.desired_speed == 0.12
     assert agent_model.radius == 0.13
@@ -533,7 +533,7 @@ def test_set_model_parameters_collision_free_speed_model_v3(
             range_geometry_repulsion=0.02,
         ),
     )
-    model = sim.agent(agent_id).model
+    model = sim.agent(agent_id).state
 
     model.desired_speed = 2.0
     assert model.desired_speed == 2.0

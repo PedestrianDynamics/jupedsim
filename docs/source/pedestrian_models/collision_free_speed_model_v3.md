@@ -204,7 +204,7 @@ agent_id = sim.add_agent(
 )
 
 # modify at runtime
-sim.agent(agent_id).model.desired_speed = 1.0
+sim.agent(agent_id).state.desired_speed = 1.0
 ```
 
 | Symbol | Parameter (Python) | Default | Unit | Role |

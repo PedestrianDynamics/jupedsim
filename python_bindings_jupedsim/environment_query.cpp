@@ -17,9 +17,9 @@ void init_environment_query(py::module_& m)
 {
     py::class_<EnvironmentQuery>(m, "EnvironmentQuery")
         .def(
-            "other_agents_in_range",
+            "other_agent_states_in_range",
             [](const EnvironmentQuery& self, const CustomModel::State& state, double radius) {
-                return self.OtherAgentsInRange(OperationalModelState{state}, radius);
+                return self.OtherAgentStatesInRange(OperationalModelState{state}, radius);
             },
             py::arg("state"),
             py::arg("radius"),

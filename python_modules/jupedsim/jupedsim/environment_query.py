@@ -19,7 +19,7 @@ class EnvironmentQuery:
     Example — visibility-filtered neighborhood::
 
         def compute_next_state(self, dt, ped, env_query):
-            neighbors = env_query.other_agents_in_range(
+            neighbors = env_query.other_agent_states_in_range(
                 ped, 5.0,
                 lambda n: env_query.no_wall_between(ped.position, n.position)
             )
@@ -28,7 +28,7 @@ class EnvironmentQuery:
     def __init__(self, obj: py_jps.EnvironmentQuery) -> None:
         self._obj = obj
 
-    def other_agents_in_range(
+    def other_agent_states_in_range(
         self,
         state,
         radius: float,
@@ -47,7 +47,7 @@ class EnvironmentQuery:
         Returns:
             List of ``_CustomModelState`` objects. Only valid during the current callback.
         """
-        neighbors = self._obj.other_agents_in_range(state, radius)
+        neighbors = self._obj.other_agent_states_in_range(state, radius)
         if predicate is None:
             return neighbors
         return [n for n in neighbors if predicate(n)]
@@ -69,7 +69,7 @@ class EnvironmentQuery:
 
         Example::
 
-            neighbors = env_query.other_agents_in_range(
+            neighbors = env_query.other_agent_states_in_range(
                 ped, 5.0,
                 lambda n: env_query.no_wall_between(ped.position, n.position)
             )

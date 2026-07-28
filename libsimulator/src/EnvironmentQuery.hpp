@@ -35,11 +35,13 @@ public:
     // with the same position as 'state'. An optional predicate 'filter' further narrows
     // the result; it receives the candidate's position.
     // Example:
-    //   envQuery.OtherAgentsInRange(state, r, [&envQuery, from=model.position](const Point& to) {
+    //   envQuery.OtherAgentStatesInRange(state, r, [&envQuery, from=state.position](const Point&
+    //   to) {
     //       return envQuery.NoGeometryBetween(from, to); })
     template <std::predicate<const Point&> Pred = AcceptAll>
     std::vector<OperationalModelState>
-    OtherAgentsInRange(const OperationalModelState& state, double radius, Pred filter = {}) const
+    OtherAgentStatesInRange(const OperationalModelState& state, double radius, Pred filter = {})
+        const
     {
         const Point from = Position(state);
         auto agents = AgentsInRange(

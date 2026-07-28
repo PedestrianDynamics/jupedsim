@@ -191,7 +191,7 @@ def test_per_agent_state_survives_iterations(corridor_simulation):
     for _ in range(20):
         sim.iterate()
 
-    state = sim.agent(agent_id).model
+    state = sim.agent(agent_id).state
     assert isinstance(state, PythonSocialForceModelState)
     assert state.desired_speed == 2.0
     assert state.reaction_time == 0.25

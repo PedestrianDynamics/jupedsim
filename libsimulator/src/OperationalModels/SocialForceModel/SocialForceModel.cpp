@@ -31,7 +31,7 @@ void SocialForceModel::ComputeNextState(
     const auto& state = std::get<State>(current);
     auto forces = DrivingForce(state, destination);
 
-    const auto neighborStates = envQuery.OtherAgentsInRange(
+    const auto neighborStates = envQuery.OtherAgentStatesInRange(
         current, _cutOffRadius, [&envQuery, from = state.position](const Point& to) {
             return envQuery.NoGeometryBetween(from, to);
         });
@@ -80,7 +80,7 @@ void SocialForceModel::CheckModelConstraint(
     throwIfNegative(state.reactionTime, "reaction time");
     throwIfNegative(state.radius, "radius");
 
-    const auto neighbors = envQuery.OtherAgentsInRange(generic_state, 2.0);
+    const auto neighbors = envQuery.OtherAgentStatesInRange(generic_state, 2.0);
     for(const auto& neighbor : neighbors) {
         const auto& neighborState = std::get<State>(neighbor);
         const auto distance = (state.position - neighborState.position).Norm();

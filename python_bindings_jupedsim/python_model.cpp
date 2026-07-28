@@ -179,7 +179,7 @@ void init_python_model(py::module_& m)
             return data;
         }))
         .def_property_readonly(
-            "model", [](CustomModel::State& data) { return data.Get<GilSafePyObject>().Get(); })
+            "state", [](CustomModel::State& data) { return data.Get<GilSafePyObject>().Get(); })
         .def_property_readonly("position", [](const CustomModel::State& data) {
             return std::make_tuple(data.position.x, data.position.y);
         });

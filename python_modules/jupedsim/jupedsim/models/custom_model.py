@@ -116,7 +116,7 @@ class CustomOperationalModel(ABC):
         from jupedsim.environment_query import EnvironmentQuery
 
         return self.compute_next_state(
-            dt, state.model, destination, EnvironmentQuery(env_query)
+            dt, state, destination, EnvironmentQuery(env_query)
         )
 
     def _check_model_constraint(
@@ -126,4 +126,4 @@ class CustomOperationalModel(ABC):
     ) -> None:
         from jupedsim.environment_query import EnvironmentQuery
 
-        self.check_model_constraint(state.model, EnvironmentQuery(env_query))
+        self.check_model_constraint(state, EnvironmentQuery(env_query))

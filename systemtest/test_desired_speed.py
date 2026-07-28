@@ -67,7 +67,7 @@ def test_desired_speed_can_be_set_via_state(
         ),
     )
 
-    assert sim.agent(agent_id).model.desired_speed == 1.5
+    assert sim.agent(agent_id).state.desired_speed == 1.5
 
 
 @pytest.mark.parametrize(
@@ -91,9 +91,9 @@ def test_desired_speed_can_be_mutated_via_agent_handle(
         state=state_class(position=(1, 1), **extra_state_kwargs),
     )
 
-    sim.agent(agent_id).model.desired_speed = 1.5
+    sim.agent(agent_id).state.desired_speed = 1.5
 
-    assert sim.agent(agent_id).model.desired_speed == 1.5
+    assert sim.agent(agent_id).state.desired_speed == 1.5
 
 
 @pytest.mark.parametrize(

@@ -46,7 +46,7 @@ def _walled_room():
 
 
 class _CapturingModel(CustomOperationalModel):
-    """Calls other_agents_in_range for one designated probe agent and records results."""
+    """Calls other_agent_states_in_range for one designated probe agent and records results."""
 
     def __init__(self, probe_position, *, radius=5.0, predicate=None):
         super().__init__()
@@ -61,7 +61,7 @@ class _CapturingModel(CustomOperationalModel):
         ppx, ppy = self._probe_pos
         return abs(px - ppx) < 1e-4 and abs(py - ppy) < 1e-4
 
-    def compute_next_state(self, dt, ped, env_query):
+    def compute_next_state(self, dt, ped, destination, env_query):
         if self._is_probe(ped):
             self.predicate_positions.clear()
 
@@ -69,11 +69,11 @@ class _CapturingModel(CustomOperationalModel):
                 self.predicate_positions.append(tuple(neighbor.position))
                 return self._predicate(neighbor) if self._predicate else True
 
-            neighbors = env_query.other_agents_in_range(
+            neighbors = env_query.other_agent_states_in_range(
                 ped, self._radius, _tracking
             )
             self.neighbor_positions = [tuple(n.position) for n in neighbors]
-        return replace(ped.model, position=ped.model.position)
+        return replace(ped.state, position=ped.position)
 
 
 # ---------------------------------------------------------------------------
@@ -112,7 +112,7 @@ def test_reject_all_predicate_returns_empty():
 
 def test_group_filter_returns_only_matching_group():
     def same_group(neighbor):
-        return neighbor.model.group == 1
+        return neighbor.state.group == 1
 
     model = _CapturingModel((2.0, 10.0), radius=5.0, predicate=same_group)
     sim, exit_id, journey_id = _make_sim(model)
@@ -162,12 +162,12 @@ def test_no_wall_between_filters_occluded_agents():
             super().__init__()
             self.neighbor_positions: list[tuple] = []
 
-        def compute_next_state(self, dt, ped, env_query):
+        def compute_next_state(self, dt, ped, destination, env_query):
             px, py = ped.position
             if abs(px - 5.0) < 1e-4 and abs(py - 10.0) < 1e-4:
                 self.neighbor_positions = [
                     tuple(n.position)
-                    for n in env_query.other_agents_in_range(
+                    for n in env_query.other_agent_states_in_range(
                         ped,
                         20.0,
                         lambda n: env_query.no_wall_between(
@@ -175,7 +175,7 @@ def test_no_wall_between_filters_occluded_agents():
                         ),
                     )
                 ]
-            return replace(ped.model, position=ped.model.position)
+            return replace(ped.state, position=ped.position)
 
     model = _VisModel()
     sim, exit_id, journey_id = _make_sim(model, geometry=_walled_room())
@@ -201,12 +201,12 @@ def test_no_wall_between_agent_above_wall_is_seen():
             super().__init__()
             self.neighbor_positions: list[tuple] = []
 
-        def compute_next_state(self, _dt, ped, env_query):
+        def compute_next_state(self, _dt, ped, destination, env_query):
             px, py = ped.position
             if abs(px - 5.0) < 1e-4 and abs(py - 18.0) < 1e-4:
                 self.neighbor_positions = [
                     tuple(n.position)
-                    for n in env_query.other_agents_in_range(
+                    for n in env_query.other_agent_states_in_range(
                         ped,
                         20.0,
                         lambda n: env_query.no_wall_between(
@@ -214,7 +214,7 @@ def test_no_wall_between_agent_above_wall_is_seen():
                         ),
                     )
                 ]
-            return replace(ped.model, position=ped.model.position)
+            return replace(ped.state, position=ped.position)
 
     model = _VisModel()
     sim, exit_id, journey_id = _make_sim(model, geometry=_walled_room())
@@ -236,23 +236,23 @@ def test_composed_no_wall_between_and_group_filter():
             super().__init__()
             self.neighbor_positions: list[tuple] = []
 
-        def compute_next_state(self, _dt, ped, env_query):
+        def compute_next_state(self, _dt, ped, destination, env_query):
             px, py = ped.position
             if abs(px - 5.0) < 1e-4 and abs(py - 10.0) < 1e-4:
                 self.neighbor_positions = [
                     tuple(n.position)
-                    for n in env_query.other_agents_in_range(
+                    for n in env_query.other_agent_states_in_range(
                         ped,
                         20.0,
                         lambda neighbor: (
                             env_query.no_wall_between(
                                 ped.position, neighbor.position
                             )
-                            and neighbor.model.group == 1
+                            and neighbor.state.group == 1
                         ),
                     )
                 ]
-            return replace(ped.model, position=ped.model.position)
+            return replace(ped.state, position=ped.position)
 
     model = _ComposedModel()
     sim, exit_id, journey_id = _make_sim(model, geometry=_walled_room())

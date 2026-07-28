@@ -181,13 +181,14 @@ class PythonSocialForceModel(CustomOperationalModel):
 
         return (fx, fy)
 
-    def compute_next_state(self, dt: float, agent, env_query):
+    def compute_next_state(self, dt: float, agent, destination, env_query):
         """
         Compute new position using Social Force Model.
 
         Args:
             dt: time step [s]
-            agent: Agent (current agent, exposing position, target and model)
+            agent: _CustomModelState (position + model payload)
+            destination: current navigation waypoint as (x, y)
             env_query: EnvironmentQuery for neighbor and geometry queries
 
         Returns:
@@ -197,8 +198,8 @@ class PythonSocialForceModel(CustomOperationalModel):
 
         # Get target direction (normalized)
         target_diff = (
-            agent.next_target[0] - agent.position[0],
-            agent.next_target[1] - agent.position[1],
+            destination[0] - agent.position[0],
+            destination[1] - agent.position[1],
         )
         # eq 1 in paper
         target_dir = self._normalize(target_diff)
@@ -214,7 +215,7 @@ class PythonSocialForceModel(CustomOperationalModel):
         )
 
         # Add social forces from neighboring agents
-        for neighbor in env_query.other_agents_in_range(agent, 2.0):
+        for neighbor in env_query.other_agent_states_in_range(agent, 2.0):
             fx, fy = self._social_force(agent, neighbor)
             acc_x += fx / state.mass
             acc_y += fy / state.mass
