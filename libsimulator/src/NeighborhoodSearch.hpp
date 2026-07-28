@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -109,11 +110,10 @@ public:
         }
     }
 
-    std::vector<Value> GetNeighboringAgents(Point pos, double radius) const
+    /// Calls 'fn' for every item within 'radius' of 'pos'.
+    template <std::invocable<const Value&> Fn>
+    void ForEachInRange(Point pos, double radius, Fn&& fn) const
     {
-        std::vector<Value> result{};
-        result.reserve(128);
-
         const auto posIdx = getIndex(pos);
         const auto offset = static_cast<int32_t>(std::ceil(radius / _cellSize));
         const int32_t xMin = posIdx.idx - offset;
@@ -128,13 +128,12 @@ public:
                 auto it = _grid.find({x, y});
                 if(it != _grid.cend()) {
                     for(const auto& item : it->second) {
-                        if(DistanceSquared((*item).position(), pos) <= radiusSquared) {
-                            result.emplace_back(*item);
+                        if(DistanceSquared(item->position, pos) <= radiusSquared) {
+                            fn(*item);
                         }
                     }
                 }
             }
         }
-        return result;
     }
 };

@@ -365,15 +365,10 @@ void Simulation::SwitchAgentJourney(
 std::vector<GenericAgent::ID> Simulation::AgentsInRange(Point p, double distance)
 {
     JPS_SCOPED_TIMER_AND_TRACE(_timer, "Agents in Range", Debug);
-    const auto neighbors = _neighborhoodSearch.GetNeighboringAgents(p, distance);
-
     std::vector<GenericAgent::ID> neighborIds{};
-    neighborIds.reserve(neighbors.size());
-    std::transform(
-        std::begin(neighbors),
-        std::end(neighbors),
-        std::back_inserter(neighborIds),
-        [](const auto& agent) { return agent.id; });
+    _neighborhoodSearch.for_each_in_range(p, distance, [&neighborIds](const GenericAgent& agent) {
+        neighborIds.push_back(agent.id);
+    });
     return neighborIds;
 }
 
@@ -386,15 +381,12 @@ std::vector<GenericAgent::ID> Simulation::AgentsInPolygon(const std::vector<Poin
     }
     const auto [p, dist] = poly.ContainingCircle();
 
-    const auto candidates = _neighborhoodSearch.GetNeighboringAgents(p, dist);
     std::vector<GenericAgent::ID> result{};
-    result.reserve(candidates.size());
-    std::for_each(
-        std::begin(candidates), std::end(candidates), [&result, &poly](const auto& agent) {
-            if(poly.IsInside(agent.position())) {
-                result.push_back(agent.id);
-            }
-        });
+    _neighborhoodSearch.ForEachInRange(p, dist, [&result, &poly](const GenericAgent& agent) {
+        if(poly.IsInside(agent.position)) {
+            result.push_back(agent.id);
+        }
+    });
     return result;
 }
 

@@ -42,18 +42,24 @@ public:
     std::vector<GenericAgent>
     OtherAgentsInRange(const OperationalModelState& state, double radius, Pred filter = {}) const
     {
-        Point from = Pos(state);
-        return AgentsInRange(
-            from, radius, [&from, &filter](const Point& to) { return from != to && filter(to); });
+        std::vector<GenericAgent> neighbors{};
+        _nsearch.ForEachInRange(agent.position, radius, [&](const GenericAgent& candidate) {
+            if(candidate.id != agent.id && filter(candidate.position)) {
+                neighbors.push_back(candidate);
+            }
+        });
+        return neighbors;
     }
 
     template <std::predicate<const Point&> Pred = AcceptAll>
     std::vector<GenericAgent>
     AgentsInRange(const Point& from, double radius, Pred filter = {}) const
     {
-        auto neighbors = _nsearch.GetNeighboringAgents(from, radius);
-        std::erase_if(neighbors, [&](const GenericAgent& candidate) {
-            return !filter(candidate.position());
+        std::vector<GenericAgent> neighbors{};
+        _nsearch.ForEachInRange(from, radius, [&](const GenericAgent& candidate) {
+            if(filter(candidate.position)) {
+                neighbors.push_back(candidate);
+            }
         });
         return neighbors;
     }
