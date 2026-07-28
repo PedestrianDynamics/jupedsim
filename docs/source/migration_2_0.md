@@ -166,7 +166,7 @@ and write resolves the agent freshly through the simulation:
 ```python
 agent = sim.agent(agent_id)
 agent.target = (10.0, 5.0)
-agent.model.desired_speed = 0.8   # takes effect in the next iterate()
+agent.state.desired_speed = 0.8   # takes effect in the next iterate()
 
 for _ in range(1000):
     sim.iterate()
@@ -174,7 +174,7 @@ for _ in range(1000):
 print(agent.position)             # still valid, freshly resolved
 ```
 
-`agent.model` returns a per-model state handle with the same semantics: it
+`agent.state` returns a per-model state handle with the same semantics: it
 resolves per access and raises once the agent is gone.
 
 ## Mutation during iterate() is now an error

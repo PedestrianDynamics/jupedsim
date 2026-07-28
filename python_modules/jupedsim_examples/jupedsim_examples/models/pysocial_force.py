@@ -3,7 +3,7 @@ from dataclasses import dataclass, replace
 
 import numpy as np
 from jupedsim.geometry import LineSegment
-from jupedsim.states.custom_model import (
+from jupedsim.models.custom_model import (
     CustomModelAgentState,
     CustomOperationalModel,
 )
