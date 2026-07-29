@@ -41,6 +41,51 @@ class NeighborView:
         return f"NeighborView(relative_position={self.relative_position})"
 
 
+class WallView:
+    """A wall segment as seen from the agent that asked for it.
+
+    Obtained from :meth:`AgentView.walls_nearby` or
+    :meth:`AgentView.walls_in_range`. The view is always relative to the
+    agent - as if the agent sits at the origin.
+    """
+
+    def __init__(self, obj: py_jps.WallView) -> None:
+        """Do not use.
+
+        Wall views are created by wall queries.
+        """
+        self._obj = obj
+
+    @property
+    def segment(self) -> LineSegment:
+        """The segment itself, relative to the agent."""
+        from jupedsim.linesegment import LineSegment
+
+        return LineSegment(self._obj.segment)
+
+    @property
+    def closest_point(self) -> tuple[float, float]:
+        """The point on the segment closest to the agent."""
+        return self._obj.closest_point
+
+    @property
+    def distance(self) -> float:
+        """Distance to that point."""
+        return self._obj.distance
+
+    @property
+    def normal(self) -> tuple[float, float]:
+        """Unit vector pointing from the wall towards the agent.
+
+        This is the direction a repulsion acts in. It is ``(0.0, 0.0)`` for an
+        agent standing exactly on the wall, where no direction exists.
+        """
+        return self._obj.normal
+
+    def __repr__(self) -> str:
+        return f"WallView(distance={self.distance}, normal={self.normal})"
+
+
 class AgentView:
     """What an agent perceives of its surroundings, relative to where it stands.
 
@@ -118,35 +163,27 @@ class AgentView:
         """
         return self._obj.inside_geometry(relative_position)
 
-    def walls_nearby(self) -> list[LineSegment]:
-        """Return geometry boundary segments in the grid cells around the agent.
-
-        The segments are relative to the agent's current position.
+    def walls_nearby(self) -> list[WallView]:
+        """Return the walls in the grid cells around the agent.
 
         Faster than :meth:`walls_in_range`, but an approximation of proximity
         rather than a radius: it returns whatever shares a cell neighborhood.
 
         Returns:
-            List of :class:`~jupedsim.linesegment.LineSegment` objects.
+            List of :class:`WallView`, each as seen from the agent.
         """
-        from jupedsim.linesegment import LineSegment
+        return [WallView(w) for w in self._obj.walls_nearby()]
 
-        return [LineSegment(ls) for ls in self._obj.walls_nearby()]
-
-    def walls_in_range(self, distance: float) -> list[LineSegment]:
-        """Return geometry boundary segments within *distance* of the agent.
-
-        The segments are relative to the agent's current position.
+    def walls_in_range(self, distance: float) -> list[WallView]:
+        """Return the walls within *distance* of the agent.
 
         Args:
             distance: Maximum distance.
 
         Returns:
-            List of :class:`~jupedsim.linesegment.LineSegment` objects.
+            List of :class:`WallView`, each as seen from the agent.
         """
-        from jupedsim.linesegment import LineSegment
-
-        return [LineSegment(ls) for ls in self._obj.walls_in_range(distance)]
+        return [WallView(w) for w in self._obj.walls_in_range(distance)]
 
 
 class AgentStep(AgentView):

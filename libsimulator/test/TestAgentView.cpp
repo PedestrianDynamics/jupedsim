@@ -215,19 +215,40 @@ TEST(AgentView, WallsInRangeAreRelativeToTheAgent)
 
     const auto view = env.FirstAgentView(q);
     std::vector<LineSegment> actual{};
-    for(const auto& segment : view.WallsInRange(3.0)) {
-        actual.push_back(segment);
+    double closest = std::numeric_limits<double>::max();
+    for(const auto& wall : view.WallsInRange(3.0)) {
+        actual.push_back(wall.segment);
+        closest = std::min(closest, wall.distance);
     }
 
     EXPECT_EQ(actual, expected);
 
     // The near face of the wall block sits at x = 0.9, so measured from the agent it is
     // 1.9 away. Anything computed against the origin instead would report 0.9.
-    double closest = std::numeric_limits<double>::max();
-    for(const auto& segment : actual) {
-        closest = std::min(closest, segment.ShortestPoint(Point{}).Norm());
-    }
     EXPECT_DOUBLE_EQ(closest, 1.9);
+}
+
+TEST(AgentView, WallViewProjectsOntoTheWallAndPointsBackAtTheAgent)
+{
+    Environment env{};
+    const Point pos{-1.0, 2.0};
+    env.add_agent(pos);
+    const auto geo = WalledGeometry();
+    const auto q = env.query(geo);
+
+    const auto view = env.FirstAgentView(q);
+    auto walls = view.WallsInRange(3.0);
+    ASSERT_FALSE(walls.empty());
+    // The near face of the wall block spans the agent's y, so the agent faces it head on.
+    const WallView nearest =
+        *std::ranges::min_element(walls, {}, [](const WallView& w) { return w.distance; });
+
+    EXPECT_DOUBLE_EQ(nearest.closest_point.x, 1.9);
+    EXPECT_NEAR(nearest.closest_point.y, 0.0, 1e-12);
+    EXPECT_DOUBLE_EQ(nearest.distance, 1.9);
+    // The wall is to the agent's right, so a normal pointing back at the agent faces -x.
+    EXPECT_DOUBLE_EQ(nearest.normal.x, -1.0);
+    EXPECT_NEAR(nearest.normal.y, 0.0, 1e-12);
 }
 
 TEST(AgentView, WallsNearbyAreRelativeToTheAgent)
@@ -246,8 +267,8 @@ TEST(AgentView, WallsNearbyAreRelativeToTheAgent)
 
     const auto view = env.FirstAgentView(q);
     std::vector<LineSegment> actual{};
-    for(const auto& segment : view.WallsNearby()) {
-        actual.push_back(segment);
+    for(const auto& wall : view.WallsNearby()) {
+        actual.push_back(wall.segment);
     }
 
     EXPECT_EQ(actual, expected);

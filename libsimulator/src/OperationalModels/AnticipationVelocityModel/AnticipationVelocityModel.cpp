@@ -4,7 +4,6 @@
 #include "AgentView.hpp"
 #include "GenericAgent.hpp"
 #include "GeometricFunctions.hpp"
-#include "LineSegment.hpp"
 #include "Macros.hpp"
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
@@ -16,7 +15,6 @@
 #include <cstdint>
 #include <cstdlib>
 #include <limits>
-#include <numeric>
 #include <vector>
 
 AnticipationVelocityModel::AnticipationVelocityModel(double pushoutStrength, uint64_t rng_seed)
@@ -42,36 +40,29 @@ Point AnticipationVelocityModel::ComputeNextState(
             return step.NoGeometryBetween(n.RelativePosition, boundaries);
         });
 
-    const auto neighborRepulsion = std::accumulate(
-        std::begin(neighborhood),
-        std::end(neighborhood),
-        Point{},
-        [&model, toNextTarget = step.ToNextTarget(), this](const auto& res, const auto& neighbor) {
-            return res + NeighborRepulsion(model, toNextTarget, neighbor);
-        });
+    const auto toNextTarget = step.ToNextTarget();
+    Point neighborRepulsion{};
+    for(const auto& neighbor : neighborhood) {
+        neighborRepulsion += NeighborRepulsion(model, toNextTarget, neighbor);
+    }
 
-    const auto desiredDirection = step.ToNextTarget().Normalized();
+    const auto desiredDirection = toNextTarget.Normalized();
     auto direction = (desiredDirection + neighborRepulsion).Normalized();
     if(direction == Point{}) {
         direction = model.orientation;
     }
 
-    const double wallBufferDistance = model.wallBufferDistance;
-    // Wall sliding behavior
-
     // update direction towards the newly calculated direction
-    direction = UpdateDirection(model, step.ToNextTarget(), direction, step.dt());
-    const auto spacing = std::accumulate(
-        std::begin(neighborhood),
-        std::end(neighborhood),
-        std::numeric_limits<double>::max(),
-        [&model, &direction, this](const auto& res, const auto& neighbor) {
-            return std::min(res, GetSpacing(model, neighbor, direction));
-        });
+    direction = UpdateDirection(model, toNextTarget, direction, step.dt());
+    auto spacing = std::numeric_limits<double>::max();
+    for(const auto& neighbor : neighborhood) {
+        spacing = std::min(spacing, GetSpacing(model, neighbor, direction));
+    }
 
     const auto optimal_speed = OptimalSpeed(model, spacing, model.timeGap);
+    // Wall sliding behavior
     direction = HandleWallAvoidance(
-        direction, model.radius, boundaries, wallBufferDistance, _pushoutStrength);
+        direction, model.radius, boundaries, model.wallBufferDistance, _pushoutStrength);
 
     const auto velocity = direction * optimal_speed;
     auto& nextModel = std::get<State>(next);
@@ -165,8 +156,7 @@ void AnticipationVelocityModel::CheckModelConstraint(
         }
     }
 
-    const auto lineSegments = view.WallsInRange(r);
-    if(std::begin(lineSegments) != std::end(lineSegments)) {
+    if(!view.WallsInRange(r).empty()) {
         throw SimulationError(
             "Model constraint violation: Agent {} too close to geometry boundaries, distance "
             "<= {}",
@@ -283,28 +273,20 @@ Point AnticipationVelocityModel::HandleWallAvoidance(
     const double criticalWallDistance = wallBufferDistance + agentRadius;
 
     Point modifiedDirection = direction;
-    std::for_each(
-        std::begin(boundaries),
-        std::end(boundaries),
-        [&criticalWallDistance, &modifiedDirection, pushoutStrength](const LineSegment& wall) {
-            const auto closestPoint = wall.ShortestPoint(Point{});
+    for(const auto& wall : boundaries) {
+        if(wall.distance > criticalWallDistance) {
+            continue;
+        }
 
-            const auto distanceVector = Point{} - closestPoint;
-            const auto [distance, normalTowardAgent] = distanceVector.NormAndNormalized();
+        const auto dotProduct = modifiedDirection.ScalarProduct(wall.normal);
 
-            if(distance > criticalWallDistance) {
-                return;
-            }
-
-            const auto dotProduct = modifiedDirection.ScalarProduct(normalTowardAgent);
-
-            if(dotProduct < 0) {
-                // Direction points into wall - need to project it out
-                // Remove the component pointing into the wall
-                const auto projectedDirection = modifiedDirection - normalTowardAgent * dotProduct;
-                modifiedDirection = projectedDirection + normalTowardAgent * pushoutStrength;
-            }
-        });
+        if(dotProduct < 0) {
+            // Direction points into wall - need to project it out
+            // Remove the component pointing into the wall
+            const auto projectedDirection = modifiedDirection - wall.normal * dotProduct;
+            modifiedDirection = projectedDirection + wall.normal * pushoutStrength;
+        }
+    }
 
     // Renormalize to maintain speed
     const auto finalDirection = modifiedDirection.Normalized();

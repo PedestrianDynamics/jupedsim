@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "LineSegment.hpp"
-
-class EnvironmentQuery;
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
 #include "Point.hpp"
@@ -11,6 +8,7 @@ class EnvironmentQuery;
 #include <fmt/core.h>
 
 struct NeighborView;
+struct WallView;
 
 class SocialForceModel : public OperationalModel
 {
@@ -63,11 +61,10 @@ private:
      * @param segment reference to line segment, from which the force originates
      * @return vector with the repulsive force
      */
-    Point ObstacleForce(const State& self, const LineSegment& segment) const;
+    Point ObstacleForce(const State& self, const WallView& wall) const;
     /**
-     * calculates the pushing and friction forces acting between <pt1> and <pt2>
-     * @param pt1 Point on which the forces act
-     * @param pt2 Point from which the forces originate
+     * calculates the pushing and friction forces along <separation>
+     * @param separation vector pointing from where the force originates to where it acts
      * @param A State scale
      * @param B force distance
      * @param r radius
@@ -84,15 +81,6 @@ private:
         const double bodyForce,
         const double friction);
 
-    static Point ForceBetweenPoints(
-        const Point pt1,
-        const Point pt2,
-        const double A,
-        const double B,
-        const double radius,
-        const Point velocity,
-        const double bodyForce,
-        const double friction);
     /**
      *  exponential function that specifies the length of the pushing force between two points
      * @param A State scale

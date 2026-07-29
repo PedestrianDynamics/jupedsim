@@ -4,7 +4,6 @@
 #include "AgentView.hpp"
 #include "GenericAgent.hpp"
 #include "GeometricFunctions.hpp"
-#include "LineSegment.hpp"
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
 #include "Point.hpp"
@@ -14,7 +13,6 @@
 #include <cmath>
 #include <cstdlib>
 #include <limits>
-#include <numeric>
 #include <vector>
 
 CollisionFreeSpeedModel::CollisionFreeSpeedModel(
@@ -46,34 +44,25 @@ Point CollisionFreeSpeedModel::ComputeNextState(
             return step.NoGeometryBetween(n.RelativePosition, boundaries);
         });
 
-    const auto neighborRepulsion = std::accumulate(
-        std::begin(neighborhood),
-        std::end(neighborhood),
-        Point{},
-        [&model, this](const auto& res, const auto& neighbor) {
-            return res + NeighborRepulsion(model, neighbor);
-        });
+    Point neighborRepulsion{};
+    for(const auto& neighbor : neighborhood) {
+        neighborRepulsion += NeighborRepulsion(model, neighbor);
+    }
 
-    const auto boundaryRepulsion = std::accumulate(
-        std::begin(boundaries),
-        std::end(boundaries),
-        Point(0, 0),
-        [this, &model](const auto& acc, const auto& element) {
-            return acc + BoundaryRepulsion(model, element);
-        });
+    Point boundaryRepulsion{};
+    for(const auto& wall : boundaries) {
+        boundaryRepulsion += BoundaryRepulsion(model, wall);
+    }
 
     const auto desired_direction = step.ToNextTarget().Normalized();
     auto direction = (desired_direction + neighborRepulsion + boundaryRepulsion).Normalized();
     if(direction == Point{}) {
         direction = model.orientation;
     }
-    const auto spacing = std::accumulate(
-        std::begin(neighborhood),
-        std::end(neighborhood),
-        std::numeric_limits<double>::max(),
-        [&model, &direction, this](const auto& res, const auto& neighbor) {
-            return std::min(res, GetSpacing(model, neighbor, direction));
-        });
+    auto spacing = std::numeric_limits<double>::max();
+    for(const auto& neighbor : neighborhood) {
+        spacing = std::min(spacing, GetSpacing(model, neighbor, direction));
+    }
 
     const auto optimal_speed = OptimalSpeed(model, spacing, model.timeGap);
     const auto velocity = direction * optimal_speed;
@@ -115,8 +104,7 @@ void CollisionFreeSpeedModel::CheckModelConstraint(const GenericAgent& agent, co
         }
     }
 
-    const auto lineSegments = view.WallsInRange(r);
-    if(std::begin(lineSegments) != std::end(lineSegments)) {
+    if(!view.WallsInRange(r).empty()) {
         throw SimulationError(
             "Model constraint violation: Agent {} too close to geometry boundaries, distance "
             "<= {}",
@@ -161,14 +149,10 @@ Point CollisionFreeSpeedModel::NeighborRepulsion(const State& self, const Neighb
            -(this->strengthNeighborRepulsion * exp((l - distance) / this->rangeNeighborRepulsion));
 }
 
-Point CollisionFreeSpeedModel::BoundaryRepulsion(
-    const State& self,
-    const LineSegment& boundary_segment) const
+Point CollisionFreeSpeedModel::BoundaryRepulsion(const State& self, const WallView& boundary) const
 {
-    const auto dist_vec = boundary_segment.ShortestPoint(Point{});
-    const auto [dist, e_iw] = dist_vec.NormAndNormalized();
     const auto l = self.radius;
     const auto R_iw =
-        -this->strengthGeometryRepulsion * exp((l - dist) / this->rangeGeometryRepulsion);
-    return e_iw * R_iw;
+        -strengthGeometryRepulsion * exp((l - boundary.distance) / rangeGeometryRepulsion);
+    return -boundary.normal * R_iw; // The repulsion points away from the agent
 }

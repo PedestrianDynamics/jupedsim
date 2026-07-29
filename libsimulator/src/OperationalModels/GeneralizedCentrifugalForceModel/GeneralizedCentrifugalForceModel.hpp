@@ -1,8 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
-#include "LineSegment.hpp"
-
-class EnvironmentQuery;
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
 #include "Point.hpp"
@@ -10,6 +7,7 @@ class EnvironmentQuery;
 #include <fmt/core.h>
 
 struct NeighborView;
+struct WallView;
 
 class GeneralizedCentrifugalForceModel : public OperationalModel
 {
@@ -89,8 +87,7 @@ private:
      * Sum of the repulsive forces of all walls surrounding the pedestrian.
      * @see ForceRepWall
      */
-    Point ForceRepRoom(const State& self, const AgentStep& step) const;
-    Point ForceRepWall(const State& self, const LineSegment& w) const;
+    Point ForceRepWall(const State& self, const WallView& wall) const;
     Point ForceRepStatPoint(const State& self, const Point& p, double l, double vn) const;
     Point ForceInterpolation(
         double v0,

@@ -2,7 +2,7 @@
 from dataclasses import dataclass, replace
 
 import numpy as np
-from jupedsim.geometry import LineSegment
+from jupedsim.agent_view import WallView
 from jupedsim.models.custom_model import CustomOperationalModel
 
 
@@ -143,26 +143,22 @@ class PythonSocialForceModel(CustomOperationalModel):
     @staticmethod
     def _obstacle_force(
         state,
-        obstacle: LineSegment,
+        wall: WallView,
     ) -> tuple[float, float]:
         """
         Compute repulsive force from an obstacle (line segment).
 
-        The obstacle is given relative to the agent, so the agent sits at (0, 0).
+        The wall is given as seen from the agent, so the agent sits at (0, 0).
 
         Based on Helbing's model with psychological and body contact forces.
         """
-        agent = (0.0, 0.0)
-        # Get closest point on obstacle to agent
-        closest_point = obstacle.closest_point(agent)
-        dist = PythonSocialForceModel._distance(agent, closest_point)
+        dist = wall.distance
 
         if dist < 1e-3:  # Avoid division by zero
             return (0.0, 0.0)
 
         # Normal direction (from obstacle to agent)
-        n_x = -closest_point[0] / dist
-        n_y = -closest_point[1] / dist
+        n_x, n_y = wall.normal
 
         # Distance-dependent factor
         exp_factor = np.exp(-dist / state.force_distance)

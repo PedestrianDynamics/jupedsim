@@ -5,8 +5,6 @@
 ///
 /// Provides begin and end method required for range based for loops.
 /// _it_second must be reachable by _it_first.
-#include <cstddef>
-#include <iterator>
 #include <ranges>
 
 /// Deriving from view_interface marks this as a std::ranges view, so that a pair returned by
@@ -27,5 +25,8 @@ public:
     IteratorSecond end() const { return second(); }
 
     bool empty() const { return _it_first == _it_second; }
-    size_t size() const { return std::distance(_it_first, _it_second); }
+
+    /// Does not define size() on purpose: counting would have to walk the range, which is O(n).
+    /// std::ranges::sized_range promises O(1). view_interface adds size() by itself in case the
+    /// iterators can subtract.
 };

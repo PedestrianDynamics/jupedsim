@@ -7,6 +7,7 @@
 #include "LineSegment.hpp"
 #include "Point.hpp"
 
+#include <algorithm>
 #include <concepts>
 #include <ranges>
 #include <type_traits>
@@ -17,6 +18,25 @@ struct NeighborView {
     Point RelativePosition;
     const OperationalModelState* state;
 };
+
+/// A wall segment as seen from the agent that asked for it. It carries what agents typically
+/// use/compute to avoid repetitions plus harmonizes computation.
+struct WallView {
+    /// The segment itself, relative to the agent.
+    LineSegment segment;
+    /// The point on the segment closest to the agent.
+    Point closest_point;
+    /// Distance to that point.
+    double distance;
+    /// Unit vector pointing from the wall towards the agent, i.e. the direction a repulsion
+    /// acts in. Zero for an agent standing exactly on the wall, where no direction exists.
+    Point normal;
+};
+
+inline bool intersects(const LineSegment& los, const WallView& wall)
+{
+    return intersects(los, wall.segment);
+}
 
 /// What an agent perceives of its surroundings, expressed relative to where it
 /// stands. Agents do not know absolute positions as they do not need to.
@@ -55,9 +75,7 @@ public:
     template <typename Range>
     bool NoGeometryBetween(Point RelativePosition, const Range& boundaries) const
     {
-        const LineSegment los{Point{}, RelativePosition};
-        return !std::ranges::any_of(
-            boundaries, [&los](const LineSegment& seg) { return intersects(los, seg); });
+        return _world.NoGeometryBetween(Point{}, RelativePosition, boundaries);
     }
 
     /// Whether the point reached by moving 'RelativePosition' is inside the walkable area.
@@ -66,29 +84,37 @@ public:
         return _world.InsideGeometry(_agent.position + RelativePosition);
     }
 
-    /// Temporary: WarpDriver stores an absolute anchor position in its model state to detect
-    /// stuck agents. Goes away once that anchor is kept as an accumulated displacement.
-    Point position() const { return _agent.position; }
-
 private:
-    /// The segments as relative ones. Lazy range, no copies.
-    auto Relative(CollisionGeometry::LineSegmentRange segments) const
+    /// The segments as seen from the agent. Lazy range, no copies.
+    /// Must stay above walls_nearby() and walls_in_range() in code: an 'auto' return type is
+    /// deduced from the body, so unlike other members this one cannot be called before it is
+    /// defined.
+    auto AsSeenFromAgent(CollisionGeometry::LineSegmentRange segments) const
     {
         return segments | std::views::transform([origin = _agent.position](const LineSegment& s) {
-                   return LineSegment{s.p1 - origin, s.p2 - origin};
+                   const LineSegment segment{s.p1 - origin, s.p2 - origin};
+                   const Point closest_point = segment.ShortestPoint(Point{});
+                   return WallView{
+                       .segment = segment,
+                       .closest_point = closest_point,
+                       .distance = closest_point.Norm(),
+                       .normal = (Point{} - closest_point).Normalized()};
                });
     }
 
 public:
-    /// Wall segments in the grid cells around the agent, relative to it. The returned segments
-    /// depend on the underlying grid cell size.
+    /// Walls in the grid cells around the agent. Which ones are returned depends on the
+    /// underlying grid cell size.
     /// Returned as lazy range.
-    auto WallsNearby() const { return Relative(_world.LineSegmentsInRange(_agent.position)); }
+    auto WallsNearby() const
+    {
+        return AsSeenFromAgent(_world.LineSegmentsInRange(_agent.position));
+    }
 
     /// Wall segments within 'distance' of the agent, relative to it. Returns lazy range.
     auto WallsInRange(double distance) const
     {
-        return Relative(_world.LineSegmentsInRange(_agent.position, distance));
+        return AsSeenFromAgent(_world.LineSegmentsInRange(_agent.position, distance));
     }
 
 protected:

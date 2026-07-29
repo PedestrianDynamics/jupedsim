@@ -1,15 +1,14 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "AgentView.hpp"
 #include "EnvironmentQuery.hpp"
-#include "LineSegment.hpp"
 #include "OperationalModels/CustomModel/CustomModel.hpp"
 #include "conversion.hpp"
 #include "python_model.hpp"
+#include "type_casters.hpp" // IWYU pragma: keep
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include <tuple>
 #include <variant>
 
 namespace py = pybind11;
@@ -17,9 +16,7 @@ namespace py = pybind11;
 void init_agent_view(py::module_& m)
 {
     py::class_<NeighborView>(m, "NeighborView")
-        .def_property_readonly(
-            "relative_position",
-            [](const NeighborView& self) { return intoTuple(self.RelativePosition); })
+        .def_readonly("relative_position", &NeighborView::RelativePosition)
         .def_property_readonly("state", [](const NeighborView& self) -> py::object {
             const auto& state = static_cast<const OperationalModelStateVariant&>(*self.state);
             if(const auto* custom = std::get_if<CustomModel::State>(&state)) {
@@ -29,6 +26,12 @@ void init_agent_view(py::module_& m)
             }
             return py::cast(state);
         });
+
+    py::class_<WallView>(m, "WallView")
+        .def_readonly("segment", &WallView::segment)
+        .def_readonly("closest_point", &WallView::closest_point)
+        .def_readonly("distance", &WallView::distance)
+        .def_readonly("normal", &WallView::normal);
 
     py::class_<AgentView>(m, "AgentView")
         .def(
@@ -40,7 +43,7 @@ void init_agent_view(py::module_& m)
             "no_geometry_between",
             [](const AgentView& self,
                std::tuple<double, double> relative_position,
-               const std::vector<LineSegment>& walls) {
+               const std::vector<WallView>& walls) {
                 return self.NoGeometryBetween(intoPoint(relative_position), walls);
             },
             py::arg("relative_position"),
@@ -48,9 +51,7 @@ void init_agent_view(py::module_& m)
             "True when nothing blocks the straight line to relative_position.")
         .def(
             "inside_geometry",
-            [](const AgentView& self, std::tuple<double, double> relative_position) {
-                return self.InsideGeometry(intoPoint(relative_position));
-            },
+            &AgentView::InsideGeometry,
             py::arg("relative_position"),
             "True when moving by relative_position stays inside the walkable area.")
         .def(
@@ -63,10 +64,9 @@ void init_agent_view(py::module_& m)
                 return intoVec(self.WallsInRange(distance));
             },
             py::arg("distance"),
-            "Geometry segments within exact distance of the agent, relative to it.");
+            "Walls within exact distance of the agent, as seen from it.");
 
     py::class_<AgentStep, AgentView>(m, "AgentStep")
         .def_property_readonly("dt", &AgentStep::dt)
-        .def_property_readonly(
-            "to_next_target", [](const AgentStep& self) { return intoTuple(self.ToNextTarget()); });
+        .def_property_readonly("to_next_target", &AgentStep::ToNextTarget);
 }
