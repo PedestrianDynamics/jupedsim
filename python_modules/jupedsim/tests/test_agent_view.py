@@ -2,6 +2,7 @@
 from dataclasses import dataclass, replace
 
 import jupedsim as jps
+import pytest
 import shapely
 
 _STAY_PUT = (0.0, 0.0)
@@ -214,3 +215,42 @@ def test_composed_no_geometry_between_and_group_filter():
     sim.iterate()
 
     assert model.neighbors == [(0.0, 5.0)]
+
+
+# ---------------------------------------------------------------------------
+# Wall views
+# ---------------------------------------------------------------------------
+
+
+class _WallCapturingModel(jps.CustomOperationalModel):
+    """Records the walls the probe agent sees."""
+
+    def __init__(self, *, distance=3.0):
+        super().__init__()
+        self._distance = distance
+        self.walls: list = []
+
+    def compute_next_state(self, state, step):
+        if state.probe:
+            self.walls = step.walls_in_range(self._distance)
+        return replace(state), _STAY_PUT
+
+
+def test_wall_view_carries_the_projection_onto_the_wall():
+    model = _WallCapturingModel(distance=3.0)
+    sim, exit_id, journey_id = _make_sim(model, geometry=_walled_room())
+    _add_agent(sim, journey_id, exit_id, (8.0, 5.0), probe=True)
+
+    sim.iterate()
+
+    assert model.walls
+    nearest = min(model.walls, key=lambda w: w.distance)
+
+    # The near face of the wall sits at x = 9.9, so 1.9 to the agent's right.
+    assert nearest.distance == pytest.approx(1.9)
+    assert nearest.closest_point == pytest.approx((1.9, 0.0))
+    # The normal points from the wall back at the agent, i.e. against +x here.
+    assert nearest.normal == pytest.approx((-1.0, 0.0))
+    # The segment is relative to the agent too: a vertical face at x = 1.9.
+    assert nearest.segment.p1[0] == pytest.approx(1.9)
+    assert nearest.segment.p2[0] == pytest.approx(1.9)

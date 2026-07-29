@@ -34,7 +34,7 @@ constructor arguments with sensible defaults: ``sigma``, ``time_horizon``,
 :class:`WarpDriverModelState` exposes the complete per-agent state of the
 model as keyword-only constructor arguments with sensible defaults:
 ``orientation``, ``radius``, ``desired_speed``, ``stuck_time``,
-``anchor_x``, ``anchor_y``, ``detour_time`` and ``detour_side``.
+``displacement_x``, ``displacement_y``, ``detour_time`` and ``detour_side``.
 """
 
 import jupedsim.native as py_jps

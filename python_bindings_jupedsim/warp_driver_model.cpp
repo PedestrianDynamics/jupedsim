@@ -32,8 +32,8 @@ void init_warp_driver_model(py::module_& m)
                         double radius,
                         double desiredSpeed,
                         double stuckTime,
-                        double anchorX,
-                        double anchorY,
+                        double displacementX,
+                        double displacementY,
                         double detourTime,
                         int detourSide) {
                 return WarpDriverModel::State{
@@ -41,8 +41,8 @@ void init_warp_driver_model(py::module_& m)
                     .radius = radius,
                     .v0 = desiredSpeed,
                     .stuckTime = stuckTime,
-                    .anchorX = anchorX,
-                    .anchorY = anchorY,
+                    .displacementX = displacementX,
+                    .displacementY = displacementY,
                     .detourTime = detourTime,
                     .detourSide = detourSide};
             }),
@@ -51,16 +51,16 @@ void init_warp_driver_model(py::module_& m)
             py::arg("radius") = d.radius,
             py::arg("desired_speed") = d.v0,
             py::arg("stuck_time") = d.stuckTime,
-            py::arg("anchor_x") = d.anchorX,
-            py::arg("anchor_y") = d.anchorY,
+            py::arg("displacement_x") = d.displacementX,
+            py::arg("displacement_y") = d.displacementY,
             py::arg("detour_time") = d.detourTime,
             py::arg("detour_side") = d.detourSide)
         .def_readwrite("orientation", &WarpDriverModel::State::orientation)
         .def_readwrite("radius", &WarpDriverModel::State::radius)
         .def_readwrite("desired_speed", &WarpDriverModel::State::v0)
         .def_readwrite("stuck_time", &WarpDriverModel::State::stuckTime)
-        .def_readwrite("anchor_x", &WarpDriverModel::State::anchorX)
-        .def_readwrite("anchor_y", &WarpDriverModel::State::anchorY)
+        .def_readwrite("displacement_x", &WarpDriverModel::State::displacementX)
+        .def_readwrite("displacement_y", &WarpDriverModel::State::displacementY)
         .def_readwrite("detour_time", &WarpDriverModel::State::detourTime)
         .def_readwrite("detour_side", &WarpDriverModel::State::detourSide);
 }

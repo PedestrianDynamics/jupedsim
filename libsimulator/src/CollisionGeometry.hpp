@@ -20,6 +20,9 @@ class CollisionGeometry;
 
 double dist(LineSegment l, Point p);
 
+/// Skips over everything further than 'distance' away from 'p' while iterating.
+/// Models std::forward_iterator: it only wraps a vector iterator, so incrementing a copy leaves
+/// the original untouched and a range can be traversed more than once.
 template <typename T>
 class DistanceQueryIterator
 {
@@ -31,7 +34,7 @@ private:
     BackingIterator _end{};
 
 public:
-    using iterator_category = std::input_iterator_tag;
+    using iterator_category = std::forward_iterator_tag;
     using value_type = T;
     using difference_type = std::ptrdiff_t;
     using pointer = const T*;
@@ -69,7 +72,12 @@ public:
     }
 
     /// The dummy "int" marks this as post-increment.
-    void operator++(int) { ++*this; }
+    DistanceQueryIterator operator++(int)
+    {
+        auto before = *this;
+        ++*this;
+        return before;
+    }
 
     const T& operator*() const { return *_current; }
 };

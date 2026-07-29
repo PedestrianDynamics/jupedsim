@@ -4,7 +4,6 @@
 #include "AgentView.hpp"
 #include "GenericAgent.hpp"
 #include "GeometricFunctions.hpp"
-#include "LineSegment.hpp"
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
 #include "Point.hpp"
@@ -13,7 +12,6 @@
 #include <algorithm>
 #include <cmath>
 #include <limits>
-#include <numeric>
 #include <vector>
 
 namespace
@@ -72,18 +70,15 @@ Point CollisionFreeSpeedModelV3::ComputeNextState(
 {
     const auto& model = std::get<State>(current);
     const auto& boundaries = step.WallsNearby();
-    auto neighborhood = step.OtherAgentsInRange(
-        _cutOffRadius, [&step, &boundaries](const NeighborView& n) {
+    auto neighborhood =
+        step.OtherAgentsInRange(_cutOffRadius, [&step, &boundaries](const NeighborView& n) {
             return step.NoGeometryBetween(n.RelativePosition, boundaries);
         });
 
-    const auto boundaryRepulsion = std::accumulate(
-        std::begin(boundaries),
-        std::end(boundaries),
-        Point(0, 0),
-        [this, &model](const auto& acc, const auto& element) {
-            return acc + BoundaryRepulsion(model, element);
-        });
+    Point boundaryRepulsion{};
+    for(const auto& wall : boundaries) {
+        boundaryRepulsion += BoundaryRepulsion(model, wall);
+    }
 
     const auto desired_direction = step.ToNextTarget().Normalized();
     auto reference_direction = (desired_direction + boundaryRepulsion).Normalized();
@@ -100,23 +95,18 @@ Point CollisionFreeSpeedModelV3::ComputeNextState(
         direction = reference_direction;
     }
 
-    const auto spacing_move = std::accumulate(
-        std::begin(neighborhood),
-        std::end(neighborhood),
-        std::numeric_limits<double>::max(),
-        [&model, &direction, this](const auto& res, const auto& neighbor) {
-            return std::min(res, GetSpacing(model, neighbor, direction));
-        });
+    const auto closest_spacing_towards = [&](Point towards) {
+        auto spacing = std::numeric_limits<double>::max();
+        for(const auto& neighbor : neighborhood) {
+            spacing = std::min(spacing, GetSpacing(model, neighbor, towards));
+        }
+        return spacing;
+    };
 
+    const auto spacing_move = closest_spacing_towards(direction);
     const auto goal_direction =
         (desired_direction == Point{}) ? reference_direction : desired_direction;
-    const auto spacing_goal = std::accumulate(
-        std::begin(neighborhood),
-        std::end(neighborhood),
-        std::numeric_limits<double>::max(),
-        [&model, &goal_direction, this](const auto& res, const auto& neighbor) {
-            return std::min(res, GetSpacing(model, neighbor, goal_direction));
-        });
+    const auto spacing_goal = closest_spacing_towards(goal_direction);
 
     const auto spacing =
         spacing_move * (1.0 - SpacingBlendWeight) + spacing_goal * SpacingBlendWeight;
@@ -179,8 +169,7 @@ void CollisionFreeSpeedModelV3::CheckModelConstraint(
         }
     }
 
-    const auto lineSegments = view.WallsInRange(model.radius);
-    if(std::begin(lineSegments) != std::end(lineSegments)) {
+    if(!view.WallsInRange(model.radius).empty()) {
         throw SimulationError(
             "Model constraint violation: Agent {} too close to geometry boundaries, distance "
             "<= {}",
@@ -217,14 +206,11 @@ double CollisionFreeSpeedModelV3::GetSpacing(
     return distp12.Norm() - l;
 }
 
-Point CollisionFreeSpeedModelV3::BoundaryRepulsion(
-    const State& self,
-    const LineSegment& boundary_segment) const
+Point CollisionFreeSpeedModelV3::BoundaryRepulsion(const State& self, const WallView& boundary)
+    const
 {
-    const auto dist_vec = boundary_segment.ShortestPoint(Point{});
-    const auto [dist, e_iw] = dist_vec.NormAndNormalized();
     const auto l = self.radius;
-    const auto R_iw =
-        -self.strengthGeometryRepulsion * std::exp((l - dist) / self.rangeGeometryRepulsion);
-    return e_iw * R_iw;
+    const auto R_iw = -self.strengthGeometryRepulsion *
+                      std::exp((l - boundary.distance) / self.rangeGeometryRepulsion);
+    return -boundary.normal * R_iw; // The repulsion points away from the agent
 }
