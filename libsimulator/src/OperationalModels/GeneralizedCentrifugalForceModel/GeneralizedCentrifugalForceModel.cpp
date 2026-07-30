@@ -68,7 +68,12 @@ Point GeneralizedCentrifugalForceModel::ComputeNextState(
     }
 
     const Point fd = ForceDriv(
-        currentState, step.ToNextTarget(), currentState.mass, currentState.tau, step.dt(), e0);
+        currentState,
+        step.orientation_to_next_target(),
+        currentState.mass,
+        currentState.tau,
+        step.dt(),
+        e0);
     const Point acc = (fd + F_rep + repwall) / currentState.mass;
 
     const Point velocity = (currentState.orientation * currentState.speed) + acc * step.dt();
@@ -156,18 +161,17 @@ void GeneralizedCentrifugalForceModel::CheckModelConstraint(
 
 Point GeneralizedCentrifugalForceModel::ForceDriv(
     const State& currentState,
-    Point to_target,
+    Point orientationToTarget,
     double mass,
     double tau,
     double deltaT,
     Point& e0update) const
 {
     Point F_driv;
-    const auto dist = to_target.Norm();
-    if(dist > J_EPS_GOAL) {
-
+    if(orientationToTarget != Point{}) {
+        // expect this to never trigger as stage system should cover it.
         const Point e0 =
-            mollify_e0(to_target, deltaT, currentState.orientationDelay, currentState.e0);
+            mollify_e0(orientationToTarget, deltaT, currentState.orientationDelay, currentState.e0);
         e0update = e0;
         F_driv =
             ((e0 * currentState.v0 - (currentState.orientation * currentState.speed)) * mass) / tau;

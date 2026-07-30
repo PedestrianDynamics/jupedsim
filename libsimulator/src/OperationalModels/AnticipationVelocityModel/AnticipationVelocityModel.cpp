@@ -41,20 +41,19 @@ Point AnticipationVelocityModel::ComputeNextState(
             return step.NoGeometryBetween(n.RelativePosition, boundaries);
         });
 
-    const auto toNextTarget = step.ToNextTarget();
+    const auto desiredDirection = step.orientation_to_next_target();
     Point neighborRepulsion{};
     for(const auto& neighbor : neighborhood) {
-        neighborRepulsion += NeighborRepulsion(currentState, toNextTarget, neighbor);
+        neighborRepulsion += NeighborRepulsion(currentState, desiredDirection, neighbor);
     }
 
-    const auto desiredDirection = toNextTarget.Normalized();
     auto direction = (desiredDirection + neighborRepulsion).Normalized();
     if(direction == Point{}) {
         direction = currentState.orientation;
     }
 
     // update direction towards the newly calculated direction
-    direction = UpdateDirection(currentState, toNextTarget, direction, step.dt());
+    direction = UpdateDirection(currentState, desiredDirection, direction, step.dt());
     auto spacing = std::numeric_limits<double>::max();
     for(const auto& neighbor : neighborhood) {
         spacing = std::min(spacing, GetSpacing(currentState, neighbor, direction));
@@ -78,11 +77,10 @@ Point AnticipationVelocityModel::ComputeNextState(
 
 Point AnticipationVelocityModel::UpdateDirection(
     const State& currentState,
-    Point toNextTarget,
+    Point desiredDirection,
     const Point& calculatedDirection,
     double dt) const
 {
-    const Point desiredDirection = toNextTarget.Normalized();
     const Point actualDirection = currentState.orientation;
     Point updatedDirection;
 
@@ -230,7 +228,7 @@ Point AnticipationVelocityModel::CalculateInfluenceDirection(
 
 Point AnticipationVelocityModel::NeighborRepulsion(
     const State& currentState,
-    Point toNextTarget,
+    Point desiredDirection,
     const NeighborView& neighbor) const
 {
     const auto& neighborState = std::get<State>(*neighbor.state);
@@ -241,7 +239,7 @@ Point AnticipationVelocityModel::NeighborRepulsion(
 
     // Pedestrian movement and desired directions
     const auto& e1 = currentState.orientation;
-    const auto& d1 = toNextTarget.Normalized();
+    const auto& d1 = desiredDirection;
     const auto& e2 = neighborState.orientation;
 
     // Check perception range (Eq. 1)

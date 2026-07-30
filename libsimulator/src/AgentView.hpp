@@ -133,7 +133,12 @@ public:
 
     double dt() const { return _dt; }
 
-    Point ToNextTarget() const { return _agent.nextTarget - _agent.Position(); }
+    /// Normalized 2D vector pointing at the next target. Zero when the agent has already
+    /// reached it.
+    Point orientation_to_next_target() const
+    {
+        return (_agent.nextTarget - _agent.Position()).Normalized();
+    }
 
 private:
     double _dt;

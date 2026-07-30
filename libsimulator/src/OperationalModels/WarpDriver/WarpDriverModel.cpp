@@ -450,11 +450,12 @@ Point WarpDriverModel::ComputeNextState(
     }
 
     // Direction towards destination
-    Point toTarget = step.ToNextTarget();
-    const double distToTarget = toTarget.Norm();
-    if(distToTarget < 1e-9) {
+    Point desiredDir = step.orientation_to_next_target();
+    if(desiredDir == Point{}) {
         // The old update carried default-initialized stuck/detour state here,
         // so applying it reset that state; replicate that reset.
+        // [RL, FIXME] This is expected to be dead code and should be removed in a subsequent
+        //             cleanup.
         nextData.orientation = orient;
         nextData.stuckTime = 0.0;
         nextData.displacementX = 0.0;
@@ -463,7 +464,6 @@ Point WarpDriverModel::ComputeNextState(
         nextData.detourSide = 1;
         return Point{0.0, 0.0};
     }
-    Point desiredDir = toTarget.Normalized();
 
     // Use desired direction as agent's effective orientation for the frame
     Point effectiveOrient = desiredDir;

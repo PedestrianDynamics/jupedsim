@@ -27,7 +27,7 @@ Point SocialForceModel::ComputeNextState(
     const AgentStep& step) const
 {
     const auto& currentState = std::get<State>(current);
-    auto forces = DrivingForce(currentState, step.ToNextTarget());
+    auto forces = DrivingForce(currentState, step.orientation_to_next_target());
 
     auto _w = step.WallsNearby();
     const std::vector<WallView> boundaries(_w.begin(), _w.end());
@@ -104,9 +104,8 @@ void SocialForceModel::CheckModelConstraint(const GenericAgent& agent, const Age
     }
 }
 
-Point SocialForceModel::DrivingForce(const State& currentState, Point ToNextTarget)
+Point SocialForceModel::DrivingForce(const State& currentState, Point e0)
 {
-    const Point e0 = ToNextTarget.Normalized();
     return (e0 * currentState.desiredSpeed - currentState.velocity) / currentState.reactionTime;
 };
 double SocialForceModel::PushingForceLength(double A, double B, double r, double distance)

@@ -36,7 +36,7 @@ def run(model, make_state, out_path):
             journey_id=journey_id,
             stage_id=exit_id,
             position=pos,
-            state=make_state(pos),
+            state=make_state(),
         )
 
     lines = []
@@ -55,44 +55,42 @@ def scenarios():
     yield (
         "CollisionFreeSpeedModel",
         jps.CollisionFreeSpeedModel(),
-        lambda pos: jps.CollisionFreeSpeedModelState(position=pos),
+        lambda: jps.CollisionFreeSpeedModelState(),
     )
     yield (
         "CollisionFreeSpeedModelV2",
         jps.CollisionFreeSpeedModelV2(),
-        lambda pos: jps.CollisionFreeSpeedModelV2State(position=pos),
+        lambda: jps.CollisionFreeSpeedModelV2State(),
     )
     yield (
         "CollisionFreeSpeedModelV3",
         jps.CollisionFreeSpeedModelV3(),
-        lambda pos: jps.CollisionFreeSpeedModelV3State(position=pos),
+        lambda: jps.CollisionFreeSpeedModelV3State(),
     )
     yield (
         "GeneralizedCentrifugalForceModel",
         jps.GeneralizedCentrifugalForceModel(),
-        lambda pos: jps.GeneralizedCentrifugalForceModelState(position=pos),
+        lambda: jps.GeneralizedCentrifugalForceModelState(),
     )
     yield (
         "AnticipationVelocityModel",
-        jps.AnticipationVelocityModel(),
-        lambda pos: jps.AnticipationVelocityModelState(position=pos),
+        jps.AnticipationVelocityModel(rng_seed=1234),
+        lambda: jps.AnticipationVelocityModelState(),
     )
     yield (
         "SocialForceModel",
         jps.SocialForceModel(),
-        lambda pos: jps.SocialForceModelState(position=pos),
+        lambda: jps.SocialForceModelState(),
     )
     yield (
         "WarpDriverModel",
         jps.WarpDriverModel(),
-        lambda pos: jps.WarpDriverModelState(position=pos),
+        lambda: jps.WarpDriverModelState(),
     )
     yield (
         "PythonSocialForceModel",
         PythonSocialForceModel(),
-        lambda pos: PythonSocialForceModelState(
-            position=pos, velocity=(0.0, 0.0)
-        ),
+        lambda: PythonSocialForceModelState(velocity=(0.0, 0.0)),
     )
 
 

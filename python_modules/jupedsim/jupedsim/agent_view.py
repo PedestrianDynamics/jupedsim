@@ -199,6 +199,9 @@ class AgentStep(AgentView):
         return self._obj.dt
 
     @property
-    def to_next_target(self) -> tuple[float, float]:
-        """Vector from the agent to its next target."""
-        return self._obj.to_next_target
+    def orientation_to_next_target(self) -> tuple[float, float]:
+        """Unit vector pointing at the agent's next target.
+
+        Zero when the agent has already reached it.
+        """
+        return self._obj.orientation_to_next_target

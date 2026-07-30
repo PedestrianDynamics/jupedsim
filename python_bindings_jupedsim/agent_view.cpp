@@ -68,5 +68,6 @@ void init_agent_view(py::module_& m)
 
     py::class_<AgentStep, AgentView>(m, "AgentStep")
         .def_property_readonly("dt", &AgentStep::dt)
-        .def_property_readonly("to_next_target", &AgentStep::ToNextTarget);
+        .def_property_readonly(
+            "orientation_to_next_target", &AgentStep::orientation_to_next_target);
 }
