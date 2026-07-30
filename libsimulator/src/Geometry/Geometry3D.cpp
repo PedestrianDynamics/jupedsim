@@ -181,13 +181,13 @@ Geometry3D::line_segments_in_range(const Location& who, double distance) const
     return _geometry2D->LineSegmentsInDistanceTo(distance, who.xy());
 }
 
-bool Geometry3D::no_geometry_between(const Location& a, const Location& b) const
+bool Geometry3D::no_geometry_between(const Location& who, Point direction) const
 {
     if(_geometry2D == nullptr) {
         throw SimulationError(
             "no_geometry_between() on a mesh-built Geometry3D is not implemented yet.");
     }
-    return !_geometry2D->IntersectsAny(LineSegment{a.xy(), b.xy()});
+    return !_geometry2D->IntersectsAny(LineSegment{who.xy(), who.xy() + direction});
 }
 
 bool Geometry3D::inside_geometry(const Location& who, Point direction) const

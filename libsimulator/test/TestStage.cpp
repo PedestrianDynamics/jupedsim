@@ -9,13 +9,13 @@ class StagesTests : public ::testing::Test
 {
 public:
     NeighborhoodSearch<GenericAgent> neighborhoodSearch{2};
-    std::unique_ptr<Geometry2D> geometry{};
+    std::unique_ptr<Geometry3D> geometry{};
 
     void SetUp() override
     {
         GeometryBuilder b{};
         b.AddAccessibleArea({{-10, -10}, {10, -10}, {10, 10}, {-10, 10}});
-        geometry = std::make_unique<Geometry2D>(b.Build());
+        geometry = std::make_unique<Geometry3D>(b.Build().Polygon());
     }
 
     void TearDown() override {}

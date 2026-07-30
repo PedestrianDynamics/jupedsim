@@ -87,8 +87,9 @@ public:
     Geometry2D::LineSegmentRange
     line_segments_in_range(const Location& who, double distance = -1.0) const;
 
-    /// True iff the straight segment @p a -> @p b crosses no wall.
-    bool no_geometry_between(const Location& a, const Location& b) const;
+    /// True iff the straight horizontal step @p direction, taken from @p who, crosses no
+    /// wall.
+    bool no_geometry_between(const Location& who, Point direction) const;
 
     /// True iff walking from @p who by the horizontal @p direction lands inside
     /// the walkable area.

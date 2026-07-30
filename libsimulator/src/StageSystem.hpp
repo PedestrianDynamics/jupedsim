@@ -3,7 +3,7 @@
 
 #include "EnvironmentQuery.hpp"
 #include "GenericAgent.hpp"
-#include "Geometry/Geometry2D.hpp"
+#include "Geometry/Geometry3D.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "Stage.hpp"
 #include "StageManager.hpp"
@@ -22,7 +22,7 @@ public:
     void
     Run(StageManager& stageManager,
         const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
-        const Geometry2D& geometry)
+        const Geometry3D& geometry)
     {
         EnvironmentQuery envQuery(geometry, neighborhoodSearch);
         for(auto& [_, stage] : stageManager.Stages()) {

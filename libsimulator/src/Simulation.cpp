@@ -97,7 +97,7 @@ void Simulation::Iterate()
 
     {
         JPS_SCOPED_TIMER_AND_TRACE(_timer, "Stage System", Detailed);
-        _stageSystem.Run(_stageManager, _neighborhoodSearch, *_geometry->geometry_2d());
+        _stageSystem.Run(_stageManager, _neighborhoodSearch, *_geometry);
     }
 
     {
@@ -113,11 +113,7 @@ void Simulation::Iterate()
     {
         JPS_SCOPED_TIMER_AND_TRACE(_timer, "Operational Decision System", General);
         _operationalDecisionSystem.Run(
-            _clock.dT(),
-            _clock.ElapsedTime(),
-            _neighborhoodSearch,
-            *_geometry->geometry_2d(),
-            _agents);
+            _clock.dT(), _clock.ElapsedTime(), _neighborhoodSearch, *_geometry, _agents);
         // Agents moved during the operational step; rebuild the grid so cell membership
         // reflects the new positions for queries before the next iteration (AgentsInRange,
         // AddAgent validation).
@@ -271,7 +267,7 @@ GenericAgent::ID Simulation::AddAgent(GenericAgent agent)
     // will run through both the original + the 3D move. (This is temporary.)
     agent.location = _geometry->get_location(agent.Position().x, agent.Position().y, 0.0);
 
-    _operationalDecisionSystem.ValidateAgent(agent, _neighborhoodSearch, *_geometry->geometry_2d());
+    _operationalDecisionSystem.ValidateAgent(agent, _neighborhoodSearch, *_geometry);
 
     _stageManager.HandleNewAgent(agent.stageId);
     _agents.emplace_back(std::move(agent));

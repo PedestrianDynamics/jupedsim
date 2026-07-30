@@ -121,16 +121,18 @@ TEST(CustomModel, RunsThroughOperationalDecisionSystem)
 {
     GeometryBuilder builder{};
     builder.AddAccessibleArea({{-10, -10}, {10, -10}, {10, 10}, {-10, 10}});
-    const auto geometry = builder.Build();
+    const auto geometry = std::make_unique<Geometry3D>(builder.Build().Polygon());
 
     AgentContainer<GenericAgent> agents{};
     agents.emplace_back(MakeAgent(CustomModel::State{MinimalState{Point{2.0, 0.0}, 0}}));
+    agents.front().location =
+        geometry->get_location(agents.front().Position().x, agents.front().Position().y, 0.0);
 
     NeighborhoodSearch<GenericAgent> neighborhoodSearch{2.2};
     neighborhoodSearch.Update(agents);
 
     OperationalDecisionSystem system{std::make_unique<MinimalCustomModel>()};
-    system.Run(0.5, 0.0, neighborhoodSearch, geometry, agents);
+    system.Run(0.5, 0.0, neighborhoodSearch, *geometry, agents);
 
     const auto& agent = agents.front();
     const auto& state = std::get<CustomModel::State>(agent.state).Get<MinimalState>();

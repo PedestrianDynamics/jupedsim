@@ -2,25 +2,23 @@
 #pragma once
 
 #include "GenericAgent.hpp"
-#include "GeometricFunctions.hpp"
-#include "Geometry/Geometry2D.hpp"
+#include "Geometry/Geometry3D.hpp"
+#include "Geometry/Location.hpp"
 #include "LineSegment.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "Point.hpp"
+#include "SimulationError.hpp"
 
-#include <algorithm>
 #include <concepts>
-#include <iterator>
-#include <ranges>
 #include <vector>
 
 class EnvironmentQuery
 {
-    const Geometry2D& _geometry;
+    const Geometry3D& _geometry;
     const NeighborhoodSearch<GenericAgent>& _nsearch;
 
 public:
-    EnvironmentQuery(const Geometry2D& geometry, const NeighborhoodSearch<GenericAgent>& nsearch)
+    EnvironmentQuery(const Geometry3D& geometry, const NeighborhoodSearch<GenericAgent>& nsearch)
         : _geometry(geometry), _nsearch(nsearch)
     {
     }
@@ -30,6 +28,7 @@ public:
     };
 
     /// Calls 'fn' for every agent within 'radius' of 'from'.
+    /// Note: No z filtering is applied.
     template <std::invocable<const GenericAgent&> Fn>
     void ForEachAgentInRange(const Point& from, double radius, Fn fn) const
     {
@@ -49,25 +48,29 @@ public:
         return neighbors;
     }
 
-    template <typename Range>
-    bool NoGeometryBetween(const Point& from, const Point& to, const Range& boundaries) const
+    bool NoGeometryBetween(const Location& who, Point direction) const
     {
-        const LineSegment los{from, to};
-        return !std::any_of(std::begin(boundaries), std::end(boundaries), [&los](const auto& seg) {
-            return intersects(los, seg);
-        });
+        return _geometry.no_geometry_between(who, direction);
     }
 
-    Geometry2D::LineSegmentRange LineSegmentsInRange(const Point& p, double distance = -1.0) const
+    Geometry2D::LineSegmentRange
+    LineSegmentsInRange(const Location& who, double distance = -1.0) const
     {
-        if(distance < 0.0) {
-            return _geometry.LineSegmentsInApproxDistanceTo(p);
-        } else {
-            return _geometry.LineSegmentsInDistanceTo(distance, p);
+        return _geometry.line_segments_in_range(who, distance);
+    }
+
+    bool InsideGeometry(const Location& who, Point direction) const
+    {
+        return _geometry.inside_geometry(who, direction);
+    }
+
+    /// Interim: stage slots still used this. To be removed later.
+    bool NoGeometryBetween(const Point& from, const Point& to) const
+    {
+        const auto* flat = _geometry.geometry_2d();
+        if(flat == nullptr) {
+            throw SimulationError("Point-based visibility needs a stage Location on the mesh.");
         }
+        return !flat->IntersectsAny(LineSegment{from, to});
     }
-
-    bool InsideGeometry(const Point& p) const { return _geometry.InsideGeometry(p); }
-
-    const Geometry2D& Geometry() const { return _geometry; }
 };

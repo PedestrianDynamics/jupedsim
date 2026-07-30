@@ -208,9 +208,8 @@ void NotifiableWaitingSet::Update(const EnvironmentQuery& envQuery)
 
     for(size_t index = count_occupants; index < slots.size(); ++index) {
         const auto slot_pos = slots[index];
-        const auto& boundaries = envQuery.LineSegmentsInRange(slot_pos);
         auto candidates = envQuery.AgentsInRange(slot_pos, 2, [&](const GenericAgent& candidate) {
-            return envQuery.NoGeometryBetween(slot_pos, candidate.Position(), boundaries);
+            return envQuery.NoGeometryBetween(slot_pos, candidate.Position());
         });
 
         GenericAgent::ID occupant = GenericAgent::ID::Invalid;
@@ -292,9 +291,8 @@ void NotifiableQueue::Update(const EnvironmentQuery& envQuery)
 
     for(size_t index = count_occupants; index < slots.size(); ++index) {
         const auto slot_pos = slots[index];
-        const auto& boundaries = envQuery.LineSegmentsInRange(slot_pos);
         auto candidates = envQuery.AgentsInRange(slot_pos, 2, [&](const GenericAgent& candidate) {
-            return envQuery.NoGeometryBetween(slot_pos, candidate.Position(), boundaries);
+            return envQuery.NoGeometryBetween(slot_pos, candidate.Position());
         });
 
         GenericAgent::ID occupant = GenericAgent::ID::Invalid;

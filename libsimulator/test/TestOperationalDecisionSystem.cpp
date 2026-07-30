@@ -67,7 +67,7 @@ TEST(OperationalDecisionSystemLocation, LocationTracksPositionOnFlatGeometry)
     neighborhoodSearch.Update(agents);
 
     OperationalDecisionSystem system{std::make_unique<ConstantVelocityModel>()};
-    system.Run(0.5, 0.0, neighborhoodSearch, *geo->geometry_2d(), agents);
+    system.Run(0.5, 0.0, neighborhoodSearch, *geo, agents);
 
     const auto& agent = agents.front();
     ASSERT_TRUE(agent.location.has_value());
@@ -99,7 +99,7 @@ TEST(OperationalDecisionSystemLocation, InvariantHoldsOverManySteps)
 
     for(int step = 0; step < steps; ++step) {
         neighborhoodSearch.Update(agents);
-        system.Run(dT, 0.0, neighborhoodSearch, *geo->geometry_2d(), agents);
+        system.Run(dT, 0.0, neighborhoodSearch, *geo, agents);
         const auto& agent = agents.front();
         ASSERT_TRUE(agent.location.has_value());
         EXPECT_NEAR(agent.location->xy().x, agent.Position().x, 1e-9);
@@ -126,7 +126,7 @@ TEST(OperationalDecisionSystemLocation, AgentWithoutLocationIsUnaffected)
     neighborhoodSearch.Update(agents);
 
     OperationalDecisionSystem system{std::make_unique<ConstantVelocityModel>()};
-    ASSERT_NO_THROW(system.Run(dT, 0.0, neighborhoodSearch, *geo->geometry_2d(), agents));
+    ASSERT_NO_THROW(system.Run(dT, 0.0, neighborhoodSearch, *geo, agents));
 
     const auto& agent = agents.front();
     EXPECT_FALSE(agent.location.has_value());

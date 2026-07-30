@@ -209,16 +209,16 @@ TEST(Geometry3DModelQueries, NoGeometryBetweenMatchesFlatView)
     ASSERT_TRUE(left.has_value() && right.has_value() && below.has_value());
 
     // Straight line 2,5 -> 8,5 runs through the central hole: blocked.
-    EXPECT_FALSE(geo.no_geometry_between(*left, *right));
+    EXPECT_FALSE(geo.no_geometry_between(*left, right->xy() - left->xy()));
     // 2,5 -> 2,2 stays clear of the hole: visible.
-    EXPECT_TRUE(geo.no_geometry_between(*left, *below));
+    EXPECT_TRUE(geo.no_geometry_between(*left, below->xy() - left->xy()));
 
     // Delegation pinning against the 2D view.
     EXPECT_EQ(
-        geo.no_geometry_between(*left, *right),
+        geo.no_geometry_between(*left, right->xy() - left->xy()),
         !geo.geometry_2d()->IntersectsAny(LineSegment{left->xy(), right->xy()}));
     EXPECT_EQ(
-        geo.no_geometry_between(*left, *below),
+        geo.no_geometry_between(*left, below->xy() - left->xy()),
         !geo.geometry_2d()->IntersectsAny(LineSegment{left->xy(), below->xy()}));
 }
 
@@ -252,6 +252,6 @@ TEST(Geometry3DModelQueries, MeshBuiltThrows)
     ASSERT_TRUE(who.has_value());
 
     EXPECT_THROW(mesh_geo.line_segments_in_range(*who), std::exception);
-    EXPECT_THROW(mesh_geo.no_geometry_between(*who, *who), std::exception);
+    EXPECT_THROW(mesh_geo.no_geometry_between(*who, {1, 1}), std::exception);
     EXPECT_THROW(mesh_geo.inside_geometry(*who, {1, 1}), std::exception);
 }

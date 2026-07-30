@@ -70,18 +70,18 @@ public:
     }
 
     /// Whether the straight line to a point at 'RelativePosition' is free of geometry.
-    /// 'boundaries' must be in the same relative coordinate frame (agent at origin),
-    /// i.e. come from WallsNearby() or WallsInRange().
+    /// 'boundaries' is vestigial: visibility is answered on the surface now. It stays
+    /// until the model call sites drop it.
     template <typename Range>
-    bool NoGeometryBetween(Point RelativePosition, const Range& boundaries) const
+    bool NoGeometryBetween(Point RelativePosition, const Range& /*boundaries*/) const
     {
-        return _world.NoGeometryBetween(Point{}, RelativePosition, boundaries);
+        return _world.NoGeometryBetween(location(), RelativePosition);
     }
 
     /// Whether the point reached by moving 'RelativePosition' is inside the walkable area.
     bool InsideGeometry(Point RelativePosition) const
     {
-        return _world.InsideGeometry(_agent.Position() + RelativePosition);
+        return _world.InsideGeometry(location(), RelativePosition);
     }
 
 private:
@@ -106,18 +106,18 @@ public:
     /// Walls in the grid cells around the agent. Which ones are returned depends on the
     /// underlying grid cell size.
     /// Returned as lazy range.
-    auto WallsNearby() const
-    {
-        return AsSeenFromAgent(_world.LineSegmentsInRange(_agent.Position()));
-    }
+    auto WallsNearby() const { return AsSeenFromAgent(_world.LineSegmentsInRange(location())); }
 
     /// Wall segments within 'distance' of the agent, relative to it. Returns lazy range.
     auto WallsInRange(double distance) const
     {
-        return AsSeenFromAgent(_world.LineSegmentsInRange(_agent.Position(), distance));
+        return AsSeenFromAgent(_world.LineSegmentsInRange(location(), distance));
     }
 
 protected:
+    /// 3D location wrapper of the agent's position on surface.
+    const Location& location() const { return *_agent.location; }
+
     const EnvironmentQuery& _world;
     const GenericAgent& _agent;
 };

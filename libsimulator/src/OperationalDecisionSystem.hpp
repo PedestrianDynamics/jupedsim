@@ -4,6 +4,7 @@
 #include "AgentView.hpp"
 #include "EnvironmentQuery.hpp"
 #include "GenericAgent.hpp"
+#include "Geometry/Geometry3D.hpp"
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
 
@@ -33,7 +34,7 @@ public:
     Run(double dT,
         double /*t_in_sec*/,
         const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
-        const Geometry2D& geometry,
+        const Geometry3D& geometry,
         AgentContainer<GenericAgent>& agents)
     {
         const EnvironmentQuery envQuery{geometry, neighborhoodSearch};
@@ -65,7 +66,7 @@ public:
     void ValidateAgent(
         const GenericAgent& agent,
         const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
-        const Geometry2D& geometry) const
+        const Geometry3D& geometry) const
     {
         const EnvironmentQuery envQuery{geometry, neighborhoodSearch};
         _model->CheckModelConstraint(agent, AgentView{envQuery, agent});
