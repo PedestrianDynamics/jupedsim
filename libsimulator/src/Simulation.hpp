@@ -19,7 +19,6 @@
 #include "StrategicalDesicionSystem.hpp"
 #include "TacticalDecisionSystem.hpp"
 #include "Timing.hpp"
-#include "Tracing.hpp"
 
 #include <cstddef>
 #include <cstdint>

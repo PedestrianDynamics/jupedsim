@@ -2,7 +2,6 @@
 #include "Timing.hpp"
 
 #include <fmt/core.h>
-#include <perfetto.h>
 
 #include <chrono>
 #include <cstdint>

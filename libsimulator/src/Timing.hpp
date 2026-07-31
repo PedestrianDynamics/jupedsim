@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "Tracing.hpp"
-
 #include <chrono>
 #include <cstdint>
 #include <functional>
@@ -18,6 +16,8 @@
 // It creates a scope guard that starts the timer probe when it is created and stops the timer probe
 // when it goes out of scope. The log level is used to filter which
 // timer probes are active based on the log level set in the Timer object.
+// Using it requires "Tracing.hpp". Do not pull it into this header though as it pulls in the huge
+// perfetto.h.
 #ifndef JPS_SCOPE_CONCAT_IMPL
 #define JPS_SCOPE_CONCAT_IMPL(x, y) x##y
 #endif
