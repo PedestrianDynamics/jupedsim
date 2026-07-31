@@ -137,7 +137,7 @@ def build_geometry(
     Arguments:
         geometry: Data to create the geometry out of. Data may be supplied as:
 
-            * list of 2d points describing the outer boundary, holes may be added with use of `excluded_areas` kw-argument
+            * list of 2d points describing the outer boundary, holes may be added with use of ``excluded_areas`` kw-argument
 
             * :class:`~shapely.GeometryCollection` consisting only out of :class:`Polygons <shapely.Polygon>`, :class:`MultiPolygons <shapely.MultiPolygon>` and :class:`MultiPoints <shapely.MultiPoint>`
 
@@ -151,7 +151,7 @@ def build_geometry(
 
     Keyword Arguments:
         excluded_areas: describes exclusions
-            from the walkable area. Only use this argument if `geometry` was
+            from the walkable area. Only use this argument if ``geometry`` was
             provided as list[tuple[float, float]].
     """
     if isinstance(geometry, str):

@@ -39,7 +39,7 @@ class NotifiableQueueStage:
         return self._obj.count_enqueued()
 
     def pop(self, count) -> None:
-        """Pop `count` number of agents from the front of the queue.
+        """Pop ``count`` number of agents from the front of the queue.
 
         Arguments:
             count: Number of agents to be popped from the front of the
