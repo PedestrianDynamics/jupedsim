@@ -30,6 +30,19 @@ set(USE_IPO ON)
 check_prefix_path()
 
 ################################################################################
+# Compiler cache
+################################################################################
+# Use ccache if available. This especially helps wrt. compiling
+# third-party/perfetto/perfetto.cc.
+if(PROJECT_IS_TOP_LEVEL AND NOT DEFINED CMAKE_CXX_COMPILER_LAUNCHER)
+    find_program(CCACHE_PROGRAM ccache)
+    if(CCACHE_PROGRAM)
+        set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")
+    endif()
+endif()
+print_var(CMAKE_CXX_COMPILER_LAUNCHER)
+
+################################################################################
 # Optional features
 ################################################################################
 set(WERROR OFF CACHE BOOL "Build wth -Werror enabled. Not supported on Windows")
