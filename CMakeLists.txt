@@ -6,7 +6,7 @@ project(JuPedSim VERSION 2.0.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules")
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake_modules")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -22,9 +22,9 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
       STRING "Choose the type of build." FORCE)
 endif()
 
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 
 check_prefix_path()
 
@@ -125,19 +125,19 @@ endif()
 find_package(Git QUIET)
 find_program(GIT_SCM git DOC "Git version control")
 mark_as_advanced(GIT_SCM)
-find_file(GITDIR NAMES .git PATHS ${CMAKE_SOURCE_DIR} NO_DEFAULT_PATH)
+find_file(GITDIR NAMES .git PATHS ${PROJECT_SOURCE_DIR} NO_DEFAULT_PATH)
 if (GIT_SCM AND GITDIR)
     # the commit's SHA1, and whether the building workspace was dirty or not
     # describe --match=NeVeRmAtCh --always --tags --abbrev=40 --dirty
     execute_process(COMMAND
         "${GIT_EXECUTABLE}" --no-pager describe --match=Nevermatch --tags --always --dirty
-    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+    WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
     OUTPUT_VARIABLE GIT_SHA1
     ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
     # branch
     execute_process(
     COMMAND "${GIT_EXECUTABLE}" rev-parse --abbrev-ref HEAD
-    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+    WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
     OUTPUT_VARIABLE GIT_BRANCH
     OUTPUT_STRIP_TRAILING_WHITESPACE
     )
@@ -145,20 +145,20 @@ if (GIT_SCM AND GITDIR)
     # the date of the commit
     execute_process(COMMAND
     "${GIT_EXECUTABLE}" log -1 --format=%ad --date=local
-    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+    WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
     OUTPUT_VARIABLE GIT_DATE
     ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
 
   execute_process(COMMAND
     "${GIT_EXECUTABLE}" describe --tags --abbrev=0
-    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+    WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
     OUTPUT_VARIABLE GIT_TAG
     ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
 
     # the subject of the commit
     execute_process(COMMAND
     "${GIT_EXECUTABLE}" log -1 --format=%s
-    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+    WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
     OUTPUT_VARIABLE GIT_COMMIT_SUBJECT
     ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
     # remove # from subject
@@ -182,13 +182,13 @@ target_compile_definitions(git-info INTERFACE
     GIT_COMMIT_SUBJECT="${GIT_COMMIT_SUBJECT}"
     GIT_BRANCH="${GIT_BRANCH}"
 )
-configure_file(cmake_templates/BuildInfo.hpp.in ${CMAKE_BINARY_DIR}/generated/build_info/BuildInfo.hpp @ONLY)
+configure_file(cmake_templates/BuildInfo.hpp.in ${PROJECT_BINARY_DIR}/generated/build_info/BuildInfo.hpp @ONLY)
 add_library(build_info INTERFACE)
 target_include_directories(build_info INTERFACE
-    ${CMAKE_BINARY_DIR}/generated/build_info
+    ${PROJECT_BINARY_DIR}/generated/build_info
 )
 if(UNIX)
-    configure_file(cmake_templates/unix_env.in ${CMAKE_BINARY_DIR}/environment @ONLY)
+    configure_file(cmake_templates/unix_env.in ${PROJECT_BINARY_DIR}/environment @ONLY)
 endif()
 
 ################################################################################
@@ -196,11 +196,11 @@ endif()
 ################################################################################
 if(BUILD_TESTS)
     if(UNIX)
-        set(pytest-wrapper-in ${CMAKE_SOURCE_DIR}/cmake_templates/run-pythontests.unix.in)
-        set(pytest-wrapper-out ${CMAKE_BINARY_DIR}/run-pythontests)
+        set(pytest-wrapper-in ${PROJECT_SOURCE_DIR}/cmake_templates/run-pythontests.unix.in)
+        set(pytest-wrapper-out ${PROJECT_BINARY_DIR}/run-pythontests)
     else()
-        set(pytest-wrapper-in ${CMAKE_SOURCE_DIR}/cmake_templates/run-pythontests.windows.in)
-        set(pytest-wrapper-out ${CMAKE_BINARY_DIR}/run-pythontests.cmd)
+        set(pytest-wrapper-in ${PROJECT_SOURCE_DIR}/cmake_templates/run-pythontests.windows.in)
+        set(pytest-wrapper-out ${PROJECT_BINARY_DIR}/run-pythontests.cmd)
     endif()
     configure_file(
         ${pytest-wrapper-in}
@@ -213,7 +213,7 @@ if(BUILD_TESTS)
     add_custom_target(pythontests
         COMMENT "Running system tests"
         COMMAND ${pytest-wrapper-out} -vv -s
-                --basetemp=${CMAKE_BINARY_DIR}/systemtest-out
+                --basetemp=${PROJECT_BINARY_DIR}/systemtest-out
                 --junit-xml=result-pythontests.xml
         DEPENDS py_jupedsim
     )
@@ -230,8 +230,8 @@ if(BUILD_TESTS)
 endif()
 
 if(UNIX)
-    set(performancetests-wrapper-in ${CMAKE_SOURCE_DIR}/cmake_templates/run-performancetests.unix.in)
-    set(performancetests-wrapper-out ${CMAKE_BINARY_DIR}/run-performancetests)
+    set(performancetests-wrapper-in ${PROJECT_SOURCE_DIR}/cmake_templates/run-performancetests.unix.in)
+    set(performancetests-wrapper-out ${PROJECT_BINARY_DIR}/run-performancetests)
     configure_file(
         ${performancetests-wrapper-in}
         ${performancetests-wrapper-out}
@@ -290,7 +290,7 @@ if(UNIX AND WITH_FORMAT)
                         -o -name '*.h'
                         -o -name '*.hpp' | xargs ${CLANG_FORMAT}
                         -n -Werror --style=file
-                    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+                    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
                 )
                 add_custom_target(reformat
                     COMMENT "Reformatting code with clang-format"
@@ -300,7 +300,7 @@ if(UNIX AND WITH_FORMAT)
                         -o -name '*.h'
                         -o -name '*.hpp' | xargs ${CLANG_FORMAT}
                         -i --style=file
-                    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+                    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
                 )
             else ()
                 message(FATAL_ERROR "Could not create formatting target, clang-format version ${version} found, but ${clang-format-version} required")
