@@ -53,7 +53,7 @@ print_var(BUILD_TESTS)
 set(BUILD_WITH_SANITIZERS OFF CACHE BOOL
   "Build with address and undefined-behavior sanitizers. Linux / macOS only.")
 print_var(BUILD_WITH_SANITIZERS)
-if(BUILD_WITH_SANITIZERS AND ${CMAKE_SYSTEM} MATCHES "Windows")
+if(BUILD_WITH_SANITIZERS AND WIN32)
     message(FATAL_ERROR "Sanitizer builds are not supported on Windows")
 endif()
 
@@ -65,7 +65,7 @@ print_var(USE_IPO)
 
 set(WITH_FORMAT OFF CACHE BOOL "Create format tools")
 print_var(WITH_FORMAT)
-if(WITH_FORMAT AND ${CMAKE_SYSTEM} MATCHES "Windows")
+if(WITH_FORMAT AND WIN32)
     message(FATAL_ERROR "Format target not supported on Windows")
 endif()
 
