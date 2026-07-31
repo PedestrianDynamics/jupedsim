@@ -27,6 +27,8 @@ target_sources(simulator PRIVATE
     src/Geometry/RegionView.hpp
     src/Geometry/SegmentGrid.cpp
     src/Geometry/SegmentGrid.hpp
+    src/Geometry/WallMerge.cpp
+    src/Geometry/WallMerge.hpp
     src/Geometry/Validation.cpp
     src/Geometry/Validation.hpp
     src/GeometryBuilder.cpp
@@ -128,6 +130,7 @@ if (BUILD_TESTS)
         test/TestRegionView.cpp
         test/TestRoutingEngine3D.cpp
         test/TestSegmentGrid.cpp
+        test/TestWallMerge.cpp
         test/TestSimulationClock.cpp
         test/TestStage.cpp
         test/TestUniqueID.cpp
