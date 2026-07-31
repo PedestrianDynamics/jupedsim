@@ -41,8 +41,7 @@ void init_routing(py::module_& m)
             polys.reserve(polygonCount);
             for(size_t index = 0; index < polygonCount; ++index) {
                 const auto& poly = mesh->Polygons(index);
-                const auto& vertices = poly.vertices;
-                polys.emplace_back(mesh->Polygons(index).vertices);
+                polys.emplace_back(poly.vertices);
             }
             return std::make_tuple(intoTuples(mesh->FVertices()), polys);
         });

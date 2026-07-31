@@ -35,6 +35,7 @@ target_link_libraries(py_jupedsim
         simulator
         common
         perfetto
+        project_options
 )
 
 pybind11_extension(py_jupedsim)
