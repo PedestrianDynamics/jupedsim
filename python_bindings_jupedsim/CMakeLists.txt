@@ -48,6 +48,4 @@ set_target_properties(py_jupedsim
     PROPERTIES
         CXX_VISIBILITY_PRESET "hidden"
         CUDA_VISIBILITY_PRESET "hidden"
-        INTERPROCEDURAL_OPTIMIZATION ${USE_IPO}
-        INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF
 )
