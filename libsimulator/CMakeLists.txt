@@ -67,9 +67,7 @@ target_sources(simulator PRIVATE
 )
 
 add_subdirectory(src/OperationalModels)
-target_compile_options(simulator PRIVATE
-    ${COMMON_COMPILE_OPTIONS}
-)
+target_link_libraries(simulator PRIVATE project_options)
 target_compile_definitions(simulator PUBLIC
     JPSCORE_VERSION="${PROJECT_VERSION}"
 )
@@ -119,9 +117,7 @@ if (BUILD_TESTS)
         simulator
     )
 
-    target_compile_options(libsimulator-tests PRIVATE
-        ${COMMON_COMPILE_OPTIONS}
-    )
+    target_link_libraries(libsimulator-tests PRIVATE project_options)
 
 endif()
 
@@ -141,8 +137,6 @@ if (BUILD_BENCHMARKS)
         simulator
     )
 
-    target_compile_options(libsimulator-benchmarks PRIVATE
-        ${COMMON_COMPILE_OPTIONS}
-    )
+    target_link_libraries(libsimulator-benchmarks PRIVATE project_options)
 
 endif ()
