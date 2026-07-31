@@ -80,7 +80,8 @@ endif()
 # WARNING: Do not break the lines, each option has to be on its own line or
 #          CMake will enclose multiple flags in '' which the compiler then
 #          treats as a single flag and does not understand.
-list(APPEND COMMON_COMPILE_OPTIONS
+add_library(project_options INTERFACE)
+target_compile_options(project_options INTERFACE
     $<$<AND:$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>,$<BOOL:${WERROR}>>:-Werror>
     $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:-Wall>
     $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:-Wextra>
