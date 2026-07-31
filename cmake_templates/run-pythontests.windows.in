@@ -1,3 +1,3 @@
-set PYTHONPATH="@CMAKE_SOURCE_DIR@/performancetest;@CMAKE_SOURCE_DIR@/python_modules/jupedsim;@CMAKE_SOURCE_DIR@/python_modules/jupedsim_examples;@CMAKE_LIBRARY_OUTPUT_DIRECTORY@"
+set PYTHONPATH="@PROJECT_SOURCE_DIR@/performancetest;@PROJECT_SOURCE_DIR@/python_modules/jupedsim;@PROJECT_SOURCE_DIR@/python_modules/jupedsim_examples;@CMAKE_LIBRARY_OUTPUT_DIRECTORY@"
 
 pytest %JPSCORE_SOURCE_PATH%/systemtest %JPSCORE_SOURCE_PATH%/python_modules/jupedsim/tests %JPSCORE_SOURCE_PATH%/python_modules/jupedsim_examples/tests %*
