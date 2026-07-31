@@ -89,8 +89,6 @@ target_link_options(simulator PUBLIC
 target_include_directories(simulator PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
-set_property(TARGET simulator PROPERTY INTERPROCEDURAL_OPTIMIZATION ${USE_IPO})
-set_property(TARGET simulator PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
 
 ################################################################################
 # libsimulator unit tests
@@ -125,8 +123,6 @@ if (BUILD_TESTS)
         ${COMMON_COMPILE_OPTIONS}
     )
 
-    set_property(TARGET libsimulator-tests PROPERTY INTERPROCEDURAL_OPTIMIZATION ${USE_IPO})
-    set_property(TARGET libsimulator-tests PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
 endif()
 
 ################################################################################
@@ -149,6 +145,4 @@ if (BUILD_BENCHMARKS)
         ${COMMON_COMPILE_OPTIONS}
     )
 
-    set_property(TARGET libsimulator-benchmarks PROPERTY INTERPROCEDURAL_OPTIMIZATION ${USE_IPO})
-    set_property(TARGET libsimulator-benchmarks PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
 endif ()

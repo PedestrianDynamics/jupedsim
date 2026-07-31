@@ -25,7 +25,6 @@ endif()
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-set(USE_IPO ON)
 
 check_prefix_path()
 
@@ -60,6 +59,9 @@ endif()
 
 set(BUILD_BENCHMARKS OFF CACHE BOOL "Build micro benchmark")
 print_var(BUILD_BENCHMARKS)
+
+set(USE_IPO ON CACHE BOOL "Build with interprocedural optimization (LTO) where supported")
+print_var(USE_IPO)
 
 set(WITH_FORMAT OFF CACHE BOOL "Create format tools")
 print_var(WITH_FORMAT)
@@ -98,6 +100,23 @@ list(APPEND COMMON_COMPILE_OPTIONS
 # Dependencies
 ################################################################################
 add_subdirectory(third-party)
+
+################################################################################
+# Interprocedural optimization
+################################################################################
+# Note: Placed after add_subdirectory(third-party) so that these variables
+# do not put the vendored dependencies under LTO as well.
+if(USE_IPO)
+    include(CheckIPOSupported)
+    # LANGUAGES CXX is required: vendored dependencies enable C, and checking
+    # every enabled language would report IPO as unsupported for this project.
+    check_ipo_supported(RESULT IPO_SUPPORTED OUTPUT IPO_NOT_SUPPORTED_REASON LANGUAGES CXX)
+    if(NOT IPO_SUPPORTED)
+        message(STATUS "IPO unavailable: ${IPO_NOT_SUPPORTED_REASON}")
+    endif()
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ${IPO_SUPPORTED})
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
+endif()
 
 ################################################################################
 # VCS info
