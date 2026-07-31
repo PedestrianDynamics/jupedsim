@@ -38,7 +38,7 @@ class CollisionFreeSpeedModelV2AgentParameters:
     .. note::
 
         Instances of this type are copied when creating the agent, you can safely
-        create one instance of this type and modify it between calls to `add_agent`
+        create one instance of this type and modify it between calls to ``add_agent``
 
         E.g.:
 

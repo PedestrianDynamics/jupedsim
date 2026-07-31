@@ -260,7 +260,7 @@ def distribute_in_circles_by_number(
 
     This function will generate 2D coordinates in the intersection of the
     polygon and the rings specified by the centerpoint and the min/max radii of
-    each ring. `number_of_agents` is expected to contain the number of agents
+    each ring. ``number_of_agents`` is expected to contain the number of agents
     to be placed for each ring. This function may not always be able to
     generate the requested coordinate because it cannot do so without violating
     the constraints. In this case the function will stop after max_iterations
@@ -622,13 +622,19 @@ def distribute_by_percentage(
 
 
 def __check_distance_constraints(pt, wall_distance, grid, polygon):
-    """Determines if a point has enough distance to other points and to the walls
-     Uses a Grid to determine neighbours
-    :param grid: the grid of the polygon
-    :param pt: point that is being checked
-    :param wall_distance: minimal distance between point and the polygon
-    :param polygon: shapely Polygon in which the points must lie
-    :return:True or False"""
+    """Determines if a point has enough distance to other points and to the walls.
+
+    Uses a Grid to determine neighbours.
+
+    Arguments:
+        pt: point that is being checked
+        wall_distance: minimal distance between point and the polygon
+        grid: the grid of the polygon
+        polygon: shapely Polygon in which the points must lie
+
+    Returns:
+        True or False
+    """
     if not polygon.contains(shapely.Point(pt)):
         return False
     if __min_distance_to_polygon(pt, polygon) < wall_distance:
@@ -637,11 +643,16 @@ def __check_distance_constraints(pt, wall_distance, grid, polygon):
 
 
 def __box_of_intersection(polygon, center_point, outer_radius):
-    """returns an Axis Aligned Bounding Box containing the intersection of a Circle and the polygon
-     @:param polygon is a shapely Polygon
-     @:param center_point is the Center point of the Circle
-    @:param outer_radius is the radius of the Circle
-    @:return bounding box formatted like [(min(x_values), min(y_values)), (max(x_values), max(y_values))]
+    """Axis Aligned Bounding Box containing the intersection of a circle and the polygon.
+
+    Arguments:
+        polygon: a shapely Polygon
+        center_point: the center point of the circle
+        outer_radius: the radius of the circle
+
+    Returns:
+        bounding box formatted like
+        [(min(x_values), min(y_values)), (max(x_values), max(y_values))]
     """
     # creates a point
     point = shapely.Point(center_point)

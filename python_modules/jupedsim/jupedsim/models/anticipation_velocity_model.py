@@ -11,30 +11,29 @@ class AnticipationVelocityModel:
     """Anticipation Velocity Model (AVM).
 
     The AVM incorporates pedestrian anticipation, divided into three phases:
+
     1. Perception of the current situation.
     2. Prediction of future situations.
     3. Strategy selection leading to action.
 
-    This model quantitatively reproduces bidirectional pedestrian flow by accounting for:
+    This model quantitatively reproduces bidirectional pedestrian flow by
+    accounting for:
+
     - Anticipation of changes in neighboring pedestrians' positions.
-    - The strategy of following others' movement. The AVM is a model that takes into consideration
-      the anticipation of pedestrians. For this, the process of anticipation is divided into three parts:
-      - perception of the actual situation,
-      - prediction of a future situation and
-      - selection of a strategy leading to action.
+    - The strategy of following others' movement.
 
-
-    A general description of the AVM can be found in the originating publication
-    https://doi.org/10.1016/j.trc.2021.103464
+    A general description of the AVM can be found in the originating
+    publication https://doi.org/10.1016/j.trc.2021.103464
 
     Attributes:
-        pushout_strength: The pushout mechanism ensures agents maintain a safe distance
-        from walls by adding a small outward component to their movement when within the
-        critical wall distance. This outward component, scaled by `pushoutStrength`,
-        combines with the parallel component of the agent's direction to create smooth,
-        gliding behavior along walls.
-        rng_seed: seed value of internally used rng. If not explicitly set this
-            value will be chosen randomly.
+        pushout_strength: The pushout mechanism ensures agents maintain a
+            safe distance from walls by adding a small outward component to
+            their movement when within the critical wall distance. This
+            outward component, scaled by ``pushout_strength``, combines with
+            the parallel component of the agent's direction to create
+            smooth, gliding behavior along walls.
+        rng_seed: seed value of internally used rng. If not explicitly set
+            this value will be chosen randomly.
     """
 
     pushout_strength: float = 0.3
@@ -52,7 +51,7 @@ class AnticipationVelocityModelAgentParameters:
     .. note::
 
         Instances of this type are copied when creating the agent, you can safely
-        create one instance of this type and modify it between calls to `add_agent`
+        create one instance of this type and modify it between calls to ``add_agent``
 
         E.g.:
 
