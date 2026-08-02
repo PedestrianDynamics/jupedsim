@@ -13,11 +13,11 @@ class Geometry2D
 {
 private:
     PolyWithHoles _accessibleAreaPolygon;
-    SegmentGrid _wallGrid;
+    SegmentGrid<> _wallGrid;
     std::tuple<std::vector<Point>, std::vector<std::vector<Point>>> _accessibleArea{};
 
 public:
-    using LineSegmentRange = SegmentGrid::LineSegmentRange;
+    using LineSegmentRange = SegmentGrid<>::LineSegmentRange;
     /// Do not call constructor drectly use 'GeometryBuilder'
     /// @param accessibleArea polygon (with holes) constituting the geometry
     explicit Geometry2D(PolyWithHoles accessibleArea);

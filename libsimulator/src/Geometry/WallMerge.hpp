@@ -28,6 +28,13 @@ struct MergedWall {
     boost::container::small_vector<std::size_t, 2> regions;
 };
 
+/// Lets `SegmentGrid` index a wall by its geometry while still handing the whole wall back,
+/// identity included.
+inline const LineSegment& segment_of(const MergedWall& wall)
+{
+    return wall.segment;
+}
+
 /// Fuse the mesh's border edges into walls, walking the border cycles of @p mesh. A run ends
 /// where the border bends by more than @p eps or where it doubles back on itself.
 ///

@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Geometry/Geometry3D.hpp"
 
+#include "Geometry/RegionReach.hpp"
+#include "Geometry/RegionSeams.hpp"
+#include "Geometry/WallMerge.hpp"
 #include "LineSegment.hpp"
 #include "SimulationError.hpp"
 
@@ -53,22 +56,6 @@ SurfaceMesh mesh_from_polygon(const PolyWithHoles& poly)
     return mesh;
 }
 
-/// Calculate an epsilon to be used for the merge of segments. The max error
-/// in float operation depends on the magnitude of numbers - therefore take
-/// those into account + an additiona safety factor.
-/// WARNING: this assumes the intermediate vertices were produced in double; an
-/// externally generated mesh authored in float would need a coarser epsilon.
-double collinear_merge_tolerance(const std::vector<LineSegment>& segments)
-{
-    double scale = 0.0;
-    for(const auto& s : segments) {
-        for(const auto& p : {s.p1, s.p2}) {
-            scale = std::max({scale, std::abs(p.x), std::abs(p.y)});
-        }
-    }
-    scale *= 64.0; // additional safety
-    return scale * std::numeric_limits<double>::epsilon();
-}
 } // namespace
 
 Geometry3D::Geometry3D(SurfaceMesh mesh) : _mesh(std::move(mesh))
@@ -96,44 +83,24 @@ void Geometry3D::build()
 
 void Geometry3D::build_region_views()
 {
-    const auto xy = [&](SurfaceMesh::Vertex_index v) {
-        const auto& p = _mesh.point(v);
-        return Point{p.x(), p.y()};
-    };
-
-    // Classify every region-boundary halfedge: opposite is a mesh border -> the
-    // edge is a WALL; opposite belongs to another region -> the edge is a SEAM
-    // (and the neighbour region is recorded). Interior edges (same region on
-    // both sides) are ignored. Seams never enter the wall grid.
-    std::vector<std::vector<LineSegment>> walls(_regionCount);
-    std::vector<std::vector<LineSegment>> seams(_regionCount);
-    std::vector<std::set<std::size_t>> neighbors(_regionCount);
-    for(const auto f : _mesh.faces()) {
-        const auto r = _region[f];
-        for(const auto h : CGAL::halfedges_around_face(_mesh.halfedge(f), _mesh)) {
-            const LineSegment seg{xy(_mesh.source(h)), xy(_mesh.target(h))};
-            const auto opp = _mesh.opposite(h);
-            if(_mesh.is_border(opp)) {
-                walls[r].push_back(seg);
-                continue;
-            }
-            const auto r2 = _region[_mesh.face(opp)];
-            if(r2 != r) {
-                seams[r].push_back(seg);
-                neighbors[r].insert(r2);
-            }
+    // Walls are fused across the whole mesh, so a wall running past a region boundary stays
+    // one wall - and is then held by both regions it borders, to be findable from either.
+    const auto walls = merge_border_walls(_mesh, _region, wall_merge_tolerance(_mesh));
+    std::vector<std::vector<MergedWall>> walls_by_region(_regionCount);
+    for(const auto& wall : walls) {
+        for(const auto r : wall.regions) {
+            walls_by_region[r].push_back(wall);
         }
     }
+
+    auto seams_by_region =
+        group_seams_by_region(extract_region_seams(_mesh, _region), _regionCount);
 
     _regionViews.clear();
     _regionViews.reserve(_regionCount);
     for(std::size_t r = 0; r < _regionCount; ++r) {
         _regionViews.emplace_back(
-            r,
-            this,
-            merge_collinear(walls[r], collinear_merge_tolerance(walls[r])),
-            merge_collinear(seams[r], collinear_merge_tolerance(seams[r])),
-            std::vector<std::size_t>(neighbors[r].begin(), neighbors[r].end()));
+            r, this, std::move(walls_by_region[r]), std::move(seams_by_region[r]));
     }
 }
 

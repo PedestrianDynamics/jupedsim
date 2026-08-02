@@ -11,7 +11,7 @@
 namespace
 {
 /// A single vertical wall from (0,0) to (0,10).
-SegmentGrid singleVerticalWall()
+SegmentGrid<> singleVerticalWall()
 {
     return SegmentGrid{std::vector<LineSegment>{LineSegment{{0., 0.}, {0., 10.}}}};
 }

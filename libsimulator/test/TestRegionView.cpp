@@ -35,7 +35,7 @@ std::vector<LineSegment> all_walls(const RegionView& view)
 {
     std::vector<LineSegment> out{};
     for(const auto& s : view.LineSegmentsInDistanceTo(1e12, {0, 0})) {
-        out.push_back(s);
+        out.push_back(s.segment);
     }
     return out;
 }
@@ -80,47 +80,11 @@ PolyWithHoles rectangle_poly()
 }
 } // namespace
 
-// -- merge_collinear (standalone) -------------------------------------------
-
-TEST(MergeCollinear, EmptyStaysEmpty)
-{
-    EXPECT_TRUE(merge_collinear({}, 1e-9).empty());
-}
-
-TEST(MergeCollinear, SingleSegmentSurvives)
-{
-    const std::vector<LineSegment> in{{{0, 0}, {10, 0}}};
-    EXPECT_EQ(as_set(merge_collinear(in, 1e-9)), as_set(in));
-}
-
-TEST(MergeCollinear, CollinearRunFusesToOne)
-{
-    const std::vector<LineSegment> in{{{0, 0}, {5, 0}}, {{5, 0}, {10, 0}}};
-    const auto out = merge_collinear(in, 1e-9);
-    ASSERT_EQ(out.size(), 1u);
-    EXPECT_EQ(as_set(out), as_set({{{0, 0}, {10, 0}}}));
-}
-
-TEST(MergeCollinear, CornerIsPreserved)
-{
-    const std::vector<LineSegment> in{{{0, 0}, {5, 0}}, {{5, 0}, {5, 5}}};
-    EXPECT_EQ(as_set(merge_collinear(in, 1e-9)), as_set(in));
-}
-
-TEST(MergeCollinear, JunctionBreaksTheChain)
-{
-    // A T-junction at (5,0): three spokes, none collinear-mergeable across it.
-    const std::vector<LineSegment> in{{{0, 0}, {5, 0}}, {{5, 0}, {10, 0}}, {{5, 0}, {5, 5}}};
-    EXPECT_EQ(as_set(merge_collinear(in, 1e-9)), as_set(in));
-}
-
-// -- RegionView on a flat mesh (A/B vs polygon build) -----------------------
-
 TEST(RegionViewFlat, SingleRegionNoSeams)
 {
     Geometry3D geo{flat_rectangle_mesh()};
     ASSERT_EQ(geo.region_count(), 1u);
-    EXPECT_TRUE(geo.region_view(0).seam_neighbors().empty());
+    EXPECT_TRUE(geo.region_view(0).seams().empty());
     EXPECT_FALSE(geo.region_view(0).crosses_seam({0, 5}, {10, 5}));
 }
 
@@ -153,8 +117,8 @@ TEST(RegionViewFolded, SeamSplitsIntoTwoRegions)
     Geometry3D geo{folded_ribbon()};
     ASSERT_EQ(geo.region_count(), 2u);
     // Each region contains the other one as neighbor.
-    EXPECT_EQ(geo.region_view(0).seam_neighbors(), (std::vector<std::size_t>{1}));
-    EXPECT_EQ(geo.region_view(1).seam_neighbors(), (std::vector<std::size_t>{0}));
+    EXPECT_EQ(geo.region_view(0).seams().front().neighbor, 1u);
+    EXPECT_EQ(geo.region_view(1).seams().front().neighbor, 0u);
 }
 
 TEST(RegionViewFolded, SeamIsInSeamGridNotWallGrid)
