@@ -6,6 +6,7 @@
 #include "Geometry/Location.hpp"
 #include "Geometry/RegionSplit.hpp"
 #include "Geometry/RegionView.hpp"
+#include "Geometry/WallRange.hpp"
 #include "Point.hpp"
 
 #include <array>
@@ -17,6 +18,11 @@
 /// Default z-hint tolerance: When a `Location` is created, how far the z-value
 /// is allowed to be away from the surface to still be accepted.
 inline constexpr double ZHintTolerance = 0.1;
+
+/// How far a query without an explicit distance reaches. The grid answers such a query by
+/// cell, and a cell holds what is within the search radius of it -- so this is what decides
+/// which regions a seam can still bring into view.
+inline constexpr double ApproximateWallReach = 8.0;
 
 /// The single source of truth for a 3D navigation geometry: owns the surface
 /// mesh, its AABB tree (for -z projection queries) and the single-valued region
@@ -84,8 +90,10 @@ public:
 
     /// Wall segments near @p who: within @p distance if given (>= 0), else the
     /// approximate-grid neighbourhood.
-    Geometry2D::LineSegmentRange
-    line_segments_in_range(const Location& who, double distance = -1.0) const;
+    ///
+    /// On a mesh the answer may have to be collected from more than one region, since a
+    /// seam can bring another one within reach. What comes back is the same either way.
+    WallRange line_segments_in_range(const Location& who, double distance = -1.0) const;
 
     /// True iff the straight horizontal step @p direction, taken from @p who, crosses no
     /// wall.

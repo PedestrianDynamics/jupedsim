@@ -31,7 +31,7 @@ group_seams_by_region(const std::vector<RegionSeam>& seams, std::size_t region_c
 }
 
 std::vector<RegionVisit> regions_within_reach(
-    const std::vector<std::vector<RegionSeam>>& seams_by_region,
+    const std::function<const std::vector<RegionSeam>&(std::size_t)>& seams_of,
     std::size_t region,
     Point start,
     double radius)
@@ -50,7 +50,7 @@ std::vector<RegionVisit> regions_within_reach(
         }
         visits.push_back(visit);
 
-        for(const auto& seam : seams_by_region[visit.region]) {
+        for(const auto& seam : seams_of(visit.region)) {
             const Point crossing = seam.segment.ShortestPoint(visit.from);
             const double left = visit.radius - Distance(visit.from, crossing);
             if(left <= 0.0) {

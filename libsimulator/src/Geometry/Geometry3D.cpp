@@ -135,17 +135,34 @@ bool Geometry3D::is_valid_location(const Point3D& p) const
     return face_below(p).face != SurfaceMesh::null_face();
 }
 
-Geometry2D::LineSegmentRange
-Geometry3D::line_segments_in_range(const Location& who, double distance) const
+WallRange Geometry3D::line_segments_in_range(const Location& who, double distance) const
 {
-    if(_geometry2D == nullptr) {
-        throw SimulationError(
-            "line_segments_in_range() on a mesh-built Geometry3D is not implemented yet.");
+    if(_geometry2D != nullptr) {
+        return WallRange{
+            distance < 0.0 ? _geometry2D->LineSegmentsInApproxDistanceTo(who.xy()) :
+                             _geometry2D->LineSegmentsInDistanceTo(distance, who.xy())};
     }
-    if(distance < 0.0) {
-        return _geometry2D->LineSegmentsInApproxDistanceTo(who.xy());
+
+    // Without an explicit distance the grid answers by cell, so the reach that decides which
+    // regions to consult is the one the cells were built for.
+    const double reach = distance >= 0.0 ? distance : ApproximateWallReach;
+
+    WallRange::Spans spans{};
+    for(const auto& visit : regions_within_reach(
+            [this](std::size_t r) -> const std::vector<RegionSeam>& {
+                return region_view(r).seams();
+            },
+            who.region(),
+            who.xy(),
+            reach)) {
+        const auto& view = region_view(visit.region);
+        const auto walls = distance < 0.0 ? view.LineSegmentsInApproxDistanceTo(visit.from) :
+                                            view.LineSegmentsInDistanceTo(visit.radius, visit.from);
+        if(!walls.empty()) {
+            spans.push_back(walls);
+        }
     }
-    return _geometry2D->LineSegmentsInDistanceTo(distance, who.xy());
+    return WallRange{std::move(spans)};
 }
 
 bool Geometry3D::no_geometry_between(const Location& who, Point direction) const

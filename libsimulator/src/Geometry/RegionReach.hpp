@@ -5,6 +5,7 @@
 #include "Point.hpp"
 
 #include <cstddef>
+#include <functional>
 #include <vector>
 
 /// One region a query has to look at, and the disc to look at it with.
@@ -29,10 +30,26 @@ struct RegionVisit {
 ///
 /// Reported in no particular order.
 std::vector<RegionVisit> regions_within_reach(
-    const std::vector<std::vector<RegionSeam>>& seams_by_region,
+    const std::function<const std::vector<RegionSeam>&(std::size_t)>& seams_of,
     std::size_t region,
     Point start,
     double radius);
+
+/// Convenience for callers holding the seams grouped in a vector.
+inline std::vector<RegionVisit> regions_within_reach(
+    const std::vector<std::vector<RegionSeam>>& seams_by_region,
+    std::size_t region,
+    Point start,
+    double radius)
+{
+    return regions_within_reach(
+        [&seams_by_region](std::size_t r) -> const std::vector<RegionSeam>& {
+            return seams_by_region[r];
+        },
+        region,
+        start,
+        radius);
+}
 
 /// Group the flat seam list by the region a seam belongs to, which is how the reach walk
 /// wants to look at it.

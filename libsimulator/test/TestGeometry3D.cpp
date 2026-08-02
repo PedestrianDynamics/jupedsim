@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Geometry/Geometry3D.hpp"
 #include "LineSegment.hpp"
+#include "MeshFixtures.hpp"
 
 #include <CGAL/mark_domain_in_triangulation.h>
 #include <gtest/gtest.h>
@@ -50,7 +51,9 @@ SurfaceMesh stacked_floors()
 }
 
 /// Gather a LineSegmentRange into a set for order-independent comparison.
-std::set<LineSegment> into_set(const Geometry2D::LineSegmentRange& range)
+/// Gather any range of segments into a set for order-independent comparison.
+template <typename Range>
+std::set<LineSegment> into_set(const Range& range)
 {
     return std::set<LineSegment>{range.begin(), range.end()};
 }
@@ -243,15 +246,62 @@ TEST(Geometry3DModelQueries, InsideGeometryMatchesFlatView)
         geo.inside_geometry(*who, to_hole - who->xy()), geo.geometry_2d()->InsideGeometry(to_hole));
 }
 
-TEST(Geometry3DModelQueries, MeshBuiltThrows)
+TEST(Geometry3DModelQueries, MeshBuiltStillLacksTheVisibilityQueries)
 {
-    // A mesh-built geometry has no 2D view; the queries are not implemented
-    // until M9 and must throw rather than dereference a null view.
     Geometry3D mesh_geo{flat_room()};
     const auto who = mesh_geo.get_location(2, 5, 0.0);
     ASSERT_TRUE(who.has_value());
 
-    EXPECT_THROW(mesh_geo.line_segments_in_range(*who), std::exception);
+    // Walls answer on a mesh now; these two still only know the flat path.
     EXPECT_THROW(mesh_geo.no_geometry_between(*who, {1, 1}), std::exception);
     EXPECT_THROW(mesh_geo.inside_geometry(*who, {1, 1}), std::exception);
+}
+
+TEST(Geometry3DModelQueries, AMeshAnswersWithItsOwnRegionsWalls)
+{
+    Geometry3D geo{fixtures::wavy_terrain()};
+    const auto who = geo.get_location(10.0, 5.0, 0.0, 2.0);
+    ASSERT_TRUE(who.has_value());
+
+    // One region, so this is the plain case: the field's outline, four walls, and the query
+    // has to reach them from the middle.
+    const auto walls = into_set(geo.line_segments_in_range(*who, 100.0));
+    EXPECT_EQ(walls.size(), 4u);
+}
+
+TEST(Geometry3DModelQueries, ASeamBringsTheOtherLevelsWallsIntoTheAnswer)
+{
+    Geometry3D geo{fixtures::two_levels_with_stair()};
+
+    // Standing on the lower level right below the stair head, where the levels meet.
+    const auto near_seam = geo.get_location(14.0, 2.0, 2.4, 1.0);
+    ASSERT_TRUE(near_seam.has_value());
+    const auto close = geo.line_segments_in_range(*near_seam, 4.0);
+    ASSERT_FALSE(close.empty());
+
+    // Standing at the far end of the lower level, the upper level is out of reach and must
+    // not contribute anything.
+    const auto far_away = geo.get_location(2.0, 2.0, 0.0);
+    ASSERT_TRUE(far_away.has_value());
+    const auto few = into_set(geo.line_segments_in_range(*far_away, 4.0));
+    const auto many = into_set(close);
+    EXPECT_LT(few.size(), many.size());
+}
+
+TEST(Geometry3DModelQueries, AWallBorderingTwoRegionsIsDeliveredOnce)
+{
+    Geometry3D geo{fixtures::switchback_stair()};
+
+    // The wall along y = 8 runs across landing and upper floor and belongs to both regions,
+    // so a query looking at both finds it twice unless it recognises it.
+    const auto who = geo.get_location(13.0, 7.0, 3.0, 0.5);
+    ASSERT_TRUE(who.has_value());
+
+    const auto range = geo.line_segments_in_range(*who, 100.0);
+    std::vector<LineSegment> delivered{};
+    for(const auto& w : range) {
+        delivered.push_back(w);
+    }
+    const std::set<LineSegment> distinct{delivered.begin(), delivered.end()};
+    EXPECT_EQ(delivered.size(), distinct.size()) << "the same wall came back more than once";
 }

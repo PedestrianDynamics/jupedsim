@@ -4,6 +4,7 @@
 #include "GenericAgent.hpp"
 #include "Geometry/Geometry3D.hpp"
 #include "Geometry/Location.hpp"
+#include "Geometry/WallRange.hpp"
 #include "LineSegment.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "Point.hpp"
@@ -53,8 +54,7 @@ public:
         return _geometry.no_geometry_between(who, direction);
     }
 
-    Geometry2D::LineSegmentRange
-    LineSegmentsInRange(const Location& who, double distance = -1.0) const
+    WallRange LineSegmentsInRange(const Location& who, double distance = -1.0) const
     {
         return _geometry.line_segments_in_range(who, distance);
     }

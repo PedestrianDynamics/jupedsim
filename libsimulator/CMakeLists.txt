@@ -32,6 +32,8 @@ target_sources(simulator PRIVATE
     src/Geometry/SegmentGrid.cpp
     src/Geometry/SegmentGrid.hpp
     src/Geometry/WallMerge.cpp
+    src/Geometry/WallRange.cpp
+    src/Geometry/WallRange.hpp
     src/Geometry/WallMerge.hpp
     src/Geometry/Validation.cpp
     src/Geometry/Validation.hpp
