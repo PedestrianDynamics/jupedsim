@@ -23,6 +23,8 @@ target_sources(simulator PRIVATE
     src/Geometry/Location.hpp
     src/Geometry/RegionSplit.cpp
     src/Geometry/RegionSplit.hpp
+    src/Geometry/RegionSeams.cpp
+    src/Geometry/RegionSeams.hpp
     src/Geometry/RegionView.cpp
     src/Geometry/RegionView.hpp
     src/Geometry/SegmentGrid.cpp
@@ -127,6 +129,7 @@ if (BUILD_TESTS)
         test/TestOperationalDecisionSystem.cpp
         test/TestPoint.cpp
         test/TestRegionSplit.cpp
+        test/TestRegionSeams.cpp
         test/TestRegionView.cpp
         test/TestRoutingEngine3D.cpp
         test/TestSegmentGrid.cpp
