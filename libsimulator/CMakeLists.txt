@@ -136,6 +136,7 @@ if (BUILD_TESTS)
         test/TestPoint.cpp
         test/TestRegionSplit.cpp
         test/TestRegionReach.cpp
+        test/TestFlatMeshParity.cpp
         test/TestRegionSeams.cpp
         test/TestRegionView.cpp
         test/TestRoutingEngine3D.cpp
