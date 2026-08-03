@@ -139,6 +139,7 @@ if (BUILD_TESTS)
         test/TestRoutingEngine3D.cpp
         test/TestSegmentGrid.cpp
         test/TestWallMerge.cpp
+        test/TestWarpDriver.cpp
         test/TestSimulationClock.cpp
         test/TestStage.cpp
         test/TestUniqueID.cpp
