@@ -1,17 +1,19 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "python_model.hpp"
 
-#include "EnvironmentQuery.hpp"
+#include "AgentView.hpp"
 #include "GenericAgent.hpp"
 #include "OperationalModel.hpp"
 #include "OperationalModels/CustomModel/CustomModel.hpp"
 #include "SimulationError.hpp"
 #include "conversion.hpp"
 
+#include <fmt/format.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
 #include <stdexcept>
+#include <string>
 #include <tuple>
 #include <utility>
 
@@ -84,79 +86,81 @@ PythonModel::PythonModel(py::object model) : _model(std::move(model))
     }
 }
 
-void PythonModel::ComputeNextState(
-    double dT,
-    const GenericAgent& current,
-    GenericAgent& next,
-    const EnvironmentQuery& envQuery) const
+/// Best-effort "<repr> (of type <T>)" for an object that failed a conversion. The
+/// diagnostics run Python code on the offending object; they must not be able to
+/// replace the error they describe.
+static std::string Describe(const py::object& obj)
+{
+    std::string type = "<unknown>";
+    std::string repr = "<unprintable>";
+    try {
+        type = std::string(py::str(py::type::of(obj).attr("__name__")));
+    } catch(const py::error_already_set&) {
+    }
+    try {
+        repr = std::string(py::repr(obj));
+    } catch(const py::error_already_set&) {
+    }
+    return fmt::format("{} (of type {})", repr, type);
+}
+
+Point PythonModel::ComputeNextState(
+    const OperationalModelState& current,
+    OperationalModelState& next,
+    const AgentStep& step) const
 {
     py::gil_scoped_acquire gil;
 
-    py::object pythonAgent = py::cast(current);
-    py::object pythonEnvQuery = py::cast(&envQuery, py::return_value_policy::reference);
+    py::object pythonState = std::get<CustomModel::State>(current).Get<GilSafePyObject>().Get();
+    py::object pythonStep = py::cast(&step, py::return_value_policy::reference);
 
-    py::object pythonUpdate = _model.attr("_compute_next_state")(dT, pythonAgent, pythonEnvQuery);
+    py::object pythonUpdate = _model.attr("_compute_next_state")(pythonState, pythonStep);
+
+    if(!py::isinstance<py::tuple>(pythonUpdate)) {
+        throw SimulationError(
+            "compute_next_state() must return a (state, movement) pair, got {}",
+            Describe(pythonUpdate));
+    }
+    auto update = py::reinterpret_borrow<py::tuple>(pythonUpdate);
+    if(update.size() != 2) {
+        throw SimulationError(
+            "compute_next_state() must return a (state, movement) pair, got {} values",
+            update.size());
+    }
+    py::object nextState = update[0];
+    py::object movementValue = update[1];
 
     // "next" shares the Python state object with "current" (GilSafePyObject copies are
     // refcounted, not cloned), so this also rejects returning the current state instance.
-    auto& nextModelData = std::get<CustomModel::State>(next.model);
-    auto& customModelData = nextModelData.Get<GilSafePyObject>();
-    if(pythonUpdate.is(customModelData.Get())) {
+    auto& customModelData = std::get<CustomModel::State>(next).Get<GilSafePyObject>();
+    if(nextState.is(customModelData.Get())) {
         throw SimulationError(
             "Current and updated model state are the same instance. "
             "compute_next_state() must return a new state object, "
-            "e.g. dataclasses.replace(ped.model, ...).");
+            "e.g. dataclasses.replace(state, ...).");
     }
 
-    constexpr auto attr_name = "position";
-    py::object attr;
+    Point movement{};
     try {
-        attr = pythonUpdate.attr(attr_name);
-    } catch(const py::error_already_set& ex) {
-        if(ex.matches(PyExc_AttributeError)) {
-            throw SimulationError(
-                "State returned by compute_next_state() is missing the '{}' attribute.", attr_name);
-        }
-        throw;
-    }
-
-    try {
-        // Sync the GIL-free position cache from the returned Python state so the
-        // framework can read the agent position without acquiring the GIL.
-        nextModelData.position = intoPoint(py::cast<std::tuple<double, double>>(attr));
+        movement = intoPoint(py::cast<std::tuple<double, double>>(movementValue));
     } catch(const py::cast_error&) {
-        // Diagnostics run Python code on the offending object; they must not
-        // be able to replace the error they describe.
-        std::string actualType = "<unknown>";
-        std::string valueRepr = "<unprintable>";
-        try {
-            actualType = std::string(py::str(py::type::of(attr).attr("__name__")));
-        } catch(const py::error_already_set&) {
-        }
-        try {
-            valueRepr = std::string(py::repr(attr));
-        } catch(const py::error_already_set&) {
-        }
-
         throw SimulationError(
-            "State returned by compute_next_state() has attribute '{}' of wrong type: "
-            "expected tuple[float, float], got {} ({})",
-            attr_name,
-            actualType,
-            valueRepr);
+            "Movement returned by compute_next_state() is of wrong type: "
+            "expected tuple[float, float], got {}",
+            Describe(movementValue));
     }
-    customModelData.Set(pythonUpdate);
+    customModelData.Set(nextState);
+    return movement;
 }
 
-void PythonModel::CheckModelConstraint(const GenericAgent& agent, const EnvironmentQuery& envQuery)
-    const
+void PythonModel::CheckModelConstraint(const GenericAgent& agent, const AgentView& view) const
 {
     py::gil_scoped_acquire gil;
 
-    py::object pythonAgent = py::cast(agent);
-    py::object pythonEnvQuery = py::cast(&envQuery, py::return_value_policy::reference);
+    py::object pythonState = std::get<CustomModel::State>(agent.model).Get<GilSafePyObject>().Get();
+    py::object pythonView = py::cast(&view, py::return_value_policy::reference);
 
-    _model.attr("_check_model_constraint")(pythonAgent, pythonEnvQuery);
+    _model.attr("_check_model_constraint")(pythonState, pythonView);
 }
 
 void init_python_model(py::module_& m)
@@ -165,13 +169,7 @@ void init_python_model(py::module_& m)
 
     py::class_<CustomModel::State>(m, "_CustomModelState")
         .def(py::init([](py::object model) {
-            // Prime the GIL-free position cache from the wrapped state so the
-            // framework can spawn the agent at the state's position.
-            const auto position =
-                intoPoint(py::cast<std::tuple<double, double>>(model.attr("position")));
-            CustomModel::State data{GilSafePyObject{std::move(model)}};
-            data.position = position;
-            return data;
+            return CustomModel::State{GilSafePyObject{std::move(model)}};
         }))
         .def_property_readonly(
             "model", [](CustomModel::State& data) { return data.Get<GilSafePyObject>().Get(); });

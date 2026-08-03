@@ -20,8 +20,7 @@ void init_social_force_model(py::module_& m)
     const SocialForceModel::State d{};
     py::class_<SocialForceModel::State>(m, "SocialForceModelState")
         .def(
-            py::init([](Point position,
-                        Point velocity,
+            py::init([](Point velocity,
                         double mass,
                         double desiredSpeed,
                         double reactionTime,
@@ -30,7 +29,6 @@ void init_social_force_model(py::module_& m)
                         double forceDistance,
                         double radius) {
                 return SocialForceModel::State{
-                    .position = position,
                     .velocity = velocity,
                     .mass = mass,
                     .desiredSpeed = desiredSpeed,
@@ -41,7 +39,6 @@ void init_social_force_model(py::module_& m)
                     .radius = radius};
             }),
             py::kw_only(),
-            py::arg("position") = d.position,
             py::arg("velocity") = d.velocity,
             py::arg("mass") = d.mass,
             py::arg("desired_speed") = d.desiredSpeed,
@@ -53,7 +50,6 @@ void init_social_force_model(py::module_& m)
         .def_property_readonly(
             "orientation",
             [](const SocialForceModel::State& obj) { return obj.velocity.Normalized(); })
-        .def_readwrite("position", &SocialForceModel::State::position)
         .def_readwrite("velocity", &SocialForceModel::State::velocity)
         .def_readwrite("mass", &SocialForceModel::State::mass)
         .def_readwrite("desired_speed", &SocialForceModel::State::desiredSpeed)

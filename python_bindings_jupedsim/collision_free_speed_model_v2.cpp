@@ -17,8 +17,7 @@ void init_collision_free_speed_model_v2(py::module_& m)
     const CollisionFreeSpeedModelV2::State d{};
     py::class_<CollisionFreeSpeedModelV2::State>(m, "CollisionFreeSpeedModelV2State")
         .def(
-            py::init([](Point position,
-                        Point orientation,
+            py::init([](Point orientation,
                         double strengthNeighborRepulsion,
                         double rangeNeighborRepulsion,
                         double strengthGeometryRepulsion,
@@ -27,7 +26,6 @@ void init_collision_free_speed_model_v2(py::module_& m)
                         double desiredSpeed,
                         double radius) {
                 return CollisionFreeSpeedModelV2::State{
-                    .position = position,
                     .orientation = orientation,
                     .strengthNeighborRepulsion = strengthNeighborRepulsion,
                     .rangeNeighborRepulsion = rangeNeighborRepulsion,
@@ -38,7 +36,6 @@ void init_collision_free_speed_model_v2(py::module_& m)
                     .radius = radius};
             }),
             py::kw_only(),
-            py::arg("position") = d.position,
             py::arg("orientation") = d.orientation,
             py::arg("strength_neighbor_repulsion") = d.strengthNeighborRepulsion,
             py::arg("range_neighbor_repulsion") = d.rangeNeighborRepulsion,
@@ -47,7 +44,6 @@ void init_collision_free_speed_model_v2(py::module_& m)
             py::arg("time_gap") = d.timeGap,
             py::arg("desired_speed") = d.v0,
             py::arg("radius") = d.radius)
-        .def_readwrite("position", &CollisionFreeSpeedModelV2::State::position)
         .def_readwrite("orientation", &CollisionFreeSpeedModelV2::State::orientation)
         .def_readwrite(
             "strength_neighbor_repulsion",

@@ -2,15 +2,17 @@
 #pragma once
 
 #include "OperationalModelType.hpp"
-
-class EnvironmentQuery;
+#include "Point.hpp"
 #include "SimulationError.hpp"
 
 #include <fmt/core.h>
 
 #include <string>
 
+class AgentStep;
+class AgentView;
 struct GenericAgent;
+struct OperationalModelState;
 
 template <typename T>
 void validateConstraint(
@@ -54,16 +56,14 @@ public:
 
     virtual OperationalModelType Type() const = 0;
 
-    /// Computes the agent state for the next iteration.
-    /// "next" arrives as an exact copy of "current"; implementations overwrite only the fields
-    /// they change. Other agents must be read exclusively from the frozen current generation,
-    /// i.e. via "current" and the neighborhood search, never via "next".
-    virtual void ComputeNextState(
-        double dT,
-        const GenericAgent& current,
-        GenericAgent& next,
-        const EnvironmentQuery& envQuery) const = 0;
+    /// Computes the agent's model state for the next iteration and returns how far it
+    /// wants to move during this step. "next" arrives as an exact copy of "current";
+    /// implementations overwrite only the fields they change. The returned movement is
+    /// binding: the framework applies it as is.
+    virtual Point ComputeNextState(
+        const OperationalModelState& current,
+        OperationalModelState& next,
+        const AgentStep& step) const = 0;
 
-    virtual void
-    CheckModelConstraint(const GenericAgent& agent, const EnvironmentQuery& envQuery) const = 0;
+    virtual void CheckModelConstraint(const GenericAgent& agent, const AgentView& view) const = 0;
 };

@@ -18,7 +18,7 @@ the model instance, which is passed to the simulation:
     sim.add_agent(
         journey_id=journey_id,
         stage_id=stage_id,
-        state=jupedsim.SocialForceModelState(position=(1.0, 1.0), mass=75.0),
+        position=(1.0, 1.0), state=jupedsim.SocialForceModelState(mass=75.0),
     )
 
 .. warning::
@@ -32,7 +32,7 @@ constructor arguments with sensible defaults: ``body_force`` (k) and
 
 :class:`SocialForceModelState` exposes the complete per-agent state of the
 model as keyword-only constructor arguments with sensible defaults:
-``position``, ``velocity``, ``mass`` (m), ``desired_speed`` (v0),
+``velocity``, ``mass`` (m), ``desired_speed`` (v0),
 ``reaction_time`` (tau), ``agent_scale`` (A), ``obstacle_scale`` (A),
 ``force_distance`` (B) and ``radius`` (r).
 """

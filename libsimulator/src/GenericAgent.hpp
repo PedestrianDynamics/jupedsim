@@ -16,28 +16,32 @@
 
 #include <fmt/core.h>
 
-#include <concepts>
 #include <deque>
 #include <utility>
 #include <variant>
 class Journey;
 class BaseStage;
 
-/// Agent position is owned by the per-model agent state. Every alternative of
-/// GenericAgent::ModelState must satisfy this concept; the framework accesses the
-/// position type-erased through GenericAgent::position().
-template <typename T>
-concept ModelAgentState = requires(T t) {
-    // position() hands out mutable Point& into the state, so a convertible or const member
-    // is not enough.
-    { t.position } -> std::same_as<Point&>;
-};
+using OperationalModelStateVariant = std::variant<
+    GeneralizedCentrifugalForceModel::State,
+    CollisionFreeSpeedModel::State,
+    CollisionFreeSpeedModelV2::State,
+    CollisionFreeSpeedModelV3::State,
+    AnticipationVelocityModel::State,
+    SocialForceModel::State,
+    WarpDriverModel::State,
+    CustomModel::State>;
 
-template <typename Variant>
-inline constexpr bool EachAlternativeIsModelAgentState = false;
-template <typename... Ts>
-inline constexpr bool EachAlternativeIsModelAgentState<std::variant<Ts...>> =
-    (ModelAgentState<Ts> && ...);
+/// We need this extra class to be able to forward-declare. Otherwise we run
+/// into a circular dependency.
+struct OperationalModelState : OperationalModelStateVariant {
+    using OperationalModelStateVariant::variant;
+
+    OperationalModelState(OperationalModelStateVariant state)
+        : OperationalModelStateVariant(std::move(state))
+    {
+    }
+};
 
 struct GenericAgent {
     using ID = jps::UniqueID<GenericAgent>;
@@ -46,62 +50,34 @@ struct GenericAgent {
     jps::UniqueID<Journey> journeyId{jps::UniqueID<Journey>::Invalid};
     jps::UniqueID<BaseStage> stageId{jps::UniqueID<BaseStage>::Invalid};
 
+    Point position{};
+
     // This is evaluated by the "operational level"
     Point nextTarget{};
     Point finalTarget{};
 
-    using ModelState = std::variant<
-        GeneralizedCentrifugalForceModel::State,
-        CollisionFreeSpeedModel::State,
-        CollisionFreeSpeedModelV2::State,
-        CollisionFreeSpeedModelV3::State,
-        AnticipationVelocityModel::State,
-        SocialForceModel::State,
-        WarpDriverModel::State,
-        CustomModel::State>;
-    static_assert(
-        EachAlternativeIsModelAgentState<ModelState>,
-        "Every agent model state must provide a 'Point position' member");
-    ModelState model{};
-
-    Point& position()
-    {
-        return std::visit([](auto& m) -> Point& { return m.position; }, model);
-    }
-    const Point& position() const
-    {
-        return std::visit([](const auto& m) -> const Point& { return m.position; }, model);
-    }
+    OperationalModelState model{};
 
     GenericAgent(
         ID id_,
         jps::UniqueID<Journey> journeyId_,
         jps::UniqueID<BaseStage> stageId_,
-        ModelState model_)
+        Point position_,
+        OperationalModelState model_)
         : id(id_ != ID::Invalid ? id_ : ID{})
         , journeyId(journeyId_)
         , stageId(stageId_)
+        , position(position_)
+        , finalTarget(position_)
         , model(std::move(model_))
     {
-        // Position is owned by the model state; seed the initial waypoint from it.
-        finalTarget = position();
     }
 };
-
-inline const Point& Pos(const GenericAgent::ModelState& state)
-{
-    return std::visit([](const auto& s) -> const Point& { return s.position; }, state);
-}
-
-inline Point& Pos(GenericAgent::ModelState& state)
-{
-    return std::visit([](auto& s) -> Point& { return s.position; }, state);
-}
 
 /// Maps agent model data to the operational model type it belongs to. Kept
 /// exhaustive on purpose: adding a model type will not compile until the
 /// mapping is extended.
-inline OperationalModelType ModelTypeOf(const GenericAgent::ModelState& model)
+inline OperationalModelType ModelTypeOf(const OperationalModelState& model)
 {
     return std::visit(
         overloaded{
@@ -147,7 +123,7 @@ struct fmt::formatter<GenericAgent> {
                     agent.stageId,
                     agent.nextTarget,
                     agent.finalTarget,
-                    agent.position(),
+                    agent.position,
                     m);
             },
             agent.model);

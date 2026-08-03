@@ -34,7 +34,8 @@ def square_simulation(tmp_path: pathlib.Path):
         sim.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
-            state=jps.CollisionFreeSpeedModelV2State(position=(x, y)),
+            position=(x, y),
+            state=jps.CollisionFreeSpeedModelV2State(),
         )
     for _ in range(50):
         sim.iterate()

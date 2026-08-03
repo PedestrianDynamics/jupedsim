@@ -28,8 +28,7 @@ void init_warp_driver_model(py::module_& m)
     const WarpDriverModel::State d{};
     py::class_<WarpDriverModel::State>(m, "WarpDriverModelState")
         .def(
-            py::init([](Point position,
-                        Point orientation,
+            py::init([](Point orientation,
                         double radius,
                         double desiredSpeed,
                         double stuckTime,
@@ -38,7 +37,6 @@ void init_warp_driver_model(py::module_& m)
                         double detourTime,
                         int detourSide) {
                 return WarpDriverModel::State{
-                    .position = position,
                     .orientation = orientation,
                     .radius = radius,
                     .v0 = desiredSpeed,
@@ -49,7 +47,6 @@ void init_warp_driver_model(py::module_& m)
                     .detourSide = detourSide};
             }),
             py::kw_only(),
-            py::arg("position") = d.position,
             py::arg("orientation") = d.orientation,
             py::arg("radius") = d.radius,
             py::arg("desired_speed") = d.v0,
@@ -58,7 +55,6 @@ void init_warp_driver_model(py::module_& m)
             py::arg("anchor_y") = d.anchorY,
             py::arg("detour_time") = d.detourTime,
             py::arg("detour_side") = d.detourSide)
-        .def_readwrite("position", &WarpDriverModel::State::position)
         .def_readwrite("orientation", &WarpDriverModel::State::orientation)
         .def_readwrite("radius", &WarpDriverModel::State::radius)
         .def_readwrite("desired_speed", &WarpDriverModel::State::v0)

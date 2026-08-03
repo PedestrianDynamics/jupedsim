@@ -18,7 +18,7 @@ instance, which is passed to the simulation:
     sim.add_agent(
         journey_id=journey_id,
         stage_id=stage_id,
-        state=jupedsim.WarpDriverModelState(position=(1.0, 1.0)),
+        position=(1.0, 1.0), state=jupedsim.WarpDriverModelState(),
     )
 
 .. warning::
@@ -33,7 +33,7 @@ constructor arguments with sensible defaults: ``sigma``, ``time_horizon``,
 
 :class:`WarpDriverModelState` exposes the complete per-agent state of the
 model as keyword-only constructor arguments with sensible defaults:
-``position``, ``orientation``, ``radius``, ``desired_speed``, ``stuck_time``,
+``orientation``, ``radius``, ``desired_speed``, ``stuck_time``,
 ``anchor_x``, ``anchor_y``, ``detour_time`` and ``detour_side``.
 """
 

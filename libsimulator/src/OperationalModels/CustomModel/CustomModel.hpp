@@ -3,7 +3,6 @@
 
 #include "FormatAny.hpp"
 #include "OperationalModel.hpp"
-#include "Point.hpp"
 
 #include <any>
 #include <type_traits>
@@ -19,9 +18,9 @@
 ///
 /// Per-agent custom state should be stored in GenericAgent::model as CustomModel::State. In
 /// ComputeNextState(), "next" arrives as an exact copy of "current"; the model overwrites only the
-/// fields it changes. The agent's new position must be written to CustomModel::State::position of
-/// "next". CustomModel::State stores its payload in std::any, so model implementations must agree
-/// on the concrete stored type and retrieve it with the exact typed accessors.
+/// fields it changes and returns how far it wants to move. CustomModel::State stores its payload
+/// in std::any, so model implementations must agree on the concrete stored type and retrieve it
+/// with the exact typed accessors.
 ///
 /// Payload types must be copy-constructible because GenericAgent values are copied during
 /// simulation queries, e.g. by NeighborhoodSearch.
@@ -30,15 +29,14 @@
 /// class MyModel : public CustomModel
 /// {
 /// public:
-///     void ComputeNextState(
-///         double dT,
-///         const GenericAgent& current,
-///         GenericAgent& next,
-///         const EnvironmentQuery& envQuery) const override;
+///     Point ComputeNextState(
+///         const OperationalModelState& current,
+///         OperationalModelState& next,
+///         const AgentStep& step) const override;
 ///
 ///     void CheckModelConstraint(
 ///         const GenericAgent& agent,
-///         const EnvironmentQuery& envQuery) const override;
+///         const AgentView& view) const override;
 /// };
 /// @endcode
 ///
@@ -67,13 +65,6 @@ public:
     /// falls back to a diagnostic <type@address> representation.
     class State
     {
-    public:
-        /// State position cache, kept outside the type-erased payload so the framework can read
-        /// it without touching the payload (for GilSafePyObject payloads: without acquiring the
-        /// GIL). The owning model must keep it in sync with the payload's own position state.
-        Point position{};
-
-    private:
         std::any value{};
         FormatFn format{};
 

@@ -14,8 +14,6 @@
 #include <ranges>
 #include <vector>
 
-using OperationalModelState = GenericAgent::ModelState;
-
 class EnvironmentQuery
 {
     const CollisionGeometry& _geometry;
@@ -30,36 +28,23 @@ public:
     }
 
     struct AcceptAll {
-        bool operator()(const Point&) const { return true; }
+        bool operator()(const GenericAgent&) const { return true; }
     };
 
-    // Returns all agents within 'radius' of 'agent', excluding 'agent' itself.
-    // An optional predicate 'filter' further filters the result; it receives the
-    // position for which neighbors are returned as well as the candidates. Example:
-    //   const auto& boundaries = query.LineSegmentsInRange(Pos(state));
-    //   query.OtherAgentsInRange(state, r, [&](const Point& to) {
-    //   return query.NoGeometryBetween(from, to, boundaries);})
-    template <std::predicate<const Point&> Pred = AcceptAll>
-    std::vector<GenericAgent>
-    OtherAgentsInRange(const OperationalModelState& state, double radius, Pred filter = {}) const
+    /// Calls 'fn' for every agent within 'radius' of 'from'.
+    template <std::invocable<const GenericAgent&> Fn>
+    void ForEachAgentInRange(const Point& from, double radius, Fn fn) const
     {
-        const Point from = Pos(state);
-        std::vector<GenericAgent> neighbors{};
-        _nsearch.ForEachInRange(from, radius, [&](const GenericAgent& candidate) {
-            if(candidate.position() != from && filter(candidate.position())) {
-                neighbors.push_back(candidate);
-            }
-        });
-        return neighbors;
+        _nsearch.ForEachInRange(from, radius, fn);
     }
 
-    template <std::predicate<const Point&> Pred = AcceptAll>
+    template <std::predicate<const GenericAgent&> Pred = AcceptAll>
     std::vector<GenericAgent>
     AgentsInRange(const Point& from, double radius, Pred filter = {}) const
     {
         std::vector<GenericAgent> neighbors{};
-        _nsearch.ForEachInRange(from, radius, [&](const GenericAgent& candidate) {
-            if(filter(candidate.position())) {
+        ForEachAgentInRange(from, radius, [&](const GenericAgent& candidate) {
+            if(filter(candidate)) {
                 neighbors.push_back(candidate);
             }
         });
