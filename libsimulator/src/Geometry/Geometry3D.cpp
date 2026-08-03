@@ -167,11 +167,18 @@ WallRange Geometry3D::line_segments_in_range(const Location& who, double distanc
 
 bool Geometry3D::no_geometry_between(const Location& who, Point direction) const
 {
-    if(_geometry2D == nullptr) {
-        throw SimulationError(
-            "no_geometry_between() on a mesh-built Geometry3D is not implemented yet.");
+    const LineSegment chord{who.xy(), who.xy() + direction};
+    if(_geometry2D != nullptr) {
+        return !_geometry2D->IntersectsAny(chord);
     }
-    return !_geometry2D->IntersectsAny(LineSegment{who.xy(), who.xy() + direction});
+
+    const auto& view = region_view(who.region());
+    if(!view.crosses_seam(chord.p1, chord.p2)) {
+        return !view.IntersectsAny(chord);
+    }
+    // The chord leaves the region, so the flat test would be answering about the wrong
+    // sheet. Walking it is the only thing that stays on the surface.
+    return who.try_move_on_surface(direction).has_value();
 }
 
 bool Geometry3D::inside_geometry(const Location& who, Point direction) const

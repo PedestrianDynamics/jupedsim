@@ -246,15 +246,54 @@ TEST(Geometry3DModelQueries, InsideGeometryMatchesFlatView)
         geo.inside_geometry(*who, to_hole - who->xy()), geo.geometry_2d()->InsideGeometry(to_hole));
 }
 
-TEST(Geometry3DModelQueries, MeshBuiltStillLacksTheVisibilityQueries)
+TEST(Geometry3DModelQueries, MeshBuiltStillLacksTheWalkableAreaQuery)
 {
     Geometry3D mesh_geo{flat_room()};
     const auto who = mesh_geo.get_location(2, 5, 0.0);
     ASSERT_TRUE(who.has_value());
 
-    // Walls answer on a mesh now; these two still only know the flat path.
-    EXPECT_THROW(mesh_geo.no_geometry_between(*who, {1, 1}), std::exception);
+    // Walls and line of sight answer on a mesh now. This one is about to be folded into
+    // line of sight, since on a surface they are the same question.
     EXPECT_THROW(mesh_geo.inside_geometry(*who, {1, 1}), std::exception);
+}
+
+TEST(Geometry3DVisibility, WithinOneRegionTheFlatTestAnswers)
+{
+    Geometry3D geo{fixtures::wavy_terrain()};
+    const auto who = geo.get_location(10.0, 5.0, 0.0, 2.0);
+    ASSERT_TRUE(who.has_value());
+
+    // A field has no seams, so every chord stays on the one sheet and the flat test decides.
+    EXPECT_TRUE(geo.no_geometry_between(*who, {4.0, 0.0}));
+    // Out past the edge of the field, across its boundary.
+    EXPECT_FALSE(geo.no_geometry_between(*who, {40.0, 0.0}));
+}
+
+TEST(Geometry3DVisibility, LeavingTheSurfaceOverASeamBlocksTheView)
+{
+    Geometry3D geo{fixtures::two_levels_with_stair()};
+
+    // Standing on the stair, two metres short of its head at x = 15.
+    const auto who = geo.get_location(13.0, 2.0, 1.8, 0.5);
+    ASSERT_TRUE(who.has_value());
+
+    // Back down the stair: same region, no seam, and nothing in the way.
+    EXPECT_TRUE(geo.no_geometry_between(*who, {-2.0, 0.0}));
+
+    // On past the head, where the surface folds back over itself. The chord crosses the
+    // seam, so the walk decides - and it runs off the end.
+    EXPECT_FALSE(geo.no_geometry_between(*who, {4.0, 0.0}));
+}
+
+TEST(Geometry3DVisibility, CrossingASeamOntoWalkableSurfaceDoesNotBlock)
+{
+    Geometry3D geo{fixtures::switchback_stair()};
+
+    // Upper floor and landing lie at the same height and meet at x = 14, which is also where
+    // the region overlay cut. Walking across it stays on the surface all the way.
+    const auto who = geo.get_location(12.0, 6.0, 3.0, 0.5);
+    ASSERT_TRUE(who.has_value());
+    EXPECT_TRUE(geo.no_geometry_between(*who, {4.0, 0.0}));
 }
 
 TEST(Geometry3DModelQueries, AMeshAnswersWithItsOwnRegionsWalls)
