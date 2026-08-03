@@ -50,6 +50,33 @@ inline SurfaceMesh two_levels_with_stair()
     return extrude_profile({{0, 0}, {10, 0}, {15, 3}, {5, 3}}, 4.0);
 }
 
+/// The two-level fold again, but meshed across the sweep as well as along it, so the seam
+/// where the levels meet runs over @p strips edges instead of one.
+///
+/// `extrude_profile` lays a single edge across the whole width, and a one-edge seam cannot
+/// show whether anything was merged -- one segment in, one segment out, either way.
+inline SurfaceMesh two_levels_with_wide_seam(std::size_t strips = 4)
+{
+    const std::vector<std::array<double, 2>> profile{{0, 0}, {10, 0}, {15, 3}, {5, 3}};
+    constexpr double width = 4.0;
+
+    SurfaceMesh mesh{};
+    std::vector<std::vector<SurfaceMesh::Vertex_index>> rows(strips + 1);
+    for(std::size_t s = 0; s <= strips; ++s) {
+        const double y = width * static_cast<double>(s) / static_cast<double>(strips);
+        for(const auto& [x, z] : profile) {
+            rows[s].push_back(mesh.add_vertex(Point3D{x, y, z}));
+        }
+    }
+    for(std::size_t s = 0; s < strips; ++s) {
+        for(std::size_t i = 0; i + 1 < profile.size(); ++i) {
+            mesh.add_face(rows[s][i], rows[s][i + 1], rows[s + 1][i + 1]);
+            mesh.add_face(rows[s][i], rows[s + 1][i + 1], rows[s + 1][i]);
+        }
+    }
+    return mesh;
+}
+
 /// Two floors sharing a footprint with nothing joining them. Non-realistic, but does
 /// not matter for the testing purpose.
 inline SurfaceMesh stacked_floors(double upper_z = 3.0)

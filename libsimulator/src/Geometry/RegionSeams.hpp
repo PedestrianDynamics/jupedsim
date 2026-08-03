@@ -29,9 +29,12 @@ struct RegionSeam {
     std::size_t neighbor;
 };
 
-/// Collect the seams of @p mesh under the region assignment @p region.
+/// Collect the seams of @p mesh under the region assignment @p region, fusing collinear runs
+/// the same way walls are fused: straight to within @p eps, and never across a bend or a
+/// change of neighbour.
 ///
-/// Unmerged on purpose for now: fusing collinear runs would have to keep runs with different
-/// neighbours apart, and until there is a query that feels the segment count it would be
-/// optimising blind.
-std::vector<RegionSeam> extract_region_seams(const SurfaceMesh& mesh, const RegionMap& region);
+/// Merging is not cosmetic here. Every visibility query walks a region's seams to find out
+/// whether its chord leaves the region, so the segment count is what that scan costs -- once
+/// per neighbour per step. It is paid for once, when the geometry is built.
+std::vector<RegionSeam>
+extract_region_seams(const SurfaceMesh& mesh, const RegionMap& region, double eps);

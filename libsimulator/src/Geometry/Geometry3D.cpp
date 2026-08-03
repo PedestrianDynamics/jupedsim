@@ -96,7 +96,7 @@ void Geometry3D::build_region_views()
     }
 
     auto seams_by_region =
-        group_seams_by_region(extract_region_seams(_mesh, _region), _regionCount);
+        group_seams_by_region(extract_region_seams(_mesh, _region, eps), _regionCount);
 
     _regionViews.clear();
     _regionViews.reserve(_regionCount);

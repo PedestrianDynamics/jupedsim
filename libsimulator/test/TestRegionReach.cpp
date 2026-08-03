@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
+#include "Geometry/PolylineMerge.hpp"
 #include "Geometry/RegionReach.hpp"
 #include "Geometry/RegionSeams.hpp"
 #include "Geometry/RegionSplit.hpp"
@@ -23,7 +24,7 @@ struct Reach {
 Reach reach_of(SurfaceMesh mesh)
 {
     const auto split = split_into_regions(mesh);
-    const auto seams = extract_region_seams(mesh, split.region);
+    const auto seams = extract_region_seams(mesh, split.region, mesh_merge_tolerance(mesh));
     return Reach{group_seams_by_region(seams, split.count), split.count};
 }
 
