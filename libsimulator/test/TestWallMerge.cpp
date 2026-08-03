@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Geometry/Geometry3D.hpp"
+#include "Geometry/PolylineMerge.hpp"
 #include "Geometry/RegionSplit.hpp"
 #include "Geometry/WallMerge.hpp"
 #include "GeometryBuilder.hpp"
@@ -31,7 +32,7 @@ struct Merged {
 Merged merge(SurfaceMesh mesh)
 {
     const auto split = split_into_regions(mesh);
-    auto walls = merge_border_walls(mesh, split.region, wall_merge_tolerance(mesh));
+    auto walls = merge_border_walls(mesh, split.region, mesh_merge_tolerance(mesh));
     return Merged{std::move(mesh), std::move(walls), split.count};
 }
 
@@ -270,7 +271,7 @@ TEST(WallMerge, FusedWallsAreTheOnesThePolygonPathWouldGive)
     auto mesh = copy_mesh(geo.mesh());
     refine_boundary(mesh, 0.25);
     const auto split = split_into_regions(mesh);
-    const auto fused = merge_border_walls(mesh, split.region, wall_merge_tolerance(mesh));
+    const auto fused = merge_border_walls(mesh, split.region, mesh_merge_tolerance(mesh));
 
     std::set<std::array<double, 4>> expected{};
     for(const auto& s : geo.geometry_2d()->LineSegmentsInDistanceTo(1e6, Point{10, 10})) {

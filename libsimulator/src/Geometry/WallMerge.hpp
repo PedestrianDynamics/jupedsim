@@ -46,7 +46,3 @@ inline const LineSegment& segment_of(const MergedWall& wall)
 /// "wavy" terrain outline at every mesh edge.
 std::vector<MergedWall>
 merge_border_walls(const SurfaceMesh& mesh, const RegionMap& region, double eps);
-
-/// Tolerance for `merge_border_walls`, scaled to the mesh extent: enough to absorb the
-/// floating-point noise in coordinates that are meant to be collinear.
-double wall_merge_tolerance(const SurfaceMesh& mesh);

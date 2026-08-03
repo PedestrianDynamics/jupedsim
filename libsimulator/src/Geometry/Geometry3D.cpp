@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Geometry/Geometry3D.hpp"
 
+#include "Geometry/PolylineMerge.hpp"
 #include "Geometry/RegionReach.hpp"
 #include "Geometry/RegionSeams.hpp"
 #include "Geometry/WallMerge.hpp"
@@ -85,7 +86,8 @@ void Geometry3D::build_region_views()
 {
     // Walls are fused across the whole mesh, so a wall running past a region boundary stays
     // one wall - and is then held by both regions it borders, to be findable from either.
-    const auto walls = merge_border_walls(_mesh, _region, wall_merge_tolerance(_mesh));
+    const double eps = mesh_merge_tolerance(_mesh);
+    const auto walls = merge_border_walls(_mesh, _region, eps);
     std::vector<std::vector<MergedWall>> walls_by_region(_regionCount);
     for(const auto& wall : walls) {
         for(const auto r : wall.regions) {

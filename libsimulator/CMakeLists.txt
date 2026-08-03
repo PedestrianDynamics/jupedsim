@@ -25,6 +25,8 @@ target_sources(simulator PRIVATE
     src/Geometry/RegionSplit.hpp
     src/Geometry/RegionReach.cpp
     src/Geometry/RegionReach.hpp
+    src/Geometry/PolylineMerge.cpp
+    src/Geometry/PolylineMerge.hpp
     src/Geometry/RegionSeams.cpp
     src/Geometry/RegionSeams.hpp
     src/Geometry/RegionView.cpp
