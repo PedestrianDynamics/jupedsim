@@ -101,7 +101,7 @@ class AgentView:
             boundaries = step.walls_nearby()
             neighbors = step.other_agents_in_range(
                 5.0,
-                lambda n: step.no_geometry_between(n.relative_position, boundaries),
+                lambda n: step.no_geometry_between(n),
             )
     """
 
@@ -138,24 +138,22 @@ class AgentView:
         return [n for n in neighbors if predicate(n)]
 
     def no_geometry_between(
-        self,
-        relative_position: tuple[float, float],
-        boundaries: list[WallView],
+        self, target: NeighborView | tuple[float, float]
     ) -> bool:
-        """Return ``True`` when the straight line from the agent to the point
-        *relative_position* away is not intersected by any of *walls*.
+        """Return ``True`` when nothing blocks the straight line to *target*.
 
-        This is also the answer to whether the agent can move there: what blocks
-        the line of sight blocks the step.
+        Given a :class:`NeighborView`, this answers whether that neighbor can be
+        seen. Given an offset, it answers whether the straight line to that point
+        is free of geometry — which is also whether the agent can move there, as
+        what blocks the line of sight blocks the step.
 
         Args:
-            relative_position: Offset from the agent as ``(dx, dy)``.
-            boundaries: List of geometry boundary segments.
+            target: A :class:`NeighborView`, or an offset from the agent as
+                ``(dx, dy)``.
         """
-
-        return self._obj.no_geometry_between(
-            relative_position, [b._obj for b in boundaries]
-        )
+        if isinstance(target, NeighborView):
+            return self._obj.no_geometry_between(target._obj)
+        return self._obj.no_geometry_between(target)
 
     def walls_nearby(self) -> list[WallView]:
         """Return the walls in the grid cells around the agent.

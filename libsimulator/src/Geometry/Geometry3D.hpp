@@ -109,6 +109,14 @@ public:
     /// without a way leading to it, is `is_valid_location`.
     bool no_geometry_between(const Location& who, Point direction) const;
 
+    /// True iff @p who can see @p other: the way there has to be clear, and it has to lead
+    /// to the sheet @p other is standing on.
+    ///
+    /// The second half is what a direction cannot express. On a mesh one (x, y) can carry
+    /// several sheets, so two agents a metre and a half apart in height have an unobstructed
+    /// line between them in plan and no sight of each other at all.
+    bool no_geometry_between(const Location& who, const Location& other) const;
+
     // -- region overlay & render data (see split_into_regions) --------------
 
     std::size_t region_count() const { return _regionCount; }
@@ -137,6 +145,13 @@ private:
     /// Build one RegionView per region: classify boundary halfedges into walls
     /// and seams, merge collinear runs, record seam neighbours.
     void build_region_views();
+
+    /// The region a straight horizontal step from @p who along @p direction ends up in, or
+    /// nothing when a wall stops it or it runs off the surface.
+    ///
+    /// Both visibility questions are this one plus what the caller does with the answer: a
+    /// step only cares that there is one, a sight line also cares which.
+    std::optional<std::size_t> region_reached(const Location& who, Point direction) const;
 
     SurfaceMesh _mesh{};
     std::unique_ptr<Geometry2D> _geometry2D{};

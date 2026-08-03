@@ -47,12 +47,8 @@ Point GeneralizedCentrifugalForceModel::ComputeNextState(
     const AgentStep& step) const
 {
     const auto& currentState = std::get<State>(current);
-    auto _w = step.WallsNearby();
-    const std::vector<WallView> boundaries(_w.begin(), _w.end());
-    const auto neighborhood =
-        step.OtherAgentsInRange(_cutOffRadius, [&step, &boundaries](const NeighborView& n) {
-            return step.NoGeometryBetween(n.RelativePosition, boundaries);
-        });
+    const auto neighborhood = step.OtherAgentsInRange(
+        _cutOffRadius, [&step](const NeighborView& n) { return step.NoGeometryBetween(n); });
     Point F_rep;
     for(const auto& neighbor : neighborhood) {
         F_rep += ForceRepPed(currentState, neighbor);
@@ -63,7 +59,7 @@ Point GeneralizedCentrifugalForceModel::ComputeNextState(
     Point e0{};
     // repulsive forces to the walls and transitions that are not my target
     Point repwall{};
-    for(const auto& wall : boundaries) {
+    for(const auto& wall : step.WallsNearby()) {
         repwall += ForceRepWall(currentState, wall);
     }
 

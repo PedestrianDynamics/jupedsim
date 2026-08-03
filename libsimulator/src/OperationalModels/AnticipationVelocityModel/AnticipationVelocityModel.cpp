@@ -33,13 +33,9 @@ Point AnticipationVelocityModel::ComputeNextState(
     const AgentStep& step) const
 {
     const auto& currentState = std::get<State>(current);
-    auto _w = step.WallsNearby();
-    const std::vector<WallView> boundaries(_w.begin(), _w.end());
     // Exclude occluded and self agents
-    auto neighborhood =
-        step.OtherAgentsInRange(_cutOffRadius, [&step, &boundaries](const NeighborView& n) {
-            return step.NoGeometryBetween(n.RelativePosition, boundaries);
-        });
+    auto neighborhood = step.OtherAgentsInRange(
+        _cutOffRadius, [&step](const NeighborView& n) { return step.NoGeometryBetween(n); });
 
     const auto desiredDirection = step.orientation_to_next_target();
     Point neighborRepulsion{};
@@ -64,7 +60,7 @@ Point AnticipationVelocityModel::ComputeNextState(
     direction = HandleWallAvoidance(
         direction,
         currentState.radius,
-        boundaries,
+        step.WallsNearby(),
         currentState.wallBufferDistance,
         _pushoutStrength);
 

@@ -54,6 +54,11 @@ public:
         return _geometry.no_geometry_between(who, direction);
     }
 
+    bool NoGeometryBetween(const Location& who, const Location& other) const
+    {
+        return _geometry.no_geometry_between(who, other);
+    }
+
     WallRange LineSegmentsInRange(const Location& who, double distance = -1.0) const
     {
         return _geometry.line_segments_in_range(who, distance);

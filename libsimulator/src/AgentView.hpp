@@ -17,6 +17,17 @@
 struct NeighborView {
     Point RelativePosition;
     const OperationalModelState* state;
+
+private:
+    /// Where they are actually standing, which is none of a model's business. It rides along
+    /// because telling whether they can be seen means telling which sheet of the surface they
+    /// are on, and only the region in here says that.
+    friend class AgentView;
+    NeighborView(Point relative, const OperationalModelState* model, const Location* where)
+        : RelativePosition(relative), state(model), _location(where)
+    {
+    }
+    const Location* _location;
 };
 
 /// A wall segment as seen from the agent that asked for it. It carries what agents typically
@@ -71,7 +82,8 @@ public:
             if(std::abs(candidate.location->z() - z) > InteractionHeight) {
                 return;
             }
-            const NeighborView neighbor{candidate.Position() - _agent.Position(), &candidate.state};
+            const NeighborView neighbor{
+                candidate.Position() - _agent.Position(), &candidate.state, &*candidate.location};
             if(filter(neighbor)) {
                 neighbors.push_back(neighbor);
             }
@@ -82,12 +94,17 @@ public:
     /// Whether the straight line to a point at 'RelativePosition' is free of geometry.
     /// Also the answer to whether the agent can move there: on a surface, what blocks the
     /// view blocks the step.
-    /// 'boundaries' is vestigial: visibility is answered on the surface now. It stays
-    /// until the model call sites drop it.
-    template <typename Range>
-    bool NoGeometryBetween(Point RelativePosition, const Range& /*boundaries*/) const
+    bool NoGeometryBetween(Point RelativePosition) const
     {
         return _world.NoGeometryBetween(location(), RelativePosition);
+    }
+
+    /// Whether 'neighbor' can be seen from here. Same question as above plus the one a
+    /// direction cannot carry: whether the way there leads to the surface they are standing
+    /// on, rather than to one stacked over or under it.
+    bool NoGeometryBetween(const NeighborView& neighbor) const
+    {
+        return _world.NoGeometryBetween(location(), *neighbor._location);
     }
 
 private:

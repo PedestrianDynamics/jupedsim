@@ -139,10 +139,8 @@ TEST(AgentView, NoGeometryBetweenFiltersOccludedAgents)
     const auto q = env.query(*geo);
 
     const auto view = env.FirstAgentView(q);
-    const auto& walls = view.WallsNearby();
-    const auto result = view.OtherAgentsInRange(5.0, [&](const NeighborView& n) {
-        return view.NoGeometryBetween(n.RelativePosition, walls);
-    });
+    const auto result = view.OtherAgentsInRange(
+        5.0, [&](const NeighborView& n) { return view.NoGeometryBetween(n); });
 
     ASSERT_EQ(result.size(), 1u);
     EXPECT_EQ(result[0].RelativePosition, Point(0, 1));
@@ -324,4 +322,33 @@ TEST(AgentView, AgentsOnTheSameStoreyStillAre)
     const EnvironmentQuery query{geo, search};
 
     EXPECT_EQ(AgentView(query, agents[0]).OtherAgentsInRange(10.0).size(), 1u);
+}
+
+TEST(AgentView, ANeighbourCloseEnoughToTouchCanStillBeOnAnotherStorey)
+{
+    // A mezzanine 1.5 m up, so the height band keeps both as candidates and what has to tell
+    // them apart is which sheet each stands on. Nothing is between them in plan either: no
+    // wall on either floor, and no seam joining the two.
+    Geometry3D geo{fixtures::stacked_floors(1.5)};
+
+    AgentContainer<GenericAgent> agents{};
+    agents.push_back(MakeAgent({2.0, 5.0}));
+    agents.push_back(MakeAgent({4.0, 5.0}));
+    agents.push_back(MakeAgent({6.0, 5.0}));
+    agents[0].location = geo.get_location(2.0, 5.0, 0.0);
+    agents[1].location = geo.get_location(4.0, 5.0, 0.0);
+    agents[2].location = geo.get_location(6.0, 5.0, 1.5);
+    ASSERT_TRUE(agents[0].location.has_value() && agents[1].location.has_value());
+    ASSERT_TRUE(agents[2].location.has_value());
+
+    NeighborhoodSearch<GenericAgent> search{5.0};
+    search.Update(agents);
+    const EnvironmentQuery query{geo, search};
+
+    const AgentView view{query, agents[0]};
+    const auto seen = view.OtherAgentsInRange(
+        10.0, [&](const NeighborView& n) { return view.NoGeometryBetween(n); });
+
+    ASSERT_EQ(seen.size(), 1u);
+    EXPECT_EQ(seen[0].RelativePosition, Point(2.0, 0.0));
 }

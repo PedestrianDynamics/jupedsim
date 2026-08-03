@@ -167,18 +167,35 @@ WallRange Geometry3D::line_segments_in_range(const Location& who, double distanc
 
 bool Geometry3D::no_geometry_between(const Location& who, Point direction) const
 {
+    return region_reached(who, direction).has_value();
+}
+
+bool Geometry3D::no_geometry_between(const Location& who, const Location& other) const
+{
+    // Rebuilding the direction rather than handing over other.xy() keeps the chord exactly
+    // what the direction-taking callers have always passed.
+    const auto arrival = region_reached(who, other.xy() - who.xy());
+    return arrival == other.region();
+}
+
+std::optional<std::size_t> Geometry3D::region_reached(const Location& who, Point direction) const
+{
     const LineSegment chord{who.xy(), who.xy() + direction};
     if(_geometry2D != nullptr) {
-        return !_geometry2D->IntersectsAny(chord);
+        return _geometry2D->IntersectsAny(chord) ? std::nullopt : std::optional{who.region()};
     }
 
     const auto& view = region_view(who.region());
     if(!view.crosses_seam(chord.p1, chord.p2)) {
-        return !view.IntersectsAny(chord);
+        // Staying inside the region means never reaching another sheet, so only the walls of
+        // this one can be in the way, and this is where the step ends up.
+        return view.IntersectsAny(chord) ? std::nullopt : std::optional{who.region()};
     }
     // The chord leaves the region, so the flat test would be answering about the wrong
-    // sheet. Walking it is the only thing that stays on the surface.
-    return who.try_move_on_surface(direction).has_value();
+    // sheet. Walking it is the only thing that stays on the surface, and where the walk comes
+    // out says which sheet it followed.
+    const auto arrival = who.try_move_on_surface(direction);
+    return arrival.has_value() ? std::optional{arrival->region()} : std::nullopt;
 }
 
 Geometry3D::FaceLocation

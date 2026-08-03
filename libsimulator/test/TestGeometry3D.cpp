@@ -257,6 +257,20 @@ TEST(Geometry3DVisibility, WithinOneRegionTheFlatTestAnswers)
     EXPECT_FALSE(geo.no_geometry_between(*who, {40.0, 0.0}));
 }
 
+TEST(Geometry3DVisibility, TheFloorAboveIsNotInSightThoughNothingStandsBetween)
+{
+    Geometry3D geo{stacked_floors()};
+    const auto below = geo.get_location(2, 5, 0.0);
+    const auto beside = geo.get_location(8, 5, 0.0);
+    const auto above = geo.get_location(8, 5, 3.0);
+    ASSERT_TRUE(below.has_value() && beside.has_value() && above.has_value());
+
+    // The two floors are not joined, so the chord crosses no seam and meets no wall either
+    // way. What separates them is which sheet each end is on, and nothing else.
+    EXPECT_TRUE(geo.no_geometry_between(*below, *beside));
+    EXPECT_FALSE(geo.no_geometry_between(*below, *above));
+}
+
 TEST(Geometry3DVisibility, LeavingTheSurfaceOverASeamBlocksTheView)
 {
     Geometry3D geo{fixtures::two_levels_with_stair()};
@@ -282,6 +296,13 @@ TEST(Geometry3DVisibility, CrossingASeamOntoWalkableSurfaceDoesNotBlock)
     const auto who = geo.get_location(12.0, 6.0, 3.0, 0.5);
     ASSERT_TRUE(who.has_value());
     EXPECT_TRUE(geo.no_geometry_between(*who, {4.0, 0.0}));
+
+    // And someone standing where that walk comes out is in sight, even though the query
+    // started in a different region than the one they are in.
+    const auto beyond = geo.get_location(16.0, 6.0, 3.0, 0.5);
+    ASSERT_TRUE(beyond.has_value());
+    ASSERT_NE(who->region(), beyond->region());
+    EXPECT_TRUE(geo.no_geometry_between(*who, *beyond));
 }
 
 TEST(Geometry3DModelQueries, AMeshAnswersWithItsOwnRegionsWalls)

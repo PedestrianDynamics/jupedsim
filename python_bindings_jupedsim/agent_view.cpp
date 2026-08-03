@@ -41,14 +41,14 @@ void init_agent_view(py::module_& m)
             "Neighbors within radius, each as the vector pointing to it.")
         .def(
             "no_geometry_between",
-            [](const AgentView& self,
-               std::tuple<double, double> relative_position,
-               const std::vector<WallView>& walls) {
-                return self.NoGeometryBetween(intoPoint(relative_position), walls);
-            },
+            py::overload_cast<Point>(&AgentView::NoGeometryBetween, py::const_),
             py::arg("relative_position"),
-            py::arg("walls"),
             "True when nothing blocks the straight line to relative_position.")
+        .def(
+            "no_geometry_between",
+            py::overload_cast<const NeighborView&>(&AgentView::NoGeometryBetween, py::const_),
+            py::arg("neighbor"),
+            "True when the neighbor can be seen from here.")
         .def(
             "walls_nearby",
             [](const AgentView& self) { return intoVec(self.WallsNearby()); },

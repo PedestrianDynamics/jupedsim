@@ -473,12 +473,8 @@ Point WarpDriverModel::ComputeNextState(
     const double dtSample = this->_timeHorizon / std::max(this->_numSamples - 1, 1);
 
     // === Step 2: Perceive - build collision probability field ===
-    auto _w = step.WallsInRange(_cutOffRadius);
-    const std::vector<WallView> boundaries(_w.begin(), _w.end());
-    const auto neighbors =
-        step.OtherAgentsInRange(_cutOffRadius, [&step, &boundaries](const NeighborView& n) {
-            return step.NoGeometryBetween(n.RelativePosition, boundaries);
-        });
+    const auto neighbors = step.OtherAgentsInRange(
+        _cutOffRadius, [&step](const NeighborView& n) { return step.NoGeometryBetween(n); });
 
     // Short-range repulsion: not part of the original Wolinski et al. (2016)
     // model, which is purely anticipatory. Added as a practical safety net
@@ -650,7 +646,7 @@ Point WarpDriverModel::ComputeNextState(
     newVelWorld = newVelWorld + repulsion;
 
     // Boundary avoidance: steer agents away from walls
-    for(const auto& wall : boundaries) {
+    for(const auto& wall : step.WallsNearby()) {
         if(wall.segment.LengthSquare() < 1e-12) {
             continue; // degenerate wall segment
         }
@@ -684,14 +680,14 @@ Point WarpDriverModel::ComputeNextState(
         Point detourVel = detourDir * agentData.v0 * 0.5;
         Point movement = detourVel * step.dt();
         // If detour would leave the walkable area, try the other side
-        if(!step.NoGeometryBetween(movement, boundaries)) {
+        if(!step.NoGeometryBetween(movement)) {
             detourSide = -detourSide;
             lateral = Point{-desiredDir.y * detourSide, desiredDir.x * detourSide};
             detourDir = (lateral * 0.8 + desiredDir * 0.2).Normalized();
             detourVel = detourDir * agentData.v0 * 0.5;
             movement = detourVel * step.dt();
             // If both sides fail, just creep toward goal
-            if(!step.NoGeometryBetween(movement, boundaries)) {
+            if(!step.NoGeometryBetween(movement)) {
                 movement = desiredDir * agentData.v0 * 0.1 * step.dt();
                 detourDir = desiredDir;
             }

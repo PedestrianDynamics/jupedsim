@@ -52,7 +52,7 @@ inline SurfaceMesh two_levels_with_stair()
 
 /// Two floors sharing a footprint with nothing joining them. Non-realistic, but does
 /// not matter for the testing purpose.
-inline SurfaceMesh stacked_floors()
+inline SurfaceMesh stacked_floors(double upper_z = 3.0)
 {
     SurfaceMesh mesh{};
     const auto quad = [&mesh](double z) {
@@ -64,7 +64,7 @@ inline SurfaceMesh stacked_floors()
         mesh.add_face(a, c, d);
     };
     quad(0.0);
-    quad(3.0);
+    quad(upper_z);
     return mesh;
 }
 
