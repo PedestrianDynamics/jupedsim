@@ -23,25 +23,18 @@ void init_collision_free_speed_model(py::module_& m)
     const CollisionFreeSpeedModel::State d{};
     py::class_<CollisionFreeSpeedModel::State>(m, "CollisionFreeSpeedModelState")
         .def(
-            py::init([](Point position,
-                        Point orientation,
-                        double timeGap,
-                        double desiredSpeed,
-                        double radius) {
+            py::init([](Point orientation, double timeGap, double desiredSpeed, double radius) {
                 return CollisionFreeSpeedModel::State{
-                    .position = position,
                     .orientation = orientation,
                     .timeGap = timeGap,
                     .v0 = desiredSpeed,
                     .radius = radius};
             }),
             py::kw_only(),
-            py::arg("position") = d.position,
             py::arg("orientation") = d.orientation,
             py::arg("time_gap") = d.timeGap,
             py::arg("desired_speed") = d.v0,
             py::arg("radius") = d.radius)
-        .def_readwrite("position", &CollisionFreeSpeedModel::State::position)
         .def_readwrite("orientation", &CollisionFreeSpeedModel::State::orientation)
         .def_readwrite("time_gap", &CollisionFreeSpeedModel::State::timeGap)
         .def_readwrite("desired_speed", &CollisionFreeSpeedModel::State::v0)

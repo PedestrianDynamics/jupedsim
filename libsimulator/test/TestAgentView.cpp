@@ -1,0 +1,254 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later
+#include "AgentView.hpp"
+#include "EnvironmentQuery.hpp"
+#include "GenericAgent.hpp"
+#include "GeometryBuilder.hpp"
+#include "NeighborhoodSearch.hpp"
+#include "OperationalModels/CollisionFreeSpeedModel/CollisionFreeSpeedModel.hpp"
+
+#include <gtest/gtest.h>
+
+#include <algorithm>
+#include <limits>
+#include <vector>
+
+namespace
+{
+using State = CollisionFreeSpeedModel::State;
+
+GenericAgent MakeAgent(Point pos, double radius = 0.2)
+{
+    State s{};
+    s.radius = radius;
+    return GenericAgent(
+        GenericAgent::ID::Invalid,
+        jps::UniqueID<Journey>::Invalid,
+        jps::UniqueID<BaseStage>::Invalid,
+        pos,
+        std::move(s));
+}
+
+CollisionGeometry OpenGeometry()
+{
+    GeometryBuilder b{};
+    b.AddAccessibleArea({{-100, -100}, {100, -100}, {100, 100}, {-100, 100}});
+    return b.Build();
+}
+
+// Geometry with a thin wall at x≈1 that blocks line-of-sight across it.
+CollisionGeometry WalledGeometry()
+{
+    GeometryBuilder b{};
+    b.AddAccessibleArea({{-100, -100}, {100, -100}, {100, 100}, {-100, 100}});
+    b.ExcludeFromAccessibleArea({{0.9, -50}, {1.1, -50}, {1.1, 50}, {0.9, 50}});
+    return b.Build();
+}
+
+struct Environment {
+    AgentContainer<GenericAgent> agents{};
+    NeighborhoodSearch<GenericAgent> neighborhood_search{5.0};
+
+    void add_agent(Point pos, double radius = 0.2) { agents.push_back(MakeAgent(pos, radius)); }
+
+    EnvironmentQuery query(const CollisionGeometry& geo)
+    {
+        neighborhood_search.Update(agents);
+        return {geo, neighborhood_search};
+    }
+
+    // The first agent added is the one every test queries from.
+    AgentView FirstAgentView(const EnvironmentQuery& q) const { return {q, agents[0]}; }
+};
+} // namespace
+
+TEST(AgentView, OtherAgentsInRangeExcludesSelf)
+{
+    Environment env{};
+    env.add_agent({0, 0});
+    const auto geo = OpenGeometry();
+    const auto q = env.query(geo);
+
+    const auto result = env.FirstAgentView(q).OtherAgentsInRange(100.0);
+    EXPECT_TRUE(result.empty());
+}
+
+TEST(AgentView, OtherAgentsInRangeNoFilterReturnsAllInRadius)
+{
+    Environment env{};
+    env.add_agent({0, 0}); // querying agent
+    env.add_agent({1, 0});
+    env.add_agent({0, 1});
+    env.add_agent({-1, 0});
+    const auto geo = OpenGeometry();
+    const auto q = env.query(geo);
+
+    const auto result = env.FirstAgentView(q).OtherAgentsInRange(5.0);
+    EXPECT_EQ(result.size(), 3u);
+}
+
+TEST(AgentView, OtherAgentsInRangeCustomFilterRejectsAll)
+{
+    Environment env{};
+    env.add_agent({0, 0});
+    env.add_agent({1, 0});
+    env.add_agent({0, 1});
+    const auto geo = OpenGeometry();
+    const auto q = env.query(geo);
+
+    const auto result =
+        env.FirstAgentView(q).OtherAgentsInRange(5.0, [](const NeighborView&) { return false; });
+    EXPECT_TRUE(result.empty());
+}
+
+TEST(AgentView, OtherAgentsInRangeCustomFilterSelectsSubset)
+{
+    Environment env{};
+    env.add_agent({0, 0}); // querying agent
+    env.add_agent({1, 0}); // positive x — kept
+    env.add_agent({0, 1}); // positive y — kept
+    env.add_agent({-1, 0}); // negative x — filtered out
+    const auto geo = OpenGeometry();
+    const auto q = env.query(geo);
+
+    const auto result = env.FirstAgentView(q).OtherAgentsInRange(
+        5.0, [](const NeighborView& n) { return n.RelativePosition.x >= 0.0; });
+
+    ASSERT_EQ(result.size(), 2u);
+    for(const auto& neighbor : result) {
+        EXPECT_GE(neighbor.RelativePosition.x, 0.0);
+    }
+}
+
+TEST(AgentView, NoGeometryBetweenFiltersOccludedAgents)
+{
+    Environment env{};
+    env.add_agent({0, 0}); // querying agent
+    env.add_agent({2, 0}); // behind wall — occluded
+    env.add_agent({0, 1}); // same side as querying agent — visible
+    const auto geo = WalledGeometry();
+    const auto q = env.query(geo);
+
+    const auto view = env.FirstAgentView(q);
+    const auto& walls = view.WallsNearby();
+    const auto result = view.OtherAgentsInRange(5.0, [&](const NeighborView& n) {
+        return view.NoGeometryBetween(n.RelativePosition, walls);
+    });
+
+    ASSERT_EQ(result.size(), 1u);
+    EXPECT_EQ(result[0].RelativePosition, Point(0, 1));
+}
+
+TEST(AgentView, OtherAgentsInRangeCustomFilterReceivesNoSelf)
+{
+    // Verify the filter is never called with the querying agent itself.
+    Environment env{};
+    env.add_agent({0, 0});
+    env.add_agent({1, 0});
+    const auto geo = OpenGeometry();
+    const auto q = env.query(geo);
+
+    int calls = 0;
+    env.FirstAgentView(q).OtherAgentsInRange(5.0, [&](const NeighborView&) {
+        ++calls;
+        return true;
+    });
+    EXPECT_EQ(calls, 1);
+}
+
+TEST(AgentView, OtherAgentsInRangeOutOfRadiusNotReturned)
+{
+    Environment env{};
+    env.add_agent({0, 0});
+    env.add_agent({50, 0}); // far away
+    const auto geo = OpenGeometry();
+    const auto q = env.query(geo);
+
+    const auto result =
+        env.FirstAgentView(q).OtherAgentsInRange(1.0, [](const NeighborView&) { return true; });
+    EXPECT_TRUE(result.empty());
+}
+
+TEST(AgentView, AgentsOnTheSamePositionSeeEachOther)
+{
+    Environment env{};
+    env.add_agent({3, 4});
+    env.add_agent({3, 4});
+    const auto geo = OpenGeometry();
+    const auto q = env.query(geo);
+
+    const auto result = env.FirstAgentView(q).OtherAgentsInRange(1.0);
+
+    ASSERT_EQ(result.size(), 1u);
+    EXPECT_EQ(result[0].state, &env.agents[1].model);
+}
+
+// Every other test here queries from {0,0} and would not notice a centre that
+// silently defaults to the origin.
+TEST(AgentView, OtherAgentsInRangeCentresOnTheQueryingAgentNotTheOrigin)
+{
+    Environment env{};
+    env.add_agent({50, 30}); // querying agent, deliberately away from the origin
+    env.add_agent({51, 30}); // its actual neighbor
+    env.add_agent({0.5, 0}); // decoy next to the origin
+    const auto geo = OpenGeometry();
+    const auto q = env.query(geo);
+
+    const auto result = env.FirstAgentView(q).OtherAgentsInRange(2.0);
+
+    ASSERT_EQ(result.size(), 1u);
+    EXPECT_EQ(result[0].RelativePosition, Point(1, 0));
+}
+
+TEST(AgentView, WallsInRangeAreRelativeToTheAgent)
+{
+    Environment env{};
+    const Point pos{-1.0, 2.0};
+    env.add_agent(pos);
+    const auto geo = WalledGeometry();
+    const auto q = env.query(geo);
+
+    std::vector<LineSegment> expected{};
+    for(const auto& segment : q.LineSegmentsInRange(pos, 3.0)) {
+        expected.push_back({segment.p1 - pos, segment.p2 - pos});
+    }
+    ASSERT_FALSE(expected.empty());
+
+    const auto view = env.FirstAgentView(q);
+    std::vector<LineSegment> actual{};
+    for(const auto& segment : view.WallsInRange(3.0)) {
+        actual.push_back(segment);
+    }
+
+    EXPECT_EQ(actual, expected);
+
+    // The near face of the wall block sits at x = 0.9, so measured from the agent it is
+    // 1.9 away. Anything computed against the origin instead would report 0.9.
+    double closest = std::numeric_limits<double>::max();
+    for(const auto& segment : actual) {
+        closest = std::min(closest, segment.ShortestPoint(Point{}).Norm());
+    }
+    EXPECT_DOUBLE_EQ(closest, 1.9);
+}
+
+TEST(AgentView, WallsNearbyAreRelativeToTheAgent)
+{
+    Environment env{};
+    const Point pos{-1.0, 2.0};
+    env.add_agent(pos);
+    const auto geo = WalledGeometry();
+    const auto q = env.query(geo);
+
+    std::vector<LineSegment> expected{};
+    for(const auto& segment : q.LineSegmentsInRange(pos)) {
+        expected.push_back({segment.p1 - pos, segment.p2 - pos});
+    }
+    ASSERT_FALSE(expected.empty());
+
+    const auto view = env.FirstAgentView(q);
+    std::vector<LineSegment> actual{};
+    for(const auto& segment : view.WallsNearby()) {
+        actual.push_back(segment);
+    }
+
+    EXPECT_EQ(actual, expected);
+}

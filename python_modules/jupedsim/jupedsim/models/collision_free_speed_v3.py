@@ -15,9 +15,7 @@ The model instance is passed to the simulation:
     sim.add_agent(
         journey_id=journey_id,
         stage_id=stage_id,
-        state=jupedsim.CollisionFreeSpeedModelV3State(
-            position=(1.0, 1.0), desired_speed=1.4
-        ),
+        position=(1.0, 1.0), state=jupedsim.CollisionFreeSpeedModelV3State(desired_speed=1.4),
     )
 
 .. warning::
@@ -27,7 +25,7 @@ The model instance is passed to the simulation:
 
 :class:`CollisionFreeSpeedModelV3State` exposes the complete per-agent state
 of the model as keyword-only constructor arguments with sensible defaults:
-``position``, ``orientation``, ``strength_neighbor_repulsion``,
+``orientation``, ``strength_neighbor_repulsion``,
 ``range_neighbor_repulsion``, ``strength_geometry_repulsion``,
 ``range_geometry_repulsion``, ``range_x_scale``, ``range_y_scale``,
 ``theta_max_upper_bound``, ``agent_buffer``, ``time_gap``, ``desired_speed``,

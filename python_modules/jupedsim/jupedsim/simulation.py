@@ -26,10 +26,7 @@ from jupedsim.models.collision_free_speed_v3 import (
     CollisionFreeSpeedModelV3,
     CollisionFreeSpeedModelV3State,
 )
-from jupedsim.models.custom_model import (
-    CustomModelAgentState,
-    CustomOperationalModel,
-)
+from jupedsim.models.custom_model import CustomOperationalModel
 from jupedsim.models.generalized_centrifugal_force import (
     GeneralizedCentrifugalForceModel,
     GeneralizedCentrifugalForceModelState,
@@ -270,6 +267,7 @@ class Simulation:
         *,
         journey_id: int,
         stage_id: int,
+        position: tuple[float, float],
         state: (
             GeneralizedCentrifugalForceModelState
             | CollisionFreeSpeedModelState
@@ -278,44 +276,40 @@ class Simulation:
             | AnticipationVelocityModelState
             | SocialForceModelState
             | WarpDriverModelState
-            | CustomModelAgentState
+            | Any
         ),
     ) -> int:
         """Add an agent to the simulation.
 
-        The agent is spawned at ``state.position``.
-
         Arguments:
             journey_id: Id of the journey the agent follows.
             stage_id: Id of the stage the agent initially targets.
+            position: Position to spawn the agent at, as ``(x, y)`` in metres.
+                The position belongs to the agent, not to its model state.
             state: Initial per-agent model state. For built-in models this is
                 the matching ``XModelState`` instance, e.g.
                 :class:`~jupedsim.CollisionFreeSpeedModelState`. For custom
-                models this is your own object satisfying
-                :class:`~jupedsim.CustomModelAgentState`, i.e. exposing a
-                ``position`` attribute. The state type has to match the model
-                used in this simulation. When adding agents with invalid
-                parameters, or too close to the boundary or other agents, this
-                will cause an error.
+                models this is your own object, of whatever type your
+                :class:`~jupedsim.CustomOperationalModel` expects. The state
+                type has to match the model used in this simulation. When
+                adding agents with invalid parameters, or too close to the
+                boundary or other agents, this will cause an error.
 
         Returns:
             Id of the added agent.
         """
         if isinstance(state, _STATE_TYPES):
             return self._obj.add_agent(
-                journey_id=journey_id, stage_id=stage_id, state=state
-            )
-        if isinstance(state, CustomModelAgentState):
-            return self._obj.add_agent(
                 journey_id=journey_id,
                 stage_id=stage_id,
-                state=py_jps._CustomModelState(state),
+                position=position,
+                state=state,
             )
-        raise TypeError(
-            "state must be one of the built-in model states "
-            f"({', '.join(t.__name__ for t in _STATE_TYPES)}) or an object "
-            "satisfying CustomModelAgentState (exposing a 'position' "
-            f"attribute), got {type(state).__name__}"
+        return self._obj.add_agent(
+            journey_id=journey_id,
+            stage_id=stage_id,
+            position=position,
+            state=py_jps._CustomModelState(state),
         )
 
     def mark_agent_for_removal(self, agent_id: int):

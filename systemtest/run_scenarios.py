@@ -33,7 +33,10 @@ def run(model, make_state, out_path):
     journey_id = sim.add_journey(jps.JourneyDescription([exit_id]))
     for pos in grid_positions():
         sim.add_agent(
-            journey_id=journey_id, stage_id=exit_id, state=make_state(pos)
+            journey_id=journey_id,
+            stage_id=exit_id,
+            position=pos,
+            state=make_state(pos),
         )
 
     lines = []

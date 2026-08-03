@@ -3,7 +3,7 @@ import jupedsim as jps
 import pytest
 
 # Expected defaults are pinned to the C++ Agent struct initializers of each
-# operational model. Constructing a state with only a position must yield
+# operational model. Constructing a state with no arguments must yield
 # exactly these values.
 STATE_DEFAULTS = [
     (
@@ -116,8 +116,8 @@ _GEOMETRY = [(-50, -50), (50, -50), (50, 50), (-50, 50)]
 
 def _default_state(state_cls):
     if state_cls is jps.GeneralizedCentrifugalForceModelState:
-        return state_cls(position=(0, 0), orientation=(1.0, 0.0))
-    return state_cls(position=(0, 0))
+        return state_cls(orientation=(1.0, 0.0))
+    return state_cls()
 
 
 def _trajectory(model, state_cls):
@@ -126,7 +126,10 @@ def _trajectory(model, state_cls):
     exit_id = simulation.add_exit_stage([(49, -3), (49, 3), (50, 3), (50, -3)])
     journey_id = simulation.add_journey(jps.JourneyDescription([exit_id]))
     agent_id = simulation.add_agent(
-        journey_id=journey_id, stage_id=exit_id, state=_default_state(state_cls)
+        journey_id=journey_id,
+        stage_id=exit_id,
+        position=(0, 0),
+        state=_default_state(state_cls),
     )
     positions = []
     for _ in range(20):
@@ -204,8 +207,7 @@ def test_state_defaults_match_cpp_struct_initializers(
     state_cls, expected_defaults
 ):
     """State ctor defaults must match the C++ Agent struct initializers."""
-    state = state_cls(position=(0, 0))
-    assert state.position == (0, 0)
+    state = state_cls()
     for field, expected in expected_defaults.items():
         actual = getattr(state, field)
         assert actual == pytest.approx(expected), (

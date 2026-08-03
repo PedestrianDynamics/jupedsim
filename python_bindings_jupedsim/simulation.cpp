@@ -83,15 +83,21 @@ void init_simulation(py::module_& m)
             [](Simulation& sim,
                uint64_t journeyId,
                uint64_t stageId,
-               GenericAgent::ModelState state) {
+               std::tuple<double, double> position,
+               OperationalModelStateVariant state) {
                 return sim
                     .AddAgent(GenericAgent(
-                        GenericAgent::ID::Invalid, journeyId, stageId, std::move(state)))
+                        GenericAgent::ID::Invalid,
+                        journeyId,
+                        stageId,
+                        intoPoint(position),
+                        std::move(state)))
                     .getID();
             },
             py::kw_only(),
             py::arg("journey_id"),
             py::arg("stage_id"),
+            py::arg("position"),
             py::arg("state"))
         .def(
             "mark_agent_for_removal",

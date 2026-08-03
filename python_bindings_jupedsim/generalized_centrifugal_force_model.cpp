@@ -27,8 +27,7 @@ void init_generalized_centrifugal_force_model(py::module_& m)
     const GeneralizedCentrifugalForceModel::State d{};
     py::class_<GeneralizedCentrifugalForceModel::State>(m, "GeneralizedCentrifugalForceModelState")
         .def(
-            py::init([](Point position,
-                        Point orientation,
+            py::init([](Point orientation,
                         double speed,
                         Point desiredDirection,
                         int orientationDelay,
@@ -40,7 +39,6 @@ void init_generalized_centrifugal_force_model(py::module_& m)
                         double bmin,
                         double bmax) {
                 return GeneralizedCentrifugalForceModel::State{
-                    .position = position,
                     .orientation = orientation,
                     .speed = speed,
                     .e0 = desiredDirection,
@@ -54,7 +52,6 @@ void init_generalized_centrifugal_force_model(py::module_& m)
                     .BMax = bmax};
             }),
             py::kw_only(),
-            py::arg("position") = d.position,
             py::arg("orientation") = d.orientation,
             py::arg("speed") = d.speed,
             py::arg("desired_direction") = d.e0,
@@ -66,7 +63,6 @@ void init_generalized_centrifugal_force_model(py::module_& m)
             py::arg("a_min") = d.AMin,
             py::arg("b_min") = d.BMin,
             py::arg("b_max") = d.BMax)
-        .def_readwrite("position", &GeneralizedCentrifugalForceModel::State::position)
         .def_readwrite("orientation", &GeneralizedCentrifugalForceModel::State::orientation)
         .def_readwrite("speed", &GeneralizedCentrifugalForceModel::State::speed)
         .def_readwrite("desired_direction", &GeneralizedCentrifugalForceModel::State::e0)

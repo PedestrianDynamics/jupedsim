@@ -4,12 +4,13 @@
 #include <fmt/format.h>
 #include <gtest/gtest.h>
 
-static GenericAgent make_agent(GenericAgent::ModelState model)
+static GenericAgent make_agent(OperationalModelState model)
 {
     return GenericAgent(
         GenericAgent::ID{},
         jps::UniqueID<Journey>::Invalid,
         jps::UniqueID<BaseStage>::Invalid,
+        Point{},
         std::move(model));
 }
 

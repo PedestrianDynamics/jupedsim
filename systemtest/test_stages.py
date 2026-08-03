@@ -105,7 +105,8 @@ def test_can_share_queue_between_stages():
         simulation.add_agent(
             journey_id=journey_id,
             stage_id=stage_id,
-            state=jps.CollisionFreeSpeedModelState(position=pos),
+            position=pos,
+            state=jps.CollisionFreeSpeedModelState(),
         )
 
     while simulation.agent_count() > 0:
@@ -169,7 +170,8 @@ def test_can_use_stage_proxy():
     agent_id = simulation.add_agent(
         journey_id=exit_journey_id,
         stage_id=exit_id,
-        state=jps.CollisionFreeSpeedModelState(position=(-9.5, 0)),
+        position=(-9.5, 0),
+        state=jps.CollisionFreeSpeedModelState(),
     )
 
     assert exit.count_targeting() == 1

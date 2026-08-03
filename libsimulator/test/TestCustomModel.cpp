@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "EnvironmentQuery.hpp"
+#include "AgentView.hpp"
 #include "GenericAgent.hpp"
 #include "GeometryBuilder.hpp"
 #include "OperationalDecisionSystem.hpp"
@@ -36,31 +36,31 @@ struct ConstCharPointerToStringPayload {
 class MinimalCustomModel : public CustomModel
 {
 public:
-    void ComputeNextState(
-        double dT,
-        const GenericAgent& current,
-        GenericAgent& next,
-        const EnvironmentQuery&) const override
+    Point ComputeNextState(
+        const OperationalModelState& current,
+        OperationalModelState& next,
+        const AgentStep& step) const override
     {
-        const auto& currentModelData = std::get<CustomModel::State>(current.model);
+        const auto& currentModelData = std::get<CustomModel::State>(current);
         const auto& state = currentModelData.Get<MinimalState>();
-        auto& nextModelData = std::get<CustomModel::State>(next.model);
+        auto& nextModelData = std::get<CustomModel::State>(next);
         auto& nextState = nextModelData.Get<MinimalState>();
 
-        nextModelData.position = currentModelData.position + state.velocity * dT;
         nextState.velocity = state.velocity;
         nextState.applications = state.applications + 1;
+        return state.velocity * step.dt();
     }
 
-    void CheckModelConstraint(const GenericAgent&, const EnvironmentQuery&) const override {}
+    void CheckModelConstraint(const GenericAgent&, const AgentView&) const override {}
 };
 
-GenericAgent MakeAgent(GenericAgent::ModelState model)
+GenericAgent MakeAgent(OperationalModelState model, Point position = {})
 {
     return GenericAgent(
         GenericAgent::ID::Invalid,
         jps::UniqueID<Journey>::Invalid,
         jps::UniqueID<BaseStage>::Invalid,
+        position,
         std::move(model));
 }
 } // namespace
@@ -76,8 +76,8 @@ TEST(CustomModelState, DoesNotSwallowArbitraryTypesImplicitly)
     // Ensure only explicit construction of CustomModelState and no implicit conversion
     // from any type.
     EXPECT_FALSE((std::is_convertible_v<Point, CustomModel::State>) );
-    EXPECT_FALSE((std::is_convertible_v<Point, GenericAgent::ModelState>) );
-    EXPECT_FALSE((std::is_convertible_v<GenericAgent, GenericAgent::ModelState>) );
+    EXPECT_FALSE((std::is_convertible_v<Point, OperationalModelState>) );
+    EXPECT_FALSE((std::is_convertible_v<GenericAgent, OperationalModelState>) );
 
     EXPECT_TRUE((std::is_constructible_v<CustomModel::State, int>) );
 }
@@ -134,34 +134,34 @@ TEST(CustomModel, RunsThroughOperationalDecisionSystem)
 
     const auto& agent = agents.front();
     const auto& state = std::get<CustomModel::State>(agent.model).Get<MinimalState>();
-    ASSERT_EQ(agent.position(), Point(1.0, 0.0));
+    ASSERT_EQ(agent.position, Point(1.0, 0.0));
     ASSERT_EQ(state.applications, 1);
 }
 
 TEST(ModelTypeOf, MapsEveryAgentModelDataToItsOperationalModelType)
 {
     ASSERT_EQ(
-        ModelTypeOf(GenericAgent::ModelState{GeneralizedCentrifugalForceModel::State{}}),
+        ModelTypeOf(OperationalModelState{GeneralizedCentrifugalForceModel::State{}}),
         OperationalModelType::GENERALIZED_CENTRIFUGAL_FORCE);
     ASSERT_EQ(
-        ModelTypeOf(GenericAgent::ModelState{CollisionFreeSpeedModel::State{}}),
+        ModelTypeOf(OperationalModelState{CollisionFreeSpeedModel::State{}}),
         OperationalModelType::COLLISION_FREE_SPEED);
     ASSERT_EQ(
-        ModelTypeOf(GenericAgent::ModelState{CollisionFreeSpeedModelV2::State{}}),
+        ModelTypeOf(OperationalModelState{CollisionFreeSpeedModelV2::State{}}),
         OperationalModelType::COLLISION_FREE_SPEED_V2);
     ASSERT_EQ(
-        ModelTypeOf(GenericAgent::ModelState{CollisionFreeSpeedModelV3::State{}}),
+        ModelTypeOf(OperationalModelState{CollisionFreeSpeedModelV3::State{}}),
         OperationalModelType::COLLISION_FREE_SPEED_V3);
     ASSERT_EQ(
-        ModelTypeOf(GenericAgent::ModelState{AnticipationVelocityModel::State{}}),
+        ModelTypeOf(OperationalModelState{AnticipationVelocityModel::State{}}),
         OperationalModelType::ANTICIPATION_VELOCITY_MODEL);
     ASSERT_EQ(
-        ModelTypeOf(GenericAgent::ModelState{SocialForceModel::State{}}),
+        ModelTypeOf(OperationalModelState{SocialForceModel::State{}}),
         OperationalModelType::SOCIAL_FORCE);
     ASSERT_EQ(
-        ModelTypeOf(GenericAgent::ModelState{WarpDriverModel::State{}}),
+        ModelTypeOf(OperationalModelState{WarpDriverModel::State{}}),
         OperationalModelType::WARP_DRIVER);
     ASSERT_EQ(
-        ModelTypeOf(GenericAgent::ModelState{CustomModel::State{MinimalState{}}}),
+        ModelTypeOf(OperationalModelState{CustomModel::State{MinimalState{}}}),
         OperationalModelType::CUSTOM_MODEL);
 }

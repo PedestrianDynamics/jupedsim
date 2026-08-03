@@ -204,12 +204,7 @@ sim = jps.Simulation(model=model, geometry=area, dt=0.01)
 agent_id = sim.add_agent(
     journey_id=journey_id,
     stage_id=stage_id,
-    state=jps.WarpDriverModelState(
-        position=(2.0, 2.0),
-        orientation=(1.0, 0.0),
-        desired_speed=1.2,
-        radius=0.15,
-    ),
+    position=(2.0, 2.0), state=jps.WarpDriverModelState(orientation=(1.0, 0.0), desired_speed=1.2, radius=0.15),
 )
 
 # Runtime state access through the agent handle. The handle resolves the

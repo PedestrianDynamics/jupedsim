@@ -9,10 +9,8 @@
 
 template <typename T>
 struct ValueWithPos {
-    Point pos{};
+    Point position{};
     T val;
-
-    const Point& position() const { return pos; }
 };
 
 namespace

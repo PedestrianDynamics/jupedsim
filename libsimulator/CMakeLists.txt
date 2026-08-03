@@ -9,6 +9,7 @@ target_sources(simulator PRIVATE
     src/AABB.cpp
     src/AABB.hpp
     src/AgentRemovalSystem.hpp
+    src/AgentView.hpp
     src/CfgCgal.hpp
     src/CollisionGeometry.cpp
     src/CollisionGeometry.hpp
@@ -94,10 +95,10 @@ target_include_directories(simulator PUBLIC
 if (BUILD_TESTS)
     add_executable(libsimulator-tests
         test/TestAABB.cpp
+        test/TestAgentView.cpp
         test/TestBasicPrimitiveTests.cpp
         test/TestCollisionGeometry.cpp
         test/TestCustomModel.cpp
-        test/TestEnvironmentQuery.cpp
         test/TestGenericAgentFormatter.cpp
         test/TestGraph.cpp
         test/TestJourney.cpp

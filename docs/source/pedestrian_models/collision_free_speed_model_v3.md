@@ -200,7 +200,7 @@ sim = jps.Simulation(
 agent_id = sim.add_agent(
     journey_id=journey_id,
     stage_id=stage_id,
-    state=jps.CollisionFreeSpeedModelV3State(position=(1.0, 1.0)),
+    position=(1.0, 1.0), state=jps.CollisionFreeSpeedModelV3State(),
 )
 
 # modify at runtime

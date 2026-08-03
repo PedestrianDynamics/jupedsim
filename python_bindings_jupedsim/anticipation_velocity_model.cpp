@@ -23,8 +23,7 @@ void init_anticipation_velocity_model(py::module_& m)
     const AnticipationVelocityModel::State d{};
     py::class_<AnticipationVelocityModel::State>(m, "AnticipationVelocityModelState")
         .def(
-            py::init([](Point position,
-                        Point orientation,
+            py::init([](Point orientation,
                         double strengthNeighborRepulsion,
                         double rangeNeighborRepulsion,
                         double wallBufferDistance,
@@ -35,7 +34,6 @@ void init_anticipation_velocity_model(py::module_& m)
                         double desiredSpeed,
                         double radius) {
                 return AnticipationVelocityModel::State{
-                    .position = position,
                     .orientation = orientation,
                     .strengthNeighborRepulsion = strengthNeighborRepulsion,
                     .rangeNeighborRepulsion = rangeNeighborRepulsion,
@@ -48,7 +46,6 @@ void init_anticipation_velocity_model(py::module_& m)
                     .radius = radius};
             }),
             py::kw_only(),
-            py::arg("position") = d.position,
             py::arg("orientation") = d.orientation,
             py::arg("strength_neighbor_repulsion") = d.strengthNeighborRepulsion,
             py::arg("range_neighbor_repulsion") = d.rangeNeighborRepulsion,
@@ -59,7 +56,6 @@ void init_anticipation_velocity_model(py::module_& m)
             py::arg("time_gap") = d.timeGap,
             py::arg("desired_speed") = d.v0,
             py::arg("radius") = d.radius)
-        .def_readwrite("position", &AnticipationVelocityModel::State::position)
         .def_readwrite("orientation", &AnticipationVelocityModel::State::orientation)
         .def_readwrite(
             "strength_neighbor_repulsion",

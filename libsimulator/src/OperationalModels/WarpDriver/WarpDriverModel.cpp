@@ -27,7 +27,7 @@
 //
 #include "WarpDriverModel.hpp"
 
-#include "EnvironmentQuery.hpp"
+#include "AgentView.hpp"
 #include "GenericAgent.hpp"
 #include "OperationalModelType.hpp"
 #include "Point.hpp"
@@ -146,18 +146,19 @@ namespace
 
 using STP = WarpDriverModel::SpaceTimePoint;
 
-// W_local: change of reference frame from agent a to agent b
-STP WarpLocalForward(const STP& s, Point posA, Point orientA, Point posB, Point orientB)
+// W_local: change of reference frame from agent a to agent b. Everything is expressed
+// relative to a, so a sits at the origin and b at 'relPosB'.
+STP WarpLocalForward(const STP& s, Point relPosB, Point orientA, Point orientB)
 {
-    // Rotate from a's frame to world
+    // Rotate from a's frame to the axis aligned frame around a
     const double cosA = orientA.x;
     const double sinA = orientA.y;
-    const double wx = cosA * s.x - sinA * s.y + posA.x;
-    const double wy = sinA * s.x + cosA * s.y + posA.y;
+    const double wx = cosA * s.x - sinA * s.y;
+    const double wy = sinA * s.x + cosA * s.y;
 
-    // World to b's frame
-    const double dx = wx - posB.x;
-    const double dy = wy - posB.y;
+    // ... and on into b's frame
+    const double dx = wx - relPosB.x;
+    const double dy = wy - relPosB.y;
     const double cosB = orientB.x;
     const double sinB = orientB.y;
     return STP{cosB * dx + sinB * dy, -sinB * dx + cosB * dy, s.t};
@@ -207,9 +208,8 @@ STP WarpVelocityUncertaintyForward(const STP& s, double uncertaintyX, double unc
 // Order: W_local -> W_v -> W_r -> W_ts -> W_vu
 // Then check W_th (time validity)
 struct WarpParams {
-    Point posA;
+    Point relPosB;
     Point orientA;
-    Point posB;
     Point orientB;
     double speedB;
     double radiusB;
@@ -231,7 +231,7 @@ double ProbabilityScale(const STP& sOriginal, const WarpParams& p)
 
 STP ComposeForward(const STP& s, const WarpParams& p)
 {
-    auto s1 = WarpLocalForward(s, p.posA, p.orientA, p.posB, p.orientB);
+    auto s1 = WarpLocalForward(s, p.relPosB, p.orientA, p.orientB);
     auto s2 = WarpVelocityForward(s1, p.speedB);
     auto s3 = WarpRadiusForward(s2, p.radiusB);
     auto s4 = WarpTimeUncertaintyForward(s3, p.lambda);
@@ -272,7 +272,7 @@ STP ComposeGradientInverse(const Point& gradI, const STP& sOriginal, const WarpP
     {
         const double t = sOriginal.t;
         const double beta = 1.0 / (1.0 + p.lambda * std::max(t, 0.0));
-        auto sAtTu = WarpLocalForward(sOriginal, p.posA, p.orientA, p.posB, p.orientB);
+        auto sAtTu = WarpLocalForward(sOriginal, p.relPosB, p.orientA, p.orientB);
         sAtTu = WarpVelocityForward(sAtTu, p.speedB);
         sAtTu = WarpRadiusForward(sAtTu, p.radiusB);
         const double gamma1 = -p.lambda * beta * beta * sAtTu.x;
@@ -350,9 +350,8 @@ OperationalModelType WarpDriverModel::Type() const
     return OperationalModelType::WARP_DRIVER;
 }
 
-void WarpDriverModel::CheckModelConstraint(
-    const GenericAgent& agent,
-    const EnvironmentQuery& /*envQuery*/) const
+void WarpDriverModel::CheckModelConstraint(const GenericAgent& agent, const AgentView& /*view*/)
+    const
 {
     const auto* data = std::get_if<State>(&agent.model);
     if(!data) {
@@ -411,14 +410,13 @@ void WarpDriverModel::CheckModelConstraint(
     }
 }
 
-void WarpDriverModel::ComputeNextState(
-    double dT,
-    const GenericAgent& current,
-    GenericAgent& next,
-    const EnvironmentQuery& envQuery) const
+Point WarpDriverModel::ComputeNextState(
+    const OperationalModelState& current,
+    OperationalModelState& next,
+    const AgentStep& step) const
 {
-    const auto& agentData = std::get<State>(current.model);
-    auto& nextData = std::get<State>(next.model);
+    const auto& agentData = std::get<State>(current);
+    auto& nextData = std::get<State>(next);
     const double speed = agentData.v0;
 
     // State orientation (unit vector). If zero, default to +x.
@@ -430,19 +428,18 @@ void WarpDriverModel::ComputeNextState(
     }
 
     // Direction towards destination
-    Point toTarget = current.nextTarget - agentData.position;
+    Point toTarget = step.ToNextTarget();
     const double distToTarget = toTarget.Norm();
     if(distToTarget < 1e-9) {
         // The old update carried default-initialized stuck/detour state here,
         // so applying it reset that state; replicate that reset.
-        nextData.position = agentData.position;
         nextData.orientation = orient;
         nextData.stuckTime = 0.0;
         nextData.anchorX = 0.0;
         nextData.anchorY = 0.0;
         nextData.detourTime = 0.0;
         nextData.detourSide = 1;
-        return;
+        return Point{0.0, 0.0};
     }
     Point desiredDir = toTarget.Normalized();
 
@@ -454,7 +451,7 @@ void WarpDriverModel::ComputeNextState(
     const double dtSample = this->_timeHorizon / std::max(this->_numSamples - 1, 1);
 
     // === Step 2: Perceive - build collision probability field ===
-    const auto neighbors = envQuery.OtherAgentsInRange(current.model, _cutOffRadius);
+    const auto neighbors = step.OtherAgentsInRange(_cutOffRadius);
 
     // Short-range repulsion: not part of the original Wolinski et al. (2016)
     // model, which is purely anticipatory. Added as a practical safety net
@@ -463,11 +460,11 @@ void WarpDriverModel::ComputeNextState(
     // Similar to the pushout mechanisms in CFS and AVM.
     Point repulsion{0.0, 0.0};
     for(const auto& neighbor : neighbors) {
-        const auto* nbData = std::get_if<State>(&neighbor.model);
+        const auto* nbData = std::get_if<State>(neighbor.state);
         if(!nbData) {
             continue;
         }
-        Point diff = agentData.position - nbData->position;
+        Point diff = neighbor.RelativePosition * -1.0;
         const double dist = diff.Norm();
         const double combinedRadius = agentData.radius + nbData->radius;
         if(dist < combinedRadius * 3.0 && dist > 1e-6) {
@@ -500,7 +497,7 @@ void WarpDriverModel::ComputeNextState(
     }
 
     for(const auto& neighbor : neighbors) {
-        const auto* nbData = std::get_if<State>(&neighbor.model);
+        const auto* nbData = std::get_if<State>(neighbor.state);
         if(!nbData) {
             continue;
         }
@@ -521,9 +518,8 @@ void WarpDriverModel::ComputeNextState(
         // gradient inverse) are loop-invariant w.r.t. the sample index. Hoist
         // them out of the sample loop and precompute once per (ped, neighbor).
         WarpParams wp{};
-        wp.posA = agentData.position;
+        wp.relPosB = neighbor.RelativePosition;
         wp.orientA = effectiveOrient;
-        wp.posB = nbData->position;
         wp.orientB = nbOrient;
         wp.speedB = nbSpeed;
         wp.radiusB = agentData.radius + nbData->radius; // Minkowski sum
@@ -627,17 +623,17 @@ void WarpDriverModel::ComputeNextState(
     newVelWorld = newVelWorld + repulsion;
 
     // Boundary avoidance: steer agents away from walls
-    const auto& walls = envQuery.LineSegmentsInRange(agentData.position);
+    const auto& walls = step.WallsNearby();
     for(const auto& wall : walls) {
         const Point wallVec = wall.p2 - wall.p1;
         const double wallLen2 = wallVec.ScalarProduct(wallVec);
         if(wallLen2 < 1e-12) {
             continue; // degenerate wall segment
         }
-        const Point toAgent = agentData.position - wall.p1;
+        const Point toAgent = Point{} - wall.p1;
         const double t = std::clamp(toAgent.ScalarProduct(wallVec) / wallLen2, 0.0, 1.0);
         const Point closest = wall.p1 + wallVec * t;
-        const Point diff = agentData.position - closest;
+        const Point diff = Point{} - closest;
         const double dist = diff.Norm();
         if(dist < agentData.radius * 3.0 && dist > 1e-6) {
             const double steering = agentData.v0 * (agentData.radius * 3.0 - dist) / dist;
@@ -663,38 +659,38 @@ void WarpDriverModel::ComputeNextState(
 
     // Detour mode: agent is currently on a lateral detour to break a deadlock
     if(detourTime > 0.0) {
-        detourTime -= dT;
+        detourTime -= step.dt();
         Point lateral{-desiredDir.y * detourSide, desiredDir.x * detourSide};
         Point detourDir = (lateral * 0.8 + desiredDir * 0.2).Normalized();
         Point detourVel = detourDir * agentData.v0 * 0.5;
-        Point newPos = agentData.position + detourVel * dT;
+        Point movement = detourVel * step.dt();
         // If detour would leave the walkable area, try the other side
-        if(!envQuery.InsideGeometry(newPos)) {
+        if(!step.InsideGeometry(movement)) {
             detourSide = -detourSide;
             lateral = Point{-desiredDir.y * detourSide, desiredDir.x * detourSide};
             detourDir = (lateral * 0.8 + desiredDir * 0.2).Normalized();
             detourVel = detourDir * agentData.v0 * 0.5;
-            newPos = agentData.position + detourVel * dT;
+            movement = detourVel * step.dt();
             // If both sides fail, just creep toward goal
-            if(!envQuery.InsideGeometry(newPos)) {
-                newPos = agentData.position + desiredDir * agentData.v0 * 0.1 * dT;
+            if(!step.InsideGeometry(movement)) {
+                movement = desiredDir * agentData.v0 * 0.1 * step.dt();
                 detourDir = desiredDir;
             }
         }
         if(detourTime <= 0.0) {
             detourTime = 0.0;
             stuckTime = 0.0;
+            const Point newPos = step.position() + movement;
             anchorX = newPos.x;
             anchorY = newPos.y;
         }
-        nextData.position = newPos;
         nextData.orientation = detourDir;
         nextData.stuckTime = stuckTime;
         nextData.anchorX = anchorX;
         nextData.anchorY = anchorY;
         nextData.detourTime = detourTime;
         nextData.detourSide = detourSide;
-        return;
+        return movement;
     }
 
     // Measure net displacement from anchor over the stuck window
@@ -702,15 +698,15 @@ void WarpDriverModel::ComputeNextState(
     constexpr double detourDuration = 1.0; // seconds of lateral movement
     constexpr double progressRadius = 0.3; // must move this far from anchor to count as progress
 
-    stuckTime += dT;
+    stuckTime += step.dt();
     const double netDisplacement =
-        std::hypot(agentData.position.x - anchorX, agentData.position.y - anchorY);
+        std::hypot(step.position().x - anchorX, step.position().y - anchorY);
 
     if(netDisplacement > progressRadius) {
         // Real progress — reset anchor to current position
         stuckTime = 0.0;
-        anchorX = agentData.position.x;
-        anchorY = agentData.position.y;
+        anchorX = step.position().x;
+        anchorY = step.position().y;
     } else if(stuckTime >= stuckThreshold) {
         // Stuck: no net progress for stuckThreshold seconds — enter detour
         std::uniform_int_distribution<int> sideDist(0, 1);
@@ -728,14 +724,13 @@ void WarpDriverModel::ComputeNextState(
         smoothedVel = smoothedVel * (agentData.v0 / smoothedSpeed);
     }
 
-    Point newPos = agentData.position + smoothedVel * dT;
     Point newOrient = (smoothedVel.Norm() > 1e-9) ? smoothedVel.Normalized() : orient;
 
-    nextData.position = newPos;
     nextData.orientation = newOrient;
     nextData.stuckTime = stuckTime;
     nextData.anchorX = anchorX;
     nextData.anchorY = anchorY;
     nextData.detourTime = detourTime;
     nextData.detourSide = detourSide;
+    return smoothedVel * step.dt();
 }

@@ -50,9 +50,8 @@ def test_collision_free_speed_model_can_set_radius(
     simulation.add_agent(
         journey_id=journey_id,
         stage_id=exit_id,
-        state=jps.CollisionFreeSpeedModelState(
-            position=agent_position, radius=radius
-        ),
+        position=agent_position,
+        state=jps.CollisionFreeSpeedModelState(radius=radius),
     )
 
 
@@ -67,9 +66,8 @@ def test_collision_free_speed_model_can_not_set_radius_too_small(
         simulation.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
-            state=jps.CollisionFreeSpeedModelState(
-                position=agent_position, radius=-1
-            ),
+            position=agent_position,
+            state=jps.CollisionFreeSpeedModelState(radius=-1),
         )
 
 
@@ -84,9 +82,8 @@ def test_collision_free_speed_model_can_not_set_radius_zero(
         simulation.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
-            state=jps.CollisionFreeSpeedModelState(
-                position=agent_position, radius=0
-            ),
+            position=agent_position,
+            state=jps.CollisionFreeSpeedModelState(radius=0),
         )
 
 
@@ -101,9 +98,8 @@ def test_collision_free_speed_model_can_not_set_radius_too_large(
         simulation.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
-            state=jps.CollisionFreeSpeedModelState(
-                position=agent_position, radius=2.1
-            ),
+            position=agent_position,
+            state=jps.CollisionFreeSpeedModelState(radius=2.1),
         )
 
 
@@ -116,9 +112,8 @@ def test_collision_free_speed_model_can_set_desired_speed(
     simulation.add_agent(
         journey_id=journey_id,
         stage_id=exit_id,
-        state=jps.CollisionFreeSpeedModelState(
-            position=agent_position, desired_speed=desired_speed
-        ),
+        position=agent_position,
+        state=jps.CollisionFreeSpeedModelState(desired_speed=desired_speed),
     )
 
 
@@ -133,9 +128,8 @@ def test_collision_free_speed_model_can_not_set_desired_speed_too_small(
         simulation.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
-            state=jps.CollisionFreeSpeedModelState(
-                position=agent_position, desired_speed=-1
-            ),
+            position=agent_position,
+            state=jps.CollisionFreeSpeedModelState(desired_speed=-1),
         )
 
 
@@ -150,9 +144,8 @@ def test_collision_free_speed_model_can_not_set_desired_speed_too_large(
         simulation.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
-            state=jps.CollisionFreeSpeedModelState(
-                position=agent_position, desired_speed=10.1
-            ),
+            position=agent_position,
+            state=jps.CollisionFreeSpeedModelState(desired_speed=10.1),
         )
 
 
@@ -165,9 +158,8 @@ def test_collision_free_speed_model_can_set_time_gap(
     simulation.add_agent(
         journey_id=journey_id,
         stage_id=exit_id,
-        state=jps.CollisionFreeSpeedModelState(
-            position=agent_position, time_gap=time_gap
-        ),
+        position=agent_position,
+        state=jps.CollisionFreeSpeedModelState(time_gap=time_gap),
     )
 
 
@@ -182,9 +174,8 @@ def test_collision_free_speed_model_can_not_set_time_gap_too_small(
         simulation.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
-            state=jps.CollisionFreeSpeedModelState(
-                position=agent_position, time_gap=-1
-            ),
+            position=agent_position,
+            state=jps.CollisionFreeSpeedModelState(time_gap=-1),
         )
 
 
@@ -200,9 +191,8 @@ def test_collision_free_speed_model_can_not_set_time_too_large(
         simulation.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
-            state=jps.CollisionFreeSpeedModelState(
-                position=agent_position, time_gap=10.1
-            ),
+            position=agent_position,
+            state=jps.CollisionFreeSpeedModelState(time_gap=10.1),
         )
 
 
@@ -220,9 +210,8 @@ def test_collision_free_speed_model_can_not_add_agent_too_close_to_wall(
         simulation.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
-            state=jps.CollisionFreeSpeedModelState(
-                position=(50 - (0.99 * radius), 0), radius=radius
-            ),
+            position=(50 - (0.99 * radius), 0),
+            state=jps.CollisionFreeSpeedModelState(radius=radius),
         )
 
 
@@ -235,8 +224,9 @@ def test_generalized_centrifugal_force_model_can_set_mass(
     simulation.add_agent(
         journey_id=journey_id,
         stage_id=exit_id,
+        position=agent_position,
         state=jps.GeneralizedCentrifugalForceModelState(
-            orientation=(1.0, 0.0), position=agent_position, mass=mass
+            orientation=(1.0, 0.0), mass=mass
         ),
     )
 
@@ -251,8 +241,9 @@ def test_generalized_centrifugal_force_model_can_not_set_mass_too_small(
         simulation.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
+            position=agent_position,
             state=jps.GeneralizedCentrifugalForceModelState(
-                orientation=(1.0, 0.0), position=agent_position, mass=0
+                orientation=(1.0, 0.0), mass=0
             ),
         )
 
@@ -267,8 +258,9 @@ def test_generalized_centrifugal_force_model_can_not_set_mass_too_large(
         simulation.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
+            position=agent_position,
             state=jps.GeneralizedCentrifugalForceModelState(
-                orientation=(1.0, 0.0), position=agent_position, mass=100.1
+                orientation=(1.0, 0.0), mass=100.1
             ),
         )
 
@@ -282,8 +274,9 @@ def test_generalized_centrifugal_force_model_can_set_tau(
     simulation.add_agent(
         journey_id=journey_id,
         stage_id=exit_id,
+        position=agent_position,
         state=jps.GeneralizedCentrifugalForceModelState(
-            orientation=(1.0, 0.0), position=agent_position, tau=tau
+            orientation=(1.0, 0.0), tau=tau
         ),
     )
 
@@ -298,8 +291,9 @@ def test_generalized_centrifugal_force_model_can_not_set_tau_too_small(
         simulation.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
+            position=agent_position,
             state=jps.GeneralizedCentrifugalForceModelState(
-                orientation=(1.0, 0.0), position=agent_position, tau=0
+                orientation=(1.0, 0.0), tau=0
             ),
         )
 
@@ -314,8 +308,9 @@ def test_generalized_centrifugal_force_model_can_not_set_tau_too_large(
         simulation.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
+            position=agent_position,
             state=jps.GeneralizedCentrifugalForceModelState(
-                orientation=(1.0, 0.0), position=agent_position, tau=10.1
+                orientation=(1.0, 0.0), tau=10.1
             ),
         )
 
@@ -329,10 +324,9 @@ def test_generalized_centrifugal_force_model_can_set_desired_speed(
     simulation.add_agent(
         journey_id=journey_id,
         stage_id=exit_id,
+        position=agent_position,
         state=jps.GeneralizedCentrifugalForceModelState(
-            orientation=(1.0, 0.0),
-            position=agent_position,
-            desired_speed=desired_speed,
+            orientation=(1.0, 0.0), desired_speed=desired_speed
         ),
     )
 
@@ -347,10 +341,9 @@ def test_generalized_centrifugal_force_model_can_not_set_desired_speed_too_small
         simulation.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
+            position=agent_position,
             state=jps.GeneralizedCentrifugalForceModelState(
-                orientation=(1.0, 0.0),
-                position=agent_position,
-                desired_speed=-0.1,
+                orientation=(1.0, 0.0), desired_speed=-0.1
             ),
         )
 
@@ -365,10 +358,9 @@ def test_generalized_centrifugal_force_model_can_not_set_desired_speed_too_large
         simulation.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
+            position=agent_position,
             state=jps.GeneralizedCentrifugalForceModelState(
-                orientation=(1.0, 0.0),
-                position=agent_position,
-                desired_speed=10.1,
+                orientation=(1.0, 0.0), desired_speed=10.1
             ),
         )
 
@@ -382,8 +374,9 @@ def test_generalized_centrifugal_force_model_can_set_a_v(
     simulation.add_agent(
         journey_id=journey_id,
         stage_id=exit_id,
+        position=agent_position,
         state=jps.GeneralizedCentrifugalForceModelState(
-            orientation=(1.0, 0.0), position=agent_position, a_v=a_v
+            orientation=(1.0, 0.0), a_v=a_v
         ),
     )
 
@@ -398,8 +391,9 @@ def test_generalized_centrifugal_force_model_can_not_set_a_v_too_small(
         simulation.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
+            position=agent_position,
             state=jps.GeneralizedCentrifugalForceModelState(
-                orientation=(1.0, 0.0), position=agent_position, a_v=-0.1
+                orientation=(1.0, 0.0), a_v=-0.1
             ),
         )
 
@@ -414,8 +408,9 @@ def test_generalized_centrifugal_force_model_can_not_set_a_v_too_large(
         simulation.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
+            position=agent_position,
             state=jps.GeneralizedCentrifugalForceModelState(
-                orientation=(1.0, 0.0), position=agent_position, a_v=10.1
+                orientation=(1.0, 0.0), a_v=10.1
             ),
         )
 
@@ -429,8 +424,9 @@ def test_generalized_centrifugal_force_model_can_set_a_min(
     simulation.add_agent(
         journey_id=journey_id,
         stage_id=exit_id,
+        position=agent_position,
         state=jps.GeneralizedCentrifugalForceModelState(
-            orientation=(1.0, 0.0), position=agent_position, a_min=a_min
+            orientation=(1.0, 0.0), a_min=a_min
         ),
     )
 
@@ -446,8 +442,9 @@ def test_generalized_centrifugal_force_model_can_not_set_a_min_too_small(
         simulation.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
+            position=agent_position,
             state=jps.GeneralizedCentrifugalForceModelState(
-                orientation=(1.0, 0.0), position=agent_position, a_min=0.099
+                orientation=(1.0, 0.0), a_min=0.099
             ),
         )
 
@@ -462,8 +459,9 @@ def test_generalized_centrifugal_force_model_can_not_set_a_min_too_large(
         simulation.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
+            position=agent_position,
             state=jps.GeneralizedCentrifugalForceModelState(
-                orientation=(1.0, 0.0), position=agent_position, a_min=1.1
+                orientation=(1.0, 0.0), a_min=1.1
             ),
         )
 
@@ -477,11 +475,9 @@ def test_generalized_centrifugal_force_model_can_set_b_min(
     simulation.add_agent(
         journey_id=journey_id,
         stage_id=exit_id,
+        position=agent_position,
         state=jps.GeneralizedCentrifugalForceModelState(
-            orientation=(1.0, 0.0),
-            position=agent_position,
-            b_min=b_min,
-            b_max=b_min,
+            orientation=(1.0, 0.0), b_min=b_min, b_max=b_min
         ),
     )
 
@@ -497,8 +493,9 @@ def test_generalized_centrifugal_force_model_can_not_set_b_min_too_small(
         simulation.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
+            position=agent_position,
             state=jps.GeneralizedCentrifugalForceModelState(
-                orientation=(1.0, 0.0), position=agent_position, b_min=0.099
+                orientation=(1.0, 0.0), b_min=0.099
             ),
         )
 
@@ -513,8 +510,9 @@ def test_generalized_centrifugal_force_model_can_not_set_b_min_too_large(
         simulation.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
+            position=agent_position,
             state=jps.GeneralizedCentrifugalForceModelState(
-                orientation=(1.0, 0.0), position=agent_position, b_min=1.1
+                orientation=(1.0, 0.0), b_min=1.1
             ),
         )
 
@@ -528,8 +526,9 @@ def test_generalized_centrifugal_force_model_can_set_b_max(
     simulation.add_agent(
         journey_id=journey_id,
         stage_id=exit_id,
+        position=agent_position,
         state=jps.GeneralizedCentrifugalForceModelState(
-            orientation=(1.0, 0.0), position=agent_position, b_max=b_max
+            orientation=(1.0, 0.0), b_max=b_max
         ),
     )
 
@@ -544,11 +543,9 @@ def test_generalized_centrifugal_force_model_can_not_set_b_max_too_small(
         simulation.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
+            position=agent_position,
             state=jps.GeneralizedCentrifugalForceModelState(
-                orientation=(1.0, 0.0),
-                position=agent_position,
-                b_min=0.4,
-                b_max=0.39,
+                orientation=(1.0, 0.0), b_min=0.4, b_max=0.39
             ),
         )
 
@@ -563,8 +560,9 @@ def test_generalized_centrifugal_force_model_can_not_set_b_max_too_large(
         simulation.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
+            position=agent_position,
             state=jps.GeneralizedCentrifugalForceModelState(
-                orientation=(1.0, 0.0), position=agent_position, b_max=2.1
+                orientation=(1.0, 0.0), b_max=2.1
             ),
         )
 
@@ -584,11 +582,9 @@ def test_generalized_centrifugal_force_model_can_not_add_agent_too_close_to_wall
         simulation.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
+            position=(-50 + 0.5 * a_min, 10),
             state=jps.GeneralizedCentrifugalForceModelState(
-                orientation=(1.0, 0.0),
-                position=(-50 + 0.5 * a_min, 10),
-                a_min=a_min,
-                b_max=b_max,
+                orientation=(1.0, 0.0), a_min=a_min, b_max=b_max
             ),
         )
 
@@ -618,8 +614,9 @@ def test_anticipation_velocity_model_can_set_strength_neighbor_repulsion(
     simulation.add_agent(
         journey_id=journey_id,
         stage_id=exit_id,
+        position=agent_position,
         state=jps.AnticipationVelocityModelState(
-            position=agent_position, strength_neighbor_repulsion=strength
+            strength_neighbor_repulsion=strength
         ),
     )
 
@@ -635,8 +632,9 @@ def test_anticipation_velocity_model_can_not_set_strength_neighbor_repulsion_too
         simulation.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
+            position=agent_position,
             state=jps.AnticipationVelocityModelState(
-                position=agent_position, strength_neighbor_repulsion=-0.1
+                strength_neighbor_repulsion=-0.1
             ),
         )
 
@@ -652,8 +650,9 @@ def test_anticipation_velocity_model_can_not_set_strength_neighbor_repulsion_too
         simulation.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
+            position=agent_position,
             state=jps.AnticipationVelocityModelState(
-                position=agent_position, strength_neighbor_repulsion=20.1
+                strength_neighbor_repulsion=20.1
             ),
         )
 
@@ -667,8 +666,9 @@ def test_anticipation_velocity_model_can_set_range_neighbor_repulsion(
     simulation.add_agent(
         journey_id=journey_id,
         stage_id=exit_id,
+        position=agent_position,
         state=jps.AnticipationVelocityModelState(
-            position=agent_position, range_neighbor_repulsion=range_repulsion
+            range_neighbor_repulsion=range_repulsion
         ),
     )
 
@@ -684,8 +684,9 @@ def test_anticipation_velocity_model_can_not_set_range_neighbor_repulsion_too_sm
         simulation.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
+            position=agent_position,
             state=jps.AnticipationVelocityModelState(
-                position=agent_position, range_neighbor_repulsion=0
+                range_neighbor_repulsion=0
             ),
         )
 
@@ -701,8 +702,9 @@ def test_anticipation_velocity_model_can_not_set_range_neighbor_repulsion_too_la
         simulation.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
+            position=agent_position,
             state=jps.AnticipationVelocityModelState(
-                position=agent_position, range_neighbor_repulsion=5.1
+                range_neighbor_repulsion=5.1
             ),
         )
 
@@ -716,8 +718,9 @@ def test_anticipation_velocity_model_can_set_wall_buffer_distance(
     simulation.add_agent(
         journey_id=journey_id,
         stage_id=exit_id,
+        position=agent_position,
         state=jps.AnticipationVelocityModelState(
-            position=agent_position, wall_buffer_distance=wall_buffer
+            wall_buffer_distance=wall_buffer
         ),
     )
 
@@ -733,9 +736,8 @@ def test_anticipation_velocity_model_can_not_set_wall_buffer_distance_too_small(
         simulation.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
-            state=jps.AnticipationVelocityModelState(
-                position=agent_position, wall_buffer_distance=-0.1
-            ),
+            position=agent_position,
+            state=jps.AnticipationVelocityModelState(wall_buffer_distance=-0.1),
         )
 
 
@@ -750,9 +752,8 @@ def test_anticipation_velocity_model_can_not_set_wall_buffer_distance_too_large(
         simulation.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
-            state=jps.AnticipationVelocityModelState(
-                position=agent_position, wall_buffer_distance=2.1
-            ),
+            position=agent_position,
+            state=jps.AnticipationVelocityModelState(wall_buffer_distance=2.1),
         )
 
 
@@ -765,8 +766,9 @@ def test_anticipation_velocity_model_can_set_anticipation_time(
     simulation.add_agent(
         journey_id=journey_id,
         stage_id=exit_id,
+        position=agent_position,
         state=jps.AnticipationVelocityModelState(
-            position=agent_position, anticipation_time=anticipation_time
+            anticipation_time=anticipation_time
         ),
     )
 
@@ -782,9 +784,8 @@ def test_anticipation_velocity_model_can_not_set_anticipation_time_too_small(
         simulation.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
-            state=jps.AnticipationVelocityModelState(
-                position=agent_position, anticipation_time=-0.1
-            ),
+            position=agent_position,
+            state=jps.AnticipationVelocityModelState(anticipation_time=-0.1),
         )
 
 
@@ -799,9 +800,8 @@ def test_anticipation_velocity_model_can_not_set_anticipation_time_too_large(
         simulation.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
-            state=jps.AnticipationVelocityModelState(
-                position=agent_position, anticipation_time=5.1
-            ),
+            position=agent_position,
+            state=jps.AnticipationVelocityModelState(anticipation_time=5.1),
         )
 
 
@@ -814,9 +814,8 @@ def test_anticipation_velocity_model_can_set_reaction_time(
     simulation.add_agent(
         journey_id=journey_id,
         stage_id=exit_id,
-        state=jps.AnticipationVelocityModelState(
-            position=agent_position, reaction_time=reaction_time
-        ),
+        position=agent_position,
+        state=jps.AnticipationVelocityModelState(reaction_time=reaction_time),
     )
 
 
@@ -831,9 +830,8 @@ def test_anticipation_velocity_model_can_not_set_reaction_time_too_small(
         simulation.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
-            state=jps.AnticipationVelocityModelState(
-                position=agent_position, reaction_time=0
-            ),
+            position=agent_position,
+            state=jps.AnticipationVelocityModelState(reaction_time=0),
         )
 
 
@@ -848,9 +846,8 @@ def test_anticipation_velocity_model_can_not_set_reaction_time_too_large(
         simulation.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
-            state=jps.AnticipationVelocityModelState(
-                position=agent_position, reaction_time=2.1
-            ),
+            position=agent_position,
+            state=jps.AnticipationVelocityModelState(reaction_time=2.1),
         )
 
 
@@ -863,9 +860,8 @@ def test_anticipation_velocity_model_can_set_time_gap(
     simulation.add_agent(
         journey_id=journey_id,
         stage_id=exit_id,
-        state=jps.AnticipationVelocityModelState(
-            position=agent_position, time_gap=time_gap
-        ),
+        position=agent_position,
+        state=jps.AnticipationVelocityModelState(time_gap=time_gap),
     )
 
 
@@ -879,9 +875,8 @@ def test_anticipation_velocity_model_can_not_set_time_gap_too_small(
         simulation.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
-            state=jps.AnticipationVelocityModelState(
-                position=agent_position, time_gap=0
-            ),
+            position=agent_position,
+            state=jps.AnticipationVelocityModelState(time_gap=0),
         )
 
 
@@ -896,9 +891,8 @@ def test_anticipation_velocity_model_can_not_set_time_gap_too_large(
         simulation.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
-            state=jps.AnticipationVelocityModelState(
-                position=agent_position, time_gap=10.1
-            ),
+            position=agent_position,
+            state=jps.AnticipationVelocityModelState(time_gap=10.1),
         )
 
 
@@ -911,9 +905,8 @@ def test_anticipation_velocity_model_can_set_desired_speed(
     simulation.add_agent(
         journey_id=journey_id,
         stage_id=exit_id,
-        state=jps.AnticipationVelocityModelState(
-            position=agent_position, desired_speed=desired_speed
-        ),
+        position=agent_position,
+        state=jps.AnticipationVelocityModelState(desired_speed=desired_speed),
     )
 
 
@@ -927,9 +920,8 @@ def test_anticipation_velocity_model_can_not_set_desired_speed_too_small(
         simulation.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
-            state=jps.AnticipationVelocityModelState(
-                position=agent_position, desired_speed=-0.1
-            ),
+            position=agent_position,
+            state=jps.AnticipationVelocityModelState(desired_speed=-0.1),
         )
 
 
@@ -943,9 +935,8 @@ def test_anticipation_velocity_model_can_not_set_desired_speed_too_large(
         simulation.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
-            state=jps.AnticipationVelocityModelState(
-                position=agent_position, desired_speed=10.1
-            ),
+            position=agent_position,
+            state=jps.AnticipationVelocityModelState(desired_speed=10.1),
         )
 
 
@@ -958,9 +949,8 @@ def test_anticipation_velocity_model_can_set_radius(
     simulation.add_agent(
         journey_id=journey_id,
         stage_id=exit_id,
-        state=jps.AnticipationVelocityModelState(
-            position=agent_position, radius=radius
-        ),
+        position=agent_position,
+        state=jps.AnticipationVelocityModelState(radius=radius),
     )
 
 
@@ -974,9 +964,8 @@ def test_anticipation_velocity_model_can_not_set_radius_too_small(
         simulation.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
-            state=jps.AnticipationVelocityModelState(
-                position=agent_position, radius=0
-            ),
+            position=agent_position,
+            state=jps.AnticipationVelocityModelState(radius=0),
         )
 
 
@@ -990,9 +979,8 @@ def test_anticipation_velocity_model_can_not_set_radius_too_large(
         simulation.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
-            state=jps.AnticipationVelocityModelState(
-                position=agent_position, radius=2.1
-            ),
+            position=agent_position,
+            state=jps.AnticipationVelocityModelState(radius=2.1),
         )
 
 
@@ -1010,20 +998,19 @@ def test_anticipation_velocity_model_can_not_add_agent_too_close_to_wall(
         simulation.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
-            state=jps.AnticipationVelocityModelState(
-                position=(50 - (0.99 * radius), 0), radius=radius
-            ),
+            position=(50 - (0.99 * radius), 0),
+            state=jps.AnticipationVelocityModelState(radius=radius),
         )
 
 
 @dataclasses.dataclass(frozen=True)
 class _MinimalCustomState:
-    position: tuple[float, float]
+    marker: int = 0
 
 
 class _MinimalCustomModel(jps.CustomOperationalModel):
-    def compute_next_state(self, dt, ped, env_query):
-        return _MinimalCustomState(position=ped.position)
+    def compute_next_state(self, state, step):
+        return dataclasses.replace(state), (0.0, 0.0)
 
 
 def test_add_agent_rejects_state_of_different_model_on_custom_simulation():
@@ -1041,7 +1028,8 @@ def test_add_agent_rejects_state_of_different_model_on_custom_simulation():
         simulation.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
-            state=jps.SocialForceModelState(position=(0, 0)),
+            position=(0, 0),
+            state=jps.SocialForceModelState(),
         )
 
 
@@ -1060,36 +1048,32 @@ def test_add_agent_rejects_custom_state_on_builtin_model_simulation():
         simulation.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
-            state=_MinimalCustomState(position=(0, 0)),
+            position=(0, 0),
+            state=_MinimalCustomState(),
         )
 
 
-def test_add_agent_rejects_object_without_position():
-    simulation = jps.Simulation(
-        model=jps.SocialForceModel(),
-        geometry=[(-50, -50), (50, -50), (50, 50), (-50, 50)],
-    )
-    exit_id = simulation.add_exit_stage([(49, -3), (49, 3), (50, 3), (50, -3)])
-    journey_id = simulation.add_journey(jps.JourneyDescription([exit_id]))
-
-    with pytest.raises(TypeError, match="CustomModelAgentState"):
-        simulation.add_agent(
-            journey_id=journey_id, stage_id=exit_id, state=object()
-        )
+class _NoPairModel(jps.CustomOperationalModel):
+    def compute_next_state(self, state, step):
+        return dataclasses.replace(state)
 
 
-class _NoPositionState:
-    pass
+class _WrongMovementTypeModel(jps.CustomOperationalModel):
+    def compute_next_state(self, state, step):
+        return dataclasses.replace(state), "not-a-tuple"
 
 
-class _NoPositionModel(jps.CustomOperationalModel):
-    def compute_next_state(self, dt, ped, env_query):
-        return _NoPositionState()
+class _SameStateModel(jps.CustomOperationalModel):
+    def compute_next_state(self, state, step):
+        return state, (0.0, 0.0)
 
 
-class _WrongPositionTypeModel(jps.CustomOperationalModel):
-    def compute_next_state(self, dt, ped, env_query):
-        return _MinimalCustomState(position="not-a-tuple")
+class _ConstantMovementModel(jps.CustomOperationalModel):
+    def __init__(self, movement):
+        self._movement = movement
+
+    def compute_next_state(self, state, step):
+        return dataclasses.replace(state), self._movement
 
 
 def _custom_model_simulation_with_agent(model):
@@ -1102,29 +1086,77 @@ def _custom_model_simulation_with_agent(model):
     simulation.add_agent(
         journey_id=journey_id,
         stage_id=exit_id,
-        state=_MinimalCustomState(position=(0, 0)),
+        position=(0, 0),
+        state=_MinimalCustomState(),
     )
     return simulation
 
 
-def test_custom_model_update_missing_position_names_source():
-    simulation = _custom_model_simulation_with_agent(_NoPositionModel())
+def test_add_agent_spawns_the_agent_where_add_agent_says():
+    simulation = jps.Simulation(
+        model=_MinimalCustomModel(),
+        geometry=[(-50, -50), (50, -50), (50, 50), (-50, 50)],
+    )
+    exit_id = simulation.add_exit_stage([(49, -3), (49, 3), (50, 3), (50, -3)])
+    journey_id = simulation.add_journey(jps.JourneyDescription([exit_id]))
+
+    agent_id = simulation.add_agent(
+        journey_id=journey_id,
+        stage_id=exit_id,
+        position=(5.0, 5.0),
+        state=_MinimalCustomState(),
+    )
+
+    assert simulation.agent(agent_id).position == (5.0, 5.0)
+
+
+def test_custom_model_update_without_movement_names_source():
+    simulation = _custom_model_simulation_with_agent(_NoPairModel())
 
     with pytest.raises(
         jps.SimulationError,
-        match=r"State returned by compute_next_state\(\) is missing the 'position' attribute",
+        match=r"compute_next_state\(\) must return a \(state, movement\) pair",
     ):
         simulation.iterate()
 
 
-def test_custom_model_update_wrong_position_type_names_source():
-    simulation = _custom_model_simulation_with_agent(_WrongPositionTypeModel())
+def test_custom_model_update_wrong_movement_type_names_source():
+    simulation = _custom_model_simulation_with_agent(_WrongMovementTypeModel())
 
     with pytest.raises(
         jps.SimulationError,
-        match=r"State returned by compute_next_state\(\) has attribute 'position' of wrong type",
+        match=r"Movement returned by compute_next_state\(\) is of wrong type",
     ):
         simulation.iterate()
+
+
+def test_custom_model_update_returning_the_current_state_is_rejected():
+    simulation = _custom_model_simulation_with_agent(_SameStateModel())
+
+    with pytest.raises(
+        jps.SimulationError,
+        match="Current and updated model state are the same instance",
+    ):
+        simulation.iterate()
+
+
+def test_custom_model_movement_is_applied_as_given():
+    simulation = jps.Simulation(
+        model=_ConstantMovementModel((0.25, -0.5)),
+        geometry=[(-50, -50), (50, -50), (50, 50), (-50, 50)],
+    )
+    exit_id = simulation.add_exit_stage([(49, -3), (49, 3), (50, 3), (50, -3)])
+    journey_id = simulation.add_journey(jps.JourneyDescription([exit_id]))
+    agent_id = simulation.add_agent(
+        journey_id=journey_id,
+        stage_id=exit_id,
+        position=(0.0, 0.0),
+        state=_MinimalCustomState(),
+    )
+
+    simulation.iterate()
+
+    assert simulation.agent(agent_id).position == (0.25, -0.5)
 
 
 class _AddAgentDuringIterateModel(jps.CustomOperationalModel):
@@ -1136,16 +1168,17 @@ class _AddAgentDuringIterateModel(jps.CustomOperationalModel):
         self.stage_id = None
         self.error = None
 
-    def compute_next_state(self, dt, ped, env_query):
+    def compute_next_state(self, state, step):
         try:
             self.simulation.add_agent(
                 journey_id=self.journey_id,
                 stage_id=self.stage_id,
-                state=_MinimalCustomState(position=(5, 5)),
+                position=(5, 5),
+                state=_MinimalCustomState(),
             )
         except Exception as e:
             self.error = e
-        return _MinimalCustomState(position=ped.position)
+        return dataclasses.replace(state), (0.0, 0.0)
 
 
 def test_add_agent_during_iterate_raises_simulation_error():
@@ -1162,7 +1195,8 @@ def test_add_agent_during_iterate_raises_simulation_error():
     simulation.add_agent(
         journey_id=journey_id,
         stage_id=exit_id,
-        state=_MinimalCustomState(position=(0, 0)),
+        position=(0, 0),
+        state=_MinimalCustomState(),
     )
 
     simulation.iterate()

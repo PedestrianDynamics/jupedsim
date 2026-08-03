@@ -24,7 +24,8 @@ def _add_agent(sim, journey_id, stage_id, position, velocity=(0.0, 0.0)):
     return sim.add_agent(
         journey_id=journey_id,
         stage_id=stage_id,
-        state=PythonSocialForceModelState(position=position, velocity=velocity),
+        position=position,
+        state=PythonSocialForceModelState(velocity=velocity),
     )
 
 
@@ -127,8 +128,9 @@ def test_custom_desired_speed_affects_movement():
     slow_id = sim.add_agent(
         journey_id=journey_id,
         stage_id=exit_id,
+        position=(2.0, 8.0),
         state=PythonSocialForceModelState(
-            position=(2.0, 8.0), velocity=(0.0, 0.0), desired_speed=0.5
+            velocity=(0.0, 0.0), desired_speed=0.5
         ),
     )
 
@@ -136,8 +138,9 @@ def test_custom_desired_speed_affects_movement():
     fast_id = sim.add_agent(
         journey_id=journey_id,
         stage_id=exit_id,
+        position=(2.0, 12.0),
         state=PythonSocialForceModelState(
-            position=(2.0, 12.0), velocity=(0.0, 0.0), desired_speed=2.0
+            velocity=(0.0, 0.0), desired_speed=2.0
         ),
     )
 
@@ -180,8 +183,8 @@ def test_per_agent_state_survives_iterations(corridor_simulation):
     agent_id = sim.add_agent(
         journey_id=journey_id,
         stage_id=exit_id,
+        position=(2.0, 10.0),
         state=PythonSocialForceModelState(
-            position=(2.0, 10.0),
             velocity=(0.0, 0.0),
             desired_speed=2.0,
             reaction_time=0.25,
@@ -195,4 +198,3 @@ def test_per_agent_state_survives_iterations(corridor_simulation):
     assert isinstance(state, PythonSocialForceModelState)
     assert state.desired_speed == 2.0
     assert state.reaction_time == 0.25
-    assert state.position == pytest.approx(sim.agent(agent_id).position)

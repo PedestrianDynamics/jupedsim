@@ -32,7 +32,9 @@ auto intoVec(Range&& range)
     using Value = std::remove_cvref_t<decltype(*std::begin(range))>;
 
     std::vector<Value> result{};
-    result.reserve(std::ranges::size(range));
+    if constexpr(std::ranges::sized_range<Range>) {
+        result.reserve(std::ranges::size(range));
+    }
     for(auto&& value : range) {
         result.emplace_back(value);
     }

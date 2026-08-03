@@ -14,12 +14,13 @@ class EnvironmentQuery;
 #include <utility>
 #include <vector>
 
+struct NeighborView;
+
 class WarpDriverModel : public OperationalModel
 {
 public:
     /// Per-agent state of the warp driver model.
     struct State {
-        Point position{};
         Point orientation{0.0, 0.0};
         double radius{0.15};
         double v0{1.2};
@@ -86,14 +87,12 @@ public:
 
     OperationalModelType Type() const override;
 
-    void ComputeNextState(
-        double dT,
-        const GenericAgent& current,
-        GenericAgent& next,
-        const EnvironmentQuery& envQuery) const override;
+    Point ComputeNextState(
+        const OperationalModelState& current,
+        OperationalModelState& next,
+        const AgentStep& step) const override;
 
-    void CheckModelConstraint(const GenericAgent& agent, const EnvironmentQuery& envQuery)
-        const override;
+    void CheckModelConstraint(const GenericAgent& agent, const AgentView& view) const override;
 };
 
 template <>

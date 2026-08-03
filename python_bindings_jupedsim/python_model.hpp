@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "EnvironmentQuery.hpp"
+#include "AgentView.hpp"
 #include "OperationalModels/CustomModel/CustomModel.hpp"
 
 #include <pybind11/pybind11.h>
@@ -44,14 +44,12 @@ class PythonModel final : public CustomModel
 public:
     explicit PythonModel(py::object model);
 
-    void ComputeNextState(
-        double dT,
-        const GenericAgent& current,
-        GenericAgent& next,
-        const EnvironmentQuery& envQuery) const override;
+    Point ComputeNextState(
+        const OperationalModelState& current,
+        OperationalModelState& next,
+        const AgentStep& step) const override;
 
-    void CheckModelConstraint(const GenericAgent& agent, const EnvironmentQuery& envQuery)
-        const override;
+    void CheckModelConstraint(const GenericAgent& agent, const AgentView& view) const override;
 
 private:
     py::object _model;

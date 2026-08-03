@@ -50,7 +50,8 @@ def test_simulation_from_model_instance(model, state_cls, state_kwargs):
     agent_id = sim.add_agent(
         journey_id=journey_id,
         stage_id=wp,
-        state=state_cls(position=(1, 1), **state_kwargs),
+        position=(1, 1),
+        state=state_cls(**state_kwargs),
     )
 
     for _ in range(10):
@@ -79,9 +80,8 @@ def test_set_desired_speed(corridor):
     agent_id = sim.add_agent(
         journey_id=journey_id,
         stage_id=wp,
-        state=jps.CollisionFreeSpeedModelV2State(
-            position=(1, 1), desired_speed=1
-        ),
+        position=(1, 1),
+        state=jps.CollisionFreeSpeedModelV2State(desired_speed=1),
     )
     assert math.isclose(sim.agent(agent_id).position[0], 1)
     for _ in range(0, 100):
@@ -116,7 +116,6 @@ def test_initial_parameters_collision_free_speed_model_v2(
 
     # Create an agent with distinct non-default values for each parameter.
     state = jps.CollisionFreeSpeedModelV2State(
-        position=(1, 1),
         time_gap=0.1,
         desired_speed=0.12,
         radius=0.13,
@@ -125,7 +124,9 @@ def test_initial_parameters_collision_free_speed_model_v2(
         strength_geometry_repulsion=0.16,
         range_geometry_repulsion=0.17,
     )
-    agent_id = sim.add_agent(journey_id=journey_id, stage_id=wp, state=state)
+    agent_id = sim.add_agent(
+        journey_id=journey_id, stage_id=wp, position=(1, 1), state=state
+    )
 
     agent_model = sim.agent(agent_id).model
     assert agent_model.time_gap == 0.1, (
@@ -161,7 +162,8 @@ def test_set_model_parameters_collision_free_speed_model_v2(
     agent_id = sim.add_agent(
         journey_id=journey_id,
         stage_id=wp,
-        state=jps.CollisionFreeSpeedModelV2State(position=(1, 1)),
+        position=(1, 1),
+        state=jps.CollisionFreeSpeedModelV2State(),
     )
 
     sim.agent(agent_id).model.desired_speed = 2.0
@@ -207,7 +209,8 @@ def test_set_model_parameters_anticipation_velocity_model(
     agent_id = sim.add_agent(
         journey_id=journey_id,
         stage_id=wp,
-        state=jps.AnticipationVelocityModelState(position=(1, 1)),
+        position=(1, 1),
+        state=jps.AnticipationVelocityModelState(),
     )
 
     sim.agent(agent_id).model.desired_speed = 2.0
@@ -256,7 +259,8 @@ def test_set_model_parameters_collision_free_speed_model(
     agent_id = sim.add_agent(
         journey_id=journey_id,
         stage_id=wp,
-        state=jps.CollisionFreeSpeedModelState(position=(1, 1)),
+        position=(1, 1),
+        state=jps.CollisionFreeSpeedModelState(),
     )
 
     sim.agent(agent_id).model.desired_speed = 2.0
@@ -289,7 +293,8 @@ def test_collision_free_speed_model_repulsion_parameters_are_model_level():
     agent_id = sim.add_agent(
         journey_id=journey_id,
         stage_id=wp,
-        state=jps.CollisionFreeSpeedModelState(position=(1, 1)),
+        position=(1, 1),
+        state=jps.CollisionFreeSpeedModelState(),
     )
 
     # The repulsion parameters no longer appear on the per-agent state.
@@ -326,16 +331,14 @@ def test_set_model_parameters_generalized_centrifugal_force_model(
     agent_id = sim.add_agent(
         journey_id=journey_id,
         stage_id=wp,
-        state=jps.GeneralizedCentrifugalForceModelState(
-            position=(1, 1), orientation=(1.0, 0.0)
-        ),
+        position=(1, 1),
+        state=jps.GeneralizedCentrifugalForceModelState(orientation=(1.0, 0.0)),
     )
     sim.add_agent(
         journey_id=journey_id,
         stage_id=wp,
-        state=jps.GeneralizedCentrifugalForceModelState(
-            position=(3, 1), orientation=(1.0, 0.0)
-        ),
+        position=(3, 1),
+        state=jps.GeneralizedCentrifugalForceModelState(orientation=(1.0, 0.0)),
     )
 
     sim.agent(agent_id).model.speed = 2.0
@@ -385,7 +388,8 @@ def test_set_model_parameters_social_force_model(
     agent_id = sim.add_agent(
         journey_id=journey_id,
         stage_id=wp,
-        state=jps.SocialForceModelState(position=(1, 1)),
+        position=(1, 1),
+        state=jps.SocialForceModelState(),
     )
 
     sim.agent(agent_id).model.velocity = (2.0, -2.0)
@@ -425,7 +429,8 @@ def test_social_force_model_body_force_and_friction_are_model_level():
     agent_id = sim.add_agent(
         journey_id=journey_id,
         stage_id=wp,
-        state=jps.SocialForceModelState(position=(1, 1)),
+        position=(1, 1),
+        state=jps.SocialForceModelState(),
     )
 
     # body_force and friction no longer appear on the per-agent state.
@@ -449,7 +454,8 @@ def test_agent_handle_raises_after_removal(
     agent_id = sim.add_agent(
         journey_id=journey_id,
         stage_id=wp,
-        state=jps.SocialForceModelState(position=(1, 1)),
+        position=(1, 1),
+        state=jps.SocialForceModelState(),
     )
     agent = sim.agent(agent_id)
     model = agent.model
@@ -486,7 +492,6 @@ def test_initial_parameters_collision_free_speed_model_v3(
     journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
     state = jps.CollisionFreeSpeedModelV3State(
-        position=(1, 1),
         time_gap=0.11,
         desired_speed=0.12,
         radius=0.13,
@@ -499,7 +504,9 @@ def test_initial_parameters_collision_free_speed_model_v3(
         theta_max_upper_bound=0.8,
         agent_buffer=0.4,
     )
-    agent_id = sim.add_agent(journey_id=journey_id, stage_id=wp, state=state)
+    agent_id = sim.add_agent(
+        journey_id=journey_id, stage_id=wp, position=(1, 1), state=state
+    )
 
     agent_model = sim.agent(agent_id).model
     assert agent_model.time_gap == 0.11
@@ -525,8 +532,8 @@ def test_set_model_parameters_collision_free_speed_model_v3(
     agent_id = sim.add_agent(
         journey_id=journey_id,
         stage_id=wp,
+        position=(1, 1),
         state=jps.CollisionFreeSpeedModelV3State(
-            position=(1, 1),
             strength_neighbor_repulsion=8.0,
             range_neighbor_repulsion=0.1,
             strength_geometry_repulsion=5.0,

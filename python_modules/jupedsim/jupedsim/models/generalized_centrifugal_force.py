@@ -16,9 +16,7 @@ is passed to the simulation:
     sim.add_agent(
         journey_id=journey_id,
         stage_id=stage_id,
-        state=jupedsim.GeneralizedCentrifugalForceModelState(
-            position=(1.0, 1.0), desired_speed=1.0
-        ),
+        position=(1.0, 1.0), state=jupedsim.GeneralizedCentrifugalForceModelState(desired_speed=1.0),
     )
 
 .. warning::
@@ -36,9 +34,9 @@ as keyword-only constructor arguments with sensible defaults:
 
 :class:`GeneralizedCentrifugalForceModelState` exposes the complete per-agent
 state of the model as keyword-only constructor arguments with sensible
-defaults: ``position``, ``orientation``, ``speed``, ``desired_direction``
-(e0), ``mass``, ``tau``, ``desired_speed`` (v0), ``a_v``, ``a_min``,
-``b_min`` and ``b_max``.
+defaults: ``orientation``, ``speed``, ``desired_direction`` (e0),
+``orientation_delay``, ``mass``, ``tau``, ``desired_speed`` (v0), ``a_v``,
+``a_min``, ``b_min`` and ``b_max``.
 """
 
 import jupedsim.native as py_jps

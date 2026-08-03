@@ -7,8 +7,12 @@
 /// _it_second must be reachable by _it_first.
 #include <cstddef>
 #include <iterator>
+#include <ranges>
+
+/// Deriving from view_interface marks this as a std::ranges view, so that a pair returned by
+/// value can be piped into range adaptors without being copied into a container first.
 template <typename IteratorFirst, typename IteratorSecond = IteratorFirst>
-class IteratorPair
+class IteratorPair : public std::ranges::view_interface<IteratorPair<IteratorFirst, IteratorSecond>>
 {
     IteratorFirst _it_first;
     IteratorSecond _it_second;

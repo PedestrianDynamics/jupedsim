@@ -17,8 +17,7 @@ void init_collision_free_speed_model_v3(py::module_& m)
     const CollisionFreeSpeedModelV3::State d{};
     py::class_<CollisionFreeSpeedModelV3::State>(m, "CollisionFreeSpeedModelV3State")
         .def(
-            py::init([](Point position,
-                        Point orientation,
+            py::init([](Point orientation,
                         double strengthNeighborRepulsion,
                         double rangeNeighborRepulsion,
                         double strengthGeometryRepulsion,
@@ -32,7 +31,6 @@ void init_collision_free_speed_model_v3(py::module_& m)
                         double radius,
                         double headingAngle) {
                 return CollisionFreeSpeedModelV3::State{
-                    .position = position,
                     .orientation = orientation,
                     .strengthNeighborRepulsion = strengthNeighborRepulsion,
                     .rangeNeighborRepulsion = rangeNeighborRepulsion,
@@ -48,7 +46,6 @@ void init_collision_free_speed_model_v3(py::module_& m)
                     .headingAngle = headingAngle};
             }),
             py::kw_only(),
-            py::arg("position") = d.position,
             py::arg("orientation") = d.orientation,
             py::arg("strength_neighbor_repulsion") = d.strengthNeighborRepulsion,
             py::arg("range_neighbor_repulsion") = d.rangeNeighborRepulsion,
@@ -62,7 +59,6 @@ void init_collision_free_speed_model_v3(py::module_& m)
             py::arg("desired_speed") = d.v0,
             py::arg("radius") = d.radius,
             py::arg("heading_angle") = d.headingAngle)
-        .def_readwrite("position", &CollisionFreeSpeedModelV3::State::position)
         .def_readwrite("orientation", &CollisionFreeSpeedModelV3::State::orientation)
         .def_readwrite(
             "strength_neighbor_repulsion",

@@ -10,12 +10,13 @@ class EnvironmentQuery;
 
 #include <fmt/core.h>
 
+struct NeighborView;
+
 class SocialForceModel : public OperationalModel
 {
 public:
     /// Per-agent state of the social force model.
     struct State {
-        Point position{};
         Point velocity{}; // v
         double mass{80.0}; // m
         double desiredSpeed{0.8}; // v0
@@ -35,13 +36,11 @@ public:
     SocialForceModel(double bodyForce, double friction);
     ~SocialForceModel() override = default;
     OperationalModelType Type() const override;
-    void ComputeNextState(
-        double dT,
-        const GenericAgent& current,
-        GenericAgent& next,
-        const EnvironmentQuery& envQuery) const override;
-    void CheckModelConstraint(const GenericAgent& agent, const EnvironmentQuery& envQuery)
-        const override;
+    Point ComputeNextState(
+        const OperationalModelState& current,
+        OperationalModelState& next,
+        const AgentStep& step) const override;
+    void CheckModelConstraint(const GenericAgent& agent, const AgentView& view) const override;
 
 private:
     /**
@@ -50,21 +49,21 @@ private:
      *
      * @return vector with driving force of pedestrian
      */
-    static Point DrivingForce(const GenericAgent& agent);
+    static Point DrivingForce(const State& self, Point ToNextTarget);
     /**
      *  Repulsive force acting on pedestrian <ped1> from pedestrian <ped2>
      * @param ped1 reference to Pedestrian 1 on whom the force acts on
      * @param ped2 reference to Pedestrian 2, from whom the force originates
      * @return vector with the repulsive force
      */
-    Point AgentForce(const GenericAgent& ped1, const GenericAgent& ped2) const;
+    Point AgentForce(const State& self, const NeighborView& neighbor) const;
     /**
      *  Repulsive force acting on pedestrian <agent> from line segment <segment>
      * @param agent reference to the Pedestrian on whom the force acts on
      * @param segment reference to line segment, from which the force originates
      * @return vector with the repulsive force
      */
-    Point ObstacleForce(const GenericAgent& agent, const LineSegment& segment) const;
+    Point ObstacleForce(const State& self, const LineSegment& segment) const;
     /**
      * calculates the pushing and friction forces acting between <pt1> and <pt2>
      * @param pt1 Point on which the forces act
@@ -76,6 +75,15 @@ private:
      * @param bodyForce body force parameter (k) of the agent the force acts on
      * @param friction friction parameter (kappa) of the agent the force acts on
      */
+    static Point ForceFromSeparation(
+        const Point separation,
+        const double A,
+        const double B,
+        const double radius,
+        const Point velocity,
+        const double bodyForce,
+        const double friction);
+
     static Point ForceBetweenPoints(
         const Point pt1,
         const Point pt2,

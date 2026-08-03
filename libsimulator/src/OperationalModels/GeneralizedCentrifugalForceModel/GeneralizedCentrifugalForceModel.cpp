@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "GeneralizedCentrifugalForceModel.hpp"
 
+#include "AgentView.hpp"
 #include "Ellipse.hpp"
-#include "EnvironmentQuery.hpp"
 #include "GenericAgent.hpp"
 #include "Macros.hpp"
 #include "Mathematics.hpp"
@@ -41,51 +41,43 @@ OperationalModelType GeneralizedCentrifugalForceModel::Type() const
     return OperationalModelType::GENERALIZED_CENTRIFUGAL_FORCE;
 }
 
-void GeneralizedCentrifugalForceModel::ComputeNextState(
-    double dT,
-    const GenericAgent& current,
-    GenericAgent& next,
-    const EnvironmentQuery& envQuery) const
+Point GeneralizedCentrifugalForceModel::ComputeNextState(
+    const OperationalModelState& current,
+    OperationalModelState& next,
+    const AgentStep& step) const
 {
-    const auto& model = std::get<State>(current.model);
-    const auto& boundaries = envQuery.LineSegmentsInRange(model.position);
-    auto neighborhood = envQuery.OtherAgentsInRange(
-        model, _cutOffRadius, [&envQuery, &boundaries, from = model.position](const Point& to) {
-            return envQuery.NoGeometryBetween(from, to, boundaries);
+    const auto& model = std::get<State>(current);
+    const auto& walls = step.WallsNearby();
+    const auto neighborhood =
+        step.OtherAgentsInRange(_cutOffRadius, [&step, &walls](const NeighborView& n) {
+            return step.NoGeometryBetween(n.RelativePosition, walls);
         });
     Point F_rep;
     for(const auto& neighbor : neighborhood) {
-        F_rep += ForceRepPed(current, neighbor);
+        F_rep += ForceRepPed(model, neighbor);
     }
 
-    // e0 stays default constructed when ForceDriv does not overwrite it, matching the old
-    // update struct semantics.
+    // ForceDriv leaves e0 untouched when the agent has practically arrived; the default
+    // constructed value is what gets stored then.
     Point e0{};
-    std::optional<Point> position{};
-    std::optional<Point> velocity{};
     // repulsive forces to the walls and transitions that are not my target
-    Point repwall = ForceRepRoom(current, envQuery);
-    Point fd = ForceDriv(current, current.nextTarget, model.mass, model.tau, dT, e0);
-    Point acc = (fd + F_rep + repwall) / model.mass;
+    const Point repwall = ForceRepRoom(model, step);
+    const Point fd = ForceDriv(model, step.ToNextTarget(), model.mass, model.tau, step.dt(), e0);
+    const Point acc = (fd + F_rep + repwall) / model.mass;
 
-    velocity = (model.orientation * model.speed) + acc * dT;
-    position = model.position + *velocity * dT;
+    const Point velocity = (model.orientation * model.speed) + acc * step.dt();
 
-    auto& nextModel = std::get<State>(next.model);
+    auto& nextModel = std::get<State>(next);
     nextModel.e0 = e0;
     ++nextModel.orientationDelay;
-    if(position) {
-        nextModel.position = *position;
-    }
-    if(velocity) {
-        nextModel.orientation = (*velocity).Normalized();
-        nextModel.speed = (*velocity).Norm();
-    }
+    nextModel.orientation = velocity.Normalized();
+    nextModel.speed = velocity.Norm();
+    return velocity * step.dt();
 }
 
 void GeneralizedCentrifugalForceModel::CheckModelConstraint(
     const GenericAgent& agent,
-    const EnvironmentQuery& envQuery) const
+    const AgentView& view) const
 {
     const auto& model = std::get<State>(agent.model);
 
@@ -128,18 +120,17 @@ void GeneralizedCentrifugalForceModel::CheckModelConstraint(
     constexpr double BMaxMax = 2.;
     validateConstraint(BMax, BMaxMin, BMaxMax, "BMax");
 
-    const auto neighbors = envQuery.OtherAgentsInRange(agent.model, 2.0);
+    const auto neighbors = view.OtherAgentsInRange(2.0);
     for(const auto& neighbor : neighbors) {
-        const auto& neighborModel = std::get<State>(neighbor.model);
-        const auto contanctDist = AgentToAgentSpacing(agent, neighbor);
-        const auto distance = (model.position - neighborModel.position).Norm();
+        const auto contanctDist = AgentToAgentSpacing(model, neighbor);
+        const auto distance = neighbor.RelativePosition.Norm();
         if(contanctDist >= distance) {
             throw SimulationError(
                 "Model constraint violation: Agent {} too close to agent {}: distance {}, "
                 "contactDist {}, "
                 "effective distance {}",
-                model.position,
-                neighborModel.position,
+                agent.position,
+                agent.position + neighbor.RelativePosition,
                 distance,
                 contanctDist,
                 distance - contanctDist);
@@ -147,49 +138,45 @@ void GeneralizedCentrifugalForceModel::CheckModelConstraint(
     }
 
     const auto maxRadius = std::max(AMin, BMax) / 2.;
-    const auto lineSegments = envQuery.LineSegmentsInRange(model.position, maxRadius);
+    const auto lineSegments = view.WallsInRange(maxRadius);
     if(std::begin(lineSegments) != std::end(lineSegments)) {
         throw SimulationError(
             "Model constraint violation: Agent {} too close to geometry boundaries, distance <= {}",
-            model.position,
+            agent.position,
             maxRadius);
     }
 }
 
 Point GeneralizedCentrifugalForceModel::ForceDriv(
-    const GenericAgent& ped,
-    Point target,
+    const State& self,
+    Point to_target,
     double mass,
     double tau,
     double deltaT,
     Point& e0update) const
 {
     Point F_driv;
-    const auto& model = std::get<State>(ped.model);
-    const auto pos = model.position;
-    const auto dest = ped.nextTarget;
-    const auto dist = (dest - pos).Norm();
+    const auto dist = to_target.Norm();
     if(dist > J_EPS_GOAL) {
 
-        const Point e0 = mollify_e0(target, pos, deltaT, model.orientationDelay, model.e0);
+        const Point e0 = mollify_e0(to_target, deltaT, self.orientationDelay, self.e0);
         e0update = e0;
-        F_driv = ((e0 * model.v0 - (model.orientation * model.speed)) * mass) / tau;
+        F_driv = ((e0 * self.v0 - (self.orientation * self.speed)) * mass) / tau;
     } else {
-        const Point e0 = model.e0;
-        F_driv = ((e0 * model.v0 - (model.orientation * model.speed)) * mass) / tau;
+        const Point e0 = self.e0;
+        F_driv = ((e0 * self.v0 - (self.orientation * self.speed)) * mass) / tau;
     }
     return F_driv;
 }
 
-Point GeneralizedCentrifugalForceModel::ForceRepPed(
-    const GenericAgent& ped1,
-    const GenericAgent& ped2) const
+Point GeneralizedCentrifugalForceModel::ForceRepPed(const State& self, const NeighborView& neighbor)
+    const
 {
-    const auto& model1 = std::get<State>(ped1.model);
-    const auto& model2 = std::get<State>(ped2.model);
+    const auto& model1 = self;
+    const auto& model2 = std::get<State>(*neighbor.state);
     Point F_rep;
     // x- and y-coordinate of the distance between p1 and p2
-    Point distp12 = model2.position - model1.position;
+    Point distp12 = neighbor.RelativePosition;
     const Point vp1 = (model1.orientation * model1.speed); // v Ped1
     const Point vp2 = (model2.orientation * model2.speed); // v Ped2
     Point ep12; // x- and y-coordinate of the normalized vector between p1 and p2
@@ -198,7 +185,7 @@ Point GeneralizedCentrifugalForceModel::ForceRepPed(
     double K_ij;
     double nom; // nominator of Frep
     double px; // hermite Interpolation value
-    const auto dist_eff = AgentToAgentSpacing(ped1, ped2);
+    const auto dist_eff = AgentToAgentSpacing(self, neighbor);
     const auto agent1_mass = model1.mass;
 
     //          smax    dist_intpol_left      dist_intpol_right       dist_eff_max
@@ -284,9 +271,8 @@ Point GeneralizedCentrifugalForceModel::ForceRepPed(
     }
     if(F_rep.x != F_rep.x || F_rep.y != F_rep.y) {
         LOG_ERROR(
-            "NAN return p1{} p2 {} Frepx={:f} Frepy={:f} K_ij={:f}",
-            ped1.id,
-            ped2.id,
+            "NAN return distp12 {} Frepx={:f} Frepy={:f} K_ij={:f}",
+            distp12,
             F_rep.x,
             F_rep.y,
             K_ij);
@@ -302,28 +288,26 @@ Point GeneralizedCentrifugalForceModel::ForceRepPed(
  *   - Vektor(x,y) mit Summe aller abstoßenden Kräfte im SubRoom
  * */
 
-inline Point GeneralizedCentrifugalForceModel::ForceRepRoom(
-    const GenericAgent& ped,
-    const EnvironmentQuery& envQuery) const
+inline Point
+GeneralizedCentrifugalForceModel::ForceRepRoom(const State& self, const AgentStep& step) const
 {
-    const auto& walls = envQuery.LineSegmentsInRange(std::get<State>(ped.model).position);
+    const auto& walls = step.WallsNearby();
 
     auto f = std::accumulate(
         std::begin(walls),
         std::end(walls),
         Point(0, 0),
-        [this, &ped](const auto& acc, const auto& element) {
-            return acc + ForceRepWall(ped, element);
+        [this, &self](const auto& acc, const auto& element) {
+            return acc + ForceRepWall(self, element);
         });
     return f;
 }
 
 inline Point
-GeneralizedCentrifugalForceModel::ForceRepWall(const GenericAgent& ped, const LineSegment& w) const
+GeneralizedCentrifugalForceModel::ForceRepWall(const State& self, const LineSegment& w) const
 {
     Point F = Point(0.0, 0.0);
-    const auto& model = std::get<State>(ped.model);
-    Point pt = w.ShortestPoint(model.position);
+    Point pt = w.ShortestPoint(Point{});
     double wlen = w.LengthSquare();
 
     if(wlen < 0.01) { // ignore walls smaller than 10 cm
@@ -331,13 +315,13 @@ GeneralizedCentrifugalForceModel::ForceRepWall(const GenericAgent& ped, const Li
     }
     // Kraft soll nur orthgonal wirken
     // ???
-    if(fabs((w.p1 - w.p2).ScalarProduct(model.position - pt)) > J_EPS) {
+    if(fabs((w.p1 - w.p2).ScalarProduct(Point{} - pt)) > J_EPS) {
         return F;
     }
     double mind = 0.5; // for performance reasons this distance is assumed to be constant
-    double vn = w.NormalComp(
-        model.orientation * model.speed); // normal component of the velocity on the wall
-    F = ForceRepStatPoint(ped, pt, mind, vn);
+    double vn =
+        w.NormalComp(self.orientation * self.speed); // normal component of the velocity on the wall
+    F = ForceRepStatPoint(self, pt, mind, vn);
 
     return F; // line --> l != 0
 }
@@ -353,7 +337,7 @@ GeneralizedCentrifugalForceModel::ForceRepWall(const GenericAgent& ped, const Li
  * */
 // TODO: use effective DistanceToEllipse and simplify this function.
 Point GeneralizedCentrifugalForceModel::ForceRepStatPoint(
-    const GenericAgent& ped,
+    const State& self,
     const Point& p,
     double l,
     double vn) const
@@ -361,9 +345,9 @@ Point GeneralizedCentrifugalForceModel::ForceRepStatPoint(
     Point F_rep = Point(0.0, 0.0);
     // TODO(kkratz): this will fail for speed 0.
     // I think the code can be rewritten to account for orientation and speed separately
-    const auto& model = std::get<State>(ped.model);
+    const auto& model = self;
     const Point v = model.orientation * model.speed;
-    Point dist = p - model.position; // x- and y-coordinate of the distance between ped and p
+    Point dist = p; // p is relative to the agent, so it already is the distance vector
     double d = dist.Norm(); // distance between the centre of ped and point p
     Point e_ij; // x- and y-coordinate of the normalized vector between ped and p
 
@@ -385,13 +369,12 @@ Point GeneralizedCentrifugalForceModel::ForceRepStatPoint(
     double K_ij;
     K_ij = 0.5 * bla / v.Norm(); // K_ij
     // Punkt auf der Ellipse
-    pinE =
-        p.TransformToEllipseCoordinates(model.position, model.orientation.x, model.orientation.y);
+    pinE = p.TransformToEllipseCoordinates(Point{}, model.orientation.x, model.orientation.y);
     const auto v0 = model.v0;
     // Punkt auf der Ellipse
-    r = E.PointOnEllipse(pinE, model.speed / v0, model.position, model.speed, model.orientation);
+    r = E.PointOnEllipse(pinE, model.speed / v0, Point{}, model.speed, model.orientation);
     // interpolierte Kraft
-    F_rep = ForceInterpolation(v0, K_ij, e_ij, vn, d, (r - model.position).Norm(), l);
+    F_rep = ForceInterpolation(v0, K_ij, e_ij, vn, d, r.Norm(), l);
     return F_rep;
 }
 
@@ -453,11 +436,11 @@ Point GeneralizedCentrifugalForceModel::ForceInterpolation(
     return F_rep;
 }
 double GeneralizedCentrifugalForceModel::AgentToAgentSpacing(
-    const GenericAgent& agent1,
-    const GenericAgent& agent2) const
+    const State& self,
+    const NeighborView& neighbor) const
 {
-    const auto& model1 = std::get<State>(agent1.model);
-    const auto& model2 = std::get<State>(agent2.model);
+    const auto& model1 = self;
+    const auto& model2 = std::get<State>(*neighbor.state);
     const Ellipse E1{model1.Av, model1.AMin, model1.BMax, model1.BMin};
     const Ellipse E2{model2.Av, model2.AMin, model2.BMax, model2.BMin};
     const auto v0_1 = model1.v0;
@@ -466,10 +449,12 @@ double GeneralizedCentrifugalForceModel::AgentToAgentSpacing(
     const double scale1 = (v0_1 == 0.0) ? 1.0 : model1.speed / v0_1;
     const double scale2 = (v0_2 == 0.0) ? 1.0 : model2.speed / v0_2;
 
+    // The ellipse distance is translation invariant, so we evaluate it in the frame of the
+    // agent that asked, which sits at the origin.
     return E1.EffectiveDistanceToEllipse(
         E2,
-        model1.position,
-        model2.position,
+        Point{0.0, 0.0},
+        neighbor.RelativePosition,
         scale1,
         scale2,
         model1.speed,

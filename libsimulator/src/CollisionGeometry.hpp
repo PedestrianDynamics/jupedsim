@@ -25,17 +25,22 @@ class DistanceQueryIterator
 {
 private:
     using BackingIterator = typename std::vector<T>::const_iterator;
-    double _distance;
-    Point _p;
-    BackingIterator _current;
-    BackingIterator _end;
+    double _distance{};
+    Point _p{};
+    BackingIterator _current{};
+    BackingIterator _end{};
 
 public:
     using iterator_category = std::input_iterator_tag;
     using value_type = T;
     using difference_type = std::ptrdiff_t;
-    using pointer = T*;
-    using reference = T&;
+    using pointer = const T*;
+    using reference = const T&;
+
+    /// A default constructed iterator queries nothing. It exists because std::sentinel_for
+    /// requires the 'end' iterator to be semiregular, which includes default construction.
+    DistanceQueryIterator() = default;
+
     DistanceQueryIterator(double distance, Point p, BackingIterator current, BackingIterator end)
         : _distance(distance)
         , _p(p)
@@ -62,6 +67,9 @@ public:
         } while(_current != _end && dist(*_current, _p) > _distance);
         return *this;
     }
+
+    /// The dummy "int" marks this as post-increment.
+    void operator++(int) { ++*this; }
 
     const T& operator*() const { return *_current; }
 };

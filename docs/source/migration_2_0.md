@@ -111,20 +111,19 @@ agent_id = sim.add_agent(
 agent_id = sim.add_agent(
     journey_id=journey_id,
     stage_id=stage_id,
-    state=jps.CollisionFreeSpeedModelState(position=(1.0, 1.0), desired_speed=1.4),
+    position=(1.0, 1.0), state=jps.CollisionFreeSpeedModelState(desired_speed=1.4),
 )
 ```
 
 Passing a state class that does not match the simulation's model raises
-{class}`~jupedsim.SimulationError`; passing a non-state object raises
-`TypeError`.
+{class}`~jupedsim.SimulationError`.
 
-For custom models the state is your own object satisfying the
-{class}`~jupedsim.CustomModelAgentState` protocol (an object with a
-`position` attribute; a frozen dataclass is recommended):
+For custom models the state is your own object, of whatever type your
+{class}`~jupedsim.CustomOperationalModel` expects (a frozen dataclass is
+recommended):
 
 ```python
-sim.add_agent(journey_id=journey_id, stage_id=stage_id, state=MyState(position=(1.0, 1.0)))
+sim.add_agent(journey_id=journey_id, stage_id=stage_id, position=(1.0, 1.0), state=MyState())
 ```
 
 ## Old → new mapping per model

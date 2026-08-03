@@ -10,12 +10,13 @@ class EnvironmentQuery;
 
 #include <fmt/core.h>
 
+struct NeighborView;
+
 class CollisionFreeSpeedModelV3 : public OperationalModel
 {
 public:
     /// Per-agent state of the collision free speed model v3.
     struct State {
-        Point position{};
         Point orientation{1.0, 0.0};
         double strengthNeighborRepulsion{8.0}; // [rad] max steering authority before upper bound
         double rangeNeighborRepulsion{0.1}; // [m] base interaction range for neighbor influence
@@ -40,19 +41,17 @@ public:
     CollisionFreeSpeedModelV3() = default;
     ~CollisionFreeSpeedModelV3() override = default;
     OperationalModelType Type() const override;
-    void ComputeNextState(
-        double dT,
-        const GenericAgent& current,
-        GenericAgent& next,
-        const EnvironmentQuery& envQuery) const override;
-    void CheckModelConstraint(const GenericAgent& agent, const EnvironmentQuery& envQuery)
-        const override;
+    Point ComputeNextState(
+        const OperationalModelState& current,
+        OperationalModelState& next,
+        const AgentStep& step) const override;
+    void CheckModelConstraint(const GenericAgent& agent, const AgentView& view) const override;
 
 private:
-    double OptimalSpeed(const GenericAgent& ped, double spacing, double time_gap) const;
+    double OptimalSpeed(const State& self, double spacing, double time_gap) const;
     double
-    GetSpacing(const GenericAgent& ped1, const GenericAgent& ped2, const Point& direction) const;
-    Point BoundaryRepulsion(const GenericAgent& ped, const LineSegment& boundary_segment) const;
+    GetSpacing(const State& self, const NeighborView& neighbor, const Point& direction) const;
+    Point BoundaryRepulsion(const State& self, const LineSegment& boundary_segment) const;
 };
 
 template <>

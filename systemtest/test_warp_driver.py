@@ -26,8 +26,7 @@ def test_default_model_construction():
 
 def test_default_state_construction():
     """Test that the WarpDriver agent state exposes the C++ defaults."""
-    state = jps.WarpDriverModelState(position=(1, 2))
-    assert state.position == (1, 2)
+    state = jps.WarpDriverModelState()
     assert math.isclose(state.radius, 0.15)
     assert math.isclose(state.desired_speed, 1.2)
 
@@ -42,11 +41,8 @@ def test_simulation_runs(warp_driver_corridor):
     aid = sim.add_agent(
         journey_id=journey_id,
         stage_id=exit_id,
-        state=jps.WarpDriverModelState(
-            position=(2, 2),
-            desired_speed=1.2,
-            radius=0.15,
-        ),
+        position=(2, 2),
+        state=jps.WarpDriverModelState(desired_speed=1.2, radius=0.15),
     )
 
     initial_x = sim.agent(aid).position[0]
@@ -67,11 +63,8 @@ def test_single_agent_straight_path(warp_driver_corridor):
     aid = sim.add_agent(
         journey_id=journey_id,
         stage_id=wp,
-        state=jps.WarpDriverModelState(
-            position=(2, 2),
-            desired_speed=1.0,
-            radius=0.15,
-        ),
+        position=(2, 2),
+        state=jps.WarpDriverModelState(desired_speed=1.0, radius=0.15),
     )
 
     for _ in range(100):
@@ -100,21 +93,17 @@ def test_two_agents_head_on_avoid(warp_driver_corridor):
     sim.add_agent(
         journey_id=journey_right,
         stage_id=exit_right_id,
+        position=(3, 2),
         state=jps.WarpDriverModelState(
-            position=(3, 2),
-            orientation=(1, 0),
-            desired_speed=1.2,
-            radius=0.15,
+            orientation=(1, 0), desired_speed=1.2, radius=0.15
         ),
     )
     sim.add_agent(
         journey_id=journey_left,
         stage_id=exit_left_id,
+        position=(17, 2),
         state=jps.WarpDriverModelState(
-            position=(17, 2),
-            orientation=(-1, 0),
-            desired_speed=1.2,
-            radius=0.15,
+            orientation=(-1, 0), desired_speed=1.2, radius=0.15
         ),
     )
 
@@ -140,11 +129,8 @@ def test_agent_parameters():
     aid = sim.add_agent(
         journey_id=journey_id,
         stage_id=wp,
-        state=jps.WarpDriverModelState(
-            position=(1, 2),
-            desired_speed=1.0,
-            radius=0.2,
-        ),
+        position=(1, 2),
+        state=jps.WarpDriverModelState(desired_speed=1.0, radius=0.2),
     )
 
     state = sim.agent(aid).model
@@ -170,12 +156,14 @@ def test_invalid_agent_state():
         sim.add_agent(
             journey_id=journey_id,
             stage_id=wp,
-            state=jps.WarpDriverModelState(position=(1, 2), radius=-1.0),
+            position=(1, 2),
+            state=jps.WarpDriverModelState(radius=-1.0),
         )
 
     with pytest.raises(jps.SimulationError, match="v0"):
         sim.add_agent(
             journey_id=journey_id,
             stage_id=wp,
-            state=jps.WarpDriverModelState(position=(1, 2), desired_speed=-1.0),
+            position=(1, 2),
+            state=jps.WarpDriverModelState(desired_speed=-1.0),
         )
