@@ -19,6 +19,12 @@
 /// is allowed to be away from the surface to still be accepted.
 inline constexpr double ZHintTolerance = 0.1;
 
+/// Height difference above which two people cannot touch each other, whatever the distance
+/// between them in plan. A person is about 1.8 m tall, so past this one's feet are above the
+/// other's head and there is nothing left to push against. Not a tolerance to tune and not
+/// derived from any query radius -- it is a property of the bodies being modelled.
+inline constexpr double InteractionHeight = 2.0;
+
 /// How far a query without an explicit distance reaches. The grid answers such a query by
 /// cell, and a cell holds what is within the search radius of it -- so this is what decides
 /// which regions a seam can still bring into view.

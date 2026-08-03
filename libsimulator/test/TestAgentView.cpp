@@ -4,6 +4,7 @@
 #include "GenericAgent.hpp"
 #include "Geometry/Geometry3D.hpp"
 #include "GeometryBuilder.hpp"
+#include "MeshFixtures.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalModels/CollisionFreeSpeedModel/CollisionFreeSpeedModel.hpp"
 
@@ -281,4 +282,46 @@ TEST(AgentView, WallsNearbyAreRelativeToTheAgent)
     }
 
     EXPECT_EQ(actual, expected);
+}
+
+TEST(AgentView, AgentsOnAnotherStoreyAreNotNeighbours)
+{
+    // Two floors sharing a footprint, one agent on each, standing at the same (x, y) three
+    // metres apart in height. The neighbourhood grid searches by (x, y) and offers them to
+    // each other; one is standing well above the other's head and cannot touch them.
+    Geometry3D geo{fixtures::stacked_floors()};
+
+    AgentContainer<GenericAgent> agents{};
+    agents.push_back(MakeAgent({5.0, 5.0}));
+    agents.push_back(MakeAgent({5.0, 5.0}));
+    agents[0].location = geo.get_location(5.0, 5.0, 0.0);
+    agents[1].location = geo.get_location(5.0, 5.0, 3.0);
+    ASSERT_TRUE(agents[0].location.has_value());
+    ASSERT_TRUE(agents[1].location.has_value());
+
+    NeighborhoodSearch<GenericAgent> search{5.0};
+    search.Update(agents);
+    const EnvironmentQuery query{geo, search};
+
+    EXPECT_TRUE(AgentView(query, agents[0]).OtherAgentsInRange(10.0).empty());
+    EXPECT_TRUE(AgentView(query, agents[1]).OtherAgentsInRange(10.0).empty());
+}
+
+TEST(AgentView, AgentsOnTheSameStoreyStillAre)
+{
+    // The same mesh, both agents on the lower floor: the filter must not swallow those.
+    Geometry3D geo{fixtures::stacked_floors()};
+
+    AgentContainer<GenericAgent> agents{};
+    agents.push_back(MakeAgent({5.0, 5.0}));
+    agents.push_back(MakeAgent({6.0, 5.0}));
+    agents[0].location = geo.get_location(5.0, 5.0, 0.0);
+    agents[1].location = geo.get_location(6.0, 5.0, 0.0);
+    ASSERT_TRUE(agents[0].location.has_value() && agents[1].location.has_value());
+
+    NeighborhoodSearch<GenericAgent> search{5.0};
+    search.Update(agents);
+    const EnvironmentQuery query{geo, search};
+
+    EXPECT_EQ(AgentView(query, agents[0]).OtherAgentsInRange(10.0).size(), 1u);
 }

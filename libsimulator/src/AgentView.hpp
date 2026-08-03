@@ -7,7 +7,7 @@
 #include "LineSegment.hpp"
 #include "Point.hpp"
 
-#include <algorithm>
+#include <cmath>
 #include <concepts>
 #include <ranges>
 #include <type_traits>
@@ -57,8 +57,18 @@ public:
     std::vector<NeighborView> OtherAgentsInRange(double radius, Pred filter = {}) const
     {
         std::vector<NeighborView> neighbors{};
+        // The grid searches by (x, y), so on a mesh it offers up whoever stands on the storey
+        // above as readily as whoever stands next to you. Someone that far above cannot be
+        // touched, so they are not a neighbour.
+        //
+        // This says nothing about walls: collecting candidates never did, in 2D either. A
+        // model that wants line of sight passes 'filter' for it.
+        const double z = location().z();
         _world.ForEachAgentInRange(_agent.Position(), radius, [&](const GenericAgent& candidate) {
             if(candidate.id == _agent.id) {
+                return;
+            }
+            if(std::abs(candidate.location->z() - z) > InteractionHeight) {
                 return;
             }
             const NeighborView neighbor{candidate.Position() - _agent.Position(), &candidate.state};
