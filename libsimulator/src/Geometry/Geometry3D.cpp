@@ -181,14 +181,6 @@ bool Geometry3D::no_geometry_between(const Location& who, Point direction) const
     return who.try_move_on_surface(direction).has_value();
 }
 
-bool Geometry3D::inside_geometry(const Location& who, Point direction) const
-{
-    if(_geometry2D == nullptr) {
-        throw SimulationError("inside_geometry on a mesh-built Geometry3D is not implemented yet.");
-    }
-    return _geometry2D->InsideGeometry(who.xy() + direction);
-}
-
 Geometry3D::FaceLocation
 Geometry3D::locate_in_region(std::size_t region_id, const Point2D& xy) const
 {

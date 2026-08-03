@@ -102,12 +102,12 @@ public:
     WallRange line_segments_in_range(const Location& who, double distance = -1.0) const;
 
     /// True iff the straight horizontal step @p direction, taken from @p who, crosses no
-    /// wall.
+    /// wall and does not run off the surface.
+    ///
+    /// This also answers "can I move there?". On a surface the two are one question: what
+    /// stops a line of sight is what stops a step. The question about a point on its own,
+    /// without a way leading to it, is `is_valid_location`.
     bool no_geometry_between(const Location& who, Point direction) const;
-
-    /// True iff walking from @p who by the horizontal @p direction lands inside
-    /// the walkable area.
-    bool inside_geometry(const Location& who, Point direction) const;
 
     // -- region overlay & render data (see split_into_regions) --------------
 

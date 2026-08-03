@@ -50,11 +50,6 @@ void init_agent_view(py::module_& m)
             py::arg("walls"),
             "True when nothing blocks the straight line to relative_position.")
         .def(
-            "inside_geometry",
-            &AgentView::InsideGeometry,
-            py::arg("relative_position"),
-            "True when moving by relative_position stays inside the walkable area.")
-        .def(
             "walls_nearby",
             [](const AgentView& self) { return intoVec(self.WallsNearby()); },
             "Geometry segments in the grid cells around the agent.")

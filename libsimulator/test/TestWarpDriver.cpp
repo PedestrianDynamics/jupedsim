@@ -25,9 +25,26 @@ std::unique_ptr<Geometry3D> WalledGeometry()
     return std::make_unique<Geometry3D>(b.Build().Polygon());
 }
 
-GenericAgent MakeAgent(Point position, Point target)
+/// The same ground with nothing on it.
+std::unique_ptr<Geometry3D> OpenGeometry()
 {
-    State s{};
+    GeometryBuilder b{};
+    b.AddAccessibleArea({{-100, -100}, {100, -100}, {100, 100}, {-100, 100}});
+    return std::make_unique<Geometry3D>(b.Build().Polygon());
+}
+
+/// Open ground with a 0.1 m block just left of the origin -- thin enough that one long step
+/// clears it and lands in free space on the far side.
+std::unique_ptr<Geometry3D> ThinWallLeftOfOrigin()
+{
+    GeometryBuilder b{};
+    b.AddAccessibleArea({{-100, -100}, {100, -100}, {100, 100}, {-100, 100}});
+    b.ExcludeFromAccessibleArea({{-0.2, -50}, {-0.1, -50}, {-0.1, 50}, {-0.2, 50}});
+    return std::make_unique<Geometry3D>(b.Build().Polygon());
+}
+
+GenericAgent MakeAgent(Point position, Point target, State s = State{})
+{
     // Heading where it is going: the anticipation reads the neighbour's orientation, so an
     // agent facing away predicts no collision and would make the test pass for free.
     s.orientation = (target - position).Normalized();
@@ -42,7 +59,7 @@ GenericAgent MakeAgent(Point position, Point target)
 }
 
 /// One step of the first agent, with whatever company it has been given.
-Point step_of_first(const Geometry3D& geo, AgentContainer<GenericAgent>& agents)
+Point step_of_first(const Geometry3D& geo, AgentContainer<GenericAgent>& agents, double dt = 0.05)
 {
     for(auto& agent : agents) {
         agent.location = geo.get_location(agent.Position().x, agent.Position().y, 0.0);
@@ -53,7 +70,7 @@ Point step_of_first(const Geometry3D& geo, AgentContainer<GenericAgent>& agents)
 
     const WarpDriverModel model{0.3};
     OperationalModelState next = agents[0].state;
-    return model.ComputeNextState(agents[0].state, next, AgentStep{query, agents[0], 0.05});
+    return model.ComputeNextState(agents[0].state, next, AgentStep{query, agents[0], dt});
 }
 
 } // namespace
@@ -75,6 +92,27 @@ TEST(WarpDriverModel, AnAgentBehindAWallDoesNotSteerUs)
     const Point with = step_of_first(*geo, accompanied);
 
     EXPECT_EQ(with, without) << "the agent behind the wall changed the step";
+}
+
+TEST(WarpDriverModel, ADetourTakesTheOtherSideWhenTheWayIsBlocked)
+{
+    // An agent already breaking a deadlock sideways. Heading towards +y, side +1 veers
+    // towards -x, which is where the block stands.
+    State detouring{};
+    detouring.detourTime = 1.0;
+    detouring.detourSide = 1;
+
+    // The step is long enough to clear the block outright and land in free space beyond it.
+    // Judging where it lands would wave that through; judging the way there does not.
+    constexpr double longStep = 0.5;
+
+    AgentContainer<GenericAgent> unobstructed{};
+    unobstructed.push_back(MakeAgent({0, 0}, {0, 10}, detouring));
+    EXPECT_LT(step_of_first(*OpenGeometry(), unobstructed, longStep).x, 0.0);
+
+    AgentContainer<GenericAgent> obstructed{};
+    obstructed.push_back(MakeAgent({0, 0}, {0, 10}, detouring));
+    EXPECT_GT(step_of_first(*ThinWallLeftOfOrigin(), obstructed, longStep).x, 0.0);
 }
 
 TEST(WarpDriverModel, AnAgentInPlainSightStillDoes)

@@ -59,11 +59,6 @@ public:
         return _geometry.line_segments_in_range(who, distance);
     }
 
-    bool InsideGeometry(const Location& who, Point direction) const
-    {
-        return _geometry.inside_geometry(who, direction);
-    }
-
     /// Interim: stage slots still used this. To be removed later.
     bool NoGeometryBetween(const Point& from, const Point& to) const
     {

@@ -684,14 +684,14 @@ Point WarpDriverModel::ComputeNextState(
         Point detourVel = detourDir * agentData.v0 * 0.5;
         Point movement = detourVel * step.dt();
         // If detour would leave the walkable area, try the other side
-        if(!step.InsideGeometry(movement)) {
+        if(!step.NoGeometryBetween(movement, boundaries)) {
             detourSide = -detourSide;
             lateral = Point{-desiredDir.y * detourSide, desiredDir.x * detourSide};
             detourDir = (lateral * 0.8 + desiredDir * 0.2).Normalized();
             detourVel = detourDir * agentData.v0 * 0.5;
             movement = detourVel * step.dt();
             // If both sides fail, just creep toward goal
-            if(!step.InsideGeometry(movement)) {
+            if(!step.NoGeometryBetween(movement, boundaries)) {
                 movement = desiredDir * agentData.v0 * 0.1 * step.dt();
                 detourDir = desiredDir;
             }

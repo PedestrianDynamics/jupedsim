@@ -145,6 +145,9 @@ class AgentView:
         """Return ``True`` when the straight line from the agent to the point
         *relative_position* away is not intersected by any of *walls*.
 
+        This is also the answer to whether the agent can move there: what blocks
+        the line of sight blocks the step.
+
         Args:
             relative_position: Offset from the agent as ``(dx, dy)``.
             boundaries: List of geometry boundary segments.
@@ -153,15 +156,6 @@ class AgentView:
         return self._obj.no_geometry_between(
             relative_position, [b._obj for b in boundaries]
         )
-
-    def inside_geometry(self, relative_position: tuple[float, float]) -> bool:
-        """Return ``True`` when the point reached by moving *relative_position*
-        lies inside the walkable area.
-
-        Args:
-            relative_position: Offset from the agent as ``(dx, dy)``.
-        """
-        return self._obj.inside_geometry(relative_position)
 
     def walls_nearby(self) -> list[WallView]:
         """Return the walls in the grid cells around the agent.

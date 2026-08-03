@@ -80,18 +80,14 @@ public:
     }
 
     /// Whether the straight line to a point at 'RelativePosition' is free of geometry.
+    /// Also the answer to whether the agent can move there: on a surface, what blocks the
+    /// view blocks the step.
     /// 'boundaries' is vestigial: visibility is answered on the surface now. It stays
     /// until the model call sites drop it.
     template <typename Range>
     bool NoGeometryBetween(Point RelativePosition, const Range& /*boundaries*/) const
     {
         return _world.NoGeometryBetween(location(), RelativePosition);
-    }
-
-    /// Whether the point reached by moving 'RelativePosition' is inside the walkable area.
-    bool InsideGeometry(Point RelativePosition) const
-    {
-        return _world.InsideGeometry(location(), RelativePosition);
     }
 
 private:

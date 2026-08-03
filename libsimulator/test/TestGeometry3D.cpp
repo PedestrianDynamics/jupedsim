@@ -225,36 +225,24 @@ TEST(Geometry3DModelQueries, NoGeometryBetweenMatchesFlatView)
         !geo.geometry_2d()->IntersectsAny(LineSegment{left->xy(), below->xy()}));
 }
 
-TEST(Geometry3DModelQueries, InsideGeometryMatchesFlatView)
+TEST(Geometry3DModelQueries, AStepIsJudgedByTheWayThereNotByWhereItLands)
 {
     Geometry3D geo{square_with_hole()};
     const auto who = geo.get_location(2, 5, 0.0);
     ASSERT_TRUE(who.has_value());
 
-    // The step endpoint who.xy() + direction is judged, not the location itself.
     const Point to_free{1, 1}; // free
     const Point to_hole{5, 5}; // inside the central hole
     const Point to_outside{20, 20}; // outside geometry
-    EXPECT_TRUE(geo.inside_geometry(*who, to_free - who->xy()));
-    EXPECT_FALSE(geo.inside_geometry(*who, to_hole - who->xy()));
-    EXPECT_FALSE(geo.inside_geometry(*who, to_outside - who->xy()));
+    const Point beyond_hole{8, 5}; // free again, but only reachable around the hole
+    EXPECT_TRUE(geo.no_geometry_between(*who, to_free - who->xy()));
+    EXPECT_FALSE(geo.no_geometry_between(*who, to_hole - who->xy()));
+    EXPECT_FALSE(geo.no_geometry_between(*who, to_outside - who->xy()));
+    EXPECT_FALSE(geo.no_geometry_between(*who, beyond_hole - who->xy()));
 
-    // Delegation pinning against the 2D view.
-    EXPECT_EQ(
-        geo.inside_geometry(*who, to_free - who->xy()), geo.geometry_2d()->InsideGeometry(to_free));
-    EXPECT_EQ(
-        geo.inside_geometry(*who, to_hole - who->xy()), geo.geometry_2d()->InsideGeometry(to_hole));
-}
-
-TEST(Geometry3DModelQueries, MeshBuiltStillLacksTheWalkableAreaQuery)
-{
-    Geometry3D mesh_geo{flat_room()};
-    const auto who = mesh_geo.get_location(2, 5, 0.0);
-    ASSERT_TRUE(who.has_value());
-
-    // Walls and line of sight answer on a mesh now. This one is about to be folded into
-    // line of sight, since on a surface they are the same question.
-    EXPECT_THROW(mesh_geo.inside_geometry(*who, {1, 1}), std::exception);
+    // The last one is where the two questions part ways: it lands on walkable ground, and
+    // there is still no straight step to it.
+    EXPECT_TRUE(geo.geometry_2d()->InsideGeometry(beyond_hole));
 }
 
 TEST(Geometry3DVisibility, WithinOneRegionTheFlatTestAnswers)
