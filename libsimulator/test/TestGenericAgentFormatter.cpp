@@ -1,16 +1,25 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "GenericAgent.hpp"
+#include "Geometry/Geometry3D.hpp"
+#include "GeometryBuilder.hpp"
 
 #include <fmt/format.h>
 #include <gtest/gtest.h>
 
+#include <memory>
+
 static GenericAgent make_agent(OperationalModelState model)
 {
+    static const auto geometry = [] {
+        GeometryBuilder builder{};
+        builder.AddAccessibleArea({{-10, -10}, {10, -10}, {10, 10}, {-10, 10}});
+        return std::make_unique<Geometry3D>(builder.Build().Polygon());
+    }();
     return GenericAgent(
         GenericAgent::ID{},
         jps::UniqueID<Journey>::Invalid,
         jps::UniqueID<BaseStage>::Invalid,
-        Point{},
+        *geometry->get_location(0.0, 0.0, 0.0),
         std::move(model));
 }
 

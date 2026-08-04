@@ -493,3 +493,28 @@ def test_agent_can_not_be_added_outside_geometry():
             position=(-50, -50),
             state=jps.CollisionFreeSpeedModelState(),
         )
+
+
+def test_direct_steering_target_must_be_inside_geometry():
+    simulation = jps.Simulation(
+        model=jps.CollisionFreeSpeedModel(),
+        geometry=[(0, 0), (100, 0), (100, 100), (0, 100)],
+    )
+    stage_id = simulation.add_direct_steering_stage()
+    journey_id = simulation.add_journey(jps.JourneyDescription([stage_id]))
+    agent_id = simulation.add_agent(
+        journey_id=journey_id,
+        stage_id=stage_id,
+        position=(50, 50),
+        state=jps.CollisionFreeSpeedModelState(),
+    )
+    agent = simulation.agent(agent_id)
+
+    agent.final_target = (60, 60)
+    assert agent.final_target == (60, 60)
+
+    with pytest.raises(
+        jps.SimulationError,
+        match=r"Point \(-50, -50\) is outside of accessible area",
+    ):
+        agent.final_target = (-50, -50)

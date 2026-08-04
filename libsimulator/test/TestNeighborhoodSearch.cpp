@@ -7,14 +7,18 @@
 #include <cmath>
 #include <set>
 
+/// Stands in for an agent's Location: of a stored value the grid only ever asks where it is
+/// in plan, and building a real one would need a geometry this test has no use for.
+struct PlanarLocation {
+    PlanarLocation(double x = 0.0, double y = 0.0) : p(x, y) {}
+    Point p;
+    Point xy() const { return p; }
+};
+
 template <typename T>
-class ValueWithPos
-{
-public:
-    Point position{};
+struct ValueWithPos {
+    PlanarLocation location{};
     T val;
-    ValueWithPos(Point pos, T v) : position(pos), val(v) {}
-    const Point& Position() const { return position; }
 };
 
 namespace

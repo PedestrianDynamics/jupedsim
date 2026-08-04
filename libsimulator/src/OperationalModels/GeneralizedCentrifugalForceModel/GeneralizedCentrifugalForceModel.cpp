@@ -137,8 +137,8 @@ void GeneralizedCentrifugalForceModel::CheckModelConstraint(
                 "Model constraint violation: Agent at {} too close to agent at {}: distance {}, "
                 "contactDist {}, "
                 "effective distance {}",
-                agent.Position(),
-                agent.Position() + neighbor.RelativePosition,
+                agent.location.xy(),
+                agent.location.xy() + neighbor.RelativePosition,
                 distance,
                 contanctDist,
                 distance - contanctDist);
@@ -148,9 +148,8 @@ void GeneralizedCentrifugalForceModel::CheckModelConstraint(
     const auto maxRadius = std::max(AMin, BMax) / 2.;
     if(!view.WallsInRange(maxRadius).empty()) {
         throw SimulationError(
-            "Model constraint violation: Agent at {} too close to geometry boundaries, distance <= "
-            "{}",
-            agent.Position(),
+            "Model constraint violation: Agent {} too close to geometry boundaries, distance <= {}",
+            agent.location.xy(),
             maxRadius);
     }
 }

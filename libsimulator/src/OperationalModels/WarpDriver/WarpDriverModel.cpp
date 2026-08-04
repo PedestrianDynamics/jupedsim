@@ -416,8 +416,8 @@ void WarpDriverModel::CheckModelConstraint(const GenericAgent& agent, const Agen
             throw SimulationError(
                 "Model constraint violation: Agent at {} too close to agent at {}: distance {}, "
                 "radius {}",
-                agent.Position(),
-                agent.Position() + neighbor.RelativePosition,
+                agent.location.xy(),
+                agent.location.xy() + neighbor.RelativePosition,
                 distance,
                 data->radius);
         }
@@ -427,7 +427,7 @@ void WarpDriverModel::CheckModelConstraint(const GenericAgent& agent, const Agen
         throw SimulationError(
             "Model constraint violation: Agent at {} too close to geometry boundaries, distance <= "
             "{}/2",
-            agent.Position(),
+            agent.location.xy(),
             data->radius);
     }
 }

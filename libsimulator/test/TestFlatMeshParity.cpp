@@ -92,13 +92,13 @@ struct BothWays {
     }
 };
 
-GenericAgent make_agent(Point position, Point target)
+GenericAgent make_agent(const Geometry3D& geo, Point position, Point target)
 {
     GenericAgent agent(
         GenericAgent::ID::Invalid,
         jps::UniqueID<Journey>::Invalid,
         jps::UniqueID<BaseStage>::Invalid,
-        position,
+        *geo.get_location(position.x, position.y, 0.0),
         State{});
     agent.nextTarget = target;
     return agent;
@@ -143,10 +143,7 @@ populate(const Geometry3D& geo, const std::vector<std::pair<Point, Point>>& who 
 {
     AgentContainer<GenericAgent> agents{};
     for(const auto& [position, target] : who) {
-        agents.push_back(make_agent(position, target));
-    }
-    for(auto& agent : agents) {
-        agent.location = geo.get_location(agent.Position().x, agent.Position().y, 0.0);
+        agents.push_back(make_agent(geo, position, target));
     }
     return agents;
 }
@@ -225,19 +222,18 @@ std::vector<Point> positions_after(
             updated.push_back(next);
         }
         for(std::size_t i = 0; i < agents.size(); ++i) {
-            agents[i].MoveAlongSurface(deltas[i]);
-            agents[i].state = updated[i];
-            auto where = geo.get_location(agents[i].Position().x, agents[i].Position().y, 0.0);
-            if(!where.has_value()) {
+            const auto moved = agents[i].location.try_move_on_surface(deltas[i]);
+            if(!moved) {
                 return {};
             }
-            agents[i].location = where;
+            agents[i].location = *moved;
+            agents[i].state = updated[i];
         }
     }
 
     std::vector<Point> out{};
     for(const auto& agent : agents) {
-        out.push_back(agent.Position());
+        out.push_back(agent.location.xy());
     }
     return out;
 }

@@ -34,13 +34,13 @@ public:
     void CheckModelConstraint(const GenericAgent&, const AgentView&) const override {}
 };
 
-GenericAgent make_agent(Point start, Point velocity)
+GenericAgent make_agent(const Geometry3D& geometry, Point start, Point velocity)
 {
     return GenericAgent(
         GenericAgent::ID::Invalid,
         jps::UniqueID<Journey>::Invalid,
         jps::UniqueID<BaseStage>::Invalid,
-        start,
+        *geometry.get_location(start.x, start.y, 0.0),
         CustomModel::State{ConstantVelocity{velocity}});
 }
 
@@ -53,15 +53,13 @@ std::unique_ptr<Geometry3D> flat_square()
 }
 } // namespace
 
-TEST(OperationalDecisionSystemLocation, LocationTracksPositionOnFlatGeometry)
+TEST(OperationalDecisionSystemLocation, WalkingTheStepLandsWhereDeadReckoningSays)
 {
     auto geo = flat_square();
 
     AgentContainer<GenericAgent> agents{};
     const Point start{0.0, 0.0};
-    agents.emplace_back(make_agent(start, Point{2.0, 0.0}));
-    agents.front().location = geo->get_location(start.x, start.y, 0.0);
-    ASSERT_TRUE(agents.front().location.has_value());
+    agents.emplace_back(make_agent(*geo, start, Point{2.0, 0.0}));
 
     NeighborhoodSearch<GenericAgent> neighborhoodSearch{2.2};
     neighborhoodSearch.Update(agents);
@@ -69,19 +67,15 @@ TEST(OperationalDecisionSystemLocation, LocationTracksPositionOnFlatGeometry)
     OperationalDecisionSystem system{std::make_unique<ConstantVelocityModel>()};
     system.Run(0.5, 0.0, neighborhoodSearch, *geo, agents);
 
-    const auto& agent = agents.front();
-    ASSERT_TRUE(agent.location.has_value());
-    // Check invariant: the Location's (x,y) equals the model position.
     // velocity=2.0, dt=0.5 --> move x by 1.0
-    EXPECT_NEAR(agent.location->xy().x, agent.Position().x, 1e-9);
-    EXPECT_NEAR(agent.location->xy().y, agent.Position().y, 1e-9);
-    EXPECT_NEAR(agent.Position().x, start.x + 1.0, 1e-9);
-    EXPECT_NEAR(agent.Position().y, start.y, 1e-9);
-    EXPECT_NEAR(agent.location->z(), 0.0, 1e-9);
-    EXPECT_EQ(agent.location->region(), 0u);
+    const auto& agent = agents.front();
+    EXPECT_NEAR(agent.location.xy().x, start.x + 1.0, 1e-9);
+    EXPECT_NEAR(agent.location.xy().y, start.y, 1e-9);
+    EXPECT_NEAR(agent.location.z(), 0.0, 1e-9);
+    EXPECT_EQ(agent.location.region(), 0u);
 }
 
-TEST(OperationalDecisionSystemLocation, InvariantHoldsOverManySteps)
+TEST(OperationalDecisionSystemLocation, ItStaysOnTheSheetOverManySteps)
 {
     auto geo = flat_square();
 
@@ -90,9 +84,7 @@ TEST(OperationalDecisionSystemLocation, InvariantHoldsOverManySteps)
     const Point velocity{1.0, 0.5};
     const double dT = 0.1;
     const int steps = 20;
-    agents.emplace_back(make_agent(start, velocity));
-    agents.front().location = geo->get_location(start.x, start.y, 0.0);
-    ASSERT_TRUE(agents.front().location.has_value());
+    agents.emplace_back(make_agent(*geo, start, velocity));
 
     NeighborhoodSearch<GenericAgent> neighborhoodSearch{2.2};
     OperationalDecisionSystem system{std::make_unique<ConstantVelocityModel>()};
@@ -101,34 +93,10 @@ TEST(OperationalDecisionSystemLocation, InvariantHoldsOverManySteps)
         neighborhoodSearch.Update(agents);
         system.Run(dT, 0.0, neighborhoodSearch, *geo, agents);
         const auto& agent = agents.front();
-        ASSERT_TRUE(agent.location.has_value());
-        EXPECT_NEAR(agent.location->xy().x, agent.Position().x, 1e-9);
-        EXPECT_NEAR(agent.location->xy().y, agent.Position().y, 1e-9);
-        EXPECT_NEAR(agent.location->z(), 0.0, 1e-9);
-        EXPECT_EQ(agent.location->region(), 0u);
+        EXPECT_NEAR(agent.location.z(), 0.0, 1e-9);
+        EXPECT_EQ(agent.location.region(), 0u);
     }
     // After `steps` steps the agent advanced by velocity * dT * steps.
-    EXPECT_NEAR(agents.front().Position().x, start.x + velocity.x * dT * steps, 1e-9);
-    EXPECT_NEAR(agents.front().Position().y, start.y + velocity.y * dT * steps, 1e-9);
-}
-
-TEST(OperationalDecisionSystemLocation, AgentWithoutLocationIsUnaffected)
-{
-    auto geo = flat_square();
-
-    AgentContainer<GenericAgent> agents{};
-    const Point start{0.0, 0.0};
-    const Point velocity{2.0, 0.0};
-    const double dT = 0.5;
-    agents.emplace_back(make_agent(start, velocity)); // no location -> nullopt
-
-    NeighborhoodSearch<GenericAgent> neighborhoodSearch{2.2};
-    neighborhoodSearch.Update(agents);
-
-    OperationalDecisionSystem system{std::make_unique<ConstantVelocityModel>()};
-    ASSERT_NO_THROW(system.Run(dT, 0.0, neighborhoodSearch, *geo, agents));
-
-    const auto& agent = agents.front();
-    EXPECT_FALSE(agent.location.has_value());
-    EXPECT_EQ(agent.Position(), start + velocity * dT);
+    EXPECT_NEAR(agents.front().location.xy().x, start.x + velocity.x * dT * steps, 1e-9);
+    EXPECT_NEAR(agents.front().location.xy().y, start.y + velocity.y * dT * steps, 1e-9);
 }

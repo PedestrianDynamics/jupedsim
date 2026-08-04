@@ -84,8 +84,8 @@ void SocialForceModel::CheckModelConstraint(const GenericAgent& agent, const Age
             throw SimulationError(
                 "Model constraint violation: Agent at {} too close to agent at {}: distance {}, "
                 "radius {}",
-                agent.Position(),
-                agent.Position() + neighbor.RelativePosition,
+                agent.location.xy(),
+                agent.location.xy() + neighbor.RelativePosition,
                 distance,
                 currentState.radius);
         }
@@ -95,7 +95,7 @@ void SocialForceModel::CheckModelConstraint(const GenericAgent& agent, const Age
         throw SimulationError(
             "Model constraint violation: Agent at {} too close to geometry boundaries, distance <= "
             "{}/2",
-            agent.Position(),
+            agent.location.xy(),
             currentState.radius);
     }
 }

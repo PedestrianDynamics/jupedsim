@@ -78,7 +78,14 @@ public:
     /// Returns IDs of all agents inside the defined polygon
     /// @param polygon Required to be a simple convex polygon with CCW ordering.
     std::vector<GenericAgent::ID> AgentsInPolygon(const std::vector<Point>& polygon);
-    GenericAgent::ID AddAgent(GenericAgent agent);
+    GenericAgent::ID AddAgent(
+        Journey::ID journeyId,
+        BaseStage::ID stageId,
+        Point position,
+        OperationalModelState model);
+    /// Raycast 2D @p target along z-axis. The closest intersection with the geometry to agent's
+    /// z coordinate is the one taken.
+    void SetAgentTarget(GenericAgent::ID id, Point target);
     const GenericAgent& Agent(GenericAgent::ID id) const;
     GenericAgent& Agent(GenericAgent::ID id);
     AgentContainer<GenericAgent>& Agents();

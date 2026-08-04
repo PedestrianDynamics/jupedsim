@@ -148,8 +148,7 @@ class Agent:
         .. important::
 
             When setting the target, the given coordinates must lie within the
-            walkable area. Otherwise, an error will be thrown at the next
-            iteration call.
+            walkable area. Otherwise, an error will be thrown immediately.
 
         Returns:
             Current final target of the agent.
@@ -158,7 +157,7 @@ class Agent:
 
     @final_target.setter
     def final_target(self, final_target: tuple[float, float]) -> None:
-        self.__resolve().final_target = final_target
+        self.__simulation._obj.set_agent_target(self.__id, final_target)
 
     @property
     def next_target(self) -> tuple[float, float]:

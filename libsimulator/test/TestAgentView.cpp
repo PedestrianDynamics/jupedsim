@@ -19,7 +19,7 @@ namespace
 {
 using State = CollisionFreeSpeedModel::State;
 
-GenericAgent MakeAgent(Point pos, double radius = 0.2)
+GenericAgent MakeAgent(const Geometry3D& geo, Point pos, double radius = 0.2, double z = 0.0)
 {
     State s{};
     s.radius = radius;
@@ -27,7 +27,7 @@ GenericAgent MakeAgent(Point pos, double radius = 0.2)
         GenericAgent::ID::Invalid,
         jps::UniqueID<Journey>::Invalid,
         jps::UniqueID<BaseStage>::Invalid,
-        pos,
+        *geo.get_location(pos.x, pos.y, z),
         std::move(s));
 }
 
@@ -50,16 +50,18 @@ std::unique_ptr<Geometry3D> WalledGeometry()
 struct Environment {
     AgentContainer<GenericAgent> agents{};
     NeighborhoodSearch<GenericAgent> neighborhood_search{5.0};
+    std::vector<std::pair<Point, double>> requested{};
 
-    void add_agent(Point pos, double radius = 0.2) { agents.push_back(MakeAgent(pos, radius)); }
+    void add_agent(Point pos, double radius = 0.2) { requested.emplace_back(pos, radius); }
 
-    // Agents are added before the geometry exists, so they are put onto the surface here --
-    // the same z=0 placement Simulation::AddAgent does on the flat path.
+    // Agents are asked for before the geometry exists, so they are made here -- only the
+    // geometry can put them onto the surface, the same way Simulation::AddAgent does.
     EnvironmentQuery query(const Geometry3D& geo)
     {
-        for(auto& agent : agents) {
-            agent.location = geo.get_location(agent.Position().x, agent.Position().y, 0.0);
+        for(const auto& [pos, radius] : requested) {
+            agents.push_back(MakeAgent(geo, pos, radius));
         }
+        requested.clear();
         neighborhood_search.Update(agents);
         return {geo, neighborhood_search};
     }
@@ -67,7 +69,7 @@ struct Environment {
     // The first agent added is the one every test queries from.
     AgentView FirstAgentView(const EnvironmentQuery& q) const { return {q, agents[0]}; }
 
-    const Location& FirstAgentLocation() const { return *agents[0].location; }
+    const Location& FirstAgentLocation() const { return agents[0].location; }
 };
 } // namespace
 
@@ -290,12 +292,8 @@ TEST(AgentView, AgentsOnAnotherStoreyAreNotNeighbours)
     Geometry3D geo{fixtures::stacked_floors()};
 
     AgentContainer<GenericAgent> agents{};
-    agents.push_back(MakeAgent({5.0, 5.0}));
-    agents.push_back(MakeAgent({5.0, 5.0}));
-    agents[0].location = geo.get_location(5.0, 5.0, 0.0);
-    agents[1].location = geo.get_location(5.0, 5.0, 3.0);
-    ASSERT_TRUE(agents[0].location.has_value());
-    ASSERT_TRUE(agents[1].location.has_value());
+    agents.push_back(MakeAgent(geo, {5.0, 5.0}));
+    agents.push_back(MakeAgent(geo, {5.0, 5.0}, 0.2, 3.0));
 
     NeighborhoodSearch<GenericAgent> search{5.0};
     search.Update(agents);
@@ -311,11 +309,8 @@ TEST(AgentView, AgentsOnTheSameStoreyStillAre)
     Geometry3D geo{fixtures::stacked_floors()};
 
     AgentContainer<GenericAgent> agents{};
-    agents.push_back(MakeAgent({5.0, 5.0}));
-    agents.push_back(MakeAgent({6.0, 5.0}));
-    agents[0].location = geo.get_location(5.0, 5.0, 0.0);
-    agents[1].location = geo.get_location(6.0, 5.0, 0.0);
-    ASSERT_TRUE(agents[0].location.has_value() && agents[1].location.has_value());
+    agents.push_back(MakeAgent(geo, {5.0, 5.0}));
+    agents.push_back(MakeAgent(geo, {6.0, 5.0}));
 
     NeighborhoodSearch<GenericAgent> search{5.0};
     search.Update(agents);
@@ -332,14 +327,9 @@ TEST(AgentView, ANeighbourCloseEnoughToTouchCanStillBeOnAnotherStorey)
     Geometry3D geo{fixtures::stacked_floors(1.5)};
 
     AgentContainer<GenericAgent> agents{};
-    agents.push_back(MakeAgent({2.0, 5.0}));
-    agents.push_back(MakeAgent({4.0, 5.0}));
-    agents.push_back(MakeAgent({6.0, 5.0}));
-    agents[0].location = geo.get_location(2.0, 5.0, 0.0);
-    agents[1].location = geo.get_location(4.0, 5.0, 0.0);
-    agents[2].location = geo.get_location(6.0, 5.0, 1.5);
-    ASSERT_TRUE(agents[0].location.has_value() && agents[1].location.has_value());
-    ASSERT_TRUE(agents[2].location.has_value());
+    agents.push_back(MakeAgent(geo, {2.0, 5.0}));
+    agents.push_back(MakeAgent(geo, {4.0, 5.0}));
+    agents.push_back(MakeAgent(geo, {6.0, 5.0}, 0.2, 1.5));
 
     NeighborhoodSearch<GenericAgent> search{5.0};
     search.Update(agents);

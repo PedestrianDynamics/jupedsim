@@ -26,13 +26,10 @@ void init_agent(py::module_& m)
         .def_property_readonly(
             "stage_id", [](const GenericAgent& agent) { return agent.stageId.getID(); })
         .def_property_readonly(
-            "position", [](const GenericAgent& agent) { return intoTuple(agent.Position()); })
-        .def_property(
+            "position", [](const GenericAgent& agent) { return intoTuple(agent.location.xy()); })
+        .def_property_readonly(
             "final_target",
-            [](const GenericAgent& agent) { return intoTuple(agent.finalTarget); },
-            [](GenericAgent& agent, std::tuple<double, double> finalTarget) {
-                agent.finalTarget = intoPoint(finalTarget);
-            })
+            [](const GenericAgent& agent) { return intoTuple(agent.finalTarget.xy()); })
         .def_property_readonly(
             "next_target", [](const GenericAgent& agent) { return intoTuple(agent.nextTarget); })
         .def_property_readonly(

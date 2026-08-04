@@ -43,7 +43,7 @@ std::unique_ptr<Geometry3D> ThinWallLeftOfOrigin()
     return std::make_unique<Geometry3D>(b.Build().Polygon());
 }
 
-GenericAgent MakeAgent(Point position, Point target, State s = State{})
+GenericAgent MakeAgent(const Geometry3D& geo, Point position, Point target, State s = State{})
 {
     // Heading where it is going: the anticipation reads the neighbour's orientation, so an
     // agent facing away predicts no collision and would make the test pass for free.
@@ -52,7 +52,7 @@ GenericAgent MakeAgent(Point position, Point target, State s = State{})
         GenericAgent::ID::Invalid,
         jps::UniqueID<Journey>::Invalid,
         jps::UniqueID<BaseStage>::Invalid,
-        position,
+        *geo.get_location(position.x, position.y, 0.0),
         std::move(s));
     agent.nextTarget = target;
     return agent;
@@ -61,9 +61,6 @@ GenericAgent MakeAgent(Point position, Point target, State s = State{})
 /// One step of the first agent, with whatever company it has been given.
 Point step_of_first(const Geometry3D& geo, AgentContainer<GenericAgent>& agents, double dt = 0.05)
 {
-    for(auto& agent : agents) {
-        agent.location = geo.get_location(agent.Position().x, agent.Position().y, 0.0);
-    }
     NeighborhoodSearch<GenericAgent> search{10.0};
     search.Update(agents);
     const EnvironmentQuery query{geo, search};
@@ -83,12 +80,12 @@ TEST(WarpDriverModel, AnAgentBehindAWallDoesNotSteerUs)
     const auto geo = WalledGeometry();
 
     AgentContainer<GenericAgent> alone{};
-    alone.push_back(MakeAgent({-1.0, 0.0}, {5.0, 0.0}));
+    alone.push_back(MakeAgent(*geo, {-1.0, 0.0}, {5.0, 0.0}));
     const Point without = step_of_first(*geo, alone);
 
     AgentContainer<GenericAgent> accompanied{};
-    accompanied.push_back(MakeAgent({-1.0, 0.0}, {5.0, 0.0}));
-    accompanied.push_back(MakeAgent({2.0, 0.0}, {-5.0, 0.0}));
+    accompanied.push_back(MakeAgent(*geo, {-1.0, 0.0}, {5.0, 0.0}));
+    accompanied.push_back(MakeAgent(*geo, {2.0, 0.0}, {-5.0, 0.0}));
     const Point with = step_of_first(*geo, accompanied);
 
     EXPECT_EQ(with, without) << "the agent behind the wall changed the step";
@@ -106,13 +103,15 @@ TEST(WarpDriverModel, ADetourTakesTheOtherSideWhenTheWayIsBlocked)
     // Judging where it lands would wave that through; judging the way there does not.
     constexpr double longStep = 0.5;
 
+    const auto open = OpenGeometry();
     AgentContainer<GenericAgent> unobstructed{};
-    unobstructed.push_back(MakeAgent({0, 0}, {0, 10}, detouring));
-    EXPECT_LT(step_of_first(*OpenGeometry(), unobstructed, longStep).x, 0.0);
+    unobstructed.push_back(MakeAgent(*open, {0, 0}, {0, 10}, detouring));
+    EXPECT_LT(step_of_first(*open, unobstructed, longStep).x, 0.0);
 
+    const auto blocked = ThinWallLeftOfOrigin();
     AgentContainer<GenericAgent> obstructed{};
-    obstructed.push_back(MakeAgent({0, 0}, {0, 10}, detouring));
-    EXPECT_GT(step_of_first(*ThinWallLeftOfOrigin(), obstructed, longStep).x, 0.0);
+    obstructed.push_back(MakeAgent(*blocked, {0, 0}, {0, 10}, detouring));
+    EXPECT_GT(step_of_first(*blocked, obstructed, longStep).x, 0.0);
 }
 
 TEST(WarpDriverModel, AnAgentInPlainSightStillDoes)
@@ -122,12 +121,12 @@ TEST(WarpDriverModel, AnAgentInPlainSightStillDoes)
     const auto geo = WalledGeometry();
 
     AgentContainer<GenericAgent> alone{};
-    alone.push_back(MakeAgent({-1.0, 0.0}, {5.0, 0.0}));
+    alone.push_back(MakeAgent(*geo, {-1.0, 0.0}, {5.0, 0.0}));
     const Point without = step_of_first(*geo, alone);
 
     AgentContainer<GenericAgent> accompanied{};
-    accompanied.push_back(MakeAgent({-1.0, 0.0}, {5.0, 0.0}));
-    accompanied.push_back(MakeAgent({-0.2, 0.0}, {-5.0, 0.0}));
+    accompanied.push_back(MakeAgent(*geo, {-1.0, 0.0}, {5.0, 0.0}));
+    accompanied.push_back(MakeAgent(*geo, {-0.2, 0.0}, {-5.0, 0.0}));
     const Point with = step_of_first(*geo, accompanied);
 
     EXPECT_NE(with, without);

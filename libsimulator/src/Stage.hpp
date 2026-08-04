@@ -25,9 +25,9 @@
 #include <variant>
 #include <vector>
 
-class Simulation;
-
 class BaseStage;
+class Geometry3D;
+class Simulation;
 
 enum class WaitingSetState {
     Active,
@@ -114,7 +114,7 @@ protected:
 public:
     virtual ~BaseStage() = default;
     virtual bool IsCompleted(const GenericAgent& agent) = 0;
-    virtual Point Target(const GenericAgent& agent) = 0;
+    virtual Location Target(const GenericAgent& agent) = 0;
     virtual StageProxy Proxy(Simulation* simulation_) = 0;
     ID Id() const { return id; }
     size_t CountTargeting() const { return targeting; }
@@ -147,7 +147,7 @@ public:
     Waypoint(Location position_, double distance_);
     ~Waypoint() override = default;
     bool IsCompleted(const GenericAgent& agent) override;
-    Point Target(const GenericAgent& agent) override;
+    Location Target(const GenericAgent& agent) override;
     StageProxy Proxy(Simulation* simulation_) override;
     Point Position() const { return position.xy(); };
 };
@@ -163,7 +163,7 @@ public:
     Exit(Polygon area, Location centroid_, std::vector<GenericAgent::ID>& toRemove_);
     ~Exit() override = default;
     bool IsCompleted(const GenericAgent& agent) override;
-    Point Target(const GenericAgent& agent) override;
+    Location Target(const GenericAgent& agent) override;
     StageProxy Proxy(Simulation* simulation_) override;
     Polygon Position() const { return area; };
 };
@@ -178,7 +178,7 @@ public:
     NotifiableWaitingSet(std::vector<Location> slots_);
     ~NotifiableWaitingSet() override = default;
     bool IsCompleted(const GenericAgent& agent) override;
-    Point Target(const GenericAgent& agent) override;
+    Location Target(const GenericAgent& agent) override;
     StageProxy Proxy(Simulation* simulation_) override;
     void State(WaitingSetState s);
     WaitingSetState State() const;
@@ -199,7 +199,7 @@ public:
     NotifiableQueue(std::vector<Location> slots_);
     ~NotifiableQueue() override = default;
     bool IsCompleted(const GenericAgent& agent) override;
-    Point Target(const GenericAgent& agent) override;
+    Location Target(const GenericAgent& agent) override;
     StageProxy Proxy(Simulation* simulation_) override;
     void Update(const EnvironmentQuery& envQuery);
     void Pop(size_t count);
@@ -213,7 +213,7 @@ public:
     DirectSteering() = default;
     ~DirectSteering() override = default;
     bool IsCompleted(const GenericAgent&) override { return false; };
-    Point Target(const GenericAgent& agent) override { return agent.finalTarget; };
+    Location Target(const GenericAgent& agent) override;
     StageProxy Proxy(Simulation* simulation) override
     {
         return DirectSteeringProxy(simulation, this);

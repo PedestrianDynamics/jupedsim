@@ -75,15 +75,15 @@ public:
         // This says nothing about walls: collecting candidates never did, in 2D either. A
         // model that wants line of sight passes 'filter' for it.
         const double z = location().z();
-        _world.ForEachAgentInRange(_agent.Position(), radius, [&](const GenericAgent& candidate) {
+        _world.ForEachAgentInRange(location().xy(), radius, [&](const GenericAgent& candidate) {
             if(candidate.id == _agent.id) {
                 return;
             }
-            if(std::abs(candidate.location->z() - z) > InteractionHeight) {
+            if(std::abs(candidate.location.z() - z) > InteractionHeight) {
                 return;
             }
             const NeighborView neighbor{
-                candidate.Position() - _agent.Position(), &candidate.state, &*candidate.location};
+                candidate.location.xy() - location().xy(), &candidate.state, &candidate.location};
             if(filter(neighbor)) {
                 neighbors.push_back(neighbor);
             }
@@ -114,7 +114,7 @@ private:
     /// defined.
     auto AsSeenFromAgent(WallRange segments) const
     {
-        return segments | std::views::transform([origin = _agent.Position()](const LineSegment& s) {
+        return segments | std::views::transform([origin = location().xy()](const LineSegment& s) {
                    const LineSegment segment{s.p1 - origin, s.p2 - origin};
                    const Point closest_point = segment.ShortestPoint(Point{});
                    return WallView{
@@ -138,8 +138,8 @@ public:
     }
 
 protected:
-    /// 3D location wrapper of the agent's position on surface.
-    const Location& location() const { return *_agent.location; }
+    /// Where the agent stands on the surface.
+    const Location& location() const { return _agent.location; }
 
     const EnvironmentQuery& _world;
     const GenericAgent& _agent;
@@ -160,7 +160,7 @@ public:
     /// reached it.
     Point orientation_to_next_target() const
     {
-        return (_agent.nextTarget - _agent.Position()).Normalized();
+        return (_agent.nextTarget - location().xy()).Normalized();
     }
 
 private:

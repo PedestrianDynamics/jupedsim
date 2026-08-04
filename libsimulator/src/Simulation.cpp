@@ -20,6 +20,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
+#include <limits>
 #include <map>
 #include <memory>
 #include <string>
@@ -206,22 +207,27 @@ BaseStage::ID Simulation::AddStage(const StageDescription stageDescription)
     return _stageManager.AddStage(stageDescription, _removedAgentsInLastIteration, *_geometry);
 }
 
-GenericAgent::ID Simulation::AddAgent(GenericAgent agent)
+GenericAgent::ID Simulation::AddAgent(
+    Journey::ID journeyId,
+    BaseStage::ID stageId,
+    Point position,
+    OperationalModelState model)
 {
     ThrowIfIterating("AddAgent");
     JPS_SCOPED_TIMER_AND_TRACE(_timer, "Add Agent", Detailed);
-    if(!_geometry->geometry_2d()->InsideGeometry(agent.Position())) {
-        throw SimulationError("Agent {} not inside walkable area", agent.Position());
+    const auto location = _geometry->get_location(position.x, position.y, 0.0);
+    if(!location) {
+        throw SimulationError("Agent {} not inside walkable area", position);
     }
-    if(_journeys.count(agent.journeyId) == 0) {
-        throw SimulationError("Unknown journey id: {}", agent.journeyId);
-    }
-
-    if(!_journeys.at(agent.journeyId)->ContainsStage(agent.stageId)) {
-        throw SimulationError("Unknown stage id: {}", agent.stageId);
+    if(_journeys.count(journeyId) == 0) {
+        throw SimulationError("Unknown journey id: {}", journeyId);
     }
 
-    if(const auto agentModelType = ModelTypeOf(agent.state);
+    if(!_journeys.at(journeyId)->ContainsStage(stageId)) {
+        throw SimulationError("Unknown stage id: {}", stageId);
+    }
+
+    if(const auto agentModelType = ModelTypeOf(model);
        agentModelType != _operationalDecisionSystem.ModelType()) {
         throw SimulationError(
             "Agent model data of type '{}' does not match the simulation's operational model "
@@ -230,9 +236,7 @@ GenericAgent::ID Simulation::AddAgent(GenericAgent agent)
             ToString(_operationalDecisionSystem.ModelType()));
     }
 
-    // Set 3D location (with fixed z=0.0 for the time being), so that the OperationDecisionSystem
-    // will run through both the original + the 3D move. (This is temporary.)
-    agent.location = _geometry->get_location(agent.Position().x, agent.Position().y, 0.0);
+    GenericAgent agent{GenericAgent::ID::Invalid, journeyId, stageId, *location, std::move(model)};
 
     _operationalDecisionSystem.ValidateAgent(agent, _neighborhoodSearch, *_geometry);
 
@@ -244,6 +248,17 @@ GenericAgent::ID Simulation::AddAgent(GenericAgent agent)
     _stategicalDecisionSystem.Run(_journeys, v, _stageManager);
     _tacticalDecisionSystem.Run(*_routingEngine, v);
     return _agents.back().id.getID();
+}
+
+void Simulation::SetAgentTarget(GenericAgent::ID id, Point target)
+{
+    auto& agent = Agent(id);
+    const auto located = _geometry->get_location(
+        target.x, target.y, agent.location.z(), std::numeric_limits<double>::max());
+    if(!located) {
+        throw SimulationError("Point {} is outside of accessible area", target);
+    }
+    agent.finalTarget = *located;
 }
 
 void Simulation::MarkAgentForRemoval(GenericAgent::ID id)
@@ -353,7 +368,7 @@ std::vector<GenericAgent::ID> Simulation::AgentsInPolygon(const std::vector<Poin
 
     std::vector<GenericAgent::ID> result{};
     _neighborhoodSearch.ForEachInRange(p, dist, [&result, &poly](const GenericAgent& agent) {
-        if(poly.IsInside(agent.Position())) {
+        if(poly.IsInside(agent.location.xy())) {
             result.push_back(agent.id);
         }
     });

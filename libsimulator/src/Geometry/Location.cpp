@@ -4,8 +4,11 @@
 #include "Geometry/Geometry3D.hpp"
 #include "SimulationError.hpp"
 
+#include <CGAL/squared_distance_3.h>
+
 #include <array>
 #include <cassert>
+#include <cmath>
 #include <cstddef>
 #include <optional>
 
@@ -192,6 +195,11 @@ std::optional<Location> Location::try_move_on_surface(Point xy_direction) const
             new_face_location->point.z()};
     }
     return std::nullopt;
+}
+
+double Location::distance_to(const Location& other) const
+{
+    return std::sqrt(CGAL::squared_distance(position_3d(), other.position_3d()));
 }
 
 bool Location::can_walk_straight_to(const Location& other) const

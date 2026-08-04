@@ -34,14 +34,12 @@ public:
 
     GenericAgent AgentAt(Point p, BaseStage::ID stageId) const
     {
-        GenericAgent agent(
+        return GenericAgent(
             GenericAgent::ID::Invalid,
             Journey::ID::Invalid,
             stageId,
-            p,
+            At(p),
             CollisionFreeSpeedModelState{});
-        agent.location = At(p);
-        return agent;
     }
 };
 
@@ -56,8 +54,7 @@ TEST_F(StagesTests, NotifiableWaitingSetTargetIsCorrect)
         GenericAgent agent = AgentAt(waitingPoints[i], waitingSet.Id());
         neighborhoodSearch.AddAgent(agent);
 
-        const auto& target = waitingSet.Target(agent);
-        ASSERT_EQ(target, waitingPoints[i]);
+        ASSERT_EQ(waitingSet.Target(agent).xy(), waitingPoints[i]);
         EnvironmentQuery envQuery(*geometry, neighborhoodSearch);
         waitingSet.Update(envQuery);
     }
@@ -66,8 +63,7 @@ TEST_F(StagesTests, NotifiableWaitingSetTargetIsCorrect)
     for(size_t i = 0; i < 2; ++i) {
         GenericAgent agentToLastWaitingSetPos = AgentAt(Point{}, waitingSet.Id());
         neighborhoodSearch.AddAgent(agentToLastWaitingSetPos);
-        const auto& target = waitingSet.Target(agentToLastWaitingSetPos);
-        ASSERT_EQ(target, waitingPoints.back());
+        ASSERT_EQ(waitingSet.Target(agentToLastWaitingSetPos).xy(), waitingPoints.back());
     }
 }
 
@@ -81,14 +77,12 @@ public:
 
     GenericAgent AgentAt(Point p, double z, BaseStage::ID stageId) const
     {
-        GenericAgent agent(
+        return GenericAgent(
             GenericAgent::ID::Invalid,
             Journey::ID::Invalid,
             stageId,
-            p,
+            At(p, z),
             CollisionFreeSpeedModelState{});
-        agent.location = At(p, z);
-        return agent;
     }
 };
 
@@ -163,6 +157,27 @@ TEST_F(StagesOnTwoStoreys, WaitingSetSeatsOnlyAgentsOnItsOwnFloor)
     EXPECT_EQ(waitingSet.Occupants().front(), agents[1].id);
 }
 
+TEST_F(StagesOnTwoStoreys, TargetCarriesTheFloorItIsOn)
+{
+    Waypoint upper(At({5, 5}, 3.0), 1.0);
+    Waypoint lower(At({5, 5}, 0.0), 1.0);
+    const auto agent = AgentAt({1, 1}, 0.0, upper.Id());
+
+    EXPECT_DOUBLE_EQ(upper.Target(agent).z(), 3.0);
+    EXPECT_DOUBLE_EQ(lower.Target(agent).z(), 0.0);
+}
+
+TEST_F(StagesOnTwoStoreys, DirectSteeringHandsBackWhereTheAgentWasSteered)
+{
+    DirectSteering steering{};
+
+    auto agent = AgentAt({1, 1}, 0.0, steering.Id());
+    agent.finalTarget = At({5, 5}, 3.0);
+
+    EXPECT_EQ(steering.Target(agent).xy(), Point(5, 5));
+    EXPECT_DOUBLE_EQ(steering.Target(agent).z(), 3.0);
+}
+
 TEST(StagesOnAStair, WaypointIsReachedFromTheStairItStandsOn)
 {
     // A stair climbing 3 m over 5 m: an agent 0.8 m short of the waypoint in plan is
@@ -170,14 +185,12 @@ TEST(StagesOnAStair, WaypointIsReachedFromTheStairItStandsOn)
     Geometry3D geometry{fixtures::two_levels_with_stair()};
     Waypoint waypoint(*geometry.get_location(12.5, 2.0, 1.5), 1.0);
 
-    GenericAgent agent(
+    const GenericAgent agent(
         GenericAgent::ID::Invalid,
         Journey::ID::Invalid,
         waypoint.Id(),
-        Point{11.7, 2.0},
+        *geometry.get_location(11.7, 2.0, 1.02),
         CollisionFreeSpeedModelState{});
-    agent.location = geometry.get_location(11.7, 2.0, 1.02);
-    ASSERT_TRUE(agent.location.has_value());
 
     EXPECT_TRUE(waypoint.IsCompleted(agent));
 }

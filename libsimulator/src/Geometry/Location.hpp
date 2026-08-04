@@ -33,6 +33,8 @@ public:
     /// the walkable area. Does not modify `*this`.
     std::optional<Location> try_move_on_surface(Point xy_direction) const;
 
+    double distance_to(const Location& other) const;
+
     /// Whether walking straight from here arrives where @p other stands.
     bool can_walk_straight_to(const Location& other) const;
 

@@ -147,10 +147,9 @@ void AnticipationVelocityModel::CheckModelConstraint(
         const auto distance = neighbor.RelativePosition.Norm();
         if(contanctdDist >= distance) {
             throw SimulationError(
-                "Model constraint violation: Agent at {} too close to agent at {}: "
-                "distance {}",
-                agent.Position(),
-                agent.Position() + neighbor.RelativePosition,
+                "Model constraint violation: Agent {} too close to agent {}: distance {}",
+                agent.location.xy(),
+                agent.location.xy() + neighbor.RelativePosition,
                 distance);
         }
     }
@@ -159,7 +158,7 @@ void AnticipationVelocityModel::CheckModelConstraint(
         throw SimulationError(
             "Model constraint violation: Agent at {} too close to geometry boundaries, distance "
             "<= {}",
-            agent.Position(),
+            agent.location.xy(),
             r);
     }
 }
