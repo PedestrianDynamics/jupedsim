@@ -6,6 +6,7 @@
 class EnvironmentQuery;
 #include "OperationalModelType.hpp"
 #include "Point.hpp"
+#include "WarpDriverModelState.hpp"
 
 #include <fmt/core.h>
 
@@ -19,17 +20,7 @@ struct NeighborView;
 class WarpDriverModel : public OperationalModel
 {
 public:
-    /// Per-agent state of the warp driver model.
-    struct State {
-        Point orientation{0.0, 0.0};
-        double radius{0.15};
-        double v0{1.2};
-        double stuckTime{0.0}; // elapsed time since the last reset
-        double displacementX{0.0}; // movement accumulated since the last reset
-        double displacementY{0.0};
-        double detourTime{0.0}; // remaining time in detour mode
-        int detourSide{1}; // +1 = left, -1 = right of desired direction
-    };
+    using State = WarpDriverModelState;
 
     /// 3-component space-time point/vector used internally
     struct SpaceTimePoint {
@@ -93,21 +84,4 @@ public:
         const AgentStep& step) const override;
 
     void CheckModelConstraint(const GenericAgent& agent, const AgentView& view) const override;
-};
-
-template <>
-struct fmt::formatter<WarpDriverModel::State> {
-
-    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
-
-    template <typename FormatContext>
-    auto format(const WarpDriverModel::State& m, FormatContext& ctx) const
-    {
-        return fmt::format_to(
-            ctx.out(),
-            "WarpDriver[orientation={}, radius={}, v0={}]",
-            m.orientation,
-            m.radius,
-            m.v0);
-    }
 };

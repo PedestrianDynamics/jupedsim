@@ -18,7 +18,7 @@ void init_agent_view(py::module_& m)
     py::class_<NeighborView>(m, "NeighborView")
         .def_readonly("relative_position", &NeighborView::RelativePosition)
         .def_property_readonly("state", [](const NeighborView& self) -> py::object {
-            const auto& state = static_cast<const OperationalModelStateVariant&>(*self.state);
+            const auto& state = *self.state;
             if(const auto* custom = std::get_if<CustomModel::State>(&state)) {
                 // Custom states are unwrapped so that the _CustomModelState transport type
                 // never reaches user code.

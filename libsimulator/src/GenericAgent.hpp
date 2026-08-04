@@ -5,8 +5,8 @@
 #include "CollisionFreeSpeedModelV2.hpp"
 #include "CollisionFreeSpeedModelV3.hpp"
 #include "GeneralizedCentrifugalForceModel.hpp"
-#include "OperationalModel.hpp"
 #include "OperationalModels/CustomModel/CustomModel.hpp"
+#include "OperationalModels/OperationalModelState.hpp"
 #include "OperationalModels/OperationalModelType.hpp"
 #include "Point.hpp"
 #include "SocialForceModel.hpp"
@@ -18,30 +18,8 @@
 
 #include <deque>
 #include <utility>
-#include <variant>
 class Journey;
 class BaseStage;
-
-using OperationalModelStateVariant = std::variant<
-    GeneralizedCentrifugalForceModel::State,
-    CollisionFreeSpeedModel::State,
-    CollisionFreeSpeedModelV2::State,
-    CollisionFreeSpeedModelV3::State,
-    AnticipationVelocityModel::State,
-    SocialForceModel::State,
-    WarpDriverModel::State,
-    CustomModel::State>;
-
-/// We need this extra class to be able to forward-declare. Otherwise we run
-/// into a circular dependency.
-struct OperationalModelState : OperationalModelStateVariant {
-    using OperationalModelStateVariant::variant;
-
-    OperationalModelState(OperationalModelStateVariant state)
-        : OperationalModelStateVariant(std::move(state))
-    {
-    }
-};
 
 struct GenericAgent {
     using ID = jps::UniqueID<GenericAgent>;

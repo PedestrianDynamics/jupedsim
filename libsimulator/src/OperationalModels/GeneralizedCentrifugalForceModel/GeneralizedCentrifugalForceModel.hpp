@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
+#include "GeneralizedCentrifugalForceModelState.hpp"
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
 #include "Point.hpp"
@@ -12,20 +13,7 @@ struct WallView;
 class GeneralizedCentrifugalForceModel : public OperationalModel
 {
 public:
-    /// Per-agent state of the generalized centrifugal force model.
-    struct State {
-        Point orientation{1.0, 0.0};
-        double speed{};
-        Point e0{};
-        int orientationDelay{};
-        double mass{1.0};
-        double tau{0.5};
-        double v0{1.2};
-        double Av{1.0};
-        double AMin{0.2};
-        double BMin{0.2};
-        double BMax{0.4};
-    };
+    using State = GeneralizedCentrifugalForceModelState;
 
 private:
     double _cutOffRadius{4.0}; // TODO (MC) check this free parameter
@@ -98,16 +86,4 @@ private:
         double r,
         double l) const;
     double AgentToAgentSpacing(const State& currState, const NeighborView& neighbor) const;
-};
-
-template <>
-struct fmt::formatter<GeneralizedCentrifugalForceModel::State> {
-
-    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
-
-    template <typename FormatContext>
-    auto format(const GeneralizedCentrifugalForceModel::State& m, FormatContext& ctx) const
-    {
-        return fmt::format_to(ctx.out(), "GCFM[orientation={}, speed={}])", m.orientation, m.speed);
-    }
 };

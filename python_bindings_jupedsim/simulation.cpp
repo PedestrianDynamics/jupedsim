@@ -84,7 +84,7 @@ void init_simulation(py::module_& m)
                uint64_t journeyId,
                uint64_t stageId,
                std::tuple<double, double> position,
-               OperationalModelStateVariant state) {
+               OperationalModelState state) {
                 return sim
                     .AddAgent(GenericAgent(
                         GenericAgent::ID::Invalid,
