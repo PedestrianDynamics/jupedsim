@@ -180,6 +180,26 @@ TEST(WallMerge, WallCrossingARegionBoundaryStaysOneWall)
     EXPECT_EQ(crossing->regions.size(), 2u);
 }
 
+TEST(WallMerge, AWallStandsOnTheLowestPointOfItsRun)
+{
+    const auto m = merge(switchback_stair());
+
+    // The far wall lies wholly on the upper level, and says so -- that is what keeps it out
+    // of the answers given to the ground floor it also borders.
+    const auto upper = find_far_side_wall(m.walls);
+    ASSERT_NE(upper, m.walls.end());
+    EXPECT_EQ(upper->zMin, 3.0);
+
+    // The wall along y = 0 is fused from ground floor, flight and landing, so it climbs from
+    // 0 to 3. It stands on the ground floor, and reaches up from there.
+    const auto climbing = std::find_if(m.walls.begin(), m.walls.end(), [](const MergedWall& w) {
+        return w.segment.p1.y == 0.0 && w.segment.p2.y == 0.0;
+    });
+    ASSERT_NE(climbing, m.walls.end());
+    EXPECT_EQ(length(*climbing), 18.0);
+    EXPECT_EQ(climbing->zMin, 0.0);
+}
+
 TEST(WallMerge, WallsDoNotMoveWhenTheRegionCutDoes)
 {
     const auto ground_first = merge(switchback_stair(false));

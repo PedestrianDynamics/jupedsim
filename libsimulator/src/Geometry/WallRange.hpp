@@ -31,13 +31,13 @@ public:
     using Span = SegmentGrid<MergedWall>::LineSegmentRange;
     using Spans = boost::container::small_vector<Span, 4>;
 
-    WallRange() = default;
-
     /// The polygon path: one slice, nothing to stitch, nothing to recognise.
     explicit WallRange(Geometry2D::LineSegmentRange flat) : _flat(flat), _isFlat(true) {}
 
-    /// The mesh path.
-    explicit WallRange(Spans spans) : _spans(std::move(spans)) {}
+    /// The mesh path. Walls standing higher than @p reachesUpTo are not handed out.
+    WallRange(Spans spans, double reachesUpTo) : _spans(std::move(spans)), _reachesUpTo(reachesUpTo)
+    {
+    }
 
     class Iterator
     {
@@ -81,5 +81,6 @@ public:
 private:
     Geometry2D::LineSegmentRange _flat{{}, {}};
     Spans _spans{};
+    double _reachesUpTo{0.0};
     bool _isFlat{false};
 };

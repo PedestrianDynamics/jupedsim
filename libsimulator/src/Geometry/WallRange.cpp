@@ -19,6 +19,10 @@ WallRange::Iterator::Iterator(const WallRange* range, bool at_end) : _range(rang
 
 bool WallRange::Iterator::worth_handing_out()
 {
+    // A wall standing higher than the agent can reach  - cheap pre-filter.
+    if((*_wall).zMin > _range->_reachesUpTo) {
+        return false;
+    }
     // A wall reached through a second region has already been handed out by the first. With
     // one span there is no second source, so the bookkeeping is skipped entirely.
     if(_range->_spans.size() <= 1) {

@@ -6,6 +6,7 @@
 
 #include <CGAL/boost/graph/iterator.h>
 
+#include <algorithm>
 #include <set>
 #include <unordered_set>
 
@@ -68,30 +69,37 @@ merge_border_walls(const SurfaceMesh& mesh, const RegionMap& region, double eps)
 
         std::vector<BorderStep> rotated{};
         std::vector<Point> chain{};
+        std::vector<double> height{};
         rotated.reserve(m);
         chain.reserve(m + 1);
+        height.reserve(m + 1);
         for(std::size_t k = 0; k < m; ++k) {
             rotated.push_back(steps[(corner + k) % m]);
             chain.push_back(cycle[(corner + k) % m]);
+            height.push_back(steps[(corner + k) % m].from.z());
         }
         // Closing the loop: the chain ends where it started, so there is one more point than
-        // there are steps.
+        // there are steps. Same for the heights, which run alongside it.
         chain.push_back(chain.front());
+        height.push_back(height.front());
 
         // Turn the half-open range of steps [first, last) into one wall. The regions come
         // from the steps rather than the points, because a region sits behind an edge, not
-        // at a vertex.
+        // at a vertex. Also collect the heights to calculate zMin.
         const auto emit = [&](std::size_t first, std::size_t last) {
             std::set<std::size_t> regions{};
             for(std::size_t i = first; i < last; ++i) {
                 regions.insert(rotated[i].region);
             }
+            const double z_min =
+                *std::min_element(height.begin() + first, height.begin() + last + 1);
             out.push_back(
                 // End to start, so a wall faces the way the polygon path faced it in 2D.
                 // If provided the other way round, `ShortestPoint` to an agent might change
                 // in the last bit.
                 MergedWall{
                     LineSegment{chain[last], chain[first]},
+                    z_min,
                     static_cast<std::uint32_t>(out.size()),
                     {regions.begin(), regions.end()}});
         };

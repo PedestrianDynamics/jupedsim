@@ -20,6 +20,11 @@ struct MergedWall {
     /// The wall in the horizontal plane.
     LineSegment segment;
 
+    /// The lowest z of the fused run. This is an additional cheap pre-filter. E.g. triggers
+    /// if a wall is nearby in the same/neighboring region but "too high". E.g. "U"-stairs where
+    /// the agent is at the "bottom" of the first stairs.
+    double zMin;
+
     /// Position of this wall in the geometry's wall list. Two entrances into the same
     /// region can deliver the same wall twice, index can detect and deduplicate.
     std::uint32_t index;

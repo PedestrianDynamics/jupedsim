@@ -353,3 +353,54 @@ TEST(Geometry3DModelQueries, AWallBorderingTwoRegionsIsDeliveredOnce)
     const std::set<LineSegment> distinct{delivered.begin(), delivered.end()};
     EXPECT_EQ(delivered.size(), distinct.size()) << "the same wall came back more than once";
 }
+
+TEST(Geometry3DModelQueries, AWallOfTheStoreyAboveIsNotInTheAnswer)
+{
+    Geometry3D geo{fixtures::switchback_stair()};
+
+    // The far side at y = 8 carries two walls, one above the other: the ground floor's, which
+    // ends at x = 10, and the upper floor's, which runs on to the landing at x = 18. The upper
+    // one crosses the region boundary and is therefore held by the ground floor's region too.
+    const auto who = geo.get_location(5.0, 6.0, 0.0, 0.5);
+    ASSERT_TRUE(who.has_value());
+
+    const auto walls = into_set(geo.line_segments_in_range(*who, 2.2));
+    EXPECT_TRUE(walls.contains(LineSegment{{10, 8}, {0, 8}})) << "its own wall, 2 m away";
+    EXPECT_FALSE(walls.contains(LineSegment{{18, 8}, {0, 8}}))
+        << "the upper floor's wall, 2 m away in plan but 3 m over the agent's head";
+}
+
+TEST(Geometry3DModelQueries, TheFlightAboveIsNotAWallEvenInTheSameRegion)
+{
+    Geometry3D geo{fixtures::stair_turning_on_a_landing()};
+    ASSERT_EQ(geo.region_count(), 1u);
+
+    // Standing at the foot of the first flight, with the stair well beside him: its near wall
+    // at y = 2 is his own flight's and 1 m away, its far wall at y = 3 belongs to the flight
+    // above and stands 3 m up, 2 m away in plan.
+    const auto who = geo.get_location(1.0, 1.0, 0.5, 0.2);
+    ASSERT_TRUE(who.has_value());
+
+    const auto walls = geo.line_segments_in_range(*who, 2.2);
+    const auto side_of_the_well = [&walls](double y) {
+        return std::any_of(walls.begin(), walls.end(), [y](const LineSegment& w) {
+            return w.p1.y == y && w.p2.y == y;
+        });
+    };
+    EXPECT_TRUE(side_of_the_well(2.0)) << "his own flight's wall, right beside him";
+    EXPECT_FALSE(side_of_the_well(3.0)) << "repelled by a wall belonging to the flight above";
+}
+
+TEST(Geometry3DModelQueries, AWallRisingFromTheAgentsLevelStaysInTheAnswer)
+{
+    Geometry3D geo{fixtures::switchback_stair()};
+
+    // The wall along y = 0 is fused from ground floor, stair flight and landing, so it starts
+    // at the agent's feet and ends 3 m up. Nothing may drop it: how far a wall reaches up is
+    // not in the surface, and it is right there next to him.
+    const auto who = geo.get_location(5.0, 1.0, 0.0, 0.5);
+    ASSERT_TRUE(who.has_value());
+
+    const auto walls = into_set(geo.line_segments_in_range(*who, 2.2));
+    EXPECT_TRUE(walls.contains(LineSegment{{0, 0}, {18, 0}}));
+}

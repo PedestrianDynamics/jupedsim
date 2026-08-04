@@ -163,6 +163,27 @@ inline SurfaceMesh switchback_stair(bool upper_first = false)
     return builder.take();
 }
 
+/// A stair that turns on a landing and climbs on: the first flight out along y in [0, 2], the
+/// landing at the far end, the second flight back along y in [3, 5], ending 6 m up. Between
+/// the flights the stair well, open at the near end.
+///
+/// The flights lie beside each other in plan and overlap nowhere, so this is a single region --
+/// and still the far wall of the well stands 3 m up and climbs to 6, one metre in plan from
+/// someone at the foot of the first flight.
+///
+/// The landing is cut into strips matching the flights: sharing a vertex is not sharing an
+/// edge, and a T-junction would leave the flights topologically apart.
+inline SurfaceMesh stair_turning_on_a_landing()
+{
+    QuadMesh builder{};
+    builder.add({{{0, 0, 0}, {6, 0, 3}, {6, 2, 3}, {0, 2, 0}}}); // first flight, climbing
+    builder.add({{{6, 0, 3}, {8, 0, 3}, {8, 2, 3}, {6, 2, 3}}}); // landing, beside the flight
+    builder.add({{{6, 2, 3}, {8, 2, 3}, {8, 3, 3}, {6, 3, 3}}}); // landing, across the well
+    builder.add({{{6, 3, 3}, {8, 3, 3}, {8, 5, 3}, {6, 5, 3}}}); // landing, beside the flight
+    builder.add({{{0, 3, 6}, {6, 3, 3}, {6, 5, 3}, {0, 5, 6}}}); // second flight, climbing on
+    return builder.take();
+}
+
 /// A rectangular field, 20 x 10, meshed on a 2 m grid, whose height gently undulates. The
 /// commonest 3D input there is, and the one a piecewise-planar fixture cannot stand in for:
 /// its outline is straight in plan but no two consecutive border edges are collinear in 3D.
