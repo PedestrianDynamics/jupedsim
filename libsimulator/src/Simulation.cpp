@@ -244,8 +244,8 @@ GenericAgent::ID Simulation::AddAgent(GenericAgent agent)
 {
     ThrowIfIterating("AddAgent");
     JPS_SCOPED_TIMER_AND_TRACE(_timer, "Add Agent", Detailed);
-    if(!_geometry->InsideGeometry(agent.position)) {
-        throw SimulationError("Agent {} not inside walkable area", agent.position);
+    if(!_geometry->InsideGeometry(agent.Position())) {
+        throw SimulationError("Agent {} not inside walkable area", agent.Position());
     }
     if(_journeys.count(agent.journeyId) == 0) {
         throw SimulationError("Unknown journey id: {}", agent.journeyId);
@@ -255,7 +255,7 @@ GenericAgent::ID Simulation::AddAgent(GenericAgent agent)
         throw SimulationError("Unknown stage id: {}", agent.stageId);
     }
 
-    if(const auto agentModelType = ModelTypeOf(agent.model);
+    if(const auto agentModelType = ModelTypeOf(agent.state);
        agentModelType != _operationalDecisionSystem.ModelType()) {
         throw SimulationError(
             "Agent model data of type '{}' does not match the simulation's operational model "
@@ -383,7 +383,7 @@ std::vector<GenericAgent::ID> Simulation::AgentsInPolygon(const std::vector<Poin
 
     std::vector<GenericAgent::ID> result{};
     _neighborhoodSearch.ForEachInRange(p, dist, [&result, &poly](const GenericAgent& agent) {
-        if(poly.IsInside(agent.position)) {
+        if(poly.IsInside(agent.Position())) {
             result.push_back(agent.id);
         }
     });

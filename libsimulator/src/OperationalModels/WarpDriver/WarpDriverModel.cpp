@@ -353,7 +353,7 @@ OperationalModelType WarpDriverModel::Type() const
 void WarpDriverModel::CheckModelConstraint(const GenericAgent& agent, const AgentView& /*view*/)
     const
 {
-    const auto* data = std::get_if<State>(&agent.model);
+    const auto* data = std::get_if<State>(&agent.state);
     if(!data) {
         throw SimulationError(
             "WarpDriverModel constraint check: agent {} does not have WarpDriverModel data",

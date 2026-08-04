@@ -57,11 +57,11 @@ public:
     std::vector<NeighborView> OtherAgentsInRange(double radius, Pred filter = {}) const
     {
         std::vector<NeighborView> neighbors{};
-        _world.ForEachAgentInRange(_agent.position, radius, [&](const GenericAgent& candidate) {
+        _world.ForEachAgentInRange(_agent.Position(), radius, [&](const GenericAgent& candidate) {
             if(candidate.id == _agent.id) {
                 return;
             }
-            const NeighborView neighbor{candidate.position - _agent.position, &candidate.model};
+            const NeighborView neighbor{candidate.Position() - _agent.Position(), &candidate.state};
             if(filter(neighbor)) {
                 neighbors.push_back(neighbor);
             }
@@ -81,7 +81,7 @@ public:
     /// Whether the point reached by moving 'RelativePosition' is inside the walkable area.
     bool InsideGeometry(Point RelativePosition) const
     {
-        return _world.InsideGeometry(_agent.position + RelativePosition);
+        return _world.InsideGeometry(_agent.Position() + RelativePosition);
     }
 
 private:
@@ -91,7 +91,7 @@ private:
     /// defined.
     auto AsSeenFromAgent(CollisionGeometry::LineSegmentRange segments) const
     {
-        return segments | std::views::transform([origin = _agent.position](const LineSegment& s) {
+        return segments | std::views::transform([origin = _agent.Position()](const LineSegment& s) {
                    const LineSegment segment{s.p1 - origin, s.p2 - origin};
                    const Point closest_point = segment.ShortestPoint(Point{});
                    return WallView{
@@ -108,13 +108,13 @@ public:
     /// Returned as lazy range.
     auto WallsNearby() const
     {
-        return AsSeenFromAgent(_world.LineSegmentsInRange(_agent.position));
+        return AsSeenFromAgent(_world.LineSegmentsInRange(_agent.Position()));
     }
 
     /// Wall segments within 'distance' of the agent, relative to it. Returns lazy range.
     auto WallsInRange(double distance) const
     {
-        return AsSeenFromAgent(_world.LineSegmentsInRange(_agent.position, distance));
+        return AsSeenFromAgent(_world.LineSegmentsInRange(_agent.Position(), distance));
     }
 
 protected:
@@ -133,7 +133,7 @@ public:
 
     double dt() const { return _dt; }
 
-    Point ToNextTarget() const { return _agent.nextTarget - _agent.position; }
+    Point ToNextTarget() const { return _agent.nextTarget - _agent.Position(); }
 
 private:
     double _dt;

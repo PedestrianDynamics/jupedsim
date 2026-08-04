@@ -189,7 +189,7 @@ form persistent deadlocks.
 These are exposed as keyword-only constructor arguments of
 {class}`~jupedsim.CollisionFreeSpeedModelV3State`, which is passed
 to `add_agent`, and can be modified per agent at any time through the
-agent handle (`sim.agent(id).model`).
+agent handle (`sim.agent(id).state`).
 
 ```python
 import jupedsim as jps
@@ -204,7 +204,7 @@ agent_id = sim.add_agent(
 )
 
 # modify at runtime
-sim.agent(agent_id).model.desired_speed = 1.0
+sim.agent(agent_id).state.desired_speed = 1.0
 ```
 
 | Symbol | Parameter (Python) | Default | Unit | Role |

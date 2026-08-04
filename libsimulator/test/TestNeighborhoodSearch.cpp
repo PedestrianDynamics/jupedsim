@@ -8,9 +8,13 @@
 #include <set>
 
 template <typename T>
-struct ValueWithPos {
+class ValueWithPos
+{
+public:
     Point position{};
     T val;
+    ValueWithPos(Point pos, T v) : position(pos), val(v) {}
+    const Point& Position() const { return position; }
 };
 
 namespace

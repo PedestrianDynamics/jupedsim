@@ -117,7 +117,7 @@ Each :class:`~jupedsim.agent.Agent` exposes:
     * - ``agent.orientation``
       - ``(x, y)`` tuple of the agent's orientation vector
 
-    * - ``agent.model``
+    * - ``agent.state``
       - Model-specific state (speed, radius, etc.)
 
 

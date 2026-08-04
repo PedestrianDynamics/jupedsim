@@ -133,8 +133,8 @@ TEST(CustomModel, RunsThroughOperationalDecisionSystem)
     system.Run(0.5, 0.0, neighborhoodSearch, geometry, agents);
 
     const auto& agent = agents.front();
-    const auto& state = std::get<CustomModel::State>(agent.model).Get<MinimalState>();
-    ASSERT_EQ(agent.position, Point(1.0, 0.0));
+    const auto& state = std::get<CustomModel::State>(agent.state).Get<MinimalState>();
+    ASSERT_EQ(agent.Position(), Point(1.0, 0.0));
     ASSERT_EQ(state.applications, 1);
 }
 

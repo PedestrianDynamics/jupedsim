@@ -17,7 +17,7 @@ public:
     {
         for(auto& agent : agents) {
             const auto dest = agent.finalTarget;
-            agent.nextTarget = routingEngine.ComputeWaypoint(agent.position, dest);
+            agent.nextTarget = routingEngine.ComputeWaypoint(agent.Position(), dest);
         }
     }
 };
