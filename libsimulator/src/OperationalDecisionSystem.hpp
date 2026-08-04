@@ -43,8 +43,8 @@ public:
             const auto& current = agents[index];
             auto& next = _next[index];
             const AgentStep step{envQuery, current, dT};
-            const Point movement = _model->ComputeNextState(current.model, next.model, step);
-            next.position += movement;
+            const Point movement = _model->ComputeNextState(current.state, next.state, step);
+            next.MoveAlongSurface(movement);
         }
         // Swap in the computed generation. This is safe because no caller retains
         // pointers/references across an iteration (Python-side agent handles resolve per

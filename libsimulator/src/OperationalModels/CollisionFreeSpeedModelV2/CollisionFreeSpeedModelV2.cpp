@@ -25,7 +25,7 @@ Point CollisionFreeSpeedModelV2::ComputeNextState(
     OperationalModelState& next,
     const AgentStep& step) const
 {
-    const auto& model = std::get<State>(current);
+    const auto& currState = std::get<State>(current);
     const auto& boundaries = step.WallsNearby();
     auto neighborhood =
         step.OtherAgentsInRange(_cutOffRadius, [&step, &boundaries](const NeighborView& n) {
@@ -34,25 +34,25 @@ Point CollisionFreeSpeedModelV2::ComputeNextState(
 
     Point neighborRepulsion{};
     for(const auto& neighbor : neighborhood) {
-        neighborRepulsion += NeighborRepulsion(model, neighbor);
+        neighborRepulsion += NeighborRepulsion(currState, neighbor);
     }
 
     Point boundaryRepulsion{};
     for(const auto& wall : boundaries) {
-        boundaryRepulsion += BoundaryRepulsion(model, wall);
+        boundaryRepulsion += BoundaryRepulsion(currState, wall);
     }
 
     const auto desired_direction = step.ToNextTarget().Normalized();
     auto direction = (desired_direction + neighborRepulsion + boundaryRepulsion).Normalized();
     if(direction == Point{}) {
-        direction = model.orientation;
+        direction = currState.orientation;
     }
     auto spacing = std::numeric_limits<double>::max();
     for(const auto& neighbor : neighborhood) {
-        spacing = std::min(spacing, GetSpacing(model, neighbor, direction));
+        spacing = std::min(spacing, GetSpacing(currState, neighbor, direction));
     }
 
-    const auto optimal_speed = OptimalSpeed(model, spacing, model.timeGap);
+    const auto optimal_speed = OptimalSpeed(currState, spacing, currState.timeGap);
     const auto velocity = direction * optimal_speed;
     std::get<State>(next).orientation = direction;
     return velocity * step.dt();
@@ -62,33 +62,33 @@ void CollisionFreeSpeedModelV2::CheckModelConstraint(
     const GenericAgent& agent,
     const AgentView& view) const
 {
-    const auto& model = std::get<State>(agent.model);
+    const auto& currState = std::get<State>(agent.state);
 
-    const auto r = model.radius;
+    const auto r = currState.radius;
     constexpr double rMin = 0.;
     constexpr double rMax = 2.;
     validateConstraint(r, rMin, rMax, "radius", true);
 
-    const auto v0 = model.v0;
+    const auto v0 = currState.v0;
     constexpr double v0Min = 0.;
     constexpr double v0Max = 10.;
     validateConstraint(v0, v0Min, v0Max, "v0");
 
-    const auto timeGap = model.timeGap;
+    const auto timeGap = currState.timeGap;
     constexpr double timeGapMin = 0.1;
     constexpr double timeGapMax = 10.;
     validateConstraint(timeGap, timeGapMin, timeGapMax, "timeGap");
 
     const auto neighbors = view.OtherAgentsInRange(2.0);
     for(const auto& neighbor : neighbors) {
-        const auto& neighbor_model = std::get<State>(*neighbor.state);
-        const auto contanctdDist = r + neighbor_model.radius;
+        const auto& neighState = std::get<State>(*neighbor.state);
+        const auto contanctdDist = r + neighState.radius;
         const auto distance = neighbor.RelativePosition.Norm();
         if(contanctdDist >= distance) {
             throw SimulationError(
                 "Model constraint violation: Agent {} too close to agent {}: distance {}",
-                agent.position,
-                agent.position + neighbor.RelativePosition,
+                agent.Position(),
+                agent.Position() + neighbor.RelativePosition,
                 distance);
         }
     }
@@ -97,19 +97,21 @@ void CollisionFreeSpeedModelV2::CheckModelConstraint(
         throw SimulationError(
             "Model constraint violation: Agent {} too close to geometry boundaries, distance "
             "<= {}",
-            agent.position,
+            agent.Position(),
             r);
     }
 }
 
-double
-CollisionFreeSpeedModelV2::OptimalSpeed(const State& self, double spacing, double time_gap) const
+double CollisionFreeSpeedModelV2::OptimalSpeed(
+    const State& currState,
+    double spacing,
+    double time_gap) const
 {
-    return std::min(std::max(spacing / time_gap, 0.0), self.v0);
+    return std::min(std::max(spacing / time_gap, 0.0), currState.v0);
 }
 
 double CollisionFreeSpeedModelV2::GetSpacing(
-    const State& self,
+    const State& currState,
     const NeighborView& neighbor,
     const Point& direction) const
 {
@@ -121,28 +123,29 @@ double CollisionFreeSpeedModelV2::GetSpacing(
     }
 
     const auto left = direction.Rotate90Deg();
-    const auto l = self.radius + other.radius;
+    const auto l = currState.radius + other.radius;
     bool inCorridor = std::abs(left.ScalarProduct(distp12)) <= l;
     if(!inCorridor) {
         return std::numeric_limits<double>::max();
     }
     return distp12.Norm() - l;
 }
-Point CollisionFreeSpeedModelV2::NeighborRepulsion(const State& self, const NeighborView& neighbor)
-    const
+Point CollisionFreeSpeedModelV2::NeighborRepulsion(
+    const State& currState,
+    const NeighborView& neighbor) const
 {
     const auto& other = std::get<State>(*neighbor.state);
     const auto [distance, direction] = neighbor.RelativePosition.NormAndNormalized();
-    const auto l = self.radius + other.radius;
-    return direction *
-           -(self.strengthNeighborRepulsion * exp((l - distance) / self.rangeNeighborRepulsion));
+    const auto l = currState.radius + other.radius;
+    return direction * -(currState.strengthNeighborRepulsion *
+                         exp((l - distance) / currState.rangeNeighborRepulsion));
 }
 
-Point CollisionFreeSpeedModelV2::BoundaryRepulsion(const State& self, const WallView& boundary)
+Point CollisionFreeSpeedModelV2::BoundaryRepulsion(const State& currState, const WallView& boundary)
     const
 {
-    const auto l = self.radius;
-    const auto R_iw = -self.strengthGeometryRepulsion *
-                      exp((l - boundary.distance) / self.rangeGeometryRepulsion);
+    const auto l = currState.radius;
+    const auto R_iw = -currState.strengthGeometryRepulsion *
+                      exp((l - boundary.distance) / currState.rangeGeometryRepulsion);
     return -boundary.normal * R_iw; // The repulsion points away from the agent
 }

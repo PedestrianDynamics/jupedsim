@@ -25,7 +25,7 @@ class _ModelStateHandle:
     def __init__(self, simulation: Simulation, agent_id: int) -> None:
         """Do not use.
 
-        Model state handles are obtained via :attr:`Agent.model`.
+        Model state handles are obtained via :attr:`Agent.state`.
         """
         object.__setattr__(self, "_ModelStateHandle__simulation", simulation)
         object.__setattr__(self, "_ModelStateHandle__id", agent_id)
@@ -33,7 +33,7 @@ class _ModelStateHandle:
     def __resolve(self):
         # Transient reference: only valid for the duration of one attribute
         # access, never stored.
-        return self.__simulation._obj.agent(self.__id).model
+        return self.__simulation._obj.agent(self.__id).state
 
     def __getattr__(self, name: str) -> Any:
         if name.startswith("_"):
@@ -89,7 +89,7 @@ class Agent:
     .. code:: python
 
         agent.final_target = (1.0, 2.0)
-        agent.model.desired_speed = 1.5
+        agent.state.desired_speed = 1.5
 
     .. note ::
 
@@ -173,17 +173,17 @@ class Agent:
         return self.__resolve().next_destination
 
     @property
-    def model(self) -> Any:
+    def state(self) -> Any:
         """Access model specific state of this agent.
 
         For built-in models this returns a state handle that resolves the
         agent on every attribute access, e.g.
-        ``agent.model.desired_speed = 1.5``. For custom Python models this
+        ``agent.state.desired_speed = 1.5``. For custom Python models this
         returns the user supplied state object.
         """
-        state = self.__resolve().model
-        if isinstance(state, py_jps._CustomModelState):
-            return state.model
+        raw_state = self.__resolve().state
+        if isinstance(raw_state, py_jps._CustomModelState):
+            return raw_state.model
         return _ModelStateHandle(self.__simulation, self.__id)
 
     def __repr__(self) -> str:

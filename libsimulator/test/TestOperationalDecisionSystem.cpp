@@ -73,10 +73,10 @@ TEST(OperationalDecisionSystemReAnchor, LocationTracksPositionOnFlatGeometry)
     ASSERT_TRUE(agent.location.has_value());
     // Check invariant: the Location's (x,y) equals the model position.
     // velocity=2.0, dt=0.5 --> move x by 1.0
-    EXPECT_NEAR(agent.location->xy().x, agent.position.x, 1e-9);
-    EXPECT_NEAR(agent.location->xy().y, agent.position.y, 1e-9);
-    EXPECT_NEAR(agent.position.x, start.x + 1.0, 1e-9);
-    EXPECT_NEAR(agent.position.y, start.y, 1e-9);
+    EXPECT_NEAR(agent.location->xy().x, agent.Position().x, 1e-9);
+    EXPECT_NEAR(agent.location->xy().y, agent.Position().y, 1e-9);
+    EXPECT_NEAR(agent.Position().x, start.x + 1.0, 1e-9);
+    EXPECT_NEAR(agent.Position().y, start.y, 1e-9);
     EXPECT_NEAR(agent.location->z(), 0.0, 1e-9);
     EXPECT_EQ(agent.location->region(), 0u);
 }
@@ -102,14 +102,14 @@ TEST(OperationalDecisionSystemReAnchor, InvariantHoldsOverManySteps)
         system.Run(dT, 0.0, neighborhoodSearch, *geo->geometry_2d(), agents);
         const auto& agent = agents.front();
         ASSERT_TRUE(agent.location.has_value());
-        EXPECT_NEAR(agent.location->xy().x, agent.position.x, 1e-9);
-        EXPECT_NEAR(agent.location->xy().y, agent.position.y, 1e-9);
+        EXPECT_NEAR(agent.location->xy().x, agent.Position().x, 1e-9);
+        EXPECT_NEAR(agent.location->xy().y, agent.Position().y, 1e-9);
         EXPECT_NEAR(agent.location->z(), 0.0, 1e-9);
         EXPECT_EQ(agent.location->region(), 0u);
     }
     // After `steps` steps the agent advanced by velocity * dT * steps.
-    EXPECT_NEAR(agents.front().position.x, start.x + velocity.x * dT * steps, 1e-9);
-    EXPECT_NEAR(agents.front().position.y, start.y + velocity.y * dT * steps, 1e-9);
+    EXPECT_NEAR(agents.front().Position().x, start.x + velocity.x * dT * steps, 1e-9);
+    EXPECT_NEAR(agents.front().Position().y, start.y + velocity.y * dT * steps, 1e-9);
 }
 
 TEST(OperationalDecisionSystemReAnchor, AgentWithoutLocationIsUnaffected)
@@ -130,5 +130,5 @@ TEST(OperationalDecisionSystemReAnchor, AgentWithoutLocationIsUnaffected)
 
     const auto& agent = agents.front();
     EXPECT_FALSE(agent.location.has_value());
-    EXPECT_EQ(agent.position, start + velocity * dT);
+    EXPECT_EQ(agent.Position(), start + velocity * dT);
 }

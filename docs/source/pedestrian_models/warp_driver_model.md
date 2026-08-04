@@ -210,7 +210,7 @@ agent_id = sim.add_agent(
 # Runtime state access through the agent handle. The handle resolves the
 # agent freshly on every access, so it stays valid across iterate() calls
 # and mutations take effect immediately.
-state = sim.agent(agent_id).model
+state = sim.agent(agent_id).state
 print(state.desired_speed)   # 1.2
 print(state.radius)          # 0.15
 

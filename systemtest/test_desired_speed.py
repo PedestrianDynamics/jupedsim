@@ -66,7 +66,7 @@ def test_desired_speed_can_be_set_via_state(
         state=state_class(desired_speed=1.5, **extra_state_kwargs),
     )
 
-    assert sim.agent(agent_id).model.desired_speed == 1.5
+    assert sim.agent(agent_id).state.desired_speed == 1.5
 
 
 @pytest.mark.parametrize(
@@ -91,9 +91,9 @@ def test_desired_speed_can_be_mutated_via_agent_handle(
         state=state_class(**extra_state_kwargs),
     )
 
-    sim.agent(agent_id).model.desired_speed = 1.5
+    sim.agent(agent_id).state.desired_speed = 1.5
 
-    assert sim.agent(agent_id).model.desired_speed == 1.5
+    assert sim.agent(agent_id).state.desired_speed == 1.5
 
 
 @pytest.mark.parametrize(
@@ -128,4 +128,4 @@ def test_removed_parameter_names_raise(
 
     for removed_attr in removed_attrs:
         with pytest.raises(AttributeError):
-            getattr(sim.agent(agent_id).model, removed_attr)
+            getattr(sim.agent(agent_id).state, removed_attr)

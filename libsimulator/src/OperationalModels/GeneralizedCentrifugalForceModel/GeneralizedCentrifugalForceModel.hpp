@@ -67,7 +67,7 @@ private:
      * @return Point
      */
     Point ForceDriv(
-        const State& self,
+        const State& currState,
         Point to_target,
         double mass,
         double tau,
@@ -82,13 +82,13 @@ private:
      *
      * @return Point
      */
-    Point ForceRepPed(const State& self, const NeighborView& neighbor) const;
+    Point ForceRepPed(const State& currState, const NeighborView& neighbor) const;
     /**
      * Sum of the repulsive forces of all walls surrounding the pedestrian.
      * @see ForceRepWall
      */
-    Point ForceRepWall(const State& self, const WallView& wall) const;
-    Point ForceRepStatPoint(const State& self, const Point& p, double l, double vn) const;
+    Point ForceRepWall(const State& currState, const WallView& wall) const;
+    Point ForceRepStatPoint(const State& currState, const Point& p, double l, double vn) const;
     Point ForceInterpolation(
         double v0,
         double K_ij,
@@ -97,7 +97,7 @@ private:
         double d,
         double r,
         double l) const;
-    double AgentToAgentSpacing(const State& self, const NeighborView& neighbor) const;
+    double AgentToAgentSpacing(const State& currState, const NeighborView& neighbor) const;
 };
 
 template <>

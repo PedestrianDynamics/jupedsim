@@ -179,7 +179,7 @@ TEST(AgentView, AgentsOnTheSamePositionSeeEachOther)
     const auto result = env.FirstAgentView(q).OtherAgentsInRange(1.0);
 
     ASSERT_EQ(result.size(), 1u);
-    EXPECT_EQ(result[0].state, &env.agents[1].model);
+    EXPECT_EQ(result[0].state, &env.agents[1].state);
 }
 
 // Every other test here queries from {0,0} and would not notice a centre that

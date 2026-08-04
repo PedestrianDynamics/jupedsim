@@ -157,7 +157,7 @@ void PythonModel::CheckModelConstraint(const GenericAgent& agent, const AgentVie
 {
     py::gil_scoped_acquire gil;
 
-    py::object pythonState = std::get<CustomModel::State>(agent.model).Get<GilSafePyObject>().Get();
+    py::object pythonState = std::get<CustomModel::State>(agent.state).Get<GilSafePyObject>().Get();
     py::object pythonView = py::cast(&view, py::return_value_policy::reference);
 
     _model.attr("_check_model_constraint")(pythonState, pythonView);

@@ -40,11 +40,11 @@ public:
     void CheckModelConstraint(const GenericAgent& agent, const AgentView& view) const override;
 
 private:
-    double OptimalSpeed(const State& self, double spacing, double time_gap) const;
+    double OptimalSpeed(const State& currState, double spacing, double time_gap) const;
     double
-    GetSpacing(const State& self, const NeighborView& neighbor, const Point& direction) const;
-    Point NeighborRepulsion(const State& self, const NeighborView& neighbor) const;
-    Point BoundaryRepulsion(const State& self, const WallView& boundary) const;
+    GetSpacing(const State& currState, const NeighborView& neighbor, const Point& direction) const;
+    Point NeighborRepulsion(const State& currState, const NeighborView& neighbor) const;
+    Point BoundaryRepulsion(const State& currState, const WallView& boundary) const;
 };
 
 template <>
