@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
+#include "OperationalModelState.hpp"
 #include "OperationalModelType.hpp"
 #include "Point.hpp"
 #include "SimulationError.hpp"
@@ -12,7 +13,6 @@
 class AgentStep;
 class AgentView;
 struct GenericAgent;
-struct OperationalModelState;
 
 template <typename T>
 void validateConstraint(
