@@ -63,14 +63,4 @@ public:
     {
         return _geometry.line_segments_in_range(who, distance);
     }
-
-    /// Interim: stage slots still used this. To be removed later.
-    bool NoGeometryBetween(const Point& from, const Point& to) const
-    {
-        const auto* flat = _geometry.geometry_2d();
-        if(flat == nullptr) {
-            throw SimulationError("Point-based visibility needs a stage Location on the mesh.");
-        }
-        return !flat->IntersectsAny(LineSegment{from, to});
-    }
 };

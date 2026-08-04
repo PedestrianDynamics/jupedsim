@@ -5,6 +5,7 @@
 #include "GenericAgent.hpp"
 #include "GeometricFunctions.hpp"
 #include "Geometry/Geometry2D.hpp"
+#include "Geometry/Location.hpp"
 #include "LineSegment.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "Point.hpp"
@@ -139,26 +140,27 @@ struct fmt::formatter<BaseStage> {
 
 class Waypoint : public BaseStage
 {
-    Point position;
+    Location position;
     double distance;
 
 public:
-    Waypoint(Point position_, double distance_);
+    Waypoint(Location position_, double distance_);
     ~Waypoint() override = default;
     bool IsCompleted(const GenericAgent& agent) override;
     Point Target(const GenericAgent& agent) override;
     StageProxy Proxy(Simulation* simulation_) override;
-    Point Position() const { return position; };
+    Point Position() const { return position.xy(); };
 };
 
 /// Notifies simulation of all agents that need to be removed at the beginning of the next iteration
 class Exit : public BaseStage
 {
     Polygon area;
+    Location centroid;
     std::vector<GenericAgent::ID>& toRemove;
 
 public:
-    Exit(Polygon area, std::vector<GenericAgent::ID>& toRemove_);
+    Exit(Polygon area, Location centroid_, std::vector<GenericAgent::ID>& toRemove_);
     ~Exit() override = default;
     bool IsCompleted(const GenericAgent& agent) override;
     Point Target(const GenericAgent& agent) override;
@@ -168,12 +170,12 @@ public:
 
 class NotifiableWaitingSet : public BaseStage
 {
-    std::vector<Point> slots;
+    std::vector<Location> slots;
     std::vector<GenericAgent::ID> occupants{};
     WaitingSetState state{WaitingSetState::Active};
 
 public:
-    NotifiableWaitingSet(std::vector<Point> slots_);
+    NotifiableWaitingSet(std::vector<Location> slots_);
     ~NotifiableWaitingSet() override = default;
     bool IsCompleted(const GenericAgent& agent) override;
     Point Target(const GenericAgent& agent) override;
@@ -182,19 +184,19 @@ public:
     WaitingSetState State() const;
     void Update(const EnvironmentQuery& envQuery);
     const std::vector<GenericAgent::ID>& Occupants() const;
-    const std::vector<Point>& Slots() const { return slots; };
+    const std::vector<Location>& Slots() const { return slots; };
 };
 
 class NotifiableQueue : public BaseStage
 {
 
 private:
-    std::vector<Point> slots;
+    std::vector<Location> slots;
     std::vector<GenericAgent::ID> occupants{};
     std::set<GenericAgent::ID> exitingThisUpdate{};
 
 public:
-    NotifiableQueue(std::vector<Point> slots_);
+    NotifiableQueue(std::vector<Location> slots_);
     ~NotifiableQueue() override = default;
     bool IsCompleted(const GenericAgent& agent) override;
     Point Target(const GenericAgent& agent) override;
@@ -202,7 +204,7 @@ public:
     void Update(const EnvironmentQuery& envQuery);
     void Pop(size_t count);
     const std::vector<GenericAgent::ID>& Occupants() const;
-    const std::vector<Point>& Slots() const { return slots; };
+    const std::vector<Location>& Slots() const { return slots; };
 };
 
 class DirectSteering : public BaseStage

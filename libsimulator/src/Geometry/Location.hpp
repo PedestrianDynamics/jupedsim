@@ -33,6 +33,9 @@ public:
     /// the walkable area. Does not modify `*this`.
     std::optional<Location> try_move_on_surface(Point xy_direction) const;
 
+    /// Whether walking straight from here arrives where @p other stands.
+    bool can_walk_straight_to(const Location& other) const;
+
 private:
     // Location uses private constructor. Only Geometry3D can create Location objects.
     friend class Geometry3D;

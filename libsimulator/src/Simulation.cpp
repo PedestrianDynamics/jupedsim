@@ -203,40 +203,7 @@ BaseStage::ID Simulation::AddStage(const StageDescription stageDescription)
 {
     ThrowIfIterating("AddStage");
     JPS_SCOPED_TIMER_AND_TRACE(_timer, "Add Stage", Detailed);
-    std::visit(
-        overloaded{
-            [this](const WaypointDescription& d) -> void {
-                if(!this->_geometry->geometry_2d()->InsideGeometry(d.position)) {
-                    throw SimulationError("WayPoint {} not inside walkable area", d.position);
-                }
-            },
-            [this](const ExitDescription& d) -> void {
-                if(!this->_geometry->geometry_2d()->InsideGeometry(d.polygon.Centroid())) {
-                    throw SimulationError("Exit {} not inside walkable area", d.polygon.Centroid());
-                }
-            },
-            [this](const NotifiableWaitingSetDescription& d) -> void {
-                for(const auto& point : d.slots) {
-                    if(!this->_geometry->geometry_2d()->InsideGeometry(point)) {
-                        throw SimulationError(
-                            "NotifiableWaitingSet point {} not inside walkable area", point);
-                    }
-                }
-            },
-            [this](const NotifiableQueueDescription& d) -> void {
-                for(const auto& point : d.slots) {
-                    if(!this->_geometry->geometry_2d()->InsideGeometry(point)) {
-                        throw SimulationError(
-                            "NotifiableQueue point {} not inside walkable area", point);
-                    }
-                }
-            },
-            [](const DirectSteeringDescription&) -> void {
-
-            }},
-        stageDescription);
-
-    return _stageManager.AddStage(stageDescription, _removedAgentsInLastIteration);
+    return _stageManager.AddStage(stageDescription, _removedAgentsInLastIteration, *_geometry);
 }
 
 GenericAgent::ID Simulation::AddAgent(GenericAgent agent)

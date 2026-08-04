@@ -10,10 +10,30 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 #include <cstddef>
 #include <list>
 #include <utility>
 #include <vector>
+
+namespace
+{
+/// 3D distance between @p agent and @p where.
+double distance_to(const GenericAgent& agent, const Location& where)
+{
+    const auto in_plan = (agent.Position() - where.xy()).Norm();
+    if(!agent.location) {
+        return in_plan;
+    }
+    return std::hypot(in_plan, agent.location->z() - where.z());
+}
+
+/// Whether the agent has a straight way to a place.
+bool can_walk_straight_to(const GenericAgent& agent, const Location& where)
+{
+    return !agent.location || agent.location->can_walk_straight_to(where);
+}
+} // namespace
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Base Proxy
@@ -82,19 +102,18 @@ const std::vector<GenericAgent::ID>& NotifiableWaitingSetProxy::Waiting() const
 ////////////////////////////////////////////////////////////////////////////////
 /// Waypoint
 ////////////////////////////////////////////////////////////////////////////////
-Waypoint::Waypoint(Point position_, double distance_) : position(position_), distance(distance_)
+Waypoint::Waypoint(Location position_, double distance_) : position(position_), distance(distance_)
 {
 }
 
 bool Waypoint::IsCompleted(const GenericAgent& agent)
 {
-    const auto actual_distance = (agent.Position() - position).Norm();
-    return actual_distance <= distance;
+    return distance_to(agent, position) <= distance;
 }
 
 Point Waypoint::Target(const GenericAgent&)
 {
-    return position;
+    return position.xy();
 }
 
 StageProxy Waypoint::Proxy(Simulation* simulation)
@@ -105,8 +124,8 @@ StageProxy Waypoint::Proxy(Simulation* simulation)
 ////////////////////////////////////////////////////////////////////////////////
 /// Exit
 ////////////////////////////////////////////////////////////////////////////////
-Exit::Exit(Polygon area_, std::vector<GenericAgent::ID>& toRemove_)
-    : area(std::move(area_)), toRemove(toRemove_)
+Exit::Exit(Polygon area_, Location centroid_, std::vector<GenericAgent::ID>& toRemove_)
+    : area(std::move(area_)), centroid(centroid_), toRemove(toRemove_)
 {
     if(!area.IsConvex()) {
         throw SimulationError("Exit areas need to be bounded by convex polygons.");
@@ -115,7 +134,8 @@ Exit::Exit(Polygon area_, std::vector<GenericAgent::ID>& toRemove_)
 
 bool Exit::IsCompleted(const GenericAgent& agent)
 {
-    const bool hasReachedExit = area.IsInside(agent.Position());
+    const bool hasReachedExit =
+        area.IsInside(agent.Position()) && can_walk_straight_to(agent, centroid);
     if(hasReachedExit) {
         toRemove.push_back(agent.id);
     }
@@ -124,7 +144,7 @@ bool Exit::IsCompleted(const GenericAgent& agent)
 
 Point Exit::Target(const GenericAgent&)
 {
-    return area.Centroid();
+    return centroid.xy();
 }
 
 StageProxy Exit::Proxy(Simulation* simulation)
@@ -135,7 +155,7 @@ StageProxy Exit::Proxy(Simulation* simulation)
 ////////////////////////////////////////////////////////////////////////////////
 /// NotifiableWaitingSet
 ////////////////////////////////////////////////////////////////////////////////
-NotifiableWaitingSet::NotifiableWaitingSet(std::vector<Point> slots_) : slots(std::move(slots_))
+NotifiableWaitingSet::NotifiableWaitingSet(std::vector<Location> slots_) : slots(std::move(slots_))
 {
     occupants.reserve(slots.size());
 }
@@ -149,25 +169,24 @@ bool NotifiableWaitingSet::IsCompleted(const GenericAgent& agent)
     if(find_iter != std::end(occupants)) {
         return true;
     }
-    const auto distance = (agent.Position() - slots[0]).Norm();
-    return distance <= 1;
+    return distance_to(agent, slots[0]) <= 1;
 }
 
 Point NotifiableWaitingSet::Target(const GenericAgent& agent)
 {
     if(state == WaitingSetState::Inactive) {
-        return slots[0];
+        return slots[0].xy();
     }
 
     const auto next_slot_index = std::min(occupants.size(), slots.size() - 1);
 
     for(size_t index = 0; index < next_slot_index; ++index) {
         if(agent.id == occupants[index]) {
-            return slots[index];
+            return slots[index].xy();
         }
     }
 
-    return slots[next_slot_index];
+    return slots[next_slot_index].xy();
 }
 
 void NotifiableWaitingSet::State(WaitingSetState s)
@@ -207,9 +226,9 @@ void NotifiableWaitingSet::Update(const EnvironmentQuery& envQuery)
     }
 
     for(size_t index = count_occupants; index < slots.size(); ++index) {
-        const auto slot_pos = slots[index];
-        auto candidates = envQuery.AgentsInRange(slot_pos, 2, [&](const GenericAgent& candidate) {
-            return envQuery.NoGeometryBetween(slot_pos, candidate.Position());
+        const auto& slot = slots[index];
+        auto candidates = envQuery.AgentsInRange(slot.xy(), 2, [&](const GenericAgent& candidate) {
+            return candidate.location && envQuery.NoGeometryBetween(slot, *candidate.location);
         });
 
         GenericAgent::ID occupant = GenericAgent::ID::Invalid;
@@ -218,7 +237,7 @@ void NotifiableWaitingSet::Update(const EnvironmentQuery& envQuery)
             if(agent.stageId == id) {
                 if(std::find(std::begin(occupants), std::end(occupants), agent.id) ==
                    std::end(occupants)) {
-                    const auto distance = (agent.Position() - slots[index]).Norm();
+                    const auto distance = (agent.Position() - slot.xy()).Norm();
                     if(distance < min_distance) {
                         min_distance = distance;
                         occupant = agent.id;
@@ -237,7 +256,7 @@ void NotifiableWaitingSet::Update(const EnvironmentQuery& envQuery)
 ////////////////////////////////////////////////////////////////////////////////
 /// NotifiablQueue
 ////////////////////////////////////////////////////////////////////////////////
-NotifiableQueue::NotifiableQueue(std::vector<Point> slots_) : slots(std::move(slots_))
+NotifiableQueue::NotifiableQueue(std::vector<Location> slots_) : slots(std::move(slots_))
 {
 }
 
@@ -254,11 +273,11 @@ Point NotifiableQueue::Target(const GenericAgent& agent)
 {
 
     if(const auto index_opt = IndexInContainer(occupants, agent.id); index_opt) {
-        return slots[*index_opt];
+        return slots[*index_opt].xy();
     }
 
     const auto next_target_index = std::min(occupants.size(), slots.size() - 1);
-    return slots[next_target_index];
+    return slots[next_target_index].xy();
 }
 
 void NotifiableQueue::Pop(size_t count)
@@ -290,9 +309,9 @@ void NotifiableQueue::Update(const EnvironmentQuery& envQuery)
     }
 
     for(size_t index = count_occupants; index < slots.size(); ++index) {
-        const auto slot_pos = slots[index];
-        auto candidates = envQuery.AgentsInRange(slot_pos, 2, [&](const GenericAgent& candidate) {
-            return envQuery.NoGeometryBetween(slot_pos, candidate.Position());
+        const auto& slot = slots[index];
+        auto candidates = envQuery.AgentsInRange(slot.xy(), 2, [&](const GenericAgent& candidate) {
+            return candidate.location && envQuery.NoGeometryBetween(slot, *candidate.location);
         });
 
         GenericAgent::ID occupant = GenericAgent::ID::Invalid;
@@ -302,7 +321,7 @@ void NotifiableQueue::Update(const EnvironmentQuery& envQuery)
                exitingThisUpdate.contains(agent.id)) {
                 continue;
             }
-            const auto distance = (agent.Position() - slots[index]).Norm();
+            const auto distance = (agent.Position() - slot.xy()).Norm();
             if(distance < min_distance) {
                 min_distance = distance;
                 occupant = agent.id;

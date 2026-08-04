@@ -2,6 +2,7 @@
 #include "GenericAgent.hpp"
 #include "GeometryBuilder.hpp"
 #include "Journey.hpp"
+#include "MeshFixtures.hpp"
 #include "Stage.hpp"
 #include "gtest/gtest.h"
 
@@ -19,22 +20,40 @@ public:
     }
 
     void TearDown() override {}
+
+    Location At(Point p) const { return *geometry->get_location(p.x, p.y, 0.0); }
+
+    std::vector<Location> AllAt(const std::vector<Point>& points) const
+    {
+        std::vector<Location> locations{};
+        for(const auto& p : points) {
+            locations.push_back(At(p));
+        }
+        return locations;
+    }
+
+    GenericAgent AgentAt(Point p, BaseStage::ID stageId) const
+    {
+        GenericAgent agent(
+            GenericAgent::ID::Invalid,
+            Journey::ID::Invalid,
+            stageId,
+            p,
+            CollisionFreeSpeedModelState{});
+        agent.location = At(p);
+        return agent;
+    }
 };
 
 TEST_F(StagesTests, NotifiableWaitingSetTargetIsCorrect)
 {
     std::vector<Point> waitingPoints = {{-9, -9}, {9, -9}, {9, 9}, {-9, 9}};
-    NotifiableWaitingSet waitingSet(waitingPoints);
+    NotifiableWaitingSet waitingSet(AllAt(waitingPoints));
 
     // Each agent gets the next target of the provided waiting points until all positions are
     // occupied
     for(size_t i = 0; i < waitingPoints.size(); ++i) {
-        GenericAgent agent(
-            GenericAgent::ID::Invalid,
-            Journey::ID::Invalid,
-            waitingSet.Id(),
-            waitingPoints[i],
-            CollisionFreeSpeedModelState{});
+        GenericAgent agent = AgentAt(waitingPoints[i], waitingSet.Id());
         neighborhoodSearch.AddAgent(agent);
 
         const auto& target = waitingSet.Target(agent);
@@ -45,14 +64,120 @@ TEST_F(StagesTests, NotifiableWaitingSetTargetIsCorrect)
 
     // Each next agent gets the last slot
     for(size_t i = 0; i < 2; ++i) {
-        GenericAgent agentToLastWaitingSetPos(
-            GenericAgent::ID::Invalid,
-            Journey::ID::Invalid,
-            waitingSet.Id(),
-            Point{},
-            CollisionFreeSpeedModelState{});
+        GenericAgent agentToLastWaitingSetPos = AgentAt(Point{}, waitingSet.Id());
         neighborhoodSearch.AddAgent(agentToLastWaitingSetPos);
         const auto& target = waitingSet.Target(agentToLastWaitingSetPos);
         ASSERT_EQ(target, waitingPoints.back());
     }
+}
+
+/// Two floors over the same footprint: (x, y) alone no longer says where a stage is.
+class StagesOnTwoStoreys : public ::testing::Test
+{
+public:
+    Geometry3D geometry{fixtures::stacked_floors()};
+
+    Location At(Point p, double z) const { return *geometry.get_location(p.x, p.y, z); }
+
+    GenericAgent AgentAt(Point p, double z, BaseStage::ID stageId) const
+    {
+        GenericAgent agent(
+            GenericAgent::ID::Invalid,
+            Journey::ID::Invalid,
+            stageId,
+            p,
+            CollisionFreeSpeedModelState{});
+        agent.location = At(p, z);
+        return agent;
+    }
+};
+
+TEST_F(StagesOnTwoStoreys, WaypointIsReachedOnlyFromItsOwnFloor)
+{
+    Waypoint waypoint(At({5, 5}, 3.0), 1.0);
+
+    EXPECT_FALSE(waypoint.IsCompleted(AgentAt({5, 5}, 0.0, waypoint.Id())));
+    EXPECT_TRUE(waypoint.IsCompleted(AgentAt({5, 5}, 3.0, waypoint.Id())));
+}
+
+TEST_F(StagesOnTwoStoreys, PassingOverOrUnderAnExitDoesNotTakeIt)
+{
+    std::vector<GenericAgent::ID> removed{};
+    const Polygon area{std::vector<Point>{{4, 4}, {6, 4}, {6, 6}, {4, 6}}};
+    Exit lower(area, At({5, 5}, 0.0), removed);
+    Exit upper(area, At({5, 5}, 3.0), removed);
+
+    EXPECT_FALSE(lower.IsCompleted(AgentAt({5, 5}, 3.0, lower.Id())));
+    EXPECT_FALSE(upper.IsCompleted(AgentAt({5, 5}, 0.0, upper.Id())));
+    EXPECT_TRUE(removed.empty());
+
+    EXPECT_TRUE(lower.IsCompleted(AgentAt({5, 5}, 0.0, lower.Id())));
+    EXPECT_TRUE(upper.IsCompleted(AgentAt({5, 5}, 3.0, upper.Id())));
+    EXPECT_EQ(removed.size(), 2u);
+}
+
+TEST_F(StagesOnTwoStoreys, WaitingSetIsCompletedOnlyOnItsOwnFloor)
+{
+    NotifiableWaitingSet waitingSet(std::vector<Location>{At({5, 5}, 3.0)});
+    waitingSet.State(WaitingSetState::Inactive);
+
+    EXPECT_FALSE(waitingSet.IsCompleted(AgentAt({5, 5}, 0.0, waitingSet.Id())));
+    EXPECT_TRUE(waitingSet.IsCompleted(AgentAt({5, 5}, 3.0, waitingSet.Id())));
+}
+
+TEST_F(StagesOnTwoStoreys, QueueEnqueuesOnlyAgentsOnItsOwnFloor)
+{
+    NotifiableQueue queue(std::vector<Location>{At({5, 5}, 3.0)});
+    NeighborhoodSearch<GenericAgent> search{5.0};
+    const EnvironmentQuery query{geometry, search};
+
+    AgentContainer<GenericAgent> agents{};
+    agents.push_back(AgentAt({5, 5}, 0.0, queue.Id()));
+    search.Update(agents);
+    queue.Update(query);
+    EXPECT_TRUE(queue.Occupants().empty());
+
+    agents.push_back(AgentAt({5, 5}, 3.0, queue.Id()));
+    search.Update(agents);
+    queue.Update(query);
+    ASSERT_EQ(queue.Occupants().size(), 1u);
+    EXPECT_EQ(queue.Occupants().front(), agents[1].id);
+}
+
+TEST_F(StagesOnTwoStoreys, WaitingSetSeatsOnlyAgentsOnItsOwnFloor)
+{
+    NotifiableWaitingSet waitingSet(std::vector<Location>{At({5, 5}, 3.0)});
+    NeighborhoodSearch<GenericAgent> search{5.0};
+    const EnvironmentQuery query{geometry, search};
+
+    AgentContainer<GenericAgent> agents{};
+    agents.push_back(AgentAt({5, 5}, 0.0, waitingSet.Id()));
+    search.Update(agents);
+    waitingSet.Update(query);
+    EXPECT_TRUE(waitingSet.Occupants().empty());
+
+    agents.push_back(AgentAt({5, 5}, 3.0, waitingSet.Id()));
+    search.Update(agents);
+    waitingSet.Update(query);
+    ASSERT_EQ(waitingSet.Occupants().size(), 1u);
+    EXPECT_EQ(waitingSet.Occupants().front(), agents[1].id);
+}
+
+TEST(StagesOnAStair, WaypointIsReachedFromTheStairItStandsOn)
+{
+    // A stair climbing 3 m over 5 m: an agent 0.8 m short of the waypoint in plan is
+    // half a metre below it.
+    Geometry3D geometry{fixtures::two_levels_with_stair()};
+    Waypoint waypoint(*geometry.get_location(12.5, 2.0, 1.5), 1.0);
+
+    GenericAgent agent(
+        GenericAgent::ID::Invalid,
+        Journey::ID::Invalid,
+        waypoint.Id(),
+        Point{11.7, 2.0},
+        CollisionFreeSpeedModelState{});
+    agent.location = geometry.get_location(11.7, 2.0, 1.02);
+    ASSERT_TRUE(agent.location.has_value());
+
+    EXPECT_TRUE(waypoint.IsCompleted(agent));
 }

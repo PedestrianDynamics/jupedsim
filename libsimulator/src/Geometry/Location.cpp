@@ -194,6 +194,11 @@ std::optional<Location> Location::try_move_on_surface(Point xy_direction) const
     return std::nullopt;
 }
 
+bool Location::can_walk_straight_to(const Location& other) const
+{
+    return _geometry->no_geometry_between(*this, other);
+}
+
 void Location::move_on_surface(Point xy_direction)
 {
     auto moved = try_move_on_surface(xy_direction);
