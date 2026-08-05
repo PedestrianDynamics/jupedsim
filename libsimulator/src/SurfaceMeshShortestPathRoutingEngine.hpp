@@ -30,6 +30,8 @@ public:
 
 private:
     const Geometry3D& _geometry;
+    /// Tolerance needed for the collinear merge, calculated on the underlying mesh itself.
+    double _mergeTolerance;
 
     // cache
     using Traits = CGAL::Surface_mesh_shortest_path_traits<K, SurfaceMesh>;

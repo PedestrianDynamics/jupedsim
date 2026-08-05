@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "SurfaceMeshShortestPathRoutingEngine.hpp"
 
+#include "Geometry/PolylineMerge.hpp"
 #include "SimulationError.hpp"
 
 #include <cstddef>
@@ -14,7 +15,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 SurfaceMeshShortestPathRoutingEngine::SurfaceMeshShortestPathRoutingEngine(
     const Geometry3D& geometry)
-    : _geometry(geometry)
+    : _geometry(geometry), _mergeTolerance(mesh_merge_tolerance(geometry.mesh()))
 {
 }
 
@@ -60,16 +61,24 @@ Point SurfaceMeshShortestPathRoutingEngine::ComputeWaypoint(
     const Location& to)
 {
     const auto& [path, cost] = GetShortestPath(from.position_3d(), to.position_3d());
+
+    // CGAL sets a point whenever it crosses a triangle edge. need to do a collinear merge or
+    // agents stop at each of those intermediate points as they occur in "agent.nextTarget".
+    std::vector<Point> chain{from.xy()};
     for(const auto& p : path) {
         const Point xy{p.x(), p.y()};
-        // A query point sitting exactly on a triangle edge makes CGAL repeat
-        // the leading one.
-        if(xy != from.xy()) {
-            return xy;
+        // Points on top of each other would read as a turn: the leading one comes back when the
+        // agent stands on an edge.
+        if((xy - chain.back()).Norm() > _mergeTolerance) {
+            chain.push_back(xy);
         }
     }
-    // Already there.
-    return to.xy();
+    if(chain.size() < 2) {
+        // Already there.
+        return to.xy();
+    }
+    const auto runs = straight_runs(chain, _mergeTolerance);
+    return runs.size() > 1 ? chain[runs[1]] : chain.back();
 }
 
 Point SurfaceMeshShortestPathRoutingEngine::GetOrientation(

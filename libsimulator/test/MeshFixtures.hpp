@@ -163,6 +163,21 @@ inline SurfaceMesh switchback_stair(bool upper_first = false)
     return builder.take();
 }
 
+/// A stair straight up to a higher landing: ground floor, a flight climbing 3 m over 5 m across
+/// the full width, and the landing carrying on at the top. Nothing lies over anything.
+///
+/// The plain climb, and the one a whole simulation can walk end to end: the way up is straight
+/// in plan, so it passes no wall corner -- which a route that keeps no distance from walls
+/// cannot get an agent around: That requires "wall clearance".
+inline SurfaceMesh straight_stair_to_a_landing()
+{
+    QuadMesh builder{};
+    builder.add({{{0, 0, 0}, {10, 0, 0}, {10, 8, 0}, {0, 8, 0}}}); // ground floor
+    builder.add({{{10, 0, 0}, {15, 0, 3}, {15, 8, 3}, {10, 8, 0}}}); // flight, full width
+    builder.add({{{15, 0, 3}, {20, 0, 3}, {20, 8, 3}, {15, 8, 3}}}); // landing at the top
+    return builder.take();
+}
+
 /// A stair that turns on a landing and climbs on: the first flight out along y in [0, 2], the
 /// landing at the far end, the second flight back along y in [3, 5], ending 6 m up. Between
 /// the flights the stair well, open at the near end.

@@ -4,14 +4,17 @@
 #include "Journey.hpp"
 #include "MeshFixtures.hpp"
 #include "OperationalModels/CollisionFreeSpeedModel/CollisionFreeSpeedModel.hpp"
+#include "Polygon.hpp"
 #include "Simulation.hpp"
 #include "SimulationError.hpp"
 #include "StageDescription.hpp"
 
 #include <gtest/gtest.h>
 
+#include <cstddef>
 #include <memory>
 #include <utility>
+#include <vector>
 
 /// What only a whole simulation can be asked: whether a world made of a surface mesh runs, and
 /// whether the places written into it land on the storey they were meant on.
@@ -130,4 +133,43 @@ TEST(MeshBuiltSimulation, HasNoPolygonToHandOut)
 
     // A polygon-built one still has one, and that is what the viewer and the systemtests read.
     EXPECT_NO_THROW(on_a_flat_room()->Geo());
+}
+
+TEST(MeshBuiltSimulation, WalkingUpAStairToTheExitAtTheTop)
+{
+    auto sim = std::make_unique<Simulation>(
+        model(), std::make_unique<Geometry3D>(fixtures::straight_stair_to_a_landing()), 0.01);
+
+    // Start on the ground floor, exit on the landing three metres up: the whole way there leads
+    // over the flight, so arriving at all means the climb worked.
+    const Polygon outline{{{17, 2}, {19, 2}, {19, 6}, {17, 6}}};
+    const auto exit = sim->AddStage(ExitDescription{outline}, 3.0);
+    const auto journey = sim->AddJourney({{exit, NonTransitionDescription{}}});
+    const auto id = sim->AddAgent(journey, exit, Point{2, 4}, State{}, 0.0);
+
+    std::vector<double> heights{};
+    std::vector<Point> positions{};
+    for(int step = 0; step < 4000 && sim->AgentCount() > 0; ++step) {
+        heights.push_back(sim->Agent(id).location.z());
+        positions.push_back(sim->Agent(id).location.xy());
+        sim->Iterate();
+    }
+
+    EXPECT_EQ(sim->AgentCount(), 0u) << "never made it to the exit";
+    ASSERT_FALSE(heights.empty());
+
+    // Up, and never back down.
+    EXPECT_EQ(heights.front(), 0.0);
+    for(std::size_t i = 1; i < heights.size(); ++i) {
+        EXPECT_GE(heights[i], heights[i - 1] - 1e-9)
+            << "dropped from " << heights[i - 1] << " to " << heights[i] << " at step " << i;
+    }
+    EXPECT_GE(heights.back(), 3.0);
+
+    // No standing still: a phantom wall under or over the flight would show as an agent that
+    // stops making headway without ever arriving.
+    for(std::size_t i = 100; i < positions.size(); i += 100) {
+        EXPECT_GT((positions[i] - positions[i - 100]).Norm(), 0.05)
+            << "stalled around " << positions[i].x << ", " << positions[i].y;
+    }
 }
