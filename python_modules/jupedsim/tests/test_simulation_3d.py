@@ -220,6 +220,70 @@ def test_a_direct_steering_target_can_be_given_as_a_location():
     assert agent.location.z == pytest.approx(UPPER_Z)
 
 
+# The models that carry a whole storey change today. The two force models
+# (SocialForceModel, GeneralizedCentrifugalForceModel) stall at the stair's
+# turn and are deliberately absent.
+WALK_UP_MODELS = [
+    (jps.CollisionFreeSpeedModel, jps.CollisionFreeSpeedModelState),
+    (jps.CollisionFreeSpeedModelV2, jps.CollisionFreeSpeedModelV2State),
+    (jps.WarpDriverModel, jps.WarpDriverModelState),
+    (
+        lambda: jps.AnticipationVelocityModel(rng_seed=1),
+        jps.AnticipationVelocityModelState,
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    "model, state",
+    WALK_UP_MODELS,
+    ids=["cfsm", "cfsm_v2", "warp_driver", "avm"],
+)
+def test_agents_walk_up_the_u_stair_to_an_exit_on_the_floor_above(model, state):
+    # No waypoints on the way: the exit upstairs is the only stage, so the
+    # route around the stair's turn is the router's to find.
+    sim = jps.Simulation(model=model(), geometry=OBJ, dt=0.01)
+    journey_id, exit_id = journey_to_upper_exit(sim)
+    agents = [
+        sim.agent(
+            sim.add_agent(
+                journey_id=journey_id,
+                stage_id=exit_id,
+                position=position,
+                state=state(),
+                z_hint=GROUND_Z,
+            )
+        )
+        for position in [
+            (3.3, 7.6),
+            (4.0, 7.6),
+            (3.3, 8.3),
+            (4.0, 8.3),
+            (3.65, 6.9),
+        ]
+    ]
+    watched, watched_id = agents[0], agents[0].id
+    heights = [watched.location.z]
+    for _ in range(6000):
+        sim.iterate()
+        if watched_id in sim.removed_agents():
+            watched = None
+        if watched is not None:
+            heights.append(watched.location.z)
+        if sim.agent_count() == 0:
+            break
+
+    assert sim.agent_count() == 0
+    # up the whole way: never a step back down, ground floor to upper floor
+    assert all(
+        later >= earlier - 1e-9 for earlier, later in zip(heights, heights[1:])
+    )
+    assert heights[0] == pytest.approx(GROUND_Z)
+    assert heights[-1] == pytest.approx(UPPER_Z)
+    # and it went up the stair rather than straight there: the landing is halfway
+    assert any(1.0 < z < 2.0 for z in heights)
+
+
 def test_the_exit_an_agent_walks_towards_is_the_one_on_its_own_floor():
     # Same (x, y) polygon on both floors: without the hint the two exits would be one place.
     sim = mesh_simulation()
