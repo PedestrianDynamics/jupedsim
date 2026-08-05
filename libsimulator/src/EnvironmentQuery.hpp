@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <concepts>
 #include <iterator>
+#include <optional>
 #include <ranges>
 #include <vector>
 
@@ -20,6 +21,15 @@ class EnvironmentQuery
 {
     const CollisionGeometry& _geometry;
     const NeighborhoodSearch<GenericAgent>& _nsearch;
+    mutable std::optional<Point> _cached_boundary_pos{};
+    mutable std::vector<LineSegment> _cached_boundary{};
+
+    void _fetchBoundaryAt(const Point& from) const
+    {
+        _cached_boundary_pos = from;
+        auto range = _geometry.LineSegmentsInApproxDistanceTo(from);
+        _cached_boundary.assign(range.begin(), range.end());
+    }
 
 public:
     EnvironmentQuery(
@@ -42,9 +52,11 @@ public:
     std::vector<GenericAgent>
     OtherAgentsInRange(const OperationalModelState& state, double radius, Pred filter = {}) const
     {
+        const Point from = Pos(state);
+        _fetchBoundaryAt(from);
         std::vector<GenericAgent> neighbors{};
-        _nsearch.ForEachInRange(Pos(state), radius, [&](const GenericAgent& candidate) {
-            if(candidate.position() != Pos(state) && filter(candidate.position())) {
+        _nsearch.ForEachInRange(from, radius, [&](const GenericAgent& candidate) {
+            if(candidate.position() != from && filter(candidate.position())) {
                 neighbors.push_back(candidate);
             }
         });
@@ -66,14 +78,14 @@ public:
 
     bool NoGeometryBetween(const Point& from, const Point& to) const
     {
+        if(!_cached_boundary_pos || *_cached_boundary_pos != from) {
+            _fetchBoundaryAt(from);
+        }
         const LineSegment los{from, to};
-        const double dist = Distance(from, to);
-        auto blocked = [&los](const auto& boundaries) {
-            return std::any_of(boundaries.begin(), boundaries.end(), [&los](const auto& seg) {
+        return !std::any_of(
+            _cached_boundary.begin(), _cached_boundary.end(), [&los](const auto& seg) {
                 return intersects(los, seg);
             });
-        };
-        return !blocked(LineSegmentsInRange(from, dist));
     }
 
     CollisionGeometry::LineSegmentRange
