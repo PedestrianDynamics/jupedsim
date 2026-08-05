@@ -91,15 +91,16 @@ merge_border_walls(const SurfaceMesh& mesh, const RegionMap& region, double eps)
             for(std::size_t i = first; i < last; ++i) {
                 regions.insert(rotated[i].region);
             }
-            const double z_min =
-                *std::min_element(height.begin() + first, height.begin() + last + 1);
+            const auto [z_min, z_max] =
+                std::minmax_element(height.begin() + first, height.begin() + last + 1);
             out.push_back(
                 // End to start, so a wall faces the way the polygon path faced it in 2D.
                 // If provided the other way round, `ShortestPoint` to an agent might change
                 // in the last bit.
                 MergedWall{
                     LineSegment{chain[last], chain[first]},
-                    z_min,
+                    *z_min,
+                    *z_max,
                     static_cast<std::uint32_t>(out.size()),
                     {regions.begin(), regions.end()}});
         };

@@ -404,3 +404,36 @@ TEST(Geometry3DModelQueries, AWallRisingFromTheAgentsLevelStaysInTheAnswer)
     const auto walls = into_set(geo.line_segments_in_range(*who, 2.2));
     EXPECT_TRUE(walls.contains(LineSegment{{0, 0}, {18, 0}}));
 }
+
+TEST(Geometry3DModelQueries, AWallOfTheStoreyBelowIsNotInTheAnswer)
+{
+    Geometry3D geo{fixtures::switchback_stair()};
+
+    // Upstairs, over the ground floor. Its east wall (10,4)-(10,8) stands three metres below and
+    // comes within reach over the seam -- and it is what the upper floor's own floor rests on, so
+    // it cannot reach up here.
+    const auto who = geo.get_location(10.5, 6.0, 3.0, 0.5);
+    ASSERT_TRUE(who.has_value());
+
+    const auto walls = into_set(geo.line_segments_in_range(*who));
+    EXPECT_TRUE(walls.contains(LineSegment{{0, 4}, {14, 4}})) << "its own storey's wall";
+    EXPECT_FALSE(walls.contains(LineSegment{{10, 4}, {10, 8}}))
+        << "the ground floor's wall, three metres below";
+    EXPECT_FALSE(walls.contains(LineSegment{{10, 8}, {0, 8}}))
+        << "the ground floor's wall, three metres below";
+}
+
+TEST(Geometry3DModelQueries, AWallOfTheFlightBelowIsNotInTheAnswerEither)
+{
+    Geometry3D geo{fixtures::stair_turning_on_a_landing()};
+    ASSERT_EQ(geo.region_count(), 1u);
+
+    // At the top of the second flight, six metres up. The foot of the first flight lies in the
+    // same region, two metres away in plan -- the distance is beside the point, the height is not.
+    const auto who = geo.get_location(0.5, 4.0, 5.75, 0.5);
+    ASSERT_TRUE(who.has_value());
+
+    const auto walls = into_set(geo.line_segments_in_range(*who));
+    EXPECT_TRUE(walls.contains(LineSegment{{0, 5}, {0, 3}})) << "the wall right in front of him";
+    EXPECT_FALSE(walls.contains(LineSegment{{0, 2}, {0, 0}})) << "the foot of the flight below";
+}

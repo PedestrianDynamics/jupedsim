@@ -20,10 +20,15 @@ struct MergedWall {
     /// The wall in the horizontal plane.
     LineSegment segment;
 
-    /// The lowest z of the fused run. This is an additional cheap pre-filter. E.g. triggers
-    /// if a wall is nearby in the same/neighboring region but "too high". E.g. "U"-stairs where
-    /// the agent is at the "bottom" of the first stairs.
+    /// How high the fused run reaches, lowest and highest z along it. A cheap pre-filter against
+    /// the height an agent can touch: a wall too high above him is one of the flight above, a wall
+    /// too far below one of the storey he is standing on top of. Both happen a few metres away in
+    /// plan, in his own region as readily as in a neighbouring one -- a "U"-stair has them both.
+    ///
+    /// A run climbing a stair spans the whole climb, which is why it takes two values: it has to
+    /// stay in play for whoever is at its foot and for whoever is at its head.
     double zMin;
+    double zMax;
 
     /// Position of this wall in the geometry's wall list. Two entrances into the same
     /// region can deliver the same wall twice, index can detect and deduplicate.

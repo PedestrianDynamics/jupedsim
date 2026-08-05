@@ -19,8 +19,8 @@ WallRange::Iterator::Iterator(const WallRange* range, bool at_end) : _range(rang
 
 bool WallRange::Iterator::worth_handing_out()
 {
-    // A wall standing higher than the agent can reach  - cheap pre-filter.
-    if((*_wall).zMin > _range->_reachesUpTo) {
+    // A wall out of the height the agent can touch is one of another storey - cheap pre-filter.
+    if((*_wall).zMin > _range->_highest || (*_wall).zMax < _range->_lowest) {
         return false;
     }
     // A wall reached through a second region has already been handed out by the first. With

@@ -164,7 +164,7 @@ WallRange Geometry3D::line_segments_in_range(const Location& who, double distanc
             spans.push_back(walls);
         }
     }
-    return WallRange{std::move(spans), who.z() + InteractionHeight};
+    return WallRange{std::move(spans), who.z() - InteractionHeight, who.z() + InteractionHeight};
 }
 
 bool Geometry3D::no_geometry_between(const Location& who, Point direction) const

@@ -34,8 +34,10 @@ public:
     /// The polygon path: one slice, nothing to stitch, nothing to recognise.
     explicit WallRange(Geometry2D::LineSegmentRange flat) : _flat(flat), _isFlat(true) {}
 
-    /// The mesh path. Walls standing higher than @p reachesUpTo are not handed out.
-    WallRange(Spans spans, double reachesUpTo) : _spans(std::move(spans)), _reachesUpTo(reachesUpTo)
+    /// The mesh path. Only walls reaching into [@p lowest, @p highest] are handed out: what lies
+    /// wholly above or below that is another storey's.
+    WallRange(Spans spans, double lowest, double highest)
+        : _spans(std::move(spans)), _lowest(lowest), _highest(highest)
     {
     }
 
@@ -81,6 +83,7 @@ public:
 private:
     Geometry2D::LineSegmentRange _flat{{}, {}};
     Spans _spans{};
-    double _reachesUpTo{0.0};
+    double _lowest{0.0};
+    double _highest{0.0};
     bool _isFlat{false};
 };

@@ -174,37 +174,52 @@ TEST(MeshBuiltSimulation, WalkingUpAStairToTheExitAtTheTop)
     }
 }
 
-TEST(MeshBuiltSimulation, TheCornerAtTheFootOfTheUStairDoesNotStopHim)
+TEST(MeshBuiltSimulation, WalkingUpTheUStairToTheExitAbove)
 {
     auto sim = on_the_switchback_stair();
 
-    // The way up leads around the corner at (10, 4), where the ground floor's wall ends and the
-    // flight begins. The geodesic turns exactly on that corner, and heading for it is a place no
-    // agent can reach: he used to settle his own radius short of it and stay there.
+    // The exit lies on the upper floor, and the agent starts on the ground floor directly below
+    // it -- inside its outline in plan. Four metres apart on paper, some thirty along the only way
+    // there: east around the corner at (10, 4), up the flight, over the landing, and back west on
+    // the upper floor.
     const Polygon outline{{{0, 4}, {3, 4}, {3, 8}, {0, 8}}};
     const auto exit = sim->AddStage(ExitDescription{outline}, 3.0);
     const auto journey = sim->AddJourney({{exit, NonTransitionDescription{}}});
     const auto id = sim->AddAgent(journey, exit, Point{2, 6}, State{}, 0.0);
 
     std::vector<double> heights{};
+    std::vector<Point> positions{};
     bool past_the_corner = false;
-    for(int step = 0; step < 2000; ++step) {
+    for(int step = 0; step < 6000 && sim->AgentCount() > 0; ++step) {
         const auto& agent = sim->Agent(id);
         heights.push_back(agent.location.z());
-        // East of the corner and already climbing: he got around it.
+        positions.push_back(agent.location.xy());
+        // East of the corner and already climbing: he went around it rather than into it.
         past_the_corner = past_the_corner || (agent.location.xy().x > 10.5 &&
                                               agent.location.z() > 0.0 && agent.location.z() < 3.0);
-        if(agent.location.z() >= 3.0 && agent.location.region() != 0) {
-            break;
-        }
         sim->Iterate();
     }
 
-    EXPECT_TRUE(past_the_corner) << "stopped at the corner instead of walking around it";
-    EXPECT_GE(heights.back(), 3.0) << "never got up the flight";
+    EXPECT_EQ(sim->AgentCount(), 0u) << "never made it to the exit";
+    EXPECT_TRUE(past_the_corner) << "never went around the corner at the foot of the flight";
+    ASSERT_FALSE(heights.empty());
+
+    // Standing in the exit's outline is not standing in the exit: from the ground floor the way to
+    // its centre leads to the storey above, not to the centre.
     EXPECT_EQ(heights.front(), 0.0);
+    EXPECT_GT(heights.size(), 1u) << "left through the floor above, on the first step";
+
+    // Up, and never back down.
     for(std::size_t i = 1; i < heights.size(); ++i) {
         EXPECT_GE(heights[i], heights[i - 1] - 1e-9)
             << "dropped from " << heights[i - 1] << " to " << heights[i] << " at step " << i;
+    }
+    EXPECT_GE(heights.back(), 3.0);
+
+    // No standing still: a phantom wall over or under him would show as an agent that stops
+    // making headway without ever arriving.
+    for(std::size_t i = 100; i < positions.size(); i += 100) {
+        EXPECT_GT((positions[i] - positions[i - 100]).Norm(), 0.05)
+            << "stalled around " << positions[i].x << ", " << positions[i].y;
     }
 }
