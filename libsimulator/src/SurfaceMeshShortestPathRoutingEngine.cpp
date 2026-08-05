@@ -55,6 +55,23 @@ std::tuple<std::vector<Point3D>, double> SurfaceMeshShortestPathRoutingEngine::G
     return {std::move(path), result.first};
 }
 
+Point SurfaceMeshShortestPathRoutingEngine::ComputeWaypoint(
+    const Location& from,
+    const Location& to)
+{
+    const auto& [path, cost] = GetShortestPath(from.position_3d(), to.position_3d());
+    for(const auto& p : path) {
+        const Point xy{p.x(), p.y()};
+        // A query point sitting exactly on a triangle edge makes CGAL repeat
+        // the leading one.
+        if(xy != from.xy()) {
+            return xy;
+        }
+    }
+    // Already there.
+    return to.xy();
+}
+
 Point SurfaceMeshShortestPathRoutingEngine::GetOrientation(
     const Point3D& source,
     const RoutingTarget& target)

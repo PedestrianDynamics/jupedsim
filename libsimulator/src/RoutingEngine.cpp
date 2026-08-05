@@ -45,6 +45,41 @@ Point RoutingEngine::ComputeWaypoint(Point currentPosition, Point destination)
     return ComputeAllWaypoints(currentPosition, destination)[1];
 }
 
+Point RoutingEngine::ComputeWaypoint(const Location& from, const Location& to)
+{
+    return ComputeWaypoint(from.xy(), to.xy());
+}
+
+bool RoutingEngine::IsValidLocation(const RoutingTarget& loc) const
+{
+    return IsRoutable(Point{loc.x(), loc.y()});
+}
+
+std::tuple<std::vector<Point3D>, double>
+RoutingEngine::GetShortestPath(const Point3D& source, const RoutingTarget& target)
+{
+    const auto flat =
+        ComputeAllWaypoints(Point{source.x(), source.y()}, Point{target.x(), target.y()});
+
+    std::vector<Point3D> path{};
+    path.reserve(flat.size());
+    double cost = 0.0;
+    for(std::size_t i = 0; i < flat.size(); ++i) {
+        // Sum up 2D distance costs of the path.
+        path.push_back(Point3D{flat[i].x, flat[i].y, 0.0});
+        if(i > 0) {
+            cost += (flat[i] - flat[i - 1]).Norm();
+        }
+    }
+    return {std::move(path), cost};
+}
+
+Point RoutingEngine::GetOrientation(const Point3D& source, const RoutingTarget& target)
+{
+    const Point from{source.x(), source.y()};
+    return (ComputeWaypoint(from, Point{target.x(), target.y()}) - from).Normalized();
+}
+
 struct SearchState {
     double g_value{};
     double h_value{};

@@ -4,12 +4,15 @@
 #include "CfgCgal.hpp"
 #include "Mesh.hpp"
 #include "Point.hpp"
+#include "RoutingEngine3D.hpp"
 
 #include <cstddef>
 #include <memory>
+#include <tuple>
 #include <vector>
 
-class RoutingEngine
+/// 2D TA* + funnel routing engine wrapped to 3D routing engine interface.
+class RoutingEngine : public RoutingEngine3D
 {
     CDT cdt{};
     std::unique_ptr<Mesh> mesh{};
@@ -17,18 +20,21 @@ class RoutingEngine
 public:
     RoutingEngine();
     explicit RoutingEngine(const PolyWithHoles& poly);
-    ~RoutingEngine() = default;
+    ~RoutingEngine() override = default;
 
-    RoutingEngine(const RoutingEngine& other) = delete;
-    RoutingEngine& operator=(const RoutingEngine& other) = delete;
-
-    RoutingEngine(RoutingEngine&& other) = default;
-    RoutingEngine& operator=(RoutingEngine&& other) = default;
+    // Nte: Copy and move are both deleted by the base class RoutingEngine3D.
 
     Point ComputeWaypoint(Point currentPosition, Point destination);
     std::vector<Point> ComputeAllWaypoints(Point currentPosition, Point destination);
     bool IsRoutable(Point p) const;
     void Update();
+
+    // RoutingEngine3D interface
+    Point ComputeWaypoint(const Location& from, const Location& to) override;
+    bool IsValidLocation(const RoutingTarget& loc) const override;
+    std::tuple<std::vector<Point3D>, double>
+    GetShortestPath(const Point3D& source, const RoutingTarget& target) override;
+    Point GetOrientation(const Point3D& source, const RoutingTarget& target) override;
 
     const Mesh* MeshData() const { return mesh.get(); };
 

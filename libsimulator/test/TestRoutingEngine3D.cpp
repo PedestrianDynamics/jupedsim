@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "CfgCgal.hpp"
 #include "Geometry/Geometry3D.hpp"
+#include "GeometryBuilder.hpp"
+#include "RoutingEngine.hpp"
 #include "SimulationError.hpp"
 #include "SurfaceMeshShortestPathRoutingEngine.hpp"
 
@@ -261,4 +263,46 @@ TEST(RoutingEngine3DLShape, OrientationBendsTowardsReflexCorner)
     const Point at_goal = engine.GetOrientation({2.5, 0.5, 1}, {2.5, 0.5, 1});
     EXPECT_EQ(at_goal.x, 0.0);
     EXPECT_EQ(at_goal.y, 0.0);
+}
+
+TEST(RoutingEngine3DLShape, WaypointIsTheNextTurnOfTheGeodesic)
+{
+    const std::vector<K::Point_2> outer{{0, 0}, {3, 0}, {3, 1}, {1, 1}, {1, 3}, {0, 3}};
+
+    Geometry3D geometry{mesh_from_polygon(outer)}; // flat z = 0
+    SurfaceMeshShortestPathRoutingEngine engine{geometry};
+
+    const auto from = geometry.get_location(2.5, 0.5, 0.0);
+    const auto to = geometry.get_location(0.5, 2.5, 0.0);
+    ASSERT_TRUE(from.has_value() && to.has_value());
+
+    // Where the geodesic bends, which is the reflex corner: the tactical level asks for a place
+    // to head for, and the surface engine answers with the path's own next vertex.
+    const Point waypoint = engine.ComputeWaypoint(*from, *to);
+    EXPECT_NEAR(waypoint.x, 1.0, 1e-6);
+    EXPECT_NEAR(waypoint.y, 1.0, 1e-6);
+
+    // Standing on the target: nowhere else to head for.
+    EXPECT_EQ(engine.ComputeWaypoint(*to, *to), to->xy());
+}
+
+TEST(RoutingEngineProjected, WaypointOnLocationsIsTheOneOnPoints)
+{
+    GeometryBuilder b{};
+    b.AddAccessibleArea({{0, 0}, {20, 0}, {20, 20}, {0, 20}});
+    b.ExcludeFromAccessibleArea({{9, 0}, {11, 0}, {11, 15}, {9, 15}});
+    const auto poly = b.Build().Polygon();
+
+    Geometry3D geometry{poly};
+    RoutingEngine engine{poly};
+
+    const auto from = geometry.get_location(4.0, 4.0, 0.0);
+    const auto to = geometry.get_location(16.0, 4.0, 0.0);
+    ASSERT_TRUE(from.has_value() && to.has_value());
+
+    // Around the barrier, so the route has a turn in it and the waypoint is not the target.
+    const Point on_points = engine.ComputeWaypoint(from->xy(), to->xy());
+    EXPECT_NE(on_points, to->xy());
+    // Bit for bit the same answer: this is the engine the flat suites are pinned to.
+    EXPECT_EQ(engine.ComputeWaypoint(*from, *to), on_points);
 }

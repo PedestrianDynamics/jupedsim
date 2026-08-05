@@ -2,6 +2,7 @@
 #pragma once
 
 #include "CfgCgal.hpp"
+#include "Geometry/Location.hpp"
 #include "Point.hpp"
 
 #include <tuple>
@@ -43,4 +44,9 @@ public:
     /// @param target where to route to
     /// @return 2D orientation to the next waypoint
     virtual Point GetOrientation(const Point3D& source, const RoutingTarget& target) = 0;
+
+    /// The very next point to target from @p from to @p to, projected to x/y.
+    ///
+    /// Interim: The idea is to move to `GetOrientation`.
+    virtual Point ComputeWaypoint(const Location& from, const Location& to) = 0;
 };

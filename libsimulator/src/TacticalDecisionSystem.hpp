@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "RoutingEngine.hpp"
+#include "RoutingEngine3D.hpp"
 
 class TacticalDecisionSystem
 {
@@ -13,11 +13,10 @@ public:
     TacticalDecisionSystem(TacticalDecisionSystem&& other) = delete;
     TacticalDecisionSystem& operator=(TacticalDecisionSystem&& other) = delete;
 
-    void Run(RoutingEngine& routingEngine, auto&& agents) const
+    void Run(RoutingEngine3D& routingEngine, auto&& agents) const
     {
         for(auto& agent : agents) {
-            agent.nextTarget =
-                routingEngine.ComputeWaypoint(agent.location.xy(), agent.finalTarget.xy());
+            agent.nextTarget = routingEngine.ComputeWaypoint(agent.location, agent.finalTarget);
         }
     }
 };

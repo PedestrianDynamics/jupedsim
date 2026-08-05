@@ -26,6 +26,8 @@ public:
 
     Point GetOrientation(const Point3D& source, const RoutingTarget& target) override;
 
+    Point ComputeWaypoint(const Location& from, const Location& to) override;
+
 private:
     const Geometry3D& _geometry;
 
