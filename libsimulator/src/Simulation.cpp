@@ -13,6 +13,7 @@
 #include "SimulationError.hpp"
 #include "Stage.hpp"
 #include "StageDescription.hpp"
+#include "SurfaceMeshShortestPathRoutingEngine.hpp"
 #include "Tracing.hpp"
 #include "Visitor.hpp"
 
@@ -43,6 +44,16 @@ public:
     IterationScope(const IterationScope&) = delete;
     IterationScope& operator=(const IterationScope&) = delete;
 };
+
+/// Selects routing engine based on availability of 2D polygon.
+/// For backwards compatibility reason we use TA*+funnel in 2D case.
+std::unique_ptr<RoutingEngine3D> pick_routing_engine(const Geometry3D& geometry)
+{
+    if(const auto* flat = geometry.geometry_2d(); flat != nullptr) {
+        return std::make_unique<RoutingEngine>(flat->Polygon());
+    }
+    return std::make_unique<SurfaceMeshShortestPathRoutingEngine>(geometry);
+}
 } // namespace
 
 void Simulation::ThrowIfIterating(const char* operation) const
@@ -57,12 +68,20 @@ void Simulation::ThrowIfIterating(const char* operation) const
 
 Simulation::Simulation(
     std::unique_ptr<OperationalModel>&& operationalModel,
-    std::unique_ptr<Geometry2D>&& geometry,
+    std::unique_ptr<Geometry3D>&& geometry,
     double dT)
     : _clock(dT)
     , _operationalDecisionSystem(std::move(operationalModel))
-    , _geometry(std::make_unique<Geometry3D>(geometry->Polygon()))
-    , _routingEngine(std::make_unique<RoutingEngine>(geometry->Polygon()))
+    , _geometry(std::move(geometry))
+    , _routingEngine(pick_routing_engine(*_geometry))
+{
+}
+
+Simulation::Simulation(
+    std::unique_ptr<OperationalModel>&& operationalModel,
+    std::unique_ptr<Geometry2D>&& geometry,
+    double dT)
+    : Simulation(std::move(operationalModel), std::make_unique<Geometry3D>(geometry->Polygon()), dT)
 {
 }
 
@@ -200,22 +219,24 @@ Journey::ID Simulation::AddJourney(const std::map<BaseStage::ID, TransitionDescr
     return id;
 }
 
-BaseStage::ID Simulation::AddStage(const StageDescription stageDescription)
+BaseStage::ID Simulation::AddStage(const StageDescription stageDescription, double z_hint)
 {
     ThrowIfIterating("AddStage");
     JPS_SCOPED_TIMER_AND_TRACE(_timer, "Add Stage", Detailed);
-    return _stageManager.AddStage(stageDescription, _removedAgentsInLastIteration, *_geometry);
+    return _stageManager.AddStage(
+        stageDescription, _removedAgentsInLastIteration, *_geometry, z_hint);
 }
 
 GenericAgent::ID Simulation::AddAgent(
     Journey::ID journeyId,
     BaseStage::ID stageId,
     Point position,
-    OperationalModelState model)
+    OperationalModelState model,
+    double z_hint)
 {
     ThrowIfIterating("AddAgent");
     JPS_SCOPED_TIMER_AND_TRACE(_timer, "Add Agent", Detailed);
-    const auto location = _geometry->get_location(position.x, position.y, 0.0);
+    const auto location = _geometry->get_location(position.x, position.y, z_hint);
     if(!location) {
         throw SimulationError("Agent {} not inside walkable area", position);
     }
@@ -386,7 +407,12 @@ StageProxy Simulation::Stage(BaseStage::ID stageId)
 }
 Geometry2D Simulation::Geo() const
 {
-    return *_geometry->geometry_2d();
+    const auto* flat = _geometry->geometry_2d();
+    if(flat == nullptr) {
+        throw SimulationError(
+            "This simulation was built from a surface mesh, which has no polygon underneath.");
+    }
+    return *flat;
 }
 
 void Simulation::PushTimer(const std::string_view name, size_t probe_log_level)

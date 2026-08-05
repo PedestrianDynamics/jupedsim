@@ -144,6 +144,7 @@ if (BUILD_TESTS)
         test/TestWallMerge.cpp
         test/TestWarpDriver.cpp
         test/TestSimulationClock.cpp
+        test/TestSimulation.cpp
         test/TestStage.cpp
         test/TestUniqueID.cpp
     )

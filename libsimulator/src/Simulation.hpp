@@ -52,6 +52,14 @@ class Simulation
     void ThrowIfIterating(const char* operation) const;
 
 public:
+    /// Mesh-built: the world is a surface, routed on that surface. `Geo()` has no answer here.
+    Simulation(
+        std::unique_ptr<OperationalModel>&& operationalModel,
+        std::unique_ptr<Geometry3D>&& geometry,
+        double dT);
+
+    /// Polygon-built: lifts the walkable area to a flat surface and routes in the projection,
+    /// as it always has.
     Simulation(
         std::unique_ptr<OperationalModel>&& operationalModel,
         std::unique_ptr<Geometry2D>&& geometry,
@@ -65,7 +73,8 @@ public:
     void SetTracing(bool on);
     void Iterate();
     Journey::ID AddJourney(const std::map<BaseStage::ID, TransitionDescription>& stages);
-    BaseStage::ID AddStage(const StageDescription stageDescription);
+    /// @param z_hint "stage point" is the closest z on the surface related to @p z_hint
+    BaseStage::ID AddStage(const StageDescription stageDescription, double z_hint = 0.0);
     void MarkAgentForRemoval(GenericAgent::ID id);
     const std::vector<GenericAgent::ID>& RemovedAgents() const;
     size_t AgentCount() const;
@@ -78,11 +87,13 @@ public:
     /// Returns IDs of all agents inside the defined polygon
     /// @param polygon Required to be a simple convex polygon with CCW ordering.
     std::vector<GenericAgent::ID> AgentsInPolygon(const std::vector<Point>& polygon);
+    /// @param z_hint Agent will land on the closest z on the surface matching @p position.
     GenericAgent::ID AddAgent(
         Journey::ID journeyId,
         BaseStage::ID stageId,
         Point position,
-        OperationalModelState model);
+        OperationalModelState model,
+        double z_hint = 0.0);
     /// Raycast 2D @p target along z-axis. The closest intersection with the geometry to agent's
     /// z coordinate is the one taken.
     void SetAgentTarget(GenericAgent::ID id, Point target);

@@ -1,0 +1,133 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later
+#include "Geometry/Geometry3D.hpp"
+#include "GeometryBuilder.hpp"
+#include "Journey.hpp"
+#include "MeshFixtures.hpp"
+#include "OperationalModels/CollisionFreeSpeedModel/CollisionFreeSpeedModel.hpp"
+#include "Simulation.hpp"
+#include "SimulationError.hpp"
+#include "StageDescription.hpp"
+
+#include <gtest/gtest.h>
+
+#include <memory>
+#include <utility>
+
+/// What only a whole simulation can be asked: whether a world made of a surface mesh runs, and
+/// whether the places written into it land on the storey they were meant on.
+namespace
+{
+using State = CollisionFreeSpeedModel::State;
+
+std::unique_ptr<CollisionFreeSpeedModel> model()
+{
+    return std::make_unique<CollisionFreeSpeedModel>(8.0, 0.1, 5.0, 0.02);
+}
+
+/// The switchback stair: ground floor, a flight climbing away from it, a landing, and the upper
+/// floor turning back over the ground floor. Over (5, 6) there are two storeys.
+std::unique_ptr<Simulation> on_the_switchback_stair()
+{
+    return std::make_unique<Simulation>(
+        model(), std::make_unique<Geometry3D>(fixtures::switchback_stair()), 0.01);
+}
+
+std::unique_ptr<Simulation> on_a_flat_room()
+{
+    GeometryBuilder b{};
+    b.AddAccessibleArea({{0, 0}, {20, 0}, {20, 20}, {0, 20}});
+    return std::make_unique<Simulation>(model(), std::make_unique<Geometry2D>(b.Build()), 0.01);
+}
+
+/// A journey of one waypoint, so that agents have somewhere to be routed to.
+std::pair<Journey::ID, BaseStage::ID>
+journey_to(Simulation& sim, Point position, double z_hint, double distance = 0.5)
+{
+    const auto stage = sim.AddStage(WaypointDescription{position, distance}, z_hint);
+    const auto journey = sim.AddJourney({{stage, NonTransitionDescription{}}});
+    return {journey, stage};
+}
+
+} // namespace
+
+TEST(MeshBuiltSimulation, RunsOnASurfaceMesh)
+{
+    auto sim = on_the_switchback_stair();
+    const auto [journey, stage] = journey_to(*sim, Point{16, 6}, 3.0);
+
+    const auto id = sim->AddAgent(journey, stage, Point{2, 2}, State{}, 0.0);
+    ASSERT_EQ(sim->AgentCount(), 1u);
+    EXPECT_NO_THROW(sim->Iterate());
+
+    // Heading for the stair, which is the only way up: over there in plan, and still on the
+    // ground floor.
+    const auto& agent = sim->Agent(id);
+    EXPECT_GT(agent.nextTarget.x, agent.location.xy().x);
+    EXPECT_EQ(agent.location.z(), 0.0);
+}
+
+TEST(MeshBuiltSimulation, AnAgentIsPutOnTheStoreyItsHintNames)
+{
+    auto sim = on_the_switchback_stair();
+    const auto [journey, stage] = journey_to(*sim, Point{16, 6}, 3.0);
+
+    // The same (x, y) twice: the ground floor lies at z=0 and the upper floor at z=3, and
+    // without the hint there is nothing to tell them apart.
+    const auto downstairs = sim->AddAgent(journey, stage, Point{5, 6}, State{}, 0.0);
+    const auto upstairs = sim->AddAgent(journey, stage, Point{5, 6}, State{}, 3.0);
+
+    EXPECT_EQ(sim->Agent(downstairs).location.z(), 0.0);
+    EXPECT_EQ(sim->Agent(upstairs).location.z(), 3.0);
+    EXPECT_NE(sim->Agent(downstairs).location.region(), sim->Agent(upstairs).location.region());
+}
+
+TEST(MeshBuiltSimulation, NoStoreyNearTheHintIsNoPlaceToStand)
+{
+    auto sim = on_the_switchback_stair();
+    const auto [journey, stage] = journey_to(*sim, Point{16, 6}, 3.0);
+
+    // Between the two floors: walkable surface above and below, none within reach of the hint.
+    EXPECT_THROW(sim->AddAgent(journey, stage, Point{5, 6}, State{}, 1.5), SimulationError);
+}
+
+TEST(MeshBuiltSimulation, AStageIsPutOnTheStoreyItsHintNames)
+{
+    auto sim = on_the_switchback_stair();
+    const auto [up_journey, up_stage] = journey_to(*sim, Point{5, 6}, 3.0);
+    const auto [down_journey, down_stage] = journey_to(*sim, Point{5, 6}, 0.0);
+
+    const auto id = sim->AddAgent(up_journey, up_stage, Point{2, 2}, State{}, 0.0);
+    sim->Iterate();
+    // The waypoint of the journey the agent is on, so its target says which storey the stage
+    // was put on.
+    EXPECT_EQ(sim->Agent(id).finalTarget.z(), 3.0);
+
+    sim->SwitchAgentJourney(id, down_journey, down_stage);
+    sim->Iterate();
+    EXPECT_EQ(sim->Agent(id).finalTarget.z(), 0.0);
+}
+
+TEST(MeshBuiltSimulation, ATargetWrittenFromOutsideLandsOnTheAgentsOwnStorey)
+{
+    auto sim = on_the_switchback_stair();
+    const auto [journey, stage] = journey_to(*sim, Point{16, 6}, 3.0);
+    const auto upstairs = sim->AddAgent(journey, stage, Point{5, 6}, State{}, 3.0);
+
+    // Only (x, y) is given, and two storeys carry it. It has to mean the one the agent is on --
+    // anything else routes it through the wrong floor.
+    sim->SetAgentTarget(upstairs, Point{2, 6});
+    EXPECT_EQ(sim->Agent(upstairs).finalTarget.z(), 3.0);
+
+    const auto downstairs = sim->AddAgent(journey, stage, Point{5, 6}, State{}, 0.0);
+    sim->SetAgentTarget(downstairs, Point{2, 6});
+    EXPECT_EQ(sim->Agent(downstairs).finalTarget.z(), 0.0);
+}
+
+TEST(MeshBuiltSimulation, HasNoPolygonToHandOut)
+{
+    auto sim = on_the_switchback_stair();
+    EXPECT_THROW(sim->Geo(), SimulationError);
+
+    // A polygon-built one still has one, and that is what the viewer and the systemtests read.
+    EXPECT_NO_THROW(on_a_flat_room()->Geo());
+}

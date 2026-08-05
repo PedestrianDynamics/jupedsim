@@ -17,24 +17,27 @@
 
 namespace detail
 {
-/// Put a stage's representative point on the surface. @p what names the stage kind in the
-/// error message.
-inline Location locate_stage_point(const Geometry3D& geometry, Point point, std::string_view what)
+/// Put a stage's representative point on the surface that is closest to @p z_hint.
+inline Location
+locate_stage_point(const Geometry3D& geometry, Point point, std::string_view what, double z_hint)
 {
-    const auto location = geometry.get_location(point.x, point.y, 0.0);
+    const auto location = geometry.get_location(point.x, point.y, z_hint);
     if(!location) {
         throw SimulationError("{} {} not inside walkable area", what, point);
     }
     return *location;
 }
 
-inline std::vector<Location>
-locate_slots(const Geometry3D& geometry, const std::vector<Point>& slots, std::string_view what)
+inline std::vector<Location> locate_slots(
+    const Geometry3D& geometry,
+    const std::vector<Point>& slots,
+    std::string_view what,
+    double z_hint)
 {
     std::vector<Location> located{};
     located.reserve(slots.size());
     for(const auto& slot : slots) {
-        located.push_back(locate_stage_point(geometry, slot, what));
+        located.push_back(locate_stage_point(geometry, slot, what, z_hint));
     }
     return located;
 }
@@ -56,29 +59,32 @@ public:
     BaseStage::ID AddStage(
         const StageDescription stageDescription,
         std::vector<GenericAgent::ID>& removedAgentsInLastIteration,
-        const Geometry3D& geometry)
+        const Geometry3D& geometry,
+        double z_hint)
     {
         std::unique_ptr<BaseStage> stage = std::visit(
             overloaded{
-                [&geometry](const WaypointDescription& d) -> std::unique_ptr<BaseStage> {
+                [&geometry, z_hint](const WaypointDescription& d) -> std::unique_ptr<BaseStage> {
                     return std::make_unique<Waypoint>(
-                        detail::locate_stage_point(geometry, d.position, "WayPoint"), d.distance);
+                        detail::locate_stage_point(geometry, d.position, "WayPoint", z_hint),
+                        d.distance);
                 },
-                [&removedAgentsInLastIteration,
-                 &geometry](const ExitDescription& d) -> std::unique_ptr<BaseStage> {
+                [&removedAgentsInLastIteration, &geometry, z_hint](
+                    const ExitDescription& d) -> std::unique_ptr<BaseStage> {
                     return std::make_unique<Exit>(
                         d.polygon,
-                        detail::locate_stage_point(geometry, d.polygon.Centroid(), "Exit"),
+                        detail::locate_stage_point(geometry, d.polygon.Centroid(), "Exit", z_hint),
                         removedAgentsInLastIteration);
                 },
-                [&geometry](
-                    const NotifiableWaitingSetDescription& d) -> std::unique_ptr<BaseStage> {
-                    return std::make_unique<NotifiableWaitingSet>(
-                        detail::locate_slots(geometry, d.slots, "NotifiableWaitingSet point"));
+                [&geometry,
+                 z_hint](const NotifiableWaitingSetDescription& d) -> std::unique_ptr<BaseStage> {
+                    return std::make_unique<NotifiableWaitingSet>(detail::locate_slots(
+                        geometry, d.slots, "NotifiableWaitingSet point", z_hint));
                 },
-                [&geometry](const NotifiableQueueDescription& d) -> std::unique_ptr<BaseStage> {
+                [&geometry,
+                 z_hint](const NotifiableQueueDescription& d) -> std::unique_ptr<BaseStage> {
                     return std::make_unique<NotifiableQueue>(
-                        detail::locate_slots(geometry, d.slots, "NotifiableQueue point"));
+                        detail::locate_slots(geometry, d.slots, "NotifiableQueue point", z_hint));
                 },
                 [](const DirectSteeringDescription&) -> std::unique_ptr<BaseStage> {
                     return std::make_unique<DirectSteering>();

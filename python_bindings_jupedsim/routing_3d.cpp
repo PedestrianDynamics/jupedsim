@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Geometry/Geometry2D.hpp"
 #include "Geometry/Geometry3D.hpp"
+#include "Geometry/Validation.hpp"
 #include "SimulationError.hpp"
 #include "SurfaceMeshShortestPathRoutingEngine.hpp"
 #include "type_casters.hpp"
@@ -34,6 +35,9 @@ void init_routing_3d(py::module_& m)
                 if(!CGAL::is_triangle_mesh(mesh)) {
                     PMP::triangulate_faces(mesh);
                 }
+                // The one door a mesh from outside comes through, so the one place to insist it
+                // is a surface people can walk on -- and to turn it right side up if it is not.
+                NormaliseAndValidateMesh(mesh);
                 return std::make_unique<Geometry3D>(std::move(mesh));
             },
             py::arg("obj_path"))
