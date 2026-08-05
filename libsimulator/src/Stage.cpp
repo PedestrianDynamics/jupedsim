@@ -208,8 +208,10 @@ void NotifiableWaitingSet::Update(const EnvironmentQuery& envQuery)
 
     for(size_t index = count_occupants; index < slots.size(); ++index) {
         const auto slot_pos = slots[index];
-        auto candidates = envQuery.AgentsInRange(
-            slot_pos, 2, [&](const Point& to) { return envQuery.NoGeometryBetween(slot_pos, to); });
+        const auto boundary = envQuery.LineSegmentsInRange(slot_pos);
+        auto candidates = envQuery.AgentsInRange(slot_pos, 2, [&](const Point& to) {
+            return envQuery.NoGeometryBetween(slot_pos, to, boundary);
+        });
 
         GenericAgent::ID occupant = GenericAgent::ID::Invalid;
         double min_distance = std::numeric_limits<double>::max();
@@ -290,8 +292,10 @@ void NotifiableQueue::Update(const EnvironmentQuery& envQuery)
 
     for(size_t index = count_occupants; index < slots.size(); ++index) {
         const auto slot_pos = slots[index];
-        auto candidates = envQuery.AgentsInRange(
-            slot_pos, 2, [&](const Point& to) { return envQuery.NoGeometryBetween(slot_pos, to); });
+        const auto boundary = envQuery.LineSegmentsInRange(slot_pos);
+        auto candidates = envQuery.AgentsInRange(slot_pos, 2, [&](const Point& to) {
+            return envQuery.NoGeometryBetween(slot_pos, to, boundary);
+        });
 
         GenericAgent::ID occupant = GenericAgent::ID::Invalid;
         double min_distance = std::numeric_limits<double>::max();

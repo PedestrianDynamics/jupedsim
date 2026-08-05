@@ -171,7 +171,11 @@ def test_no_wall_between_filters_occluded_agents():
                         ped,
                         20.0,
                         lambda n: env_query.no_wall_between(
-                            ped.position, n.position
+                            ped.position,
+                            n.position,
+                            env_query.line_segments_in_range(
+                                ped.position, 20.0
+                            ),
                         ),
                     )
                 ]
@@ -210,7 +214,11 @@ def test_no_wall_between_agent_above_wall_is_seen():
                         ped,
                         20.0,
                         lambda n: env_query.no_wall_between(
-                            ped.position, n.position
+                            ped.position,
+                            n.position,
+                            env_query.line_segments_in_range(
+                                ped.position, 20.0
+                            ),
                         ),
                     )
                 ]
@@ -246,7 +254,11 @@ def test_composed_no_wall_between_and_group_filter():
                         20.0,
                         lambda neighbor: (
                             env_query.no_wall_between(
-                                ped.position, neighbor.position
+                                ped.position,
+                                neighbor.position,
+                                env_query.line_segments_in_range(
+                                    ped.position, 20.0
+                                ),
                             )
                             and neighbor.model.group == 1
                         ),
