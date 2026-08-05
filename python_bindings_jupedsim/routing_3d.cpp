@@ -20,7 +20,9 @@ namespace py = pybind11;
 
 void init_routing_3d(py::module_& m)
 {
-    py::class_<Geometry3D>(m, "Geometry3D")
+    // smart_holder: a mesh-built Simulation takes ownership of the geometry, which means
+    // handing a `unique_ptr` from Python into C++.
+    py::class_<Geometry3D, py::smart_holder>(m, "Geometry3D")
         .def_static(
             // Read a surface mesh from an OBJ file (triangulating if needed).
             "from_obj",

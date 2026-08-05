@@ -3,6 +3,7 @@
 
 #include "GenericAgent.hpp"
 #include "Geometry/Geometry2D.hpp"
+#include "Geometry/Geometry3D.hpp"
 #include "Journey.hpp"
 #include "OperationalModel.hpp"
 #include "Polygon.hpp"
@@ -45,25 +46,57 @@ void init_simulation(py::module_& m)
             py::arg("geometry"),
             py::arg("dt"))
         .def(
+            // Mesh-built world: the geometry is consumed here, the Python object passed in is
+            // disowned and must not be reused.
+            py::init([](std::unique_ptr<OperationalModel> model,
+                        std::unique_ptr<Geometry3D> geometry,
+                        double dT) {
+                if(!model) {
+                    throw std::invalid_argument("model must not be None");
+                }
+                if(!geometry) {
+                    throw std::invalid_argument("geometry must not be None");
+                }
+                return std::make_unique<Simulation>(std::move(model), std::move(geometry), dT);
+            }),
+            py::kw_only(),
+            py::arg("model"),
+            py::arg("geometry"),
+            py::arg("dt"))
+        .def(
             "add_waypoint_stage",
-            [](Simulation& sim, std::tuple<double, double> position, double distance) {
-                return sim.AddStage(WaypointDescription{intoPoint(position), distance}).getID();
-            })
+            [](Simulation& sim, std::tuple<double, double> position, double distance, double z) {
+                return sim.AddStage(WaypointDescription{intoPoint(position), distance}, z).getID();
+            },
+            py::arg("position"),
+            py::arg("distance"),
+            py::arg("z_hint") = 0.0)
         .def(
             "add_queue_stage",
-            [](Simulation& sim, const std::vector<std::tuple<double, double>>& positions) {
-                return sim.AddStage(NotifiableQueueDescription{intoPoints(positions)}).getID();
-            })
+            [](Simulation& sim,
+               const std::vector<std::tuple<double, double>>& positions,
+               double z) {
+                return sim.AddStage(NotifiableQueueDescription{intoPoints(positions)}, z).getID();
+            },
+            py::arg("positions"),
+            py::arg("z_hint") = 0.0)
         .def(
             "add_waiting_set_stage",
-            [](Simulation& sim, const std::vector<std::tuple<double, double>>& positions) {
-                return sim.AddStage(NotifiableWaitingSetDescription{intoPoints(positions)}).getID();
-            })
+            [](Simulation& sim,
+               const std::vector<std::tuple<double, double>>& positions,
+               double z) {
+                return sim.AddStage(NotifiableWaitingSetDescription{intoPoints(positions)}, z)
+                    .getID();
+            },
+            py::arg("positions"),
+            py::arg("z_hint") = 0.0)
         .def(
             "add_exit_stage",
-            [](Simulation& sim, const std::vector<std::tuple<double, double>>& polygon) {
-                return sim.AddStage(ExitDescription{Polygon{intoPoints(polygon)}}).getID();
-            })
+            [](Simulation& sim, const std::vector<std::tuple<double, double>>& polygon, double z) {
+                return sim.AddStage(ExitDescription{Polygon{intoPoints(polygon)}}, z).getID();
+            },
+            py::arg("polygon"),
+            py::arg("z_hint") = 0.0)
         .def(
             "add_direct_steering_stage",
             [](Simulation& sim) { return sim.AddStage(DirectSteeringDescription{}).getID(); })
@@ -83,15 +116,17 @@ void init_simulation(py::module_& m)
                uint64_t journeyId,
                uint64_t stageId,
                std::tuple<double, double> position,
-               OperationalModelState state) {
-                return sim.AddAgent(journeyId, stageId, intoPoint(position), std::move(state))
+               OperationalModelState state,
+               double z) {
+                return sim.AddAgent(journeyId, stageId, intoPoint(position), std::move(state), z)
                     .getID();
             },
             py::kw_only(),
             py::arg("journey_id"),
             py::arg("stage_id"),
             py::arg("position"),
-            py::arg("state"))
+            py::arg("state"),
+            py::arg("z_hint") = 0.0)
         .def(
             "mark_agent_for_removal",
             [](Simulation& sim, uint64_t id) { sim.MarkAgentForRemoval(id); })
