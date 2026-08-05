@@ -10,6 +10,16 @@
 #include <utility>
 #include <vector>
 
+namespace
+{
+/// How close a point has to be to count as the one already under the agent's feet.
+///
+/// Not the merge tolerance: collinearity is a question of ULPs, being somewhere already is
+/// not. The path comes back with its own source point up to a nanometre off, and kept as a
+/// waypoint of its own that is one no amount of walking ever reaches.
+constexpr double AlreadyStandingThere = 1e-9;
+} // namespace
+
 ////////////////////////////////////////////////////////////////////////////////
 // SurfaceMeshShortestPathRoutingEngine
 ////////////////////////////////////////////////////////////////////////////////
@@ -157,7 +167,7 @@ Point SurfaceMeshShortestPathRoutingEngine::ComputeWaypoint(
         const Point xy{p.x(), p.y()};
         // Points on top of each other would read as a turn: the leading one comes back when the
         // agent stands on an edge.
-        if((xy - chain.back()).Norm() > _mergeTolerance) {
+        if((xy - chain.back()).Norm() > AlreadyStandingThere) {
             chain.push_back(xy);
         }
     }

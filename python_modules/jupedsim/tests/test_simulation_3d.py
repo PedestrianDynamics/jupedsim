@@ -5,6 +5,7 @@ import jupedsim as jps
 import pytest
 
 OBJ = Path(__file__).parents[3] / "examples/geometry/multi_level_u_stair.obj"
+OFFICE = Path(__file__).parents[3] / "examples/geometry/office_5floors.obj"
 
 # The two stacked floors of the U-stair fixture, and an (x, y) that both carry.
 GROUND_Z = 0.0
@@ -306,3 +307,39 @@ def test_the_exit_an_agent_walks_towards_is_the_one_on_its_own_floor():
         if sim.agent_count() == 0:
             break
     assert sim.agent_count() == 0
+
+
+def test_an_agent_gets_down_a_long_corridor():
+    # A corridor 45 m long, finely divided: the geodesic crosses a hundred edges, and the
+    # path comes back with its own source point a fraction of a nanometre off. Given that as
+    # its next waypoint, an agent walks a nanometre and stalls -- and because the direction of
+    # so short a step is rounding noise, it wanders back the way it came.
+    sim = jps.Simulation(
+        model=jps.CollisionFreeSpeedModel(), geometry=OFFICE, dt=0.01
+    )
+    exit_id = sim.add_exit_stage(
+        [(43.5, 7.4), (45.5, 7.4), (45.5, 8.6), (43.5, 8.6)], z_hint=0.0
+    )
+    journey_id = sim.add_journey(jps.JourneyDescription([exit_id]))
+    agent = sim.agent(
+        sim.add_agent(
+            journey_id=journey_id,
+            stage_id=exit_id,
+            position=(2.0, 3.5),
+            state=jps.CollisionFreeSpeedModelState(),
+            z_hint=0.0,
+        )
+    )
+    reached = [agent.position[0]]
+    for _ in range(6000):
+        sim.iterate()
+        if sim.agent_count() == 0:
+            break
+        reached.append(agent.position[0])
+
+    assert sim.agent_count() == 0
+    # and it walked the corridor rather than wandering it: never far back the way it came
+    assert (
+        min(later - earlier for earlier, later in zip(reached, reached[1:]))
+        > -0.05
+    )
