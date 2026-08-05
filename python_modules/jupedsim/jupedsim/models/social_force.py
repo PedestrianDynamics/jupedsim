@@ -18,7 +18,8 @@ the model instance, which is passed to the simulation:
     sim.add_agent(
         journey_id=journey_id,
         stage_id=stage_id,
-        position=(1.0, 1.0), state=jupedsim.SocialForceModelState(mass=75.0),
+        position=(1.0, 1.0),
+        state=jupedsim.SocialForceModelState(mass=75.0),
     )
 
 .. warning::

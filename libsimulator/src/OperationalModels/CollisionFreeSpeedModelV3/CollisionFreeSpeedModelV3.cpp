@@ -27,12 +27,14 @@ constexpr double MinReverseSpeed =
 double NeighborInfluence(
     const std::vector<NeighborView>& neighborhood,
     const Point& reference_direction,
-    const CollisionFreeSpeedModelV3::State& currState)
+    const CollisionFreeSpeedModelV3::State& currentState)
 {
-    const auto range_x = std::max(Eps, currState.rangeNeighborRepulsion * currState.rangeXScale);
-    const auto range_y = std::max(Eps, currState.rangeNeighborRepulsion * currState.rangeYScale);
+    const auto range_x =
+        std::max(Eps, currentState.rangeNeighborRepulsion * currentState.rangeXScale);
+    const auto range_y =
+        std::max(Eps, currentState.rangeNeighborRepulsion * currentState.rangeYScale);
     const auto theta_max =
-        std::clamp(currState.strengthNeighborRepulsion, 0.0, currState.thetaMaxUpperBound);
+        std::clamp(currentState.strengthNeighborRepulsion, 0.0, currentState.thetaMaxUpperBound);
 
     double best_influence = 0.0;
     double best_weight = 0.0;
@@ -68,7 +70,7 @@ Point CollisionFreeSpeedModelV3::ComputeNextState(
     OperationalModelState& next,
     const AgentStep& step) const
 {
-    const auto& currState = std::get<State>(current);
+    const auto& currentState = std::get<State>(current);
     const auto& boundaries = step.WallsNearby();
     auto neighborhood =
         step.OtherAgentsInRange(_cutOffRadius, [&step, &boundaries](const NeighborView& n) {
@@ -77,19 +79,19 @@ Point CollisionFreeSpeedModelV3::ComputeNextState(
 
     Point boundaryRepulsion{};
     for(const auto& wall : boundaries) {
-        boundaryRepulsion += BoundaryRepulsion(currState, wall);
+        boundaryRepulsion += BoundaryRepulsion(currentState, wall);
     }
 
     const auto desired_direction = step.ToNextTarget().Normalized();
     auto reference_direction = (desired_direction + boundaryRepulsion).Normalized();
     if(reference_direction == Point{}) {
-        reference_direction = currState.orientation;
+        reference_direction = currentState.orientation;
     }
 
-    const auto heading_target = NeighborInfluence(neighborhood, reference_direction, currState);
+    const auto heading_target = NeighborInfluence(neighborhood, reference_direction, currentState);
     const auto alpha = std::clamp(step.dt() / TauTheta, 0.0, 1.0);
     const auto heading_angle =
-        currState.headingAngle + alpha * (heading_target - currState.headingAngle);
+        currentState.headingAngle + alpha * (heading_target - currentState.headingAngle);
     auto direction =
         reference_direction.Rotate(std::cos(heading_angle), std::sin(heading_angle)).Normalized();
     if(direction == Point{}) {
@@ -99,7 +101,7 @@ Point CollisionFreeSpeedModelV3::ComputeNextState(
     const auto closest_spacing_towards = [&](Point towards) {
         auto spacing = std::numeric_limits<double>::max();
         for(const auto& neighbor : neighborhood) {
-            spacing = std::min(spacing, GetSpacing(currState, neighbor, towards));
+            spacing = std::min(spacing, GetSpacing(currentState, neighbor, towards));
         }
         return spacing;
     };
@@ -112,7 +114,7 @@ Point CollisionFreeSpeedModelV3::ComputeNextState(
     const auto spacing =
         spacing_move * (1.0 - SpacingBlendWeight) + spacing_goal * SpacingBlendWeight;
 
-    const auto optimal_speed = OptimalSpeed(currState, spacing, currState.timeGap);
+    const auto optimal_speed = OptimalSpeed(currentState, spacing, currentState.timeGap);
     const auto velocity = direction * optimal_speed;
     auto& nextModel = std::get<State>(next);
     nextModel.orientation = direction;
@@ -124,74 +126,74 @@ void CollisionFreeSpeedModelV3::CheckModelConstraint(
     const GenericAgent& agent,
     const AgentView& view) const
 {
-    const auto& currState = std::get<State>(agent.state);
+    const auto& currentState = std::get<State>(agent.state);
 
-    validateConstraint(currState.radius, 0.0, 2.0, "radius", true);
-    validateConstraint(currState.v0, 0.0, 10.0, "v0");
-    validateConstraint(currState.timeGap, 0.1, 10.0, "timeGap");
+    validateConstraint(currentState.radius, 0.0, 2.0, "radius", true);
+    validateConstraint(currentState.v0, 0.0, 10.0, "v0");
+    validateConstraint(currentState.timeGap, 0.1, 10.0, "timeGap");
 
     validateConstraint(
-        currState.strengthNeighborRepulsion,
+        currentState.strengthNeighborRepulsion,
         0.0,
         std::numeric_limits<double>::max(),
         "strengthNeighborRepulsion");
     validateConstraint(
-        currState.rangeNeighborRepulsion,
+        currentState.rangeNeighborRepulsion,
         0.01,
         std::numeric_limits<double>::max(),
         "rangeNeighborRepulsion");
     validateConstraint(
-        currState.strengthGeometryRepulsion,
+        currentState.strengthGeometryRepulsion,
         0.0,
         std::numeric_limits<double>::max(),
         "strengthGeometryRepulsion");
     validateConstraint(
-        currState.rangeGeometryRepulsion,
+        currentState.rangeGeometryRepulsion,
         0.01,
         std::numeric_limits<double>::max(),
         "rangeGeometryRepulsion");
 
     validateConstraint(
-        currState.rangeXScale, 0.01, std::numeric_limits<double>::max(), "rangeXScale");
+        currentState.rangeXScale, 0.01, std::numeric_limits<double>::max(), "rangeXScale");
     validateConstraint(
-        currState.rangeYScale, 0.01, std::numeric_limits<double>::max(), "rangeYScale");
-    validateConstraint(currState.thetaMaxUpperBound, 0.0, std::acos(-1.0), "thetaMaxUpperBound");
-    validateConstraint(currState.agentBuffer, 0.0, 100.0, "agentBuffer");
+        currentState.rangeYScale, 0.01, std::numeric_limits<double>::max(), "rangeYScale");
+    validateConstraint(currentState.thetaMaxUpperBound, 0.0, std::acos(-1.0), "thetaMaxUpperBound");
+    validateConstraint(currentState.agentBuffer, 0.0, 100.0, "agentBuffer");
 
     const auto neighbors = view.OtherAgentsInRange(2.0);
     for(const auto& neighbor : neighbors) {
-        const auto& neighState = std::get<State>(*neighbor.state);
-        const auto contactDist = currState.radius + neighState.radius;
+        const auto& neighborState = std::get<State>(*neighbor.state);
+        const auto contactDist = currentState.radius + neighborState.radius;
         const auto distance = neighbor.RelativePosition.Norm();
         if(contactDist >= distance) {
             throw SimulationError(
-                "Model constraint violation: Agent {} too close to agent {}: distance {}",
+                "Model constraint violation: Agent at {} too close to agent at {}: distance {}",
                 agent.Position(),
                 agent.Position() + neighbor.RelativePosition,
                 distance);
         }
     }
 
-    if(!view.WallsInRange(currState.radius).empty()) {
+    if(!view.WallsInRange(currentState.radius).empty()) {
         throw SimulationError(
-            "Model constraint violation: Agent {} too close to geometry boundaries, distance "
+            "Model constraint violation: Agent at {} too close to geometry boundaries, distance "
             "<= {}",
             agent.Position(),
-            currState.radius);
+            currentState.radius);
     }
 }
 
 double CollisionFreeSpeedModelV3::OptimalSpeed(
-    const State& currState,
+    const State& currentState,
     double spacing,
     double time_gap) const
 {
-    const auto effective_spacing = spacing - currState.agentBuffer;
-    return std::min(std::max(effective_spacing / time_gap, MinReverseSpeed), currState.v0);
+    const auto effective_spacing = spacing - currentState.agentBuffer;
+    return std::min(std::max(effective_spacing / time_gap, MinReverseSpeed), currentState.v0);
 }
 
 double CollisionFreeSpeedModelV3::GetSpacing(
-    const State& currState,
+    const State& currentState,
     const NeighborView& neighbor,
     const Point& direction) const
 {
@@ -202,7 +204,7 @@ double CollisionFreeSpeedModelV3::GetSpacing(
     }
 
     const auto left = direction.Rotate90Deg();
-    const auto l = currState.radius + other.radius;
+    const auto l = currentState.radius + other.radius;
     const auto inCorridor = std::abs(left.ScalarProduct(distp12)) <= l;
     if(!inCorridor) {
         return std::numeric_limits<double>::max();
@@ -211,11 +213,12 @@ double CollisionFreeSpeedModelV3::GetSpacing(
     return distp12.Norm() - l;
 }
 
-Point CollisionFreeSpeedModelV3::BoundaryRepulsion(const State& currState, const WallView& boundary)
-    const
+Point CollisionFreeSpeedModelV3::BoundaryRepulsion(
+    const State& currentState,
+    const WallView& boundary) const
 {
-    const auto l = currState.radius;
-    const auto R_iw = -currState.strengthGeometryRepulsion *
-                      std::exp((l - boundary.distance) / currState.rangeGeometryRepulsion);
+    const auto l = currentState.radius;
+    const auto R_iw = -currentState.strengthGeometryRepulsion *
+                      std::exp((l - boundary.distance) / currentState.rangeGeometryRepulsion);
     return -boundary.normal * R_iw; // The repulsion points away from the agent
 }

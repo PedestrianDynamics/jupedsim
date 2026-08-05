@@ -19,7 +19,8 @@ by the model instance, which is passed to the simulation:
     sim.add_agent(
         journey_id=journey_id,
         stage_id=stage_id,
-        position=(1.0, 1.0), state=jupedsim.AnticipationVelocityModelState(),
+        position=(1.0, 1.0),
+        state=jupedsim.AnticipationVelocityModelState(),
     )
 
 .. warning::

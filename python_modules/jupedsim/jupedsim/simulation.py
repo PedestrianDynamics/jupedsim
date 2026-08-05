@@ -285,7 +285,6 @@ class Simulation:
             journey_id: Id of the journey the agent follows.
             stage_id: Id of the stage the agent initially targets.
             position: Position to spawn the agent at, as ``(x, y)`` in metres.
-                The position belongs to the agent, not to its model state.
             state: Initial per-agent model state. For built-in models this is
                 the matching ``XModelState`` instance, e.g.
                 :class:`~jupedsim.CollisionFreeSpeedModelState`. For custom

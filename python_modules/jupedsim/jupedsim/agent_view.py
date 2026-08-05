@@ -98,10 +98,10 @@ class AgentView:
     Example — visibility-filtered neighborhood::
 
         def compute_next_state(self, state, step):
-            walls = step.walls_nearby()
+            boundaries = step.walls_nearby()
             neighbors = step.other_agents_in_range(
                 5.0,
-                lambda n: step.no_geometry_between(n.relative_position, walls),
+                lambda n: step.no_geometry_between(n.relative_position, boundaries),
             )
     """
 
@@ -140,7 +140,7 @@ class AgentView:
     def no_geometry_between(
         self,
         relative_position: tuple[float, float],
-        boundaries: list[LineSegment],
+        boundaries: list[WallView],
     ) -> bool:
         """Return ``True`` when the straight line from the agent to the point
         *relative_position* away is not intersected by any of *walls*.

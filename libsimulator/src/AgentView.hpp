@@ -52,7 +52,7 @@ public:
         bool operator()(const NeighborView&) const { return true; }
     };
 
-    /// All agents within 'radius', excluding this agent. 'filter' is never called with it.
+    /// All agents within 'radius', excluding this agent.
     template <std::predicate<const NeighborView&> Pred = AcceptAllNeighbors>
     std::vector<NeighborView> OtherAgentsInRange(double radius, Pred filter = {}) const
     {
@@ -86,7 +86,7 @@ public:
 
 private:
     /// The segments as seen from the agent. Lazy range, no copies.
-    /// Must stay above walls_nearby() and walls_in_range() in code: an 'auto' return type is
+    /// Must stay above WallsNearby() and WallsInRange() in code: an 'auto' return type is
     /// deduced from the body, so unlike other members this one cannot be called before it is
     /// defined.
     auto AsSeenFromAgent(CollisionGeometry::LineSegmentRange segments) const

@@ -1,18 +1,10 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
-#include "AnticipationVelocityModel.hpp"
-#include "CollisionFreeSpeedModel.hpp"
-#include "CollisionFreeSpeedModelV2.hpp"
-#include "CollisionFreeSpeedModelV3.hpp"
-#include "GeneralizedCentrifugalForceModel.hpp"
-#include "OperationalModels/CustomModel/CustomModel.hpp"
 #include "OperationalModels/OperationalModelState.hpp"
 #include "OperationalModels/OperationalModelType.hpp"
 #include "Point.hpp"
-#include "SocialForceModel.hpp"
 #include "UniqueID.hpp"
 #include "Visitor.hpp"
-#include "WarpDriver/WarpDriverModel.hpp"
 
 #include <fmt/core.h>
 
@@ -34,7 +26,7 @@ struct GenericAgent {
 
     OperationalModelState state{};
 
-    Point Position() const { return _position; }
+    const Point& Position() const { return _position; }
     void MoveAlongSurface(Point delta) { _position += delta; }
 
     GenericAgent(
@@ -63,24 +55,24 @@ inline OperationalModelType ModelTypeOf(const OperationalModelState& model)
 {
     return std::visit(
         overloaded{
-            [](const GeneralizedCentrifugalForceModel::State&) {
+            [](const GeneralizedCentrifugalForceModelState&) {
                 return OperationalModelType::GENERALIZED_CENTRIFUGAL_FORCE;
             },
-            [](const CollisionFreeSpeedModel::State&) {
+            [](const CollisionFreeSpeedModelState&) {
                 return OperationalModelType::COLLISION_FREE_SPEED;
             },
-            [](const CollisionFreeSpeedModelV2::State&) {
+            [](const CollisionFreeSpeedModelV2State&) {
                 return OperationalModelType::COLLISION_FREE_SPEED_V2;
             },
-            [](const CollisionFreeSpeedModelV3::State&) {
+            [](const CollisionFreeSpeedModelV3State&) {
                 return OperationalModelType::COLLISION_FREE_SPEED_V3;
             },
-            [](const AnticipationVelocityModel::State&) {
+            [](const AnticipationVelocityModelState&) {
                 return OperationalModelType::ANTICIPATION_VELOCITY_MODEL;
             },
-            [](const SocialForceModel::State&) { return OperationalModelType::SOCIAL_FORCE; },
-            [](const WarpDriverModel::State&) { return OperationalModelType::WARP_DRIVER; },
-            [](const CustomModel::State&) { return OperationalModelType::CUSTOM_MODEL; }},
+            [](const SocialForceModelState&) { return OperationalModelType::SOCIAL_FORCE; },
+            [](const WarpDriverModelState&) { return OperationalModelType::WARP_DRIVER; },
+            [](const CustomModelState&) { return OperationalModelType::CUSTOM_MODEL; }},
         model);
 }
 

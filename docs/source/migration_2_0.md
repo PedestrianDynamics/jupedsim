@@ -111,7 +111,8 @@ agent_id = sim.add_agent(
 agent_id = sim.add_agent(
     journey_id=journey_id,
     stage_id=stage_id,
-    position=(1.0, 1.0), state=jps.CollisionFreeSpeedModelState(desired_speed=1.4),
+    position=(1.0, 1.0),
+    state=jps.CollisionFreeSpeedModelState(desired_speed=1.4),
 )
 ```
 

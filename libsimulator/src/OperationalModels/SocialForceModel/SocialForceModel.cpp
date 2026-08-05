@@ -26,8 +26,8 @@ Point SocialForceModel::ComputeNextState(
     OperationalModelState& next,
     const AgentStep& step) const
 {
-    const auto& currState = std::get<State>(current);
-    auto forces = DrivingForce(currState, step.ToNextTarget());
+    const auto& currentState = std::get<State>(current);
+    auto forces = DrivingForce(currentState, step.ToNextTarget());
 
     const auto& walls = step.WallsNearby();
     auto neighborhood =
@@ -36,16 +36,16 @@ Point SocialForceModel::ComputeNextState(
         });
     Point F_rep;
     for(const auto& neighbor : neighborhood) {
-        F_rep += AgentForce(currState, neighbor);
+        F_rep += AgentForce(currentState, neighbor);
     }
-    forces += F_rep / currState.mass;
+    forces += F_rep / currentState.mass;
     Point obstacle_f{};
     for(const auto& wall : walls) {
-        obstacle_f += ObstacleForce(currState, wall);
+        obstacle_f += ObstacleForce(currentState, wall);
     }
-    forces += obstacle_f / currState.mass;
+    forces += obstacle_f / currentState.mass;
 
-    const auto velocity = currState.velocity + forces * step.dt();
+    const auto velocity = currentState.velocity + forces * step.dt();
     std::get<State>(next).velocity = velocity;
     return velocity * step.dt();
 }
@@ -65,78 +65,78 @@ void SocialForceModel::CheckModelConstraint(const GenericAgent& agent, const Age
         }
     };
 
-    const auto& currState = std::get<State>(agent.state);
+    const auto& currentState = std::get<State>(agent.state);
 
-    const auto mass = currState.mass;
+    const auto mass = currentState.mass;
     throwIfNegative(mass, "mass");
 
-    const auto desiredSpeed = currState.desiredSpeed;
+    const auto desiredSpeed = currentState.desiredSpeed;
     throwIfNegative(desiredSpeed, "desired speed");
 
-    const auto reactionTime = currState.reactionTime;
+    const auto reactionTime = currentState.reactionTime;
     throwIfNegative(reactionTime, "reaction time");
 
-    const auto radius = currState.radius;
+    const auto radius = currentState.radius;
     throwIfNegative(radius, "radius");
 
     const auto neighbors = view.OtherAgentsInRange(2.0);
     for(const auto& neighbor : neighbors) {
         const auto distance = neighbor.RelativePosition.Norm();
 
-        if(currState.radius >= distance) {
+        if(currentState.radius >= distance) {
             throw SimulationError(
-                "Model constraint violation: Agent {} too close to agent {}: distance {}, "
+                "Model constraint violation: Agent at {} too close to agent at {}: distance {}, "
                 "radius {}",
                 agent.Position(),
                 agent.Position() + neighbor.RelativePosition,
                 distance,
-                currState.radius);
+                currentState.radius);
         }
     }
-    const auto maxRadius = currState.radius / 2;
+    const auto maxRadius = currentState.radius / 2;
     if(!view.WallsInRange(maxRadius).empty()) {
         throw SimulationError(
-            "Model constraint violation: Agent {} too close to geometry boundaries, distance <= "
+            "Model constraint violation: Agent at {} too close to geometry boundaries, distance <= "
             "{}/2",
             agent.Position(),
-            currState.radius);
+            currentState.radius);
     }
 }
 
-Point SocialForceModel::DrivingForce(const State& currState, Point ToNextTarget)
+Point SocialForceModel::DrivingForce(const State& currentState, Point ToNextTarget)
 {
     const Point e0 = ToNextTarget.Normalized();
-    return (e0 * currState.desiredSpeed - currState.velocity) / currState.reactionTime;
+    return (e0 * currentState.desiredSpeed - currentState.velocity) / currentState.reactionTime;
 };
 double SocialForceModel::PushingForceLength(double A, double B, double r, double distance)
 {
     return A * exp((r - distance) / B);
 }
 
-Point SocialForceModel::AgentForce(const State& currState, const NeighborView& neighbor) const
+Point SocialForceModel::AgentForce(const State& currentState, const NeighborView& neighbor) const
 {
     const auto& other = std::get<State>(*neighbor.state);
 
-    const double total_radius = currState.radius + other.radius;
+    const double total_radius = currentState.radius + other.radius;
 
     return ForceFromSeparation(
         -neighbor.RelativePosition,
-        currState.agentScale,
-        currState.forceDistance,
+        currentState.agentScale,
+        currentState.forceDistance,
         total_radius,
-        other.velocity - currState.velocity,
+        other.velocity - currentState.velocity,
         this->bodyForce,
         this->friction);
 };
 
-Point SocialForceModel::ObstacleForce(const State& currState, const WallView& wall) const
+Point SocialForceModel::ObstacleForce(const State& currentState, const WallView& wall) const
 {
     return ForceFromSeparation(
         -wall.closest_point,
-        currState.obstacleScale,
-        currState.forceDistance,
-        currState.radius,
-        currState.velocity,
+        currentState.obstacleScale,
+        currentState.forceDistance,
+        currentState.radius,
+        currentState.velocity,
         this->bodyForce,
         this->friction);
 }
