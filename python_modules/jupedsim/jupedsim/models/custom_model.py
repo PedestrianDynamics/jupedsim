@@ -53,7 +53,7 @@ class CustomOperationalModel(ABC):
     def compute_next_state(
         self,
         state: Any,
-        step: AgentStep,
+        step: "AgentStep",
     ) -> tuple[Any, tuple[float, float]]:
         """Compute one update for the agent this model is called for.
 
@@ -73,7 +73,7 @@ class CustomOperationalModel(ABC):
     def check_model_constraint(
         self,
         state: Any,
-        view: AgentView,
+        view: "AgentView",
     ) -> None:
         """Raise an exception when *state* violates this model's constraints.
 
@@ -90,7 +90,11 @@ class CustomOperationalModel(ABC):
     ) -> tuple[Any, tuple[float, float]]:
         from jupedsim.agent_view import AgentStep
 
-        return self.compute_next_state(state, AgentStep(step))
+        wrapper = AgentStep(step)
+        try:
+            return self.compute_next_state(state, wrapper)
+        finally:
+            wrapper._obj = None
 
     def _check_model_constraint(
         self,
@@ -99,4 +103,8 @@ class CustomOperationalModel(ABC):
     ) -> None:
         from jupedsim.agent_view import AgentView
 
-        self.check_model_constraint(state, AgentView(view))
+        wrapper = AgentView(view)
+        try:
+            self.check_model_constraint(state, wrapper)
+        finally:
+            wrapper._obj = None

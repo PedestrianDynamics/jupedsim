@@ -38,21 +38,21 @@ private:
      *
      * @return vector with driving force of pedestrian
      */
-    static Point DrivingForce(const State& currState, Point ToNextTarget);
+    static Point DrivingForce(const State& currentState, Point ToNextTarget);
     /**
      *  Repulsive force acting on pedestrian <ped1> from pedestrian <ped2>
      * @param ped1 reference to Pedestrian 1 on whom the force acts on
      * @param ped2 reference to Pedestrian 2, from whom the force originates
      * @return vector with the repulsive force
      */
-    Point AgentForce(const State& currState, const NeighborView& neighbor) const;
+    Point AgentForce(const State& currentState, const NeighborView& neighbor) const;
     /**
      *  Repulsive force acting on pedestrian <agent> from line segment <segment>
      * @param agent reference to the Pedestrian on whom the force acts on
      * @param segment reference to line segment, from which the force originates
      * @return vector with the repulsive force
      */
-    Point ObstacleForce(const State& currState, const WallView& wall) const;
+    Point ObstacleForce(const State& currentState, const WallView& wall) const;
     /**
      * calculates the pushing and friction forces along <separation>
      * @param separation vector pointing from where the force originates to where it acts

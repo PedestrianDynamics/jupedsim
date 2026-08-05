@@ -38,9 +38,11 @@ public:
     void CheckModelConstraint(const GenericAgent& agent, const AgentView& view) const override;
 
 private:
-    double OptimalSpeed(const State& currState, double spacing, double time_gap) const;
-    double
-    GetSpacing(const State& currState, const NeighborView& neighbor, const Point& direction) const;
-    Point NeighborRepulsion(const State& currState, const NeighborView& neighbor) const;
-    Point BoundaryRepulsion(const State& currState, const WallView& boundary) const;
+    double OptimalSpeed(const State& currentState, double spacing, double time_gap) const;
+    double GetSpacing(
+        const State& currentState,
+        const NeighborView& neighbor,
+        const Point& direction) const;
+    Point NeighborRepulsion(const State& currentState, const NeighborView& neighbor) const;
+    Point BoundaryRepulsion(const State& currentState, const WallView& boundary) const;
 };

@@ -38,14 +38,16 @@ public:
     void CheckModelConstraint(const GenericAgent& agent, const AgentView& view) const override;
 
 private:
-    double OptimalSpeed(const State& currState, double spacing, double time_gap) const;
+    double OptimalSpeed(const State& currentState, double spacing, double time_gap) const;
     Point CalculateInfluenceDirection(
         const Point& desiredDirection,
         const Point& predictedDirection) const;
-    double
-    GetSpacing(const State& currState, const NeighborView& neighbor, const Point& direction) const;
+    double GetSpacing(
+        const State& currentState,
+        const NeighborView& neighbor,
+        const Point& direction) const;
     Point NeighborRepulsion(
-        const State& currState,
+        const State& currentState,
         Point toNextTarget,
         const NeighborView& neighbor) const;
 
@@ -57,7 +59,7 @@ private:
         double pushoutStrength) const;
 
     Point UpdateDirection(
-        const State& currState,
+        const State& currentState,
         Point toNextTarget,
         const Point& calculatedDirection,
         double dt) const;

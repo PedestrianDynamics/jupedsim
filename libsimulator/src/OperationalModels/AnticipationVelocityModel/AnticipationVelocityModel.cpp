@@ -32,7 +32,7 @@ Point AnticipationVelocityModel::ComputeNextState(
     OperationalModelState& next,
     const AgentStep& step) const
 {
-    const auto& currState = std::get<State>(current);
+    const auto& currentState = std::get<State>(current);
     const auto& boundaries = step.WallsNearby();
     // Exclude occluded and self agents
     auto neighborhood =
@@ -43,26 +43,30 @@ Point AnticipationVelocityModel::ComputeNextState(
     const auto toNextTarget = step.ToNextTarget();
     Point neighborRepulsion{};
     for(const auto& neighbor : neighborhood) {
-        neighborRepulsion += NeighborRepulsion(currState, toNextTarget, neighbor);
+        neighborRepulsion += NeighborRepulsion(currentState, toNextTarget, neighbor);
     }
 
     const auto desiredDirection = toNextTarget.Normalized();
     auto direction = (desiredDirection + neighborRepulsion).Normalized();
     if(direction == Point{}) {
-        direction = currState.orientation;
+        direction = currentState.orientation;
     }
 
     // update direction towards the newly calculated direction
-    direction = UpdateDirection(currState, toNextTarget, direction, step.dt());
+    direction = UpdateDirection(currentState, toNextTarget, direction, step.dt());
     auto spacing = std::numeric_limits<double>::max();
     for(const auto& neighbor : neighborhood) {
-        spacing = std::min(spacing, GetSpacing(currState, neighbor, direction));
+        spacing = std::min(spacing, GetSpacing(currentState, neighbor, direction));
     }
 
-    const auto optimal_speed = OptimalSpeed(currState, spacing, currState.timeGap);
+    const auto optimal_speed = OptimalSpeed(currentState, spacing, currentState.timeGap);
     // Wall sliding behavior
     direction = HandleWallAvoidance(
-        direction, currState.radius, boundaries, currState.wallBufferDistance, _pushoutStrength);
+        direction,
+        currentState.radius,
+        boundaries,
+        currentState.wallBufferDistance,
+        _pushoutStrength);
 
     const auto velocity = direction * optimal_speed;
     auto& nextModel = std::get<State>(next);
@@ -72,13 +76,13 @@ Point AnticipationVelocityModel::ComputeNextState(
 }
 
 Point AnticipationVelocityModel::UpdateDirection(
-    const State& currState,
+    const State& currentState,
     Point toNextTarget,
     const Point& calculatedDirection,
     double dt) const
 {
     const Point desiredDirection = toNextTarget.Normalized();
-    const Point actualDirection = currState.orientation;
+    const Point actualDirection = currentState.orientation;
     Point updatedDirection;
 
     if(desiredDirection.ScalarProduct(calculatedDirection) *
@@ -88,7 +92,7 @@ Point AnticipationVelocityModel::UpdateDirection(
     } else {
         // Compute the rate of change of direction (Eq. 7)
         const Point directionDerivative =
-            (calculatedDirection.Normalized() - actualDirection) / currState.reactionTime;
+            (calculatedDirection.Normalized() - actualDirection) / currentState.reactionTime;
         updatedDirection = actualDirection + directionDerivative * dt;
     }
 
@@ -99,44 +103,44 @@ void AnticipationVelocityModel::CheckModelConstraint(
     const GenericAgent& agent,
     const AgentView& view) const
 {
-    const auto& currState = std::get<State>(agent.state);
-    const auto r = currState.radius;
+    const auto& currentState = std::get<State>(agent.state);
+    const auto r = currentState.radius;
     constexpr double rMin = 0.;
     constexpr double rMax = 2.;
     validateConstraint(r, rMin, rMax, "radius", true);
 
-    const auto strengthNeighborRepulsion = currState.strengthNeighborRepulsion;
+    const auto strengthNeighborRepulsion = currentState.strengthNeighborRepulsion;
     constexpr double snMin = 0.;
     constexpr double snMax = 20.;
     validateConstraint(strengthNeighborRepulsion, snMin, snMax, "strengthNeighborRepulsion", false);
 
-    const auto rangeNeighborRepulsion = currState.rangeNeighborRepulsion;
+    const auto rangeNeighborRepulsion = currentState.rangeNeighborRepulsion;
     constexpr double rnMin = 0.;
     constexpr double rnMax = 5.;
     validateConstraint(rangeNeighborRepulsion, rnMin, rnMax, "rangeNeighborRepulsion", true);
 
-    const auto buff = currState.wallBufferDistance;
+    const auto buff = currentState.wallBufferDistance;
     constexpr double buffMin = 0.;
     constexpr double buffMax = 1.;
     validateConstraint(buff, buffMin, buffMax, "wallBufferDistance", false);
 
-    const auto v0 = currState.v0;
+    const auto v0 = currentState.v0;
     constexpr double v0Min = 0.;
     constexpr double v0Max = 10.;
     validateConstraint(v0, v0Min, v0Max, "v0");
 
-    const auto timeGap = currState.timeGap;
+    const auto timeGap = currentState.timeGap;
     constexpr double timeGapMin = 0.;
     constexpr double timeGapMax = 10.;
     validateConstraint(timeGap, timeGapMin, timeGapMax, "timeGap", true);
 
-    const auto anticipationTime = currState.anticipationTime;
+    const auto anticipationTime = currentState.anticipationTime;
     constexpr double anticipationTimeMin = 0.0;
     constexpr double anticipationTimeMax = 5.0;
     validateConstraint(
         anticipationTime, anticipationTimeMin, anticipationTimeMax, "anticipationTime");
 
-    const auto reactionTime = currState.reactionTime;
+    const auto reactionTime = currentState.reactionTime;
     constexpr double reactionTimeMin = 0.0;
     constexpr double reactionTimeMax = 1.0;
     validateConstraint(reactionTime, reactionTimeMin, reactionTimeMax, "reactionTime", true);
@@ -148,7 +152,8 @@ void AnticipationVelocityModel::CheckModelConstraint(
         const auto distance = neighbor.RelativePosition.Norm();
         if(contanctdDist >= distance) {
             throw SimulationError(
-                "Model constraint violation: Agent {} too close to agent {}: distance {}",
+                "Model constraint violation: Agent at {} too close to agent at {}: "
+                "distance {}",
                 agent.Position(),
                 agent.Position() + neighbor.RelativePosition,
                 distance);
@@ -157,7 +162,7 @@ void AnticipationVelocityModel::CheckModelConstraint(
 
     if(!view.WallsInRange(r).empty()) {
         throw SimulationError(
-            "Model constraint violation: Agent {} too close to geometry boundaries, distance "
+            "Model constraint violation: Agent at {} too close to geometry boundaries, distance "
             "<= {}",
             agent.Position(),
             r);
@@ -165,7 +170,7 @@ void AnticipationVelocityModel::CheckModelConstraint(
 }
 
 double AnticipationVelocityModel::OptimalSpeed(
-    const State& currState,
+    const State& currentState,
     double spacing,
     double time_gap) const
 {
@@ -179,14 +184,14 @@ double AnticipationVelocityModel::OptimalSpeed(
         speed = (r == 0) ? creep_speed : (r == 1) ? -creep_speed : 0.0;
     }
 
-    return std::min(std::max(speed, -creep_speed), currState.v0);
+    return std::min(std::max(speed, -creep_speed), currentState.v0);
 }
 double AnticipationVelocityModel::GetSpacing(
-    const State& currState,
+    const State& currentState,
     const NeighborView& neighbor,
     const Point& direction) const
 {
-    const auto& neighState = std::get<State>(*neighbor.state);
+    const auto& neighborState = std::get<State>(*neighbor.state);
     const auto distp12 = neighbor.RelativePosition;
     const auto inFront = direction.ScalarProduct(distp12) >= 0;
     if(!inFront) {
@@ -195,7 +200,7 @@ double AnticipationVelocityModel::GetSpacing(
 
     const auto left = direction.Rotate90Deg();
     const auto buffer = 0.02;
-    const auto l = currState.radius + neighState.radius + buffer;
+    const auto l = currentState.radius + neighborState.radius + buffer;
     const bool inCorridor = std::abs(left.ScalarProduct(distp12)) <= l;
     if(!inCorridor) {
         return std::numeric_limits<double>::max();
@@ -223,28 +228,28 @@ Point AnticipationVelocityModel::CalculateInfluenceDirection(
 }
 
 Point AnticipationVelocityModel::NeighborRepulsion(
-    const State& currState,
+    const State& currentState,
     Point toNextTarget,
     const NeighborView& neighbor) const
 {
-    const auto& neighState = std::get<State>(*neighbor.state);
+    const auto& neighborState = std::get<State>(*neighbor.state);
 
     const auto distp12 = neighbor.RelativePosition;
     const auto [distance, ep12] = distp12.NormAndNormalized();
-    const double adjustedDist = distance - (currState.radius + neighState.radius);
+    const double adjustedDist = distance - (currentState.radius + neighborState.radius);
 
     // Pedestrian movement and desired directions
-    const auto& e1 = currState.orientation;
+    const auto& e1 = currentState.orientation;
     const auto& d1 = toNextTarget.Normalized();
-    const auto& e2 = neighState.orientation;
+    const auto& e2 = neighborState.orientation;
 
     // Check perception range (Eq. 1)
     const auto inPerceptionRange = d1.ScalarProduct(ep12) >= 0 || e1.ScalarProduct(ep12) >= 0;
     if(!inPerceptionRange)
         return Point(0, 0);
 
-    const double S_Gap =
-        (currState.velocity - neighState.velocity).ScalarProduct(ep12) * currState.anticipationTime;
+    const double S_Gap = (currentState.velocity - neighborState.velocity).ScalarProduct(ep12) *
+                         currentState.anticipationTime;
     double R_dist = adjustedDist - S_Gap;
     R_dist = std::max(R_dist, 0.0); // Clamp to zero if negative
 
@@ -252,9 +257,10 @@ Point AnticipationVelocityModel::NeighborRepulsion(
     constexpr double alignmentBase = 1.0;
     constexpr double alignmentWeight = 0.5;
     const double alignmentFactor = alignmentBase + alignmentWeight * (1.0 - d1.ScalarProduct(e2));
-    const double interactionStrength = currState.strengthNeighborRepulsion * alignmentFactor *
-                                       std::exp(-R_dist / currState.rangeNeighborRepulsion);
-    const auto newep12 = distp12 + neighState.velocity * neighState.anticipationTime; // e_ij(t+ta)
+    const double interactionStrength = currentState.strengthNeighborRepulsion * alignmentFactor *
+                                       std::exp(-R_dist / currentState.rangeNeighborRepulsion);
+    const auto newep12 =
+        distp12 + neighborState.velocity * neighborState.anticipationTime; // e_ij(t+ta)
 
     // Compute adjusted influence direction
     const auto influenceDirection = CalculateInfluenceDirection(d1, newep12);

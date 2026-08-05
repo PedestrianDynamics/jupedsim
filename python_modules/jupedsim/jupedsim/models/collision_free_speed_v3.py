@@ -15,7 +15,8 @@ The model instance is passed to the simulation:
     sim.add_agent(
         journey_id=journey_id,
         stage_id=stage_id,
-        position=(1.0, 1.0), state=jupedsim.CollisionFreeSpeedModelV3State(desired_speed=1.4),
+        position=(1.0, 1.0),
+        state=jupedsim.CollisionFreeSpeedModelV3State(desired_speed=1.4),
     )
 
 .. warning::

@@ -2,7 +2,7 @@
 
 import jupedsim.native as py_jps
 from jupedsim.agent import Agent
-from jupedsim.agent_view import AgentStep, AgentView, NeighborView
+from jupedsim.agent_view import AgentStep, AgentView, NeighborView, WallView
 from jupedsim.distributions import (
     AgentNumberError,
     IncorrectParameterError,
@@ -148,6 +148,7 @@ __all__ = [
     "WaitingSetState",
     "WarpDriverModel",
     "WarpDriverModelState",
+    "WallView",
     "WaypointStage",
     "__commit__",
     "__compiler__",
