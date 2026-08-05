@@ -61,6 +61,40 @@ def journey_to_upper_exit(sim):
     return journey_id, exit_id
 
 
+@pytest.mark.parametrize(
+    "writer_of",
+    [
+        lambda path: jps.SqliteTrajectoryWriter(output_file=path / "t.sqlite"),
+        pytest.param(
+            lambda path: jps.Hdf5TrajectoryWriter(output_file=path / "t.h5"),
+            marks=pytest.mark.skipif(
+                jps.Hdf5TrajectoryWriter is None, reason="h5py not installed"
+            ),
+        ),
+    ],
+    ids=["sqlite", "hdf5"],
+)
+def test_the_shipped_trajectory_writers_stay_out_of_a_mesh_world(
+    tmp_path, writer_of
+):
+    sim = jps.Simulation(
+        model=jps.CollisionFreeSpeedModel(),
+        geometry=OBJ,
+        dt=0.01,
+        trajectory_writer=writer_of(tmp_path),
+    )
+    journey_id, exit_id = journey_to_upper_exit(sim)
+    sim.add_agent(
+        journey_id=journey_id,
+        stage_id=exit_id,
+        position=STACKED_XY,
+        state=jps.CollisionFreeSpeedModelState(),
+        z_hint=GROUND_Z,
+    )
+    with pytest.raises(jps.TrajectoryWriter.Exception, match="2D"):
+        sim.iterate()
+
+
 def test_agents_spawn_on_either_of_two_stacked_floors():
     sim = mesh_simulation()
     journey_id, exit_id = journey_to_upper_exit(sim)

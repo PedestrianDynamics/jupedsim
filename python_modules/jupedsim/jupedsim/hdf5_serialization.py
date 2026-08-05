@@ -21,7 +21,7 @@ from typing import Final
 
 from shapely import from_wkt
 
-from jupedsim.serialization import TrajectoryWriter
+from jupedsim.serialization import TrajectoryWriter, walkable_area_as_wkt
 from jupedsim.simulation import Simulation
 
 try:
@@ -162,7 +162,7 @@ class Hdf5TrajectoryWriter(TrajectoryWriter):
             raise TrajectoryWriter.Exception("File already closed.")
 
         fps = 1.0 / simulation.delta_time() / self._every_nth_frame
-        wkt = simulation.get_geometry().as_wkt()
+        wkt = walkable_area_as_wkt(simulation)
 
         comp_kwargs: dict[str, object] = {}
         if self._compression_level > 0:
