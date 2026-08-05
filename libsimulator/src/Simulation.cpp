@@ -366,7 +366,7 @@ std::vector<GenericAgent::ID> Simulation::AgentsInRange(Point p, double distance
 {
     JPS_SCOPED_TIMER_AND_TRACE(_timer, "Agents in Range", Debug);
     std::vector<GenericAgent::ID> neighborIds{};
-    _neighborhoodSearch.for_each_in_range(p, distance, [&neighborIds](const GenericAgent& agent) {
+    _neighborhoodSearch.ForEachInRange(p, distance, [&neighborIds](const GenericAgent& agent) {
         neighborIds.push_back(agent.id);
     });
     return neighborIds;
@@ -383,7 +383,7 @@ std::vector<GenericAgent::ID> Simulation::AgentsInPolygon(const std::vector<Poin
 
     std::vector<GenericAgent::ID> result{};
     _neighborhoodSearch.ForEachInRange(p, dist, [&result, &poly](const GenericAgent& agent) {
-        if(poly.IsInside(agent.position)) {
+        if(poly.IsInside(agent.position())) {
             result.push_back(agent.id);
         }
     });

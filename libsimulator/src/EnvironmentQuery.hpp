@@ -43,8 +43,8 @@ public:
     OtherAgentsInRange(const OperationalModelState& state, double radius, Pred filter = {}) const
     {
         std::vector<GenericAgent> neighbors{};
-        _nsearch.ForEachInRange(agent.position, radius, [&](const GenericAgent& candidate) {
-            if(candidate.id != agent.id && filter(candidate.position)) {
+        _nsearch.ForEachInRange(Pos(state), radius, [&](const GenericAgent& candidate) {
+            if(candidate.position() != Pos(state) && filter(candidate.position())) {
                 neighbors.push_back(candidate);
             }
         });
@@ -57,7 +57,7 @@ public:
     {
         std::vector<GenericAgent> neighbors{};
         _nsearch.ForEachInRange(from, radius, [&](const GenericAgent& candidate) {
-            if(filter(candidate.position)) {
+            if(filter(candidate.position())) {
                 neighbors.push_back(candidate);
             }
         });

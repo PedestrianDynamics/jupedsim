@@ -21,7 +21,7 @@ std::set<int>
 ItemIdsInRange(const NeighborhoodSearch<ValueWithPos<int>>& neighborhood, Point pos, double radius)
 {
     std::set<int> ids{};
-    neighborhood.for_each_in_range(
+    neighborhood.ForEachInRange(
         pos, radius, [&ids](const ValueWithPos<int>& item) { ids.insert(item.val); });
     return ids;
 }

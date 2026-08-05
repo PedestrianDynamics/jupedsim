@@ -128,7 +128,7 @@ public:
                 auto it = _grid.find({x, y});
                 if(it != _grid.cend()) {
                     for(const auto& item : it->second) {
-                        if(DistanceSquared(item->position, pos) <= radiusSquared) {
+                        if(DistanceSquared(item->position(), pos) <= radiusSquared) {
                             fn(*item);
                         }
                     }
