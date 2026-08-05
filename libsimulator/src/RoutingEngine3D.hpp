@@ -4,8 +4,8 @@
 #include "CfgCgal.hpp"
 #include "Geometry/Location.hpp"
 #include "Point.hpp"
+#include "SimulationError.hpp"
 
-#include <tuple>
 #include <vector>
 
 using RoutingTarget = Point3D; // [RL] TODO: Support more than just points
@@ -14,7 +14,13 @@ using RoutingTarget = Point3D; // [RL] TODO: Support more than just points
 class RoutingEngine3D
 {
 public:
-    RoutingEngine3D() = default;
+    /// @param wallClearance how far a route is held off the wall corners it turns on.
+    explicit RoutingEngine3D(double wallClearance = 0.2) : _wallClearance(wallClearance)
+    {
+        if(wallClearance < 0.0) {
+            throw SimulationError("Wall clearance cannot be negative, got {}.", wallClearance);
+        }
+    }
     virtual ~RoutingEngine3D() = default;
 
     // Non-copyable and non-movable
@@ -29,13 +35,12 @@ public:
     /// @return true if the location projects onto the walkable surface
     virtual bool IsValidLocation(const RoutingTarget& loc) const = 0;
 
-    /// Compute the shortest path from @p source to @p target.
+    /// Compute the shortest path from @p source to @p target, held off wall corners by the
+    /// engine's wall clearance.
     /// @param source where to route from
     /// @param target where to route to
-    /// @return tuple of (path, cost): the path includes source as first element
-    ///         and the target as last element; cost is typically geodesic distance
-    ///         along it, but not necessarily (e.g. floor fields with slowness field).
-    virtual std::tuple<std::vector<Point3D>, double>
+    /// @return the path, including source as first and target as last element
+    virtual std::vector<Point3D>
     GetShortestPath(const Point3D& source, const RoutingTarget& target) = 0;
 
     /// Get orientation to next point of the shortest path from @p source to
@@ -49,4 +54,9 @@ public:
     ///
     /// Interim: The idea is to move to `GetOrientation`.
     virtual Point ComputeWaypoint(const Location& from, const Location& to) = 0;
+
+    double WallClearance() const { return _wallClearance; }
+
+private:
+    double _wallClearance;
 };

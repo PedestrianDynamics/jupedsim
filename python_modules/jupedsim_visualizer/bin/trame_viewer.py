@@ -344,13 +344,15 @@ def build_app(obj_path: str | None):
         tgt = tuple(float(v) for v in target_pos)
         t0 = time.perf_counter()
         try:
-            path, cost = engine.get_shortest_path(src, tgt)
+            path = engine.get_shortest_path(src, tgt)
         except Exception:
             return  # off-surface pick or no path
         elapsed_us = (time.perf_counter() - t0) * 1e6
         if len(path) < 2:
             return
         pts = np.asarray(path, dtype=float)
+        # The engine hands out the way, not what it costs: measure it along the surface here.
+        cost = float(np.linalg.norm(np.diff(pts, axis=0), axis=1).sum())
         route["target_pos"] = np.asarray(target_pos, dtype=float)
         _draw_path(pts)
         _place_marker("route_target", target_pos, "red")

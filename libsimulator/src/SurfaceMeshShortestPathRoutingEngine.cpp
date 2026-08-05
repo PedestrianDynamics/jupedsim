@@ -14,9 +14,18 @@
 // SurfaceMeshShortestPathRoutingEngine
 ////////////////////////////////////////////////////////////////////////////////
 SurfaceMeshShortestPathRoutingEngine::SurfaceMeshShortestPathRoutingEngine(
-    const Geometry3D& geometry)
-    : _geometry(geometry), _mergeTolerance(mesh_merge_tolerance(geometry.mesh()))
+    const Geometry3D& geometry,
+    double wallClearance)
+    : RoutingEngine3D(wallClearance)
+    , _geometry(geometry)
+    , _mergeTolerance(mesh_merge_tolerance(geometry.mesh()))
 {
+    if(wallClearance != 0.0) {
+        throw SimulationError(
+            "Routing on a surface does not keep a wall clearance yet, so it cannot be given one "
+            "({}).",
+            wallClearance);
+    }
 }
 
 bool SurfaceMeshShortestPathRoutingEngine::IsValidLocation(const RoutingTarget& loc) const
@@ -24,7 +33,7 @@ bool SurfaceMeshShortestPathRoutingEngine::IsValidLocation(const RoutingTarget& 
     return _geometry.face_below(loc).face != SurfaceMesh::null_face();
 }
 
-std::tuple<std::vector<Point3D>, double> SurfaceMeshShortestPathRoutingEngine::GetShortestPath(
+std::vector<Point3D> SurfaceMeshShortestPathRoutingEngine::GetShortestPath(
     const Point3D& source,
     const RoutingTarget& target)
 {
@@ -50,17 +59,16 @@ std::tuple<std::vector<Point3D>, double> SurfaceMeshShortestPathRoutingEngine::G
 
     const auto from_loc = it->second->locate(from_below.point, _geometry.aabb_tree());
     std::vector<Point3D> path;
-    const auto result = it->second->shortest_path_points_to_source_points(
+    it->second->shortest_path_points_to_source_points(
         from_loc.first, from_loc.second, std::back_inserter(path));
-    // CGAL returns the cost directly. No separate calculation needed.
-    return {std::move(path), result.first};
+    return path;
 }
 
 Point SurfaceMeshShortestPathRoutingEngine::ComputeWaypoint(
     const Location& from,
     const Location& to)
 {
-    const auto& [path, cost] = GetShortestPath(from.position_3d(), to.position_3d());
+    const auto path = GetShortestPath(from.position_3d(), to.position_3d());
 
     // CGAL sets a point whenever it crosses a triangle edge. need to do a collinear merge or
     // agents stop at each of those intermediate points as they occur in "agent.nextTarget".
@@ -85,8 +93,7 @@ Point SurfaceMeshShortestPathRoutingEngine::GetOrientation(
     const Point3D& source,
     const RoutingTarget& target)
 {
-    const auto result = GetShortestPath(source, target);
-    const auto& path = std::get<0>(result);
+    const auto path = GetShortestPath(source, target);
     // Heading to the next waypoint, projected onto x/y (z dropped). If a query
     // point sits exactly on a triangle edge, CGAL emits a duplicate leading
     // waypoint, so return the first non-zero direction along the shortest path.

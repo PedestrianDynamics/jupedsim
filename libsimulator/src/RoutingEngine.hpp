@@ -18,8 +18,7 @@ class RoutingEngine : public RoutingEngine3D
     std::unique_ptr<Mesh> mesh{};
 
 public:
-    RoutingEngine();
-    explicit RoutingEngine(const PolyWithHoles& poly);
+    explicit RoutingEngine(const PolyWithHoles& poly, double wallClearance = 0.2);
     ~RoutingEngine() override = default;
 
     // Nte: Copy and move are both deleted by the base class RoutingEngine3D.
@@ -32,7 +31,7 @@ public:
     // RoutingEngine3D interface
     Point ComputeWaypoint(const Location& from, const Location& to) override;
     bool IsValidLocation(const RoutingTarget& loc) const override;
-    std::tuple<std::vector<Point3D>, double>
+    std::vector<Point3D>
     GetShortestPath(const Point3D& source, const RoutingTarget& target) override;
     Point GetOrientation(const Point3D& source, const RoutingTarget& target) override;
 

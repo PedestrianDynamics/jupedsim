@@ -25,11 +25,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 // NavMeshRoutingEngine
 ////////////////////////////////////////////////////////////////////////////////
-RoutingEngine::RoutingEngine()
-{
-}
-
-RoutingEngine::RoutingEngine(const PolyWithHoles& poly)
+RoutingEngine::RoutingEngine(const PolyWithHoles& poly, double wallClearance)
+    : RoutingEngine3D(wallClearance)
 {
     cdt.insert_constraint(
         poly.outer_boundary().vertices_begin(), poly.outer_boundary().vertices_end(), true);
@@ -55,7 +52,7 @@ bool RoutingEngine::IsValidLocation(const RoutingTarget& loc) const
     return IsRoutable(Point{loc.x(), loc.y()});
 }
 
-std::tuple<std::vector<Point3D>, double>
+std::vector<Point3D>
 RoutingEngine::GetShortestPath(const Point3D& source, const RoutingTarget& target)
 {
     const auto flat =
@@ -63,15 +60,13 @@ RoutingEngine::GetShortestPath(const Point3D& source, const RoutingTarget& targe
 
     std::vector<Point3D> path{};
     path.reserve(flat.size());
-    double cost = 0.0;
-    for(std::size_t i = 0; i < flat.size(); ++i) {
-        // Sum up 2D distance costs of the path.
-        path.push_back(Point3D{flat[i].x, flat[i].y, 0.0});
-        if(i > 0) {
-            cost += (flat[i] - flat[i - 1]).Norm();
-        }
+    for(const auto& p : flat) {
+        // Just push flat 3D-points back as this is a 2D engine.
+        // In theory one could calculate the correct 3D-points in a 1-region case. Do not
+        // do this for performance reasons right now.
+        path.push_back(Point3D{p.x, p.y, 0.0});
     }
-    return {std::move(path), cost};
+    return path;
 }
 
 Point RoutingEngine::GetOrientation(const Point3D& source, const RoutingTarget& target)
@@ -323,8 +318,9 @@ CDT::Face_handle RoutingEngine::find_face(K::Point_2 p) const
 std::vector<Point>
 RoutingEngine::straightenPath(Point from, Point to, const std::vector<CDT::Face_handle>& path)
 {
-    // TODO(kkratz): Remove the 0.2m edge width adjustment and replace this with p[roper
-    // arc-paths from the "Efficient Triangulation-Based Pathfinding" publication
+    // TODO(kkratz): Replace pulling the portals in with proper arc-paths from the "Efficient
+    // Triangulation-Based Pathfinding" publication
+    const double clearance = WallClearance();
     const size_t portalCount = path.size();
 
     // This is the actual simple stupid funnel algorithm
@@ -362,8 +358,8 @@ RoutingEngine::straightenPath(Point from, Point to, const std::vector<CDT::Face_
         const auto line_segment_left = portal.p2;
         const auto line_segment_right = portal.p1;
         const auto line_segment_direction = (line_segment_right - line_segment_left).Normalized();
-        const auto candidate_left = line_segment_left + (line_segment_direction * 0.2);
-        const auto candidate_right = line_segment_right - (line_segment_direction * 0.2);
+        const auto candidate_left = line_segment_left + (line_segment_direction * clearance);
+        const auto candidate_right = line_segment_right - (line_segment_direction * clearance);
 
         if(triarea2d(apex, portal_right, candidate_right) <= 0.0) {
             if(apex == portal_right || triarea2d(apex, portal_left, candidate_right) > 0.0) {

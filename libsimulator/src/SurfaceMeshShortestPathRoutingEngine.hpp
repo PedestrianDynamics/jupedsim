@@ -16,12 +16,16 @@ public:
     /// Borrows @p geometry (non-owning); the caller keeps it alive for the
     /// engine's lifetime. Ownership lives with the world (later: Simulation),
     /// matching the 2D pipeline where engines never own the geometry.
-    explicit SurfaceMeshShortestPathRoutingEngine(const Geometry3D& geometry);
+    /// @param wallClearance has to be zero: this engine does not keep a distance from wall
+    /// corners yet, and would silently ignore one.
+    explicit SurfaceMeshShortestPathRoutingEngine(
+        const Geometry3D& geometry,
+        double wallClearance = 0.0);
     ~SurfaceMeshShortestPathRoutingEngine() override = default;
 
     bool IsValidLocation(const RoutingTarget& loc) const override;
 
-    std::tuple<std::vector<Point3D>, double>
+    std::vector<Point3D>
     GetShortestPath(const Point3D& source, const RoutingTarget& target) override;
 
     Point GetOrientation(const Point3D& source, const RoutingTarget& target) override;
