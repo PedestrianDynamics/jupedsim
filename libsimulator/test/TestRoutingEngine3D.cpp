@@ -244,12 +244,14 @@ TEST(RoutingEngine3DLShape, GeodesicBendsAroundReflexCorner)
 
     const auto path = engine.GetShortestPath(source, target);
 
-    // Straight line would cut the missing quadrant (x>1, y>1), so the any-angle
-    // geodesic must pivot on the reflex corner (1,1):
-    //   |S->(1,1)| + |(1,1)->T| = sqrt(2.5) + sqrt(2.5) = 2*sqrt(2.5).
+    // Straight line would cut the missing quadrant (x>1, y>1), so the any-angle geodesic must
+    // pivot on the reflex corner (1,1). The route is held off that corner, diagonally into the
+    // open -- which pins the pivot just as tightly, since only one point lies that way.
     ASSERT_EQ(path.size(), 3u);
-    EXPECT_NEAR(path[1].x(), 1.0, 1e-6);
-    EXPECT_NEAR(path[1].y(), 1.0, 1e-6);
+    const Point turn{path[1].x(), path[1].y()};
+    const Point expected = Point{1, 1} + Point{-1, -1}.Normalized() * engine.WallClearance();
+    EXPECT_NEAR(turn.x, expected.x, 1e-6);
+    EXPECT_NEAR(turn.y, expected.y, 1e-6);
 }
 
 TEST(RoutingEngine3DLShape, OrientationBendsTowardsReflexCorner)
@@ -259,12 +261,12 @@ TEST(RoutingEngine3DLShape, OrientationBendsTowardsReflexCorner)
     Geometry3D geometry{mesh_from_polygon(outer)}; // flat z = 0
     SurfaceMeshShortestPathRoutingEngine engine{geometry};
 
-    // The geodesic pivots exactly on the reflex corner (1,1) -- no wall
-    // clearance (unlike the legacy 2D funnel, which keeps 0.2 m off). So the
-    // heading from (2.5,0.5) points straight at that corner, not direct to the
-    // target.
+    // The route bends around the reflex corner (1,1), so the heading points there rather than at
+    // the target -- at the turn the route makes, which is held off the corner itself. Heading for
+    // the corner exactly is what leaves an agent stuck against it.
+    const Point turn = Point{1, 1} + Point{-1, -1}.Normalized() * engine.WallClearance();
     const Point dir = engine.GetOrientation({2.5, 0.5, 1}, {0.5, 2.5, 1});
-    const Point expected = (Point{1, 1} - Point{2.5, 0.5}).Normalized();
+    const Point expected = (turn - Point{2.5, 0.5}).Normalized();
     EXPECT_NEAR(dir.x, expected.x, 1e-6);
     EXPECT_NEAR(dir.y, expected.y, 1e-6);
 
@@ -285,11 +287,11 @@ TEST(RoutingEngine3DLShape, WaypointIsTheNextTurnOfTheGeodesic)
     const auto to = geometry.get_location(0.5, 2.5, 0.0);
     ASSERT_TRUE(from.has_value() && to.has_value());
 
-    // Where the geodesic bends, which is the reflex corner: the tactical level asks for a place
-    // to head for, and the surface engine answers with the path's own next vertex.
+    // Where the route bends, held off the corner it bends around.
+    const Point turn = Point{1, 1} + Point{-1, -1}.Normalized() * engine.WallClearance();
     const Point waypoint = engine.ComputeWaypoint(*from, *to);
-    EXPECT_NEAR(waypoint.x, 1.0, 1e-6);
-    EXPECT_NEAR(waypoint.y, 1.0, 1e-6);
+    EXPECT_NEAR(waypoint.x, turn.x, 1e-6);
+    EXPECT_NEAR(waypoint.y, turn.y, 1e-6);
 
     // Standing on the target: nowhere else to head for.
     EXPECT_EQ(engine.ComputeWaypoint(*to, *to), to->xy());
@@ -323,11 +325,26 @@ TEST(RoutingEngineWallClearance, NegativeIsNoDistance)
     EXPECT_THROW(RoutingEngine(b.Build().Polygon(), -0.1), SimulationError);
 }
 
-TEST(RoutingEngineWallClearance, TheSurfaceEngineRefusesOneItWouldIgnore)
+TEST(RoutingEngineWallClearance, TheSurfaceEngineKeepsItToo)
 {
-    const auto geometry = std::make_unique<Geometry3D>(unit_square_mesh());
-    EXPECT_THROW(SurfaceMeshShortestPathRoutingEngine(*geometry, 0.2), SimulationError);
-    EXPECT_NO_THROW(SurfaceMeshShortestPathRoutingEngine{*geometry});
+    const std::vector<K::Point_2> outer{{0, 0}, {3, 0}, {3, 1}, {1, 1}, {1, 3}, {0, 3}};
+    Geometry3D geometry{mesh_from_polygon(outer)};
+    const Point3D source{2.5, 0.5, 1};
+    const Point3D target{0.5, 2.5, 1};
+
+    // Zero routes through the corner, which is the bare geodesic.
+    SurfaceMeshShortestPathRoutingEngine bare{geometry, 0.0};
+    const auto through_the_corner = bare.GetShortestPath(source, target);
+    ASSERT_EQ(through_the_corner.size(), 3u);
+    EXPECT_NEAR(through_the_corner[1].x(), 1.0, 1e-9);
+    EXPECT_NEAR(through_the_corner[1].y(), 1.0, 1e-9);
+
+    // And whatever distance is asked for is the distance kept.
+    SurfaceMeshShortestPathRoutingEngine keeping_distance{geometry, 0.3};
+    const auto around_it = keeping_distance.GetShortestPath(source, target);
+    ASSERT_EQ(around_it.size(), 3u);
+    const Point turn{around_it[1].x(), around_it[1].y()};
+    EXPECT_NEAR((turn - Point{1, 1}).Norm(), 0.3, 1e-9);
 }
 
 TEST(RoutingEngineProjected, TheClearanceIsWhatHoldsARouteOffACorner)

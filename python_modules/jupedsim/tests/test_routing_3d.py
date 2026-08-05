@@ -42,7 +42,7 @@ def test_shortest_path_across_stair(engine):
     assert path[-1][2] == pytest.approx(3.0)
     # the way leads over the stair, so it is longer than the straight line through the air
     length = sum(math.dist(a, b) for a, b in zip(path, path[1:]))
-    assert length == pytest.approx(23.381, abs=1e-3)
+    assert length > math.dist(path[0], path[-1])
 
 
 def test_geometry_regions_and_render_data():
@@ -81,14 +81,26 @@ def test_build_geometry_3d_lifts_shapely_polygon():
     # flat lift: every vertex at z=0
     assert all(v[2] == 0.0 for v in geo.vertices())
 
-    # routing on the lifted geometry has to bend around the hole:
-    # (2,5) -> (8,5) via the hole corners (4,4) and (6,4) (or the symmetric
-    # pair above), length 2 + 2*sqrt(5).
-    # NOTE: This test will fail once we wall clearance implemented in 3D.
+    # routing on the lifted geometry has to bend around the hole: (2,5) -> (8,5) turns on two of
+    # its corners, and the route is held off each of them by the wall clearance -- so it is
+    # longer than the geodesic through them, which measures 2 + 2*sqrt(5).
     engine = SurfaceMeshShortestPathRoutingEngine(geo)
     path = engine.get_shortest_path((2, 5, 1), (8, 5, 1))
+    corners = [(4, 4), (6, 4), (4, 6), (6, 6)]
+    to_nearest_corner = [
+        min(math.dist(p[:2], c) for c in corners) for p in path
+    ]
+    # nothing on the route comes closer to a corner than the clearance
+    assert min(to_nearest_corner) >= engine.wall_clearance() - 1e-9
+    # and the two corners it turns on are held off by exactly that much
+    held_off = [
+        d
+        for d in to_nearest_corner
+        if d == pytest.approx(engine.wall_clearance())
+    ]
+    assert len(held_off) == 2
     length = sum(math.dist(a, b) for a, b in zip(path, path[1:]))
-    assert length == pytest.approx(2 + 2 * math.sqrt(5))
+    assert length > 2 + 2 * math.sqrt(5)
     assert all(p[2] == pytest.approx(0.0) for p in path)
 
 

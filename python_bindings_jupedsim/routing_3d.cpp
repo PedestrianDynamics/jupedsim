@@ -57,7 +57,8 @@ void init_routing_3d(py::module_& m)
     py::class_<RoutingEngine3D>(m, "RoutingEngine3D")
         .def("is_valid_location", &RoutingEngine3D::IsValidLocation)
         .def("get_shortest_path", &RoutingEngine3D::GetShortestPath)
-        .def("get_orientation", &RoutingEngine3D::GetOrientation);
+        .def("get_orientation", &RoutingEngine3D::GetOrientation)
+        .def("wall_clearance", &RoutingEngine3D::WallClearance);
 
     py::class_<SurfaceMeshShortestPathRoutingEngine, RoutingEngine3D>(
         m, "SurfaceMeshShortestPathRoutingEngine")
