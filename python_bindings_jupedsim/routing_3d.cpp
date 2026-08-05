@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Geometry/Geometry2D.hpp"
 #include "Geometry/Geometry3D.hpp"
+#include "Geometry/Location.hpp"
 #include "Geometry/Validation.hpp"
 #include "SimulationError.hpp"
 #include "SurfaceMeshShortestPathRoutingEngine.hpp"
@@ -9,6 +10,7 @@
 #include <CGAL/Polygon_mesh_processing/IO/polygon_mesh_io.h>
 #include <CGAL/Polygon_mesh_processing/triangulate_faces.h>
 #include <CGAL/boost/graph/helpers.h>
+#include <fmt/format.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h> // IWYU pragma: keep
 
@@ -20,6 +22,17 @@ namespace py = pybind11;
 
 void init_routing_3d(py::module_& m)
 {
+    // A place on the surface, handed out by the simulation and passed back to it. Read-only and
+    // deliberately narrow: no region ids, no face handles -- the coordinates are all a caller
+    // can do anything with, everything else is the geometry's business.
+    py::class_<Location>(m, "Location")
+        .def_property_readonly("x", [](const Location& l) { return l.xy().x; })
+        .def_property_readonly("y", [](const Location& l) { return l.xy().y; })
+        .def_property_readonly("z", &Location::z)
+        .def("__repr__", [](const Location& l) {
+            return fmt::format("Location({}, {}, {})", l.xy().x, l.xy().y, l.z());
+        });
+
     // smart_holder: a mesh-built Simulation takes ownership of the geometry, which means
     // handing a `unique_ptr` from Python into C++.
     py::class_<Geometry3D, py::smart_holder>(m, "Geometry3D")

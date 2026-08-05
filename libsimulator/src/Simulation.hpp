@@ -94,9 +94,15 @@ public:
         Point position,
         OperationalModelState model,
         double z_hint = 0.0);
+    /// The place at @p x, @p y on the sheet closest to @p z_hint. Raw coordinates become a
+    /// place here and nowhere else: the geometry has to stand for a Location, and over stacked
+    /// floors an (x, y) on its own does not say which one is meant.
+    /// @throws SimulationError if no walkable sheet lies within the hint's tolerance.
+    Location GetLocation(double x, double y, double z_hint = 0.0) const;
     /// Raycast 2D @p target along z-axis. The closest intersection with the geometry to agent's
     /// z coordinate is the one taken.
     void SetAgentTarget(GenericAgent::ID id, Point target);
+    void SetAgentTarget(GenericAgent::ID id, const Location& target);
     const GenericAgent& Agent(GenericAgent::ID id) const;
     GenericAgent& Agent(GenericAgent::ID id);
     AgentContainer<GenericAgent>& Agents();

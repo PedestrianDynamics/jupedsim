@@ -4,6 +4,7 @@
 #include "GenericAgent.hpp"
 #include "Geometry/Geometry2D.hpp"
 #include "Geometry/Geometry3D.hpp"
+#include "Geometry/Location.hpp"
 #include "Journey.hpp"
 #include "OperationalModel.hpp"
 #include "Polygon.hpp"
@@ -167,11 +168,29 @@ void init_simulation(py::module_& m)
             "agent",
             [](Simulation& sim, uint64_t agentId) -> auto& { return sim.Agent(agentId); },
             py::arg("agent_id"),
-            py::return_value_policy::reference)
+            py::return_value_policy::reference,
+            py::keep_alive<0, 1>())
+        .def(
+            "get_location",
+            [](const Simulation& sim, double x, double y, double z_hint) {
+                return sim.GetLocation(x, y, z_hint);
+            },
+            py::arg("x"),
+            py::arg("y"),
+            py::arg("z_hint") = 0.0,
+            // The returned token points into geometry the simulation owns.
+            py::keep_alive<0, 1>())
         .def(
             "set_agent_target",
             [](Simulation& sim, uint64_t agentId, std::tuple<double, double> target) {
                 sim.SetAgentTarget(agentId, intoPoint(target));
+            },
+            py::arg("agent_id"),
+            py::arg("target"))
+        .def(
+            "set_agent_target",
+            [](Simulation& sim, uint64_t agentId, const Location& target) {
+                sim.SetAgentTarget(agentId, target);
             },
             py::arg("agent_id"),
             py::arg("target"))

@@ -271,6 +271,15 @@ GenericAgent::ID Simulation::AddAgent(
     return _agents.back().id.getID();
 }
 
+Location Simulation::GetLocation(double x, double y, double z_hint) const
+{
+    const auto located = _geometry->get_location(x, y, z_hint);
+    if(!located) {
+        throw SimulationError("Point {} is outside of accessible area", Point{x, y});
+    }
+    return *located;
+}
+
 void Simulation::SetAgentTarget(GenericAgent::ID id, Point target)
 {
     auto& agent = Agent(id);
@@ -280,6 +289,11 @@ void Simulation::SetAgentTarget(GenericAgent::ID id, Point target)
         throw SimulationError("Point {} is outside of accessible area", target);
     }
     agent.finalTarget = *located;
+}
+
+void Simulation::SetAgentTarget(GenericAgent::ID id, const Location& target)
+{
+    Agent(id).finalTarget = target;
 }
 
 void Simulation::MarkAgentForRemoval(GenericAgent::ID id)
