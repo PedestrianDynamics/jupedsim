@@ -90,7 +90,7 @@ void SocialForceModel::CheckModelConstraint(
     const auto radius = model.radius;
     throwIfNegative(radius, "radius");
 
-    const auto neighbors = envQuery.OtherAgentsInRange(agent.position(), 2.0);
+    const auto neighbors = envQuery.OtherAgentsInRange(agent.model, 2.0);
     for(const auto& neighbor : neighbors) {
         const auto& neighborPosition = std::get<State>(neighbor.model).position;
         const auto distance = (model.position - neighborPosition).Norm();

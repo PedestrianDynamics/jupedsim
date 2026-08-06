@@ -80,7 +80,7 @@ public:
     public:
         template <typename T>
             requires(!std::is_same_v<std::decay_t<T>, State>)
-        State(T&& value) : value(std::forward<T>(value)), format(makeFormatFn<T>())
+        explicit State(T&& value) : value(std::forward<T>(value)), format(makeFormatFn<T>())
         {
             using Stored = std::decay_t<T>;
             static_assert(

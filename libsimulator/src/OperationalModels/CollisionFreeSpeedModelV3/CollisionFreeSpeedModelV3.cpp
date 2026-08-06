@@ -169,7 +169,7 @@ void CollisionFreeSpeedModelV3::CheckModelConstraint(
     validateConstraint(model.thetaMaxUpperBound, 0.0, std::acos(-1.0), "thetaMaxUpperBound");
     validateConstraint(model.agentBuffer, 0.0, 100.0, "agentBuffer");
 
-    const auto neighbors = envQuery.OtherAgentsInRange(agent.position(), 2.0);
+    const auto neighbors = envQuery.OtherAgentsInRange(agent.model, 2.0);
     for(const auto& neighbor : neighbors) {
         const auto& neighbor_model = std::get<State>(neighbor.model);
         const auto contactDist = model.radius + neighbor_model.radius;
