@@ -63,7 +63,7 @@ class EnvironmentQuery:
         self,
         from_pos: tuple[float, float],
         to_pos: tuple[float, float],
-        boundary: list[LineSegment],
+        boundaries: list[LineSegment],
     ) -> bool:
         """Return ``True`` when the straight line from *from_pos* to *to_pos*
         is not intersected by any geometry boundary (i.e. no wall blocks it).
@@ -71,7 +71,7 @@ class EnvironmentQuery:
         Args:
             from_pos: Observer position as ``(x, y)`` in metres.
             to_pos: Target position as ``(x, y)`` in metres.
-            boundary: pre-fetched list of wall segments from
+            boundaries: pre-fetched list of wall segments from
                 :meth:`line_segments_in_range`.
 
         Returns:
@@ -79,14 +79,14 @@ class EnvironmentQuery:
 
         Example — pre-fetch once, reuse for every neighbor::
 
-            walls = env_query.line_segments_in_range(ped.position, cutoff)
+            boundaries = env_query.line_segments_in_range(ped.position, cutoff)
             neighbors = env_query.other_agents_in_range(
                 ped, cutoff,
-                lambda n: env_query.no_wall_between(ped.position, n.position, walls)
+                lambda n: env_query.no_wall_between(ped.position, n.position, boundaries)
             )
         """
         return self._obj.no_wall_between(
-            from_pos, to_pos, [ls._obj for ls in boundary]
+            from_pos, to_pos, [ls._obj for ls in boundaries]
         )
 
     def line_segments_in_grid_cell_distance(

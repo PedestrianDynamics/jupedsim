@@ -24,30 +24,18 @@ void init_environment_query(py::module_& m)
             "All agents within radius of agent (self excluded).")
         .def(
             "no_wall_between",
-            [](const EnvironmentQuery& self,
-               std::tuple<double, double> from,
-               std::tuple<double, double> to) -> bool {
-                const auto boundary = self.LineSegmentsInRange(intoPoint(from));
-                return self.NoGeometryBetween(intoPoint(from), intoPoint(to), boundary);
-            },
-            py::arg("from"),
-            py::arg("to"),
-            "Returns a bool: True when position from has a line-of-sight unobstructed by wall to "
-            "the candidate position to.")
-        .def(
-            "no_wall_between",
             [](const EnvironmentQuery& /*self*/,
                std::tuple<double, double> from,
                std::tuple<double, double> to,
-               const std::vector<LineSegment>& boundary) -> bool {
+               const std::vector<LineSegment>& boundaries) -> bool {
                 const LineSegment los{intoPoint(from), intoPoint(to)};
-                return !std::any_of(boundary.begin(), boundary.end(), [&los](const auto& seg) {
+                return !std::any_of(boundaries.begin(), boundaries.end(), [&los](const auto& seg) {
                     return intersects(los, seg);
                 });
             },
             py::arg("from"),
             py::arg("to"),
-            py::arg("boundary"),
+            py::arg("boundaries"),
             "Returns a bool: True when position from has a line-of-sight unobstructed by any "
             "segment in the pre-fetched boundary. Pass the result of line_segments_in_range() as "
             "boundary to avoid re-fetching geometry on every call.")

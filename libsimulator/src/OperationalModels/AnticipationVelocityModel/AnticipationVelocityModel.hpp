@@ -63,7 +63,7 @@ private:
         const Point& direction,
         const Point& agentPosition,
         double agentRadius,
-        const auto& boundary,
+        const auto& boundaries,
         double wallBufferDistance,
         double pushoutStrength) const;
 

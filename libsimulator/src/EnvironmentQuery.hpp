@@ -36,9 +36,9 @@ public:
     // Returns all agents within 'radius' of 'agent', excluding 'agent' itself.
     // An optional predicate 'filter' further filters the result; it receives the
     // position for which neighbors are returned as well as the candidates. Example:
-    //   const auto& boundary = query.LineSegmentsInRange(Pos(state));
+    //   const auto& boundaries = query.LineSegmentsInRange(Pos(state));
     //   query.OtherAgentsInRange(state, r, [&](const Point& to) {
-    //   return query.NoGeometryBetween(from, to, boundary);})
+    //   return query.NoGeometryBetween(from, to, boundaries);})
     template <std::predicate<const Point&> Pred = AcceptAll>
     std::vector<GenericAgent>
     OtherAgentsInRange(const OperationalModelState& state, double radius, Pred filter = {}) const
@@ -69,10 +69,10 @@ public:
     bool NoGeometryBetween(
         const Point& from,
         const Point& to,
-        const CollisionGeometry::LineSegmentRange& boundary) const
+        const CollisionGeometry::LineSegmentRange& boundaries) const
     {
         const LineSegment los{from, to};
-        return !std::any_of(boundary.begin(), boundary.end(), [&los](const auto& seg) {
+        return !std::any_of(boundaries.begin(), boundaries.end(), [&los](const auto& seg) {
             return intersects(los, seg);
         });
     }

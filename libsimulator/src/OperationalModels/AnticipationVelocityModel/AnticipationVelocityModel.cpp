@@ -36,11 +36,11 @@ void AnticipationVelocityModel::ComputeNextState(
     const EnvironmentQuery& envQuery) const
 {
     const auto& model = std::get<State>(current.model);
-    const auto& boundary = envQuery.LineSegmentsInRange(model.position);
+    const auto& boundaries = envQuery.LineSegmentsInRange(model.position);
     // Exclude occluded and self agents
     auto neighborhood = envQuery.OtherAgentsInRange(
-        model, _cutOffRadius, [&envQuery, &boundary, from = model.position](const Point& to) {
-            return envQuery.NoGeometryBetween(from, to, boundary);
+        model, _cutOffRadius, [&envQuery, &boundaries, from = model.position](const Point& to) {
+            return envQuery.NoGeometryBetween(from, to, boundaries);
         });
 
     const auto neighborRepulsion = std::accumulate(
@@ -72,7 +72,7 @@ void AnticipationVelocityModel::ComputeNextState(
 
     const auto optimal_speed = OptimalSpeed(current, spacing, model.timeGap);
     direction = HandleWallAvoidance(
-        direction, model.position, model.radius, boundary, wallBufferDistance, _pushoutStrength);
+        direction, model.position, model.radius, boundaries, wallBufferDistance, _pushoutStrength);
 
     const auto velocity = direction * optimal_speed;
     auto& nextModel = std::get<State>(next.model);
@@ -278,7 +278,7 @@ Point AnticipationVelocityModel::HandleWallAvoidance(
     const Point& direction,
     const Point& agentPosition,
     double agentRadius,
-    const auto& boundary,
+    const auto& boundaries,
     double wallBufferDistance,
     double pushoutStrength) const
 {
@@ -286,8 +286,8 @@ Point AnticipationVelocityModel::HandleWallAvoidance(
 
     Point modifiedDirection = direction;
     std::for_each(
-        std::begin(boundary),
-        std::end(boundary),
+        std::begin(boundaries),
+        std::end(boundaries),
         [&agentPosition, &criticalWallDistance, &modifiedDirection, pushoutStrength](
             const LineSegment& wall) {
             const auto closestPoint = wall.ShortestPoint(agentPosition);

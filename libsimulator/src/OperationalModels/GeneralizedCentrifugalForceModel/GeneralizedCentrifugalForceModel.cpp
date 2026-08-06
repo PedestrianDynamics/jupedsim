@@ -48,10 +48,10 @@ void GeneralizedCentrifugalForceModel::ComputeNextState(
     const EnvironmentQuery& envQuery) const
 {
     const auto& model = std::get<State>(current.model);
-    const auto& boundary = envQuery.LineSegmentsInRange(model.position);
+    const auto& boundaries = envQuery.LineSegmentsInRange(model.position);
     auto neighborhood = envQuery.OtherAgentsInRange(
-        model, _cutOffRadius, [&envQuery, &boundary, from = model.position](const Point& to) {
-            return envQuery.NoGeometryBetween(from, to, boundary);
+        model, _cutOffRadius, [&envQuery, &boundaries, from = model.position](const Point& to) {
+            return envQuery.NoGeometryBetween(from, to, boundaries);
         });
     Point F_rep;
     for(const auto& neighbor : neighborhood) {
