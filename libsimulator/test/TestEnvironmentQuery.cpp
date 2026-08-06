@@ -124,8 +124,10 @@ TEST(EnvironmentQuery, NoGeometryBetweenFiltersOccludedAgents)
     const auto q = env.query(geo);
 
     const auto from = env.agents[0].position();
-    const auto result = q.OtherAgentsInRange(
-        env.agents[0], 5.0, [&](const Point& to) { return q.NoGeometryBetween(from, to); });
+    const auto boundary = q.LineSegmentsInRange(from, 5.0);
+    const auto result = q.OtherAgentsInRange(env.agents[0], 5.0, [&](const Point& to) {
+        return q.NoGeometryBetween(from, to, boundary);
+    });
 
     ASSERT_EQ(result.size(), 1u);
     EXPECT_EQ(std::get<State>(result[0].model).position, Point(0, 1));

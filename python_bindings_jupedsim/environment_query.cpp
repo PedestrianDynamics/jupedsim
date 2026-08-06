@@ -26,13 +26,16 @@ void init_environment_query(py::module_& m)
             "no_wall_between",
             [](const EnvironmentQuery& self,
                std::tuple<double, double> from,
-               std::tuple<double, double> to) -> bool {
-                return self.NoGeometryBetween(intoPoint(from), intoPoint(to));
+               std::tuple<double, double> to,
+               const std::vector<LineSegment>& boundaries) {
+                return self.NoGeometryBetween(intoPoint(from), intoPoint(to), boundaries);
             },
             py::arg("from"),
             py::arg("to"),
-            "Returns a bool: True when position from has a line-of-sight unobstructed by wall to "
-            "the candidate position to.")
+            py::arg("boundaries"),
+            "Returns a bool: True when position from has a line-of-sight unobstructed by any "
+            "segment in the pre-fetched boundary. Pass the result of line_segments_in_range() as "
+            "boundary to avoid re-fetching geometry on every call.")
         .def(
             "line_segments_in_range",
             [](const EnvironmentQuery& self, std::tuple<double, double> p, double distance) {

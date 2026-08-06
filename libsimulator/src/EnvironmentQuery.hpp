@@ -36,15 +36,17 @@ public:
     // Returns all agents within 'radius' of 'agent', excluding 'agent' itself.
     // An optional predicate 'filter' further filters the result; it receives the
     // position for which neighbors are returned as well as the candidates. Example:
-    //   query.AgentsInRange(state, r, [&envQuery, from=model.position](const Point& to) {
-    //   return envQuery.NoGeometryBetween(from, to);})
+    //   const auto& boundaries = query.LineSegmentsInRange(Pos(state));
+    //   query.OtherAgentsInRange(state, r, [&](const Point& to) {
+    //   return query.NoGeometryBetween(from, to, boundaries);})
     template <std::predicate<const Point&> Pred = AcceptAll>
     std::vector<GenericAgent>
     OtherAgentsInRange(const OperationalModelState& state, double radius, Pred filter = {}) const
     {
+        const Point from = Pos(state);
         std::vector<GenericAgent> neighbors{};
-        _nsearch.ForEachInRange(Pos(state), radius, [&](const GenericAgent& candidate) {
-            if(candidate.position() != Pos(state) && filter(candidate.position())) {
+        _nsearch.ForEachInRange(from, radius, [&](const GenericAgent& candidate) {
+            if(candidate.position() != from && filter(candidate.position())) {
                 neighbors.push_back(candidate);
             }
         });
@@ -64,16 +66,13 @@ public:
         return neighbors;
     }
 
-    bool NoGeometryBetween(const Point& from, const Point& to) const
+    template <typename Range>
+    bool NoGeometryBetween(const Point& from, const Point& to, const Range& boundaries) const
     {
         const LineSegment los{from, to};
-        const double dist = Distance(from, to);
-        auto blocked = [&los](const auto& boundaries) {
-            return std::any_of(boundaries.begin(), boundaries.end(), [&los](const auto& seg) {
-                return intersects(los, seg);
-            });
-        };
-        return !blocked(LineSegmentsInRange(from, dist));
+        return !std::any_of(std::begin(boundaries), std::end(boundaries), [&los](const auto& seg) {
+            return intersects(los, seg);
+        });
     }
 
     CollisionGeometry::LineSegmentRange

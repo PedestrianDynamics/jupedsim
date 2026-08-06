@@ -165,13 +165,16 @@ def test_no_wall_between_filters_occluded_agents():
         def compute_next_state(self, dt, ped, env_query):
             px, py = ped.position
             if abs(px - 5.0) < 1e-4 and abs(py - 10.0) < 1e-4:
+                walls = env_query.line_segments_in_range(ped.position, 20.0)
                 self.neighbor_positions = [
                     tuple(n.position)
                     for n in env_query.other_agents_in_range(
                         ped,
                         20.0,
                         lambda n: env_query.no_wall_between(
-                            ped.position, n.position
+                            ped.position,
+                            n.position,
+                            walls,
                         ),
                     )
                 ]
@@ -204,13 +207,16 @@ def test_no_wall_between_agent_above_wall_is_seen():
         def compute_next_state(self, _dt, ped, env_query):
             px, py = ped.position
             if abs(px - 5.0) < 1e-4 and abs(py - 18.0) < 1e-4:
+                walls = env_query.line_segments_in_range(ped.position, 20.0)
                 self.neighbor_positions = [
                     tuple(n.position)
                     for n in env_query.other_agents_in_range(
                         ped,
                         20.0,
                         lambda n: env_query.no_wall_between(
-                            ped.position, n.position
+                            ped.position,
+                            n.position,
+                            walls,
                         ),
                     )
                 ]
@@ -239,6 +245,7 @@ def test_composed_no_wall_between_and_group_filter():
         def compute_next_state(self, _dt, ped, env_query):
             px, py = ped.position
             if abs(px - 5.0) < 1e-4 and abs(py - 10.0) < 1e-4:
+                walls = env_query.line_segments_in_range(ped.position, 20.0)
                 self.neighbor_positions = [
                     tuple(n.position)
                     for n in env_query.other_agents_in_range(
@@ -246,7 +253,9 @@ def test_composed_no_wall_between_and_group_filter():
                         20.0,
                         lambda neighbor: (
                             env_query.no_wall_between(
-                                ped.position, neighbor.position
+                                ped.position,
+                                neighbor.position,
+                                walls,
                             )
                             and neighbor.model.group == 1
                         ),
