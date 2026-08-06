@@ -28,8 +28,7 @@ void init_environment_query(py::module_& m)
                std::tuple<double, double> from,
                std::tuple<double, double> to,
                const std::vector<LineSegment>& boundaries) {
-                return self.NoGeometryBetween(
-                    intoPoint(from), intoPoint(to), intoRange(boundaries));
+                return self.NoGeometryBetween(intoPoint(from), intoPoint(to), boundaries);
             },
             py::arg("from"),
             py::arg("to"),
