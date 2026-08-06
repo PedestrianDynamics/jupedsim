@@ -151,7 +151,7 @@ void AnticipationVelocityModel::CheckModelConstraint(
     constexpr double reactionTimeMax = 1.0;
     validateConstraint(reactionTime, reactionTimeMin, reactionTimeMax, "reactionTime", true);
 
-    const auto neighbors = envQuery.OtherAgentsInRange(agent.position(), 2.0);
+    const auto neighbors = envQuery.OtherAgentsInRange(agent.model, 2.0);
     for(const auto& neighbor : neighbors) {
         const auto& neighbor_model = std::get<State>(neighbor.model);
         const auto contanctdDist = r + neighbor_model.radius;

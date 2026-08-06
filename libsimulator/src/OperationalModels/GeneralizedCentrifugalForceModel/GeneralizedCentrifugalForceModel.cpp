@@ -128,7 +128,7 @@ void GeneralizedCentrifugalForceModel::CheckModelConstraint(
     constexpr double BMaxMax = 2.;
     validateConstraint(BMax, BMaxMin, BMaxMax, "BMax");
 
-    const auto neighbors = envQuery.OtherAgentsInRange(agent.position(), 2.0);
+    const auto neighbors = envQuery.OtherAgentsInRange(agent.model, 2.0);
     for(const auto& neighbor : neighbors) {
         const auto& neighborModel = std::get<State>(neighbor.model);
         const auto contanctDist = AgentToAgentSpacing(agent, neighbor);

@@ -12,6 +12,7 @@
 #include <memory>
 #include <string>
 #include <string_view>
+#include <type_traits>
 
 namespace
 {
@@ -68,6 +69,17 @@ TEST(CustomModel, TypeIsCustomModel)
 {
     const MinimalCustomModel model{};
     ASSERT_EQ(model.Type(), OperationalModelType::CUSTOM_MODEL);
+}
+
+TEST(CustomModelState, DoesNotSwallowArbitraryTypesImplicitly)
+{
+    // Ensure only explicit construction of CustomModelState and no implicit conversion
+    // from any type.
+    EXPECT_FALSE((std::is_convertible_v<Point, CustomModel::State>) );
+    EXPECT_FALSE((std::is_convertible_v<Point, GenericAgent::ModelState>) );
+    EXPECT_FALSE((std::is_convertible_v<GenericAgent, GenericAgent::ModelState>) );
+
+    EXPECT_TRUE((std::is_constructible_v<CustomModel::State, int>) );
 }
 
 TEST(CustomModelState, StoresAndUpdatesTypedPayload)

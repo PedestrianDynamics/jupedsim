@@ -104,7 +104,7 @@ void CollisionFreeSpeedModel::CheckModelConstraint(
     constexpr double timeGapMax = 10.;
     validateConstraint(timeGap, timeGapMin, timeGapMax, "timeGap");
 
-    const auto neighbors = envQuery.OtherAgentsInRange(agent.position(), 2.0);
+    const auto neighbors = envQuery.OtherAgentsInRange(agent.model, 2.0);
     for(const auto& neighbor : neighbors) {
         const auto& neighbor_model = std::get<State>(neighbor.model);
         const auto contanctdDist = r + neighbor_model.radius;
