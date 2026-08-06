@@ -24,14 +24,12 @@ void init_environment_query(py::module_& m)
             "All agents within radius of agent (self excluded).")
         .def(
             "no_wall_between",
-            [](const EnvironmentQuery& /*self*/,
+            [](const EnvironmentQuery& self,
                std::tuple<double, double> from,
                std::tuple<double, double> to,
-               const std::vector<LineSegment>& boundaries) -> bool {
-                const LineSegment los{intoPoint(from), intoPoint(to)};
-                return !std::any_of(boundaries.begin(), boundaries.end(), [&los](const auto& seg) {
-                    return intersects(los, seg);
-                });
+               const std::vector<LineSegment>& boundaries) {
+                return self.NoGeometryBetween(
+                    intoPoint(from), intoPoint(to), intoRange(boundaries));
             },
             py::arg("from"),
             py::arg("to"),

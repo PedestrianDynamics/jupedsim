@@ -66,13 +66,11 @@ public:
         return neighbors;
     }
 
-    bool NoGeometryBetween(
-        const Point& from,
-        const Point& to,
-        const CollisionGeometry::LineSegmentRange& boundaries) const
+    template <typename Range>
+    bool NoGeometryBetween(const Point& from, const Point& to, const Range& boundaries) const
     {
         const LineSegment los{from, to};
-        return !std::any_of(boundaries.begin(), boundaries.end(), [&los](const auto& seg) {
+        return !std::any_of(std::begin(boundaries), std::end(boundaries), [&los](const auto& seg) {
             return intersects(los, seg);
         });
     }

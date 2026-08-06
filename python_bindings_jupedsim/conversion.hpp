@@ -39,6 +39,12 @@ auto intoVec(Range&& range)
     return result;
 }
 
+template <typename T>
+auto intoRange(const std::vector<T>& v)
+{
+    return std::ranges::subrange(v.cbegin(), v.cend());
+}
+
 template <typename T, typename U>
 std::vector<T> intoVecT(const std::vector<U>& vec)
 {
