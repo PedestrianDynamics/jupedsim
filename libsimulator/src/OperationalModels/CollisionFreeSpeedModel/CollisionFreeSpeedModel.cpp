@@ -38,7 +38,8 @@ Point CollisionFreeSpeedModel::ComputeNextState(
     const AgentStep& step) const
 {
     const auto& currentState = std::get<State>(current);
-    const auto& boundaries = step.WallsNearby();
+    auto _w = step.WallsNearby();
+    const std::vector<WallView> boundaries(_w.begin(), _w.end());
     const auto neighborhood =
         step.OtherAgentsInRange(_cutOffRadius, [&step, &boundaries](const NeighborView& n) {
             return step.NoGeometryBetween(n.RelativePosition, boundaries);

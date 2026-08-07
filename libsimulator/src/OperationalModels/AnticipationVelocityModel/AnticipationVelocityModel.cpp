@@ -33,7 +33,8 @@ Point AnticipationVelocityModel::ComputeNextState(
     const AgentStep& step) const
 {
     const auto& currentState = std::get<State>(current);
-    const auto& boundaries = step.WallsNearby();
+    auto _w = step.WallsNearby();
+    const std::vector<WallView> boundaries(_w.begin(), _w.end());
     // Exclude occluded and self agents
     auto neighborhood =
         step.OtherAgentsInRange(_cutOffRadius, [&step, &boundaries](const NeighborView& n) {

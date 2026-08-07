@@ -29,10 +29,11 @@ Point SocialForceModel::ComputeNextState(
     const auto& currentState = std::get<State>(current);
     auto forces = DrivingForce(currentState, step.ToNextTarget());
 
-    const auto& walls = step.WallsNearby();
+    auto _w = step.WallsNearby();
+    const std::vector<WallView> boundaries(_w.begin(), _w.end());
     auto neighborhood =
-        step.OtherAgentsInRange(_cutOffRadius, [&step, &walls](const NeighborView& n) {
-            return step.NoGeometryBetween(n.RelativePosition, walls);
+        step.OtherAgentsInRange(_cutOffRadius, [&step, &boundaries](const NeighborView& n) {
+            return step.NoGeometryBetween(n.RelativePosition, boundaries);
         });
     Point F_rep;
     for(const auto& neighbor : neighborhood) {
@@ -40,7 +41,7 @@ Point SocialForceModel::ComputeNextState(
     }
     forces += F_rep / currentState.mass;
     Point obstacle_f{};
-    for(const auto& wall : walls) {
+    for(const auto& wall : boundaries) {
         obstacle_f += ObstacleForce(currentState, wall);
     }
     forces += obstacle_f / currentState.mass;
