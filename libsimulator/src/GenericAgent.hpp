@@ -26,7 +26,7 @@ struct GenericAgent {
 
     OperationalModelState state{};
 
-    const Point& Position() const { return _position; }
+    const Point Position() const { return _position; }
     void MoveAlongSurface(Point delta) { _position += delta; }
 
     GenericAgent(
