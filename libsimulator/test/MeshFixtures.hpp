@@ -3,6 +3,8 @@
 
 #include "CfgCgal.hpp"
 
+#include <CGAL/Polygon_mesh_processing/triangulate_faces.h>
+
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -220,6 +222,43 @@ inline SurfaceMesh wavy_terrain()
         }
     }
     return builder.take();
+}
+
+/// A corridor 45 m long and 2 m wide with door recesses down one side, given as the single
+/// polygonal face a floor plan arrives as and cut into triangles the way any polygon face is:
+/// by clipping ears off it.
+///
+/// That is what the other fixtures cannot show. Ear clipping is not Delaunay, so the corridor
+/// ends up carrying triangles that span its whole length on a couple of square metres, and
+/// locating a point on one of those loses three orders of magnitude more than the coordinates
+/// themselves carry. Every hand-meshed fixture here is small and well shaped, and neither is a
+/// property of real input.
+inline SurfaceMesh corridor_with_door_recesses()
+{
+    constexpr double length = 45.0;
+    constexpr double width = 2.0;
+    constexpr double depth = 0.3;
+    // Walked back along the far wall, so the ring stays counter-clockwise.
+    constexpr std::array<std::array<double, 2>, 7> doors{
+        {{42, 41}, {36, 35}, {30, 29}, {24, 23}, {18, 17}, {12, 11}, {6, 5}}};
+
+    std::vector<std::array<double, 2>> ring{{0, 0}, {length, 0}, {length, width}};
+    for(const auto& [near, far] : doors) {
+        ring.push_back({near, width});
+        ring.push_back({near, width + depth});
+        ring.push_back({far, width + depth});
+        ring.push_back({far, width});
+    }
+    ring.push_back({0, width});
+
+    SurfaceMesh mesh{};
+    std::vector<SurfaceMesh::Vertex_index> corners{};
+    for(const auto& [x, y] : ring) {
+        corners.push_back(mesh.add_vertex(Point3D{x, y, 0.0}));
+    }
+    mesh.add_face(corners);
+    CGAL::Polygon_mesh_processing::triangulate_faces(mesh);
+    return mesh;
 }
 
 } // namespace fixtures

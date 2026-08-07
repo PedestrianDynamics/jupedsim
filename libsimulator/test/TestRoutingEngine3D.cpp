@@ -2,6 +2,7 @@
 #include "CfgCgal.hpp"
 #include "Geometry/Geometry3D.hpp"
 #include "GeometryBuilder.hpp"
+#include "MeshFixtures.hpp"
 #include "RoutingEngine.hpp"
 #include "SimulationError.hpp"
 #include "SurfaceMeshShortestPathRoutingEngine.hpp"
@@ -367,4 +368,28 @@ TEST(RoutingEngineProjected, TheClearanceIsWhatHoldsARouteOffACorner)
     const Point waypoint = keeping_distance.ComputeWaypoint(from, to);
     EXPECT_NE(waypoint, Point(1, 1));
     EXPECT_NEAR((waypoint - Point{1, 1}).Norm(), keeping_distance.WallClearance(), 1e-9);
+}
+
+TEST(RoutingEngine3DCorridor, TheWaypointIsNeverTheSpotAlreadyStoodOn)
+{
+    // On triangles this long the path comes back with its own source point far enough off to
+    // survive as a waypoint of its own -- and a step that short has no direction, so the agent
+    // is sent to where it stands and stays there.
+    Geometry3D geometry{fixtures::corridor_with_door_recesses()};
+    SurfaceMeshShortestPathRoutingEngine engine{geometry};
+
+    auto walker = geometry.get_location(2.0, 0.9, 0.0);
+    const auto exit = geometry.get_location(44.0, 1.0, 0.0);
+    ASSERT_TRUE(walker.has_value() && exit.has_value());
+
+    // Never overshoot the waypoint, so a step is as long as the way on is -- which is what
+    // makes standing still show up as never arriving.
+    constexpr double stride = 0.05;
+    int steps = 0;
+    while(walker->distance_to(*exit) > stride) {
+        const Point onwards = engine.ComputeWaypoint(*walker, *exit) - walker->xy();
+        ASSERT_LT(++steps, 2000) << "stuck at x=" << walker->xy().x;
+        walker->move_on_surface(onwards.Normalized() * std::min(stride, onwards.Norm()));
+    }
+    EXPECT_LE(walker->distance_to(*exit), stride);
 }
