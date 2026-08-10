@@ -133,19 +133,18 @@ def main(
         )
         agent_positions = pos_stage + pos_rest
 
-        agent_parameters = jps.AnticipationVelocityModelAgentParameters()
+        agent_parameters = jps.AnticipationVelocityModelState()
         agent_parameters.radius = 0.15
         v_distribution = normal(1.34, 0.05, number_agents)
 
         routing = jps.RoutingEngine(geo.geoms[0])
 
         for i in range(len(agent_positions)):
-            agent_parameters.position = (
+            agent_position = (
                 agent_positions[i][0],
                 agent_positions[i][1],
             )
             agent_parameters.desired_speed = v_distribution[i]
-            agent_parameters.journey_id = journey_id
 
             # choose shortest path
             min_distance = float("inf")
@@ -164,8 +163,12 @@ def main(
                     min_distance = distance_to_exit
                     min_exit_id = j
 
-            agent_parameters.stage_id = exit_ids[min_exit_id]
-            simulation.add_agent(agent_parameters)
+            simulation.add_agent(
+                journey_id=journey_id,
+                stage_id=exit_ids[min_exit_id],
+                position=agent_position,
+                state=agent_parameters,
+            )
 
         start_time = time.perf_counter_ns()
         while (
