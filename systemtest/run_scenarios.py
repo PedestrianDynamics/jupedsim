@@ -74,7 +74,7 @@ def scenarios():
     )
     yield (
         "AnticipationVelocityModel",
-        jps.AnticipationVelocityModel(rng_seed=1234),
+        jps.AnticipationVelocityModel(),
         lambda pos: jps.AnticipationVelocityModelState(position=pos),
     )
     yield (
