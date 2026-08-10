@@ -37,14 +37,29 @@ inline bool intersects(const LineSegment& los, const WallView& wall)
 {
     return intersects(los, wall.segment);
 }
+/// Substitutes the model state neighbors are seen with.
+///
+/// A model that delegates a step to another model hands over a view of the world, but the
+/// delegate expects neighbors to carry its own state type. An implementation maps each
+/// neighbor's stored state to one the delegate understands and owns the mapped states for as
+/// long as it lives.
+class NeighborStates
+{
+public:
+    virtual ~NeighborStates() = default;
+    virtual const OperationalModelState& MapToCurrentState(const GenericAgent& agent) const = 0;
+};
 
 /// What an agent perceives of its surroundings, expressed relative to where it
 /// stands. Agents do not know absolute positions as they do not need to.
 class AgentView
 {
 public:
-    AgentView(const EnvironmentQuery& world, const GenericAgent& agent)
-        : _world(world), _agent(agent)
+    AgentView(
+        const EnvironmentQuery& world,
+        const GenericAgent& agent,
+        const NeighborStates* neighborStates = nullptr)
+        : _world(world), _agent(agent), _neighborStates(neighborStates)
     {
     }
 
@@ -61,13 +76,19 @@ public:
             if(candidate.id == _agent.id) {
                 return;
             }
-            const NeighborView neighbor{candidate.Position() - _agent.Position(), &candidate.state};
+            const NeighborView neighbor{
+                candidate.Position() - _agent.Position(),
+                _neighborStates ? &_neighborStates->MapToCurrentState(candidate) :
+                                  &candidate.state};
             if(filter(neighbor)) {
                 neighbors.push_back(neighbor);
             }
         });
         return neighbors;
     }
+
+    /// Whether neighbors are seen through a substituted state rather than their own.
+    bool HasNeighborMapping() const { return _neighborStates != nullptr; }
 
     /// Whether the straight line to a point at 'RelativePosition' is free of geometry.
     /// 'boundaries' must be in the same relative coordinate frame (agent at origin),
@@ -120,15 +141,28 @@ public:
 protected:
     const EnvironmentQuery& _world;
     const GenericAgent& _agent;
+    /// Null in the common case, where neighbors are seen with their own state.
+    const NeighborStates* _neighborStates;
 };
 
 /// An AgentView plus what only holds for one step (dT + next target).
 class AgentStep : public AgentView
 {
 public:
-    AgentStep(const EnvironmentQuery& world, const GenericAgent& agent, double dt)
-        : AgentView(world, agent), _dt(dt)
+    AgentStep(
+        const EnvironmentQuery& world,
+        const GenericAgent& agent,
+        double dt,
+        const NeighborStates* neighborStates = nullptr)
+        : AgentView(world, agent, neighborStates), _dt(dt)
     {
+    }
+
+    /// The same step, but with neighbors seen through 'states'. 'states' has to outlive the
+    /// returned step.
+    AgentStep WithNeighborStateMapping(const NeighborStates& states) const
+    {
+        return AgentStep{_world, _agent, _dt, &states};
     }
 
     double dt() const { return _dt; }
