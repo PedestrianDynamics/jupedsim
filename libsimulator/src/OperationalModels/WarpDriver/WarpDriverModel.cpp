@@ -350,8 +350,7 @@ OperationalModelType WarpDriverModel::Type() const
     return OperationalModelType::WARP_DRIVER;
 }
 
-void WarpDriverModel::CheckModelConstraint(const GenericAgent& agent, const AgentView& /*view*/)
-    const
+void WarpDriverModel::CheckModelConstraint(const GenericAgent& agent, const AgentView& view) const
 {
     const auto* data = std::get_if<State>(&agent.state);
     if(!data) {
@@ -408,6 +407,29 @@ void WarpDriverModel::CheckModelConstraint(const GenericAgent& agent, const Agen
             agent.id,
             this->_velocityUncertaintyY);
     }
+
+    const auto neighbors = view.OtherAgentsInRange(2.0);
+    for(const auto& neighbor : neighbors) {
+        const auto distance = neighbor.RelativePosition.Norm();
+
+        if(data->radius >= distance) {
+            throw SimulationError(
+                "Model constraint violation: Agent at {} too close to agent at {}: distance {}, "
+                "radius {}",
+                agent.Position(),
+                agent.Position() + neighbor.RelativePosition,
+                distance,
+                data->radius);
+        }
+    }
+    const auto maxRadius = data->radius / 2;
+    if(!view.WallsInRange(maxRadius).empty()) {
+        throw SimulationError(
+            "Model constraint violation: Agent at {} too close to geometry boundaries, distance <= "
+            "{}/2",
+            agent.Position(),
+            data->radius);
+    }
 }
 
 Point WarpDriverModel::ComputeNextState(
@@ -451,7 +473,12 @@ Point WarpDriverModel::ComputeNextState(
     const double dtSample = this->_timeHorizon / std::max(this->_numSamples - 1, 1);
 
     // === Step 2: Perceive - build collision probability field ===
-    const auto neighbors = step.OtherAgentsInRange(_cutOffRadius);
+    auto _w = step.WallsInRange(_cutOffRadius);
+    const std::vector<WallView> boundaries(_w.begin(), _w.end());
+    const auto neighbors =
+        step.OtherAgentsInRange(_cutOffRadius, [&step, &boundaries](const NeighborView& n) {
+            return step.NoGeometryBetween(n.RelativePosition, boundaries);
+        });
 
     // Short-range repulsion: not part of the original Wolinski et al. (2016)
     // model, which is purely anticipatory. Added as a practical safety net
@@ -623,7 +650,7 @@ Point WarpDriverModel::ComputeNextState(
     newVelWorld = newVelWorld + repulsion;
 
     // Boundary avoidance: steer agents away from walls
-    for(const auto& wall : step.WallsNearby()) {
+    for(const auto& wall : boundaries) {
         if(wall.segment.LengthSquare() < 1e-12) {
             continue; // degenerate wall segment
         }
