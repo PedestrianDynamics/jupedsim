@@ -202,3 +202,31 @@ class AgentStep(AgentView):
     def to_next_target(self) -> tuple[float, float]:
         """Vector from the agent to its next target."""
         return self._obj.to_next_target
+
+    def with_neighbor_state_mapping(
+        self, repack: Callable[[Any], Any]
+    ) -> "AgentStep":
+        """Return this step with every neighbor seen through *repack*.
+
+        Use this to delegate a step to a built-in model whose
+        ``compute_next_state`` expects neighbors to carry its own state type::
+
+            def compute_next_state(self, state, step):
+                cfsm_step = step.with_neighbor_states(self.as_cfsm_state)
+                sub, movement = self._cfsm.compute_next_state(state.sub, cfsm_step)
+                return replace(state, sub=sub), movement
+
+        This step is not modified, so the model keeps seeing its own states.
+
+        Args:
+            repack: Callable ``(neighbor_state) -> state``, called once per
+                neighbor per query. It has to return a built-in model state.
+
+        Returns:
+            A new :class:`AgentStep`. Only valid during the current callback.
+        """
+        return AgentStep(
+            self._obj.with_neighbor_state_mapping(
+                py_jps._NeighborStates(repack)
+            )
+        )
