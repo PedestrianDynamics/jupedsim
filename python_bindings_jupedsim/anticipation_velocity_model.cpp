@@ -19,7 +19,7 @@ void init_anticipation_velocity_model(py::module_& m)
             py::init<double, uint64_t>(),
             py::kw_only(),
             py::arg("pushout_strength") = 0.3,
-            py::arg("rng_seed"));
+            py::arg("rng_seed") = 42);
     const AnticipationVelocityModel::State d{};
     py::class_<AnticipationVelocityModel::State>(m, "AnticipationVelocityModelState")
         .def(
