@@ -1,9 +1,11 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
+import sys
+
 import jupedsim as jps
+import vtkmodules.qt
 import vtkmodules.vtkRenderingOpenGL2  # noqa: F401
 from jupedsim.internal.aabb import AABB
 from PySide6.QtCore import Signal
-from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from vtkmodules.vtkInteractionStyle import vtkInteractorStyleUser
 from vtkmodules.vtkRenderingCore import vtkRenderer
 
@@ -11,6 +13,12 @@ from jupedsim_visualizer.config import Colors
 from jupedsim_visualizer.geometry import HoverInfo
 from jupedsim_visualizer.grid import Grid
 from jupedsim_visualizer.move_controller import MoveController
+
+# On macOS with Qt6/PySide6, QOpenGLWidget is required so Qt manages the OpenGL context;
+# QWidget (the default) does not expose a native handle that VTK can attach to there.
+if sys.platform == "darwin":
+    vtkmodules.qt.QVTKRWIBase = "QOpenGLWidget"
+from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor  # noqa: E402  # isort: skip
 
 
 class RenderWidget(QVTKRenderWindowInteractor):
