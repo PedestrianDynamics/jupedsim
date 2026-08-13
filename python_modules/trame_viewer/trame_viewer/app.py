@@ -1,4 +1,3 @@
-#! /usr/bin/env python3
 # SPDX-License-Identifier: LGPL-3.0-or-later
 """3D viewer for a multi-level navigation mesh, via pyvista + trame.
 
@@ -595,7 +594,8 @@ def run_native(obj_path: str | None, port: int) -> None:
     child = subprocess.Popen(
         [
             sys.executable,
-            __file__,
+            "-m",
+            "trame_viewer",
             *(["--obj", obj_path] if obj_path else []),
             "--port",
             str(port),
