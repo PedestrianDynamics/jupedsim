@@ -30,18 +30,19 @@ py::object stateToPython(const OperationalModelState& state)
 
 /// Maps neighbor states through a Python callable, e.g. to hand a built-in model neighbors of
 /// the state type it expects.
-class PythonNeighborStates : public NeighborStates
+class PythonNeighborStateMapper : public NeighborStateMapper
 {
     py::object _repack;
     /// Deque, not vector: MappedTo() hands out references that must survive later calls.
     mutable std::deque<OperationalModelState> _states{};
 
 public:
-    explicit PythonNeighborStates(py::object repack) : _repack(std::move(repack)) {}
+    explicit PythonNeighborStateMapper(py::object repack) : _repack(std::move(repack)) {}
 
-    const OperationalModelState& MapToCurrentState(const GenericAgent& agent) const override
+    const OperationalModelState&
+    MapToCurrentState(const OperationalModelState& state) const override
     {
-        py::object repacked = _repack(stateToPython(agent.state));
+        py::object repacked = _repack(stateToPython(state));
         try {
             _states.emplace_back(repacked.cast<OperationalModelState>());
         } catch(const py::cast_error&) {
@@ -62,7 +63,7 @@ void init_agent_view(py::module_& m)
         .def_property_readonly(
             "state", [](const NeighborView& self) { return stateToPython(*self.state); });
 
-    py::class_<PythonNeighborStates>(m, "_NeighborStates")
+    py::class_<PythonNeighborStateMapper>(m, "_NeighborStateMapper")
         .def(py::init<py::object>(), py::arg("repack"));
 
     py::class_<WallView>(m, "WallView")
@@ -102,12 +103,20 @@ void init_agent_view(py::module_& m)
                 return intoVec(self.WallsInRange(distance));
             },
             py::arg("distance"),
-            "Walls within exact distance of the agent, as seen from it.");
+            "Walls within exact distance of the agent, as seen from it.")
+        .def(
+            "with_neighbor_state_mapping",
+            [](const AgentView& self, const PythonNeighborStateMapper& states) {
+                return self.WithNeighborStateMapping(states);
+            },
+            py::arg("neighbor_states"),
+            py::keep_alive<0, 2>(),
+            "The same view, but with every neighbor seen through the given mapping.");
 
     py::class_<AgentStep, AgentView>(m, "AgentStep")
         .def(
             "with_neighbor_state_mapping",
-            [](const AgentStep& self, const PythonNeighborStates& states) {
+            [](const AgentStep& self, const PythonNeighborStateMapper& states) {
                 return self.WithNeighborStateMapping(states);
             },
             py::arg("neighbor_states"),
