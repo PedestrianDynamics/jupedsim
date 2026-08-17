@@ -6,6 +6,7 @@
 #include "NeighborhoodSearch.hpp"
 #include "OperationalDecisionSystem.hpp"
 #include "OperationalModels/CustomModel/CustomModel.hpp"
+#include "TestCommon.hpp"
 
 #include <gtest/gtest.h>
 

@@ -4,6 +4,7 @@
 #include "Geometry/RegionView.hpp"
 #include "LineSegment.hpp"
 #include "Point.hpp"
+#include "TestCommon.hpp"
 
 #include <gtest/gtest.h>
 

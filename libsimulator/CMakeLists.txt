@@ -122,7 +122,9 @@ if (BUILD_TESTS)
         test/TestAABB.cpp
         test/TestAgentView.cpp
         test/TestBasicPrimitiveTests.cpp
+        test/TestCommon.hpp
         test/TestCustomModel.cpp
+        test/TestFlatMeshParity.cpp
         test/TestGenericAgentFormatter.cpp
         test/TestGeometry2D.cpp
         test/TestGeometry3D.cpp
@@ -134,25 +136,24 @@ if (BUILD_TESTS)
         test/TestNeighborhoodSearch.cpp
         test/TestOperationalDecisionSystem.cpp
         test/TestPoint.cpp
-        test/TestRegionSplit.cpp
         test/TestRegionReach.cpp
-        test/TestFlatMeshParity.cpp
         test/TestRegionSeams.cpp
+        test/TestRegionSplit.cpp
         test/TestRegionView.cpp
         test/TestRoutingEngine3D.cpp
         test/TestSegmentGrid.cpp
-        test/TestWallMerge.cpp
-        test/TestWarpDriver.cpp
-        test/TestSimulationClock.cpp
         test/TestSimulation.cpp
+        test/TestSimulationClock.cpp
         test/TestStage.cpp
         test/TestUniqueID.cpp
+        test/TestWallMerge.cpp
+        test/TestWarpDriver.cpp
     )
 
     target_link_libraries(libsimulator-tests PRIVATE
-        GTest::gtest
         GTest::gmock
         GTest::gtest_main
+        GTest::gtest
         simulator
     )
 

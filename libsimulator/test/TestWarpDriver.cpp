@@ -6,6 +6,7 @@
 #include "GeometryBuilder.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalModels/WarpDriver/WarpDriverModel.hpp"
+#include "TestCommon.hpp"
 
 #include <gtest/gtest.h>
 

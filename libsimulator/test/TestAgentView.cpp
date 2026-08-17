@@ -7,6 +7,7 @@
 #include "MeshFixtures.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalModels/CollisionFreeSpeedModel/CollisionFreeSpeedModel.hpp"
+#include "TestCommon.hpp"
 
 #include <gtest/gtest.h>
 

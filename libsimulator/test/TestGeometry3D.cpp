@@ -2,6 +2,7 @@
 #include "Geometry/Geometry3D.hpp"
 #include "LineSegment.hpp"
 #include "MeshFixtures.hpp"
+#include "TestCommon.hpp"
 
 #include <CGAL/mark_domain_in_triangulation.h>
 #include <gtest/gtest.h>

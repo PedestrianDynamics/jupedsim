@@ -2,6 +2,7 @@
 #include "GenericAgent.hpp"
 #include "Geometry/Geometry3D.hpp"
 #include "GeometryBuilder.hpp"
+#include "TestCommon.hpp"
 
 #include <fmt/format.h>
 #include <gtest/gtest.h>

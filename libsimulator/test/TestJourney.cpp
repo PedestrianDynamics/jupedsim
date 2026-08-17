@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Journey.hpp"
+#include "TestCommon.hpp"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>

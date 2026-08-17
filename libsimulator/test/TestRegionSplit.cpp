@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "CfgCgal.hpp"
 #include "Geometry/RegionSplit.hpp"
+#include "TestCommon.hpp"
 
 #include <gtest/gtest.h>
 

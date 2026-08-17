@@ -8,6 +8,7 @@
 #include "Simulation.hpp"
 #include "SimulationError.hpp"
 #include "StageDescription.hpp"
+#include "TestCommon.hpp"
 
 #include <gtest/gtest.h>
 

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Geometry/Geometry2D.hpp"
 #include "LineSegment.hpp"
+#include "TestCommon.hpp"
 #include "gtest/gtest.h"
 
 #include <fmt/format.h>

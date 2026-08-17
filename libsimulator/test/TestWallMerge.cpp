@@ -5,6 +5,7 @@
 #include "Geometry/WallMerge.hpp"
 #include "GeometryBuilder.hpp"
 #include "MeshFixtures.hpp"
+#include "TestCommon.hpp"
 
 #include <CGAL/Polygon_mesh_processing/remesh.h>
 #include <CGAL/boost/graph/iterator.h>

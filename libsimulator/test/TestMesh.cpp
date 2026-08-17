@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "CfgCgal.hpp"
 #include "Mesh.hpp"
+#include "TestCommon.hpp"
 
 #include <CGAL/mark_domain_in_triangulation.h>
 #include <glm/vec2.hpp>

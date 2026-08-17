@@ -4,6 +4,7 @@
 #include "GeometryBuilder.hpp"
 #include "OperationalDecisionSystem.hpp"
 #include "OperationalModels/CustomModel/CustomModel.hpp"
+#include "TestCommon.hpp"
 
 #include <fmt/format.h>
 #include <gtest/gtest.h>

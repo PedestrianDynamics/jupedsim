@@ -4,6 +4,7 @@
 #include "Journey.hpp"
 #include "MeshFixtures.hpp"
 #include "Stage.hpp"
+#include "TestCommon.hpp"
 #include "gtest/gtest.h"
 
 class StagesTests : public ::testing::Test

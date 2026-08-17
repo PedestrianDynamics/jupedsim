@@ -6,6 +6,7 @@
 #include "RoutingEngine.hpp"
 #include "SimulationError.hpp"
 #include "SurfaceMeshShortestPathRoutingEngine.hpp"
+#include "TestCommon.hpp"
 
 #include <CGAL/mark_domain_in_triangulation.h>
 #include <gtest/gtest.h>

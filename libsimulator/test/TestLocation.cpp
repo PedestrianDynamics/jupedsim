@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Geometry/Geometry3D.hpp"
 #include "Geometry/Location.hpp"
+#include "TestCommon.hpp"
 
 #include <gtest/gtest.h>
 

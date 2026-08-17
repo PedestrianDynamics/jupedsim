@@ -4,6 +4,7 @@
 #include "Geometry/RegionSeams.hpp"
 #include "Geometry/RegionSplit.hpp"
 #include "MeshFixtures.hpp"
+#include "TestCommon.hpp"
 
 #include <gtest/gtest.h>
 

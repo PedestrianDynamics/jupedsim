@@ -6,6 +6,7 @@
 #include "GeometryBuilder.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalModels/CollisionFreeSpeedModel/CollisionFreeSpeedModel.hpp"
+#include "TestCommon.hpp"
 
 #include <CGAL/Polygon_mesh_processing/remesh.h>
 #include <CGAL/boost/graph/iterator.h>
