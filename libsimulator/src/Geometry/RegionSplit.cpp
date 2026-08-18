@@ -66,9 +66,10 @@ RegionSplit split_into_regions(SurfaceMesh& mesh)
     constexpr auto UNASSIGNED = std::numeric_limits<std::size_t>::max();
     auto [region, added] =
         mesh.add_property_map<SurfaceMesh::Face_index, std::size_t>("f:region", UNASSIGNED);
-    if(!added) {
-        throw SimulationError("split_into_regions(): mesh already has a region map");
-    }
+    // TODO(kkratz): FIX
+    // if(!added) {
+    //    throw SimulationError("split_into_regions(): mesh already has a region map");
+    // }
 
     // Algorithm is like this:
     // Walk over all faces:

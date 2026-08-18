@@ -15,30 +15,32 @@ target_sources(simulator PRIVATE
     src/Ellipse.hpp
     src/GenericAgent.hpp
     src/GeometricFunctions.hpp
+    src/Geometry/BoundaryIndex.cpp
+    src/Geometry/BoundaryIndex.hpp
     src/Geometry/Geometry2D.cpp
     src/Geometry/Geometry2D.hpp
     src/Geometry/Geometry3D.cpp
     src/Geometry/Geometry3D.hpp
     src/Geometry/Location.cpp
     src/Geometry/Location.hpp
-    src/Geometry/RegionSplit.cpp
-    src/Geometry/RegionSplit.hpp
-    src/Geometry/RegionReach.cpp
-    src/Geometry/RegionReach.hpp
     src/Geometry/PolylineMerge.cpp
     src/Geometry/PolylineMerge.hpp
+    src/Geometry/RegionReach.cpp
+    src/Geometry/RegionReach.hpp
     src/Geometry/RegionSeams.cpp
     src/Geometry/RegionSeams.hpp
+    src/Geometry/RegionSplit.cpp
+    src/Geometry/RegionSplit.hpp
     src/Geometry/RegionView.cpp
     src/Geometry/RegionView.hpp
     src/Geometry/SegmentGrid.cpp
     src/Geometry/SegmentGrid.hpp
-    src/Geometry/WallMerge.cpp
-    src/Geometry/WallRange.cpp
-    src/Geometry/WallRange.hpp
-    src/Geometry/WallMerge.hpp
     src/Geometry/Validation.cpp
     src/Geometry/Validation.hpp
+    src/Geometry/WallMerge.cpp
+    src/Geometry/WallMerge.hpp
+    src/Geometry/WallRange.cpp
+    src/Geometry/WallRange.hpp
     src/GeometryBuilder.cpp
     src/GeometryBuilder.hpp
     src/Graph.hpp
@@ -122,6 +124,7 @@ if (BUILD_TESTS)
         test/TestAABB.cpp
         test/TestAgentView.cpp
         test/TestBasicPrimitiveTests.cpp
+        test/TestBoundaryIndex.cpp
         test/TestCommon.hpp
         test/TestCustomModel.cpp
         test/TestFlatMeshParity.cpp
