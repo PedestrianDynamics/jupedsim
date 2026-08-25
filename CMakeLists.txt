@@ -47,6 +47,9 @@ endif()
 set(BUILD_BENCHMARKS OFF CACHE BOOL "Build micro benchmark")
 print_var(BUILD_BENCHMARKS)
 
+set(BUILD_TOOLS OFF CACHE BOOL "Build CLI tools")
+print_var(BUILD_TOOLS)
+
 set(USE_IPO ON CACHE BOOL "Build with interprocedural optimization (LTO) where supported")
 print_var(USE_IPO)
 
@@ -232,6 +235,7 @@ endif()
 add_subdirectory(libcommon)
 add_subdirectory(libsimulator)
 add_subdirectory(python_bindings_jupedsim)
+add_subdirectory(tools)
 
 ################################################################################
 # Code formatting
