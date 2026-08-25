@@ -25,11 +25,14 @@ struct RegionSplit {
 ///
 /// Equivalently (slopes are <= 50deg and faces consistently oriented, so
 /// projection is orientation-preserving per face): each region's projected
-/// boundary -- walls and seams together -- forms a simple polygon with holes,
-/// weakened only at genuinely shared vertices, where the boundary may pinch.
+/// boundary -- walls and seams together -- forms strictly simple loops. The
+/// boundary of a region may not even touch itself: two lobes meeting at a
+/// genuinely shared vertex stay separate regions.
 ///
 /// The split criterion is coincidence, NOT slope: a straight ramp or a stair
-/// run stays one region even though it is tilted.
+/// run stays one region even though it is tilted. Grown planar-first and merged
+/// bottom-up by height, the result is deterministic: it depends only on the
+/// mesh's vertex/face order, never on growth order or platform.
 ///
 /// Expects a "well-behaved" triangulated 2-manifold (clean, consistently
 /// oriented, walkable faces only, no garbage). Note that unwelded duplicate

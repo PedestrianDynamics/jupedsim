@@ -58,11 +58,21 @@ std::vector<std::pair<double, double>> extents_along(const std::vector<MergedWal
 }
 
 /// The wall running the full length of the far side at z = 3, across landing and upper
-/// floor. It is the one the region boundary can cut.
+/// floor -- one region since the overlay fuses the coplanar pair.
 std::vector<MergedWall>::const_iterator find_far_side_wall(const std::vector<MergedWall>& walls)
 {
     return std::find_if(walls.begin(), walls.end(), [](const MergedWall& w) {
         return w.segment.p1.y == 8.0 && w.segment.p2.y == 8.0 &&
+               std::abs(w.segment.p2.x - w.segment.p1.x) == 18.0;
+    });
+}
+
+/// The wall climbing the full length of the near side, fused from ground floor, flight and
+/// landing. It is the one the region boundary cuts (at the flight/landing seam, x = 14).
+std::vector<MergedWall>::const_iterator find_near_side_wall(const std::vector<MergedWall>& walls)
+{
+    return std::find_if(walls.begin(), walls.end(), [](const MergedWall& w) {
+        return w.segment.p1.y == 0.0 && w.segment.p2.y == 0.0 &&
                std::abs(w.segment.p2.x - w.segment.p1.x) == 18.0;
     });
 }
@@ -169,11 +179,11 @@ TEST(WallMerge, WallCrossingARegionBoundaryStaysOneWall)
     const auto m = merge(switchback_stair());
     ASSERT_EQ(m.region_count, 2u);
 
-    // Landing and upper floor lie at the same height and their y = 8 edges continue each
-    // other, so this is one straight wall from x = 0 to x = 18 -- and the region flood cuts
-    // it in the middle. Breaking the wall there would make the repulsion depend on where the
-    // overlay happened to draw its line.
-    const auto crossing = find_far_side_wall(m.walls);
+    // Ground floor, flight and landing edges at y = 0 continue each other in plan, so this
+    // is one straight wall from x = 0 to x = 18 -- and the region overlay cuts it at the
+    // flight/landing seam (x = 14). Breaking the wall there would make the repulsion depend
+    // on where the overlay happened to draw its line.
+    const auto crossing = find_near_side_wall(m.walls);
     ASSERT_NE(crossing, m.walls.end()) << "the wall across the region boundary was split";
 
     // Spanning the boundary means it borders both regions, and has to be findable from
@@ -208,18 +218,21 @@ TEST(WallMerge, WallsDoNotMoveWhenTheRegionCutDoes)
     ASSERT_EQ(ground_first.region_count, 2u);
     ASSERT_EQ(upper_first.region_count, 2u);
 
-    // The flood is greedy from an arbitrary seed, and the two overlapping ends are separated
-    // by pieces that overlap neither -- so feeding the same geometry in the other order cuts
-    // it somewhere else. Seeded at the ground floor the cut falls between landing and upper
-    // floor, which is across the far wall; seeded at the upper floor it falls inside the
-    // ground floor, leaving that wall untouched.
-    const auto ground_crossing = find_far_side_wall(ground_first.walls);
-    const auto upper_crossing = find_far_side_wall(upper_first.walls);
-    ASSERT_NE(ground_crossing, ground_first.walls.end());
-    ASSERT_NE(upper_crossing, upper_first.walls.end());
-    ASSERT_EQ(ground_crossing->regions.size(), 2u);
-    ASSERT_EQ(upper_crossing->regions.size(), 1u)
-        << "the cut no longer moves with build order, so this fixture tests nothing";
+    // The overlay fuses the coplanar landing + upper floor and cuts at the flight/landing
+    // seam -- independent of the order the faces were fed in. The far wall lies wholly in
+    // the fused region, the near wall crosses the cut, both ways round.
+    const auto ground_far = find_far_side_wall(ground_first.walls);
+    const auto upper_far = find_far_side_wall(upper_first.walls);
+    ASSERT_NE(ground_far, ground_first.walls.end());
+    ASSERT_NE(upper_far, upper_first.walls.end());
+    ASSERT_EQ(ground_far->regions.size(), 1u);
+    ASSERT_EQ(upper_far->regions.size(), 1u);
+    const auto ground_near = find_near_side_wall(ground_first.walls);
+    const auto upper_near = find_near_side_wall(upper_first.walls);
+    ASSERT_NE(ground_near, ground_first.walls.end());
+    ASSERT_NE(upper_near, upper_first.walls.end());
+    ASSERT_EQ(ground_near->regions.size(), 2u);
+    ASSERT_EQ(upper_near->regions.size(), 2u);
 
     // The walls themselves must not care. That is what the merge exists for: geometry
     // decides what a wall is, the overlay does not.

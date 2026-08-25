@@ -51,9 +51,11 @@ def geometry() -> Geometry3D:
 
 
 def test_mesh_splits_into_multiple_regions(geometry) -> None:
-    # The folded U-stair cannot share a region with the floors it connects;
-    # a count this low would mean the split regressed to folded mega-regions.
-    assert geometry.region_count() >= 3
+    # The folded U-stair cannot share a region with the floors it connects. The
+    # split certifies every region's projection as injective (strictly simple
+    # boundary), so a low count no longer signals folded mega-regions -- only a
+    # single region would mean the overlap went undetected.
+    assert geometry.region_count() >= 2
 
 
 def test_query_invariants_hold_over_a_grid(geometry) -> None:

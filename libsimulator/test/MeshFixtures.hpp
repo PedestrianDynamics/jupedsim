@@ -135,12 +135,14 @@ public:
 ///
 /// Its point is what the extruded fixtures cannot show. The pieces form the chain
 /// ground - flight - landing - upper, and only the two ends overlap in (x, y) -- the flight
-/// and the landing sit beside the ground floor, not over it. The region flood is greedy from
-/// an arbitrary seed, so with the two ends in conflict and the middle free, *where* it cuts
-/// depends on which end it starts from. Feeding the quads in the other order moves the cut.
+/// and the landing sit beside the ground floor, not over it. The landing and the upper
+/// floor are coplanar and welded, so the region overlay fuses them and the cut falls at the
+/// flight/landing seam (x = 14) -- regardless of the order the quads are fed in, which is
+/// what the `upper_first` flag exists to demonstrate.
 ///
-/// The wall along y = 8 runs from x = 0 to x = 18 across landing and upper floor: straight
-/// in plan, and across whatever region boundary the flood happened to draw.
+/// The wall along y = 0 runs from x = 0 to x = 18 across ground floor, flight and landing:
+/// straight in plan, and across the region boundary. The wall along y = 8 (landing + upper
+/// floor) is equally straight but lies wholly inside the fused region.
 inline std::vector<QuadMesh::Quad> switchback_stair_quads()
 {
     return {

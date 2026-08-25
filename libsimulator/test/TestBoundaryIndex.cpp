@@ -42,11 +42,11 @@ TEST_F(TestBoundaryIndexTwoLevelsWithStairs, Neighboors1)
 
     auto loc = geo->get_location(2, 2, 0).value();
     auto res = sut->Query(loc, 100); // Ensure we get everything.
-    EXPECT_EQ(res.size(), 11);
+    EXPECT_EQ(res.size(), 7);
 
     loc = geo->get_location(16, 6, 3).value();
     res = sut->Query(loc, 100); // Ensure we get everything.
-    EXPECT_EQ(res.size(), 11);
+    EXPECT_EQ(res.size(), 7);
 }
 
 TEST_F(TestBoundaryIndexTwoLevelsWithStairs, Neighboors2)
@@ -55,11 +55,11 @@ TEST_F(TestBoundaryIndexTwoLevelsWithStairs, Neighboors2)
 
     auto loc = geo->get_location(2, 2, 0).value();
     auto res = sut->Query(loc, 100); // Ensure we get everything.
-    EXPECT_EQ(res.size(), 11);
+    EXPECT_EQ(res.size(), 7);
 
     loc = geo->get_location(16, 6, 3).value();
     res = sut->Query(loc, 100); // Ensure we get everything.
-    EXPECT_EQ(res.size(), 11);
+    EXPECT_EQ(res.size(), 7);
 }
 
 #include <CGAL/IO/polygon_mesh_io.h>

@@ -55,9 +55,12 @@ def test_geometry_regions_and_render_data():
     assert all(len(t) == 3 for t in tris)
     # one region id per triangle, in triangle order
     assert len(ids) == len(tris)
-    # lower floor + whole stair merge into one region,
-    # only the overlapping upper floor splits off -> exactly 2 regions.
-    assert geo.region_count() == 2
+    # Four regions: lower floor, upper floor, first flight + mid landing, and
+    # the second flight. Fewer is not possible: each flight's border coincides
+    # in (x, y) with stairwell walls it shares no mesh edge with (see
+    # RegionSplit.AFlightCoincidingWithTheStairwellWallsSplitsOff), and the two
+    # flights overlap each other in plan across the U-turn.
+    assert geo.region_count() == 4
     assert max(ids) == geo.region_count() - 1
 
 

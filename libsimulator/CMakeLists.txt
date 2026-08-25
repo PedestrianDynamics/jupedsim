@@ -25,6 +25,8 @@ target_sources(simulator PRIVATE
     src/Geometry/Location.hpp
     src/Geometry/PolylineMerge.cpp
     src/Geometry/PolylineMerge.hpp
+    src/Geometry/ProjectedBoundary.cpp
+    src/Geometry/ProjectedBoundary.hpp
     src/Geometry/RegionReach.cpp
     src/Geometry/RegionReach.hpp
     src/Geometry/RegionSeams.cpp
@@ -139,6 +141,7 @@ if (BUILD_TESTS)
         test/TestNeighborhoodSearch.cpp
         test/TestOperationalDecisionSystem.cpp
         test/TestPoint.cpp
+        test/TestProjectedBoundary.cpp
         test/TestRegionReach.cpp
         test/TestRegionSeams.cpp
         test/TestRegionSplit.cpp

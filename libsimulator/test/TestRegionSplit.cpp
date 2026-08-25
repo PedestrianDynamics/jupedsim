@@ -340,21 +340,71 @@ TEST(RegionSplit, AForeignPointContactSplits)
 {
     // The wing touches the floor's border edge in exactly one (x, y) point, one metre up and
     // welded to nothing there. Distinct surface points may not share a projection, so the
-    // wing cannot stay in the floor's region.
+    // wing cannot stay in the floor's region. The wing IS coplanar with and welded to the
+    // upper floor, so it rides in that region -- the cut falls at the floor/upper seam.
     const auto mesh = wing_tip_over_a_floor_edge();
     ASSERT_EQ(mesh.number_of_faces(), 9u);
     const auto split = split_into_regions(mesh);
     EXPECT_EQ(split.count, 2u);
 
-    // Faces 0..7 are floor+ramp+upper (one welded, coincidence-free surface), face 8 the wing.
-    std::set<std::size_t> surface_ids{};
+    // Faces 0..3 are floor+ramp, 4..8 upper floor + wing (add order on a fresh mesh).
+    std::set<std::size_t> floor_ramp_ids{};
+    std::set<std::size_t> upper_wing_ids{};
     for(const auto f : faces(mesh)) {
-        if(static_cast<std::size_t>(f) < 8) {
-            surface_ids.insert(split.region[f]);
+        (static_cast<std::size_t>(f) < 4 ? floor_ramp_ids : upper_wing_ids)
+            .insert(split.region[f]);
+    }
+    EXPECT_EQ(floor_ramp_ids.size(), 1u);
+    EXPECT_EQ(upper_wing_ids.size(), 1u);
+    EXPECT_NE(*floor_ramp_ids.begin(), *upper_wing_ids.begin());
+    expect_valid_split(mesh, split);
+}
+
+TEST(RegionSplit, EpsilonPerturbedFloorStaysOneRegion)
+{
+    // A "flat" floor as a remesher leaves it: vertices jittered a few 1e-5 out of plane.
+    // The split must not fragment it -- one region, exactly like a mathematically flat one.
+    SurfaceMesh mesh{};
+    std::array<std::array<SurfaceMesh::Vertex_index, 11>, 11> v{};
+    for(int j = 0; j < 11; ++j) {
+        for(int i = 0; i < 11; ++i) {
+            const double z = static_cast<double>((7 * i + 13 * j) % 5) * 2e-5;
+            v[j][i] = mesh.add_vertex({static_cast<double>(i), static_cast<double>(j), z});
         }
     }
-    EXPECT_EQ(surface_ids.size(), 1u);
-    EXPECT_NE(split.region[8], *surface_ids.begin());
+    for(int j = 0; j < 10; ++j) {
+        for(int i = 0; i < 10; ++i) {
+            mesh.add_face(v[j][i], v[j][i + 1], v[j + 1][i + 1]);
+            mesh.add_face(v[j][i], v[j + 1][i + 1], v[j + 1][i]);
+        }
+    }
+    const auto split = split_into_regions(mesh);
+    EXPECT_EQ(split.count, 1u);
+    expect_valid_split(mesh, split);
+}
+
+TEST(RegionSplit, MicroFoldWithinToleranceStillSplits)
+{
+    // ramp_back_over_floor squeezed into a 5e-5 slab: the fold-back sheet sits within any
+    // reasonable planarity tolerance of the floor, yet overlaps it in (x, y). The split
+    // must still separate the sheets -- tolerance may cost performance, never correctness.
+    SurfaceMesh mesh{};
+    const auto v0 = mesh.add_vertex({0, 0, 0});
+    const auto v1 = mesh.add_vertex({10, 0, 0});
+    const auto v2 = mesh.add_vertex({10, 10, 0}); // seam
+    const auto v3 = mesh.add_vertex({0, 10, 0}); // seam
+    const auto v4 = mesh.add_vertex({10, 5, 5e-5}); // fold-back sheet, barely above
+    const auto v5 = mesh.add_vertex({0, 5, 5e-5});
+    mesh.add_face(v0, v1, v2);
+    mesh.add_face(v0, v2, v3);
+    mesh.add_face(v3, v2, v4);
+    mesh.add_face(v3, v4, v5);
+    const auto split = split_into_regions(mesh);
+    ASSERT_EQ(split.count, 2u);
+    // Faces 0..1 are the floor, 2..3 the fold-back sheet.
+    EXPECT_EQ(split.region[0], split.region[1]);
+    EXPECT_EQ(split.region[2], split.region[3]);
+    EXPECT_NE(split.region[0], split.region[2]);
     expect_valid_split(mesh, split);
 }
 

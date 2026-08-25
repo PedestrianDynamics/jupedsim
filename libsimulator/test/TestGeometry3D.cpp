@@ -292,15 +292,16 @@ TEST(Geometry3DVisibility, CrossingASeamOntoWalkableSurfaceDoesNotBlock)
 {
     Geometry3D geo{fixtures::switchback_stair()};
 
-    // Upper floor and landing lie at the same height and meet at x = 14, which is also where
-    // the region overlay cut. Walking across it stays on the surface all the way.
-    const auto who = geo.get_location(12.0, 6.0, 3.0, 0.5);
+    // Flight and landing meet at x = 14, which is also where the region overlay cuts (the
+    // coplanar landing + upper floor fuse into one region). Walking across the seam stays
+    // on the surface all the way.
+    const auto who = geo.get_location(12.0, 2.0, 1.5, 0.5);
     ASSERT_TRUE(who.has_value());
     EXPECT_TRUE(geo.no_geometry_between(*who, {4.0, 0.0}));
 
     // And someone standing where that walk comes out is in sight, even though the query
     // started in a different region than the one they are in.
-    const auto beyond = geo.get_location(16.0, 6.0, 3.0, 0.5);
+    const auto beyond = geo.get_location(16.0, 2.0, 3.0, 0.5);
     ASSERT_TRUE(beyond.has_value());
     ASSERT_NE(who->region(), beyond->region());
     EXPECT_TRUE(geo.no_geometry_between(*who, *beyond));
