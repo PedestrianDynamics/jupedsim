@@ -6,6 +6,8 @@
 #include <CGAL/Polygon_mesh_processing/compute_normal.h>
 #include <CGAL/Polygon_mesh_processing/connected_components.h>
 #include <CGAL/Polygon_mesh_processing/orientation.h>
+#include <CGAL/Polygon_mesh_processing/triangulate_faces.h>
+#include <CGAL/boost/graph/helpers.h>
 
 #include <algorithm>
 #include <cmath>
@@ -61,6 +63,10 @@ bool AllFacesInMeshPlanar(const SurfaceMesh& mesh)
 void NormaliseAndValidateMesh(SurfaceMesh& mesh)
 {
     namespace PMP = CGAL::Polygon_mesh_processing;
+    if(!CGAL::is_triangle_mesh(mesh)) {
+        PMP::triangulate_faces(mesh);
+    }
+
     auto fcc = mesh.add_property_map<SurfaceMesh::Face_index, size_t>("f:cc").first;
     const auto count = PMP::connected_components(mesh, fcc);
     mesh.remove_property_map(fcc);

@@ -8,8 +8,6 @@
 #include "type_casters.hpp"
 
 #include <CGAL/Polygon_mesh_processing/IO/polygon_mesh_io.h>
-#include <CGAL/Polygon_mesh_processing/triangulate_faces.h>
-#include <CGAL/boost/graph/helpers.h>
 #include <fmt/format.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h> // IWYU pragma: keep
@@ -46,9 +44,6 @@ void init_routing_3d(py::module_& m)
                 SurfaceMesh mesh{};
                 if(!PMP::IO::read_polygon_mesh(obj_path, mesh) || mesh.is_empty()) {
                     throw SimulationError("Could not read a mesh from OBJ file '{}'", obj_path);
-                }
-                if(!CGAL::is_triangle_mesh(mesh)) {
-                    PMP::triangulate_faces(mesh);
                 }
                 // The one door a mesh from outside comes through, so the one place to insist it
                 // is a surface people can walk on -- and to turn it right side up if it is not.

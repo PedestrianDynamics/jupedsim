@@ -149,6 +149,7 @@ if (BUILD_TESTS)
         test/TestSimulationClock.cpp
         test/TestStage.cpp
         test/TestUniqueID.cpp
+        test/TestValidation.cpp
         test/TestWallMerge.cpp
         test/TestWarpDriver.cpp
     )
