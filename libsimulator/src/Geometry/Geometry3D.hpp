@@ -138,6 +138,8 @@ public:
     /// Triangles as vertex-index triples, matching region_id_per_face() order.
     std::vector<std::array<std::size_t, 3>> triangles() const;
 
+    const RegionSplit& region_split() const { return _regionSplit; }
+
 private:
     /// Compact indices, build the AABB tree and the region overlay.
     void build();
@@ -159,4 +161,5 @@ private:
     RegionMap _region{};
     std::size_t _regionCount{0};
     std::vector<RegionView> _regionViews{};
+    RegionSplit _regionSplit{};
 };

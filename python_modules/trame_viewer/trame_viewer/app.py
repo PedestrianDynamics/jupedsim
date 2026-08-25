@@ -13,6 +13,8 @@ import socket
 import tempfile
 import time
 import urllib.request
+from collections.abc import Callable
+from dataclasses import dataclass
 
 # Force pyvista offscreen before it (and VTK) initialise: the frame is rendered to an FBO and
 # streamed to the client, never into an on-screen native window.
@@ -27,6 +29,8 @@ pv.OFF_SCREEN = True
 from jupedsim.internal.routing_3d import (  # noqa: E402
     Geometry3D,
     SurfaceMeshShortestPathRoutingEngine,
+    make_naive_boundary_index,
+    make_portal_boundary_index,
 )
 from pyvista.trame.ui import plotter_ui  # noqa: E402
 from trame.app import get_server  # noqa: E402
@@ -35,6 +39,31 @@ from trame.ui.vuetify3 import SinglePageWithDrawerLayout  # noqa: E402
 from trame.widgets import vuetify3 as v3  # noqa: E402
 
 TITLE = "JuPedSim - Multi-Level Viewer"
+
+# BoundaryIndex implementations selectable in Boundary Highlight mode:
+# (key stored in state, dropdown title, factory building the index from a Geometry3D).
+BOUNDARY_INDEX_VARIANTS = [
+    ("naive", "Naive", make_naive_boundary_index),
+    ("portal", "Portal", make_portal_boundary_index),
+]
+
+
+@dataclass(frozen=True)
+class ViewerMode:
+    """One mutually exclusive user interaction mode.
+
+    Registered once in build_app(): the title feeds the mode dropdown and the
+    drawer header, build_drawer() emits the mode's drawer rows (called once at
+    layout build), reset() tears down all of the mode's state when the user
+    switches away from it, and on_right_click() (if any) receives fractional
+    canvas coords whenever the user right-clicks while the mode is active.
+    """
+
+    key: str  # value stored in state.interaction_mode
+    title: str  # dropdown entry and drawer header
+    reset: Callable[[], None]
+    build_drawer: Callable[[], None]
+    on_right_click: Callable[[float, float], None] | None = None
 
 
 def find_free_port() -> int:
@@ -76,9 +105,13 @@ def build_app(obj_path: str | None):
     state.n_points = 0
     state.n_cells = 0
     state.n_regions = 0
-    # Routing: a right-click sets the start, then the hovered point is the live target, and the
-    # next right-click freezes the path. Hover only tracks while no button is held, so the left
-    # button and all modifier / wheel gestures stay pure camera (rotate / pan / spin / zoom).
+    # Mutually exclusive interaction mode, selected in the toolbar dropdown.
+    # Keys come from the ViewerMode registry (`modes`) below.
+    state.interaction_mode = "none"
+    # Routing (Pathfinding mode): a right-click sets the start, then the hovered point is the live
+    # target, and the next right-click freezes the path. Hover only tracks while no button is held,
+    # so the left button and all modifier / wheel gestures stay pure camera (rotate / pan / spin /
+    # zoom).
     state.route_status = "idle"  # idle | tracking | frozen
     state.cursor_pos = "—"  # live, unsnapped surface position under the cursor
     state.route_start = "—"
@@ -86,6 +119,13 @@ def build_app(obj_path: str | None):
     state.route_cost = 0.0
     state.route_corners = 0
     state.route_query_us = 0  # get_shortest_path() full solve time
+    # Boundary Highlight mode: a right-click sets the query point; all boundary line segments
+    # within the search distance are highlighted.
+    state.boundary_distance = 2.0  # BoundaryIndex.query() search radius [m]
+    state.boundary_index_variant = "naive"  # key into BOUNDARY_INDEX_VARIANTS
+    state.boundary_query = "—"  # query point of the highlighted result
+    state.boundary_count = 0  # number of highlighted segments
+    state.boundary_query_us = 0  # BoundaryIndex.query() solve time
 
     # Holds the currently loaded geometry + mesh + its height range; swapped out by load_mesh().
     current: dict = {
@@ -104,6 +144,10 @@ def build_app(obj_path: str | None):
         "busy": False,  # a hover compute/render is currently in flight
         "line": None,  # persistent polyline dataset, updated in place per hover
     }
+    # Boundary Highlight interaction state. Each index variant is built lazily
+    # on its first query (users may never enter the mode / switch variants) and
+    # cached per variant; all are dropped on mesh load.
+    boundary: dict = {"indices": {}, "loc": None}
     engine = None  # Routing engine - populated in load_mesh()
     picker = vtkCellPicker()
     picker.SetTolerance(0.0005)
@@ -200,7 +244,9 @@ def build_app(obj_path: str | None):
             z_max=z_max,
             marker_r=max(0.01 * diag, 0.05),
         )
-        clear_route()
+        boundary["indices"].clear()  # segment grids of the previous mesh
+        for m in modes:
+            m.reset()  # a new mesh invalidates every mode's picks/overlays
         with state:
             state.z_min, state.z_max = z_min, z_max
             state.clip_range = [z_min, z_max]  # start showing the whole mesh
@@ -387,9 +433,10 @@ def build_app(obj_path: str | None):
         if ctrl.view_update:
             ctrl.view_update()
 
-    # Routing is fully client-driven and decoupled from the camera: RIGHT-click sets start /
-    # freezes, plain hover (no button) moves the live target. The left button and all modifier /
-    # wheel gestures stay pure camera (rotate / pan / spin / zoom) -- we touch none of them.
+    # Routing is only active in Pathfinding mode. It is fully client-driven and decoupled from
+    # the camera: RIGHT-click sets start / freezes, plain hover (no button) moves the live
+    # target. The left button and all modifier / wheel gestures stay pure camera (rotate / pan /
+    # spin / zoom) -- we touch none of them.
     def _pick_world_fraction(fx, fy):
         """Pick the exact surface position at fractional cursor coords (origin bottom-left)."""
         # The client divides by the canvas size; before layout (or mid-detach) that
@@ -413,6 +460,10 @@ def build_app(obj_path: str | None):
         # compute/render is in flight, let further hovers collapse onto it instead
         # of queuing. Otherwise, on slow/large geometry, a backlog of stale
         # positions replays for seconds after the mouse has stopped.
+        # The client already gates on the mode; re-check here since its state
+        # can be stale mid-switch.
+        if state.interaction_mode != "pathfinding":
+            return
         if current["mesh"] is None:
             return
         route["pending"] = (fx, fy)
@@ -430,8 +481,7 @@ def build_app(obj_path: str | None):
         finally:
             route["busy"] = False
 
-    @ctrl.trigger("route_click")
-    def _route_click(fx, fy):
+    def _pathfinding_click(fx, fy):
         if current["mesh"] is None:
             return
         if route["tracking"]:
@@ -443,6 +493,228 @@ def build_app(obj_path: str | None):
         pos = _pick_world_fraction(fx, fy)
         if pos is not None:
             set_start(pos)
+
+    # -- boundary highlight via BoundaryIndex --------------------------
+
+    def _draw_boundary_segments(segments, z: float) -> None:
+        plotter.remove_actor("boundary_segments", render=False)
+        if not segments:
+            return
+        # The index hands out 2D (x, y) segments; draw them at the query
+        # point's height, slightly lifted so they never z-fight with the
+        # floor. Exact on flat floors, approximate on ramps / stairs.
+        lift = z + 0.05
+        pts = np.array(
+            [(*p, lift) for seg in segments for p in (seg.p1, seg.p2)]
+        )
+        pairs = np.arange(len(pts)).reshape(-1, 2)
+        cells = np.hstack(
+            [np.full((len(pairs), 1), 2, dtype=np.int64), pairs]
+        ).ravel()
+        plotter.add_mesh(
+            pv.PolyData(pts, lines=cells),
+            name="boundary_segments",
+            color="magenta",
+            line_width=6,
+            pickable=False,
+        )
+
+    def _draw_boundary_radius(center, radius: float, z: float) -> None:
+        plotter.remove_actor("boundary_radius", render=False)
+        if radius <= 0.0:
+            return
+        # The search disc as a closed polyline around the query point, at the
+        # same lift as the highlighted segments.
+        angles = np.linspace(0.0, 2.0 * np.pi, 129)
+        pts = np.column_stack(
+            [
+                center[0] + radius * np.cos(angles),
+                center[1] + radius * np.sin(angles),
+                np.full(len(angles), z + 0.05),
+            ]
+        )
+        pairs = np.column_stack(
+            [np.arange(len(pts) - 1), np.arange(1, len(pts))]
+        )
+        cells = np.hstack(
+            [np.full((len(pairs), 1), 2, dtype=np.int64), pairs]
+        ).ravel()
+        plotter.add_mesh(
+            pv.PolyData(pts, lines=cells),
+            name="boundary_radius",
+            color="lightgray",
+            line_width=1,
+            pickable=False,
+        )
+
+    def _run_boundary_query() -> None:
+        loc = boundary["loc"]
+        if loc is None:
+            return
+        try:
+            distance = max(float(state.boundary_distance), 0.0)
+        except (TypeError, ValueError):
+            return  # mid-typing / empty distance field
+        variant = state.boundary_index_variant
+        index = boundary["indices"].get(variant)
+        if index is None:
+            factory = next(
+                f for k, _, f in BOUNDARY_INDEX_VARIANTS if k == variant
+            )
+            index = boundary["indices"][variant] = factory(current["geometry"])
+        t0 = time.perf_counter()
+        segments = index.query(loc, distance)
+        elapsed_us = (time.perf_counter() - t0) * 1e6
+        _draw_boundary_segments(segments, loc.z)
+        _draw_boundary_radius((loc.x, loc.y), distance, loc.z)
+        with state:
+            state.boundary_query = _fmt((loc.x, loc.y, loc.z))
+            state.boundary_count = len(segments)
+            state.boundary_query_us = int(elapsed_us)
+        if ctrl.view_update:
+            ctrl.view_update()
+
+    def _boundary_click(fx, fy):
+        if current["geometry"] is None:
+            return
+        pos = _pick_world_fraction(fx, fy)
+        if pos is None:
+            return
+        # The picked point sits exactly on the rendered surface, so its z is
+        # the hint that selects the right floor in stacked geometry.
+        loc = current["geometry"].get_location(
+            float(pos[0]), float(pos[1]), z_hint=float(pos[2])
+        )
+        if loc is None:
+            return  # pick does not project onto the walkable surface
+        boundary["loc"] = loc
+        _place_marker("boundary_query", pos, "dodgerblue")
+        _run_boundary_query()
+
+    @state.change("boundary_distance", "boundary_index_variant")
+    def _on_boundary_inputs(**_):
+        # Re-run the query live while a point is set; parsing (and clamping)
+        # of the field value happens inside _run_boundary_query().
+        if state.interaction_mode == "boundary":
+            _run_boundary_query()
+
+    def _reset_boundary() -> None:
+        # The query point and highlights are mode state; the search distance
+        # is a user setting and survives leaving the mode.
+        boundary["loc"] = None
+        for actor_name in (
+            "boundary_segments",
+            "boundary_radius",
+            "boundary_query",
+        ):
+            plotter.remove_actor(actor_name, render=False)
+        with state:
+            state.boundary_query = "—"
+            state.boundary_count = 0
+            state.boundary_query_us = 0
+
+    # -- interaction modes ---------------------------------------------
+    # To add a mode: append a ViewerMode entry, gate its input handlers on
+    # state.interaction_mode, and make reset() undo everything the mode did.
+
+    def _reset_pathfinding() -> None:
+        route["pending"] = None
+        clear_route()
+        state.cursor_pos = "—"
+
+    def _build_none_drawer() -> None:
+        v3.VListItem("No interaction active", subtitle="Pick a mode above")
+
+    def _build_pathfinding_drawer() -> None:
+        v3.VListItem(
+            "right-click sets start / freezes the path", subtitle="Usage"
+        )
+        v3.VListItem("{{ cursor_pos }}", subtitle="Cursor (x, y, z)")
+        v3.VListItem("{{ route_status }}", subtitle="State")
+        v3.VListItem("{{ route_start }}", subtitle="Start (x, y, z)")
+        v3.VListItem("{{ route_target }}", subtitle="Target (x, y, z)")
+        v3.VListItem("{{ route_cost.toFixed(2) }}", subtitle="Path cost")
+        v3.VListItem("{{ route_corners }}", subtitle="Waypoints")
+        v3.VListItem(
+            "{{ route_query_us }} µs", subtitle="get_shortest_path time"
+        )
+
+    def _build_boundary_drawer() -> None:
+        v3.VListItem("right-click sets the query point", subtitle="Usage")
+        v3.VSelect(
+            v_model=("boundary_index_variant", "naive"),
+            items=(
+                "boundary_index_variants",
+                [
+                    {"title": title, "value": key}
+                    for key, title, _ in BOUNDARY_INDEX_VARIANTS
+                ],
+            ),
+            label="Index variant",
+            density="compact",
+            variant="outlined",
+            hide_details=True,
+            classes="mx-4 mb-2",
+        )
+        v3.VSlider(
+            v_model=("boundary_distance", 2.0),
+            min=0.1,
+            max=20.0,
+            step=0.1,
+            hide_details=True,
+            classes="mx-4",
+        )
+        v3.VTextField(
+            v_model_number=("boundary_distance",),
+            label="Search distance [m]",
+            type="number",
+            density="compact",
+            variant="outlined",
+            hide_details=True,
+            classes="mx-4 mt-1",
+        )
+        v3.VListItem("{{ boundary_query }}", subtitle="Query point (x, y, z)")
+        v3.VListItem("{{ boundary_count }}", subtitle="Segments")
+        v3.VListItem(
+            "{{ boundary_query_us }} µs", subtitle="BoundaryIndex.query time"
+        )
+
+    modes = [
+        ViewerMode("none", "None", lambda: None, _build_none_drawer),
+        ViewerMode(
+            "pathfinding",
+            "Pathfinding",
+            _reset_pathfinding,
+            _build_pathfinding_drawer,
+            on_right_click=_pathfinding_click,
+        ),
+        ViewerMode(
+            "boundary",
+            "Boundary Highlight",
+            _reset_boundary,
+            _build_boundary_drawer,
+            on_right_click=_boundary_click,
+        ),
+    ]
+    mode_by_key = {m.key: m for m in modes}
+    active_mode = {"key": state.interaction_mode}
+
+    @ctrl.trigger("mode_click")
+    def _mode_click(fx, fy):
+        # Right-clicks arrive here whenever any mode is active (client-side
+        # gate) and are dispatched to the mode's handler.
+        mode = mode_by_key.get(state.interaction_mode)
+        if mode is not None and mode.on_right_click is not None:
+            mode.on_right_click(fx, fy)
+
+    @state.change("interaction_mode")
+    def _on_mode(interaction_mode, **_):
+        prev, active_mode["key"] = active_mode["key"], interaction_mode
+        if prev == interaction_mode:
+            return
+        mode_by_key[prev].reset()  # leaving a mode drops all of its state
+        if ctrl.view_update:
+            ctrl.view_update()
 
     with SinglePageWithDrawerLayout(server) as layout:
         layout.title.set_text(TITLE)
@@ -462,20 +734,12 @@ def build_app(obj_path: str | None):
                     subtitle="Height range z",
                 )
                 v3.VDivider(classes="my-2")
-                v3.VListSubheader(
-                    "Routing  ·  right-click to set start / freeze"
-                )
-                v3.VListItem("{{ cursor_pos }}", subtitle="Cursor (x, y, z)")
-                v3.VListItem("{{ route_status }}", subtitle="State")
-                v3.VListItem("{{ route_start }}", subtitle="Start (x, y, z)")
-                v3.VListItem("{{ route_target }}", subtitle="Target (x, y, z)")
-                v3.VListItem(
-                    "{{ route_cost.toFixed(2) }}", subtitle="Path cost"
-                )
-                v3.VListItem("{{ route_corners }}", subtitle="Waypoints")
-                v3.VListItem(
-                    "{{ route_query_us }} µs", subtitle="get_shortest_path time"
-                )
+                # One block per mode; only the selected mode's drawer is
+                # rendered, always headed by that mode's name.
+                for m in modes:
+                    with v3.Template(v_if=f"interaction_mode === '{m.key}'"):
+                        v3.VListSubheader(m.title)
+                        m.build_drawer()
         with layout.toolbar:
             with v3.VMenu(close_on_content_click=False):
                 with v3.Template(v_slot_activator="{ props }"):
@@ -493,6 +757,19 @@ def build_app(obj_path: str | None):
                         hide_details=True,
                         classes="px-3 pt-2",
                     )
+            v3.VSelect(
+                v_model=("interaction_mode", "none"),
+                items=(
+                    "interaction_modes",
+                    [{"title": m.title, "value": m.key} for m in modes],
+                ),
+                label="Mode",
+                density="compact",
+                variant="outlined",
+                hide_details=True,
+                classes="ml-4",
+                style="max-width: 180px",
+            )
             v3.VSpacer()
             # Height band: range slider with editable low/high fields on each side.
             v3.VTextField(
@@ -540,13 +817,22 @@ def build_app(obj_path: str | None):
         # actual rendered canvas/img -- via offsetX/offsetY, so the mapping is correct even if the
         # render element is smaller than or offset within its container (else picks land off / on
         # the wrong floor). Hover only tracks when no button is held, so camera drags never move
-        # the target; right-click sets start / freezes (and we suppress its menu).
+        # the target. Hover is gated client-side on Pathfinding (the only mode using it) -- no
+        # websocket traffic per mousemove outside it. Right-clicks are forwarded (and the native
+        # context menu suppressed) whenever any mode is active; the server dispatches them to the
+        # active mode's handler. In mode None the native context menu stays available.
         coords = (
             "[$event.offsetX / $event.target.clientWidth, "
             "1 - $event.offsetY / $event.target.clientHeight]"
         )
-        hover_js = f"$event.buttons === 0 && trigger('route_hover', {coords})"
-        click_js = f"$event.preventDefault(); trigger('route_click', {coords})"
+        hover_js = (
+            "interaction_mode === 'pathfinding' && "
+            f"$event.buttons === 0 && trigger('route_hover', {coords})"
+        )
+        click_js = (
+            "interaction_mode !== 'none' && "
+            f"($event.preventDefault(), trigger('mode_click', {coords}))"
+        )
         with layout.content:
             with v3.VContainer(
                 fluid=True,

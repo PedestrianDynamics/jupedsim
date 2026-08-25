@@ -76,9 +76,9 @@ void Geometry3D::build()
     // faces behind).
     _mesh.collect_garbage();
     _aabbTree = std::make_unique<AABBTree>(_mesh.faces().begin(), _mesh.faces().end(), _mesh);
-    const auto split = split_into_regions(_mesh);
-    _region = split.region;
-    _regionCount = split.count;
+    _regionSplit = split_into_regions(_mesh);
+    _region = _regionSplit.region;
+    _regionCount = _regionSplit.count;
     build_region_views();
 }
 

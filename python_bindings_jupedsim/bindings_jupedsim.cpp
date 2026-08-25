@@ -27,6 +27,7 @@ void init_simulation(py::module_& m);
 void init_linesegment(py::module_& m);
 void init_agent_view(py::module_& m);
 void init_python_model(py::module_& m);
+void init_boundary_index(py::module_& m);
 
 PYBIND11_MODULE(py_jupedsim, m)
 {
@@ -52,4 +53,5 @@ PYBIND11_MODULE(py_jupedsim, m)
     init_transition(m);
     init_stage(m);
     init_simulation(m);
+    init_boundary_index(m);
 }

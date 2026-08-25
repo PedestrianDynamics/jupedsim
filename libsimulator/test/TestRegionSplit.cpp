@@ -1,11 +1,18 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "CfgCgal.hpp"
 #include "Geometry/RegionSplit.hpp"
+#include "MeshFixtures.hpp"
 #include "TestCommon.hpp"
+
+#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
+#include <CGAL/intersections.h>
 
 #include <gtest/gtest.h>
 
+#include <array>
 #include <set>
+#include <string>
+#include <vector>
 
 namespace
 {
@@ -97,6 +104,141 @@ double mean_z(const SurfaceMesh& mesh, SurfaceMesh::Face_index f)
     }
     return sum / n;
 }
+
+/// Flat ring around a stairwell hole, plus a flight welded to one hole edge and rising
+/// through the hole footprint: the flight's remaining border edges coincide in (x, y) with
+/// the ring's other hole walls WITHOUT sharing those mesh edges -- the essence of
+/// examples/geometry/multi_level_u_stair.obj.
+SurfaceMesh ring_with_flight_in_the_stairwell()
+{
+    SurfaceMesh mesh{};
+    const auto o0 = mesh.add_vertex({0, 0, 0});
+    const auto o1 = mesh.add_vertex({12, 0, 0});
+    const auto o2 = mesh.add_vertex({12, 12, 0});
+    const auto o3 = mesh.add_vertex({0, 12, 0});
+    const auto h0 = mesh.add_vertex({4, 4, 0});
+    const auto h1 = mesh.add_vertex({8, 4, 0});
+    const auto h2 = mesh.add_vertex({8, 8, 0});
+    const auto h3 = mesh.add_vertex({4, 8, 0});
+    mesh.add_face(o0, o1, h1);
+    mesh.add_face(o0, h1, h0);
+    mesh.add_face(o1, o2, h2);
+    mesh.add_face(o1, h2, h1);
+    mesh.add_face(o2, o3, h3);
+    mesh.add_face(o2, h3, h2);
+    mesh.add_face(o3, o0, h0);
+    mesh.add_face(o3, h0, h3);
+    const auto t0 = mesh.add_vertex({4, 8, 2});
+    const auto t1 = mesh.add_vertex({8, 8, 2});
+    mesh.add_face(h0, h1, t1); // flight, welded to the ring along h0-h1 only
+    mesh.add_face(h0, t1, t0);
+    return mesh;
+}
+
+/// A floor, a ramp up, an upper floor -- all welded -- and a wing whose single vertex
+/// (8, 2, 1) projects onto the interior of the floor's border edge y=2: exactly one
+/// isolated (x, y) coincidence between distinct surface points, shared with nothing.
+SurfaceMesh wing_tip_over_a_floor_edge()
+{
+    SurfaceMesh mesh{};
+    const auto a0 = mesh.add_vertex({0, 0, 0});
+    const auto a1 = mesh.add_vertex({10, 0, 0});
+    const auto a2 = mesh.add_vertex({10, 2, 0});
+    const auto a3 = mesh.add_vertex({0, 2, 0});
+    mesh.add_face(a0, a1, a2); // floor
+    mesh.add_face(a0, a2, a3);
+    const auto r2 = mesh.add_vertex({12, 0, 1});
+    const auto r3 = mesh.add_vertex({12, 2, 1});
+    mesh.add_face(a1, r2, r3); // ramp, welded to the floor along x=10
+    mesh.add_face(a1, r3, a2);
+    const auto b3 = mesh.add_vertex({12, 3, 1});
+    const auto b4 = mesh.add_vertex({12, 4, 1});
+    const auto b5 = mesh.add_vertex({20, 0, 1});
+    const auto b6 = mesh.add_vertex({20, 4, 1});
+    mesh.add_face(r2, b5, r3); // upper floor, welded to the ramp along x=12
+    mesh.add_face(r3, b5, b3);
+    mesh.add_face(b3, b5, b6);
+    mesh.add_face(b3, b6, b4);
+    const auto w = mesh.add_vertex({8, 2, 1});
+    mesh.add_face(w, b3, b4); // the wing, welded to the upper floor along b3-b4
+    return mesh;
+}
+
+using EK = CGAL::Exact_predicates_exact_constructions_kernel;
+
+EK::Triangle_2 project_exact(const SurfaceMesh& mesh, SurfaceMesh::Face_index f)
+{
+    std::array<EK::Point_2, 3> p{};
+    int i = 0;
+    for(const auto v : CGAL::vertices_around_face(mesh.halfedge(f), mesh)) {
+        const auto& q = mesh.point(v);
+        p[i++] = EK::Point_2(q.x(), q.y());
+    }
+    return {p[0], p[1], p[2]};
+}
+
+bool faces_share_edge(const SurfaceMesh& mesh, SurfaceMesh::Face_index a, SurfaceMesh::Face_index b)
+{
+    for(const auto h : CGAL::halfedges_around_face(mesh.halfedge(a), mesh)) {
+        if(mesh.face(mesh.opposite(h)) == b) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool faces_share_vertex(
+    const SurfaceMesh& mesh,
+    SurfaceMesh::Face_index a,
+    SurfaceMesh::Face_index b)
+{
+    for(const auto v_a : mesh.vertices_around_face(mesh.halfedge(a))) {
+        for(const auto v_b : mesh.vertices_around_face(mesh.halfedge(b))) {
+            if(v_a == v_b) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+/// Independent oracle for the invariant split_into_regions() promises: within one region, a
+/// face pair's projected intersection may not exceed the dimension of the mesh element the
+/// two faces share -- a segment only across the shared edge, a point only at a shared vertex.
+void expect_valid_split(const SurfaceMesh& mesh, const RegionSplit& split)
+{
+    std::vector<SurfaceMesh::Face_index> all{};
+    all.reserve(mesh.number_of_faces());
+    for(const auto f : faces(mesh)) {
+        all.push_back(f);
+    }
+    for(std::size_t i = 0; i < all.size(); ++i) {
+        const auto ti = project_exact(mesh, all[i]);
+        const auto bbi = ti.bbox();
+        for(std::size_t j = i + 1; j < all.size(); ++j) {
+            if(split.region[all[i]] != split.region[all[j]]) {
+                continue;
+            }
+            const auto tj = project_exact(mesh, all[j]);
+            if(!CGAL::do_overlap(bbi, tj.bbox())) {
+                continue;
+            }
+            const auto hit = CGAL::intersection(ti, tj);
+            if(!hit) {
+                continue;
+            }
+            bool allowed = false;
+            if(std::get_if<EK::Point_2>(&*hit) != nullptr) {
+                allowed = faces_share_vertex(mesh, all[i], all[j]);
+            } else if(std::get_if<EK::Segment_2>(&*hit) != nullptr) {
+                allowed = faces_share_edge(mesh, all[i], all[j]);
+            }
+            EXPECT_TRUE(allowed) << "faces " << all[i] << " and " << all[j] << " of region "
+                                 << split.region[all[i]] << " coincide beyond their shared "
+                                 << "mesh elements";
+        }
+    }
+}
 } // namespace
 
 TEST(RegionSplit, FlatSliverNeighborsStayOneRegion)
@@ -170,4 +312,74 @@ TEST(RegionSplit, RampMergesWithAFloorAcrossWeldedSeams)
     EXPECT_EQ(lower_ramp_ids.size(), 1u); // lower AND ramp in a single region
     EXPECT_EQ(upper_ids.size(), 1u);
     EXPECT_NE(*lower_ramp_ids.begin(), *upper_ids.begin());
+}
+
+TEST(RegionSplit, AFlightCoincidingWithTheStairwellWallsSplitsOff)
+{
+    // No positive-area overlap anywhere: the flight fills the hole's footprint. What forces
+    // the split is boundary coincidence alone -- the flight's side and top edges lie exactly
+    // over the ring's hole walls without sharing those mesh edges.
+    const auto mesh = ring_with_flight_in_the_stairwell();
+    ASSERT_EQ(mesh.number_of_faces(), 10u);
+    const auto split = split_into_regions(mesh);
+    EXPECT_EQ(split.count, 2u);
+
+    // Faces 0..7 are the ring, 8..9 the flight (add order on a fresh mesh).
+    std::set<std::size_t> ring_ids{};
+    std::set<std::size_t> flight_ids{};
+    for(const auto f : faces(mesh)) {
+        (static_cast<std::size_t>(f) < 8 ? ring_ids : flight_ids).insert(split.region[f]);
+    }
+    EXPECT_EQ(ring_ids.size(), 1u);
+    EXPECT_EQ(flight_ids.size(), 1u);
+    EXPECT_NE(*ring_ids.begin(), *flight_ids.begin());
+    expect_valid_split(mesh, split);
+}
+
+TEST(RegionSplit, AForeignPointContactSplits)
+{
+    // The wing touches the floor's border edge in exactly one (x, y) point, one metre up and
+    // welded to nothing there. Distinct surface points may not share a projection, so the
+    // wing cannot stay in the floor's region.
+    const auto mesh = wing_tip_over_a_floor_edge();
+    ASSERT_EQ(mesh.number_of_faces(), 9u);
+    const auto split = split_into_regions(mesh);
+    EXPECT_EQ(split.count, 2u);
+
+    // Faces 0..7 are floor+ramp+upper (one welded, coincidence-free surface), face 8 the wing.
+    std::set<std::size_t> surface_ids{};
+    for(const auto f : faces(mesh)) {
+        if(static_cast<std::size_t>(f) < 8) {
+            surface_ids.insert(split.region[f]);
+        }
+    }
+    EXPECT_EQ(surface_ids.size(), 1u);
+    EXPECT_NE(split.region[8], *surface_ids.begin());
+    expect_valid_split(mesh, split);
+}
+
+TEST(RegionSplit, EveryFixtureSplitsValidly)
+{
+    const std::vector<std::pair<std::string, SurfaceMesh>> meshes{
+        {"flat_square", flat_square()},
+        {"ramp_forward", ramp_forward()},
+        {"ramp_back_over_floor", ramp_back_over_floor()},
+        {"stacked_floors_via_ramp", stacked_floors_via_ramp()},
+        {"ring_with_flight_in_the_stairwell", ring_with_flight_in_the_stairwell()},
+        {"wing_tip_over_a_floor_edge", wing_tip_over_a_floor_edge()},
+        {"flat_rectangle", fixtures::flat_rectangle()},
+        {"two_levels_with_stair", fixtures::two_levels_with_stair()},
+        {"two_levels_with_wide_seam", fixtures::two_levels_with_wide_seam()},
+        {"stacked_floors", fixtures::stacked_floors()},
+        {"switchback_stair", fixtures::switchback_stair()},
+        {"switchback_stair_upper_first", fixtures::switchback_stair(true)},
+        {"straight_stair_to_a_landing", fixtures::straight_stair_to_a_landing()},
+        {"stair_turning_on_a_landing", fixtures::stair_turning_on_a_landing()},
+        {"wavy_terrain", fixtures::wavy_terrain()},
+        {"corridor_with_door_recesses", fixtures::corridor_with_door_recesses()},
+    };
+    for(const auto& [name, mesh] : meshes) {
+        SCOPED_TRACE(name);
+        expect_valid_split(mesh, split_into_regions(mesh));
+    }
 }

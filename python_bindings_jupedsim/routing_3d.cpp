@@ -64,6 +64,19 @@ void init_routing_3d(py::module_& m)
             },
             py::arg("geometry"))
         .def("is_valid_location", &Geometry3D::is_valid_location)
+        .def(
+            // Ray-cast (x, y) against the surface near z_hint -> Location, or None if no
+            // sheet comes within tol of the hint.
+            "get_location",
+            [](const Geometry3D& geo, double x, double y, double z_hint, double tol) {
+                return geo.get_location(x, y, z_hint, tol);
+            },
+            py::arg("x"),
+            py::arg("y"),
+            py::arg("z_hint") = 0.0,
+            py::arg("tol") = ZHintTolerance,
+            // The returned token points into this geometry.
+            py::keep_alive<0, 1>())
         .def("region_count", &Geometry3D::region_count)
         .def("region_id_per_face", &Geometry3D::region_id_per_face)
         .def("vertices", &Geometry3D::vertices)
