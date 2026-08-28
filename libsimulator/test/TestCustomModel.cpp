@@ -56,12 +56,12 @@ public:
 };
 
 /// The flat square every agent in this file stands on.
-const Geometry3D& flat_square()
+const Geometry& flat_square()
 {
     static const auto geometry = [] {
         GeometryBuilder builder{};
         builder.AddAccessibleArea({{-10, -10}, {10, -10}, {10, 10}, {-10, 10}});
-        return std::make_unique<Geometry3D>(builder.Build().Polygon());
+        return std::make_unique<Geometry>(builder.Build());
     }();
     return *geometry;
 }

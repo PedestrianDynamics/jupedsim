@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "Geometry/Geometry3D.hpp"
+#include "Geometry/Geometry.hpp"
 
 #include "Geometry/BoundaryIndex.hpp"
 #include "Geometry/PolylineMerge.hpp"
@@ -70,17 +70,17 @@ group_seams_by_region(const std::vector<RegionSeam>& seams, std::size_t region_c
 
 } // namespace
 
-Geometry3D::Geometry3D(SurfaceMesh mesh) : _mesh(std::move(mesh))
+Geometry::Geometry(SurfaceMesh mesh) : _mesh(std::move(mesh))
 {
     build();
 }
 
-Geometry3D::Geometry3D(PolyWithHoles poly) : Geometry3D(mesh_from_polygon(poly))
+Geometry::Geometry(PolyWithHoles poly) : Geometry(mesh_from_polygon(poly))
 {
-    _geometry2D = std::make_unique<Geometry2D>(std::move(poly));
+    _polygon = std::move(poly);
 }
 
-void Geometry3D::build()
+void Geometry::build()
 {
     // Compact vertex/face indices so vertices()/triangles()/region_id_per_face() are
     // contiguous and 1:1 with each other (triangulate_faces may leave removed
@@ -94,7 +94,7 @@ void Geometry3D::build()
     build_region_views();
 }
 
-void Geometry3D::build_region_views()
+void Geometry::build_region_views()
 {
     auto walls_by_region = CreatePerRegionSegmentGrids(_mesh, _regionSplit);
     auto seams_by_region = group_seams_by_region(
@@ -108,15 +108,15 @@ void Geometry3D::build_region_views()
     }
 }
 
-const AABBTree& Geometry3D::aabb_tree() const
+const AABBTree& Geometry::aabb_tree() const
 {
     if(!_aabbTree) {
-        throw SimulationError("Geometry3D has no geometry loaded.");
+        throw SimulationError("Geometry has no geometry loaded.");
     }
     return *_aabbTree;
 }
 
-Geometry3D::FaceLocation Geometry3D::face_below(const Point3D& p) const
+Geometry::FaceLocation Geometry::face_below(const Point3D& p) const
 {
     // first_intersection along -z returns the hit nearest to the ray source,
     // i.e. the face directly below the query point. The ray starts a hair
@@ -134,23 +134,23 @@ Geometry3D::FaceLocation Geometry3D::face_below(const Point3D& p) const
     return {hit->second, *projected};
 }
 
-bool Geometry3D::is_valid_location(const Point3D& p) const
+bool Geometry::is_valid_location(const Point3D& p) const
 {
     return face_below(p).face != SurfaceMesh::null_face();
 }
 
 std::vector<LineSegment>
-Geometry3D::line_segments_in_range(const Location& who, double distance) const
+Geometry::line_segments_in_range(const Location& who, double distance) const
 {
     return _boundaryIndex->Query(who, distance);
 }
 
-bool Geometry3D::no_geometry_between(const Location& who, Point direction) const
+bool Geometry::no_geometry_between(const Location& who, Point direction) const
 {
     return region_reached(who, direction).has_value();
 }
 
-bool Geometry3D::no_geometry_between(const Location& who, const Location& other) const
+bool Geometry::no_geometry_between(const Location& who, const Location& other) const
 {
     // Rebuilding the direction rather than handing over other.xy() keeps the chord exactly
     // what the direction-taking callers have always passed.
@@ -158,13 +158,9 @@ bool Geometry3D::no_geometry_between(const Location& who, const Location& other)
     return arrival == other.region();
 }
 
-std::optional<std::size_t> Geometry3D::region_reached(const Location& who, Point direction) const
+std::optional<std::size_t> Geometry::region_reached(const Location& who, Point direction) const
 {
     const LineSegment chord{who.xy(), who.xy() + direction};
-    if(_geometry2D != nullptr) {
-        return _geometry2D->IntersectsAny(chord) ? std::nullopt : std::optional{who.region()};
-    }
-
     const auto& view = region_view(who.region());
     if(!view.crosses_seam(chord.p1, chord.p2)) {
         // Staying inside the region means never reaching another sheet, so only the walls of
@@ -178,8 +174,7 @@ std::optional<std::size_t> Geometry3D::region_reached(const Location& who, Point
     return arrival.has_value() ? std::optional{arrival->region()} : std::nullopt;
 }
 
-Geometry3D::FaceLocation
-Geometry3D::locate_in_region(std::size_t region_id, const Point2D& xy) const
+Geometry::FaceLocation Geometry::locate_in_region(std::size_t region_id, const Point2D& xy) const
 {
     // All intersections along z. Search for the one with the region_id.
     const Line3D vertical(Point3D{xy.x(), xy.y(), 0}, Direction3D(0, 0, 1));
@@ -198,8 +193,7 @@ Geometry3D::locate_in_region(std::size_t region_id, const Point2D& xy) const
     return {SurfaceMesh::null_face(), Point3D{}};
 }
 
-std::optional<Location>
-Geometry3D::get_location(double x, double y, double z_hint, double tol) const
+std::optional<Location> Geometry::get_location(double x, double y, double z_hint, double tol) const
 {
     const auto face_location = locate_near_z(Point2D{x, y}, z_hint, tol);
     if(face_location.face == SurfaceMesh::null_face()) {
@@ -213,8 +207,7 @@ Geometry3D::get_location(double x, double y, double z_hint, double tol) const
         face_location.point.z()};
 }
 
-Geometry3D::FaceLocation
-Geometry3D::locate_near_z(const Point2D& xy, double z, double tolerance) const
+Geometry::FaceLocation Geometry::locate_near_z(const Point2D& xy, double z, double tolerance) const
 {
     const Line3D vertical(Point3D{xy.x(), xy.y(), 0}, Direction3D(0, 0, 1));
     std::vector<AABBTree::Intersection_and_primitive_id<Line3D>::Type> hits{};
@@ -234,7 +227,7 @@ Geometry3D::locate_near_z(const Point2D& xy, double z, double tolerance) const
     return best;
 }
 
-std::vector<std::size_t> Geometry3D::region_id_per_face() const
+std::vector<std::size_t> Geometry::region_id_per_face() const
 {
     std::vector<std::size_t> ids{};
     ids.reserve(_mesh.number_of_faces());
@@ -244,7 +237,7 @@ std::vector<std::size_t> Geometry3D::region_id_per_face() const
     return ids;
 }
 
-std::vector<std::array<double, 3>> Geometry3D::vertices() const
+std::vector<std::array<double, 3>> Geometry::vertices() const
 {
     std::vector<std::array<double, 3>> out{};
     out.reserve(_mesh.number_of_vertices());
@@ -255,7 +248,7 @@ std::vector<std::array<double, 3>> Geometry3D::vertices() const
     return out;
 }
 
-std::vector<std::array<std::size_t, 3>> Geometry3D::triangles() const
+std::vector<std::array<std::size_t, 3>> Geometry::triangles() const
 {
     std::vector<std::array<std::size_t, 3>> out{};
     out.reserve(_mesh.number_of_faces());

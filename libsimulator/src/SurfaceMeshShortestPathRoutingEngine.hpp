@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "Geometry/Geometry3D.hpp"
+#include "Geometry/Geometry.hpp"
 #include "RoutingEngine3D.hpp"
 
 #include <CGAL/Surface_mesh_shortest_path.h>
@@ -17,7 +17,7 @@ public:
     /// engine's lifetime. Ownership lives with the world (later: Simulation),
     /// matching the 2D pipeline where engines never own the geometry.
     explicit SurfaceMeshShortestPathRoutingEngine(
-        const Geometry3D& geometry,
+        const Geometry& geometry,
         double wallClearance = 0.2);
     ~SurfaceMeshShortestPathRoutingEngine() override = default;
 
@@ -48,7 +48,7 @@ private:
     };
 
     /// Where @p p sits on the surface. Throws naming @p what if it sits nowhere.
-    Geometry3D::FaceLocation on_surface(const Point3D& p, const char* what) const;
+    Geometry::FaceLocation on_surface(const Point3D& p, const char* what) const;
 
     /// The sequence tree for @p target: built on first use, then kept.
     ShortestPath& tree_for(const RoutingTarget& target);
@@ -58,7 +58,7 @@ private:
     /// @p corner moved into the open by the wall clearance, put back onto the surface.
     Point3D held_off_the_wall(const Point3D& corner, Point into_the_open) const;
 
-    const Geometry3D& _geometry;
+    const Geometry& _geometry;
     /// Tolerance needed for the collinear merge, calculated on the underlying mesh itself.
     double _mergeTolerance;
 

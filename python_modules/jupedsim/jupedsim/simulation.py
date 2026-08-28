@@ -63,19 +63,19 @@ _STATE_TYPES = (
 _MESH_SUFFIXES = (".obj",)
 
 
-def _as_surface_mesh(geometry: Any) -> py_jps.Geometry3D | None:
+def _as_surface_mesh(geometry: Any) -> py_jps.Geometry | None:
     """The geometry argument read as a surface mesh, or None if it is a 2D one.
 
     A ``Path`` always names a mesh file; a ``str`` only when it carries a mesh
     suffix, since a plain string is also how a WKT walkable area arrives.
     """
-    if isinstance(geometry, py_jps.Geometry3D):
+    if isinstance(geometry, py_jps.Geometry):
         return geometry
     if isinstance(geometry, os.PathLike) or (
         isinstance(geometry, str)
         and Path(geometry).suffix.lower() in _MESH_SUFFIXES
     ):
-        return py_jps.Geometry3D.from_obj(os.fspath(geometry))
+        return py_jps.Geometry.from_obj(os.fspath(geometry))
     return None
 
 

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "Geometry/Geometry2D.hpp"
+#include "CfgCgal.hpp"
 #include "Point.hpp"
 #include "Polygon.hpp"
 
@@ -22,5 +22,6 @@ public:
 
     GeometryBuilder& AddAccessibleArea(const std::vector<Point>& lineLoop);
     GeometryBuilder& ExcludeFromAccessibleArea(const std::vector<Point>& lineLoop);
-    Geometry2D Build();
+    /// The walkable area as a single polygon with holes, ready to be lifted.
+    PolyWithHoles Build();
 };

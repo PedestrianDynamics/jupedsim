@@ -4,7 +4,6 @@
 #include "EnvironmentQuery.hpp"
 #include "GenericAgent.hpp"
 #include "GeometricFunctions.hpp"
-#include "Geometry/Geometry2D.hpp"
 #include "Geometry/Location.hpp"
 #include "LineSegment.hpp"
 #include "NeighborhoodSearch.hpp"
@@ -26,7 +25,7 @@
 #include <vector>
 
 class BaseStage;
-class Geometry3D;
+class Geometry;
 class Simulation;
 
 enum class WaitingSetState {

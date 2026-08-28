@@ -13,7 +13,7 @@ from pathlib import Path
 
 import pytest
 from jupedsim.internal.routing_3d import (
-    Geometry3D,
+    Geometry,
     make_portal_boundary_index,
 )
 
@@ -46,8 +46,8 @@ def canonical(segment) -> tuple:
 
 
 @pytest.fixture(scope="module")
-def geometry() -> Geometry3D:
-    return Geometry3D.from_obj(str(MESH))
+def geometry() -> Geometry:
+    return Geometry.from_obj(str(MESH))
 
 
 def test_mesh_splits_into_multiple_regions(geometry) -> None:

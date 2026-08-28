@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "Geometry/Geometry3D.hpp"
+#include "Geometry/Geometry.hpp"
 #include "Geometry/RegionView.hpp"
 #include "LineSegment.hpp"
 #include "Point.hpp"
@@ -48,7 +48,7 @@ SurfaceMesh flat_rectangle_mesh()
 
 TEST(RegionViewFlat, SingleRegionNoSeams)
 {
-    Geometry3D geo{flat_rectangle_mesh()};
+    Geometry geo{flat_rectangle_mesh()};
     ASSERT_EQ(geo.region_count(), 1u);
     EXPECT_TRUE(geo.region_view(0).seams().empty());
     EXPECT_FALSE(geo.region_view(0).crosses_seam({0, 5}, {10, 5}));
@@ -56,7 +56,7 @@ TEST(RegionViewFlat, SingleRegionNoSeams)
 
 TEST(RegionViewFlat, InsideGeometryMatchesTheMeshFootprint)
 {
-    Geometry3D geo{flat_rectangle_mesh()};
+    Geometry geo{flat_rectangle_mesh()};
     const auto& view = geo.region_view(0);
     EXPECT_TRUE(view.InsideGeometry({5, 5}));
     EXPECT_FALSE(view.InsideGeometry({20, 20}));
@@ -66,7 +66,7 @@ TEST(RegionViewFlat, InsideGeometryMatchesTheMeshFootprint)
 
 TEST(RegionViewFolded, SeamSplitsIntoTwoRegions)
 {
-    Geometry3D geo{folded_ribbon()};
+    Geometry geo{folded_ribbon()};
     ASSERT_EQ(geo.region_count(), 2u);
     // Each region contains the other one as neighbor.
     EXPECT_EQ(geo.region_view(0).seams().front().neighbor, 1u);
@@ -75,7 +75,7 @@ TEST(RegionViewFolded, SeamSplitsIntoTwoRegions)
 
 TEST(RegionViewFolded, SeamIsInSeamGridNotWallGrid)
 {
-    Geometry3D geo{folded_ribbon()};
+    Geometry geo{folded_ribbon()};
     // The fold edge sits at x=12; a chord crossing it must register as a seam
     // crossing but not as a wall hit.
     const Point a{11, 5};
@@ -86,7 +86,7 @@ TEST(RegionViewFolded, SeamIsInSeamGridNotWallGrid)
 
 TEST(RegionViewFolded, InsideGeometryCorrectOnBothSidesOfTheSeam)
 {
-    Geometry3D geo{folded_ribbon()};
+    Geometry geo{folded_ribbon()};
     // (6,5): floor (region 0, z=0) AND mezzanine (region 1, z=3) both cover it.
     EXPECT_TRUE(geo.region_view(0).InsideGeometry({6, 5}));
     EXPECT_TRUE(geo.region_view(1).InsideGeometry({6, 5}));

@@ -3,7 +3,6 @@
 
 #include "CfgCgal.hpp"
 #include "Geometry/BoundaryIndex.hpp"
-#include "Geometry/Geometry2D.hpp"
 #include "Geometry/Location.hpp"
 #include "Geometry/RegionSplit.hpp"
 #include "Geometry/RegionView.hpp"
@@ -31,7 +30,7 @@ inline constexpr double InteractionHeight = 2.0;
 /// overlay. Routing engines borrow it (non-owning), and the viewer reads its
 /// render data from here -- so mesh, routing and colouring all agree by
 /// construction (one load, one face order).
-class Geometry3D
+class Geometry
 {
 public:
     /// Result of projecting a query point onto the surface along -z.
@@ -41,29 +40,29 @@ public:
     };
 
     /// Take an already-built surface mesh (e.g. from a mesh builder or a test).
-    explicit Geometry3D(SurfaceMesh mesh);
+    explicit Geometry(SurfaceMesh mesh);
 
     /// Build from a 2D walkable area, lifted flat to z=0. Uses the same
     /// constrained Delaunay triangulation as the 2D RoutingEngine, so the 2D
     /// and 3D pipelines run on the identical triangle set -- the basis for
     /// exact parity comparisons. Also keeps the 2D view (geometry_2d()).
-    explicit Geometry3D(PolyWithHoles poly);
+    explicit Geometry(PolyWithHoles poly);
 
-    ~Geometry3D() = default;
+    ~Geometry() = default;
 
     // Non-copyable and non-movable: Any instance should be held by unique_ptr
     // to ensure exposed addresses do not move.
-    Geometry3D(const Geometry3D&) = delete;
-    Geometry3D& operator=(const Geometry3D&) = delete;
-    Geometry3D(Geometry3D&&) = delete;
-    Geometry3D& operator=(Geometry3D&&) = delete;
+    Geometry(const Geometry&) = delete;
+    Geometry& operator=(const Geometry&) = delete;
+    Geometry(Geometry&&) = delete;
+    Geometry& operator=(Geometry&&) = delete;
 
     const SurfaceMesh& mesh() const { return _mesh; }
     const AABBTree& aabb_tree() const;
 
-    /// The projected 2D view of the walkable area, present iff the geometry
-    /// was built from a polygon. A mesh-built geometry returns a nullptr.
-    const Geometry2D* geometry_2d() const { return _geometry2D.get(); }
+    /// Returns the polygon iff the geometry was built from one. Otherwise returns
+    /// a nullptr.
+    const PolyWithHoles* polygon() const { return _polygon ? &*_polygon : nullptr; }
 
     /// Face and on-surface point hit by the -z ray through @p p, or
     /// `null_face()` if the ray misses the walkable surface.
@@ -151,7 +150,7 @@ private:
     std::optional<std::size_t> region_reached(const Location& who, Point direction) const;
 
     SurfaceMesh _mesh{};
-    std::unique_ptr<Geometry2D> _geometry2D{};
+    std::optional<PolyWithHoles> _polygon{};
     std::unique_ptr<AABBTree> _aabbTree{};
     std::unique_ptr<BoundaryIndex> _boundaryIndex{};
     RegionMap _region{};

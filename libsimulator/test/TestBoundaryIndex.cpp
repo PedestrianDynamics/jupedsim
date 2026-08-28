@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Geometry/BoundaryIndex.hpp"
-#include "Geometry/Geometry3D.hpp"
+#include "Geometry/Geometry.hpp"
 #include "Geometry/RegionSplit.hpp"
 #include "MeshFixtures.hpp"
 #include "TestCommon.hpp"
@@ -17,14 +17,14 @@
 struct TestBoundaryIndexTwoLevelsWithStairs : public testing::Test {
     SurfaceMesh mesh;
     RegionSplit split;
-    std::unique_ptr<Geometry3D> geo;
+    std::unique_ptr<Geometry> geo;
 
     void SetUp() override
     {
         mesh = fixtures::switchback_stair();
         // TODO(kkratz): Investigate segfault if region split is applied before handing mesh to
-        // Geometry3D.
-        geo = std::make_unique<Geometry3D>(mesh);
+        // Geometry.
+        geo = std::make_unique<Geometry>(mesh);
         split = split_into_regions(mesh);
     }
 
@@ -143,22 +143,22 @@ void ExpectPieces(const std::vector<LineSegment>& seen, const std::vector<LineSe
 void ExpectSeen(const std::vector<LineSegment>& seen, Point from, Point to)
 {
     EXPECT_NE(piece_between(seen, from, to), nullptr)
-        << "missing " << fmt::format("{}", LineSegment(from, to)) << ", answered:"
-        << describe(seen);
+        << "missing " << fmt::format("{}", LineSegment(from, to))
+        << ", answered:" << describe(seen);
 }
 } // namespace
 
 class PortalVisibility : public testing::Test
 {
 protected:
-    std::unique_ptr<Geometry3D> geo{};
+    std::unique_ptr<Geometry> geo{};
 
     /// Builds the index under test on @p mesh and keeps the geometry alive, so a test can ask
     /// it where to query from. Both come from the same region overlay on purpose: splitting
     /// the same mesh twice would leave it to chance that the region ids agree.
     std::unique_ptr<BoundaryIndex> IndexOn(SurfaceMesh mesh)
     {
-        geo = std::make_unique<Geometry3D>(std::move(mesh));
+        geo = std::make_unique<Geometry>(std::move(mesh));
         return MakePortalBoundaryIndex(geo->mesh(), geo->region_split());
     }
 

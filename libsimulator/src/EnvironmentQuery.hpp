@@ -2,7 +2,7 @@
 #pragma once
 
 #include "GenericAgent.hpp"
-#include "Geometry/Geometry3D.hpp"
+#include "Geometry/Geometry.hpp"
 #include "Geometry/Location.hpp"
 #include "LineSegment.hpp"
 #include "NeighborhoodSearch.hpp"
@@ -14,11 +14,11 @@
 
 class EnvironmentQuery
 {
-    const Geometry3D& _geometry;
+    const Geometry& _geometry;
     const NeighborhoodSearch<GenericAgent>& _nsearch;
 
 public:
-    EnvironmentQuery(const Geometry3D& geometry, const NeighborhoodSearch<GenericAgent>& nsearch)
+    EnvironmentQuery(const Geometry& geometry, const NeighborhoodSearch<GenericAgent>& nsearch)
         : _geometry(geometry), _nsearch(nsearch)
     {
     }

@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "Geometry/Geometry2D.hpp"
+#include "CfgCgal.hpp"
 #include "GeometryBuilder.hpp"
 #include "Point.hpp"
 
 #include <vector>
 
-inline Geometry2D buildGrosserStern()
+inline PolyWithHoles buildGrosserStern()
 {
     GeometryBuilder builder;
     builder.AddAccessibleArea(
@@ -1459,7 +1459,7 @@ inline Geometry2D buildGrosserStern()
     return builder.Build();
 }
 
-inline Geometry2D buildLargeStreetNetwork()
+inline PolyWithHoles buildLargeStreetNetwork()
 {
 
     GeometryBuilder builder;

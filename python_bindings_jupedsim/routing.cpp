@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "Geometry/Geometry2D.hpp"
+#include "Geometry/Geometry.hpp"
 #include "RoutingEngine.hpp"
+#include "SimulationError.hpp"
 #include "conversion.hpp"
 
 #include <glm/ext/vector_float2.hpp>
@@ -18,8 +19,14 @@ namespace py = pybind11;
 void init_routing(py::module_& m)
 {
     py::class_<RoutingEngine>(m, "RoutingEngine")
-        .def(py::init([](const Geometry2D& geo) {
-            return std::make_unique<RoutingEngine>(geo.Polygon());
+        .def(py::init([](const Geometry& geo) {
+            const auto* poly = geo.polygon();
+            if(poly == nullptr) {
+                throw SimulationError(
+                    "This engine routes in the plane and needs a geometry built from a polygon; "
+                    "a surface mesh has none.");
+            }
+            return std::make_unique<RoutingEngine>(*poly);
         }))
         .def(
             "compute_waypoints",

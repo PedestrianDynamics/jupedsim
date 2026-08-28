@@ -131,11 +131,11 @@ class SimulationViewer:
         if self._geometry_obj is None:
             return
         try:
-            from jupedsim.internal.routing_3d import Geometry3D
+            from jupedsim.internal.routing_3d import Geometry
         except Exception:
             return  # routing_3d not importable -> just skip the context surface
         # Read a second time rather than borrowed from the simulation, which owns its geometry.
-        geo = Geometry3D.from_obj(str(self._geometry_obj))
+        geo = Geometry.from_obj(str(self._geometry_obj))
         verts = np.asarray(geo.vertices(), dtype=float)
         tris = np.asarray(geo.triangles(), dtype=np.int64)
         faces = np.hstack(

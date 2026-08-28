@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "AgentView.hpp"
 #include "GenericAgent.hpp"
-#include "Geometry/Geometry3D.hpp"
+#include "Geometry/Geometry.hpp"
 #include "GeometryBuilder.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalDecisionSystem.hpp"
@@ -35,7 +35,7 @@ public:
     void CheckModelConstraint(const GenericAgent&, const AgentView&) const override {}
 };
 
-GenericAgent make_agent(const Geometry3D& geometry, Point start, Point velocity)
+GenericAgent make_agent(const Geometry& geometry, Point start, Point velocity)
 {
     return GenericAgent(
         GenericAgent::ID::Invalid,
@@ -46,11 +46,11 @@ GenericAgent make_agent(const Geometry3D& geometry, Point start, Point velocity)
 }
 
 /// A flat square [-10,10]^2 with its 3D twin over the same polygon.
-std::unique_ptr<Geometry3D> flat_square()
+std::unique_ptr<Geometry> flat_square()
 {
     GeometryBuilder builder{};
     builder.AddAccessibleArea({{-10, -10}, {10, -10}, {10, 10}, {-10, 10}});
-    return std::make_unique<Geometry3D>(builder.Build().Polygon());
+    return std::make_unique<Geometry>(builder.Build());
 }
 } // namespace
 

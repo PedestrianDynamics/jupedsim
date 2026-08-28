@@ -180,13 +180,13 @@ def build_geometry_3d(
         | str
     ),
     **kwargs: Any,
-) -> py_jps.Geometry3D:
-    """Lift a 2D geometry to a flat 3D geometry at z=0.
+) -> py_jps.Geometry:
+    """The native geometry behind a walkable area.
 
     Accepts everything :func:`build_geometry` accepts, plus an already built
-    :class:`~jupedsim.geometry.Geometry`. The resulting surface mesh reuses
-    the 2D constrained Delaunay triangulation, so 2D and 3D navigation run on
-    the identical triangle set.
+    :class:`~jupedsim.geometry.Geometry`. A walkable area given as a polygon is
+    lifted to a flat surface at z=0, reusing the constrained Delaunay
+    triangulation the polygon produces.
 
     Arguments:
         geometry: See :func:`build_geometry`, or a
@@ -197,4 +197,4 @@ def build_geometry_3d(
     """
     if not isinstance(geometry, Geometry):
         geometry = build_geometry(geometry, **kwargs)
-    return py_jps.Geometry3D.from_2d(geometry._obj)
+    return geometry._obj

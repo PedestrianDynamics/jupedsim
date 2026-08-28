@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "Geometry/Geometry3D.hpp"
+#include "Geometry/Geometry.hpp"
 #include "Geometry/Location.hpp"
 #include "TestCommon.hpp"
 
@@ -131,7 +131,7 @@ SurfaceMesh two_row_strip(int n)
 
 /// Location at @p (x,y) on a single-sheet mesh, disambiguation off (generous z
 /// tolerance). Fails the calling test if the point is off the walkable area.
-Location location_at(const Geometry3D& geo, double x, double y)
+Location location_at(const Geometry& geo, double x, double y)
 {
     auto loc = geo.get_location(x, y, 0.0, 100.0);
     EXPECT_TRUE(loc.has_value()) << "location (" << x << "," << y << ") is off the surface";
@@ -141,7 +141,7 @@ Location location_at(const Geometry3D& geo, double x, double y)
 
 TEST(Location, LocationOnFlatGround)
 {
-    Geometry3D geo{flat_room()};
+    Geometry geo{flat_room()};
     ASSERT_EQ(geo.region_count(), 1);
 
     const auto loc = geo.get_location(5, 5, 0.0);
@@ -154,7 +154,7 @@ TEST(Location, LocationOnFlatGround)
 
 TEST(Location, XyIsTheExactAndZCorrectlyCalculated)
 {
-    Geometry3D geo{ramp()};
+    Geometry geo{ramp()};
 
     // On the ramp z == 0.4*y; the location keeps the exact (x,y) and caches z.
     const auto loc = geo.get_location(10, 2, 0.0, 1.0);
@@ -166,7 +166,7 @@ TEST(Location, XyIsTheExactAndZCorrectlyCalculated)
 
 TEST(Location, Position3DCombinesXyAndCachedZ)
 {
-    Geometry3D geo{ramp()};
+    Geometry geo{ramp()};
 
     const auto loc = geo.get_location(10, 9, 3.6, 0.1);
     ASSERT_TRUE(loc.has_value());
@@ -179,7 +179,7 @@ TEST(Location, Position3DCombinesXyAndCachedZ)
 
 TEST(Location, ZHintDisambiguatesStackedSheets)
 {
-    Geometry3D geo{stacked_floors()};
+    Geometry geo{stacked_floors()};
     ASSERT_EQ(geo.region_count(), 2);
 
     const auto lower = geo.get_location(5, 5, 0.0);
@@ -196,7 +196,7 @@ TEST(Location, ZHintDisambiguatesStackedSheets)
 
 TEST(Location, ZHintPicksTheNearerSheetWithinTolerance)
 {
-    Geometry3D geo{stacked_floors()};
+    Geometry geo{stacked_floors()};
 
     // Hint closer to the upper sheet -- default tolerance still resolves it.
     const auto loc = geo.get_location(5, 5, 2.95);
@@ -206,7 +206,7 @@ TEST(Location, ZHintPicksTheNearerSheetWithinTolerance)
 
 TEST(Location, ZHintBeyondToleranceOfAnySheetMisses)
 {
-    Geometry3D geo{stacked_floors()};
+    Geometry geo{stacked_floors()};
 
     // Midway between the sheets (z=0 and z=3): 1.4 m from the nearer one,
     // beyond the 0.1 default tolerance -> no location.
@@ -219,13 +219,13 @@ TEST(Location, ZHintBeyondToleranceOfAnySheetMisses)
 
 TEST(Location, PointOutsideFootprintMisses)
 {
-    Geometry3D geo{flat_room()};
+    Geometry geo{flat_room()};
     EXPECT_FALSE(geo.get_location(20, 20, 0.0).has_value());
 }
 
 TEST(Location, PointInsideHoleMisses)
 {
-    Geometry3D geo{square_with_hole()};
+    Geometry geo{square_with_hole()};
 
     EXPECT_TRUE(geo.get_location(1, 1, 0.0).has_value());
     EXPECT_FALSE(geo.get_location(5, 5, 0.0).has_value()); // inside the hole
@@ -235,7 +235,7 @@ TEST(Location, PointInsideHoleMisses)
 
 TEST(LocationMove, AcrossInteriorDiagonalKeepsRegionAndInterpolatesHeight)
 {
-    Geometry3D geo{ramp()};
+    Geometry geo{ramp()};
     ASSERT_EQ(geo.region_count(), 1);
 
     // (10,2) and (10,8) sit in the two triangles of the ramp quad; the straight
@@ -250,7 +250,7 @@ TEST(LocationMove, AcrossInteriorDiagonalKeepsRegionAndInterpolatesHeight)
 
 TEST(LocationMove, HitsVertexWhileWalking)
 {
-    Geometry3D geo{fan_square()};
+    Geometry geo{fan_square()};
 
     // Target (1,1.7) sits in the top triangle, touching the start (bottom)
     // triangle only at the centre vertex (1,1); the move hits that vertex.
@@ -263,7 +263,7 @@ TEST(LocationMove, HitsVertexWhileWalking)
 
 TEST(LocationMove, StartingExactlyOnVertexResolvesToNeighbour)
 {
-    Geometry3D geo{fan_square()};
+    Geometry geo{fan_square()};
 
     // The Location sits exactly on the centre vertex (1,1); its cached face is an
     // arbitrary incident one. A move into any of the four fan triangles must
@@ -285,7 +285,7 @@ TEST(LocationMove, StartingExactlyOnVertexResolvesToNeighbour)
 
 TEST(LocationMove, WithinOneTriangleReturnsTargetHeight)
 {
-    Geometry3D geo{ramp()};
+    Geometry geo{ramp()};
 
     auto loc = location_at(geo, 10, 2);
     loc.move_on_surface(Point{1, 1}); // -> (11,3), start/end in one triangle
@@ -296,7 +296,7 @@ TEST(LocationMove, WithinOneTriangleReturnsTargetHeight)
 
 TEST(LocationMove, LeavingWalkableAreaThrowsAndLeavesLocationUnchanged)
 {
-    Geometry3D geo{flat_room()};
+    Geometry geo{flat_room()};
 
     auto loc = location_at(geo, 3, 2);
     // The straight path crosses a border edge -> leaves the walkable area.
@@ -310,7 +310,7 @@ TEST(LocationMove, LeavingWalkableAreaThrowsAndLeavesLocationUnchanged)
 
 TEST(LocationMove, LeavingOverABoundaryCornerThrows)
 {
-    Geometry3D geo{flat_room()}; // [0,10]^2
+    Geometry geo{flat_room()}; // [0,10]^2
 
     // The straight path passes exactly through the boundary corner (10,10) and
     // continues outward. It leaves the walkable area *at the vertex*.
@@ -323,7 +323,7 @@ TEST(LocationMove, LeavingOverABoundaryCornerThrows)
 
 TEST(LocationMove, AlongAnInteriorEdgeChain)
 {
-    Geometry3D geo{two_row_strip(4)};
+    Geometry geo{two_row_strip(4)};
     ASSERT_EQ(geo.region_count(), 1);
 
     // The path runs exactly along the interior edge chain at y=1, through every
@@ -341,7 +341,7 @@ TEST(LocationMove, NearTheApexOfASliverFan)
 {
     constexpr int n = 20;
     constexpr double spacing = 1e-3;
-    Geometry3D geo{sliver_fan(n, spacing)};
+    Geometry geo{sliver_fan(n, spacing)};
     ASSERT_EQ(geo.region_count(), 1);
 
     // A vertical move at x=eps, very close to the apex, crosses every fan
@@ -358,7 +358,7 @@ TEST(LocationMove, NearTheApexOfASliverFan)
 
 TEST(LocationMove, LongStepCrossesManyFaces)
 {
-    Geometry3D geo{flat_strip(50)}; // 100 triangles
+    Geometry geo{flat_strip(50)}; // 100 triangles
 
     // One straight step from the first quad to the last, crossing 2 faces per
     // quad. Checks whether long steps are fine.
@@ -376,7 +376,7 @@ TEST(LocationMove, LongStepCrossesManyFaces)
 
 TEST(LocationTryMove, SucceedsReturnsResultAndLeavesSourceUnchanged)
 {
-    Geometry3D geo{ramp()};
+    Geometry geo{ramp()};
 
     const auto loc = location_at(geo, 10, 2);
     const auto moved = loc.try_move_on_surface(Point{1, 1}); // -> (11,3), z=1.2
@@ -392,7 +392,7 @@ TEST(LocationTryMove, SucceedsReturnsResultAndLeavesSourceUnchanged)
 
 TEST(LocationTryMove, LeavingAcrossBorderEdgeReturnsNullopt)
 {
-    Geometry3D geo{flat_room()};
+    Geometry geo{flat_room()};
 
     const auto loc = location_at(geo, 3, 2);
     // Straight path crosses a border edge -> no result (instead of throwing).
@@ -404,7 +404,7 @@ TEST(LocationTryMove, LeavingAcrossBorderEdgeReturnsNullopt)
 
 TEST(LocationTryMove, LeavingOverBoundaryCornerReturnsNullopt)
 {
-    Geometry3D geo{flat_room()}; // [0,10]^2
+    Geometry geo{flat_room()}; // [0,10]^2
 
     // Straight path passes exactly through the boundary corner (10,10) and
     // continues outward -> leaves the area at the vertex.

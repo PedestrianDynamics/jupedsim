@@ -2,14 +2,14 @@
 #include "Geometry/RegionView.hpp"
 
 #include "GeometricFunctions.hpp"
-#include "Geometry/Geometry3D.hpp"
+#include "Geometry/Geometry.hpp"
 
 #include <algorithm>
 #include <utility>
 
 RegionView::RegionView(
     std::size_t regionId,
-    const Geometry3D* geometry3d,
+    const Geometry* geometry3d,
     SegmentGrid walls,
     std::vector<RegionSeam> seams)
     : _regionId(regionId)

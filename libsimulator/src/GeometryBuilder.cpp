@@ -2,7 +2,6 @@
 #include "GeometryBuilder.hpp"
 
 #include "CfgCgal.hpp"
-#include "Geometry/Geometry2D.hpp"
 #include "Point.hpp"
 
 #include <fmt/format.h>
@@ -22,10 +21,10 @@ GeometryBuilder& GeometryBuilder::ExcludeFromAccessibleArea(const std::vector<Po
     return *this;
 }
 
-Geometry2D GeometryBuilder::Build()
+PolyWithHoles GeometryBuilder::Build()
 {
     const std::vector<Poly> accessibleAreas{
         std::begin(_accessibleAreas), std::end(_accessibleAreas)};
     const std::vector<Poly> exclusions{std::begin(_exclusions), std::end(_exclusions)};
-    return Geometry2D(CombinePolygons(accessibleAreas, exclusions));
+    return CombinePolygons(accessibleAreas, exclusions);
 }

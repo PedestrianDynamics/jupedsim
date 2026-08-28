@@ -2,7 +2,7 @@
 #pragma once
 
 #include "GenericAgent.hpp"
-#include "Geometry/Geometry3D.hpp"
+#include "Geometry/Geometry.hpp"
 #include "SimulationError.hpp"
 #include "Stage.hpp"
 #include "StageDescription.hpp"
@@ -19,7 +19,7 @@ namespace detail
 {
 /// Put a stage's representative point on the surface that is closest to @p z_hint.
 inline Location
-locate_stage_point(const Geometry3D& geometry, Point point, std::string_view what, double z_hint)
+locate_stage_point(const Geometry& geometry, Point point, std::string_view what, double z_hint)
 {
     const auto location = geometry.get_location(point.x, point.y, z_hint);
     if(!location) {
@@ -29,7 +29,7 @@ locate_stage_point(const Geometry3D& geometry, Point point, std::string_view wha
 }
 
 inline std::vector<Location> locate_slots(
-    const Geometry3D& geometry,
+    const Geometry& geometry,
     const std::vector<Point>& slots,
     std::string_view what,
     double z_hint)
@@ -59,7 +59,7 @@ public:
     BaseStage::ID AddStage(
         const StageDescription stageDescription,
         std::vector<GenericAgent::ID>& removedAgentsInLastIteration,
-        const Geometry3D& geometry,
+        const Geometry& geometry,
         double z_hint)
     {
         std::unique_ptr<BaseStage> stage = std::visit(

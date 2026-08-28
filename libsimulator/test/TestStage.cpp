@@ -11,13 +11,13 @@ class StagesTests : public ::testing::Test
 {
 public:
     NeighborhoodSearch<GenericAgent> neighborhoodSearch{2};
-    std::unique_ptr<Geometry3D> geometry{};
+    std::unique_ptr<Geometry> geometry{};
 
     void SetUp() override
     {
         GeometryBuilder b{};
         b.AddAccessibleArea({{-10, -10}, {10, -10}, {10, 10}, {-10, 10}});
-        geometry = std::make_unique<Geometry3D>(b.Build().Polygon());
+        geometry = std::make_unique<Geometry>(b.Build());
     }
 
     void TearDown() override {}
@@ -72,7 +72,7 @@ TEST_F(StagesTests, NotifiableWaitingSetTargetIsCorrect)
 class StagesOnTwoStoreys : public ::testing::Test
 {
 public:
-    Geometry3D geometry{fixtures::stacked_floors()};
+    Geometry geometry{fixtures::stacked_floors()};
 
     Location At(Point p, double z) const { return *geometry.get_location(p.x, p.y, z); }
 
@@ -183,7 +183,7 @@ TEST(StagesOnAStair, WaypointIsReachedFromTheStairItStandsOn)
 {
     // A stair climbing 3 m over 5 m: an agent 0.8 m short of the waypoint in plan is
     // half a metre below it.
-    Geometry3D geometry{fixtures::two_levels_with_stair()};
+    Geometry geometry{fixtures::two_levels_with_stair()};
     Waypoint waypoint(*geometry.get_location(12.5, 2.0, 1.5), 1.0);
 
     const GenericAgent agent(

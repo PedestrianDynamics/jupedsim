@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Geometry/Location.hpp"
 
-#include "Geometry/Geometry3D.hpp"
+#include "Geometry/Geometry.hpp"
 #include "SimulationError.hpp"
 
 #include <CGAL/squared_distance_3.h>
@@ -83,7 +83,7 @@ fan_face(const SurfaceMesh& mesh, SurfaceMesh::Vertex_index v, const K::Vector_2
 /// through the xy-projected triangulation. Steps may be arbitrarily long (cost
 /// O(crossed faces)). Requires that faces are CCW in the xy projection.
 /// Returns `nullopt` if the walkable area is left.
-std::optional<Geometry3D::FaceLocation> straight_walk(
+std::optional<Geometry::FaceLocation> straight_walk(
     const SurfaceMesh& mesh,
     SurfaceMesh::Face_index start_face,
     const Point2D& from,
@@ -120,7 +120,7 @@ std::optional<Geometry3D::FaceLocation> straight_walk(
     for(std::size_t step = 0; step < maxSteps; ++step) {
         if(covers(f)) {
             // Done: target is inside the triangle
-            return Geometry3D::FaceLocation{f, point_on_face(mesh, f, to)};
+            return Geometry::FaceLocation{f, point_on_face(mesh, f, to)};
         }
 
         // 'to' lies outside f -> find the forward exit across f's boundary.

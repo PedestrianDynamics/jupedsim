@@ -2,8 +2,7 @@
 #include "Simulation.hpp"
 
 #include "GenericAgent.hpp"
-#include "Geometry/Geometry2D.hpp"
-#include "Geometry/Geometry3D.hpp"
+#include "Geometry/Geometry.hpp"
 #include "Geometry/Location.hpp"
 #include "Journey.hpp"
 #include "OperationalModel.hpp"
@@ -34,23 +33,9 @@ void init_simulation(py::module_& m)
         .def(
             // The model is moved out of the Python object into Simulation. After this constructor
             // returns, the Python model object passed here is disowned/invalid and must not be
-            // reused.
-            py::init([](std::unique_ptr<OperationalModel> model, Geometry2D geometry, double dT) {
-                if(!model) {
-                    throw std::invalid_argument("model must not be None");
-                }
-                return std::make_unique<Simulation>(
-                    std::move(model), std::make_unique<Geometry2D>(geometry), dT);
-            }),
-            py::kw_only(),
-            py::arg("model"),
-            py::arg("geometry"),
-            py::arg("dt"))
-        .def(
-            // Mesh-built world: the geometry is consumed here, the Python object passed in is
-            // disowned and must not be reused.
+            // reused. The same goes for the geometry.
             py::init([](std::unique_ptr<OperationalModel> model,
-                        std::unique_ptr<Geometry3D> geometry,
+                        std::unique_ptr<Geometry> geometry,
                         double dT) {
                 if(!model) {
                     throw std::invalid_argument("model must not be None");
@@ -221,7 +206,11 @@ void init_simulation(py::module_& m)
         .def(
             "set_timer_log_level",
             [](Simulation& sim, size_t level) { sim.SetTimerLogLevel(level); })
-        .def("get_geometry", [](Simulation& sim) { return sim.Geo(); })
+        .def(
+            "get_geometry",
+            [](const Simulation& sim) -> const Geometry& { return sim.Geo(); },
+            // Borrowed from the simulation, which keeps owning it.
+            py::return_value_policy::reference_internal)
         .def(
             "push_timer",
             [](Simulation& sim, const std::string& name, size_t probe_log_level) {

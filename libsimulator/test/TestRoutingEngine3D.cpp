@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "CfgCgal.hpp"
-#include "Geometry/Geometry3D.hpp"
+#include "Geometry/Geometry.hpp"
 #include "GeometryBuilder.hpp"
 #include "MeshFixtures.hpp"
 #include "RoutingEngine.hpp"
@@ -115,12 +115,12 @@ class FlatSquare : public ::testing::Test
 public:
     void SetUp() override
     {
-        geometry = std::make_unique<Geometry3D>(unit_square_mesh());
+        geometry = std::make_unique<Geometry>(unit_square_mesh());
         engine = std::make_unique<SurfaceMeshShortestPathRoutingEngine>(*geometry);
     }
 
 protected:
-    std::unique_ptr<Geometry3D> geometry{};
+    std::unique_ptr<Geometry> geometry{};
     std::unique_ptr<SurfaceMeshShortestPathRoutingEngine> engine{};
 };
 
@@ -196,7 +196,7 @@ TEST_F(FlatSquare, OrientationRobustWhenSourceOnEdge)
 
 TEST(RoutingEngine3DFold, GeodesicCarriesLengthAcrossSeam)
 {
-    Geometry3D geometry{folded_mesh()};
+    Geometry geometry{folded_mesh()};
     SurfaceMeshShortestPathRoutingEngine engine{geometry};
 
     const Point3D source{3, 2, 1}; // on the floor
@@ -238,7 +238,7 @@ TEST(RoutingEngine3DLShape, GeodesicBendsAroundReflexCorner)
     // L-shape (CCW) with a single reflex corner at (1, 1).
     const std::vector<K::Point_2> outer{{0, 0}, {3, 0}, {3, 1}, {1, 1}, {1, 3}, {0, 3}};
 
-    Geometry3D geometry{mesh_from_polygon(outer)}; // flat z = 0
+    Geometry geometry{mesh_from_polygon(outer)}; // flat z = 0
     SurfaceMeshShortestPathRoutingEngine engine{geometry};
 
     const Point3D source{2.5, 0.5, 1};
@@ -260,7 +260,7 @@ TEST(RoutingEngine3DLShape, OrientationBendsTowardsReflexCorner)
 {
     const std::vector<K::Point_2> outer{{0, 0}, {3, 0}, {3, 1}, {1, 1}, {1, 3}, {0, 3}};
 
-    Geometry3D geometry{mesh_from_polygon(outer)}; // flat z = 0
+    Geometry geometry{mesh_from_polygon(outer)}; // flat z = 0
     SurfaceMeshShortestPathRoutingEngine engine{geometry};
 
     // The route bends around the reflex corner (1,1), so the heading points there rather than at
@@ -282,7 +282,7 @@ TEST(RoutingEngine3DLShape, WaypointIsTheNextTurnOfTheGeodesic)
 {
     const std::vector<K::Point_2> outer{{0, 0}, {3, 0}, {3, 1}, {1, 1}, {1, 3}, {0, 3}};
 
-    Geometry3D geometry{mesh_from_polygon(outer)}; // flat z = 0
+    Geometry geometry{mesh_from_polygon(outer)}; // flat z = 0
     SurfaceMeshShortestPathRoutingEngine engine{geometry};
 
     const auto from = geometry.get_location(2.5, 0.5, 0.0);
@@ -304,9 +304,9 @@ TEST(RoutingEngineProjected, WaypointOnLocationsIsTheOneOnPoints)
     GeometryBuilder b{};
     b.AddAccessibleArea({{0, 0}, {20, 0}, {20, 20}, {0, 20}});
     b.ExcludeFromAccessibleArea({{9, 0}, {11, 0}, {11, 15}, {9, 15}});
-    const auto poly = b.Build().Polygon();
+    const auto poly = b.Build();
 
-    Geometry3D geometry{poly};
+    Geometry geometry{poly};
     RoutingEngine engine{poly};
 
     const auto from = geometry.get_location(4.0, 4.0, 0.0);
@@ -324,13 +324,13 @@ TEST(RoutingEngineWallClearance, NegativeIsNoDistance)
 {
     GeometryBuilder b{};
     b.AddAccessibleArea({{0, 0}, {20, 0}, {20, 20}, {0, 20}});
-    EXPECT_THROW(RoutingEngine(b.Build().Polygon(), -0.1), SimulationError);
+    EXPECT_THROW(RoutingEngine(b.Build(), -0.1), SimulationError);
 }
 
 TEST(RoutingEngineWallClearance, TheSurfaceEngineKeepsItToo)
 {
     const std::vector<K::Point_2> outer{{0, 0}, {3, 0}, {3, 1}, {1, 1}, {1, 3}, {0, 3}};
-    Geometry3D geometry{mesh_from_polygon(outer)};
+    Geometry geometry{mesh_from_polygon(outer)};
     const Point3D source{2.5, 0.5, 1};
     const Point3D target{0.5, 2.5, 1};
 
@@ -354,7 +354,7 @@ TEST(RoutingEngineProjected, TheClearanceIsWhatHoldsARouteOffACorner)
     // An L, so that the route has to turn on the reflex corner at (1,1).
     GeometryBuilder b{};
     b.AddAccessibleArea({{0, 0}, {3, 0}, {3, 1}, {1, 1}, {1, 3}, {0, 3}});
-    const auto poly = b.Build().Polygon();
+    const auto poly = b.Build();
     const Point from{2.5, 0.5};
     const Point to{0.5, 2.5};
 
@@ -376,7 +376,7 @@ TEST(RoutingEngine3DCorridor, TheWaypointIsNeverTheSpotAlreadyStoodOn)
     // On triangles this long the path comes back with its own source point far enough off to
     // survive as a waypoint of its own -- and a step that short has no direction, so the agent
     // is sent to where it stands and stays there.
-    Geometry3D geometry{fixtures::corridor_with_door_recesses()};
+    Geometry geometry{fixtures::corridor_with_door_recesses()};
     SurfaceMeshShortestPathRoutingEngine engine{geometry};
 
     auto walker = geometry.get_location(2.0, 0.9, 0.0);

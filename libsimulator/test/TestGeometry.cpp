@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "Geometry/Geometry3D.hpp"
+#include "Geometry/Geometry.hpp"
 #include "LineSegment.hpp"
 #include "MeshFixtures.hpp"
 #include "TestCommon.hpp"
@@ -82,9 +82,9 @@ std::ptrdiff_t pieces_along(const std::vector<LineSegment>& answer, double y)
 
 } // namespace
 
-TEST(Geometry3DLocate, FlatRegionYieldsGroundHeight)
+TEST(GeometryLocate, FlatRegionYieldsGroundHeight)
 {
-    Geometry3D geo{flat_room()};
+    Geometry geo{flat_room()};
     ASSERT_EQ(geo.region_count(), 1);
 
     const auto loc = geo.locate_in_region(0, {5, 5});
@@ -94,15 +94,15 @@ TEST(Geometry3DLocate, FlatRegionYieldsGroundHeight)
     EXPECT_NEAR(loc.point.y(), 5.0, 1e-9);
 }
 
-TEST(Geometry3DLocate, PointOutsideRegionFootprintMisses)
+TEST(GeometryLocate, PointOutsideRegionFootprintMisses)
 {
-    Geometry3D geo{flat_room()};
+    Geometry geo{flat_room()};
     EXPECT_EQ(geo.locate_in_region(0, {20, 20}).face, SurfaceMesh::null_face());
 }
 
-TEST(Geometry3DLocate, RampInterpolatesHeightOnFace)
+TEST(GeometryLocate, RampInterpolatesHeightOnFace)
 {
-    Geometry3D geo{ramp()};
+    Geometry geo{ramp()};
     ASSERT_EQ(geo.region_count(), 1);
 
     // by construction: z == 0.4*y
@@ -110,9 +110,9 @@ TEST(Geometry3DLocate, RampInterpolatesHeightOnFace)
     EXPECT_NEAR(geo.locate_in_region(0, {10, 9}).point.z(), 3.6, 1e-9);
 }
 
-TEST(Geometry3DLocate, RegionIdDisambiguatesStackedFloors)
+TEST(GeometryLocate, RegionIdDisambiguatesStackedFloors)
 {
-    Geometry3D geo{stacked_floors()};
+    Geometry geo{stacked_floors()};
     ASSERT_EQ(geo.region_count(), 2);
 
     // Same (x,y), two sheets: the region id picks which one.
@@ -133,9 +133,9 @@ PolyWithHoles square_with_hole()
 }
 } // namespace
 
-TEST(Geometry3DFromPolygon, HoleIsNotWalkable)
+TEST(GeometryFromPolygon, HoleIsNotWalkable)
 {
-    Geometry3D geo{square_with_hole()};
+    Geometry geo{square_with_hole()};
 
     ASSERT_EQ(geo.region_count(), 1);
     EXPECT_TRUE(geo.is_valid_location({1, 1, 1}));
@@ -147,27 +147,27 @@ TEST(Geometry3DFromPolygon, HoleIsNotWalkable)
     }
 }
 
-TEST(Geometry3DFromPolygon, OwnsTheProjected2DView)
+TEST(GeometryFromPolygon, KeepsThePolygonItWasLiftedFrom)
 {
-    Geometry3D geo{square_with_hole()};
+    Geometry geo{square_with_hole()};
 
-    const auto* view = geo.geometry_2d();
-    ASSERT_NE(view, nullptr);
-    EXPECT_TRUE(view->InsideGeometry({1, 1}));
-    EXPECT_FALSE(view->InsideGeometry({5, 5})); // inside the hole
+    const auto* poly = geo.polygon();
+    ASSERT_NE(poly, nullptr);
+    EXPECT_EQ(poly->outer_boundary().size(), 4u);
+    EXPECT_EQ(poly->holes().size(), 1u);
 }
 
-TEST(Geometry3DFromMesh, HasNoProjected2DView)
+TEST(GeometryFromMesh, HasNoPolygon)
 {
-    Geometry3D geo{flat_room()};
-    // A mesh carries no 2D view -- unlike a polygon-built geometry.
-    EXPECT_EQ(geo.geometry_2d(), nullptr);
+    Geometry geo{flat_room()};
+    // A surface that may fold over itself has no polygon underneath.
+    EXPECT_EQ(geo.polygon(), nullptr);
 }
 
-TEST(Geometry3DFromPolygon, LiftReproducesThe2DTriangulation)
+TEST(GeometryFromPolygon, LiftReproducesThe2DTriangulation)
 {
     const auto poly = square_with_hole();
-    Geometry3D geo{poly};
+    Geometry geo{poly};
 
     // The reference: the CDT exactly as the 2D RoutingEngine builds it.
     CDT cdt{};
@@ -207,9 +207,9 @@ TEST(Geometry3DFromPolygon, LiftReproducesThe2DTriangulation)
     EXPECT_EQ(vertices.size(), cdt.number_of_vertices());
 }
 
-TEST(Geometry3DModelQueries, EverythingAnsweredIsWithinTheRadius)
+TEST(GeometryModelQueries, EverythingAnsweredIsWithinTheRadius)
 {
-    Geometry3D geo{square_with_hole()};
+    Geometry geo{square_with_hole()};
     const auto who = geo.get_location(2, 5, 0.0);
     ASSERT_TRUE(who.has_value());
 
@@ -225,9 +225,9 @@ TEST(Geometry3DModelQueries, EverythingAnsweredIsWithinTheRadius)
     EXPECT_FALSE(sees_part_of(walls, LineSegment{{6, 4}, {6, 6}}));
 }
 
-TEST(Geometry3DModelQueries, NoGeometryBetweenMatchesFlatView)
+TEST(GeometryModelQueries, NoGeometryBetweenMatchesFlatView)
 {
-    Geometry3D geo{square_with_hole()};
+    Geometry geo{square_with_hole()};
     const auto left = geo.get_location(2, 5, 0.0);
     const auto right = geo.get_location(8, 5, 0.0);
     const auto below = geo.get_location(2, 2, 0.0);
@@ -237,19 +237,11 @@ TEST(Geometry3DModelQueries, NoGeometryBetweenMatchesFlatView)
     EXPECT_FALSE(geo.no_geometry_between(*left, right->xy() - left->xy()));
     // 2,5 -> 2,2 stays clear of the hole: visible.
     EXPECT_TRUE(geo.no_geometry_between(*left, below->xy() - left->xy()));
-
-    // Delegation pinning against the 2D view.
-    EXPECT_EQ(
-        geo.no_geometry_between(*left, right->xy() - left->xy()),
-        !geo.geometry_2d()->IntersectsAny(LineSegment{left->xy(), right->xy()}));
-    EXPECT_EQ(
-        geo.no_geometry_between(*left, below->xy() - left->xy()),
-        !geo.geometry_2d()->IntersectsAny(LineSegment{left->xy(), below->xy()}));
 }
 
-TEST(Geometry3DModelQueries, AStepIsJudgedByTheWayThereNotByWhereItLands)
+TEST(GeometryModelQueries, AStepIsJudgedByTheWayThereNotByWhereItLands)
 {
-    Geometry3D geo{square_with_hole()};
+    Geometry geo{square_with_hole()};
     const auto who = geo.get_location(2, 5, 0.0);
     ASSERT_TRUE(who.has_value());
 
@@ -264,12 +256,12 @@ TEST(Geometry3DModelQueries, AStepIsJudgedByTheWayThereNotByWhereItLands)
 
     // The last one is where the two questions part ways: it lands on walkable ground, and
     // there is still no straight step to it.
-    EXPECT_TRUE(geo.geometry_2d()->InsideGeometry(beyond_hole));
+    EXPECT_TRUE(geo.is_valid_location({beyond_hole.x, beyond_hole.y, 0.0}));
 }
 
-TEST(Geometry3DVisibility, WithinOneRegionTheFlatTestAnswers)
+TEST(GeometryVisibility, WithinOneRegionTheFlatTestAnswers)
 {
-    Geometry3D geo{fixtures::wavy_terrain()};
+    Geometry geo{fixtures::wavy_terrain()};
     const auto who = geo.get_location(10.0, 5.0, 0.0, 2.0);
     ASSERT_TRUE(who.has_value());
 
@@ -279,9 +271,9 @@ TEST(Geometry3DVisibility, WithinOneRegionTheFlatTestAnswers)
     EXPECT_FALSE(geo.no_geometry_between(*who, {40.0, 0.0}));
 }
 
-TEST(Geometry3DVisibility, TheFloorAboveIsNotInSightThoughNothingStandsBetween)
+TEST(GeometryVisibility, TheFloorAboveIsNotInSightThoughNothingStandsBetween)
 {
-    Geometry3D geo{stacked_floors()};
+    Geometry geo{stacked_floors()};
     const auto below = geo.get_location(2, 5, 0.0);
     const auto beside = geo.get_location(8, 5, 0.0);
     const auto above = geo.get_location(8, 5, 3.0);
@@ -293,9 +285,9 @@ TEST(Geometry3DVisibility, TheFloorAboveIsNotInSightThoughNothingStandsBetween)
     EXPECT_FALSE(geo.no_geometry_between(*below, *above));
 }
 
-TEST(Geometry3DVisibility, LeavingTheSurfaceOverASeamBlocksTheView)
+TEST(GeometryVisibility, LeavingTheSurfaceOverASeamBlocksTheView)
 {
-    Geometry3D geo{fixtures::two_levels_with_stair()};
+    Geometry geo{fixtures::two_levels_with_stair()};
 
     // Standing on the stair, two metres short of its head at x = 15.
     const auto who = geo.get_location(13.0, 2.0, 1.8, 0.5);
@@ -309,9 +301,9 @@ TEST(Geometry3DVisibility, LeavingTheSurfaceOverASeamBlocksTheView)
     EXPECT_FALSE(geo.no_geometry_between(*who, {4.0, 0.0}));
 }
 
-TEST(Geometry3DVisibility, CrossingASeamOntoWalkableSurfaceDoesNotBlock)
+TEST(GeometryVisibility, CrossingASeamOntoWalkableSurfaceDoesNotBlock)
 {
-    Geometry3D geo{fixtures::switchback_stair()};
+    Geometry geo{fixtures::switchback_stair()};
 
     // Flight and landing meet at x = 14, which is also where the region overlay cuts (the
     // coplanar landing + upper floor fuse into one region). Walking across the seam stays
@@ -328,9 +320,9 @@ TEST(Geometry3DVisibility, CrossingASeamOntoWalkableSurfaceDoesNotBlock)
     EXPECT_TRUE(geo.no_geometry_between(*who, *beyond));
 }
 
-TEST(Geometry3DModelQueries, AMeshAnswersWithItsOwnRegionsWalls)
+TEST(GeometryModelQueries, AMeshAnswersWithItsOwnRegionsWalls)
 {
-    Geometry3D geo{fixtures::wavy_terrain()};
+    Geometry geo{fixtures::wavy_terrain()};
     const auto who = geo.get_location(10.0, 5.0, 0.0, 2.0);
     ASSERT_TRUE(who.has_value());
 
@@ -343,9 +335,9 @@ TEST(Geometry3DModelQueries, AMeshAnswersWithItsOwnRegionsWalls)
     EXPECT_TRUE(sees_part_of(walls, LineSegment{{20, 0}, {20, 10}}));
 }
 
-TEST(Geometry3DModelQueries, ASeamBringsTheNextRegionsWallsIntoTheAnswer)
+TEST(GeometryModelQueries, ASeamBringsTheNextRegionsWallsIntoTheAnswer)
 {
-    Geometry3D geo{fixtures::switchback_stair()};
+    Geometry geo{fixtures::switchback_stair()};
 
     // On the flight, a little short of x = 14 where it meets the landing and the region
     // changes. The wall along y = 0 runs straight on past that boundary, where it is the
@@ -361,9 +353,9 @@ TEST(Geometry3DModelQueries, ASeamBringsTheNextRegionsWallsIntoTheAnswer)
     EXPECT_TRUE(reaches_across) << "the answer stopped at the region boundary";
 }
 
-TEST(Geometry3DModelQueries, AWallBorderingTwoRegionsIsDeliveredOnce)
+TEST(GeometryModelQueries, AWallBorderingTwoRegionsIsDeliveredOnce)
 {
-    Geometry3D geo{fixtures::switchback_stair()};
+    Geometry geo{fixtures::switchback_stair()};
 
     // The wall along y = 8 runs across landing and upper floor, and the agent stands where
     // both are in sight. Nothing may be answered twice, however many ways lead to it.
@@ -375,9 +367,9 @@ TEST(Geometry3DModelQueries, AWallBorderingTwoRegionsIsDeliveredOnce)
     EXPECT_EQ(delivered.size(), distinct.size()) << "the same wall came back more than once";
 }
 
-TEST(Geometry3DModelQueries, AWallOfTheStoreyAboveIsNotInTheAnswer)
+TEST(GeometryModelQueries, AWallOfTheStoreyAboveIsNotInTheAnswer)
 {
-    Geometry3D geo{fixtures::switchback_stair()};
+    Geometry geo{fixtures::switchback_stair()};
 
     // The far side at y = 8 carries two walls, one above the other: the ground floor's, which
     // ends at x = 10, and the upper floor's, which runs on to the landing at x = 18. In plan
@@ -391,9 +383,9 @@ TEST(Geometry3DModelQueries, AWallOfTheStoreyAboveIsNotInTheAnswer)
     EXPECT_EQ(pieces_along(walls, 8.0), 1) << "the upper floor's wall answered as well";
 }
 
-TEST(Geometry3DModelQueries, TheFlightAboveIsNotAWallEvenInTheSameRegion)
+TEST(GeometryModelQueries, TheFlightAboveIsNotAWallEvenInTheSameRegion)
 {
-    Geometry3D geo{fixtures::stair_turning_on_a_landing()};
+    Geometry geo{fixtures::stair_turning_on_a_landing()};
     ASSERT_EQ(geo.region_count(), 1u);
 
     // Standing at the foot of the first flight, with the stair well beside him: its near wall
@@ -413,9 +405,9 @@ TEST(Geometry3DModelQueries, TheFlightAboveIsNotAWallEvenInTheSameRegion)
     EXPECT_FALSE(side_of_the_well(3.0)) << "repelled by a wall belonging to the flight above";
 }
 
-TEST(Geometry3DModelQueries, AWallRisingFromTheAgentsLevelStaysInTheAnswer)
+TEST(GeometryModelQueries, AWallRisingFromTheAgentsLevelStaysInTheAnswer)
 {
-    Geometry3D geo{fixtures::switchback_stair()};
+    Geometry geo{fixtures::switchback_stair()};
 
     // The wall along y = 0 runs from the ground floor up the flight to the landing, so it
     // starts at the agent's feet and ends 3 m up. Nothing may drop it: how far a wall reaches
@@ -427,9 +419,9 @@ TEST(Geometry3DModelQueries, AWallRisingFromTheAgentsLevelStaysInTheAnswer)
     EXPECT_TRUE(sees_part_of(walls, LineSegment{{0, 0}, {18, 0}}));
 }
 
-TEST(Geometry3DModelQueries, AWallOfTheStoreyBelowIsNotInTheAnswer)
+TEST(GeometryModelQueries, AWallOfTheStoreyBelowIsNotInTheAnswer)
 {
-    Geometry3D geo{fixtures::switchback_stair()};
+    Geometry geo{fixtures::switchback_stair()};
 
     // Upstairs, over the ground floor. Its east wall (10,4)-(10,8) stands three metres below and
     // comes within reach over the seam -- and it is what the upper floor's own floor rests on, so
@@ -445,9 +437,9 @@ TEST(Geometry3DModelQueries, AWallOfTheStoreyBelowIsNotInTheAnswer)
     EXPECT_EQ(pieces_along(walls, 8.0), 1) << "the ground floor's wall answered as well";
 }
 
-TEST(Geometry3DModelQueries, AWallOfTheFlightBelowIsNotInTheAnswerEither)
+TEST(GeometryModelQueries, AWallOfTheFlightBelowIsNotInTheAnswerEither)
 {
-    Geometry3D geo{fixtures::stair_turning_on_a_landing()};
+    Geometry geo{fixtures::stair_turning_on_a_landing()};
     ASSERT_EQ(geo.region_count(), 1u);
 
     // At the top of the second flight, six metres up. The foot of the first flight lies in the

@@ -27,7 +27,7 @@ from vtkmodules.vtkRenderingCore import vtkCellPicker  # noqa: E402
 pv.OFF_SCREEN = True
 
 from jupedsim.internal.routing_3d import (  # noqa: E402
-    Geometry3D,
+    Geometry,
     SurfaceMeshShortestPathRoutingEngine,
     make_naive_boundary_index,
     make_portal_boundary_index,
@@ -41,7 +41,7 @@ from trame.widgets import vuetify3 as v3  # noqa: E402
 TITLE = "JuPedSim - Multi-Level Viewer"
 
 # BoundaryIndex implementations selectable in Boundary Highlight mode:
-# (key stored in state, dropdown title, factory building the index from a Geometry3D).
+# (key stored in state, dropdown title, factory building the index from a Geometry).
 BOUNDARY_INDEX_VARIANTS = [
     ("naive", "Naive", make_naive_boundary_index),
     ("portal", "Portal", make_portal_boundary_index),
@@ -203,10 +203,10 @@ def build_app(obj_path: str | None):
 
     def load_mesh(obj_path: str, name: str) -> None:
         nonlocal engine
-        # Geometry3D is the single source of truth: the rendered vertices/faces
+        # Geometry is the single source of truth: the rendered vertices/faces
         # and the region colouring are read from it, and the engine borrows the
         # SAME instance, so routing, picking and region colouring all agree.
-        geo = Geometry3D.from_obj(obj_path)
+        geo = Geometry.from_obj(obj_path)
         engine = SurfaceMeshShortestPathRoutingEngine(geo)
 
         verts = np.asarray(geo.vertices(), dtype=float)

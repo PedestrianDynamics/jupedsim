@@ -30,9 +30,10 @@ def test_a_string_naming_an_obj_file_is_a_mesh_not_a_wkt():
 
 
 def test_a_mesh_built_simulation_has_no_polygon_to_hand_out():
+    # The geometry is handed out either way; asking it for a polygon boundary is what fails.
     sim = mesh_simulation()
     with pytest.raises(jps.SimulationError, match="surface mesh"):
-        sim.get_geometry()
+        sim.get_geometry().boundary()
 
 
 def polygon_simulation():

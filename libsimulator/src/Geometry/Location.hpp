@@ -7,7 +7,7 @@
 #include <cstddef>
 #include <optional>
 
-class Geometry3D;
+class Geometry;
 
 /// General `Location` interface. The "truth" is 2D + region, but it provides
 /// a cached z-coordinate.
@@ -39,11 +39,11 @@ public:
     bool can_walk_straight_to(const Location& other) const;
 
 private:
-    // Location uses private constructor. Only Geometry3D can create Location objects.
-    friend class Geometry3D;
+    // Location uses private constructor. Only Geometry can create Location objects.
+    friend class Geometry;
 
     Location(
-        const Geometry3D* geometry,
+        const Geometry* geometry,
         Point xy,
         std::size_t regionId,
         SurfaceMesh::Face_index face,
@@ -52,7 +52,7 @@ private:
     {
     }
 
-    const Geometry3D* _geometry;
+    const Geometry* _geometry;
     Point _xy;
     std::size_t _regionId;
     SurfaceMesh::Face_index _face; // cache; always valid (move throws before invalidating)

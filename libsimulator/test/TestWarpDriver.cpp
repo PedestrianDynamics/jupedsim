@@ -2,7 +2,7 @@
 #include "AgentView.hpp"
 #include "EnvironmentQuery.hpp"
 #include "GenericAgent.hpp"
-#include "Geometry/Geometry3D.hpp"
+#include "Geometry/Geometry.hpp"
 #include "GeometryBuilder.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalModels/WarpDriver/WarpDriverModel.hpp"
@@ -18,33 +18,33 @@ namespace
 using State = WarpDriverModel::State;
 
 /// Open ground with one thin wall block standing across x = 1.
-std::unique_ptr<Geometry3D> WalledGeometry()
+std::unique_ptr<Geometry> WalledGeometry()
 {
     GeometryBuilder b{};
     b.AddAccessibleArea({{-100, -100}, {100, -100}, {100, 100}, {-100, 100}});
     b.ExcludeFromAccessibleArea({{0.9, -50}, {1.1, -50}, {1.1, 50}, {0.9, 50}});
-    return std::make_unique<Geometry3D>(b.Build().Polygon());
+    return std::make_unique<Geometry>(b.Build());
 }
 
 /// The same ground with nothing on it.
-std::unique_ptr<Geometry3D> OpenGeometry()
+std::unique_ptr<Geometry> OpenGeometry()
 {
     GeometryBuilder b{};
     b.AddAccessibleArea({{-100, -100}, {100, -100}, {100, 100}, {-100, 100}});
-    return std::make_unique<Geometry3D>(b.Build().Polygon());
+    return std::make_unique<Geometry>(b.Build());
 }
 
 /// Open ground with a 0.1 m block just left of the origin -- thin enough that one long step
 /// clears it and lands in free space on the far side.
-std::unique_ptr<Geometry3D> ThinWallLeftOfOrigin()
+std::unique_ptr<Geometry> ThinWallLeftOfOrigin()
 {
     GeometryBuilder b{};
     b.AddAccessibleArea({{-100, -100}, {100, -100}, {100, 100}, {-100, 100}});
     b.ExcludeFromAccessibleArea({{-0.2, -50}, {-0.1, -50}, {-0.1, 50}, {-0.2, 50}});
-    return std::make_unique<Geometry3D>(b.Build().Polygon());
+    return std::make_unique<Geometry>(b.Build());
 }
 
-GenericAgent MakeAgent(const Geometry3D& geo, Point position, Point target, State s = State{})
+GenericAgent MakeAgent(const Geometry& geo, Point position, Point target, State s = State{})
 {
     // Heading where it is going: the anticipation reads the neighbour's orientation, so an
     // agent facing away predicts no collision and would make the test pass for free.
@@ -60,7 +60,7 @@ GenericAgent MakeAgent(const Geometry3D& geo, Point position, Point target, Stat
 }
 
 /// One step of the first agent, with whatever company it has been given.
-Point step_of_first(const Geometry3D& geo, AgentContainer<GenericAgent>& agents, double dt = 0.05)
+Point step_of_first(const Geometry& geo, AgentContainer<GenericAgent>& agents, double dt = 0.05)
 {
     NeighborhoodSearch<GenericAgent> search{10.0};
     search.Update(agents);

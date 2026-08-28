@@ -6,7 +6,7 @@ import pytest
 import shapely
 from jupedsim.geometry_utils import build_geometry_3d
 from jupedsim.internal.routing_3d import (
-    Geometry3D,
+    Geometry,
     SurfaceMeshShortestPathRoutingEngine,
 )
 
@@ -15,7 +15,7 @@ OBJ = Path(__file__).parents[3] / "examples/geometry/multi_level_u_stair.obj"
 
 @pytest.fixture
 def engine():
-    geo = Geometry3D.from_obj(str(OBJ))
+    geo = Geometry.from_obj(str(OBJ))
     return SurfaceMeshShortestPathRoutingEngine(geo)
 
 
@@ -46,7 +46,7 @@ def test_shortest_path_across_stair(engine):
 
 
 def test_geometry_regions_and_render_data():
-    geo = Geometry3D.from_obj(str(OBJ))
+    geo = Geometry.from_obj(str(OBJ))
     verts = geo.vertices()
     tris = geo.triangles()
     ids = geo.region_id_per_face()

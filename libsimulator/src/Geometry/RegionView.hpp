@@ -9,7 +9,7 @@
 #include <cstddef>
 #include <vector>
 
-class Geometry3D;
+class Geometry;
 
 /// Per-region 2D view onto the 3D surface: this region's own boundary, and the seams leading
 /// out of it. What a query gets to see is `BoundaryIndex`'s business; this is what answers
@@ -19,11 +19,11 @@ class RegionView
 public:
     RegionView(
         std::size_t regionId,
-        const Geometry3D* geometry3d,
+        const Geometry* geometry3d,
         SegmentGrid walls,
         std::vector<RegionSeam> seams);
 
-    // Non-copyable; move-only (built once, then held by value in Geometry3D).
+    // Non-copyable; move-only (built once, then held by value in Geometry).
     RegionView(const RegionView&) = delete;
     RegionView& operator=(const RegionView&) = delete;
     RegionView(RegionView&&) = default;
@@ -45,7 +45,7 @@ public:
 
 private:
     std::size_t _regionId;
-    const Geometry3D* _geometry3d;
+    const Geometry* _geometry3d;
     SegmentGrid _walls;
     std::vector<RegionSeam> _seams;
 };

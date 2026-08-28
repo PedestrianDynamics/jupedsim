@@ -2,7 +2,7 @@
 #include "AgentView.hpp"
 #include "EnvironmentQuery.hpp"
 #include "GenericAgent.hpp"
-#include "Geometry/Geometry3D.hpp"
+#include "Geometry/Geometry.hpp"
 #include "GeometryBuilder.hpp"
 #include "MeshFixtures.hpp"
 #include "NeighborhoodSearch.hpp"
@@ -20,7 +20,7 @@ namespace
 {
 using State = CollisionFreeSpeedModel::State;
 
-GenericAgent MakeAgent(const Geometry3D& geo, Point pos, double radius = 0.2, double z = 0.0)
+GenericAgent MakeAgent(const Geometry& geo, Point pos, double radius = 0.2, double z = 0.0)
 {
     State s{};
     s.radius = radius;
@@ -32,20 +32,20 @@ GenericAgent MakeAgent(const Geometry3D& geo, Point pos, double radius = 0.2, do
         std::move(s));
 }
 
-std::unique_ptr<Geometry3D> OpenGeometry()
+std::unique_ptr<Geometry> OpenGeometry()
 {
     GeometryBuilder b{};
     b.AddAccessibleArea({{-100, -100}, {100, -100}, {100, 100}, {-100, 100}});
-    return std::make_unique<Geometry3D>(b.Build().Polygon());
+    return std::make_unique<Geometry>(b.Build());
 }
 
 // Geometry with a thin wall at x≈1 that blocks line-of-sight across it.
-std::unique_ptr<Geometry3D> WalledGeometry()
+std::unique_ptr<Geometry> WalledGeometry()
 {
     GeometryBuilder b{};
     b.AddAccessibleArea({{-100, -100}, {100, -100}, {100, 100}, {-100, 100}});
     b.ExcludeFromAccessibleArea({{0.9, -50}, {1.1, -50}, {1.1, 50}, {0.9, 50}});
-    return std::make_unique<Geometry3D>(b.Build().Polygon());
+    return std::make_unique<Geometry>(b.Build());
 }
 
 struct Environment {
@@ -57,7 +57,7 @@ struct Environment {
 
     // Agents are asked for before the geometry exists, so they are made here -- only the
     // geometry can put them onto the surface, the same way Simulation::AddAgent does.
-    EnvironmentQuery query(const Geometry3D& geo)
+    EnvironmentQuery query(const Geometry& geo)
     {
         for(const auto& [pos, radius] : requested) {
             agents.push_back(MakeAgent(geo, pos, radius));
@@ -267,7 +267,7 @@ TEST(AgentView, AgentsOnAnotherStoreyAreNotNeighbours)
     // Two floors sharing a footprint, one agent on each, standing at the same (x, y) three
     // metres apart in height. The neighbourhood grid searches by (x, y) and offers them to
     // each other; one is standing well above the other's head and cannot touch them.
-    Geometry3D geo{fixtures::stacked_floors()};
+    Geometry geo{fixtures::stacked_floors()};
 
     AgentContainer<GenericAgent> agents{};
     agents.push_back(MakeAgent(geo, {5.0, 5.0}));
@@ -284,7 +284,7 @@ TEST(AgentView, AgentsOnAnotherStoreyAreNotNeighbours)
 TEST(AgentView, AgentsOnTheSameStoreyStillAre)
 {
     // The same mesh, both agents on the lower floor: the filter must not swallow those.
-    Geometry3D geo{fixtures::stacked_floors()};
+    Geometry geo{fixtures::stacked_floors()};
 
     AgentContainer<GenericAgent> agents{};
     agents.push_back(MakeAgent(geo, {5.0, 5.0}));
@@ -302,7 +302,7 @@ TEST(AgentView, ANeighbourCloseEnoughToTouchCanStillBeOnAnotherStorey)
     // A mezzanine 1.5 m up, so the height band keeps both as candidates and what has to tell
     // them apart is which sheet each stands on. Nothing is between them in plan either: no
     // wall on either floor, and no seam joining the two.
-    Geometry3D geo{fixtures::stacked_floors(1.5)};
+    Geometry geo{fixtures::stacked_floors(1.5)};
 
     AgentContainer<GenericAgent> agents{};
     agents.push_back(MakeAgent(geo, {2.0, 5.0}));

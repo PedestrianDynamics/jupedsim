@@ -47,10 +47,10 @@ public:
 
 /// Selects routing engine based on availability of 2D polygon.
 /// For backwards compatibility reason we use TA*+funnel in 2D case.
-std::unique_ptr<RoutingEngine3D> pick_routing_engine(const Geometry3D& geometry)
+std::unique_ptr<RoutingEngine3D> pick_routing_engine(const Geometry& geometry)
 {
-    if(const auto* flat = geometry.geometry_2d(); flat != nullptr) {
-        return std::make_unique<RoutingEngine>(flat->Polygon());
+    if(const auto* poly = geometry.polygon(); poly != nullptr) {
+        return std::make_unique<RoutingEngine>(*poly);
     }
     return std::make_unique<SurfaceMeshShortestPathRoutingEngine>(geometry);
 }
@@ -68,20 +68,12 @@ void Simulation::ThrowIfIterating(const char* operation) const
 
 Simulation::Simulation(
     std::unique_ptr<OperationalModel>&& operationalModel,
-    std::unique_ptr<Geometry3D>&& geometry,
+    std::unique_ptr<Geometry>&& geometry,
     double dT)
     : _clock(dT)
     , _operationalDecisionSystem(std::move(operationalModel))
     , _geometry(std::move(geometry))
     , _routingEngine(pick_routing_engine(*_geometry))
-{
-}
-
-Simulation::Simulation(
-    std::unique_ptr<OperationalModel>&& operationalModel,
-    std::unique_ptr<Geometry2D>&& geometry,
-    double dT)
-    : Simulation(std::move(operationalModel), std::make_unique<Geometry3D>(geometry->Polygon()), dT)
 {
 }
 
@@ -419,14 +411,9 @@ StageProxy Simulation::Stage(BaseStage::ID stageId)
 {
     return _stageManager.Stage(stageId)->Proxy(this);
 }
-Geometry2D Simulation::Geo() const
+const Geometry& Simulation::Geo() const
 {
-    const auto* flat = _geometry->geometry_2d();
-    if(flat == nullptr) {
-        throw SimulationError(
-            "This simulation was built from a surface mesh, which has no polygon underneath.");
-    }
-    return *flat;
+    return *_geometry;
 }
 
 void Simulation::PushTimer(const std::string_view name, size_t probe_log_level)

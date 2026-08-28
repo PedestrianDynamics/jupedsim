@@ -3,7 +3,7 @@
 
 #include "AgentRemovalSystem.hpp"
 #include "GenericAgent.hpp"
-#include "Geometry/Geometry3D.hpp"
+#include "Geometry/Geometry.hpp"
 #include "Journey.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalDecisionSystem.hpp"
@@ -38,7 +38,7 @@ class Simulation
     StageManager _stageManager{};
     StageSystem _stageSystem{};
     NeighborhoodSearch<GenericAgent> _neighborhoodSearch{2.2};
-    std::unique_ptr<Geometry3D> _geometry{};
+    std::unique_ptr<Geometry> _geometry{};
     std::unique_ptr<RoutingEngine3D> _routingEngine{};
     AgentContainer<GenericAgent> _agents;
     std::vector<GenericAgent::ID> _removedAgentsInLastIteration;
@@ -52,18 +52,13 @@ class Simulation
     void ThrowIfIterating(const char* operation) const;
 
 public:
-    /// Mesh-built: the world is a surface, routed on that surface. `Geo()` has no answer here.
+    /// Takes the geometry over: after this the caller no longer owns it. `Geo()` hands out a
+    /// borrowed reference for as long as the simulation lives.
     Simulation(
         std::unique_ptr<OperationalModel>&& operationalModel,
-        std::unique_ptr<Geometry3D>&& geometry,
+        std::unique_ptr<Geometry>&& geometry,
         double dT);
 
-    /// Polygon-built: lifts the walkable area to a flat surface and routes in the projection,
-    /// as it always has.
-    Simulation(
-        std::unique_ptr<OperationalModel>&& operationalModel,
-        std::unique_ptr<Geometry2D>&& geometry,
-        double dT);
     Simulation(const Simulation& other) = delete;
     Simulation& operator=(const Simulation& other) = delete;
     Simulation(Simulation&& other) = delete;
@@ -108,7 +103,8 @@ public:
     AgentContainer<GenericAgent>& Agents();
     OperationalModelType ModelType() const;
     StageProxy Stage(BaseStage::ID stageId);
-    Geometry2D Geo() const;
+    /// The geometry this simulation runs on. Borrowed: it lives as long as the simulation.
+    const Geometry& Geo() const;
     void PushTimer(const std::string_view name, size_t probe_log_level = 0);
     void PopTimer(const std::string_view name);
     void SetTimerLogLevel(int level) { _timer.setLogLevel(level); };

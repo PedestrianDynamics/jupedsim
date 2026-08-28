@@ -24,7 +24,7 @@ constexpr double AlreadyStandingThere = 1e-9;
 // SurfaceMeshShortestPathRoutingEngine
 ////////////////////////////////////////////////////////////////////////////////
 SurfaceMeshShortestPathRoutingEngine::SurfaceMeshShortestPathRoutingEngine(
-    const Geometry3D& geometry,
+    const Geometry& geometry,
     double wallClearance)
     : RoutingEngine3D(wallClearance)
     , _geometry(geometry)
@@ -37,7 +37,7 @@ bool SurfaceMeshShortestPathRoutingEngine::IsValidLocation(const RoutingTarget& 
     return _geometry.face_below(loc).face != SurfaceMesh::null_face();
 }
 
-Geometry3D::FaceLocation
+Geometry::FaceLocation
 SurfaceMeshShortestPathRoutingEngine::on_surface(const Point3D& p, const char* what) const
 {
     const auto below = _geometry.face_below(p);

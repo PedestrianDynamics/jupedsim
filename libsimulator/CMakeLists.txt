@@ -17,10 +17,8 @@ target_sources(simulator PRIVATE
     src/GeometricFunctions.hpp
     src/Geometry/BoundaryIndex.cpp
     src/Geometry/BoundaryIndex.hpp
-    src/Geometry/Geometry2D.cpp
-    src/Geometry/Geometry2D.hpp
-    src/Geometry/Geometry3D.cpp
-    src/Geometry/Geometry3D.hpp
+    src/Geometry/Geometry.cpp
+    src/Geometry/Geometry.hpp
     src/Geometry/Location.cpp
     src/Geometry/Location.hpp
     src/Geometry/PolylineMerge.cpp
@@ -124,8 +122,7 @@ if (BUILD_TESTS)
         test/TestCommon.hpp
         test/TestCustomModel.cpp
         test/TestGenericAgentFormatter.cpp
-        test/TestGeometry2D.cpp
-        test/TestGeometry3D.cpp
+        test/TestGeometry.cpp
         test/TestGraph.cpp
         test/TestJourney.cpp
         test/TestLineSegment.cpp
@@ -166,7 +163,7 @@ if (BUILD_BENCHMARKS)
     add_executable(libsimulator-benchmarks
         benchmark/BenchmarkMain.cpp
         benchmark/benchmarkLineSegment.hpp
-        benchmark/benchmarkGeometry2D.hpp
+        benchmark/benchmarkWallQuery.hpp
         benchmark/buildGeometries.hpp
     )
 

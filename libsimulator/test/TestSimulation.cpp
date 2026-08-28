@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "Geometry/Geometry3D.hpp"
+#include "Geometry/Geometry.hpp"
 #include "GeometryBuilder.hpp"
 #include "Journey.hpp"
 #include "MeshFixtures.hpp"
@@ -33,14 +33,14 @@ std::unique_ptr<CollisionFreeSpeedModel> model()
 std::unique_ptr<Simulation> on_the_switchback_stair()
 {
     return std::make_unique<Simulation>(
-        model(), std::make_unique<Geometry3D>(fixtures::switchback_stair()), 0.01);
+        model(), std::make_unique<Geometry>(fixtures::switchback_stair()), 0.01);
 }
 
 std::unique_ptr<Simulation> on_a_flat_room()
 {
     GeometryBuilder b{};
     b.AddAccessibleArea({{0, 0}, {20, 0}, {20, 20}, {0, 20}});
-    return std::make_unique<Simulation>(model(), std::make_unique<Geometry2D>(b.Build()), 0.01);
+    return std::make_unique<Simulation>(model(), std::make_unique<Geometry>(b.Build()), 0.01);
 }
 
 /// A journey of one waypoint, so that agents have somewhere to be routed to.
@@ -129,17 +129,16 @@ TEST(MeshBuiltSimulation, ATargetWrittenFromOutsideLandsOnTheAgentsOwnStorey)
 
 TEST(MeshBuiltSimulation, HasNoPolygonToHandOut)
 {
-    auto sim = on_the_switchback_stair();
-    EXPECT_THROW(sim->Geo(), SimulationError);
-
-    // A polygon-built one still has one, and that is what the viewer and the systemtests read.
-    EXPECT_NO_THROW(on_a_flat_room()->Geo());
+    // The geometry itself is handed out either way -- it is the polygon underneath that a mesh
+    // world does not have, and that is what the viewer and the systemtests read.
+    EXPECT_EQ(on_the_switchback_stair()->Geo().polygon(), nullptr);
+    EXPECT_NE(on_a_flat_room()->Geo().polygon(), nullptr);
 }
 
 TEST(MeshBuiltSimulation, WalkingUpAStairToTheExitAtTheTop)
 {
     auto sim = std::make_unique<Simulation>(
-        model(), std::make_unique<Geometry3D>(fixtures::straight_stair_to_a_landing()), 0.01);
+        model(), std::make_unique<Geometry>(fixtures::straight_stair_to_a_landing()), 0.01);
 
     // Start on the ground floor, exit on the landing three metres up: the whole way there leads
     // over the flight, so arriving at all means the climb worked.
