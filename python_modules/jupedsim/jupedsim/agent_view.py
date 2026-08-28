@@ -44,9 +44,8 @@ class NeighborView:
 class WallView:
     """A wall segment as seen from the agent that asked for it.
 
-    Obtained from :meth:`AgentView.walls_nearby` or
-    :meth:`AgentView.walls_in_range`. The view is always relative to the
-    agent - as if the agent sits at the origin.
+    Obtained from :meth:`AgentView.walls_in_range`. The view is always
+    relative to the agent - as if the agent sits at the origin.
     """
 
     def __init__(self, obj: py_jps.WallView) -> None:
@@ -98,7 +97,7 @@ class AgentView:
     Example — visibility-filtered neighborhood::
 
         def compute_next_state(self, state, step):
-            boundaries = step.walls_nearby()
+            boundaries = step.walls_in_range(1.0)
             neighbors = step.other_agents_in_range(
                 5.0,
                 lambda n: step.no_geometry_between(n),
@@ -154,17 +153,6 @@ class AgentView:
         if isinstance(target, NeighborView):
             return self._obj.no_geometry_between(target._obj)
         return self._obj.no_geometry_between(target)
-
-    def walls_nearby(self) -> list[WallView]:
-        """Return the walls in the grid cells around the agent.
-
-        Faster than :meth:`walls_in_range`, but an approximation of proximity
-        rather than a radius: it returns whatever shares a cell neighborhood.
-
-        Returns:
-            List of :class:`WallView`, each as seen from the agent.
-        """
-        return [WallView(w) for w in self._obj.walls_nearby()]
 
     def walls_in_range(self, distance: float) -> list[WallView]:
         """Return the walls within *distance* of the agent.

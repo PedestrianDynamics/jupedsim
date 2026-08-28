@@ -2,11 +2,12 @@
 #pragma once
 
 #include "CfgCgal.hpp"
+#include "Geometry/BoundaryIndex.hpp"
 #include "Geometry/Geometry2D.hpp"
 #include "Geometry/Location.hpp"
 #include "Geometry/RegionSplit.hpp"
 #include "Geometry/RegionView.hpp"
-#include "Geometry/WallRange.hpp"
+#include "LineSegment.hpp"
 #include "Point.hpp"
 
 #include <array>
@@ -24,11 +25,6 @@ inline constexpr double ZHintTolerance = 0.1;
 /// other's head and there is nothing left to push against. Not a tolerance to tune and not
 /// derived from any query radius -- it is a property of the bodies being modelled.
 inline constexpr double InteractionHeight = 2.0;
-
-/// How far a query without an explicit distance reaches. The grid answers such a query by
-/// cell, and a cell holds what is within the search radius of it -- so this is what decides
-/// which regions a seam can still bring into view.
-inline constexpr double ApproximateWallReach = 8.0;
 
 /// The single source of truth for a 3D navigation geometry: owns the surface
 /// mesh, its AABB tree (for -z projection queries) and the single-valued region
@@ -94,12 +90,11 @@ public:
 
     // -- `EnvironmentQuery` API -----------------------------------------------
 
-    /// Wall segments near @p who: within @p distance if given (>= 0), else the
-    /// approximate-grid neighbourhood.
-    ///
-    /// On a mesh the answer may have to be collected from more than one region, since a
-    /// seam can bring another one within reach. What comes back is the same either way.
-    WallRange line_segments_in_range(const Location& who, double distance = -1.0) const;
+    /// The wall segments within @p distance of @p who that @p who can see, each clipped to
+    /// that distance. Sight lines follow the surface and leave the region through seams, so
+    /// what comes back is what stands in the agent's way and not merely what lies nearby in
+    /// plan -- see `BoundaryIndex::Query`.
+    std::vector<LineSegment> line_segments_in_range(const Location& who, double distance) const;
 
     /// True iff the straight horizontal step @p direction, taken from @p who, crosses no
     /// wall and does not run off the surface.
@@ -158,6 +153,7 @@ private:
     SurfaceMesh _mesh{};
     std::unique_ptr<Geometry2D> _geometry2D{};
     std::unique_ptr<AABBTree> _aabbTree{};
+    std::unique_ptr<BoundaryIndex> _boundaryIndex{};
     RegionMap _region{};
     std::size_t _regionCount{0};
     std::vector<RegionView> _regionViews{};

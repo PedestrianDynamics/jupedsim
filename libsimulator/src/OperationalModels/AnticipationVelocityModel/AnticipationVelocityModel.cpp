@@ -57,12 +57,7 @@ Point AnticipationVelocityModel::ComputeNextState(
 
     const auto optimal_speed = OptimalSpeed(currentState, spacing, currentState.timeGap);
     // Wall sliding behavior
-    direction = HandleWallAvoidance(
-        direction,
-        currentState.radius,
-        step.WallsNearby(),
-        currentState.wallBufferDistance,
-        _pushoutStrength);
+    direction = HandleWallAvoidance(direction, currentState, step, _pushoutStrength);
 
     const auto velocity = direction * optimal_speed;
     auto& nextModel = std::get<State>(next);
@@ -157,7 +152,7 @@ void AnticipationVelocityModel::CheckModelConstraint(
     if(!view.WallsInRange(r).empty()) {
         throw SimulationError(
             "Model constraint violation: Agent at {} too close to geometry boundaries, distance "
-            "<= {}",
+            "< {}",
             agent.location.xy(),
             r);
     }
@@ -263,19 +258,14 @@ Point AnticipationVelocityModel::NeighborRepulsion(
 
 Point AnticipationVelocityModel::HandleWallAvoidance(
     const Point& direction,
-    double agentRadius,
-    const auto& boundaries,
-    double wallBufferDistance,
+    const State& currentState,
+    const AgentStep& step,
     double pushoutStrength) const
 {
-    const double criticalWallDistance = wallBufferDistance + agentRadius;
+    const double criticalWallDistance = currentState.wallBufferDistance + currentState.radius;
 
     Point modifiedDirection = direction;
-    for(const auto& wall : boundaries) {
-        if(wall.distance > criticalWallDistance) {
-            continue;
-        }
-
+    for(const auto& wall : step.WallsInRange(criticalWallDistance)) {
         const auto dotProduct = modifiedDirection.ScalarProduct(wall.normal);
 
         if(dotProduct < 0) {

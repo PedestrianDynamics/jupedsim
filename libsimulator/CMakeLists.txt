@@ -27,8 +27,6 @@ target_sources(simulator PRIVATE
     src/Geometry/PolylineMerge.hpp
     src/Geometry/ProjectedBoundary.cpp
     src/Geometry/ProjectedBoundary.hpp
-    src/Geometry/RegionReach.cpp
-    src/Geometry/RegionReach.hpp
     src/Geometry/RegionSeams.cpp
     src/Geometry/RegionSeams.hpp
     src/Geometry/RegionSplit.cpp
@@ -39,10 +37,6 @@ target_sources(simulator PRIVATE
     src/Geometry/SegmentGrid.hpp
     src/Geometry/Validation.cpp
     src/Geometry/Validation.hpp
-    src/Geometry/WallMerge.cpp
-    src/Geometry/WallMerge.hpp
-    src/Geometry/WallRange.cpp
-    src/Geometry/WallRange.hpp
     src/GeometryBuilder.cpp
     src/GeometryBuilder.hpp
     src/Graph.hpp
@@ -129,7 +123,6 @@ if (BUILD_TESTS)
         test/TestBoundaryIndex.cpp
         test/TestCommon.hpp
         test/TestCustomModel.cpp
-        test/TestFlatMeshParity.cpp
         test/TestGenericAgentFormatter.cpp
         test/TestGeometry2D.cpp
         test/TestGeometry3D.cpp
@@ -142,7 +135,6 @@ if (BUILD_TESTS)
         test/TestOperationalDecisionSystem.cpp
         test/TestPoint.cpp
         test/TestProjectedBoundary.cpp
-        test/TestRegionReach.cpp
         test/TestRegionSeams.cpp
         test/TestRegionSplit.cpp
         test/TestRegionView.cpp
@@ -153,7 +145,6 @@ if (BUILD_TESTS)
         test/TestStage.cpp
         test/TestUniqueID.cpp
         test/TestValidation.cpp
-        test/TestWallMerge.cpp
         test/TestWarpDriver.cpp
     )
 

@@ -262,29 +262,6 @@ TEST(AgentView, WallViewProjectsOntoTheWallAndPointsBackAtTheAgent)
     EXPECT_NEAR(nearest.normal.y, 0.0, 1e-12);
 }
 
-TEST(AgentView, WallsNearbyAreRelativeToTheAgent)
-{
-    Environment env{};
-    const Point pos{-1.0, 2.0};
-    env.add_agent(pos);
-    const auto geo = WalledGeometry();
-    const auto q = env.query(*geo);
-
-    std::vector<LineSegment> expected{};
-    for(const auto& segment : q.LineSegmentsInRange(env.FirstAgentLocation())) {
-        expected.push_back({segment.p1 - pos, segment.p2 - pos});
-    }
-    ASSERT_FALSE(expected.empty());
-
-    const auto view = env.FirstAgentView(q);
-    std::vector<LineSegment> actual{};
-    for(const auto& wall : view.WallsNearby()) {
-        actual.push_back(wall.segment);
-    }
-
-    EXPECT_EQ(actual, expected);
-}
-
 TEST(AgentView, AgentsOnAnotherStoreyAreNotNeighbours)
 {
     // Two floors sharing a footprint, one agent on each, standing at the same (x, y) three

@@ -50,10 +50,6 @@ void init_agent_view(py::module_& m)
             py::arg("neighbor"),
             "True when the neighbor can be seen from here.")
         .def(
-            "walls_nearby",
-            [](const AgentView& self) { return intoVec(self.WallsNearby()); },
-            "Geometry segments in the grid cells around the agent.")
-        .def(
             "walls_in_range",
             [](const AgentView& self, double distance) {
                 return intoVec(self.WallsInRange(distance));

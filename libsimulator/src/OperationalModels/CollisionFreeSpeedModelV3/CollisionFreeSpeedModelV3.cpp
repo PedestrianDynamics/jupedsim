@@ -23,6 +23,9 @@ constexpr double SpacingBlendWeight =
 constexpr double TauTheta = 0.3; // Heading relaxation timescale [s] for temporal smoothing.
 constexpr double MinReverseSpeed =
     -0.01; // Deterministic tiny reverse floor [m/s] to release local blockages.
+/// How far to ask for walls. The repulsion decays with `rangeGeometryRepulsion` (0.02 m by
+/// default), so a wall this far off contributes "nothing".
+constexpr double WallSearchRadius = 4.0;
 
 double NeighborInfluence(
     const std::vector<NeighborView>& neighborhood,
@@ -75,7 +78,7 @@ Point CollisionFreeSpeedModelV3::ComputeNextState(
         _cutOffRadius, [&step](const NeighborView& n) { return step.NoGeometryBetween(n); });
 
     Point boundaryRepulsion{};
-    for(const auto& wall : step.WallsNearby()) {
+    for(const auto& wall : step.WallsInRange(WallSearchRadius)) {
         boundaryRepulsion += BoundaryRepulsion(currentState, wall);
     }
 
@@ -174,7 +177,7 @@ void CollisionFreeSpeedModelV3::CheckModelConstraint(
     if(!view.WallsInRange(currentState.radius).empty()) {
         throw SimulationError(
             "Model constraint violation: Agent at {} too close to geometry boundaries, distance "
-            "<= {}",
+            "< {}",
             agent.location.xy(),
             currentState.radius);
     }

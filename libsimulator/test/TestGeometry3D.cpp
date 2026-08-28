@@ -51,12 +51,33 @@ SurfaceMesh stacked_floors()
     return mesh;
 }
 
-/// Gather a LineSegmentRange into a set for order-independent comparison.
-/// Gather any range of segments into a set for order-independent comparison.
-template <typename Range>
-std::set<LineSegment> into_set(const Range& range)
+/// True iff some segment of @p answer lies on @p wall.
+///
+/// An answer is made of the visible stretches of a wall, clipped to the query radius, so a
+/// wall is named by where it runs and not by a segment to compare against.
+bool sees_part_of(const std::vector<LineSegment>& answer, const LineSegment& wall)
 {
-    return std::set<LineSegment>{range.begin(), range.end()};
+    const Point along = wall.p2 - wall.p1;
+    const auto on_wall = [&](Point p) {
+        const Point offset = p - wall.p1;
+        if(std::abs(along.CrossProduct(offset)) > 1e-9) {
+            return false;
+        }
+        const double t = offset.ScalarProduct(along) / along.ScalarProduct(along);
+        return t >= -1e-9 && t <= 1.0 + 1e-9;
+    };
+    return std::any_of(answer.begin(), answer.end(), [&](const LineSegment& piece) {
+        return on_wall(piece.p1) && on_wall(piece.p2);
+    });
+}
+
+/// How many answered pieces run along the horizontal line at @p y. Where two storeys carry a
+/// wall on the same line in plan, counting is what tells one storey's answer from two.
+std::ptrdiff_t pieces_along(const std::vector<LineSegment>& answer, double y)
+{
+    return std::count_if(answer.begin(), answer.end(), [y](const LineSegment& piece) {
+        return piece.p1.y == y && piece.p2.y == y;
+    });
 }
 
 } // namespace
@@ -186,22 +207,22 @@ TEST(Geometry3DFromPolygon, LiftReproducesThe2DTriangulation)
     EXPECT_EQ(vertices.size(), cdt.number_of_vertices());
 }
 
-// Compare 3D queries to underlying 2D ones.
-TEST(Geometry3DModelQueries, LineSegmentsInRangeMatchesFlatView)
+TEST(Geometry3DModelQueries, EverythingAnsweredIsWithinTheRadius)
 {
     Geometry3D geo{square_with_hole()};
     const auto who = geo.get_location(2, 5, 0.0);
     ASSERT_TRUE(who.has_value());
 
-    // No distance -> approximate grid neighbourhood.
-    EXPECT_EQ(
-        into_set(geo.line_segments_in_range(*who)),
-        into_set(geo.geometry_2d()->LineSegmentsInApproxDistanceTo(who->xy())));
-
-    // Explicit distance -> exact distance query.
-    EXPECT_EQ(
-        into_set(geo.line_segments_in_range(*who, 3.0)),
-        into_set(geo.geometry_2d()->LineSegmentsInDistanceTo(3.0, who->xy())));
+    const auto walls = geo.line_segments_in_range(*who, 5.0);
+    ASSERT_FALSE(walls.empty());
+    for(const auto& wall : walls) {
+        EXPECT_LE(wall.DistTo(who->xy()), 5.0 + 1e-9);
+    }
+    // The hole's near side and the room's west wall are both 2 m away and in plain sight.
+    EXPECT_TRUE(sees_part_of(walls, LineSegment{{4, 4}, {4, 6}}));
+    EXPECT_TRUE(sees_part_of(walls, LineSegment{{0, 0}, {0, 10}}));
+    // The hole's far side is 4 m away and stands behind its near side.
+    EXPECT_FALSE(sees_part_of(walls, LineSegment{{6, 4}, {6, 6}}));
 }
 
 TEST(Geometry3DModelQueries, NoGeometryBetweenMatchesFlatView)
@@ -313,45 +334,43 @@ TEST(Geometry3DModelQueries, AMeshAnswersWithItsOwnRegionsWalls)
     const auto who = geo.get_location(10.0, 5.0, 0.0, 2.0);
     ASSERT_TRUE(who.has_value());
 
-    // One region, so this is the plain case: the field's outline, four walls, and the query
-    // has to reach them from the middle.
-    const auto walls = into_set(geo.line_segments_in_range(*who, 100.0));
-    EXPECT_EQ(walls.size(), 4u);
+    // One region and nothing in the way, so all four sides of the field answer. Its border
+    // is meshed on a 2 m grid, so each side comes back in pieces.
+    const auto walls = geo.line_segments_in_range(*who, 100.0);
+    EXPECT_TRUE(sees_part_of(walls, LineSegment{{0, 0}, {20, 0}}));
+    EXPECT_TRUE(sees_part_of(walls, LineSegment{{0, 10}, {20, 10}}));
+    EXPECT_TRUE(sees_part_of(walls, LineSegment{{0, 0}, {0, 10}}));
+    EXPECT_TRUE(sees_part_of(walls, LineSegment{{20, 0}, {20, 10}}));
 }
 
-TEST(Geometry3DModelQueries, ASeamBringsTheOtherLevelsWallsIntoTheAnswer)
+TEST(Geometry3DModelQueries, ASeamBringsTheNextRegionsWallsIntoTheAnswer)
 {
-    Geometry3D geo{fixtures::two_levels_with_stair()};
+    Geometry3D geo{fixtures::switchback_stair()};
 
-    // Standing on the lower level right below the stair head, where the levels meet.
-    const auto near_seam = geo.get_location(14.0, 2.0, 2.4, 1.0);
-    ASSERT_TRUE(near_seam.has_value());
-    const auto close = geo.line_segments_in_range(*near_seam, 4.0);
-    ASSERT_FALSE(close.empty());
+    // On the flight, a little short of x = 14 where it meets the landing and the region
+    // changes. The wall along y = 0 runs straight on past that boundary, where it is the
+    // next region's -- and an answer that stopped at the boundary would leave the agent
+    // with half the wall he is walking along.
+    const auto who = geo.get_location(11.5, 1.0, 1.5, 0.5);
+    ASSERT_TRUE(who.has_value());
 
-    // Standing at the far end of the lower level, the upper level is out of reach and must
-    // not contribute anything.
-    const auto far_away = geo.get_location(2.0, 2.0, 0.0);
-    ASSERT_TRUE(far_away.has_value());
-    const auto few = into_set(geo.line_segments_in_range(*far_away, 4.0));
-    const auto many = into_set(close);
-    EXPECT_LT(few.size(), many.size());
+    const auto walls = geo.line_segments_in_range(*who, 4.0);
+    const bool reaches_across = std::any_of(walls.begin(), walls.end(), [](const LineSegment& w) {
+        return w.p1.y == 0.0 && w.p2.y == 0.0 && std::max(w.p1.x, w.p2.x) > 14.0;
+    });
+    EXPECT_TRUE(reaches_across) << "the answer stopped at the region boundary";
 }
 
 TEST(Geometry3DModelQueries, AWallBorderingTwoRegionsIsDeliveredOnce)
 {
     Geometry3D geo{fixtures::switchback_stair()};
 
-    // The wall along y = 8 runs across landing and upper floor and belongs to both regions,
-    // so a query looking at both finds it twice unless it recognises it.
+    // The wall along y = 8 runs across landing and upper floor, and the agent stands where
+    // both are in sight. Nothing may be answered twice, however many ways lead to it.
     const auto who = geo.get_location(13.0, 7.0, 3.0, 0.5);
     ASSERT_TRUE(who.has_value());
 
-    const auto range = geo.line_segments_in_range(*who, 100.0);
-    std::vector<LineSegment> delivered{};
-    for(const auto& w : range) {
-        delivered.push_back(w);
-    }
+    const auto delivered = geo.line_segments_in_range(*who, 100.0);
     const std::set<LineSegment> distinct{delivered.begin(), delivered.end()};
     EXPECT_EQ(delivered.size(), distinct.size()) << "the same wall came back more than once";
 }
@@ -361,15 +380,15 @@ TEST(Geometry3DModelQueries, AWallOfTheStoreyAboveIsNotInTheAnswer)
     Geometry3D geo{fixtures::switchback_stair()};
 
     // The far side at y = 8 carries two walls, one above the other: the ground floor's, which
-    // ends at x = 10, and the upper floor's, which runs on to the landing at x = 18. The upper
-    // one crosses the region boundary and is therefore held by the ground floor's region too.
+    // ends at x = 10, and the upper floor's, which runs on to the landing at x = 18. In plan
+    // they fall on the same line, so what tells them apart is how many answers come back from
+    // it -- the one the agent stands under, and not the one three metres over his head.
     const auto who = geo.get_location(5.0, 6.0, 0.0, 0.5);
     ASSERT_TRUE(who.has_value());
 
-    const auto walls = into_set(geo.line_segments_in_range(*who, 2.2));
-    EXPECT_TRUE(walls.contains(LineSegment{{10, 8}, {0, 8}})) << "its own wall, 2 m away";
-    EXPECT_FALSE(walls.contains(LineSegment{{18, 8}, {0, 8}}))
-        << "the upper floor's wall, 2 m away in plan but 3 m over the agent's head";
+    const auto walls = geo.line_segments_in_range(*who, 2.2);
+    EXPECT_TRUE(sees_part_of(walls, LineSegment{{0, 8}, {10, 8}})) << "its own wall, 2 m away";
+    EXPECT_EQ(pieces_along(walls, 8.0), 1) << "the upper floor's wall answered as well";
 }
 
 TEST(Geometry3DModelQueries, TheFlightAboveIsNotAWallEvenInTheSameRegion)
@@ -379,7 +398,8 @@ TEST(Geometry3DModelQueries, TheFlightAboveIsNotAWallEvenInTheSameRegion)
 
     // Standing at the foot of the first flight, with the stair well beside him: its near wall
     // at y = 2 is his own flight's and 1 m away, its far wall at y = 3 belongs to the flight
-    // above and stands 3 m up, 2 m away in plan.
+    // above and stands 3 m up, 2 m away in plan. What keeps the far one out is the near one:
+    // to reach across the well a sight line has to pass through the wall along its near side.
     const auto who = geo.get_location(1.0, 1.0, 0.5, 0.2);
     ASSERT_TRUE(who.has_value());
 
@@ -397,14 +417,14 @@ TEST(Geometry3DModelQueries, AWallRisingFromTheAgentsLevelStaysInTheAnswer)
 {
     Geometry3D geo{fixtures::switchback_stair()};
 
-    // The wall along y = 0 is fused from ground floor, stair flight and landing, so it starts
-    // at the agent's feet and ends 3 m up. Nothing may drop it: how far a wall reaches up is
-    // not in the surface, and it is right there next to him.
+    // The wall along y = 0 runs from the ground floor up the flight to the landing, so it
+    // starts at the agent's feet and ends 3 m up. Nothing may drop it: how far a wall reaches
+    // up is not in the surface, and it is right there next to him.
     const auto who = geo.get_location(5.0, 1.0, 0.0, 0.5);
     ASSERT_TRUE(who.has_value());
 
-    const auto walls = into_set(geo.line_segments_in_range(*who, 2.2));
-    EXPECT_TRUE(walls.contains(LineSegment{{0, 0}, {18, 0}}));
+    const auto walls = geo.line_segments_in_range(*who, 2.2);
+    EXPECT_TRUE(sees_part_of(walls, LineSegment{{0, 0}, {18, 0}}));
 }
 
 TEST(Geometry3DModelQueries, AWallOfTheStoreyBelowIsNotInTheAnswer)
@@ -417,12 +437,12 @@ TEST(Geometry3DModelQueries, AWallOfTheStoreyBelowIsNotInTheAnswer)
     const auto who = geo.get_location(10.5, 6.0, 3.0, 0.5);
     ASSERT_TRUE(who.has_value());
 
-    const auto walls = into_set(geo.line_segments_in_range(*who));
-    EXPECT_TRUE(walls.contains(LineSegment{{0, 4}, {14, 4}})) << "its own storey's wall";
-    EXPECT_FALSE(walls.contains(LineSegment{{10, 4}, {10, 8}}))
+    const auto walls = geo.line_segments_in_range(*who, 4.0);
+    EXPECT_TRUE(sees_part_of(walls, LineSegment{{0, 4}, {14, 4}})) << "its own storey's wall";
+    EXPECT_FALSE(sees_part_of(walls, LineSegment{{10, 4}, {10, 8}}))
         << "the ground floor's wall, three metres below";
-    EXPECT_FALSE(walls.contains(LineSegment{{10, 8}, {0, 8}}))
-        << "the ground floor's wall, three metres below";
+    // The ground floor's far wall lies on y = 8 just as this storey's own does.
+    EXPECT_EQ(pieces_along(walls, 8.0), 1) << "the ground floor's wall answered as well";
 }
 
 TEST(Geometry3DModelQueries, AWallOfTheFlightBelowIsNotInTheAnswerEither)
@@ -431,11 +451,14 @@ TEST(Geometry3DModelQueries, AWallOfTheFlightBelowIsNotInTheAnswerEither)
     ASSERT_EQ(geo.region_count(), 1u);
 
     // At the top of the second flight, six metres up. The foot of the first flight lies in the
-    // same region, two metres away in plan -- the distance is beside the point, the height is not.
+    // same region, two metres away in plan, and on the same line x = 0 -- and still across the
+    // well, so the wall along its far side stands between the two.
     const auto who = geo.get_location(0.5, 4.0, 5.75, 0.5);
     ASSERT_TRUE(who.has_value());
 
-    const auto walls = into_set(geo.line_segments_in_range(*who));
-    EXPECT_TRUE(walls.contains(LineSegment{{0, 5}, {0, 3}})) << "the wall right in front of him";
-    EXPECT_FALSE(walls.contains(LineSegment{{0, 2}, {0, 0}})) << "the foot of the flight below";
+    const auto walls = geo.line_segments_in_range(*who, 4.0);
+    EXPECT_TRUE(sees_part_of(walls, LineSegment{{0, 3}, {0, 5}}))
+        << "the wall right in front of him";
+    EXPECT_FALSE(sees_part_of(walls, LineSegment{{0, 0}, {0, 2}}))
+        << "the foot of the flight below";
 }

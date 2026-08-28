@@ -11,6 +11,13 @@
 #include <cmath>
 #include <string>
 
+namespace
+{
+/// How far to ask for walls. The obstacle force decays with `forceDistance` (0.08 m by
+/// default), so a wall this far off contributes "nothing".
+constexpr double WallSearchRadius = 4.0;
+} // namespace
+
 SocialForceModel::SocialForceModel(double bodyForce, double friction)
     : bodyForce(bodyForce), friction(friction)
 {
@@ -37,7 +44,7 @@ Point SocialForceModel::ComputeNextState(
     }
     forces += F_rep / currentState.mass;
     Point obstacle_f{};
-    for(const auto& wall : step.WallsNearby()) {
+    for(const auto& wall : step.WallsInRange(WallSearchRadius)) {
         obstacle_f += ObstacleForce(currentState, wall);
     }
     forces += obstacle_f / currentState.mass;
@@ -93,7 +100,7 @@ void SocialForceModel::CheckModelConstraint(const GenericAgent& agent, const Age
     const auto maxRadius = currentState.radius / 2;
     if(!view.WallsInRange(maxRadius).empty()) {
         throw SimulationError(
-            "Model constraint violation: Agent at {} too close to geometry boundaries, distance <= "
+            "Model constraint violation: Agent at {} too close to geometry boundaries, distance < "
             "{}/2",
             agent.location.xy(),
             currentState.radius);

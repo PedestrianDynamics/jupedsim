@@ -32,7 +32,7 @@ public:
     ///
     /// PortalBoundaryIndex answers with sight taken into account: a segment belongs to the
     /// answer iff a straight sight line in the (x, y) frame runs from `loc.xy()` to some point
-    /// of it, crossing no wall on the way and never growing longer than @p maximum_distance.
+    /// of it, crossing no wall on the way and staying strictly shorter than @p maximum_distance.
     /// Sight lines leave the region the agent stands in through seams -- the portals between
     /// regions -- so what comes back is what can be seen across the surface and not merely
     /// what happens to lie nearby in plan: a floor folded back overhead is centimetres away in
@@ -63,10 +63,10 @@ public:
 class NaiveBoundaryIndex final : public BoundaryIndex
 {
 private:
-    std::vector<SegmentGrid<>> regions;
+    std::vector<SegmentGrid> regions;
 
 public:
-    explicit NaiveBoundaryIndex(std::vector<SegmentGrid<>> regions);
+    explicit NaiveBoundaryIndex(std::vector<SegmentGrid> regions);
     std::vector<LineSegment> Query(const Location& loc, double maximum_distance) override;
 };
 
@@ -79,7 +79,7 @@ using RegionGraph = boost::adjacency_list<
     boost::vecS,
     boost::vecS,
     boost::directedS,
-    std::unique_ptr<SegmentGrid<>>,
+    std::unique_ptr<SegmentGrid>,
     LineSegment>;
 
 /// Portal visibility computed by recursion over (region, window) pairs, with CGAL's exact 2D
@@ -119,7 +119,7 @@ MakePortalBoundaryIndex(const SurfaceMesh& mesh, const RegionSplit& region_split
 std::tuple<SurfaceMesh::Face_index, SurfaceMesh::Halfedge_index>
 IncidentFaceAndHalfedge(const SurfaceMesh& mesh, SurfaceMesh::Edge_index e);
 
-std::vector<SegmentGrid<>>
+std::vector<SegmentGrid>
 CreatePerRegionSegmentGrids(const SurfaceMesh& mesh, const RegionSplit& region_split);
 
 std::unique_ptr<RegionGraph>

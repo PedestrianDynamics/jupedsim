@@ -3,7 +3,6 @@
 
 #include "Geometry/RegionSeams.hpp"
 #include "Geometry/SegmentGrid.hpp"
-#include "Geometry/WallMerge.hpp"
 #include "LineSegment.hpp"
 #include "Point.hpp"
 
@@ -12,21 +11,16 @@
 
 class Geometry3D;
 
-/// Per-region 2D view onto the 3D surface: the walls a query in this region may find, and
-/// the seams leading out of it.
-///
-/// A wall running past a region boundary belongs to both regions and is held by both views,
-/// which is why walls carry an identity - a query looking at both has to recognise it as one
-/// wall rather than repel from it twice.
+/// Per-region 2D view onto the 3D surface: this region's own boundary, and the seams leading
+/// out of it. What a query gets to see is `BoundaryIndex`'s business; this is what answers
+/// whether something is in the way inside the region.
 class RegionView
 {
 public:
-    using WallRange = SegmentGrid<MergedWall>::LineSegmentRange;
-
     RegionView(
         std::size_t regionId,
         const Geometry3D* geometry3d,
-        std::vector<MergedWall> walls,
+        SegmentGrid walls,
         std::vector<RegionSeam> seams);
 
     // Non-copyable; move-only (built once, then held by value in Geometry3D).
@@ -34,16 +28,6 @@ public:
     RegionView& operator=(const RegionView&) = delete;
     RegionView(RegionView&&) = default;
     RegionView& operator=(RegionView&&) = default;
-
-    WallRange LineSegmentsInDistanceTo(double distance, Point p) const
-    {
-        return _walls.LineSegmentsInDistanceTo(distance, p);
-    }
-
-    WallRange LineSegmentsInApproxDistanceTo(Point p) const
-    {
-        return _walls.LineSegmentsInApproxDistanceTo(p);
-    }
 
     bool IntersectsAny(const LineSegment& linesegment) const
     {
@@ -62,6 +46,6 @@ public:
 private:
     std::size_t _regionId;
     const Geometry3D* _geometry3d;
-    SegmentGrid<MergedWall> _walls;
+    SegmentGrid _walls;
     std::vector<RegionSeam> _seams;
 };

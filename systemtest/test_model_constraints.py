@@ -567,26 +567,49 @@ def test_generalized_centrifugal_force_model_can_not_set_b_max_too_large(
         )
 
 
-@pytest.mark.parametrize("radius", np.arange(0.1, 0.5, 0.1))
+@pytest.mark.parametrize("b_max", np.arange(0.3, 0.7, 0.1))
 def test_generalized_centrifugal_force_model_can_not_add_agent_too_close_to_wall(
     square_room_100x100_gcfm,
-    radius,
+    b_max,
 ):
     simulation, journey_id, exit_id, agent_position = square_room_100x100_gcfm
-    a_min = 0.3
-    b_max = a_min
+    a_min = 0.2
+    margin = 0.5 * max(a_min, b_max)
     with pytest.raises(
         jps.SimulationError,
-        match=r"Model constraint violation: Agent (.+) too close to geometry boundaries, distance <= \d+\.?\d*",
+        match=r"Model constraint violation: Agent (.+) too close to geometry boundaries, distance < \d+\.?\d*",
     ):
         simulation.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
-            position=(-50 + 0.5 * a_min, 10),
+            position=(-50 + 0.99 * margin, 10),
             state=jps.GeneralizedCentrifugalForceModelState(
                 orientation=(1.0, 0.0), a_min=a_min, b_max=b_max
             ),
         )
+
+
+@pytest.mark.parametrize("b_max", np.arange(0.3, 0.7, 0.1))
+def test_generalized_centrifugal_force_model_can_add_agent_just_outside_the_margin(
+    square_room_100x100_gcfm,
+    b_max,
+):
+    """The margin is exclusive: a wall that far away is not too close.
+
+    Together with the test above this pins the margin from both sides, with
+    neither of them standing on it.
+    """
+    simulation, journey_id, exit_id, agent_position = square_room_100x100_gcfm
+    a_min = 0.2
+    margin = 0.5 * max(a_min, b_max)
+    simulation.add_agent(
+        journey_id=journey_id,
+        stage_id=exit_id,
+        position=(-50 + 1.01 * margin, 10),
+        state=jps.GeneralizedCentrifugalForceModelState(
+            orientation=(1.0, 0.0), a_min=a_min, b_max=b_max
+        ),
+    )
 
 
 @pytest.fixture

@@ -16,6 +16,13 @@
 #include <optional>
 #include <stdexcept>
 
+namespace
+{
+/// How far to ask for walls. The force reaches maxGeometryInteractionDistance beyond the
+/// agent's ellipse, 3.4 m with the default parameters. Use the 4m default of previous impl.
+constexpr double WallSearchRadius = 4.0;
+} // namespace
+
 GeneralizedCentrifugalForceModel::GeneralizedCentrifugalForceModel(
     double strengthNeighborRepulsion_,
     double strengthGeometryRepulsion_,
@@ -59,7 +66,7 @@ Point GeneralizedCentrifugalForceModel::ComputeNextState(
     Point e0{};
     // repulsive forces to the walls and transitions that are not my target
     Point repwall{};
-    for(const auto& wall : step.WallsNearby()) {
+    for(const auto& wall : step.WallsInRange(WallSearchRadius)) {
         repwall += ForceRepWall(currentState, wall);
     }
 
@@ -148,7 +155,7 @@ void GeneralizedCentrifugalForceModel::CheckModelConstraint(
     const auto maxRadius = std::max(AMin, BMax) / 2.;
     if(!view.WallsInRange(maxRadius).empty()) {
         throw SimulationError(
-            "Model constraint violation: Agent {} too close to geometry boundaries, distance <= {}",
+            "Model constraint violation: Agent {} too close to geometry boundaries, distance < {}",
             agent.location.xy(),
             maxRadius);
     }

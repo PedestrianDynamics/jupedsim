@@ -108,13 +108,14 @@ public:
     }
 
 private:
-    /// The segments as seen from the agent. Lazy range, no copies.
-    /// Must stay above WallsNearby() and WallsInRange() in code: an 'auto' return type is
-    /// deduced from the body, so unlike other members this one cannot be called before it is
-    /// defined.
-    auto AsSeenFromAgent(WallRange segments) const
+    /// The segments as seen from the agent. The query hands over what it found; the view
+    /// owns it from here and turns it into WallViews one at a time, as they are asked for.
+    /// Must stay above WallsInRange() in code: an 'auto' return type is deduced from the
+    /// body, so unlike other members this one cannot be called before it is defined.
+    auto AsSeenFromAgent(std::vector<LineSegment> segments) const
     {
-        return segments | std::views::transform([origin = location().xy()](const LineSegment& s) {
+        return std::move(segments) |
+               std::views::transform([origin = location().xy()](const LineSegment& s) {
                    const LineSegment segment{s.p1 - origin, s.p2 - origin};
                    const Point closest_point = segment.ShortestPoint(Point{});
                    return WallView{
@@ -126,11 +127,6 @@ private:
     }
 
 public:
-    /// Walls in the grid cells around the agent. Which ones are returned depends on the
-    /// underlying grid cell size.
-    /// Returned as lazy range.
-    auto WallsNearby() const { return AsSeenFromAgent(_world.LineSegmentsInRange(location())); }
-
     /// Wall segments within 'distance' of the agent, relative to it. Returns lazy range.
     auto WallsInRange(double distance) const
     {

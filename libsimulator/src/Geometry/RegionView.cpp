@@ -10,7 +10,7 @@
 RegionView::RegionView(
     std::size_t regionId,
     const Geometry3D* geometry3d,
-    std::vector<MergedWall> walls,
+    SegmentGrid walls,
     std::vector<RegionSeam> seams)
     : _regionId(regionId)
     , _geometry3d(geometry3d)

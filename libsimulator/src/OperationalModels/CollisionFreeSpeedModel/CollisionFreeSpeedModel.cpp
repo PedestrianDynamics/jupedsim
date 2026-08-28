@@ -15,6 +15,13 @@
 #include <limits>
 #include <vector>
 
+namespace
+{
+/// How far to ask for walls. The repulsion decays with `rangeGeometryRepulsion` (0.02 m by
+/// default), so a wall this far off contributes "nothing".
+constexpr double WallSearchRadius = 4.0;
+} // namespace
+
 CollisionFreeSpeedModel::CollisionFreeSpeedModel(
     double strengthNeighborRepulsion_,
     double rangeNeighborRepulsion_,
@@ -47,7 +54,7 @@ Point CollisionFreeSpeedModel::ComputeNextState(
     }
 
     Point boundaryRepulsion{};
-    for(const auto& wall : step.WallsNearby()) {
+    for(const auto& wall : step.WallsInRange(WallSearchRadius)) {
         boundaryRepulsion += BoundaryRepulsion(currentState, wall);
     }
 
@@ -104,7 +111,7 @@ void CollisionFreeSpeedModel::CheckModelConstraint(const GenericAgent& agent, co
     if(!view.WallsInRange(r).empty()) {
         throw SimulationError(
             "Model constraint violation: Agent at {} too close to geometry boundaries, distance "
-            "<= {}",
+            "< {}",
             agent.location.xy(),
             r);
     }

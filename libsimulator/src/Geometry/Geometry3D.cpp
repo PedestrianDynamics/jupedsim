@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Geometry/Geometry3D.hpp"
 
+#include "Geometry/BoundaryIndex.hpp"
 #include "Geometry/PolylineMerge.hpp"
-#include "Geometry/RegionReach.hpp"
 #include "Geometry/RegionSeams.hpp"
-#include "Geometry/WallMerge.hpp"
 #include "LineSegment.hpp"
 #include "SimulationError.hpp"
 
@@ -57,6 +56,18 @@ SurfaceMesh mesh_from_polygon(const PolyWithHoles& poly)
     return mesh;
 }
 
+/// Group the flat seam list by the region a seam belongs to, which is how the region views
+/// want to look at it.
+std::vector<std::vector<RegionSeam>>
+group_seams_by_region(const std::vector<RegionSeam>& seams, std::size_t region_count)
+{
+    std::vector<std::vector<RegionSeam>> grouped(region_count);
+    for(const auto& seam : seams) {
+        grouped[seam.region].push_back(seam);
+    }
+    return grouped;
+}
+
 } // namespace
 
 Geometry3D::Geometry3D(SurfaceMesh mesh) : _mesh(std::move(mesh))
@@ -79,24 +90,15 @@ void Geometry3D::build()
     _regionSplit = split_into_regions(_mesh);
     _region = _regionSplit.region;
     _regionCount = _regionSplit.count;
+    _boundaryIndex = MakePortalBoundaryIndex(_mesh, _regionSplit);
     build_region_views();
 }
 
 void Geometry3D::build_region_views()
 {
-    // Walls are fused across the whole mesh, so a wall running past a region boundary stays
-    // one wall - and is then held by both regions it borders, to be findable from either.
-    const double eps = mesh_merge_tolerance(_mesh);
-    const auto walls = merge_border_walls(_mesh, _region, eps);
-    std::vector<std::vector<MergedWall>> walls_by_region(_regionCount);
-    for(const auto& wall : walls) {
-        for(const auto r : wall.regions) {
-            walls_by_region[r].push_back(wall);
-        }
-    }
-
-    auto seams_by_region =
-        group_seams_by_region(extract_region_seams(_mesh, _region, eps), _regionCount);
+    auto walls_by_region = CreatePerRegionSegmentGrids(_mesh, _regionSplit);
+    auto seams_by_region = group_seams_by_region(
+        extract_region_seams(_mesh, _region, mesh_merge_tolerance(_mesh)), _regionCount);
 
     _regionViews.clear();
     _regionViews.reserve(_regionCount);
@@ -137,34 +139,10 @@ bool Geometry3D::is_valid_location(const Point3D& p) const
     return face_below(p).face != SurfaceMesh::null_face();
 }
 
-WallRange Geometry3D::line_segments_in_range(const Location& who, double distance) const
+std::vector<LineSegment>
+Geometry3D::line_segments_in_range(const Location& who, double distance) const
 {
-    if(_geometry2D != nullptr) {
-        return WallRange{
-            distance < 0.0 ? _geometry2D->LineSegmentsInApproxDistanceTo(who.xy()) :
-                             _geometry2D->LineSegmentsInDistanceTo(distance, who.xy())};
-    }
-
-    // Without an explicit distance the grid answers by cell, so the reach that decides which
-    // regions to consult is the one the cells were built for.
-    const double reach = distance >= 0.0 ? distance : ApproximateWallReach;
-
-    WallRange::Spans spans{};
-    for(const auto& visit : regions_within_reach(
-            [this](std::size_t r) -> const std::vector<RegionSeam>& {
-                return region_view(r).seams();
-            },
-            who.region(),
-            who.xy(),
-            reach)) {
-        const auto& view = region_view(visit.region);
-        const auto walls = distance < 0.0 ? view.LineSegmentsInApproxDistanceTo(visit.from) :
-                                            view.LineSegmentsInDistanceTo(visit.radius, visit.from);
-        if(!walls.empty()) {
-            spans.push_back(walls);
-        }
-    }
-    return WallRange{std::move(spans), who.z() - InteractionHeight, who.z() + InteractionHeight};
+    return _boundaryIndex->Query(who, distance);
 }
 
 bool Geometry3D::no_geometry_between(const Location& who, Point direction) const

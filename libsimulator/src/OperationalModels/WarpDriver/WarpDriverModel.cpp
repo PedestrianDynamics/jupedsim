@@ -425,7 +425,7 @@ void WarpDriverModel::CheckModelConstraint(const GenericAgent& agent, const Agen
     const auto maxRadius = data->radius / 2;
     if(!view.WallsInRange(maxRadius).empty()) {
         throw SimulationError(
-            "Model constraint violation: Agent at {} too close to geometry boundaries, distance <= "
+            "Model constraint violation: Agent at {} too close to geometry boundaries, distance < "
             "{}/2",
             agent.location.xy(),
             data->radius);
@@ -646,12 +646,12 @@ Point WarpDriverModel::ComputeNextState(
     newVelWorld = newVelWorld + repulsion;
 
     // Boundary avoidance: steer agents away from walls
-    for(const auto& wall : step.WallsNearby()) {
+    const double reach = agentData.radius * 3.0;
+    for(const auto& wall : step.WallsInRange(reach)) {
         if(wall.segment.LengthSquare() < 1e-12) {
             continue; // degenerate wall segment
         }
-        const double reach = agentData.radius * 3.0;
-        if(wall.distance < reach && wall.distance > 1e-6) {
+        if(wall.distance > 1e-6) {
             const double steering = agentData.v0 * (reach - wall.distance) / wall.distance;
             newVelWorld = newVelWorld + wall.normal * steering;
         }

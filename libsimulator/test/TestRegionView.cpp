@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "Geometry/Geometry2D.hpp"
 #include "Geometry/Geometry3D.hpp"
 #include "Geometry/RegionView.hpp"
 #include "LineSegment.hpp"
@@ -9,38 +8,10 @@
 #include <gtest/gtest.h>
 
 #include <array>
-#include <set>
-#include <utility>
 #include <vector>
 
 namespace
 {
-/// A canonical (undirected) form of a segment so two wall sets can be compared
-/// regardless of per-segment orientation.
-LineSegment canonical(const LineSegment& s)
-{
-    return s.p1 < s.p2 ? s : LineSegment{s.p2, s.p1};
-}
-
-std::set<LineSegment> as_set(const std::vector<LineSegment>& segments)
-{
-    std::set<LineSegment> out{};
-    for(const auto& s : segments) {
-        out.insert(canonical(s));
-    }
-    return out;
-}
-
-/// Every wall of a RegionView (a huge query radius returns all of them).
-std::vector<LineSegment> all_walls(const RegionView& view)
-{
-    std::vector<LineSegment> out{};
-    for(const auto& s : view.LineSegmentsInDistanceTo(1e12, {0, 0})) {
-        out.push_back(s.segment);
-    }
-    return out;
-}
-
 /// Given a side view ("profile"), add y coordinates to turn it full 3D.
 /// Uniform winding keeps the orientation consistent across folds.
 SurfaceMesh extrude_profile(const std::vector<std::array<double, 2>>& profile, double width)
@@ -68,16 +39,10 @@ SurfaceMesh folded_ribbon()
 }
 
 /// A flat 10x10 rectangle built from a mesh, with the y=0 and y=10 sides each
-/// subdivided by a collinear mid vertex (x=5): the merge must fuse them back.
+/// subdivided by a collinear mid vertex (x=5).
 SurfaceMesh flat_rectangle_mesh()
 {
     return extrude_profile({{0, 0}, {5, 0}, {10, 0}}, 10.0);
-}
-
-PolyWithHoles rectangle_poly()
-{
-    const std::vector<K::Point_2> outer{{0, 0}, {10, 0}, {10, 10}, {0, 10}};
-    return PolyWithHoles{Poly(outer.begin(), outer.end())};
 }
 } // namespace
 
@@ -87,20 +52,6 @@ TEST(RegionViewFlat, SingleRegionNoSeams)
     ASSERT_EQ(geo.region_count(), 1u);
     EXPECT_TRUE(geo.region_view(0).seams().empty());
     EXPECT_FALSE(geo.region_view(0).crosses_seam({0, 5}, {10, 5}));
-}
-
-TEST(RegionViewFlat, MergedWallsEqualPolygonWalls)
-{
-    Geometry3D mesh_geo{flat_rectangle_mesh()};
-    Geometry3D poly_geo{rectangle_poly()};
-    ASSERT_NE(poly_geo.geometry_2d(), nullptr);
-
-    // Collinear-subdivided mesh borders merge back to the 4 rectangle sides,
-    // matching the polygon build's walls exactly (undirected).
-    const auto mesh_walls = as_set(all_walls(mesh_geo.region_view(0)));
-    const auto poly_walls = as_set(all_walls(poly_geo.region_view(0)));
-    EXPECT_EQ(mesh_walls.size(), 4u);
-    EXPECT_EQ(mesh_walls, poly_walls);
 }
 
 TEST(RegionViewFlat, InsideGeometryMatchesTheMeshFootprint)
@@ -131,11 +82,6 @@ TEST(RegionViewFolded, SeamIsInSeamGridNotWallGrid)
     const Point b{13, 5};
     EXPECT_TRUE(geo.region_view(0).crosses_seam(a, b));
     EXPECT_FALSE(geo.region_view(0).IntersectsAny(LineSegment{a, b}));
-
-    // The seam is never among the walls.
-    for(const auto& w : all_walls(geo.region_view(0))) {
-        EXPECT_FALSE(canonical(w) == canonical(LineSegment{{12, 0}, {12, 10}}));
-    }
 }
 
 TEST(RegionViewFolded, InsideGeometryCorrectOnBothSidesOfTheSeam)

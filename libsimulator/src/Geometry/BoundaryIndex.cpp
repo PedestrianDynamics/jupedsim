@@ -27,7 +27,7 @@
 //==================================================================================================
 // NaiveBoundaryIndex
 //==================================================================================================
-NaiveBoundaryIndex::NaiveBoundaryIndex(std::vector<SegmentGrid<>> regions_)
+NaiveBoundaryIndex::NaiveBoundaryIndex(std::vector<SegmentGrid> regions_)
     : regions(std::move(regions_))
 {
 }
@@ -633,7 +633,7 @@ IncidentFaceAndHalfedge(const SurfaceMesh& mesh, SurfaceMesh::Edge_index e)
     return {mesh.face(h), h};
 }
 
-std::vector<SegmentGrid<>>
+std::vector<SegmentGrid>
 CreatePerRegionSegmentGrids(const SurfaceMesh& mesh, const RegionSplit& region_split)
 {
     std::vector<std::vector<LineSegment>> elements{};
@@ -649,7 +649,7 @@ CreatePerRegionSegmentGrids(const SurfaceMesh& mesh, const RegionSplit& region_s
             continue;
         }
     }
-    std::vector<SegmentGrid<>> boundaries{};
+    std::vector<SegmentGrid> boundaries{};
     boundaries.reserve(region_split.count);
     std::transform(
         std::begin(elements),
@@ -692,7 +692,7 @@ CreateRegionGraph(const SurfaceMesh& mesh, const RegionSplit& region_split)
     auto g = std::make_unique<RegionGraph>();
     for(auto&& e : elements) {
         auto v = boost::add_vertex(*g);
-        (*g)[v] = std::make_unique<SegmentGrid<>>(e);
+        (*g)[v] = std::make_unique<SegmentGrid>(e);
     }
     for(auto&& [src, dst, ls] : seams) {
         boost::add_edge(src, dst, ls, *g);
