@@ -53,10 +53,8 @@ inline SurfaceMesh two_levels_with_stair()
 }
 
 /// The two-level fold again, but meshed across the sweep as well as along it, so the seam
-/// where the levels meet runs over @p strips edges instead of one.
-///
-/// `extrude_profile` lays a single edge across the whole width, and a one-edge seam cannot
-/// show whether anything was merged -- one segment in, one segment out, either way.
+/// where the levels meet runs over @p strips edges instead of the single one
+/// `extrude_profile` lays across the whole width.
 inline SurfaceMesh two_levels_with_wide_seam(std::size_t strips = 4)
 {
     const std::vector<std::array<double, 2>> profile{{0, 0}, {10, 0}, {15, 3}, {5, 3}};

@@ -25,13 +25,6 @@
 /// boundary that is always traversed the same way round.
 std::vector<std::size_t> straight_runs(const std::vector<Point>& points, double eps);
 
-/// The index of the point at which a closed polyline turns, so a cycle can be opened there
-/// instead of in the middle of a straight side -- which would leave that side as two runs.
-///
-/// @p cycle holds each point once; the closing edge back to the first is implied. Returns 0
-/// when the polyline never turns at all, where every cut is as good as any other.
-std::size_t first_corner(const std::vector<Point>& cycle, double eps);
-
 /// The tolerance both mesh merges run at, scaled to the extent of @p mesh: enough to absorb
 /// the floating-point noise in coordinates that are meant to be collinear, and far below any
 /// corner a real geometry has.

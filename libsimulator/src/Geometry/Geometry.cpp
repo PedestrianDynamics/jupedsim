@@ -2,7 +2,6 @@
 #include "Geometry/Geometry.hpp"
 
 #include "Geometry/BoundaryIndex.hpp"
-#include "Geometry/PolylineMerge.hpp"
 #include "Geometry/RegionSeams.hpp"
 #include "LineSegment.hpp"
 #include "SimulationError.hpp"
@@ -95,8 +94,8 @@ void Geometry::build()
 void Geometry::build_region_views()
 {
     auto walls_by_region = CreatePerRegionSegmentGrids(_mesh, _regionSplit);
-    auto seams_by_region = group_seams_by_region(
-        extract_region_seams(_mesh, _region, mesh_merge_tolerance(_mesh)), _regionCount);
+    auto seams_by_region =
+        group_seams_by_region(extract_region_seams(_mesh, _region), _regionCount);
 
     _regionViews.clear();
     _regionViews.reserve(_regionCount);

@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "Geometry/PolylineMerge.hpp"
 #include "Geometry/RegionSeams.hpp"
 #include "Geometry/RegionSplit.hpp"
 #include "MeshFixtures.hpp"
@@ -26,7 +25,7 @@ struct Seams {
 Seams seams_of(SurfaceMesh mesh)
 {
     const auto split = split_into_regions(mesh);
-    auto seams = extract_region_seams(mesh, split.region, mesh_merge_tolerance(mesh));
+    auto seams = extract_region_seams(mesh, split.region);
     return Seams{std::move(mesh), std::move(seams), split.count};
 }
 
@@ -82,32 +81,19 @@ TEST(RegionSeams, FloorsWithNothingJoiningThemHaveNoSeam)
     EXPECT_TRUE(s.seams.empty());
 }
 
-TEST(RegionSeams, AStraightSeamOverManyEdgesBecomesOneSegment)
+TEST(RegionSeams, AWideSeamIsReportedEdgeByEdge)
 {
-    const auto s = seams_of(two_levels_with_wide_seam(4));
+    constexpr std::size_t strips = 4;
+    const auto s = seams_of(two_levels_with_wide_seam(strips));
 
-    // The levels meet along x = 15 over four mesh edges. Straight in plan, so it is one seam
-    // from either side -- and the whole width of it, not a quarter.
+    // The levels meet along x = 15 over four mesh edges, and each of them is a seam of its
+    // own, from either side: the whole width comes back, in the pieces the mesh has it in.
     ASSERT_EQ(s.region_count, 2u);
-    ASSERT_EQ(s.seams.size(), 2u);
+    ASSERT_EQ(s.seams.size(), 2 * strips);
     for(const auto& seam : s.seams) {
         EXPECT_EQ(seam.segment.p1.x, 15.0);
         EXPECT_EQ(seam.segment.p2.x, 15.0);
-        EXPECT_EQ(std::abs(seam.segment.p2.y - seam.segment.p1.y), 4.0);
-    }
-}
-
-TEST(RegionSeams, MergingDoesNotMoveTheSeam)
-{
-    // However the run is cut up, the same points have to lie on it. A merge that overshot or
-    // fell short would still be one straight segment and pass the test above.
-    const auto merged = seams_of(two_levels_with_wide_seam(4));
-    const auto fine = seams_of(two_levels_with_wide_seam(16));
-
-    ASSERT_EQ(merged.seams.size(), fine.seams.size());
-    for(std::size_t i = 0; i < merged.seams.size(); ++i) {
-        EXPECT_EQ(merged.seams[i].segment.p1, fine.seams[i].segment.p1);
-        EXPECT_EQ(merged.seams[i].segment.p2, fine.seams[i].segment.p2);
+        EXPECT_EQ(std::abs(seam.segment.p2.y - seam.segment.p1.y), 4.0 / strips);
     }
 }
 

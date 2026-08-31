@@ -70,18 +70,3 @@ double mesh_merge_tolerance(const SurfaceMesh& mesh)
     const double scale = std::max(std::abs(lo), std::abs(hi));
     return 8.0 * std::max(scale, 1.0) * std::numeric_limits<double>::epsilon();
 }
-
-std::size_t first_corner(const std::vector<Point>& cycle, double eps)
-{
-    const std::size_t n = cycle.size();
-    for(std::size_t i = 0; i < n; ++i) {
-        const Point prev = cycle[(i + n - 1) % n];
-        const Point next = cycle[(i + 1) % n];
-        // A corner is where the line turns: either away from the line through its two
-        // neighbours, or back onto it.
-        if(perp_distance(prev, next, cycle[i]) > eps || doubles_back(prev, cycle[i], next)) {
-            return i;
-        }
-    }
-    return 0;
-}
