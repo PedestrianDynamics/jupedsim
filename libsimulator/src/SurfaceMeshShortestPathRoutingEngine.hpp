@@ -58,9 +58,11 @@ private:
     /// @p corner moved into the open by the wall clearance, put back onto the surface.
     Point3D held_off_the_wall(const Point3D& corner, Point into_the_open) const;
 
+    /// Next point of the path from @p source to @p target
+    /// Returns @p source itself when @p target is already reached.
+    Point next_waypoint(const Point3D& source, const RoutingTarget& target);
+
     const Geometry& _geometry;
-    /// Tolerance needed for the collinear merge, calculated on the underlying mesh itself.
-    double _mergeTolerance;
 
     std::map<RoutingTarget, std::unique_ptr<ShortestPath>> _cache{};
 };

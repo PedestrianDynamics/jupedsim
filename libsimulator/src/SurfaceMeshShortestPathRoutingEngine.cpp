@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "SurfaceMeshShortestPathRoutingEngine.hpp"
 
-#include "Geometry/PolylineMerge.hpp"
 #include "SimulationError.hpp"
 
 #include <cstddef>
@@ -10,25 +9,13 @@
 #include <utility>
 #include <vector>
 
-namespace
-{
-/// How close a point has to be to count as the one already under the agent's feet.
-///
-/// Not the merge tolerance: collinearity is a question of ULPs, being somewhere already is
-/// not. The path comes back with its own source point up to a nanometre off, and kept as a
-/// waypoint of its own that is one no amount of walking ever reaches.
-constexpr double AlreadyStandingThere = 1e-9;
-} // namespace
-
 ////////////////////////////////////////////////////////////////////////////////
 // SurfaceMeshShortestPathRoutingEngine
 ////////////////////////////////////////////////////////////////////////////////
 SurfaceMeshShortestPathRoutingEngine::SurfaceMeshShortestPathRoutingEngine(
     const Geometry& geometry,
     double wallClearance)
-    : RoutingEngine(wallClearance)
-    , _geometry(geometry)
-    , _mergeTolerance(mesh_merge_tolerance(geometry.mesh()))
+    : RoutingEngine(wallClearance), _geometry(geometry)
 {
 }
 
@@ -154,45 +141,35 @@ std::vector<Point3D> SurfaceMeshShortestPathRoutingEngine::GetShortestPath(
     return path;
 }
 
+Point SurfaceMeshShortestPathRoutingEngine::next_waypoint(
+    const Point3D& source,
+    const RoutingTarget& target)
+{
+    const Point here{source.x(), source.y()};
+    // CGAL sets a point wherever the way crosses a triangle edge.
+    for(const auto& p : GetShortestPath(source, target)) {
+        const Point xy{p.x(), p.y()};
+        if(!(xy - here).isZeroLength()) {
+            // Return first point "far enough" from source
+            return xy;
+        }
+    }
+    return here;
+}
+
 Point SurfaceMeshShortestPathRoutingEngine::ComputeWaypoint(
     const Location& from,
     const Location& to)
 {
-    const auto path = GetShortestPath(from.position_3d(), to.position_3d());
-
-    // CGAL sets a point whenever it crosses a triangle edge. need to do a collinear merge or
-    // agents stop at each of those intermediate points as they occur in "agent.nextTarget".
-    std::vector<Point> chain{from.xy()};
-    for(const auto& p : path) {
-        const Point xy{p.x(), p.y()};
-        // Points on top of each other would read as a turn: the leading one comes back when the
-        // agent stands on an edge.
-        if((xy - chain.back()).Norm() > AlreadyStandingThere) {
-            chain.push_back(xy);
-        }
-    }
-    if(chain.size() < 2) {
-        // Already there.
-        return to.xy();
-    }
-    const auto runs = straight_runs(chain, _mergeTolerance);
-    return runs.size() > 1 ? chain[runs[1]] : chain.back();
+    const Point next = next_waypoint(from.position_3d(), to.position_3d());
+    return next == from.xy() ? to.xy() : next;
 }
 
 Point SurfaceMeshShortestPathRoutingEngine::GetOrientation(
     const Point3D& source,
     const RoutingTarget& target)
 {
-    const auto path = GetShortestPath(source, target);
-    // Heading to the next waypoint, projected onto x/y (z dropped). If a query
-    // point sits exactly on a triangle edge, CGAL emits a duplicate leading
-    // waypoint, so return the first non-zero direction along the shortest path.
-    for(std::size_t i = 1; i < path.size(); ++i) {
-        const Point dir(path[i].x() - path[0].x(), path[i].y() - path[0].y());
-        if(!dir.isZeroLength()) {
-            return dir.Normalized();
-        }
-    }
-    // Already at the destination (or degenerate) -> no heading.
-    return {0, 0};
+    const Point here{source.x(), source.y()};
+    // Zero when the way heads for where it already is: nowhere left to go.
+    return (next_waypoint(source, target) - here).Normalized();
 }

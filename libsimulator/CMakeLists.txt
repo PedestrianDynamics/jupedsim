@@ -21,8 +21,6 @@ target_sources(simulator PRIVATE
     src/Geometry/Geometry.hpp
     src/Geometry/Location.cpp
     src/Geometry/Location.hpp
-    src/Geometry/PolylineMerge.cpp
-    src/Geometry/PolylineMerge.hpp
     src/Geometry/ProjectedBoundary.cpp
     src/Geometry/ProjectedBoundary.hpp
     src/Geometry/RegionSeams.cpp
