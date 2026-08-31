@@ -126,14 +126,12 @@ class SimulationViewer:
     # -- rendering ------------------------------------------------------
 
     def _load_floor_mesh(self) -> None:
-        """Build the walkable-surface mesh once (best-effort). Holds both a height scalar and a
-        per-cell region id so the floor can be recoloured (see _draw_floor) without reloading."""
+        """Build the walkable-surface mesh once. Holds both a height scalar and a per-cell
+        region id so the floor can be recoloured (see _draw_floor) without reloading."""
         if self._geometry_obj is None:
             return
-        try:
-            from jupedsim.internal.routing_3d import Geometry
-        except Exception:
-            return  # routing_3d not importable -> just skip the context surface
+        from jupedsim.internal.routing import Geometry
+
         # Read a second time rather than borrowed from the simulation, which owns its geometry.
         geo = Geometry.from_obj(str(self._geometry_obj))
         verts = np.asarray(geo.vertices(), dtype=float)

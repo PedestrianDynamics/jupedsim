@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "CfgCgal.hpp"
 #include "Geometry/Geometry.hpp"
-#include "GeometryBuilder.hpp"
 #include "MeshFixtures.hpp"
-#include "RoutingEngine.hpp"
 #include "SimulationError.hpp"
 #include "SurfaceMeshShortestPathRoutingEngine.hpp"
 #include "TestCommon.hpp"
@@ -194,7 +192,7 @@ TEST_F(FlatSquare, OrientationRobustWhenSourceOnEdge)
     EXPECT_NEAR(dir.y, 0.6, 1e-6);
 }
 
-TEST(RoutingEngine3DFold, GeodesicCarriesLengthAcrossSeam)
+TEST(RoutingEngineFold, GeodesicCarriesLengthAcrossSeam)
 {
     Geometry geometry{folded_mesh()};
     SurfaceMeshShortestPathRoutingEngine engine{geometry};
@@ -233,7 +231,7 @@ TEST(RoutingEngine3DFold, GeodesicCarriesLengthAcrossSeam)
     EXPECT_TRUE(PointsCollinearXY(std::span(path).subspan(seam_idx)));
 }
 
-TEST(RoutingEngine3DLShape, GeodesicBendsAroundReflexCorner)
+TEST(RoutingEngineLShape, GeodesicBendsAroundReflexCorner)
 {
     // L-shape (CCW) with a single reflex corner at (1, 1).
     const std::vector<K::Point_2> outer{{0, 0}, {3, 0}, {3, 1}, {1, 1}, {1, 3}, {0, 3}};
@@ -256,7 +254,7 @@ TEST(RoutingEngine3DLShape, GeodesicBendsAroundReflexCorner)
     EXPECT_NEAR(turn.y, expected.y, 1e-6);
 }
 
-TEST(RoutingEngine3DLShape, OrientationBendsTowardsReflexCorner)
+TEST(RoutingEngineLShape, OrientationBendsTowardsReflexCorner)
 {
     const std::vector<K::Point_2> outer{{0, 0}, {3, 0}, {3, 1}, {1, 1}, {1, 3}, {0, 3}};
 
@@ -278,7 +276,7 @@ TEST(RoutingEngine3DLShape, OrientationBendsTowardsReflexCorner)
     EXPECT_EQ(at_goal.y, 0.0);
 }
 
-TEST(RoutingEngine3DLShape, WaypointIsTheNextTurnOfTheGeodesic)
+TEST(RoutingEngineLShape, WaypointIsTheNextTurnOfTheGeodesic)
 {
     const std::vector<K::Point_2> outer{{0, 0}, {3, 0}, {3, 1}, {1, 1}, {1, 3}, {0, 3}};
 
@@ -299,32 +297,10 @@ TEST(RoutingEngine3DLShape, WaypointIsTheNextTurnOfTheGeodesic)
     EXPECT_EQ(engine.ComputeWaypoint(*to, *to), to->xy());
 }
 
-TEST(RoutingEngineProjected, WaypointOnLocationsIsTheOneOnPoints)
-{
-    GeometryBuilder b{};
-    b.AddAccessibleArea({{0, 0}, {20, 0}, {20, 20}, {0, 20}});
-    b.ExcludeFromAccessibleArea({{9, 0}, {11, 0}, {11, 15}, {9, 15}});
-    const auto poly = b.Build();
-
-    Geometry geometry{poly};
-    RoutingEngine engine{poly};
-
-    const auto from = geometry.get_location(4.0, 4.0, 0.0);
-    const auto to = geometry.get_location(16.0, 4.0, 0.0);
-    ASSERT_TRUE(from.has_value() && to.has_value());
-
-    // Around the barrier, so the route has a turn in it and the waypoint is not the target.
-    const Point on_points = engine.ComputeWaypoint(from->xy(), to->xy());
-    EXPECT_NE(on_points, to->xy());
-    // Bit for bit the same answer: this is the engine the flat suites are pinned to.
-    EXPECT_EQ(engine.ComputeWaypoint(*from, *to), on_points);
-}
-
 TEST(RoutingEngineWallClearance, NegativeIsNoDistance)
 {
-    GeometryBuilder b{};
-    b.AddAccessibleArea({{0, 0}, {20, 0}, {20, 20}, {0, 20}});
-    EXPECT_THROW(RoutingEngine(b.Build(), -0.1), SimulationError);
+    Geometry geometry{unit_square_mesh()};
+    EXPECT_THROW(SurfaceMeshShortestPathRoutingEngine(geometry, -0.1), SimulationError);
 }
 
 TEST(RoutingEngineWallClearance, TheSurfaceEngineKeepsItToo)
@@ -349,29 +325,7 @@ TEST(RoutingEngineWallClearance, TheSurfaceEngineKeepsItToo)
     EXPECT_NEAR((turn - Point{1, 1}).Norm(), 0.3, 1e-9);
 }
 
-TEST(RoutingEngineProjected, TheClearanceIsWhatHoldsARouteOffACorner)
-{
-    // An L, so that the route has to turn on the reflex corner at (1,1).
-    GeometryBuilder b{};
-    b.AddAccessibleArea({{0, 0}, {3, 0}, {3, 1}, {1, 1}, {1, 3}, {0, 3}});
-    const auto poly = b.Build();
-    const Point from{2.5, 0.5};
-    const Point to{0.5, 2.5};
-
-    // Without a distance the route runs through the corner -- which is what stops an agent.
-    RoutingEngine bare{poly, 0.0};
-    EXPECT_EQ(bare.ComputeWaypoint(from, to), Point(1, 1));
-
-    // With one it is held off it, by exactly that much. This is the default, so it is also what
-    // the flat pipeline has always done.
-    RoutingEngine keeping_distance{poly};
-    EXPECT_EQ(keeping_distance.WallClearance(), 0.2);
-    const Point waypoint = keeping_distance.ComputeWaypoint(from, to);
-    EXPECT_NE(waypoint, Point(1, 1));
-    EXPECT_NEAR((waypoint - Point{1, 1}).Norm(), keeping_distance.WallClearance(), 1e-9);
-}
-
-TEST(RoutingEngine3DCorridor, TheWaypointIsNeverTheSpotAlreadyStoodOn)
+TEST(RoutingEngineCorridor, TheWaypointIsNeverTheSpotAlreadyStoodOn)
 {
     // On triangles this long the path comes back with its own source point far enough off to
     // survive as a waypoint of its own -- and a step that short has no direction, so the agent

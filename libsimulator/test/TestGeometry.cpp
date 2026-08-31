@@ -4,13 +4,11 @@
 #include "MeshFixtures.hpp"
 #include "TestCommon.hpp"
 
-#include <CGAL/mark_domain_in_triangulation.h>
 #include <gtest/gtest.h>
 
 #include <algorithm>
 #include <array>
 #include <set>
-#include <utility>
 #include <vector>
 
 namespace
@@ -162,49 +160,6 @@ TEST(GeometryFromMesh, HasNoPolygon)
     Geometry geo{flat_room()};
     // A surface that may fold over itself has no polygon underneath.
     EXPECT_EQ(geo.polygon(), nullptr);
-}
-
-TEST(GeometryFromPolygon, LiftReproducesThe2DTriangulation)
-{
-    const auto poly = square_with_hole();
-    Geometry geo{poly};
-
-    // The reference: the CDT exactly as the 2D RoutingEngine builds it.
-    CDT cdt{};
-    cdt.insert_constraint(
-        poly.outer_boundary().vertices_begin(), poly.outer_boundary().vertices_end(), true);
-    for(const auto& hole : poly.holes()) {
-        cdt.insert_constraint(hole.vertices_begin(), hole.vertices_end(), true);
-    }
-    CGAL::mark_domain_in_triangulation(cdt);
-
-    // Coordinates are copied verbatim (both kernels store doubles), so the
-    // centroid sets must match exactly in x/y.
-    std::vector<std::pair<double, double>> expected{};
-    for(auto f = cdt.finite_faces_begin(); f != cdt.finite_faces_end(); ++f) {
-        if(f->get_in_domain()) {
-            const auto c =
-                CGAL::centroid(f->vertex(0)->point(), f->vertex(1)->point(), f->vertex(2)->point());
-            expected.emplace_back(c.x(), c.y());
-        }
-    }
-    const auto vertices = geo.vertices();
-    std::vector<std::pair<double, double>> actual{};
-    for(const auto& tri : geo.triangles()) {
-        double x = 0;
-        double y = 0;
-        for(const auto v : tri) {
-            x += vertices[v][0];
-            y += vertices[v][1];
-        }
-        actual.emplace_back(x / 3.0, y / 3.0);
-    }
-    // Set equality: the lift produces the same triangles.
-    std::sort(expected.begin(), expected.end());
-    std::sort(actual.begin(), actual.end());
-    EXPECT_EQ(actual, expected);
-    // Exactly the triangulation's corner vertices.
-    EXPECT_EQ(vertices.size(), cdt.number_of_vertices());
 }
 
 TEST(GeometryModelQueries, EverythingAnsweredIsWithinTheRadius)

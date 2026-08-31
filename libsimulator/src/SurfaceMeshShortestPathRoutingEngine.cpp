@@ -26,7 +26,7 @@ constexpr double AlreadyStandingThere = 1e-9;
 SurfaceMeshShortestPathRoutingEngine::SurfaceMeshShortestPathRoutingEngine(
     const Geometry& geometry,
     double wallClearance)
-    : RoutingEngine3D(wallClearance)
+    : RoutingEngine(wallClearance)
     , _geometry(geometry)
     , _mergeTolerance(mesh_merge_tolerance(geometry.mesh()))
 {

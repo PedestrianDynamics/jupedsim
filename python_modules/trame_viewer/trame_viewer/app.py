@@ -26,7 +26,7 @@ from vtkmodules.vtkRenderingCore import vtkCellPicker  # noqa: E402
 
 pv.OFF_SCREEN = True
 
-from jupedsim.internal.routing_3d import (  # noqa: E402
+from jupedsim.internal.routing import (  # noqa: E402
     Geometry,
     SurfaceMeshShortestPathRoutingEngine,
     make_naive_boundary_index,

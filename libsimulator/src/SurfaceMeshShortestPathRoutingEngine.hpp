@@ -2,7 +2,7 @@
 #pragma once
 
 #include "Geometry/Geometry.hpp"
-#include "RoutingEngine3D.hpp"
+#include "RoutingEngine.hpp"
 
 #include <CGAL/Surface_mesh_shortest_path.h>
 
@@ -10,7 +10,7 @@
 #include <tuple>
 #include <vector>
 
-class SurfaceMeshShortestPathRoutingEngine : public RoutingEngine3D
+class SurfaceMeshShortestPathRoutingEngine : public RoutingEngine
 {
 public:
     /// Borrows @p geometry (non-owning); the caller keeps it alive for the

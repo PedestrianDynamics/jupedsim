@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 import shapely
 from jupedsim.geometry_utils import build_geometry_3d
-from jupedsim.internal.routing_3d import (
+from jupedsim.internal.routing import (
     Geometry,
     SurfaceMeshShortestPathRoutingEngine,
 )

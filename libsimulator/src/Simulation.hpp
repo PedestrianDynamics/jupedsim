@@ -10,7 +10,7 @@
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
 #include "Point.hpp"
-#include "RoutingEngine3D.hpp"
+#include "RoutingEngine.hpp"
 #include "SimulationClock.hpp"
 #include "Stage.hpp"
 #include "StageDescription.hpp"
@@ -39,7 +39,7 @@ class Simulation
     StageSystem _stageSystem{};
     NeighborhoodSearch<GenericAgent> _neighborhoodSearch{2.2};
     std::unique_ptr<Geometry> _geometry{};
-    std::unique_ptr<RoutingEngine3D> _routingEngine{};
+    std::unique_ptr<RoutingEngine> _routingEngine{};
     AgentContainer<GenericAgent> _agents;
     std::vector<GenericAgent::ID> _removedAgentsInLastIteration;
     std::unordered_map<Journey::ID, std::unique_ptr<Journey>> _journeys;

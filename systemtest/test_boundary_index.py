@@ -12,7 +12,7 @@ import math
 from pathlib import Path
 
 import pytest
-from jupedsim.internal.routing_3d import (
+from jupedsim.internal.routing import (
     Geometry,
     make_portal_boundary_index,
 )

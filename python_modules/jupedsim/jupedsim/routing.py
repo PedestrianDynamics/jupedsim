@@ -23,8 +23,9 @@ class RoutingEngine:
         ),
         **kwargs: Any,
     ) -> None:
-        self._obj = py_jps.RoutingEngine(
-            build_geometry(geometry, **kwargs)._obj
+        self._geometry = build_geometry(geometry, **kwargs)
+        self._obj = py_jps.SurfaceMeshShortestPathRoutingEngine(
+            self._geometry._obj
         )
 
     def compute_waypoints(
@@ -57,9 +58,14 @@ class RoutingEngine:
 
         Returns:
             List of points (path) from 'frm' to 'to' including from and to.
+            Intermediate points may be collinear: the path is reported wherever
+            it passes a triangle edge, not only where it turns.
 
         """
-        return self._obj.compute_waypoints(frm, to)
+        path = self._obj.get_shortest_path(
+            (frm[0], frm[1], 0.0), (to[0], to[1], 0.0)
+        )
+        return [(x, y) for x, y, _ in path]
 
     def is_routable(self, p: tuple[float, float]) -> bool:
         """Tests if the supplied point is inside the underlying geometry.
@@ -68,14 +74,14 @@ class RoutingEngine:
             If the point is inside the geometry.
 
         """
-        return self._obj.is_routable(p)
+        return self._obj.is_valid_location((p[0], p[1], 0.0))
 
     def mesh(
         self,
     ) -> tuple[list[tuple[float, float]], list[list[int]]]:
         """Access the navigation mesh geometry.
 
-        The navigation mesh is store as a collection of convex polygons in CCW order.
+        The navigation mesh is stored as a collection of triangles in CCW order.
 
         The returned data is to be interpreted as:
 
@@ -92,7 +98,5 @@ class RoutingEngine:
             A tuple of vertices and list of polygons which in turn are a list of indices
             tuple[list[tuple[float, float]],list[list[int]]]
         """
-        return self._obj.mesh()
-
-    def edges_for(self, vertex_id: int):
-        return self._obj.edges_for(vertex_id)
+        vertices = [(x, y) for x, y, _ in self._geometry._obj.vertices()]
+        return vertices, self._geometry._obj.triangles()

@@ -1,55 +1,49 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Geometry/Geometry.hpp"
-#include "RoutingEngine.hpp"
+#include "Geometry/Location.hpp"
+#include "Geometry/Validation.hpp"
 #include "SimulationError.hpp"
-#include "conversion.hpp"
+#include "SurfaceMeshShortestPathRoutingEngine.hpp"
+#include "type_casters.hpp"
 
-#include <glm/ext/vector_float2.hpp>
+#include <CGAL/Polygon_mesh_processing/IO/polygon_mesh_io.h>
+#include <fmt/format.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h> // IWYU pragma: keep
 
-#include <cstddef>
-#include <cstdint>
 #include <memory>
-#include <tuple>
-#include <vector>
+#include <string>
+#include <utility>
 
 namespace py = pybind11;
 
 void init_routing(py::module_& m)
 {
-    py::class_<RoutingEngine>(m, "RoutingEngine")
-        .def(py::init([](const Geometry& geo) {
-            const auto* poly = geo.polygon();
-            if(poly == nullptr) {
-                throw SimulationError(
-                    "This engine routes in the plane and needs a geometry built from a polygon; "
-                    "a surface mesh has none.");
-            }
-            return std::make_unique<RoutingEngine>(*poly);
-        }))
-        .def(
-            "compute_waypoints",
-            [](RoutingEngine& engine,
-               std::tuple<double, double> from,
-               std::tuple<double, double> to) {
-                return intoTuples(engine.ComputeAllWaypoints(intoPoint(from), intoPoint(to)));
-            })
-        .def(
-            "is_routable",
-            [](RoutingEngine& engine, std::tuple<double, double> point) {
-                return engine.IsRoutable(intoPoint(point));
-            })
-        .def("mesh", [](const RoutingEngine& routingEngine) {
-            const auto mesh = routingEngine.MeshData();
-            const auto polygonCount = mesh->CountPolygons();
-            using Ind = decltype(mesh->Polygons(0).vertices);
-            std::vector<Ind> polys;
-            polys.reserve(polygonCount);
-            for(size_t index = 0; index < polygonCount; ++index) {
-                const auto& poly = mesh->Polygons(index);
-                polys.emplace_back(poly.vertices);
-            }
-            return std::make_tuple(intoTuples(mesh->FVertices()), polys);
+    // A place on the surface, handed out by the simulation and passed back to it. Read-only and
+    // deliberately narrow: no region ids, no face handles -- the coordinates are all a caller
+    // can do anything with, everything else is the geometry's business.
+    py::class_<Location>(m, "Location")
+        .def_property_readonly("x", [](const Location& l) { return l.xy().x; })
+        .def_property_readonly("y", [](const Location& l) { return l.xy().y; })
+        .def_property_readonly("z", &Location::z)
+        .def("__repr__", [](const Location& l) {
+            return fmt::format("Location({}, {}, {})", l.xy().x, l.xy().y, l.z());
         });
+
+    py::class_<RoutingEngine>(m, "RoutingEngine")
+        .def("is_valid_location", &RoutingEngine::IsValidLocation)
+        .def("get_shortest_path", &RoutingEngine::GetShortestPath)
+        .def("get_orientation", &RoutingEngine::GetOrientation)
+        .def("wall_clearance", &RoutingEngine::WallClearance);
+
+    py::class_<SurfaceMeshShortestPathRoutingEngine, RoutingEngine>(
+        m, "SurfaceMeshShortestPathRoutingEngine")
+        // The engine borrows the geometry; keep_alive ties the Python-side
+        // Geometry's lifetime to the engine so the borrow can't dangle.
+        .def(
+            py::init([](const Geometry& geometry) {
+                return std::make_unique<SurfaceMeshShortestPathRoutingEngine>(geometry);
+            }),
+            py::arg("geometry"),
+            py::keep_alive<1, 2>());
 }

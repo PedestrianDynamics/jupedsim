@@ -24,9 +24,7 @@
 
 namespace
 {
-/// Lift a 2D walkable area to a flat surface mesh at z=0, using the same CDT
-/// the 2D RoutingEngine builds (same constraint insertion order): keeping the
-/// triangulations identical is what makes 2D/3D results directly comparable.
+/// Lift a 2D walkable area to a flat surface mesh at z=0.
 SurfaceMesh mesh_from_polygon(const PolyWithHoles& poly)
 {
     CDT cdt{};

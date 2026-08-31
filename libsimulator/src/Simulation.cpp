@@ -8,7 +8,6 @@
 #include "OperationalModelType.hpp"
 #include "Point.hpp"
 #include "Polygon.hpp"
-#include "RoutingEngine.hpp"
 #include "SimulationClock.hpp"
 #include "SimulationError.hpp"
 #include "Stage.hpp"
@@ -44,16 +43,6 @@ public:
     IterationScope(const IterationScope&) = delete;
     IterationScope& operator=(const IterationScope&) = delete;
 };
-
-/// Selects routing engine based on availability of 2D polygon.
-/// For backwards compatibility reason we use TA*+funnel in 2D case.
-std::unique_ptr<RoutingEngine3D> pick_routing_engine(const Geometry& geometry)
-{
-    if(const auto* poly = geometry.polygon(); poly != nullptr) {
-        return std::make_unique<RoutingEngine>(*poly);
-    }
-    return std::make_unique<SurfaceMeshShortestPathRoutingEngine>(geometry);
-}
 } // namespace
 
 void Simulation::ThrowIfIterating(const char* operation) const
@@ -73,7 +62,7 @@ Simulation::Simulation(
     : _clock(dT)
     , _operationalDecisionSystem(std::move(operationalModel))
     , _geometry(std::move(geometry))
-    , _routingEngine(pick_routing_engine(*_geometry))
+    , _routingEngine(std::make_unique<SurfaceMeshShortestPathRoutingEngine>(*_geometry))
 {
 }
 

@@ -42,10 +42,8 @@ public:
     /// Take an already-built surface mesh (e.g. from a mesh builder or a test).
     explicit Geometry(SurfaceMesh mesh);
 
-    /// Build from a 2D walkable area, lifted flat to z=0. Uses the same
-    /// constrained Delaunay triangulation as the 2D RoutingEngine, so the 2D
-    /// and 3D pipelines run on the identical triangle set -- the basis for
-    /// exact parity comparisons. Also keeps the 2D view (geometry_2d()).
+    /// Build from a 2D walkable area, lifted flat to z=0 by constrained Delaunay
+    /// triangulation. Keeps the polygon it was lifted from (see polygon()).
     explicit Geometry(PolyWithHoles poly);
 
     ~Geometry() = default;

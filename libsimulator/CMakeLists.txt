@@ -37,8 +37,6 @@ target_sources(simulator PRIVATE
     src/Geometry/Validation.hpp
     src/GeometryBuilder.cpp
     src/GeometryBuilder.hpp
-    src/Graph.hpp
-    src/Grid2D.hpp
     src/HashCombine.hpp
     src/IteratorPair.hpp
     src/Journey.cpp
@@ -50,19 +48,13 @@ target_sources(simulator PRIVATE
     src/Macros.hpp
     src/Mathematics.cpp
     src/Mathematics.hpp
-    src/Mesh.cpp
-    src/Mesh.hpp
     src/NeighborhoodSearch.hpp
     src/OperationalDecisionSystem.hpp
     src/Point.cpp
     src/Point.hpp
     src/Polygon.cpp
     src/Polygon.hpp
-    src/Routing.cpp
-    src/Routing.hpp
-    src/RoutingEngine.cpp
     src/RoutingEngine.hpp
-    src/RoutingEngine3D.hpp
     src/Simulation.cpp
     src/Simulation.hpp
     src/SimulationClock.cpp
@@ -79,7 +71,6 @@ target_sources(simulator PRIVATE
     src/SurfaceMeshShortestPathRoutingEngine.cpp
     src/SurfaceMeshShortestPathRoutingEngine.hpp
     src/TacticalDecisionSystem.hpp
-    src/TemplateHelper.hpp
     src/Timing.cpp
     src/Timing.hpp
     src/Tracing.cpp
@@ -123,11 +114,9 @@ if (BUILD_TESTS)
         test/TestCustomModel.cpp
         test/TestGenericAgentFormatter.cpp
         test/TestGeometry.cpp
-        test/TestGraph.cpp
         test/TestJourney.cpp
         test/TestLineSegment.cpp
         test/TestLocation.cpp
-        test/TestMesh.cpp
         test/TestNeighborhoodSearch.cpp
         test/TestOperationalDecisionSystem.cpp
         test/TestPoint.cpp
@@ -135,7 +124,7 @@ if (BUILD_TESTS)
         test/TestRegionSeams.cpp
         test/TestRegionSplit.cpp
         test/TestRegionView.cpp
-        test/TestRoutingEngine3D.cpp
+        test/TestRoutingEngine.cpp
         test/TestSegmentGrid.cpp
         test/TestSimulation.cpp
         test/TestSimulationClock.cpp
