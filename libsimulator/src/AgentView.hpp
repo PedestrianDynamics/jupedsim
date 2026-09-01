@@ -19,9 +19,7 @@ struct NeighborView {
     const OperationalModelState* state;
 
 private:
-    /// Where they are actually standing, which is none of a model's business. It rides along
-    /// because telling whether they can be seen means telling which sheet of the surface they
-    /// are on, and only the region in here says that.
+    /// Internal Location of the agent. Only AgentView has access to it.
     friend class AgentView;
     NeighborView(Point relative, const OperationalModelState* model, const Location* where)
         : RelativePosition(relative), state(model), _location(where)
@@ -68,12 +66,8 @@ public:
     std::vector<NeighborView> OtherAgentsInRange(double radius, Pred filter = {}) const
     {
         std::vector<NeighborView> neighbors{};
-        // The grid searches by (x, y), so on a mesh it offers up whoever stands on the storey
-        // above as readily as whoever stands next to you. Someone that far above cannot be
-        // touched, so they are not a neighbour.
-        //
-        // This says nothing about walls: collecting candidates never did, in 2D either. A
-        // model that wants line of sight passes 'filter' for it.
+        // The grid searches by (x, y). Only filters out the asking agent itself plus applies
+        // a quick z-filter - whether agents are "too far" away in z.
         const double z = location().z();
         _world.ForEachAgentInRange(location().xy(), radius, [&](const GenericAgent& candidate) {
             if(candidate.id == _agent.id) {
@@ -92,16 +86,13 @@ public:
     }
 
     /// Whether the straight line to a point at 'RelativePosition' is free of geometry.
-    /// Also the answer to whether the agent can move there: on a surface, what blocks the
-    /// view blocks the step.
     bool NoGeometryBetween(Point RelativePosition) const
     {
         return _world.NoGeometryBetween(location(), RelativePosition);
     }
 
-    /// Whether 'neighbor' can be seen from here. Same question as above plus the one a
-    /// direction cannot carry: whether the way there leads to the surface they are standing
-    /// on, rather than to one stacked over or under it.
+    /// Whether 'neighbor' can be seen from here. In practice whetehr the direct path to
+    /// the neighbor can be walked on the surface.
     bool NoGeometryBetween(const NeighborView& neighbor) const
     {
         return _world.NoGeometryBetween(location(), *neighbor._location);

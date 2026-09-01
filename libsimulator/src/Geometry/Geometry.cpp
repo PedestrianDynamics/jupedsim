@@ -4,7 +4,6 @@
 #include "Geometry/BoundaryIndex.hpp"
 #include "Geometry/RegionSeams.hpp"
 #include "LineSegment.hpp"
-#include "SimulationError.hpp"
 
 #include <CGAL/mark_domain_in_triangulation.h>
 
@@ -105,14 +104,6 @@ void Geometry::build_region_views()
     }
 }
 
-const AABBTree& Geometry::aabb_tree() const
-{
-    if(!_aabbTree) {
-        throw SimulationError("Geometry has no geometry loaded.");
-    }
-    return *_aabbTree;
-}
-
 Geometry::FaceLocation Geometry::face_below(const Point3D& p) const
 {
     // first_intersection along -z returns the hit nearest to the ray source,
@@ -149,8 +140,6 @@ bool Geometry::no_geometry_between(const Location& who, Point direction) const
 
 bool Geometry::no_geometry_between(const Location& who, const Location& other) const
 {
-    // Rebuilding the direction rather than handing over other.xy() keeps the chord exactly
-    // what the direction-taking callers have always passed.
     const auto arrival = region_reached(who, other.xy() - who.xy());
     return arrival == other.region();
 }
@@ -160,13 +149,10 @@ std::optional<std::size_t> Geometry::region_reached(const Location& who, Point d
     const LineSegment chord{who.xy(), who.xy() + direction};
     const auto& view = region_view(who.region());
     if(!view.crosses_seam(chord.p1, chord.p2)) {
-        // Staying inside the region means never reaching another sheet, so only the walls of
-        // this one can be in the way, and this is where the step ends up.
+        // Direct line stays within this region: We can make the quick test within the region view.
         return view.IntersectsAny(chord) ? std::nullopt : std::optional{who.region()};
     }
-    // The chord leaves the region, so the flat test would be answering about the wrong
-    // sheet. Walking it is the only thing that stays on the surface, and where the walk comes
-    // out says which sheet it followed.
+    // Crosses regions: Doing the expensive "move on surface".
     const auto arrival = who.try_move_on_surface(direction);
     return arrival.has_value() ? std::optional{arrival->region()} : std::nullopt;
 }
@@ -183,7 +169,7 @@ Geometry::FaceLocation Geometry::locate_in_region(std::size_t region_id, const P
             continue;
         }
         const auto* point = std::get_if<Point3D>(&where);
-        // Assert against vertical faces.
+        // Assert against vertical faces - purely defensive.
         assert(point && "FATAL: vertical face hit by the locate line");
         return {face, *point};
     }
@@ -214,7 +200,7 @@ Geometry::FaceLocation Geometry::locate_near_z(const Point2D& xy, double z, doub
     auto bestDeviation = tolerance;
     for(const auto& [where, face] : hits) {
         const auto* point = std::get_if<Point3D>(&where);
-        // Assert against vertical faces.
+        // Assert against vertical faces - purely defensive.
         assert(point && "FATAL: vertical face hit by the locate line");
         if(const auto deviation = std::abs(point->z() - z); deviation <= bestDeviation) {
             bestDeviation = deviation;

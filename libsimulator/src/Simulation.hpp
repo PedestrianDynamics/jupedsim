@@ -89,9 +89,7 @@ public:
         Point position,
         OperationalModelState model,
         double z_hint = 0.0);
-    /// The place at @p x, @p y on the sheet closest to @p z_hint. Raw coordinates become a
-    /// place here and nowhere else: the geometry has to stand for a Location, and over stacked
-    /// floors an (x, y) on its own does not say which one is meant.
+    /// The place at @p x, @p y on the sheet closest to @p z_hint.
     /// @throws SimulationError if no walkable sheet lies within the hint's tolerance.
     Location GetLocation(double x, double y, double z_hint = 0.0) const;
     /// Raycast 2D @p target along z-axis. The closest intersection with the geometry to agent's
