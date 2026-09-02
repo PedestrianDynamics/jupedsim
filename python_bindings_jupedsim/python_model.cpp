@@ -16,6 +16,7 @@
 #include <string>
 #include <tuple>
 #include <utility>
+#include <variant>
 
 namespace py = pybind11;
 
@@ -163,9 +164,58 @@ void PythonModel::CheckModelConstraint(const GenericAgent& agent, const AgentVie
     _model.attr("_check_model_constraint")(pythonState, pythonView);
 }
 
+/// The Python surface wraps the native view in jupedsim.agent_view.AgentStep. A model that
+/// delegates hands on the step it was given, so accept either the wrapper or the native object.
+static const AgentStep& asAgentStep(const py::object& step)
+{
+    const py::object native = py::hasattr(step, "_obj") ? step.attr("_obj") : step;
+    try {
+        return *native.cast<const AgentStep*>();
+    } catch(const py::cast_error&) {
+        throw SimulationError(
+            "compute_next_state() expects the step it was called with, got {}", Describe(step));
+    }
+}
+
 void init_python_model(py::module_& m)
 {
-    py::class_<OperationalModel, py::smart_holder>(m, "OperationalModel");
+    py::class_<OperationalModel, py::smart_holder>(m, "OperationalModel")
+        .def(
+            "compute_next_state",
+            [](const OperationalModel& self, OperationalModelState state, py::object step) {
+                const AgentStep& agentStep = asAgentStep(step);
+                const OperationalModelState current{std::move(state)};
+                if(ModelTypeOf(current) != self.Type()) {
+                    throw SimulationError(
+                        "{} cannot compute a state of type '{}'",
+                        ToString(self.Type()),
+                        ToString(ModelTypeOf(current)));
+                }
+                OperationalModelState next{current};
+
+                Point movement{};
+                try {
+                    movement = self.ComputeNextState(current, next, agentStep);
+                } catch(const std::bad_variant_access&) {
+                    // The state handed in is of the right type, so it was a neighbor's.
+                    throw SimulationError(
+                        agentStep.HasNeighborMapping() ?
+                            "{} encountered a neighbor it cannot read. The mapping passed to "
+                            "with_neighbor_states() has to return '{}' states." :
+                            "{} encountered a neighbor it cannot read. Map neighbors to '{}' "
+                            "states with AgentStep.with_neighbor_states() before delegating.",
+                        ToString(self.Type()),
+                        ToString(self.Type()));
+                }
+
+                return std::make_tuple(
+                    static_cast<const OperationalModelState&>(next),
+                    std::make_tuple(movement.x, movement.y));
+            },
+            py::arg("state"),
+            py::arg("step"),
+            "Run this model for one step on 'state', as perceived through 'step'. Returns "
+            "(next_state, movement). The agent's stored state is not touched.");
 
     py::class_<CustomModel::State>(m, "_CustomModelState")
         .def(py::init([](py::object model) {
