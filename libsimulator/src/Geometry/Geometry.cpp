@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Geometry/Geometry.hpp"
 
+#include "GeometricFunctions.hpp"
 #include "Geometry/BoundaryIndex.hpp"
-#include "Geometry/RegionSeams.hpp"
 #include "LineSegment.hpp"
 
 #include <CGAL/mark_domain_in_triangulation.h>
+#include <boost/range/iterator_range.hpp>
 
 #include <algorithm>
 #include <array>
@@ -52,18 +53,6 @@ SurfaceMesh mesh_from_polygon(const PolyWithHoles& poly)
     return mesh;
 }
 
-/// Group the flat seam list by the region a seam belongs to, which is how the region views
-/// want to look at it.
-std::vector<std::vector<RegionSeam>>
-group_seams_by_region(const std::vector<RegionSeam>& seams, std::size_t region_count)
-{
-    std::vector<std::vector<RegionSeam>> grouped(region_count);
-    for(const auto& seam : seams) {
-        grouped[seam.region].push_back(seam);
-    }
-    return grouped;
-}
-
 } // namespace
 
 Geometry::Geometry(SurfaceMesh mesh) : _mesh(std::move(mesh))
@@ -87,21 +76,7 @@ void Geometry::build()
     _region = _regionSplit.region;
     _regionCount = _regionSplit.count;
     _boundaryIndex = MakePortalBoundaryIndex(_mesh, _regionSplit);
-    build_region_views();
-}
-
-void Geometry::build_region_views()
-{
-    auto walls_by_region = CreatePerRegionSegmentGrids(_mesh, _regionSplit);
-    auto seams_by_region =
-        group_seams_by_region(extract_region_seams(_mesh, _region), _regionCount);
-
-    _regionViews.clear();
-    _regionViews.reserve(_regionCount);
-    for(std::size_t r = 0; r < _regionCount; ++r) {
-        _regionViews.emplace_back(
-            r, this, std::move(walls_by_region[r]), std::move(seams_by_region[r]));
-    }
+    _regionGraph = CreateRegionGraph(_mesh, _regionSplit);
 }
 
 Geometry::FaceLocation Geometry::face_below(const Point3D& p) const
@@ -147,10 +122,19 @@ bool Geometry::no_geometry_between(const Location& who, const Location& other) c
 std::optional<std::size_t> Geometry::region_reached(const Location& who, Point direction) const
 {
     const LineSegment chord{who.xy(), who.xy() + direction};
-    const auto& view = region_view(who.region());
-    if(!view.crosses_seam(chord.p1, chord.p2)) {
-        // Direct line stays within this region: We can make the quick test within the region view.
-        return view.IntersectsAny(chord) ? std::nullopt : std::optional{who.region()};
+    const auto& graph = *_regionGraph;
+    const auto crosses_seam = [&] {
+        for(const auto e : boost::make_iterator_range(boost::out_edges(who.region(), graph))) {
+            if(intersects(chord, graph[e])) {
+                return true;
+            }
+        }
+        return false;
+    };
+    if(!crosses_seam()) {
+        // Direct line stays within this region: the region's own walls settle it.
+        return graph[who.region()]->IntersectsAny(chord) ? std::nullopt :
+                                                           std::optional{who.region()};
     }
     // Crosses regions: Doing the expensive "move on surface".
     const auto arrival = who.try_move_on_surface(direction);

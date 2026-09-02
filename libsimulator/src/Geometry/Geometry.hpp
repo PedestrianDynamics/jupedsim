@@ -5,7 +5,6 @@
 #include "Geometry/BoundaryIndex.hpp"
 #include "Geometry/Location.hpp"
 #include "Geometry/RegionSplit.hpp"
-#include "Geometry/RegionView.hpp"
 #include "LineSegment.hpp"
 #include "Point.hpp"
 
@@ -103,9 +102,6 @@ public:
     /// One 0-based region id per triangle, in mesh face order.
     std::vector<std::size_t> region_id_per_face() const;
 
-    /// The 2D view of region @p region_id
-    const RegionView& region_view(std::size_t region_id) const { return _regionViews[region_id]; }
-
     const RegionSplit& region_split() const { return _regionSplit; }
 
     // -- Viewer API -----------------------------------------------------------
@@ -120,10 +116,6 @@ private:
     /// Create internal structures like building the AABB tree and the region overlay.
     void build();
 
-    /// Build one RegionView per region: classify boundary halfedges into walls
-    /// and seams, record seam neighbours.
-    void build_region_views();
-
     /// The region a straight horizontal step from @p who along @p direction ends up in, or
     /// nothing when a wall stops it or it runs off the surface.
     std::optional<std::size_t> region_reached(const Location& who, Point direction) const;
@@ -132,8 +124,8 @@ private:
     std::optional<PolyWithHoles> _polygon{};
     std::unique_ptr<AABBTree> _aabbTree{};
     std::unique_ptr<BoundaryIndex> _boundaryIndex{};
+    std::unique_ptr<RegionGraph> _regionGraph{};
     RegionMap _region{};
     std::size_t _regionCount{0};
-    std::vector<RegionView> _regionViews{};
     RegionSplit _regionSplit{};
 };

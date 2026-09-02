@@ -23,12 +23,8 @@ target_sources(simulator PRIVATE
     src/Geometry/Location.hpp
     src/Geometry/ProjectedBoundary.cpp
     src/Geometry/ProjectedBoundary.hpp
-    src/Geometry/RegionSeams.cpp
-    src/Geometry/RegionSeams.hpp
     src/Geometry/RegionSplit.cpp
     src/Geometry/RegionSplit.hpp
-    src/Geometry/RegionView.cpp
-    src/Geometry/RegionView.hpp
     src/Geometry/SegmentGrid.cpp
     src/Geometry/SegmentGrid.hpp
     src/Geometry/Validation.cpp
@@ -119,9 +115,7 @@ if (BUILD_TESTS)
         test/TestOperationalDecisionSystem.cpp
         test/TestPoint.cpp
         test/TestProjectedBoundary.cpp
-        test/TestRegionSeams.cpp
         test/TestRegionSplit.cpp
-        test/TestRegionView.cpp
         test/TestRoutingEngine.cpp
         test/TestSegmentGrid.cpp
         test/TestSimulation.cpp
