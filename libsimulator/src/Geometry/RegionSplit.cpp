@@ -200,7 +200,8 @@ std::vector<std::size_t> grow_planar_patches(const SurfaceMesh& mesh, std::vecto
         }
         const auto id = patches.size();
         const SeedPlane plane{
-            normal_of[seed], mesh.point(*std::begin(CGAL::vertices_around_face(mesh.halfedge(seed), mesh)))};
+            normal_of[seed],
+            mesh.point(*std::begin(CGAL::vertices_around_face(mesh.halfedge(seed), mesh)))};
         patch_faces.clear();
         std::queue<SurfaceMesh::Face_index> frontier{};
         patch_of[seed] = id;
@@ -301,8 +302,7 @@ void merge_to_fixpoint(
 
     // (root a, root b) -> versions at the last failed attempt; unchanged versions mean the
     // attempt would fail again. Purely an optimization, results are identical without it.
-    std::map<std::pair<std::size_t, std::size_t>, std::pair<std::uint64_t, std::uint64_t>>
-        failed{};
+    std::map<std::pair<std::size_t, std::size_t>, std::pair<std::uint64_t, std::uint64_t>> failed{};
 
     const auto neighbor_roots = [&](std::size_t root) {
         std::vector<std::size_t> roots{};

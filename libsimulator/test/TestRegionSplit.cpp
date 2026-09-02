@@ -6,7 +6,6 @@
 
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 #include <CGAL/intersections.h>
-
 #include <gtest/gtest.h>
 
 #include <array>
@@ -351,8 +350,7 @@ TEST(RegionSplit, AForeignPointContactSplits)
     std::set<std::size_t> floor_ramp_ids{};
     std::set<std::size_t> upper_wing_ids{};
     for(const auto f : faces(mesh)) {
-        (static_cast<std::size_t>(f) < 4 ? floor_ramp_ids : upper_wing_ids)
-            .insert(split.region[f]);
+        (static_cast<std::size_t>(f) < 4 ? floor_ramp_ids : upper_wing_ids).insert(split.region[f]);
     }
     EXPECT_EQ(floor_ramp_ids.size(), 1u);
     EXPECT_EQ(upper_wing_ids.size(), 1u);

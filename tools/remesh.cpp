@@ -104,17 +104,15 @@ void RemeshWithMaxEdgeLength(SurfaceMesh& mesh, double max_edge_length, unsigned
     // protect_constraints keeps these edges out of the remesher's reach, so cap their length
     // here; this also satisfies the remesher's < 4/3 x target precondition on them.
     PMP::split_long_edges(
-        constrained,
-        target_edge_length,
-        mesh,
-        CGAL::parameters::edge_is_constrained_map(ecm));
+        constrained, target_edge_length, mesh, CGAL::parameters::edge_is_constrained_map(ecm));
 
     PMP::isotropic_remeshing(
         CGAL::faces(mesh),
         target_edge_length,
         mesh,
-        CGAL::parameters::edge_is_constrained_map(ecm).protect_constraints(true).number_of_iterations(
-            iterations));
+        CGAL::parameters::edge_is_constrained_map(ecm)
+            .protect_constraints(true)
+            .number_of_iterations(iterations));
 
     // The remesher's smoothing step can stretch edges slightly past 4/3 x target, so the
     // target alone does not bound edge lengths; a final split pass makes the cap strict.
@@ -164,8 +162,8 @@ int main(int argc, char** argv)
     RemeshWithMaxEdgeLength(mesh, opts->max_edge_length, opts->iterations);
     mesh.collect_garbage();
 
-    const auto output = std::filesystem::current_path() /
-                        (opts->input.stem().string() + "_remeshed.obj");
+    const auto output =
+        std::filesystem::current_path() / (opts->input.stem().string() + "_remeshed.obj");
     if(!CGAL::IO::write_polygon_mesh(
            output.string(), mesh, CGAL::parameters::stream_precision(17))) {
         std::cerr << "Could not write mesh to '" << output.string() << "'\n";

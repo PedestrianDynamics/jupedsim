@@ -13,8 +13,8 @@
 /// Boundary halfedges of the face set {f : keep(f)}: halfedges h with keep(face(h)) whose
 /// opposite halfedge lies on the mesh border or in a face with !keep(face(opposite(h))).
 /// Deterministic order: faces ascending by index, halfedges in face-circulation order.
-std::vector<SurfaceMesh::Halfedge_index> region_boundary(
-    const SurfaceMesh& mesh, const std::function<bool(SurfaceMesh::Face_index)>& keep);
+std::vector<SurfaceMesh::Halfedge_index>
+region_boundary(const SurfaceMesh& mesh, const std::function<bool(SurfaceMesh::Face_index)>& keep);
 
 /// Strict Lipman certificate: true iff the X/Y-projection of @p boundary consists of
 /// strictly simple loops. No two boundary segments may intersect, with one exception: two
@@ -26,4 +26,5 @@ std::vector<SurfaceMesh::Halfedge_index> region_boundary(
 /// meshes: every face normal has z > 0), a strictly simple projected boundary is
 /// equivalent to the projection of the whole face set being injective.
 bool is_projection_strictly_simple(
-    const SurfaceMesh& mesh, const std::vector<SurfaceMesh::Halfedge_index>& boundary);
+    const SurfaceMesh& mesh,
+    const std::vector<SurfaceMesh::Halfedge_index>& boundary);

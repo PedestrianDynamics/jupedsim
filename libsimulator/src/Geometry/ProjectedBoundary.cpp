@@ -65,8 +65,8 @@ bool pair_violates(const BoundarySegment& s, const BoundarySegment& t)
 }
 } // namespace
 
-std::vector<SurfaceMesh::Halfedge_index> region_boundary(
-    const SurfaceMesh& mesh, const std::function<bool(SurfaceMesh::Face_index)>& keep)
+std::vector<SurfaceMesh::Halfedge_index>
+region_boundary(const SurfaceMesh& mesh, const std::function<bool(SurfaceMesh::Face_index)>& keep)
 {
     std::vector<SurfaceMesh::Halfedge_index> boundary{};
     for(const auto f : faces(mesh)) {
@@ -84,7 +84,8 @@ std::vector<SurfaceMesh::Halfedge_index> region_boundary(
 }
 
 bool is_projection_strictly_simple(
-    const SurfaceMesh& mesh, const std::vector<SurfaceMesh::Halfedge_index>& boundary)
+    const SurfaceMesh& mesh,
+    const std::vector<SurfaceMesh::Halfedge_index>& boundary)
 {
     if(boundary.empty()) {
         return true;
