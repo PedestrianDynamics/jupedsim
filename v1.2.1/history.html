@@ -1,0 +1,588 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="" data-theme="light">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <link href="_static/logo.png" sizes="482x536" rel="icon" type="image/png">
+    <title>JuPedSim &#8212; JuPedSim  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" href="_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
+
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/clipboard.min.js"></script>
+    <script src="_static/copybutton.js"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'history';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.15.2';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://www.jupedsim.org/versions.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'v1.2.1';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
+        </script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Disclaimer" href="disclaimer.html" />
+    <link rel="prev" title="Simulating Single-File Movement" href="notebooks/single-file.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="light">
+
+  
+  
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+    
+    
+    
+    <img src="_static/jupedsim.svg" class="logo__image only-light" alt="JuPedSim  documentation - Home"/>
+    <script>document.write(`<img src="_static/jupedsim.svg" class="logo__image only-dark" alt="JuPedSim  documentation - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/PedestrianDynamics/jupedsim" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/jupedsim/" title="PyPI" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://img.shields.io/pypi/v/jupedsim" class="icon-link-image" alt="PyPI"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://doi.org/10.5281/zenodo.1293771" title="DOI" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.1293771.svg" class="icon-link-image" alt="DOI"/></a>
+        </li>
+</ul></div>
+        <div class="sidebar-primary-item">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="notebooks/getting_started.html">Getting started</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="concepts/index.html">Concepts</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="concepts/geometry.html">Geometry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="concepts/routing.html">Routing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pedestrian_models/index.html">Pedestrian Models</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="notebooks/index.html">Notebooks</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/corner.html">Movement around Corners</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="notebooks/double-bottleneck.html">Movement through Bottlenecks</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="notebooks/journey.html">How to work with Journeys</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="notebooks/lane-formation.html">Lane formation in bi-directional flow</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="notebooks/motivation.html">Modelling Motivation</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="notebooks/queues_waiting.html">Waiting in Queues</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="notebooks/routing.html">How Route Choice can Impact Evacuation Times</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="notebooks/single-file.html">Simulating Single-File Movement</a></li>
+
+</ul>
+</li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="disclaimer.html">Disclaimer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/jupedsim/index.html">API reference</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-2"
+      type="button"
+      class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-2"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-2"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-2">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script></div>
+      
+        <div class="header-article-item"><label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>JuPedSim</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#balancing-performance-and-complexity-with-c">Balancing performance and Complexity with C++</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#empowering-with-python-api">Empowering with Python-API</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#driving-research-forward">Driving Research Forward</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim-s-application-driven-history-about-evacuations-and-major-events">JuPedSim’s Application-Driven History: About Evacuations and Major Events</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="jupedsim">
+<span id="history"></span><h1>JuPedSim<a class="headerlink" href="#jupedsim" title="Permalink to this heading">#</a></h1>
+<p>JuPedSim has come a long way since its inception in 2010. Originally designed
+to simulate and analyze pedestrian dynamics across different scenarios, it
+stood as a testament to the evolving needs and challenges of the field. As it
+grew with every project, every Master’s, and PhD thesis, the software began to
+show its age - becoming cumbersome for prototyping. In response to these
+complex challenges, an extensive remodeling effort was undertaken to completely
+reconstruct JuPedSim. The outcome of this endeavor is a redesigned and improved
+version of the software that is more efficient and user-friendly. This article
+provides a brief glimpse into the process of transformation.</p>
+<section id="balancing-performance-and-complexity-with-c">
+<h2>Balancing performance and Complexity with C++<a class="headerlink" href="#balancing-performance-and-complexity-with-c" title="Permalink to this heading">#</a></h2>
+<p>Central to the new JuPedSim is its architecture. Revising the architectural
+choices, we’ve transitioned from a singular focus on performance to a more
+balanced perspective. Instead of multithreading, JuPedSim now operates
+single-threaded, relegating only performance-critical segments to C++. This
+decision stems from recognizing that excessive complexity can deter users.
+While we acknowledge there’s room for further enhancements, especially regarding
+the integration of new models, the primary aim of this release was not solely
+performance but to strike a harmony between speed and user-friendliness.</p>
+<p>Core functionalities of JuPedSim have been implemented as essential components
+in C++. This includes operative models describing pedestrian movement, as well
+as routing and navigation algorithms. While individually fundamental, when
+assembled, these components, much like Lego pieces, can be orchestrated to
+construct comprehensive, intricate systems, fostering the creation of
+meaningful and large-scale simulations and analyses in pedestrian dynamics.</p>
+</section>
+<section id="empowering-with-python-api">
+<h2>Empowering with Python-API<a class="headerlink" href="#empowering-with-python-api" title="Permalink to this heading">#</a></h2>
+<p>The previous version of JuPedSim operated primarily through the command-line
+interface and required navigating complex XML configurations, which could be
+quite intricate for users. However, as time passed and users adapted to the
+tool, a trend emerged towards automatic configuration generation using Python.
+Bridging the gap between core functionality and user interaction, JuPedSim
+introduces a lightweight and expressive Python API. This interface allows users
+to easily craft simulation scenarios, prototype complex behaviors, and harness
+the power of the core “primitive” components. The enhanced version of JuPedSim
+adopts a novel approach by operating as a library based on Python. This new
+architecture greatly enhances the versatility in configuring simulations. For
+instance, one can easily define dynamically changing behaviors such as
+arranging pedestrians in spiral formations and having individuals depart from
+the formation every 3 seconds. This Python API provides users with a familiar
+and intuitive programming language, enabling them to efficiently manipulate and
+analyze data, customize simulation parameters, and visualize results.</p>
+<p>This transition not only aligns with changing user practices but also takes
+advantage of the widespread familiarity with Python, making JuPedSim more
+accessible and engaging for users. These scenarios can now be effortlessly
+communicated using Python scripting while allowing JuPedSim to focus on agent
+positioning and actions. Unlike its previous iteration, which constrained users
+to predefined configurations, this updated version offers substantial creative
+freedom in simulation design. Moreover, with this API, the JuPedSIm offers
+other software, like SUMO, the possibility to integrate and communicate
+seamlessly, expanding the software’s capabilities and versatility.</p>
+<figure class="align-center" id="id1">
+<a class="reference internal image-reference" href="_images/python_trend.png"><img alt="_images/python_trend.png" src="_images/python_trend.png" style="width: 80%;" /></a>
+<figcaption>
+<p><span class="caption-text">Source: <a class="reference external" href="https://stackoverflow.blog/2017/09/06/incredible-growth-python">Stackoverflow Blog</a></span><a class="headerlink" href="#id1" title="Permalink to this image">#</a></p>
+</figcaption>
+</figure>
+</section>
+<section id="driving-research-forward">
+<h2>Driving Research Forward<a class="headerlink" href="#driving-research-forward" title="Permalink to this heading">#</a></h2>
+<p>The significant advantage of the new JuPedSim lies in its potential for
+academic research. Previously, researchers had to deal with the complexities of
+implementing low-level details. However, now they can easily conceptualize,
+prototype, and evaluate new theories in pedestrian dynamics. The capability to
+adjust agent behaviors, direct their movements, or alter their states in
+real-time allows for rapid iterations and thorough experimentation. This level
+of flexibility is unparalleled and offers numerous opportunities for
+comprehending pedestrian dynamics in complex environments.</p>
+<figure class="align-center" id="id2">
+<a class="reference internal image-reference" href="_images/high_motivation.png"><img alt="_images/high_motivation.png" src="_images/high_motivation.png" style="width: 80%;" /></a>
+<figcaption>
+<p><span class="caption-text">Source: Pinar Usten</span><a class="headerlink" href="#id2" title="Permalink to this image">#</a></p>
+</figcaption>
+</figure>
+<p>To give an example, in this <a class="reference external" href="https://doi.org/10.1098/rsos.211822">study</a>,
+motivation among agents is represented by the parameter <span class="math notranslate nohighlight">\(T\)</span>. Higher motivation,
+like in jostling situations, correlates with a smaller <span class="math notranslate nohighlight">\(T\)</span> value, causing
+pedestrians to quickly close gaps. For example, highly motivated agents might
+have <span class="math notranslate nohighlight">\(T=0.1s\)</span>, while less motivated ones might sit at <span class="math notranslate nohighlight">\(T=1.3s\)</span>. But what if the
+motivation of people varies with time and space? Consider an exit scenario:
+those closer to an exit in a crowd are more motivated than those far behind,
+indicating a need for <span class="math notranslate nohighlight">\(T\)</span> to be dynamic.</p>
+<p>This is where the new JuPedSim shines — it can adjust this “motivation
+behavior” in real-time during a simulation, providing a nuanced, adaptive, and
+accurate depiction of pedestrian behaviors as they shift and evolve.</p>
+</section>
+<section id="jupedsim-s-application-driven-history-about-evacuations-and-major-events">
+<h2>JuPedSim’s Application-Driven History: About Evacuations and Major Events<a class="headerlink" href="#jupedsim-s-application-driven-history-about-evacuations-and-major-events" title="Permalink to this heading">#</a></h2>
+<p>The advancement of JuPedSim was driven by the findings of numerous
+application-related national research projects with partners such as the fire
+department, police, transport companies, security services, event organizers
+and venue operators.</p>
+<p>We started with the project
+<a class="reference external" href="https://www.sifo.de/sifo/de/projekte/schutz-und-rettung-von-menschen/schutz-und-rettung-von-menschen/hermes/hermes-erforschung-eines-evaku-nfall-bei-grossveranstaltungen.html">Hermes</a>
+and designed JuPedSim in a way that it could be utilized to simulate the
+evacuation of a stadium in Düsseldorf. Within the project
+<a class="reference external" href="https://www.orpheus-projekt.de">ORPHEUS</a> we investigated a <strong>large-scale
+evacuation</strong> scenario of an underground station in Berlin. As a part of the
+project <a class="reference external" href="https://www.kapakrit.de">KapaKrit</a> different crowd management measures
+were investigated with JuPedSim to determine the capacity of a train station
+for a large-scale evacuation of the city Dortmund.</p>
+<p>In recent years the investigation of arrival and departure processes at <strong>major
+events</strong> has increasingly come into focus. Empirical findings from the projects
+<a class="reference external" href="https://www.sifo.de/sifo/de/projekte/schutz-und-rettung-von-menschen/schutz-und-rettung-von-menschen/basigo/basigo-bausteine-fuer-die-sich-rheit-von-grossveranstaltungen.html">BaSiGo</a>
+and <a class="reference external" href="https://www.croma-projekt.de/de">CroMa</a>) regarding <strong>crowd management
+measures and waiting behavior</strong> have created an improved data basis for
+enhancing our software and the models accordingly. In doing so, we continuously
+take into account practical challenges and issues. Since 2019, we have been
+working closely with people responsible for event safety (such as event
+planners and authorities) as part of the <a class="reference external" href="https://www.sisame.de/">SISAME/SISAME
+2.0</a> project. In interdisciplinary workshops, we have
+worked out how simulations can help in planning events and have accordingly
+advanced the development of JuPedSim. Another goal of SISAME is the coupling
+with <a class="reference external" href="https://sumo.dlr.de">SUMO</a>, a simulation software for modelling urban
+traffic (private and public transport). One of our main goals is to enable,
+together with SUMO, a holistic simulation that combines a wide variety of
+transport modes and pedestrian streams. In the current project
+<a class="reference external" href="https://www.sifo.de/sifo/shareddocs/Downloads/P-Umrisse/projektumriss_croma-pro.pdf?__blob=publicationFile&amp;v=2">CroMa-PRO</a>,
+JuPedSim is being improved for the use in event planning. In this context, the
+modeling of waiting behavior will be improved and the routing should be made
+more flexible in order to be able to reflect crowd management measures.
+JuPedSim will be tested for a wide variety of arrival and departure scenarios
+for the 2024 UEFA European Football Championship in Düsseldorf.</p>
+<p>With the new release of JuPedSim we have bundled our experiences from the last
+decades and provide a powerful simulation tool, that can be used for
+investigating different aspects of crowd dynamics ranging from large-scale
+evacuation scenarios to crowd-management measures such as waiting in queues.
+See for yourself:</p>
+<figure class="align-center" id="id3">
+<a class="reference internal image-reference" href="_images/gates.gif"><img alt="_images/gates.gif" src="_images/gates.gif" style="width: 80%;" /></a>
+<figcaption>
+<p><span class="caption-text">Agents approach gates and decide for the least targeted one.</span><a class="headerlink" href="#id3" title="Permalink to this image">#</a></p>
+</figcaption>
+</figure>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="notebooks/single-file.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Simulating Single-File Movement</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="disclaimer.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Disclaimer</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#balancing-performance-and-complexity-with-c">Balancing performance and Complexity with C++</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#empowering-with-python-api">Empowering with Python-API</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#driving-research-forward">Driving Research Forward</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#jupedsim-s-application-driven-history-about-evacuations-and-major-events">JuPedSim’s Application-Driven History: About Evacuations and Major Events</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2024, Forschungszentrum Jülich GmbH, IAS-7.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

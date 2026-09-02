@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="249.18944mm"
+   height="247.23558mm"
+   viewBox="0 0 249.18944 247.23558"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.3 (0e150ed6c4, 2023-07-21)"
+   sodipodi:docname="collection.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#eeeeee"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="0.65323552"
+     inkscape:cx="8.4196279"
+     inkscape:cy="-662.08892"
+     inkscape:window-width="3836"
+     inkscape:window-height="2101"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1">
+    <marker
+       style="overflow:visible"
+       id="ConcaveTriangle-0"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Concave triangle arrow"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         transform="scale(0.7)"
+         d="M -2,-4 9,0 -2,4 c 2,-2.33 2,-5.66 0,-8 z"
+         style="fill:context-stroke;fill-rule:evenodd;stroke:none"
+         id="path7-6" />
+    </marker>
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-18.441213,-5.4635851)">
+    <path
+       style="fill:#005676;fill-opacity:0.400373;stroke:#005676;stroke-width:2;stroke-miterlimit:3.4"
+       d="m 31.314149,17.368781 -10.633833,28.997193 16.276869,29.0811 46.302204,-8.940027 51.166581,-5.734775 20.27421,-0.02685 -1.16799,-54.2431771 -52.0325,2.017128 z"
+       id="path1" />
+    <path
+       style="fill:#005676;fill-opacity:0.400373;stroke:#005676;stroke-width:2;stroke-miterlimit:3.4"
+       d="m 172.06225,109.86803 -39.59971,-22.536346 -1.51033,-43.044369 67.65602,-3.892174 49.29601,10.497343 18.67103,19.180059 -5.06464,38.027837 -58.81556,8.13564 z"
+       id="path2" />
+    <path
+       d="m 152.39018,141.95103 -52.03248,2.01744 -70.185381,8.84908 -10.633977,28.99719 16.276526,29.08091 46.3026,-8.9395 48.282322,-5.41156 0.92088,26.23613 39.59965,22.53609 30.63275,6.36809 58.81553,-8.13542 5.06481,-38.02817 -18.67121,-19.18023 -49.29622,-10.49703 -44.29135,2.54816 z"
+       style="fill:#005676;fill-opacity:0.400373;stroke:#005676;stroke-width:2;stroke-miterlimit:3.4"
+       id="path3" />
+    <path
+       style="fill:#808080;stroke:#e97586;stroke-width:2;stroke-dasharray:none;marker-end:url(#ConcaveTriangle-0)"
+       d="m 142.85353,106.3487 0.32902,17.62992"
+       id="path2-2"
+       sodipodi:nodetypes="cc" />
+  </g>
+</svg>
