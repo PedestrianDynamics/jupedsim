@@ -15,38 +15,6 @@
 
 namespace
 {
-/// A single flat 10x10 square at z=0, split into two triangles.
-SurfaceMesh flat_square()
-{
-    SurfaceMesh mesh{};
-    const auto a = mesh.add_vertex({0, 0, 0});
-    const auto b = mesh.add_vertex({10, 0, 0});
-    const auto c = mesh.add_vertex({10, 10, 0});
-    const auto d = mesh.add_vertex({0, 10, 0});
-    mesh.add_face(a, b, c);
-    mesh.add_face(a, c, d);
-    return mesh;
-}
-
-/// Flat floor (y in [0,10], z=0) joined at the seam y=10 to a ramp rising
-/// *forward* (y in [10,15], z = y-10). Ramp does NOT overlap the floor
-/// -> the whole surface is single-valued -> one region.
-SurfaceMesh ramp_forward()
-{
-    SurfaceMesh mesh{};
-    const auto v0 = mesh.add_vertex({0, 0, 0});
-    const auto v1 = mesh.add_vertex({10, 0, 0});
-    const auto v2 = mesh.add_vertex({10, 10, 0}); // seam
-    const auto v3 = mesh.add_vertex({0, 10, 0}); // seam
-    const auto v4 = mesh.add_vertex({10, 15, 5}); // ramp top, beyond the floor
-    const auto v5 = mesh.add_vertex({0, 15, 5});
-    mesh.add_face(v0, v1, v2);
-    mesh.add_face(v0, v2, v3);
-    mesh.add_face(v3, v2, v4);
-    mesh.add_face(v3, v4, v5);
-    return mesh;
-}
-
 /// Flat floor (y in [0,10], z=0) joined at the seam y=10 to a ramp that folds
 /// *back* over the floor (y in [5,10], z rising to 5). Its (x,y)-footprint
 /// overlaps the floor -> not single-valued -> floor and ramp must split.
@@ -324,8 +292,8 @@ TEST(RegionSplit, MicroFoldWithinToleranceStillSplits)
 TEST(RegionSplit, EveryFixtureSplitsValidly)
 {
     const std::vector<std::pair<std::string, SurfaceMesh>> meshes{
-        {"flat_square", flat_square()},
-        {"ramp_forward", ramp_forward()},
+        {"flat_square", fixtures::flat_square()},
+        {"floor_with_ramp", fixtures::floor_with_ramp()},
         {"ramp_back_over_floor", ramp_back_over_floor()},
         {"stacked_floors_via_ramp", stacked_floors_via_ramp()},
         {"ring_with_flight_in_the_stairwell", ring_with_flight_in_the_stairwell()},
@@ -333,7 +301,7 @@ TEST(RegionSplit, EveryFixtureSplitsValidly)
         {"flat_rectangle", fixtures::flat_rectangle()},
         {"two_levels_with_stair", fixtures::two_levels_with_stair()},
         {"two_levels_with_wide_seam", fixtures::two_levels_with_wide_seam()},
-        {"stacked_floors", fixtures::stacked_floors()},
+        {"stacked_floors", fixtures::stacked_floors({0, 0}, {10, 10}, 3.0)},
         {"switchback_stair", fixtures::switchback_stair()},
         {"switchback_stair_upper_first", fixtures::switchback_stair(true)},
         {"straight_stair_to_a_landing", fixtures::straight_stair_to_a_landing()},

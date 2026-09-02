@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "GenericAgent.hpp"
-#include "GeometryBuilder.hpp"
+#include "GeometryFixtures.hpp"
 #include "Journey.hpp"
-#include "MeshFixtures.hpp"
 #include "Stage.hpp"
 #include "TestCommon.hpp"
 #include "gtest/gtest.h"
@@ -13,12 +12,7 @@ public:
     NeighborhoodSearch<GenericAgent> neighborhoodSearch{2};
     std::unique_ptr<Geometry> geometry{};
 
-    void SetUp() override
-    {
-        GeometryBuilder b{};
-        b.AddAccessibleArea({{-10, -10}, {10, -10}, {10, 10}, {-10, 10}});
-        geometry = std::make_unique<Geometry>(b.Build());
-    }
+    void SetUp() override { geometry = test_geometries::rectangle({-10, -10}, {10, 10}); }
 
     void TearDown() override {}
 
@@ -72,9 +66,10 @@ TEST_F(StagesTests, NotifiableWaitingSetTargetIsCorrect)
 class StagesOnTwoStoreys : public ::testing::Test
 {
 public:
-    Geometry geometry{fixtures::stacked_floors()};
+    const std::unique_ptr<Geometry> geometry =
+        test_geometries::stacked_floors({0, 0}, {10, 10}, 3.0);
 
-    Location At(Point p, double z) const { return *geometry.get_location(p.x, p.y, z); }
+    Location At(Point p, double z) const { return *geometry->get_location(p.x, p.y, z); }
 
     GenericAgent AgentAt(Point p, double z, BaseStage::ID stageId) const
     {
@@ -124,7 +119,7 @@ TEST_F(StagesOnTwoStoreys, QueueEnqueuesOnlyAgentsOnItsOwnFloor)
 {
     NotifiableQueue queue(std::vector<Location>{At({5, 5}, 3.0)});
     NeighborhoodSearch<GenericAgent> search{5.0};
-    const EnvironmentQuery query{geometry, search};
+    const EnvironmentQuery query{*geometry, search};
 
     AgentContainer<GenericAgent> agents{};
     agents.push_back(AgentAt({5, 5}, 0.0, queue.Id()));
@@ -143,7 +138,7 @@ TEST_F(StagesOnTwoStoreys, WaitingSetSeatsOnlyAgentsOnItsOwnFloor)
 {
     NotifiableWaitingSet waitingSet(std::vector<Location>{At({5, 5}, 3.0)});
     NeighborhoodSearch<GenericAgent> search{5.0};
-    const EnvironmentQuery query{geometry, search};
+    const EnvironmentQuery query{*geometry, search};
 
     AgentContainer<GenericAgent> agents{};
     agents.push_back(AgentAt({5, 5}, 0.0, waitingSet.Id()));
@@ -183,14 +178,14 @@ TEST(StagesOnAStair, WaypointIsReachedFromTheStairItStandsOn)
 {
     // A stair climbing 3 m over 5 m: an agent 0.8 m short of the waypoint in plan is
     // half a metre below it.
-    Geometry geometry{fixtures::two_levels_with_stair()};
-    Waypoint waypoint(*geometry.get_location(12.5, 2.0, 1.5), 1.0);
+    const auto geometry = test_geometries::two_levels_with_stair();
+    Waypoint waypoint(*geometry->get_location(12.5, 2.0, 1.5), 1.0);
 
     const GenericAgent agent(
         GenericAgent::ID::Invalid,
         Journey::ID::Invalid,
         waypoint.Id(),
-        *geometry.get_location(11.7, 2.0, 1.02),
+        *geometry->get_location(11.7, 2.0, 1.02),
         CollisionFreeSpeedModelState{});
 
     EXPECT_TRUE(waypoint.IsCompleted(agent));

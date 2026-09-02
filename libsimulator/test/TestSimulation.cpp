@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Geometry/Geometry.hpp"
-#include "GeometryBuilder.hpp"
+#include "GeometryFixtures.hpp"
 #include "Journey.hpp"
-#include "MeshFixtures.hpp"
 #include "OperationalModels/CollisionFreeSpeedModel/CollisionFreeSpeedModel.hpp"
 #include "Polygon.hpp"
 #include "Simulation.hpp"
@@ -32,15 +31,13 @@ std::unique_ptr<CollisionFreeSpeedModel> model()
 /// floor turning back over the ground floor. Over (5, 6) there are two storeys.
 std::unique_ptr<Simulation> on_the_switchback_stair()
 {
-    return std::make_unique<Simulation>(
-        model(), std::make_unique<Geometry>(fixtures::switchback_stair()), 0.01);
+    return std::make_unique<Simulation>(model(), test_geometries::switchback_stair(), 0.01);
 }
 
 std::unique_ptr<Simulation> on_a_flat_room()
 {
-    GeometryBuilder b{};
-    b.AddAccessibleArea({{0, 0}, {20, 0}, {20, 20}, {0, 20}});
-    return std::make_unique<Simulation>(model(), std::make_unique<Geometry>(b.Build()), 0.01);
+    return std::make_unique<Simulation>(
+        model(), test_geometries::rectangle({0, 0}, {20, 20}), 0.01);
 }
 
 /// A journey of one waypoint, so that agents have somewhere to be routed to.
@@ -137,8 +134,8 @@ TEST(MeshBuiltSimulation, HasNoPolygonToHandOut)
 
 TEST(MeshBuiltSimulation, WalkingUpAStairToTheExitAtTheTop)
 {
-    auto sim = std::make_unique<Simulation>(
-        model(), std::make_unique<Geometry>(fixtures::straight_stair_to_a_landing()), 0.01);
+    auto sim =
+        std::make_unique<Simulation>(model(), test_geometries::straight_stair_to_a_landing(), 0.01);
 
     // Start on the ground floor, exit on the landing three metres up: the whole way there leads
     // over the flight, so arriving at all means the climb worked.

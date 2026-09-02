@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "AgentView.hpp"
 #include "GenericAgent.hpp"
-#include "GeometryBuilder.hpp"
+#include "GeometryFixtures.hpp"
 #include "OperationalDecisionSystem.hpp"
 #include "OperationalModels/CustomModel/CustomModel.hpp"
 #include "TestCommon.hpp"
@@ -58,11 +58,7 @@ public:
 /// The flat square every agent in this file stands on.
 const Geometry& flat_square()
 {
-    static const auto geometry = [] {
-        GeometryBuilder builder{};
-        builder.AddAccessibleArea({{-10, -10}, {10, -10}, {10, 10}, {-10, 10}});
-        return std::make_unique<Geometry>(builder.Build());
-    }();
+    static const auto geometry = test_geometries::rectangle({-10, -10}, {10, 10});
     return *geometry;
 }
 

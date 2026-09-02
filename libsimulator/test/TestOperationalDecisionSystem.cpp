@@ -2,7 +2,7 @@
 #include "AgentView.hpp"
 #include "GenericAgent.hpp"
 #include "Geometry/Geometry.hpp"
-#include "GeometryBuilder.hpp"
+#include "GeometryFixtures.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalDecisionSystem.hpp"
 #include "OperationalModels/CustomModel/CustomModel.hpp"
@@ -48,9 +48,7 @@ GenericAgent make_agent(const Geometry& geometry, Point start, Point velocity)
 /// A flat square [-10,10]^2 with its 3D twin over the same polygon.
 std::unique_ptr<Geometry> flat_square()
 {
-    GeometryBuilder builder{};
-    builder.AddAccessibleArea({{-10, -10}, {10, -10}, {10, 10}, {-10, 10}});
-    return std::make_unique<Geometry>(builder.Build());
+    return test_geometries::rectangle({-10, -10}, {10, 10});
 }
 } // namespace
 

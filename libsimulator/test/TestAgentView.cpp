@@ -3,8 +3,7 @@
 #include "EnvironmentQuery.hpp"
 #include "GenericAgent.hpp"
 #include "Geometry/Geometry.hpp"
-#include "GeometryBuilder.hpp"
-#include "MeshFixtures.hpp"
+#include "GeometryFixtures.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalModels/CollisionFreeSpeedModel/CollisionFreeSpeedModel.hpp"
 #include "TestCommon.hpp"
@@ -34,18 +33,13 @@ GenericAgent MakeAgent(const Geometry& geo, Point pos, double radius = 0.2, doub
 
 std::unique_ptr<Geometry> OpenGeometry()
 {
-    GeometryBuilder b{};
-    b.AddAccessibleArea({{-100, -100}, {100, -100}, {100, 100}, {-100, 100}});
-    return std::make_unique<Geometry>(b.Build());
+    return test_geometries::rectangle({-100, -100}, {100, 100});
 }
 
 // Geometry with a thin wall at x≈1 that blocks line-of-sight across it.
 std::unique_ptr<Geometry> WalledGeometry()
 {
-    GeometryBuilder b{};
-    b.AddAccessibleArea({{-100, -100}, {100, -100}, {100, 100}, {-100, 100}});
-    b.ExcludeFromAccessibleArea({{0.9, -50}, {1.1, -50}, {1.1, 50}, {0.9, 50}});
-    return std::make_unique<Geometry>(b.Build());
+    return test_geometries::rectangle_with_hole({-100, -100}, {100, 100}, {0.9, -50}, {1.1, 50});
 }
 
 struct Environment {
@@ -267,15 +261,15 @@ TEST(AgentView, AgentsOnAnotherStoreyAreNotNeighbours)
     // Two floors sharing a footprint, one agent on each, standing at the same (x, y) three
     // metres apart in height. The neighbourhood grid searches by (x, y) and offers them to
     // each other; one is standing well above the other's head and cannot touch them.
-    Geometry geo{fixtures::stacked_floors()};
+    const auto geo = test_geometries::stacked_floors({0, 0}, {10, 10}, 3.0);
 
     AgentContainer<GenericAgent> agents{};
-    agents.push_back(MakeAgent(geo, {5.0, 5.0}));
-    agents.push_back(MakeAgent(geo, {5.0, 5.0}, 0.2, 3.0));
+    agents.push_back(MakeAgent(*geo, {5.0, 5.0}));
+    agents.push_back(MakeAgent(*geo, {5.0, 5.0}, 0.2, 3.0));
 
     NeighborhoodSearch<GenericAgent> search{5.0};
     search.Update(agents);
-    const EnvironmentQuery query{geo, search};
+    const EnvironmentQuery query{*geo, search};
 
     EXPECT_TRUE(AgentView(query, agents[0]).OtherAgentsInRange(10.0).empty());
     EXPECT_TRUE(AgentView(query, agents[1]).OtherAgentsInRange(10.0).empty());
@@ -284,15 +278,15 @@ TEST(AgentView, AgentsOnAnotherStoreyAreNotNeighbours)
 TEST(AgentView, AgentsOnTheSameStoreyStillAre)
 {
     // The same mesh, both agents on the lower floor: the filter must not swallow those.
-    Geometry geo{fixtures::stacked_floors()};
+    const auto geo = test_geometries::stacked_floors({0, 0}, {10, 10}, 3.0);
 
     AgentContainer<GenericAgent> agents{};
-    agents.push_back(MakeAgent(geo, {5.0, 5.0}));
-    agents.push_back(MakeAgent(geo, {6.0, 5.0}));
+    agents.push_back(MakeAgent(*geo, {5.0, 5.0}));
+    agents.push_back(MakeAgent(*geo, {6.0, 5.0}));
 
     NeighborhoodSearch<GenericAgent> search{5.0};
     search.Update(agents);
-    const EnvironmentQuery query{geo, search};
+    const EnvironmentQuery query{*geo, search};
 
     EXPECT_EQ(AgentView(query, agents[0]).OtherAgentsInRange(10.0).size(), 1u);
 }
@@ -302,16 +296,16 @@ TEST(AgentView, ANeighbourCloseEnoughToTouchCanStillBeOnAnotherStorey)
     // A mezzanine 1.5 m up, so the height band keeps both as candidates and what has to tell
     // them apart is which sheet each stands on. Nothing is between them in plan either: no
     // wall on either floor, and no seam joining the two.
-    Geometry geo{fixtures::stacked_floors(1.5)};
+    const auto geo = test_geometries::stacked_floors({0, 0}, {10, 10}, 1.5);
 
     AgentContainer<GenericAgent> agents{};
-    agents.push_back(MakeAgent(geo, {2.0, 5.0}));
-    agents.push_back(MakeAgent(geo, {4.0, 5.0}));
-    agents.push_back(MakeAgent(geo, {6.0, 5.0}, 0.2, 1.5));
+    agents.push_back(MakeAgent(*geo, {2.0, 5.0}));
+    agents.push_back(MakeAgent(*geo, {4.0, 5.0}));
+    agents.push_back(MakeAgent(*geo, {6.0, 5.0}, 0.2, 1.5));
 
     NeighborhoodSearch<GenericAgent> search{5.0};
     search.Update(agents);
-    const EnvironmentQuery query{geo, search};
+    const EnvironmentQuery query{*geo, search};
 
     const AgentView view{query, agents[0]};
     const auto seen = view.OtherAgentsInRange(

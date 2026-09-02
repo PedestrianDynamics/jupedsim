@@ -1,83 +1,24 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "CfgCgal.hpp"
 #include "Geometry/Geometry.hpp"
-#include "MeshFixtures.hpp"
+#include "GeometryFixtures.hpp"
 #include "SimulationError.hpp"
 #include "SurfaceMeshShortestPathRoutingEngine.hpp"
 #include "TestCommon.hpp"
 
-#include <CGAL/mark_domain_in_triangulation.h>
 #include <gtest/gtest.h>
 
 #include <algorithm>
 #include <cmath>
 #include <functional>
-#include <map>
 #include <memory>
 #include <span>
 #include <vector>
 
 namespace
 {
-/// A single flat 10x10 square at z=0, split into two triangles (CCW).
-SurfaceMesh unit_square_mesh()
-{
-    SurfaceMesh mesh{};
-    const auto a = mesh.add_vertex({0, 0, 0});
-    const auto b = mesh.add_vertex({10, 0, 0});
-    const auto c = mesh.add_vertex({10, 10, 0});
-    const auto d = mesh.add_vertex({0, 10, 0});
-    mesh.add_face(a, b, c);
-    mesh.add_face(a, c, d);
-    return mesh;
-}
-
-/// A flat floor (z=0, y in [0,10]) joined at the seam y=10 to a 45-degree ramp
-/// (z = y-10, y in [10,15]). The ramp is tilted, not vertical, so face_below's
-/// -z ray projects onto it cleanly.
-SurfaceMesh folded_mesh()
-{
-    SurfaceMesh mesh{};
-    const auto v0 = mesh.add_vertex({0, 0, 0});
-    const auto v1 = mesh.add_vertex({10, 0, 0});
-    const auto v2 = mesh.add_vertex({10, 10, 0}); // seam
-    const auto v3 = mesh.add_vertex({0, 10, 0}); // seam
-    const auto v4 = mesh.add_vertex({10, 15, 5}); // ramp top
-    const auto v5 = mesh.add_vertex({0, 15, 5}); // ramp top
-    mesh.add_face(v0, v1, v2);
-    mesh.add_face(v0, v2, v3);
-    mesh.add_face(v3, v2, v4);
-    mesh.add_face(v3, v4, v5);
-    return mesh;
-}
-
-/// Build a SurfaceMesh from a 2D polygon by constrained-Delaunay triangulating it.
-/// Default height => flat z=0.
-SurfaceMesh mesh_from_polygon(const std::vector<K::Point_2>& outer, double z = 0.0)
-{
-    // Inspired by https://doc.cgal.org/latest/Mesh_2, example Mesh_2/mesh_marked_domain.cpp
-    CDT cdt{};
-    cdt.insert_constraint(outer.begin(), outer.end(), true); // true => closed
-    CGAL::mark_domain_in_triangulation(cdt);
-
-    SurfaceMesh mesh{};
-    std::map<CDT::Vertex_handle, SurfaceMesh::Vertex_index> idx;
-    const auto vertex_of = [&](CDT::Vertex_handle v) {
-        const auto it = idx.find(v);
-        if(it != idx.end()) {
-            return it->second;
-        }
-        const auto p = v->point();
-        return idx[v] = mesh.add_vertex({p.x(), p.y(), z});
-    };
-    for(auto f = cdt.finite_faces_begin(); f != cdt.finite_faces_end(); ++f) {
-        if(f->get_in_domain()) {
-            mesh.add_face(
-                vertex_of(f->vertex(0)), vertex_of(f->vertex(1)), vertex_of(f->vertex(2)));
-        }
-    }
-    return mesh;
-}
+/// The L-shape (CCW) with a single reflex corner at (1, 1).
+const std::vector<Point> l_shape{{0, 0}, {3, 0}, {3, 1}, {1, 1}, {1, 3}, {0, 3}};
 
 /// Length of a path along the surface. The engine hands out the way, not what it costs -- so
 /// a test that is about the length measures it itself.
@@ -113,7 +54,7 @@ class FlatSquare : public ::testing::Test
 public:
     void SetUp() override
     {
-        geometry = std::make_unique<Geometry>(unit_square_mesh());
+        geometry = test_geometries::rectangle({0, 0}, {10, 10});
         engine = std::make_unique<SurfaceMeshShortestPathRoutingEngine>(*geometry);
     }
 
@@ -137,9 +78,10 @@ TEST_F(FlatSquare, PointOutsideFootprintIsInvalid)
 
 TEST_F(FlatSquare, PathWithinOneFaceIsTheDirectConnection)
 {
-    // Both endpoints inside the lower-right triangle (y < x): single-face path.
-    const Point3D source{6, 2, 1};
-    const Point3D target{9, 5, 1};
+    // Both endpoints below either diagonal, so they share a face however the square is cut:
+    // single-face path.
+    const Point3D source{3, 1, 1};
+    const Point3D target{7, 2, 1};
 
     const auto path = engine->GetShortestPath(source, target);
 
@@ -194,8 +136,8 @@ TEST_F(FlatSquare, OrientationRobustWhenSourceOnEdge)
 
 TEST(RoutingEngineFold, GeodesicCarriesLengthAcrossSeam)
 {
-    Geometry geometry{folded_mesh()};
-    SurfaceMeshShortestPathRoutingEngine engine{geometry};
+    const auto geometry = test_geometries::floor_with_ramp();
+    SurfaceMeshShortestPathRoutingEngine engine{*geometry};
 
     const Point3D source{3, 2, 1}; // on the floor
     const Point3D target{4, 13, 5}; // on the ramp, projects to z = 3
@@ -233,11 +175,9 @@ TEST(RoutingEngineFold, GeodesicCarriesLengthAcrossSeam)
 
 TEST(RoutingEngineLShape, GeodesicBendsAroundReflexCorner)
 {
-    // L-shape (CCW) with a single reflex corner at (1, 1).
-    const std::vector<K::Point_2> outer{{0, 0}, {3, 0}, {3, 1}, {1, 1}, {1, 3}, {0, 3}};
 
-    Geometry geometry{mesh_from_polygon(outer)}; // flat z = 0
-    SurfaceMeshShortestPathRoutingEngine engine{geometry};
+    const auto geometry = test_geometries::from_polygons({l_shape});
+    SurfaceMeshShortestPathRoutingEngine engine{*geometry};
 
     const Point3D source{2.5, 0.5, 1};
     const Point3D target{0.5, 2.5, 1};
@@ -256,10 +196,9 @@ TEST(RoutingEngineLShape, GeodesicBendsAroundReflexCorner)
 
 TEST(RoutingEngineLShape, OrientationBendsTowardsReflexCorner)
 {
-    const std::vector<K::Point_2> outer{{0, 0}, {3, 0}, {3, 1}, {1, 1}, {1, 3}, {0, 3}};
 
-    Geometry geometry{mesh_from_polygon(outer)}; // flat z = 0
-    SurfaceMeshShortestPathRoutingEngine engine{geometry};
+    const auto geometry = test_geometries::from_polygons({l_shape});
+    SurfaceMeshShortestPathRoutingEngine engine{*geometry};
 
     // The route bends around the reflex corner (1,1), so the heading points there rather than at
     // the target -- at the turn the route makes, which is held off the corner itself. Heading for
@@ -278,13 +217,12 @@ TEST(RoutingEngineLShape, OrientationBendsTowardsReflexCorner)
 
 TEST(RoutingEngineLShape, WaypointIsTheNextTurnOfTheGeodesic)
 {
-    const std::vector<K::Point_2> outer{{0, 0}, {3, 0}, {3, 1}, {1, 1}, {1, 3}, {0, 3}};
 
-    Geometry geometry{mesh_from_polygon(outer)}; // flat z = 0
-    SurfaceMeshShortestPathRoutingEngine engine{geometry};
+    const auto geometry = test_geometries::from_polygons({l_shape});
+    SurfaceMeshShortestPathRoutingEngine engine{*geometry};
 
-    const auto from = geometry.get_location(2.5, 0.5, 0.0);
-    const auto to = geometry.get_location(0.5, 2.5, 0.0);
+    const auto from = geometry->get_location(2.5, 0.5, 0.0);
+    const auto to = geometry->get_location(0.5, 2.5, 0.0);
     ASSERT_TRUE(from.has_value() && to.has_value());
 
     // Where the route bends, held off the corner it bends around.
@@ -299,26 +237,25 @@ TEST(RoutingEngineLShape, WaypointIsTheNextTurnOfTheGeodesic)
 
 TEST(RoutingEngineWallClearance, NegativeIsNoDistance)
 {
-    Geometry geometry{unit_square_mesh()};
-    EXPECT_THROW(SurfaceMeshShortestPathRoutingEngine(geometry, -0.1), SimulationError);
+    const auto geometry = test_geometries::rectangle({0, 0}, {10, 10});
+    EXPECT_THROW(SurfaceMeshShortestPathRoutingEngine(*geometry, -0.1), SimulationError);
 }
 
 TEST(RoutingEngineWallClearance, TheSurfaceEngineKeepsItToo)
 {
-    const std::vector<K::Point_2> outer{{0, 0}, {3, 0}, {3, 1}, {1, 1}, {1, 3}, {0, 3}};
-    Geometry geometry{mesh_from_polygon(outer)};
+    const auto geometry = test_geometries::from_polygons({l_shape});
     const Point3D source{2.5, 0.5, 1};
     const Point3D target{0.5, 2.5, 1};
 
     // Zero routes through the corner, which is the bare geodesic.
-    SurfaceMeshShortestPathRoutingEngine bare{geometry, 0.0};
+    SurfaceMeshShortestPathRoutingEngine bare{*geometry, 0.0};
     const auto through_the_corner = bare.GetShortestPath(source, target);
     ASSERT_EQ(through_the_corner.size(), 3u);
     EXPECT_NEAR(through_the_corner[1].x(), 1.0, 1e-9);
     EXPECT_NEAR(through_the_corner[1].y(), 1.0, 1e-9);
 
     // And whatever distance is asked for is the distance kept.
-    SurfaceMeshShortestPathRoutingEngine keeping_distance{geometry, 0.3};
+    SurfaceMeshShortestPathRoutingEngine keeping_distance{*geometry, 0.3};
     const auto around_it = keeping_distance.GetShortestPath(source, target);
     ASSERT_EQ(around_it.size(), 3u);
     const Point turn{around_it[1].x(), around_it[1].y()};
@@ -330,11 +267,11 @@ TEST(RoutingEngineCorridor, TheWaypointIsNeverTheSpotAlreadyStoodOn)
     // On triangles this long the path comes back with its own source point far enough off to
     // survive as a waypoint of its own -- and a step that short has no direction, so the agent
     // is sent to where it stands and stays there.
-    Geometry geometry{fixtures::corridor_with_door_recesses()};
-    SurfaceMeshShortestPathRoutingEngine engine{geometry};
+    const auto geometry = test_geometries::corridor_with_door_recesses();
+    SurfaceMeshShortestPathRoutingEngine engine{*geometry};
 
-    auto walker = geometry.get_location(2.0, 0.9, 0.0);
-    const auto exit = geometry.get_location(44.0, 1.0, 0.0);
+    auto walker = geometry->get_location(2.0, 0.9, 0.0);
+    const auto exit = geometry->get_location(44.0, 1.0, 0.0);
     ASSERT_TRUE(walker.has_value() && exit.has_value());
 
     // Never overshoot the waypoint, so a step is as long as the way on is -- which is what

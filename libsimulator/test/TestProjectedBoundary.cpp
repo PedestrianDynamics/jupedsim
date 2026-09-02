@@ -11,19 +11,6 @@
 
 namespace
 {
-/// A single flat 10x10 square at z=0, split into two triangles.
-SurfaceMesh flat_square()
-{
-    SurfaceMesh mesh{};
-    const auto a = mesh.add_vertex({0, 0, 0});
-    const auto b = mesh.add_vertex({10, 0, 0});
-    const auto c = mesh.add_vertex({10, 10, 0});
-    const auto d = mesh.add_vertex({0, 10, 0});
-    mesh.add_face(a, b, c);
-    mesh.add_face(a, c, d);
-    return mesh;
-}
-
 /// Flat 2x2 grid of unit cells, each cell split into two triangles. Faces are
 /// added cell by cell: cell (cx, cy) owns faces 2*(2*cy+cx) and 2*(2*cy+cx)+1.
 SurfaceMesh flat_two_by_two_grid()
@@ -73,7 +60,7 @@ std::vector<SurfaceMesh::Halfedge_index> whole_mesh_boundary(const SurfaceMesh& 
 
 TEST(ProjectedBoundary, SimpleSquareIsStrictlySimple)
 {
-    const auto mesh = flat_square();
+    const auto mesh = fixtures::flat_square();
     const auto boundary = whole_mesh_boundary(mesh);
     ASSERT_EQ(boundary.size(), 4u);
     EXPECT_TRUE(is_projection_strictly_simple(mesh, boundary));

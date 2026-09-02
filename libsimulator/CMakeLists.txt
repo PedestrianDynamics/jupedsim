@@ -100,6 +100,7 @@ target_include_directories(simulator PUBLIC
 ################################################################################
 if (BUILD_TESTS)
     add_executable(libsimulator-tests
+        test/GeometryFixtures.hpp
         test/TestAABB.cpp
         test/TestAgentView.cpp
         test/TestBasicPrimitiveTests.cpp

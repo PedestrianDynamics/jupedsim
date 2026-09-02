@@ -2,6 +2,7 @@
 #pragma once
 
 #include "CfgCgal.hpp"
+#include "Point.hpp"
 
 #include <CGAL/Polygon_mesh_processing/triangulate_faces.h>
 
@@ -79,19 +80,66 @@ inline SurfaceMesh two_levels_with_wide_seam(std::size_t strips = 4)
 
 /// Two floors sharing a footprint with nothing joining them. Non-realistic, but does
 /// not matter for the testing purpose.
-inline SurfaceMesh stacked_floors(double upper_z = 3.0)
+inline SurfaceMesh stacked_floors(Point lower_left, Point upper_right, double floor_height)
 {
     SurfaceMesh mesh{};
-    const auto quad = [&mesh](double z) {
-        const auto a = mesh.add_vertex(Point3D{0, 0, z});
-        const auto b = mesh.add_vertex(Point3D{10, 0, z});
-        const auto c = mesh.add_vertex(Point3D{10, 10, z});
-        const auto d = mesh.add_vertex(Point3D{0, 10, z});
+    const auto quad = [&](double z) {
+        const auto a = mesh.add_vertex(Point3D{lower_left.x, lower_left.y, z});
+        const auto b = mesh.add_vertex(Point3D{upper_right.x, lower_left.y, z});
+        const auto c = mesh.add_vertex(Point3D{upper_right.x, upper_right.y, z});
+        const auto d = mesh.add_vertex(Point3D{lower_left.x, upper_right.y, z});
         mesh.add_face(a, b, c);
         mesh.add_face(a, c, d);
     };
     quad(0.0);
-    quad(upper_z);
+    quad(floor_height);
+    return mesh;
+}
+
+/// A ramp climbing along y, from z = 0 to "height".
+inline SurfaceMesh ramp(Point lower_left, Point upper_right, double height)
+{
+    SurfaceMesh mesh{};
+    const auto a = mesh.add_vertex(Point3D{lower_left.x, lower_left.y, 0.0});
+    const auto b = mesh.add_vertex(Point3D{upper_right.x, lower_left.y, 0.0});
+    const auto c = mesh.add_vertex(Point3D{upper_right.x, upper_right.y, height});
+    const auto d = mesh.add_vertex(Point3D{lower_left.x, upper_right.y, height});
+    mesh.add_face(a, b, c);
+    mesh.add_face(a, c, d);
+    return mesh;
+}
+
+/// A flat 10x10 square at z = 0, split into two triangles: the coarsest walkable surface
+/// there is, with one border edge per side. `flat_rectangle` covers the same ground but
+/// carries a mid vertex, so tests that count border edges need this one.
+inline SurfaceMesh flat_square()
+{
+    SurfaceMesh mesh{};
+    const auto a = mesh.add_vertex(Point3D{0, 0, 0});
+    const auto b = mesh.add_vertex(Point3D{10, 0, 0});
+    const auto c = mesh.add_vertex(Point3D{10, 10, 0});
+    const auto d = mesh.add_vertex(Point3D{0, 10, 0});
+    mesh.add_face(a, b, c);
+    mesh.add_face(a, c, d);
+    return mesh;
+}
+
+/// A flat floor (y in [0,10]) welded at y = 10 to a ramp rising away from it (y in [10,15],
+/// z up to 5). The ramp reaches beyond the floor rather than back over it, so the surface
+/// bends without folding: one region, and a seam to carry a path across.
+inline SurfaceMesh floor_with_ramp()
+{
+    SurfaceMesh mesh{};
+    const auto v0 = mesh.add_vertex(Point3D{0, 0, 0});
+    const auto v1 = mesh.add_vertex(Point3D{10, 0, 0});
+    const auto v2 = mesh.add_vertex(Point3D{10, 10, 0});
+    const auto v3 = mesh.add_vertex(Point3D{0, 10, 0});
+    const auto v4 = mesh.add_vertex(Point3D{10, 15, 5});
+    const auto v5 = mesh.add_vertex(Point3D{0, 15, 5});
+    mesh.add_face(v0, v1, v2);
+    mesh.add_face(v0, v2, v3);
+    mesh.add_face(v3, v2, v4);
+    mesh.add_face(v3, v4, v5);
     return mesh;
 }
 

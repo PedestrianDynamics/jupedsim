@@ -358,7 +358,7 @@ TEST_F(PortalVisibility, AFloorWithNothingLeadingToItNeverShowsUp)
     // The answer is exactly the ground floor's four walls, seen whole. (The two floors are
     // indistinguishable in plan, so a leak of the upper floor could only ever surface as extra
     // or differing pieces -- which the exact comparison rules out.)
-    auto sut = IndexOn(fixtures::stacked_floors());
+    auto sut = IndexOn(fixtures::stacked_floors({0, 0}, {10, 10}, 3.0));
     const auto seen = ask(*sut, At(5, 5, 0), 100.0);
 
     ExpectPieces(

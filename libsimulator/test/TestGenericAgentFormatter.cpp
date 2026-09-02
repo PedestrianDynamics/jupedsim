@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "GenericAgent.hpp"
 #include "Geometry/Geometry.hpp"
-#include "GeometryBuilder.hpp"
+#include "GeometryFixtures.hpp"
 #include "TestCommon.hpp"
 
 #include <fmt/format.h>
@@ -11,11 +11,7 @@
 
 static GenericAgent make_agent(OperationalModelState model)
 {
-    static const auto geometry = [] {
-        GeometryBuilder builder{};
-        builder.AddAccessibleArea({{-10, -10}, {10, -10}, {10, 10}, {-10, 10}});
-        return std::make_unique<Geometry>(builder.Build());
-    }();
+    static const auto geometry = test_geometries::rectangle({-10, -10}, {10, 10});
     return GenericAgent(
         GenericAgent::ID{},
         jps::UniqueID<Journey>::Invalid,
