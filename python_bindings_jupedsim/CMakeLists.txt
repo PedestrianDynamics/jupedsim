@@ -17,6 +17,7 @@ add_library(py_jupedsim MODULE
     logging.hpp
     python_model.cpp
     python_model.hpp
+    floorfield.cpp
     routing.cpp
     simulation.cpp
     social_force_model.cpp
@@ -36,6 +37,7 @@ target_link_libraries(py_jupedsim
         common
         perfetto
         project_options
+        floorfield_cxx
 )
 
 pybind11_extension(py_jupedsim)

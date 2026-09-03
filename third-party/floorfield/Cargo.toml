@@ -1,0 +1,10 @@
+[package]
+name = "floorfield"
+version = "0.1.0"
+edition = "2026"
+
+[lib]
+crate-type = ["staticlib"]
+
+[dependencies]
+cxx = "1.0"
