@@ -36,3 +36,7 @@ __pycache__/
 
 .idea/
 /build*
+
+# Rust build artifacts
+/third-party/floorfield/target/
+Cargo.lock

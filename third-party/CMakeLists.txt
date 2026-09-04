@@ -100,3 +100,18 @@ if (WIN32)
         NOMINMAX
     )
 endif (WIN32)
+
+
+################################################################################
+# Corrosion (Rust/CMake integration)
+################################################################################
+add_subdirectory(corrosion)
+
+################################################################################
+# floorfield (Rust crate via cxx)
+################################################################################
+corrosion_import_crate(MANIFEST_PATH ${CMAKE_CURRENT_SOURCE_DIR}/floorfield/Cargo.toml)
+corrosion_add_cxxbridge(floorfield_cxx
+    CRATE floorfield
+    FILES lib.rs
+)
