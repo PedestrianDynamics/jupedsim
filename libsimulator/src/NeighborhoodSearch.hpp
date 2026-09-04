@@ -80,7 +80,7 @@ public:
 
     void AddAgent(const Value& item)
     {
-        auto index = getIndex(item.Position());
+        auto index = getIndex(item.location.xy());
         auto& vec = _grid[index];
         vec.push_back(&item);
     }
@@ -104,7 +104,7 @@ public:
     {
         _grid.clear();
         for(const auto& item : items) {
-            auto index = getIndex(item.Position());
+            auto index = getIndex(item.location.xy());
             auto& vec = _grid[index];
             vec.push_back(&item);
         }
@@ -128,7 +128,7 @@ public:
                 auto it = _grid.find({x, y});
                 if(it != _grid.cend()) {
                     for(const auto& item : it->second) {
-                        if(DistanceSquared(item->Position(), pos) <= radiusSquared) {
+                        if(DistanceSquared(item->location.xy(), pos) <= radiusSquared) {
                             fn(*item);
                         }
                     }

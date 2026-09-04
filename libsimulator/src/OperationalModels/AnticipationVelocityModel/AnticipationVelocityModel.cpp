@@ -33,28 +33,23 @@ Point AnticipationVelocityModel::ComputeNextState(
     const AgentStep& step) const
 {
     const auto& currentState = std::get<State>(current);
-    auto _w = step.WallsNearby();
-    const std::vector<WallView> boundaries(_w.begin(), _w.end());
     // Exclude occluded and self agents
-    auto neighborhood =
-        step.OtherAgentsInRange(_cutOffRadius, [&step, &boundaries](const NeighborView& n) {
-            return step.NoGeometryBetween(n.RelativePosition, boundaries);
-        });
+    auto neighborhood = step.OtherAgentsInRange(
+        _cutOffRadius, [&step](const NeighborView& n) { return step.NoGeometryBetween(n); });
 
-    const auto toNextTarget = step.ToNextTarget();
+    const auto desiredDirection = step.orientation_to_next_target();
     Point neighborRepulsion{};
     for(const auto& neighbor : neighborhood) {
-        neighborRepulsion += NeighborRepulsion(currentState, toNextTarget, neighbor);
+        neighborRepulsion += NeighborRepulsion(currentState, desiredDirection, neighbor);
     }
 
-    const auto desiredDirection = toNextTarget.Normalized();
     auto direction = (desiredDirection + neighborRepulsion).Normalized();
     if(direction == Point{}) {
         direction = currentState.orientation;
     }
 
     // update direction towards the newly calculated direction
-    direction = UpdateDirection(currentState, toNextTarget, direction, step.dt());
+    direction = UpdateDirection(currentState, desiredDirection, direction, step.dt());
     auto spacing = std::numeric_limits<double>::max();
     for(const auto& neighbor : neighborhood) {
         spacing = std::min(spacing, GetSpacing(currentState, neighbor, direction));
@@ -62,12 +57,7 @@ Point AnticipationVelocityModel::ComputeNextState(
 
     const auto optimal_speed = OptimalSpeed(currentState, spacing, currentState.timeGap);
     // Wall sliding behavior
-    direction = HandleWallAvoidance(
-        direction,
-        currentState.radius,
-        boundaries,
-        currentState.wallBufferDistance,
-        _pushoutStrength);
+    direction = HandleWallAvoidance(direction, currentState, step, _pushoutStrength);
 
     const auto velocity = direction * optimal_speed;
     auto& nextModel = std::get<State>(next);
@@ -78,11 +68,10 @@ Point AnticipationVelocityModel::ComputeNextState(
 
 Point AnticipationVelocityModel::UpdateDirection(
     const State& currentState,
-    Point toNextTarget,
+    Point desiredDirection,
     const Point& calculatedDirection,
     double dt) const
 {
-    const Point desiredDirection = toNextTarget.Normalized();
     const Point actualDirection = currentState.orientation;
     Point updatedDirection;
 
@@ -153,10 +142,9 @@ void AnticipationVelocityModel::CheckModelConstraint(
         const auto distance = neighbor.RelativePosition.Norm();
         if(contanctdDist >= distance) {
             throw SimulationError(
-                "Model constraint violation: Agent at {} too close to agent at {}: "
-                "distance {}",
-                agent.Position(),
-                agent.Position() + neighbor.RelativePosition,
+                "Model constraint violation: Agent {} too close to agent {}: distance {}",
+                agent.location.xy(),
+                agent.location.xy() + neighbor.RelativePosition,
                 distance);
         }
     }
@@ -164,8 +152,8 @@ void AnticipationVelocityModel::CheckModelConstraint(
     if(!view.WallsInRange(r).empty()) {
         throw SimulationError(
             "Model constraint violation: Agent at {} too close to geometry boundaries, distance "
-            "<= {}",
-            agent.Position(),
+            "< {}",
+            agent.location.xy(),
             r);
     }
 }
@@ -230,7 +218,7 @@ Point AnticipationVelocityModel::CalculateInfluenceDirection(
 
 Point AnticipationVelocityModel::NeighborRepulsion(
     const State& currentState,
-    Point toNextTarget,
+    Point desiredDirection,
     const NeighborView& neighbor) const
 {
     const auto& neighborState = std::get<State>(*neighbor.state);
@@ -241,7 +229,7 @@ Point AnticipationVelocityModel::NeighborRepulsion(
 
     // Pedestrian movement and desired directions
     const auto& e1 = currentState.orientation;
-    const auto& d1 = toNextTarget.Normalized();
+    const auto& d1 = desiredDirection;
     const auto& e2 = neighborState.orientation;
 
     // Check perception range (Eq. 1)
@@ -270,19 +258,14 @@ Point AnticipationVelocityModel::NeighborRepulsion(
 
 Point AnticipationVelocityModel::HandleWallAvoidance(
     const Point& direction,
-    double agentRadius,
-    const auto& boundaries,
-    double wallBufferDistance,
+    const State& currentState,
+    const AgentStep& step,
     double pushoutStrength) const
 {
-    const double criticalWallDistance = wallBufferDistance + agentRadius;
+    const double criticalWallDistance = currentState.wallBufferDistance + currentState.radius;
 
     Point modifiedDirection = direction;
-    for(const auto& wall : boundaries) {
-        if(wall.distance > criticalWallDistance) {
-            continue;
-        }
-
+    for(const auto& wall : step.WallsInRange(criticalWallDistance)) {
         const auto dotProduct = modifiedDirection.ScalarProduct(wall.normal);
 
         if(dotProduct < 0) {

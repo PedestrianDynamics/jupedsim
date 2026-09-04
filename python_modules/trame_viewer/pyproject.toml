@@ -1,0 +1,29 @@
+# SPDX-License-Identifier: LGPL-3.0-or-later
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "trame_viewer"
+version = "0.1.0"
+description = "3D viewer for multi-level JuPedSim navigation meshes, via pyvista + trame"
+license = "LGPL-3.0-or-later"
+requires-python = ">=3.10"
+# jupedsim is deliberately NOT listed: this tool is developed in tandem with the
+# in-tree jupedsim (source `<build-dir>/environment` to make it importable) and
+# must not pull a released jupedsim from PyPI on `pip install -e`.
+dependencies = [
+    "numpy",
+    "pyvista",
+    "trame",
+    "trame-vuetify",
+    "trame-vtk",
+    "vtk",
+    "pywebview",
+]
+
+[project.scripts]
+trame_viewer = "trame_viewer.app:main"
+
+[tool.setuptools]
+packages = ["trame_viewer"]

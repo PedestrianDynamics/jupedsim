@@ -56,7 +56,7 @@ private:
      */
     Point ForceDriv(
         const State& currentState,
-        Point to_target,
+        Point orientationToTarget,
         double mass,
         double tau,
         double deltaT,

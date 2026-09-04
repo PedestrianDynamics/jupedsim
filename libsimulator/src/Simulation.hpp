@@ -2,8 +2,8 @@
 #pragma once
 
 #include "AgentRemovalSystem.hpp"
-#include "CollisionGeometry.hpp"
 #include "GenericAgent.hpp"
+#include "Geometry/Geometry.hpp"
 #include "Journey.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "OperationalDecisionSystem.hpp"
@@ -38,7 +38,7 @@ class Simulation
     StageManager _stageManager{};
     StageSystem _stageSystem{};
     NeighborhoodSearch<GenericAgent> _neighborhoodSearch{2.2};
-    std::unique_ptr<CollisionGeometry> _geometry{};
+    std::unique_ptr<Geometry> _geometry{};
     std::unique_ptr<RoutingEngine> _routingEngine{};
     AgentContainer<GenericAgent> _agents;
     std::vector<GenericAgent::ID> _removedAgentsInLastIteration;
@@ -52,10 +52,13 @@ class Simulation
     void ThrowIfIterating(const char* operation) const;
 
 public:
+    /// Takes the geometry over: after this the caller no longer owns it. `Geo()` hands out a
+    /// borrowed reference for as long as the simulation lives.
     Simulation(
         std::unique_ptr<OperationalModel>&& operationalModel,
-        std::unique_ptr<CollisionGeometry>&& geometry,
+        std::unique_ptr<Geometry>&& geometry,
         double dT);
+
     Simulation(const Simulation& other) = delete;
     Simulation& operator=(const Simulation& other) = delete;
     Simulation(Simulation&& other) = delete;
@@ -65,7 +68,8 @@ public:
     void SetTracing(bool on);
     void Iterate();
     Journey::ID AddJourney(const std::map<BaseStage::ID, TransitionDescription>& stages);
-    BaseStage::ID AddStage(const StageDescription stageDescription);
+    /// @param z_hint "stage point" is the closest z on the surface related to @p z_hint
+    BaseStage::ID AddStage(const StageDescription stageDescription, double z_hint = 0.0);
     void MarkAgentForRemoval(GenericAgent::ID id);
     const std::vector<GenericAgent::ID>& RemovedAgents() const;
     size_t AgentCount() const;
@@ -78,13 +82,27 @@ public:
     /// Returns IDs of all agents inside the defined polygon
     /// @param polygon Required to be a simple convex polygon with CCW ordering.
     std::vector<GenericAgent::ID> AgentsInPolygon(const std::vector<Point>& polygon);
-    GenericAgent::ID AddAgent(GenericAgent agent);
+    /// @param z_hint Agent will land on the closest z on the surface matching @p position.
+    GenericAgent::ID AddAgent(
+        Journey::ID journeyId,
+        BaseStage::ID stageId,
+        Point position,
+        OperationalModelState model,
+        double z_hint = 0.0);
+    /// The place at @p x, @p y on the sheet closest to @p z_hint.
+    /// @throws SimulationError if no walkable sheet lies within the hint's tolerance.
+    Location GetLocation(double x, double y, double z_hint = 0.0) const;
+    /// Raycast 2D @p target along z-axis. The closest intersection with the geometry to agent's
+    /// z coordinate is the one taken.
+    void SetAgentTarget(GenericAgent::ID id, Point target);
+    void SetAgentTarget(GenericAgent::ID id, const Location& target);
     const GenericAgent& Agent(GenericAgent::ID id) const;
     GenericAgent& Agent(GenericAgent::ID id);
     AgentContainer<GenericAgent>& Agents();
     OperationalModelType ModelType() const;
     StageProxy Stage(BaseStage::ID stageId);
-    CollisionGeometry Geo() const;
+    /// The geometry this simulation runs on. Borrowed: it lives as long as the simulation.
+    const Geometry& Geo() const;
     void PushTimer(const std::string_view name, size_t probe_log_level = 0);
     void PopTimer(const std::string_view name);
     void SetTimerLogLevel(int level) { _timer.setLogLevel(level); };

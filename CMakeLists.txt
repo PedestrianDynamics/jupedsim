@@ -47,6 +47,9 @@ endif()
 set(BUILD_BENCHMARKS OFF CACHE BOOL "Build micro benchmark")
 print_var(BUILD_BENCHMARKS)
 
+set(BUILD_TOOLS OFF CACHE BOOL "Build CLI tools")
+print_var(BUILD_TOOLS)
+
 set(USE_IPO ON CACHE BOOL "Build with interprocedural optimization (LTO) where supported")
 print_var(USE_IPO)
 
@@ -232,6 +235,9 @@ endif()
 add_subdirectory(libcommon)
 add_subdirectory(libsimulator)
 add_subdirectory(python_bindings_jupedsim)
+if(BUILD_TOOLS)
+    add_subdirectory(tools)
+endif()
 
 ################################################################################
 # Code formatting
@@ -268,7 +274,7 @@ if(UNIX AND WITH_FORMAT)
             )
             if(version MATCHES "^${clang-format-version}.*")
                 message(STATUS "Found clang-format ${version}, add format-check and reformat targets")
-                set(folders libcommon libsimulator python_bindings_jupedsim)
+                set(folders libcommon libsimulator python_bindings_jupedsim tools)
                 add_custom_target(check-format
                     COMMENT "Checking format with clang-format"
                     COMMAND find ${folders}

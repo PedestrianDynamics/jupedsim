@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "AgentView.hpp"
 #include "GenericAgent.hpp"
-#include "GeometryBuilder.hpp"
+#include "GeometryFixtures.hpp"
 #include "OperationalDecisionSystem.hpp"
 #include "OperationalModels/CustomModel/CustomModel.hpp"
+#include "TestCommon.hpp"
 
 #include <fmt/format.h>
 #include <gtest/gtest.h>
@@ -54,13 +55,20 @@ public:
     void CheckModelConstraint(const GenericAgent&, const AgentView&) const override {}
 };
 
+/// The flat square every agent in this file stands on.
+const Geometry& flat_square()
+{
+    static const auto geometry = test_geometries::rectangle({-10, -10}, {10, 10});
+    return *geometry;
+}
+
 GenericAgent MakeAgent(OperationalModelState model, Point position = {})
 {
     return GenericAgent(
         GenericAgent::ID::Invalid,
         jps::UniqueID<Journey>::Invalid,
         jps::UniqueID<BaseStage>::Invalid,
-        position,
+        *flat_square().get_location(position.x, position.y, 0.0),
         std::move(model));
 }
 } // namespace
@@ -119,10 +127,6 @@ TEST(CustomModel, FormatsAgentWithCustomModelState)
 
 TEST(CustomModel, RunsThroughOperationalDecisionSystem)
 {
-    GeometryBuilder builder{};
-    builder.AddAccessibleArea({{-10, -10}, {10, -10}, {10, 10}, {-10, 10}});
-    const auto geometry = builder.Build();
-
     AgentContainer<GenericAgent> agents{};
     agents.emplace_back(MakeAgent(CustomModel::State{MinimalState{Point{2.0, 0.0}, 0}}));
 
@@ -130,11 +134,11 @@ TEST(CustomModel, RunsThroughOperationalDecisionSystem)
     neighborhoodSearch.Update(agents);
 
     OperationalDecisionSystem system{std::make_unique<MinimalCustomModel>()};
-    system.Run(0.5, 0.0, neighborhoodSearch, geometry, agents);
+    system.Run(0.5, 0.0, neighborhoodSearch, flat_square(), agents);
 
     const auto& agent = agents.front();
     const auto& state = std::get<CustomModel::State>(agent.state).Get<MinimalState>();
-    ASSERT_EQ(agent.Position(), Point(1.0, 0.0));
+    ASSERT_EQ(agent.location.xy(), Point(1.0, 0.0));
     ASSERT_EQ(state.applications, 1);
 }
 

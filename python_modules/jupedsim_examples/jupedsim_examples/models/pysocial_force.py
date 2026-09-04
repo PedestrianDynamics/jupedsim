@@ -41,7 +41,7 @@ class PythonSocialForceModel(CustomOperationalModel):
         friction: friction during contact [kg/m/s], default 240000
         radius: radius of agents [m], default 0.3
 
-    All force helpers are static: math utilities (_normalize, _distance,
+    All force helpers are static: math utilities (_distance,
     _desired_force) operate on plain values, while _social_force and
     _obstacle_force read per-agent parameters from the state they are given.
     """
@@ -50,14 +50,6 @@ class PythonSocialForceModel(CustomOperationalModel):
         self,
     ):
         CustomOperationalModel.__init__(self)
-
-    @staticmethod
-    def _normalize(vector: tuple[float, float]) -> tuple[float, float]:
-        """Normalize a 2D vector."""
-        norm = np.sqrt(vector[0] ** 2 + vector[1] ** 2)
-        if norm < 1e-10:
-            return (0.0, 0.0)
-        return (vector[0] / norm, vector[1] / norm)
 
     @staticmethod
     def _distance(p1: tuple[float, float], p2: tuple[float, float]) -> float:
@@ -190,7 +182,7 @@ class PythonSocialForceModel(CustomOperationalModel):
         """
 
         # eq 1 in paper
-        target_dir = self._normalize(step.to_next_target)
+        target_dir = step.orientation_to_next_target
 
         # Initialize acceleration from desired force
         acc_x, acc_y = self._desired_force(

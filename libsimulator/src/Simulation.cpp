@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Simulation.hpp"
 
-#include "CollisionGeometry.hpp"
 #include "GenericAgent.hpp"
 #include "IteratorPair.hpp"
 #include "Journey.hpp"
@@ -9,11 +8,11 @@
 #include "OperationalModelType.hpp"
 #include "Point.hpp"
 #include "Polygon.hpp"
-#include "RoutingEngine.hpp"
 #include "SimulationClock.hpp"
 #include "SimulationError.hpp"
 #include "Stage.hpp"
 #include "StageDescription.hpp"
+#include "SurfaceMeshShortestPathRoutingEngine.hpp"
 #include "Tracing.hpp"
 #include "Visitor.hpp"
 
@@ -21,6 +20,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
+#include <limits>
 #include <map>
 #include <memory>
 #include <string>
@@ -57,12 +57,12 @@ void Simulation::ThrowIfIterating(const char* operation) const
 
 Simulation::Simulation(
     std::unique_ptr<OperationalModel>&& operationalModel,
-    std::unique_ptr<CollisionGeometry>&& geometry,
+    std::unique_ptr<Geometry>&& geometry,
     double dT)
     : _clock(dT)
     , _operationalDecisionSystem(std::move(operationalModel))
     , _geometry(std::move(geometry))
-    , _routingEngine(std::make_unique<RoutingEngine>(_geometry->Polygon()))
+    , _routingEngine(std::make_unique<SurfaceMeshShortestPathRoutingEngine>(*_geometry))
 {
 }
 
@@ -200,62 +200,36 @@ Journey::ID Simulation::AddJourney(const std::map<BaseStage::ID, TransitionDescr
     return id;
 }
 
-BaseStage::ID Simulation::AddStage(const StageDescription stageDescription)
+BaseStage::ID Simulation::AddStage(const StageDescription stageDescription, double z_hint)
 {
     ThrowIfIterating("AddStage");
     JPS_SCOPED_TIMER_AND_TRACE(_timer, "Add Stage", Detailed);
-    std::visit(
-        overloaded{
-            [this](const WaypointDescription& d) -> void {
-                if(!this->_geometry->InsideGeometry(d.position)) {
-                    throw SimulationError("WayPoint {} not inside walkable area", d.position);
-                }
-            },
-            [this](const ExitDescription& d) -> void {
-                if(!this->_geometry->InsideGeometry(d.polygon.Centroid())) {
-                    throw SimulationError("Exit {} not inside walkable area", d.polygon.Centroid());
-                }
-            },
-            [this](const NotifiableWaitingSetDescription& d) -> void {
-                for(const auto& point : d.slots) {
-                    if(!this->_geometry->InsideGeometry(point)) {
-                        throw SimulationError(
-                            "NotifiableWaitingSet point {} not inside walkable area", point);
-                    }
-                }
-            },
-            [this](const NotifiableQueueDescription& d) -> void {
-                for(const auto& point : d.slots) {
-                    if(!this->_geometry->InsideGeometry(point)) {
-                        throw SimulationError(
-                            "NotifiableQueue point {} not inside walkable area", point);
-                    }
-                }
-            },
-            [](const DirectSteeringDescription&) -> void {
-
-            }},
-        stageDescription);
-
-    return _stageManager.AddStage(stageDescription, _removedAgentsInLastIteration);
+    return _stageManager.AddStage(
+        stageDescription, _removedAgentsInLastIteration, *_geometry, z_hint);
 }
 
-GenericAgent::ID Simulation::AddAgent(GenericAgent agent)
+GenericAgent::ID Simulation::AddAgent(
+    Journey::ID journeyId,
+    BaseStage::ID stageId,
+    Point position,
+    OperationalModelState model,
+    double z_hint)
 {
     ThrowIfIterating("AddAgent");
     JPS_SCOPED_TIMER_AND_TRACE(_timer, "Add Agent", Detailed);
-    if(!_geometry->InsideGeometry(agent.Position())) {
-        throw SimulationError("Agent {} not inside walkable area", agent.Position());
+    const auto location = _geometry->get_location(position.x, position.y, z_hint);
+    if(!location) {
+        throw SimulationError("Agent {} not inside walkable area", position);
     }
-    if(_journeys.count(agent.journeyId) == 0) {
-        throw SimulationError("Unknown journey id: {}", agent.journeyId);
-    }
-
-    if(!_journeys.at(agent.journeyId)->ContainsStage(agent.stageId)) {
-        throw SimulationError("Unknown stage id: {}", agent.stageId);
+    if(_journeys.count(journeyId) == 0) {
+        throw SimulationError("Unknown journey id: {}", journeyId);
     }
 
-    if(const auto agentModelType = ModelTypeOf(agent.state);
+    if(!_journeys.at(journeyId)->ContainsStage(stageId)) {
+        throw SimulationError("Unknown stage id: {}", stageId);
+    }
+
+    if(const auto agentModelType = ModelTypeOf(model);
        agentModelType != _operationalDecisionSystem.ModelType()) {
         throw SimulationError(
             "Agent model data of type '{}' does not match the simulation's operational model "
@@ -263,6 +237,8 @@ GenericAgent::ID Simulation::AddAgent(GenericAgent agent)
             ToString(agentModelType),
             ToString(_operationalDecisionSystem.ModelType()));
     }
+
+    GenericAgent agent{GenericAgent::ID::Invalid, journeyId, stageId, *location, std::move(model)};
 
     _operationalDecisionSystem.ValidateAgent(agent, _neighborhoodSearch, *_geometry);
 
@@ -274,6 +250,31 @@ GenericAgent::ID Simulation::AddAgent(GenericAgent agent)
     _stategicalDecisionSystem.Run(_journeys, v, _stageManager);
     _tacticalDecisionSystem.Run(*_routingEngine, v);
     return _agents.back().id.getID();
+}
+
+Location Simulation::GetLocation(double x, double y, double z_hint) const
+{
+    const auto located = _geometry->get_location(x, y, z_hint);
+    if(!located) {
+        throw SimulationError("Point {} is outside of accessible area", Point{x, y});
+    }
+    return *located;
+}
+
+void Simulation::SetAgentTarget(GenericAgent::ID id, Point target)
+{
+    auto& agent = Agent(id);
+    const auto located = _geometry->get_location(
+        target.x, target.y, agent.location.z(), std::numeric_limits<double>::max());
+    if(!located) {
+        throw SimulationError("Point {} is outside of accessible area", target);
+    }
+    agent.finalTarget = *located;
+}
+
+void Simulation::SetAgentTarget(GenericAgent::ID id, const Location& target)
+{
+    Agent(id).finalTarget = target;
 }
 
 void Simulation::MarkAgentForRemoval(GenericAgent::ID id)
@@ -383,7 +384,7 @@ std::vector<GenericAgent::ID> Simulation::AgentsInPolygon(const std::vector<Poin
 
     std::vector<GenericAgent::ID> result{};
     _neighborhoodSearch.ForEachInRange(p, dist, [&result, &poly](const GenericAgent& agent) {
-        if(poly.IsInside(agent.Position())) {
+        if(poly.IsInside(agent.location.xy())) {
             result.push_back(agent.id);
         }
     });
@@ -399,7 +400,7 @@ StageProxy Simulation::Stage(BaseStage::ID stageId)
 {
     return _stageManager.Stage(stageId)->Proxy(this);
 }
-CollisionGeometry Simulation::Geo() const
+const Geometry& Simulation::Geo() const
 {
     return *_geometry;
 }

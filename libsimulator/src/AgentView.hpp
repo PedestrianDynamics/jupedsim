@@ -7,7 +7,7 @@
 #include "LineSegment.hpp"
 #include "Point.hpp"
 
-#include <algorithm>
+#include <cmath>
 #include <concepts>
 #include <ranges>
 #include <type_traits>
@@ -17,6 +17,15 @@
 struct NeighborView {
     Point RelativePosition;
     const OperationalModelState* state;
+
+private:
+    /// Internal Location of the agent. Only AgentView has access to it.
+    friend class AgentView;
+    NeighborView(Point relative, const OperationalModelState* model, const Location* where)
+        : RelativePosition(relative), state(model), _location(where)
+    {
+    }
+    const Location* _location;
 };
 
 /// A wall segment as seen from the agent that asked for it. It carries what agents typically
@@ -73,14 +82,21 @@ public:
     std::vector<NeighborView> OtherAgentsInRange(double radius, Pred filter = {}) const
     {
         std::vector<NeighborView> neighbors{};
-        _world.ForEachAgentInRange(_agent.Position(), radius, [&](const GenericAgent& candidate) {
+        // The grid searches by (x, y). Only filters out the asking agent itself plus applies
+        // a quick z-filter - whether agents are "too far" away in z.
+        const double z = location().z();
+        _world.ForEachAgentInRange(location().xy(), radius, [&](const GenericAgent& candidate) {
             if(candidate.id == _agent.id) {
                 return;
             }
+            if(std::abs(candidate.location.z() - z) > InteractionHeight) {
+                return;
+            }
             const NeighborView neighbor{
-                candidate.Position() - _agent.Position(),
+                candidate.location.xy() - location().xy(),
                 _neighborStateMapper ? &_neighborStateMapper->MapToCurrentState(candidate.state) :
-                                       &candidate.state};
+                                       &candidate.state,
+                &candidate.location};
             if(filter(neighbor)) {
                 neighbors.push_back(neighbor);
             }
@@ -92,28 +108,27 @@ public:
     bool HasNeighborMapping() const { return _neighborStateMapper != nullptr; }
 
     /// Whether the straight line to a point at 'RelativePosition' is free of geometry.
-    /// 'boundaries' must be in the same relative coordinate frame (agent at origin),
-    /// i.e. come from WallsNearby() or WallsInRange().
-    template <typename Range>
-    bool NoGeometryBetween(Point RelativePosition, const Range& boundaries) const
+    bool NoGeometryBetween(Point RelativePosition) const
     {
-        return _world.NoGeometryBetween(Point{}, RelativePosition, boundaries);
+        return _world.NoGeometryBetween(location(), RelativePosition);
     }
 
-    /// Whether the point reached by moving 'RelativePosition' is inside the walkable area.
-    bool InsideGeometry(Point RelativePosition) const
+    /// Whether 'neighbor' can be seen from here. In practice whetehr the direct path to
+    /// the neighbor can be walked on the surface.
+    bool NoGeometryBetween(const NeighborView& neighbor) const
     {
-        return _world.InsideGeometry(_agent.Position() + RelativePosition);
+        return _world.NoGeometryBetween(location(), *neighbor._location);
     }
 
 private:
-    /// The segments as seen from the agent. Lazy range, no copies.
-    /// Must stay above WallsNearby() and WallsInRange() in code: an 'auto' return type is
-    /// deduced from the body, so unlike other members this one cannot be called before it is
-    /// defined.
-    auto AsSeenFromAgent(CollisionGeometry::LineSegmentRange segments) const
+    /// The segments as seen from the agent. The query hands over what it found; the view
+    /// owns it from here and turns it into WallViews one at a time, as they are asked for.
+    /// Must stay above WallsInRange() in code: an 'auto' return type is deduced from the
+    /// body, so unlike other members this one cannot be called before it is defined.
+    auto AsSeenFromAgent(std::vector<LineSegment> segments) const
     {
-        return segments | std::views::transform([origin = _agent.Position()](const LineSegment& s) {
+        return std::move(segments) |
+               std::views::transform([origin = location().xy()](const LineSegment& s) {
                    const LineSegment segment{s.p1 - origin, s.p2 - origin};
                    const Point closest_point = segment.ShortestPoint(Point{});
                    return WallView{
@@ -125,22 +140,14 @@ private:
     }
 
 public:
-    /// Walls in the grid cells around the agent. Which ones are returned depends on the
-    /// underlying grid cell size.
-    /// Returned as lazy range.
-    auto WallsNearby() const
-    {
-        return AsSeenFromAgent(_world.LineSegmentsInRange(_agent.Position()));
-    }
-
     /// Wall segments within 'distance' of the agent, relative to it. Returns lazy range.
     auto WallsInRange(double distance) const
     {
-        return AsSeenFromAgent(_world.LineSegmentsInRange(_agent.Position(), distance));
+        return AsSeenFromAgent(_world.LineSegmentsInRange(location(), distance));
     }
 
     /// The same view, but with neighbors seen through 'states'. 'states' has to outlive the
-    /// returned view. This is a virtual function to allow overriding in AgentStep, which has an
+    /// returned view. AgentStep shadows this function. AgentStep has an
     /// additional member (dt) that needs to be passed to the returned AgentStep.
     AgentView WithNeighborStateMapping(const NeighborStateMapper& states) const
     {
@@ -148,6 +155,9 @@ public:
     }
 
 protected:
+    /// Where the agent stands on the surface.
+    const Location& location() const { return _agent.location; }
+
     const EnvironmentQuery& _world;
     const GenericAgent& _agent;
     /// Null in the common case, where neighbors are seen with their own state.
@@ -176,7 +186,12 @@ public:
 
     double dt() const { return _dt; }
 
-    Point ToNextTarget() const { return _agent.nextTarget - _agent.Position(); }
+    /// Normalized 2D vector pointing at the next target. Zero when the agent has already
+    /// reached it.
+    Point orientation_to_next_target() const
+    {
+        return (_agent.nextTarget - location().xy()).Normalized();
+    }
 
 private:
     double _dt;

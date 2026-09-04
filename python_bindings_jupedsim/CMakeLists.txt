@@ -21,18 +21,23 @@ add_library(py_jupedsim MODULE
     simulation.cpp
     social_force_model.cpp
     stage.cpp
+    temporary/boundary_index.cpp
     trace.cpp
     transition.cpp
     type_casters.hpp
     warp_driver_model.cpp
 )
 
+target_include_directories(py_jupedsim PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
 target_link_libraries(py_jupedsim
     PRIVATE
         pybind11::module
         pybind11::windows_extras
-        fmt::fmt
         simulator
+        fmt::fmt
         common
         perfetto
         project_options

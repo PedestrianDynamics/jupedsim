@@ -4,6 +4,7 @@
 #include "AgentView.hpp"
 #include "EnvironmentQuery.hpp"
 #include "GenericAgent.hpp"
+#include "Geometry/Geometry.hpp"
 #include "OperationalModel.hpp"
 #include "OperationalModelType.hpp"
 
@@ -33,7 +34,7 @@ public:
     Run(double dT,
         double /*t_in_sec*/,
         const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
-        const CollisionGeometry& geometry,
+        const Geometry& geometry,
         AgentContainer<GenericAgent>& agents)
     {
         const EnvironmentQuery envQuery{geometry, neighborhoodSearch};
@@ -44,7 +45,7 @@ public:
             auto& next = _next[index];
             const AgentStep step{envQuery, current, dT};
             const Point movement = _model->ComputeNextState(current.state, next.state, step);
-            next.MoveAlongSurface(movement);
+            next.location.move_on_surface(movement);
         }
         // Swap in the computed generation. This is safe because no caller retains
         // pointers/references across an iteration (Python-side agent handles resolve per
@@ -56,7 +57,7 @@ public:
     void ValidateAgent(
         const GenericAgent& agent,
         const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
-        const CollisionGeometry& geometry) const
+        const Geometry& geometry) const
     {
         const EnvironmentQuery envQuery{geometry, neighborhoodSearch};
         _model->CheckModelConstraint(agent, AgentView{envQuery, agent});

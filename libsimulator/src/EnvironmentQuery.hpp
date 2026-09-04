@@ -1,28 +1,24 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "CollisionGeometry.hpp"
 #include "GenericAgent.hpp"
-#include "GeometricFunctions.hpp"
+#include "Geometry/Geometry.hpp"
+#include "Geometry/Location.hpp"
 #include "LineSegment.hpp"
 #include "NeighborhoodSearch.hpp"
 #include "Point.hpp"
+#include "SimulationError.hpp"
 
-#include <algorithm>
 #include <concepts>
-#include <iterator>
-#include <ranges>
 #include <vector>
 
 class EnvironmentQuery
 {
-    const CollisionGeometry& _geometry;
+    const Geometry& _geometry;
     const NeighborhoodSearch<GenericAgent>& _nsearch;
 
 public:
-    EnvironmentQuery(
-        const CollisionGeometry& geometry,
-        const NeighborhoodSearch<GenericAgent>& nsearch)
+    EnvironmentQuery(const Geometry& geometry, const NeighborhoodSearch<GenericAgent>& nsearch)
         : _geometry(geometry), _nsearch(nsearch)
     {
     }
@@ -32,6 +28,7 @@ public:
     };
 
     /// Calls 'fn' for every agent within 'radius' of 'from'.
+    /// Note: No z filtering is applied.
     template <std::invocable<const GenericAgent&> Fn>
     void ForEachAgentInRange(const Point& from, double radius, Fn fn) const
     {
@@ -51,26 +48,18 @@ public:
         return neighbors;
     }
 
-    template <typename Range>
-    bool NoGeometryBetween(const Point& from, const Point& to, const Range& boundaries) const
+    bool NoGeometryBetween(const Location& who, Point direction) const
     {
-        const LineSegment los{from, to};
-        return !std::any_of(std::begin(boundaries), std::end(boundaries), [&los](const auto& seg) {
-            return intersects(los, seg);
-        });
+        return _geometry.no_geometry_between(who, direction);
     }
 
-    CollisionGeometry::LineSegmentRange
-    LineSegmentsInRange(const Point& p, double distance = -1.0) const
+    bool NoGeometryBetween(const Location& who, const Location& other) const
     {
-        if(distance < 0.0) {
-            return _geometry.LineSegmentsInApproxDistanceTo(p);
-        } else {
-            return _geometry.LineSegmentsInDistanceTo(distance, p);
-        }
+        return _geometry.no_geometry_between(who, other);
     }
 
-    bool InsideGeometry(const Point& p) const { return _geometry.InsideGeometry(p); }
-
-    const CollisionGeometry& Geometry() const { return _geometry; }
+    std::vector<LineSegment> LineSegmentsInRange(const Location& who, double distance) const
+    {
+        return _geometry.line_segments_in_range(who, distance);
+    }
 };

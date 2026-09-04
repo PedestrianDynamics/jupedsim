@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "CollisionGeometry.hpp"
+#include "CfgCgal.hpp"
 #include "GeometryBuilder.hpp"
 #include "Point.hpp"
 
 #include <vector>
 
-inline CollisionGeometry buildGrosserStern()
+inline PolyWithHoles buildGrosserStern()
 {
     GeometryBuilder builder;
     builder.AddAccessibleArea(
@@ -1459,7 +1459,7 @@ inline CollisionGeometry buildGrosserStern()
     return builder.Build();
 }
 
-inline CollisionGeometry buildLargeStreetNetwork()
+inline PolyWithHoles buildLargeStreetNetwork()
 {
 
     GeometryBuilder builder;

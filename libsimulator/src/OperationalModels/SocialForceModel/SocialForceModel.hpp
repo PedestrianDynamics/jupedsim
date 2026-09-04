@@ -38,7 +38,7 @@ private:
      *
      * @return vector with driving force of pedestrian
      */
-    static Point DrivingForce(const State& currentState, Point ToNextTarget);
+    static Point DrivingForce(const State& currentState, Point e0);
     /**
      *  Repulsive force acting on pedestrian <ped1> from pedestrian <ped2>
      * @param ped1 reference to Pedestrian 1 on whom the force acts on

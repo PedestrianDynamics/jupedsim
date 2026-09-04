@@ -59,13 +59,12 @@ class _CapturingModel(jps.CustomOperationalModel):
     def compute_next_state(self, state, step):
         if state.probe:
             self.predicate_neighbors.clear()
-            boundaries = step.walls_nearby()
 
             def _tracking(neighbor):
                 self.predicate_neighbors.append(neighbor.relative_position)
                 if self._predicate is None:
                     return True
-                return self._predicate(step, neighbor, boundaries)
+                return self._predicate(step, neighbor)
 
             neighbors = step.other_agents_in_range(self._radius, _tracking)
             self.neighbors = [n.relative_position for n in neighbors]
@@ -95,9 +94,7 @@ def test_no_predicate_returns_all_in_radius():
 
 
 def test_reject_all_predicate_returns_empty():
-    model = _CapturingModel(
-        radius=5.0, predicate=lambda step, n, boundaries: False
-    )
+    model = _CapturingModel(radius=5.0, predicate=lambda step, n: False)
     sim, exit_id, journey_id = _make_sim(model)
     _add_agent(sim, journey_id, exit_id, (2.0, 10.0), probe=True)
     _add_agent(sim, journey_id, exit_id, (3.0, 10.0))
@@ -110,7 +107,7 @@ def test_reject_all_predicate_returns_empty():
 
 def test_group_filter_returns_only_matching_group():
     model = _CapturingModel(
-        radius=5.0, predicate=lambda step, n, boundaries: n.state.group == 1
+        radius=5.0, predicate=lambda step, n: n.state.group == 1
     )
     sim, exit_id, journey_id = _make_sim(model)
     _add_agent(
@@ -135,9 +132,7 @@ def test_group_filter_returns_only_matching_group():
 
 def test_predicate_never_called_with_self():
     # accept-all predicate — only here to trigger tracking
-    model = _CapturingModel(
-        radius=100.0, predicate=lambda step, n, _walls: True
-    )
+    model = _CapturingModel(radius=100.0, predicate=lambda step, n: True)
     sim, exit_id, journey_id = _make_sim(model)
     _add_agent(sim, journey_id, exit_id, (2.0, 10.0), probe=True)
     _add_agent(sim, journey_id, exit_id, (3.0, 10.0))
@@ -152,8 +147,8 @@ def test_predicate_never_called_with_self():
 # ---------------------------------------------------------------------------
 
 
-def _visible(step, neighbor, boundaries):
-    return step.no_geometry_between(neighbor.relative_position, boundaries)
+def _visible(step, neighbor):
+    return step.no_geometry_between(neighbor)
 
 
 def test_no_geometry_between_filters_occluded_agents():
@@ -194,9 +189,7 @@ def test_composed_no_geometry_between_and_group_filter():
     """Combining no_geometry_between with a group predicate using a lambda."""
     model = _CapturingModel(
         radius=20.0,
-        predicate=lambda step, n, boundaries: (
-            _visible(step, n, boundaries) and n.state.group == 1
-        ),
+        predicate=lambda step, n: _visible(step, n) and n.state.group == 1,
     )
     sim, exit_id, journey_id = _make_sim(model, geometry=_walled_room())
     _add_agent(

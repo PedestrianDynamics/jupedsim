@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "AABB.hpp"
 #include "SimulationError.hpp"
+#include "TestCommon.hpp"
 
 #include <gtest/gtest.h>
 

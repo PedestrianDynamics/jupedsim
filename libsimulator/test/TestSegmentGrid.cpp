@@ -1,11 +1,103 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "CollisionGeometry.hpp"
+#include "Geometry/SegmentGrid.hpp"
 #include "LineSegment.hpp"
-#include "gtest/gtest.h"
+#include "Point.hpp"
+#include "TestCommon.hpp"
 
 #include <fmt/format.h>
 #include <fmt/ranges.h>
 #include <gtest/gtest.h>
+
+#include <cstddef>
+#include <iterator>
+#include <set>
+#include <vector>
+
+namespace
+{
+/// A single vertical wall from (0,0) to (0,10).
+SegmentGrid singleVerticalWall()
+{
+    return SegmentGrid{std::vector<LineSegment>{LineSegment{{0., 0.}, {0., 10.}}}};
+}
+} // namespace
+
+TEST(SegmentGrid, IntersectsAnyDetectsACrossingSegment)
+{
+    const auto grid = singleVerticalWall();
+    EXPECT_TRUE(grid.IntersectsAny(LineSegment{{-1., 5.}, {1., 5.}}));
+}
+
+TEST(SegmentGrid, IntersectsAnyRejectsAFarAwaySegment)
+{
+    const auto grid = singleVerticalWall();
+    EXPECT_FALSE(grid.IntersectsAny(LineSegment{{5., 5.}, {7., 5.}}));
+}
+
+TEST(SegmentGrid, IntersectsAnyRejectsANearButParallelSegment)
+{
+    // Shares grid cells with the wall but never crosses it.
+    const auto grid = singleVerticalWall();
+    EXPECT_FALSE(grid.IntersectsAny(LineSegment{{1., 0.}, {1., 10.}}));
+}
+
+TEST(SegmentGrid, DistanceQueryReturnsSegmentsWithinRange)
+{
+    const auto grid = singleVerticalWall();
+    // Perpendicular distance from (1,5) to the wall is 1.
+    EXPECT_EQ(std::ranges::distance(grid.LineSegmentsInDistanceTo(2., {1., 5.})), 1);
+}
+
+TEST(SegmentGrid, DistanceQueryExcludesSegmentsOutOfRange)
+{
+    const auto grid = singleVerticalWall();
+    // Perpendicular distance from (3,3) to the wall is 3.
+    EXPECT_TRUE(grid.LineSegmentsInDistanceTo(2., {3., 3.}).empty());
+}
+
+TEST(SegmentGrid, DistanceQueryGrowingRadiusPicksUpParallelSegmentsOneByOne)
+{
+    // Two parallel diagonals (direction (1,1)); p sits between them, closer to A.
+    // dist(p, A) = sqrt(0.5) ~= 0.707, dist(p, B) = sqrt(4.5) ~= 2.121.
+    const SegmentGrid grid{std::vector<LineSegment>{
+        LineSegment{{0., 0.}, {10., 10.}}, // A
+        LineSegment{{0., 4.}, {10., 14.}}}}; // B
+    const Point p{5., 6.};
+
+    EXPECT_EQ(std::ranges::distance(grid.LineSegmentsInDistanceTo(0.5, p)), 0); // below both
+    EXPECT_EQ(std::ranges::distance(grid.LineSegmentsInDistanceTo(1.0, p)), 1); // reaches A only
+    EXPECT_EQ(std::ranges::distance(grid.LineSegmentsInDistanceTo(3.0, p)), 2); // reaches both
+}
+
+TEST(SegmentGrid, DistanceQueryMeasuresToTheSegmentNotItsInfiniteLine)
+{
+    // Checks with a point along "continuation" of the line segment.
+    const SegmentGrid grid{std::vector<LineSegment>{LineSegment{{0., 0.}, {10., 0.}}}};
+    const Point beyondEnd{13., 0.}; // collinear, 3 past the (10,0) endpoint
+
+    EXPECT_TRUE(grid.LineSegmentsInDistanceTo(2., beyondEnd).empty()); // 3 > 2
+    EXPECT_EQ(std::ranges::distance(grid.LineSegmentsInDistanceTo(4., beyondEnd)), 1); // 3 <= 4
+}
+
+TEST(SegmentGrid, ApproxDistanceQueryReturnsCandidatesNearby)
+{
+    const auto grid = singleVerticalWall();
+    EXPECT_FALSE(grid.LineSegmentsInApproxDistanceTo({1., 5.}).empty());
+}
+
+TEST(SegmentGrid, ApproxDistanceQueryIsEmptyFarAway)
+{
+    const auto grid = singleVerticalWall();
+    EXPECT_TRUE(grid.LineSegmentsInApproxDistanceTo({100., 100.}).empty());
+}
+
+TEST(SegmentGrid, EmptyGridAnswersAllQueriesEmpty)
+{
+    const SegmentGrid grid{std::vector<LineSegment>{}};
+    EXPECT_FALSE(grid.IntersectsAny(LineSegment{{-1., 5.}, {1., 5.}}));
+    EXPECT_TRUE(grid.LineSegmentsInDistanceTo(10., {0., 0.}).empty());
+    EXPECT_TRUE(grid.LineSegmentsInApproxDistanceTo({0., 0.}).empty());
+}
 
 struct CellAdjacencyTestData {
     Cell c;
@@ -139,27 +231,23 @@ INSTANTIATE_TEST_SUITE_P(
 );
 // clang-format on
 
-PolyWithHoles constructPolyFromPoints(const std::vector<Point>& points)
+/// The closed ring of segments through @p corners, the way a polygon boundary arrives.
+std::vector<LineSegment> ring(const std::vector<Point>& corners)
 {
-    using CGALPoint = PolyWithHoles::Polygon_2::Point_2;
-    std::vector<CGALPoint> cgalPoints{};
-    cgalPoints.reserve(points.size());
-    std::transform(
-        std::begin(points), std::end(points), std::back_inserter(cgalPoints), [](const auto& p) {
-            return CGALPoint{p.x, p.y};
-        });
-    return PolyWithHoles(Poly{cgalPoints.begin(), cgalPoints.end()});
+    std::vector<LineSegment> segments{};
+    for(std::size_t i = 1; i < corners.size(); ++i) {
+        segments.emplace_back(corners[i - 1], corners[i]);
+    }
+    segments.emplace_back(corners.back(), corners.front());
+    return segments;
 }
 
 class ApproximateDistanceSimpleRectangle : public ::testing::Test
 {
 protected:
-    CollisionGeometry collisionGeometry;
+    SegmentGrid grid;
 
-    ApproximateDistanceSimpleRectangle()
-        : collisionGeometry(constructPolyFromPoints({{1., 1.}, {3., 1.}, {3., 3.}, {1., 3.}}))
-    {
-    }
+    ApproximateDistanceSimpleRectangle() : grid(ring({{1., 1.}, {3., 1.}, {3., 3.}, {1., 3.}})) {}
 };
 
 TEST_F(ApproximateDistanceSimpleRectangle, InsideSingleCell)
@@ -171,7 +259,7 @@ TEST_F(ApproximateDistanceSimpleRectangle, InsideSingleCell)
         {{1., 3.}, {1., 1.}},
     };
 
-    const auto result = collisionGeometry.LineSegmentsInApproxDistanceTo({2., 2.});
+    const auto result = grid.LineSegmentsInApproxDistanceTo({2., 2.});
     const std::set<LineSegment> actual(std::begin(result), std::end(result));
 
     ASSERT_EQ(actual, expected);
@@ -198,7 +286,7 @@ TEST_F(ApproximateDistanceSimpleRectangle, outsideInRange)
         {CELL_EXTEND, CELL_EXTEND}};
 
     for(const auto& point : candidates) {
-        const auto result = collisionGeometry.LineSegmentsInApproxDistanceTo(point);
+        const auto result = grid.LineSegmentsInApproxDistanceTo(point);
         const std::set<LineSegment> actual(std::begin(result), std::end(result));
 
         ASSERT_EQ(actual, expected);
@@ -208,13 +296,9 @@ TEST_F(ApproximateDistanceSimpleRectangle, outsideInRange)
 class LongDiagonalRectangle : public ::testing::Test
 {
 protected:
-    CollisionGeometry collisionGeometry;
+    SegmentGrid grid;
 
-    LongDiagonalRectangle()
-        : collisionGeometry(
-              constructPolyFromPoints({{-11., -13.}, {5., 11.}, {6., 10.}, {-10., -14.}}))
-    {
-    }
+    LongDiagonalRectangle() : grid(ring({{-11., -13.}, {5., 11.}, {6., 10.}, {-10., -14.}})) {}
 };
 
 TEST_F(LongDiagonalRectangle, FarCellsOutside)
@@ -225,7 +309,7 @@ TEST_F(LongDiagonalRectangle, FarCellsOutside)
         {4, -12},   {4, -8},  {8, -20}, {8, -16},  {8, -12},  {8, -8},  {8, -4}};
 
     for(const auto& point : candidates) {
-        const auto result = collisionGeometry.LineSegmentsInApproxDistanceTo(point);
+        const auto result = grid.LineSegmentsInApproxDistanceTo(point);
         ASSERT_TRUE(result.empty());
     }
 }
@@ -248,7 +332,7 @@ TEST_F(LongDiagonalRectangle, CellsAtBottomLeft)
         {middleCell.x + CELL_EXTEND, middleCell.y + CELL_EXTEND}};
 
     for(const auto& point : candidates) {
-        const auto result = collisionGeometry.LineSegmentsInApproxDistanceTo(point);
+        const auto result = grid.LineSegmentsInApproxDistanceTo(point);
         const std::set<LineSegment> actual(std::begin(result), std::end(result));
 
         ASSERT_EQ(actual, expected);
@@ -273,7 +357,7 @@ TEST_F(LongDiagonalRectangle, CellsAtTopRight)
         {middleCell.x + CELL_EXTEND, middleCell.y + CELL_EXTEND}};
 
     for(const auto& point : candidates) {
-        const auto result = collisionGeometry.LineSegmentsInApproxDistanceTo(point);
+        const auto result = grid.LineSegmentsInApproxDistanceTo(point);
         const std::set<LineSegment> actual(std::begin(result), std::end(result));
 
         ASSERT_EQ(actual, expected);
@@ -287,7 +371,7 @@ TEST_F(LongDiagonalRectangle, CellsWithOneLSLeft)
     const std::vector<Cell> candidates = {{-12, 0}, {-4, 12}};
 
     for(const auto& point : candidates) {
-        const auto result = collisionGeometry.LineSegmentsInApproxDistanceTo(point);
+        const auto result = grid.LineSegmentsInApproxDistanceTo(point);
         const std::set<LineSegment> actual(std::begin(result), std::end(result));
 
         ASSERT_EQ(actual, expected);
@@ -301,7 +385,7 @@ TEST_F(LongDiagonalRectangle, CellsWithOneLSRight)
     const std::vector<Cell> candidates = {{0, -12}, {8, 0}};
 
     for(const auto& point : candidates) {
-        const auto result = collisionGeometry.LineSegmentsInApproxDistanceTo(point);
+        const auto result = grid.LineSegmentsInApproxDistanceTo(point);
         const std::set<LineSegment> actual(std::begin(result), std::end(result));
 
         ASSERT_EQ(actual, expected);
@@ -319,7 +403,7 @@ TEST_F(LongDiagonalRectangle, CellsWithTwoLSMiddle)
     };
 
     for(const auto& point : candidates) {
-        const auto result = collisionGeometry.LineSegmentsInApproxDistanceTo(point);
+        const auto result = grid.LineSegmentsInApproxDistanceTo(point);
         const std::set<LineSegment> actual(std::begin(result), std::end(result));
 
         ASSERT_EQ(actual, expected);

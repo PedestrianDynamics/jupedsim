@@ -11,16 +11,26 @@ target_sources(simulator PRIVATE
     src/AgentRemovalSystem.hpp
     src/AgentView.hpp
     src/CfgCgal.hpp
-    src/CollisionGeometry.cpp
-    src/CollisionGeometry.hpp
     src/Ellipse.cpp
     src/Ellipse.hpp
     src/GenericAgent.hpp
     src/GeometricFunctions.hpp
+    src/Geometry/BoundaryIndex.cpp
+    src/Geometry/BoundaryIndex.hpp
+    src/Geometry/Geometry.cpp
+    src/Geometry/Geometry.hpp
+    src/Geometry/Location.cpp
+    src/Geometry/Location.hpp
+    src/Geometry/ProjectedBoundary.cpp
+    src/Geometry/ProjectedBoundary.hpp
+    src/Geometry/RegionSplit.cpp
+    src/Geometry/RegionSplit.hpp
+    src/Geometry/SegmentGrid.cpp
+    src/Geometry/SegmentGrid.hpp
+    src/Geometry/Validation.cpp
+    src/Geometry/Validation.hpp
     src/GeometryBuilder.cpp
     src/GeometryBuilder.hpp
-    src/Graph.hpp
-    src/Grid2D.hpp
     src/HashCombine.hpp
     src/IteratorPair.hpp
     src/Journey.cpp
@@ -32,17 +42,12 @@ target_sources(simulator PRIVATE
     src/Macros.hpp
     src/Mathematics.cpp
     src/Mathematics.hpp
-    src/Mesh.cpp
-    src/Mesh.hpp
     src/NeighborhoodSearch.hpp
     src/OperationalDecisionSystem.hpp
     src/Point.cpp
     src/Point.hpp
     src/Polygon.cpp
     src/Polygon.hpp
-    src/Routing.cpp
-    src/Routing.hpp
-    src/RoutingEngine.cpp
     src/RoutingEngine.hpp
     src/Simulation.cpp
     src/Simulation.hpp
@@ -57,8 +62,9 @@ target_sources(simulator PRIVATE
     src/StageSystem.cpp
     src/StageSystem.hpp
     src/StrategicalDesicionSystem.hpp
+    src/SurfaceMeshShortestPathRoutingEngine.cpp
+    src/SurfaceMeshShortestPathRoutingEngine.hpp
     src/TacticalDecisionSystem.hpp
-    src/TemplateHelper.hpp
     src/Timing.cpp
     src/Timing.hpp
     src/Tracing.cpp
@@ -94,27 +100,36 @@ target_include_directories(simulator PUBLIC
 ################################################################################
 if (BUILD_TESTS)
     add_executable(libsimulator-tests
+        test/GeometryFixtures.hpp
         test/TestAABB.cpp
         test/TestAgentView.cpp
         test/TestBasicPrimitiveTests.cpp
-        test/TestCollisionGeometry.cpp
+        test/TestBoundaryIndex.cpp
+        test/TestCommon.hpp
         test/TestCustomModel.cpp
         test/TestGenericAgentFormatter.cpp
-        test/TestGraph.cpp
+        test/TestGeometry.cpp
         test/TestJourney.cpp
         test/TestLineSegment.cpp
-        test/TestMesh.cpp
+        test/TestLocation.cpp
         test/TestNeighborhoodSearch.cpp
+        test/TestOperationalDecisionSystem.cpp
         test/TestPoint.cpp
+        test/TestProjectedBoundary.cpp
+        test/TestRegionSplit.cpp
+        test/TestRoutingEngine.cpp
+        test/TestSegmentGrid.cpp
+        test/TestSimulation.cpp
         test/TestSimulationClock.cpp
         test/TestStage.cpp
         test/TestUniqueID.cpp
+        test/TestValidation.cpp
     )
 
     target_link_libraries(libsimulator-tests PRIVATE
-        GTest::gtest
         GTest::gmock
         GTest::gtest_main
+        GTest::gtest
         simulator
     )
 
@@ -129,7 +144,7 @@ if (BUILD_BENCHMARKS)
     add_executable(libsimulator-benchmarks
         benchmark/BenchmarkMain.cpp
         benchmark/benchmarkLineSegment.hpp
-        benchmark/benchmarkCollisionGeometry.hpp
+        benchmark/benchmarkWallQuery.hpp
         benchmark/buildGeometries.hpp
     )
 

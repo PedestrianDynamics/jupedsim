@@ -35,6 +35,7 @@ from jupedsim.library import (
     set_warning_callback,
 )
 from jupedsim.linesegment import LineSegment
+from jupedsim.location import Location
 from jupedsim.models.anticipation_velocity_model import (
     AnticipationVelocityModel,
     AnticipationVelocityModelState,
@@ -128,6 +129,7 @@ __all__ = [
     "IncorrectParameterError",
     "JourneyDescription",
     "LineSegment",
+    "Location",
     "NegativeValueError",
     "NeighborView",
     "NotifiableQueueStage",

@@ -1,12 +1,16 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
+#include <CGAL/AABB_face_graph_triangle_primitive.h>
+#include <CGAL/AABB_traits_3.h>
+#include <CGAL/AABB_tree.h>
 #include <CGAL/Constrained_Delaunay_triangulation_2.h>
 #include <CGAL/Constrained_triangulation_2.h>
 #include <CGAL/Constrained_triangulation_face_base_2.h>
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Polygon_2.h>
 #include <CGAL/Polygon_with_holes_2.h>
-#include <CGAL/Simple_cartesian.h>
+#include <CGAL/Surface_mesh.h>
 #include <CGAL/Triangulation_data_structure_2.h>
 #include <CGAL/Triangulation_vertex_base_2.h>
 
@@ -16,14 +20,42 @@
 #include <sstream>
 #include <string>
 
-// using K = CGAL::Exact_predicates_exact_constructions_kernel;
-using K = CGAL::Simple_cartesian<double>;
+using K = CGAL::Exact_predicates_inexact_constructions_kernel;
+using Point2D = K::Point_2;
+using Point3D = K::Point_3;
+using Triangle2D = K::Triangle_2;
+using Triangle3D = K::Triangle_3;
+using Vector3D = K::Vector_3;
+using Direction3D = K::Direction_3;
+using Line3D = K::Line_3;
+using Ray3D = K::Ray_3;
 
 using Poly = CGAL::Polygon_2<K>;
 using PolyWithHoles = CGAL::Polygon_with_holes_2<K>;
 using PolyWithHolesList = std::list<PolyWithHoles>;
 using PolyList = std::list<Poly>;
 using Vb = CGAL::Triangulation_vertex_base_2<K>;
+using SurfaceMesh = CGAL::Surface_mesh<Point3D>;
+
+/// Convenience alias for vertex descriptor types
+template <class G>
+using VertexDescriptor = typename boost::graph_traits<G>::vertex_descriptor;
+
+/// Convenience alias for face descriptor types
+template <class G>
+using FaceDescriptor = typename boost::graph_traits<G>::face_descriptor;
+
+/// Convenience alias for half edge descriptor types
+template <class G>
+using HalfedgeDescriptor = typename boost::graph_traits<G>::halfedge_descriptor;
+
+/// Convenience alias for face descriptor types
+template <class G>
+using EdgeDescriptor = typename boost::graph_traits<G>::edge_descriptor;
+
+using AABBPrimitive = CGAL::AABB_face_graph_triangle_primitive<SurfaceMesh>;
+using AABBTraits = CGAL::AABB_traits_3<K, AABBPrimitive>;
+using AABBTree = CGAL::AABB_tree<AABBTraits>;
 
 template <class Gt, class Fb = CGAL::Constrained_triangulation_face_base_2<Gt>>
 class MyFace : public Fb
