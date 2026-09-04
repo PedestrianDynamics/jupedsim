@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 """Tests that Python can reach the floorfield Rust crate via C++ (cxx bridge)."""
+
 import py_jupedsim as jps_native
 
 
