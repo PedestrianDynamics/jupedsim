@@ -112,8 +112,8 @@ class CellAdjacencyTest : public ::testing::TestWithParam<CellAdjacencyTestData>
 TEST_P(CellAdjacencyTest, All)
 {
     const auto [c, neighbor, expected] = GetParam();
-    EXPECT_EQ(IsN8Adjacent(c, neighbor), expected);
-    EXPECT_EQ(IsN8Adjacent(neighbor, c), expected);
+    EXPECT_EQ(IsN4Adjacent(c, neighbor), expected);
+    EXPECT_EQ(IsN4Adjacent(neighbor, c), expected);
 }
 
 // clang-format off
@@ -123,16 +123,16 @@ INSTANTIATE_TEST_SUITE_P(
     testing::Values(
         // A cell is not a neighbor of itself
         CellAdjacencyTestData{{0, 0}, {0, 0}, false},
-        // N4 neigbors
+        // N4 neighbors
         CellAdjacencyTestData{{0, 0}, {CELL_EXTEND, 0}, true},
         CellAdjacencyTestData{{0, 0}, {0, CELL_EXTEND}, true},
-        CellAdjacencyTestData{{0, 0}, {CELL_EXTEND, CELL_EXTEND}, true},
         CellAdjacencyTestData{{0, 0}, {-CELL_EXTEND, 0}, true},
         CellAdjacencyTestData{{0, 0}, {0, -CELL_EXTEND}, true},
         // N8 neighbors
-        CellAdjacencyTestData{{0, 0}, {-CELL_EXTEND, -CELL_EXTEND}, true},
-        CellAdjacencyTestData{{0, 0}, {CELL_EXTEND, -CELL_EXTEND}, true},
-        CellAdjacencyTestData{{0, 0}, {-CELL_EXTEND, CELL_EXTEND}, true},
+        CellAdjacencyTestData{{0, 0}, {CELL_EXTEND, CELL_EXTEND}, false},
+        CellAdjacencyTestData{{0, 0}, {-CELL_EXTEND, -CELL_EXTEND}, false},
+        CellAdjacencyTestData{{0, 0}, {CELL_EXTEND, -CELL_EXTEND}, false},
+        CellAdjacencyTestData{{0, 0}, {-CELL_EXTEND, CELL_EXTEND}, false},
         // Layer beyond N8 (all false, no direct neighbors)
         CellAdjacencyTestData{{0, 0}, {CELL_EXTEND*2, 0}, false},
         CellAdjacencyTestData{{0, 0}, {CELL_EXTEND*2, CELL_EXTEND}, false},
@@ -206,6 +206,14 @@ INSTANTIATE_TEST_SUITE_P(
         std::make_tuple(
             LineSegment{{1, 1}, {3, 4}},
             std::set<Cell>{{0, 0}, {0, 4}}
+        ),
+        std::make_tuple(
+            LineSegment{{1, 1}, {7, 5}},
+            std::set<Cell>{{0, 0}, {4, 0}, {4, 4}}
+        ),
+        std::make_tuple(
+            LineSegment{{1, 1}, {5, 7}},
+            std::set<Cell>{{0, 0}, {0, 4}, {4, 4}}
         ),
         std::make_tuple(
             LineSegment{{4, 12}, {8, 0}},

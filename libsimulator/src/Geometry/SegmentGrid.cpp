@@ -18,14 +18,11 @@ Cell makeCell(Point p)
     return {floor(p.x / CELL_EXTEND) * CELL_EXTEND, floor(p.y / CELL_EXTEND) * CELL_EXTEND};
 }
 
-bool IsN8Adjacent(const Cell& a, const Cell& b)
+bool IsN4Adjacent(const Cell& a, const Cell& b)
 {
     const auto dx = static_cast<int>(abs(a.x - b.x) / CELL_EXTEND);
     const auto dy = static_cast<int>(abs(a.y - b.y) / CELL_EXTEND);
-    if((dx == 0 && dy == 0) || dx > 1 || dy > 1) {
-        return false;
-    }
-    return true;
+    return dx + dy == 1;
 }
 
 std::set<Cell> cellsFromLineSegment(LineSegment ls)
@@ -36,7 +33,7 @@ std::set<Cell> cellsFromLineSegment(LineSegment ls)
         return {firstCell};
     }
 
-    if(IsN8Adjacent(firstCell, lastCell)) {
+    if(IsN4Adjacent(firstCell, lastCell)) {
         return {firstCell, lastCell};
     }
 
