@@ -83,9 +83,8 @@ public:
 const int CELL_EXTEND = 4;
 using Cell = Point;
 
-/// Checks if two Cells are N8 neighbors. 'a' and 'b' are not considered neighbors if they have the
-/// same coordinates.
-bool IsN8Adjacent(const Cell& a, const Cell& b);
+/// Checks if two Cells are N4 neighbors: Is it one of the 4 non-diagonal surrounding cells?
+bool IsN4Adjacent(const Cell& a, const Cell& b);
 
 /// Creates a cell from a position.
 /// Cells are always alligned to multiples of CELL_EXTEND. Cells are defined in worldcoordinates NOT
