@@ -78,7 +78,7 @@ TEST(MeshBuiltSimulation, AnAgentIsPutOnTheStoreyItsHintNames)
     const auto upstairs = sim->AddAgent(journey, stage, Point{5, 6}, State{}, 3.0);
 
     EXPECT_EQ(sim->Agent(downstairs).location.z(), 0.0);
-    EXPECT_EQ(sim->Agent(upstairs).location.z(), 3.0);
+    EXPECT_NEAR(sim->Agent(upstairs).location.z(), 3.0, 1e-9);
     EXPECT_NE(sim->Agent(downstairs).location.region(), sim->Agent(upstairs).location.region());
 }
 
@@ -101,7 +101,7 @@ TEST(MeshBuiltSimulation, AStageIsPutOnTheStoreyItsHintNames)
     sim->Iterate();
     // The waypoint of the journey the agent is on, so its target says which storey the stage
     // was put on.
-    EXPECT_EQ(sim->Agent(id).finalTarget.z(), 3.0);
+    EXPECT_NEAR(sim->Agent(id).finalTarget.z(), 3.0, 1e-9);
 
     sim->SwitchAgentJourney(id, down_journey, down_stage);
     sim->Iterate();
@@ -117,7 +117,7 @@ TEST(MeshBuiltSimulation, ATargetWrittenFromOutsideLandsOnTheAgentsOwnStorey)
     // Only (x, y) is given, and two storeys carry it. It has to mean the one the agent is on --
     // anything else routes it through the wrong floor.
     sim->SetAgentTarget(upstairs, Point{2, 6});
-    EXPECT_EQ(sim->Agent(upstairs).finalTarget.z(), 3.0);
+    EXPECT_NEAR(sim->Agent(upstairs).finalTarget.z(), 3.0, 1e-9);
 
     const auto downstairs = sim->AddAgent(journey, stage, Point{5, 6}, State{}, 0.0);
     sim->SetAgentTarget(downstairs, Point{2, 6});
@@ -161,7 +161,7 @@ TEST(MeshBuiltSimulation, WalkingUpAStairToTheExitAtTheTop)
         EXPECT_GE(heights[i], heights[i - 1] - 1e-9)
             << "dropped from " << heights[i - 1] << " to " << heights[i] << " at step " << i;
     }
-    EXPECT_GE(heights.back(), 3.0);
+    EXPECT_GE(heights.back(), 3.0 - 1e-9);
 
     // No standing still: a phantom wall under or over the flight would show as an agent that
     // stops making headway without ever arriving.
@@ -211,7 +211,7 @@ TEST(MeshBuiltSimulation, WalkingUpTheUStairToTheExitAbove)
         EXPECT_GE(heights[i], heights[i - 1] - 1e-9)
             << "dropped from " << heights[i - 1] << " to " << heights[i] << " at step " << i;
     }
-    EXPECT_GE(heights.back(), 3.0);
+    EXPECT_GE(heights.back(), 3.0 - 1e-9);
 
     // No standing still: a phantom wall over or under him would show as an agent that stops
     // making headway without ever arriving.
