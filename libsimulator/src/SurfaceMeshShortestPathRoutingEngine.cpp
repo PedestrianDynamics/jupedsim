@@ -3,6 +3,7 @@
 
 #include "SimulationError.hpp"
 
+#include <algorithm>
 #include <cstddef>
 #include <iterator>
 #include <tuple>
@@ -62,12 +63,18 @@ SurfaceMeshShortestPathRoutingEngine::trace_way(const Point3D& source, const Rou
     struct Collector {
         ShortestPath& tree;
         const SurfaceMesh& mesh;
+        double clearance;
         Way& way;
 
-        void add(const Point3D& p, Point open)
+        Point xy(SurfaceMesh::Vertex_index v) const
         {
-            way.points.push_back(p);
-            way.intoTheOpen.push_back(open);
+            const auto& p = mesh.point(v);
+            return Point{p.x(), p.y()};
+        }
+
+        bool on_wall(SurfaceMesh::Vertex_index v) const
+        {
+            return CGAL::is_border(v, mesh).has_value();
         }
 
         /// Where the open lies at a corner: opposite the two walls that meet there.
@@ -83,10 +90,6 @@ SurfaceMeshShortestPathRoutingEngine::trace_way(const Point3D& source, const Rou
                 // An interior vertex: the way bends over a fold, there is no wall to avoid.
                 return {0.0, 0.0};
             }
-            const auto xy = [this](SurfaceMesh::Vertex_index w) {
-                const auto& p = mesh.point(w);
-                return Point{p.x(), p.y()};
-            };
             const Point here = xy(v);
             const Point along = (xy(mesh.source(*border)) - here).Normalized();
             const Point onwards = (xy(mesh.target(mesh.next(*border))) - here).Normalized();
@@ -94,19 +97,33 @@ SurfaceMeshShortestPathRoutingEngine::trace_way(const Point3D& source, const Rou
             return (along + onwards).Normalized() * -1.0;
         }
 
+        /// The crossing of @p e, held off whichever of its ends is a wall. CGAL weights the
+        /// edge's target: the point is `t * target + (1 - t) * source`.
+        K::FT held_off_the_walls(SurfaceMesh::Halfedge_index e, K::FT t) const
+        {
+            const double length = (xy(mesh.target(e)) - xy(mesh.source(e))).Norm();
+            const double margin = std::min(clearance / length, 0.5);
+            const double low = on_wall(mesh.source(e)) ? margin : 0.0;
+            const double high = on_wall(mesh.target(e)) ? 1.0 - margin : 1.0;
+            return std::clamp(CGAL::to_double(t), low, high);
+        }
+
         void operator()(SurfaceMesh::Halfedge_index e, K::FT t)
         {
-            add(tree.point(e, t), Point{0.0, 0.0});
+            way.push_back({tree.point(e, held_off_the_walls(e, t)), Point{0.0, 0.0}});
         }
-        void operator()(SurfaceMesh::Vertex_index v) { add(tree.point(v), out_of_the_corner(v)); }
+        void operator()(SurfaceMesh::Vertex_index v)
+        {
+            way.push_back({tree.point(v), out_of_the_corner(v)});
+        }
         void operator()(SurfaceMesh::Face_index f, const ShortestPath::Barycentric_coordinates& bc)
         {
-            add(tree.point(f, bc), Point{0.0, 0.0});
+            way.push_back({tree.point(f, bc), Point{0.0, 0.0}});
         }
     };
 
     Way way{};
-    Collector collector{tree, _geometry.mesh(), way};
+    Collector collector{tree, _geometry.mesh(), WallClearance(), way};
     tree.shortest_path_sequence_to_source_points(from_loc.first, from_loc.second, collector);
     return way;
 }
@@ -131,12 +148,11 @@ std::vector<Point3D> SurfaceMeshShortestPathRoutingEngine::GetShortestPath(
     const auto way = trace_way(source, target);
 
     std::vector<Point3D> path{};
-    path.reserve(way.points.size());
-    for(std::size_t i = 0; i < way.points.size(); ++i) {
+    path.reserve(way.size());
+    for(const auto& step : way) {
         path.push_back(
-            way.intoTheOpen[i].isZeroLength() ?
-                way.points[i] :
-                held_off_the_wall(way.points[i], way.intoTheOpen[i]));
+            step.intoTheOpen.isZeroLength() ? step.point :
+                                              held_off_the_wall(step.point, step.intoTheOpen));
     }
     return path;
 }

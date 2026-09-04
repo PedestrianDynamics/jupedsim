@@ -34,18 +34,12 @@ private:
     using Traits = CGAL::Surface_mesh_shortest_path_traits<K, SurfaceMesh>;
     using ShortestPath = CGAL::Surface_mesh_shortest_path<Traits>;
 
-    /// The geodesic as the surface hands it over: every point it passes through, and where it
-    /// turns on a wall corner, which way is off that corner into the open.
-    ///
-    /// The distinction is the surface's own, not ours: a geodesic runs straight through a face
-    /// and straight across an edge -- it can only turn at a vertex. A turn on a vertex that is on
-    /// the border is a corner an agent has to get around, every other point is one the way merely
-    /// passes, and a turn on an interior vertex is a fold he walks straight over.
-    struct Way {
-        std::vector<Point3D> points{};
-        /// Parallel to points: unit vector off a wall corner, zero where there is no corner.
-        std::vector<Point> intoTheOpen{};
+    struct Step {
+        Point3D point;
+        /// Unit vector off a wall corner, zero where there is no corner.
+        Point intoTheOpen;
     };
+    using Way = std::vector<Step>;
 
     /// Where @p p sits on the surface. Throws naming @p what if it sits nowhere.
     Geometry::FaceLocation on_surface(const Point3D& p, const char* what) const;

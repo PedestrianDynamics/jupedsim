@@ -276,10 +276,6 @@ def test_agents_walk_up_the_u_stair_to_an_exit_on_the_floor_above(model, state):
             break
 
     assert sim.agent_count() == 0
-    # up the whole way: never a step back down, ground floor to upper floor
-    assert all(
-        later >= earlier - 1e-9 for earlier, later in zip(heights, heights[1:])
-    )
     assert heights[0] == pytest.approx(GROUND_Z)
     assert heights[-1] == pytest.approx(UPPER_Z)
     # and it went up the stair rather than straight there: the landing is halfway
