@@ -235,7 +235,9 @@ endif()
 add_subdirectory(libcommon)
 add_subdirectory(libsimulator)
 add_subdirectory(python_bindings_jupedsim)
-add_subdirectory(tools)
+if(BUILD_TOOLS)
+    add_subdirectory(tools)
+endif()
 
 ################################################################################
 # Code formatting
