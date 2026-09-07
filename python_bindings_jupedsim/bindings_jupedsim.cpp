@@ -28,6 +28,7 @@ void init_agent_view(py::module_& m);
 void init_python_model(py::module_& m);
 void init_boundary_index(py::module_& m);
 void init_floorfield(py::module_& m);
+void init_walkable_surface(py::module_& m);
 
 PYBIND11_MODULE(py_jupedsim, m)
 {
@@ -54,4 +55,5 @@ PYBIND11_MODULE(py_jupedsim, m)
     init_simulation(m);
     init_boundary_index(m);
     init_floorfield(m);
+    init_walkable_surface(m);
 }

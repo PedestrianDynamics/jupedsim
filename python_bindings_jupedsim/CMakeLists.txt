@@ -26,6 +26,7 @@ add_library(py_jupedsim MODULE
     trace.cpp
     transition.cpp
     type_casters.hpp
+    walkable_surface.cpp
     warp_driver_model.cpp
 )
 

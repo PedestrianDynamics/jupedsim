@@ -65,6 +65,7 @@ from jupedsim.models.warp_driver import (
     WarpDriverModel,
     WarpDriverModelState,
 )
+from jupedsim.native import WalkableSurface
 from jupedsim.recording import Recording, RecordingAgent, RecordingFrame
 from jupedsim.routing import RoutingEngine
 from jupedsim.serialization import TrajectoryWriter
@@ -148,9 +149,10 @@ __all__ = [
     "Transition",
     "WaitingSetStage",
     "WaitingSetState",
+    "WalkableSurface",
+    "WallView",
     "WarpDriverModel",
     "WarpDriverModelState",
-    "WallView",
     "WaypointStage",
     "__commit__",
     "__compiler__",

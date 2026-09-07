@@ -29,6 +29,8 @@ target_sources(simulator PRIVATE
     src/Geometry/SegmentGrid.hpp
     src/Geometry/Validation.cpp
     src/Geometry/Validation.hpp
+    src/Geometry/WalkableSurface.cpp
+    src/Geometry/WalkableSurface.hpp
     src/GeometryBuilder.cpp
     src/GeometryBuilder.hpp
     src/HashCombine.hpp
