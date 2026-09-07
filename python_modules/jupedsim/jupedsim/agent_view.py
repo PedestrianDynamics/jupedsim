@@ -1,12 +1,9 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable
+from typing import Any, Callable
 
 import jupedsim.native as py_jps
-
-if TYPE_CHECKING:
-    from jupedsim.linesegment import LineSegment
 
 
 class NeighborView:
@@ -56,11 +53,9 @@ class WallView:
         self._obj = obj
 
     @property
-    def segment(self) -> LineSegment:
+    def segment(self) -> tuple[tuple[float, float], tuple[float, float]]:
         """The segment itself, relative to the agent."""
-        from jupedsim.linesegment import LineSegment
-
-        return LineSegment(self._obj.segment)
+        return self._obj.segment
 
     @property
     def closest_point(self) -> tuple[float, float]:

@@ -31,22 +31,18 @@ size_t WalkableSurface::ConnectRegions(
     }
     const auto asPoint3D = [](const Point& p, double height) { return Point3D{p.x, p.y, height}; };
     if(!CGAL::coplanar(
-           asPoint3D(from.p1, regions[fromRegion].Height),
-           asPoint3D(from.p2, regions[fromRegion].Height),
-           asPoint3D(to.p1, regions[toRegion].Height),
-           asPoint3D(to.p2, regions[toRegion].Height))) {
+           asPoint3D(from.p1, regions[fromRegion].height),
+           asPoint3D(from.p2, regions[fromRegion].height),
+           asPoint3D(to.p1, regions[toRegion].height),
+           asPoint3D(to.p2, regions[toRegion].height))) {
         throw SimulationError("Connector not planar");
     };
 
     if(CGAL::do_intersect(
            Segment2D({from.p2.x, from.p2.y}, {to.p1.x, to.p1.y}),
            Segment2D({to.p2.x, to.p2.y}, {from.p1.x, from.p1.y}))) {
-    }
-    {
         // flip one LS
-        const auto tmp = from.p1;
-        from.p1 = from.p2;
-        from.p2 = tmp;
+        std::swap(from.p1, from.p2);
     }
 
     connectors.emplace_back(fromRegion, from, toRegion, to);
@@ -59,7 +55,7 @@ std::unique_ptr<SurfaceMesh> WalkableSurface::CreateMesh()
     // 1.1 Delauny Triangulate all input polygons and add to mesh
     SurfaceMesh mesh{};
     for(auto&& r : regions) {
-        auto p = r.Polygon.Boundary |
+        auto p = r.polygon.boundary |
                  std::views::transform([](const auto& p) { return Point2D(p.x, p.y); });
         CDT cdt{};
         cdt.insert_constraint(std::begin(p), std::end(p), true);
@@ -68,7 +64,7 @@ std::unique_ptr<SurfaceMesh> WalkableSurface::CreateMesh()
         std::unordered_map<CDT::Vertex_handle, SurfaceMesh::Vertex_index> vmap{};
         for(const auto& v : cdt.finite_vertex_handles()) {
             const auto& p = v->point();
-            Point3D p_3d{p.x(), p.y(), r.Height};
+            Point3D p_3d{p.x(), p.y(), r.height};
             vmap.emplace(v, mesh.add_vertex(p_3d));
         }
 

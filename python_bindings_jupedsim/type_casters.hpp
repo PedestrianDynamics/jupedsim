@@ -19,7 +19,7 @@ struct type_caster<Point> {
 
     bool load(handle src, bool)
     {
-        if(!isinstance<sequence>(src)) {
+        if(!isinstance<sequence>(src) || isinstance<str>(src)) { // Strings are sequences as well
             return false;
         }
         auto seq = reinterpret_borrow<sequence>(src);
@@ -39,11 +39,33 @@ struct type_caster<Point> {
 
 template <>
 struct type_caster<LineSegment> {
-    PYBIND11_TYPE_CASTER(LineSegment, const_name("tuple(tuple[float, float], tuple[float, float]"));
+    PYBIND11_TYPE_CASTER(
+        LineSegment,
+        const_name("tuple[tuple[float, float], tuple[float, float]]"));
 
-    bool load(handle src, bool)
+    bool load(handle src, bool convert)
     {
-        // TODO
+        if(!isinstance<sequence>(src) || isinstance<str>(src)) { // Strings are sequences as well
+            return false;
+        }
+        auto seq = reinterpret_borrow<sequence>(src);
+        if(seq.size() != 2) {
+            return false;
+        }
+        auto from_caster = make_caster<Point>();
+        auto to_caster = make_caster<Point>();
+        if(!from_caster.load(seq[0], convert) || !to_caster.load(seq[1], convert)) {
+            return false;
+        }
+        value = LineSegment(
+            cast_op<Point&&>(std::move(from_caster)), cast_op<Point&&>(std::move(to_caster)));
+
+        return true;
+    }
+
+    static handle cast(const LineSegment& src, return_value_policy, handle)
+    {
+        return make_tuple(make_tuple(src.p1.x, src.p1.y), make_tuple(src.p2.x, src.p2.y)).release();
     }
 };
 
@@ -84,30 +106,11 @@ inline std::optional<object> optional_attr(handle h, const char* name)
     }
     return a;
 }
-
-inline bool load_ring_from_sequence(handle src, bool convert, WalkableSurface::Ring& out)
-{
-    if(!isinstance<sequence>(src) || isinstance<str>(src)) {
-        return false;
-    }
-    auto seq = reinterpret_borrow<sequence>(src);
-    WalkableSurface::Ring ring{};
-    ring.reserve(seq.size());
-    for(auto item : seq) {
-        auto caster = make_caster<Point>();
-        caster.load(item, convert);
-        ring.emplace_back(cast_op<Point&&>(std::move(caster)));
-    }
-    std::swap(out, ring);
-    return true;
-}
 } // namespace
 
 template <>
 struct type_caster<WalkableSurface::Polygon> {
-    PYBIND11_TYPE_CASTER(
-        WalkableSurface::Polygon,
-        const_name("shapely.Polygon"));
+    PYBIND11_TYPE_CASTER(WalkableSurface::Polygon, const_name("shapely.Polygon"));
 
     bool load(handle src, bool convert)
     {
@@ -121,7 +124,7 @@ struct type_caster<WalkableSurface::Polygon> {
         if(!caster.load((*exterior).attr("coords"), convert)) {
             return false;
         }
-        value.Boundary = cast_op<WalkableSurface::Ring&&>(std::move(caster));
+        value.boundary = cast_op<WalkableSurface::Ring&&>(std::move(caster));
 
         auto seq = reinterpret_borrow<sequence>(*interiors);
         std::vector<WalkableSurface::Ring> holes{};
@@ -134,7 +137,7 @@ struct type_caster<WalkableSurface::Polygon> {
             holes.emplace_back(cast_op<WalkableSurface::Ring&&>(std::move(caster)));
         }
 
-        value.Holes = std::move(holes);
+        value.holes = std::move(holes);
         return true;
     }
 };
