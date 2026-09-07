@@ -40,8 +40,8 @@ def distance_to_segment(p, a, b) -> float:
 
 
 def canonical(segment) -> tuple:
-    a = tuple(round(c, 9) for c in segment.p1)
-    b = tuple(round(c, 9) for c in segment.p2)
+    a = tuple(round(c, 9) for c in segment[0])
+    b = tuple(round(c, 9) for c in segment[1])
     return (a, b) if a <= b else (b, a)
 
 
@@ -74,7 +74,7 @@ def test_query_invariants_hold_over_a_grid(geometry) -> None:
                     assert len(keys) == len(seen), f"duplicate piece at {at}"
                     for segment in seen:
                         reach = distance_to_segment(
-                            (x, y), segment.p1[:2], segment.p2[:2]
+                            (x, y), segment[0][:2], segment[1][:2]
                         )
                         assert reach <= radius + 1e-6, (
                             f"piece beyond the radius at {at}: {reach}"

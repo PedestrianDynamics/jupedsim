@@ -34,7 +34,6 @@ from jupedsim.library import (
     set_info_callback,
     set_warning_callback,
 )
-from jupedsim.linesegment import LineSegment
 from jupedsim.location import Location
 from jupedsim.models.anticipation_velocity_model import (
     AnticipationVelocityModel,
@@ -129,7 +128,6 @@ __all__ = [
     "Hdf5TrajectoryWriter",
     "IncorrectParameterError",
     "JourneyDescription",
-    "LineSegment",
     "Location",
     "NegativeValueError",
     "NeighborView",

@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
+#include "CfgCgal.hpp"
 #include "LineSegment.hpp"
 #include "Point.hpp"
-#include "CfgCgal.hpp"
 
 #include <fmt/ranges.h>
 
@@ -14,14 +14,14 @@ class WalkableSurface
 public:
     using Ring = std::vector<Point>;
     struct Polygon {
-        Ring Boundary;
-        std::vector<Ring> Holes;
+        Ring boundary;
+        std::vector<Ring> holes;
     };
 
 private:
     struct Region {
-        Polygon Polygon;
-        double Height;
+        Polygon polygon;
+        double height;
     };
 
     struct Connector {
@@ -49,6 +49,6 @@ struct fmt::formatter<WalkableSurface::Polygon> {
     template <typename FormatContext>
     auto format(const WalkableSurface::Polygon& p, FormatContext& ctx) const
     {
-        return fmt::format_to(ctx.out(), "({}, {})", p.Boundary, p.Holes);
+        return fmt::format_to(ctx.out(), "({}, {})", p.boundary, p.holes);
     }
 };
