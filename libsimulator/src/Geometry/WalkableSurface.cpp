@@ -55,12 +55,19 @@ std::unique_ptr<SurfaceMesh> WalkableSurface::CreateMesh()
     // 1.1 Delauny Triangulate all input polygons and add to mesh
     SurfaceMesh mesh{};
     for(auto&& r : regions) {
-        auto p = r.polygon.boundary |
-                 std::views::transform([](const auto& p) { return Point2D(p.x, p.y); });
+        const auto as_point_2d =
+            std::views::transform([](const Point& p) { return Point2D(p.x, p.y); });
         CDT cdt{};
-        cdt.insert_constraint(std::begin(p), std::end(p), true);
+        // 1.1.1 Mark outer and interior boundaries in 2D
+        auto boundary = r.polygon.boundary | as_point_2d;
+        cdt.insert_constraint(std::begin(boundary), std::end(boundary), true);
+        for(const auto& hole : r.polygon.holes) {
+            auto ring = hole | as_point_2d;
+            cdt.insert_constraint(std::begin(ring), std::end(ring), true);
+        }
         CGAL::mark_domain_in_triangulation(cdt);
 
+        // 1.1.2 While add vertices, add the height
         std::unordered_map<CDT::Vertex_handle, SurfaceMesh::Vertex_index> vmap{};
         for(const auto& v : cdt.finite_vertex_handles()) {
             const auto& p = v->point();
@@ -68,12 +75,16 @@ std::unique_ptr<SurfaceMesh> WalkableSurface::CreateMesh()
             vmap.emplace(v, mesh.add_vertex(p_3d));
         }
 
+        // 1.1.3 Add faces
         for(const auto& f : cdt.finite_face_handles()) {
+            if(!f->get_in_domain()) { // Only add faces inside the polygon.
+                continue;
+            }
             mesh.add_face(vmap[f->vertex(0)], vmap[f->vertex(1)], vmap[f->vertex(2)]);
         }
     }
     // 1.2
 
     //
-    return nullptr;
+    return std::make_unique<SurfaceMesh>(std::move(mesh));
 }
