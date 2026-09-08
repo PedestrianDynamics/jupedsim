@@ -5,6 +5,7 @@
 #include "LineSegment.hpp"
 #include "Point.hpp"
 
+#include <boost/graph/adjacency_list.hpp>
 #include <fmt/ranges.h>
 
 #include <vector>
@@ -24,15 +25,16 @@ private:
         double height;
     };
 
+    /// Seam for RegionGraph below
     struct Connector {
-        size_t fromRegion;
-        LineSegment fromSegemnt;
-        size_t toRegion;
-        LineSegment toSegement;
+        LineSegment fromSegment;
+        LineSegment toSegment;
     };
 
-    std::vector<Region> regions{};
-    std::vector<Connector> connectors{};
+    using RegionGraph =
+        boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS, Region, Connector>;
+
+    RegionGraph _regionGraph{};
 
 public:
     size_t AddRegion(Polygon polygon, double height);
