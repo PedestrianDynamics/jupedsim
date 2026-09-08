@@ -10,8 +10,7 @@
 //==================================================================================================
 size_t WalkableSurface::AddRegion(Polygon polygon, double height)
 {
-    regions.emplace_back(std::move(polygon), height);
-    return regions.size() - 1;
+    return boost::add_vertex(Region{std::move(polygon), height}, _regionGraph);
 }
 
 size_t WalkableSurface::ConnectRegions(
@@ -20,21 +19,23 @@ size_t WalkableSurface::ConnectRegions(
     size_t toRegion,
     LineSegment to)
 {
-    if(fromRegion >= regions.size()) {
+    if(fromRegion >= boost::num_vertices(_regionGraph)) {
         throw SimulationError("Unknown region id used for fromRegion: {}", fromRegion);
     }
-    if(toRegion >= regions.size()) {
+    if(toRegion >= boost::num_vertices(_regionGraph)) {
         throw SimulationError("Unknown region id used for toRegion: {}", toRegion);
     }
     if(fromRegion == toRegion) {
         throw SimulationError("fromRegion and toRegion may not be the same region.");
     }
     const auto asPoint3D = [](const Point& p, double height) { return Point3D{p.x, p.y, height}; };
+    const auto fromHeight = _regionGraph[fromRegion].height;
+    const auto toHeight = _regionGraph[toRegion].height;
     if(!CGAL::coplanar(
-           asPoint3D(from.p1, regions[fromRegion].height),
-           asPoint3D(from.p2, regions[fromRegion].height),
-           asPoint3D(to.p1, regions[toRegion].height),
-           asPoint3D(to.p2, regions[toRegion].height))) {
+           asPoint3D(from.p1, fromHeight),
+           asPoint3D(from.p2, fromHeight),
+           asPoint3D(to.p1, toHeight),
+           asPoint3D(to.p2, toHeight))) {
         throw SimulationError("Connector not planar");
     };
 
@@ -45,8 +46,8 @@ size_t WalkableSurface::ConnectRegions(
         std::swap(from.p1, from.p2);
     }
 
-    connectors.emplace_back(fromRegion, from, toRegion, to);
-    return connectors.size() - 1;
+    boost::add_edge(fromRegion, toRegion, Connector{from, to}, _regionGraph);
+    return boost::num_edges(_regionGraph) - 1;
 }
 
 std::unique_ptr<SurfaceMesh> WalkableSurface::CreateMesh()
@@ -54,7 +55,8 @@ std::unique_ptr<SurfaceMesh> WalkableSurface::CreateMesh()
     // 1. Build mesh object
     // 1.1 Delauny Triangulate all input polygons and add to mesh
     SurfaceMesh mesh{};
-    for(auto&& r : regions) {
+    for(const auto& region : boost::make_iterator_range(boost::vertices(_regionGraph))) {
+        const auto& r = _regionGraph[region];
         const auto as_point_2d =
             std::views::transform([](const Point& p) { return Point2D(p.x, p.y); });
         CDT cdt{};
