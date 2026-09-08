@@ -19,15 +19,21 @@ struct type_caster<Point> {
 
     bool load(handle src, bool)
     {
-        if(!isinstance<sequence>(src) || isinstance<str>(src)) { // Strings are sequences as well
+        if(!isinstance<sequence>(src) || isinstance<bytes>(src)) {
             return false;
         }
         auto seq = reinterpret_borrow<sequence>(src);
         if(seq.size() != 2) {
             return false;
         }
-        value.x = seq[0].cast<double>();
-        value.y = seq[1].cast<double>();
+        auto x_caster = make_caster<double>();
+        auto y_caster = make_caster<double>();
+        // call below with "true": allow implicit type conversion to target double type
+        if(!x_caster.load(seq[0], true) || !y_caster.load(seq[1], true)) {
+            return false;
+        }
+        value.x = cast_op<double&&>(std::move(x_caster));
+        value.y = cast_op<double&&>(std::move(y_caster));
         return true;
     }
 
@@ -45,7 +51,7 @@ struct type_caster<LineSegment> {
 
     bool load(handle src, bool convert)
     {
-        if(!isinstance<sequence>(src) || isinstance<str>(src)) { // Strings are sequences as well
+        if(!isinstance<sequence>(src)) {
             return false;
         }
         auto seq = reinterpret_borrow<sequence>(src);
@@ -77,14 +83,25 @@ struct type_caster<CGAL::Exact_predicates_inexact_constructions_kernel::Point_3>
 
     bool load(handle src, bool)
     {
-        if(!isinstance<sequence>(src)) {
+        if(!isinstance<sequence>(src) || isinstance<bytes>(src)) {
             return false;
         }
         auto seq = reinterpret_borrow<sequence>(src);
         if(seq.size() != 3) {
             return false;
         }
-        value = Point3D(seq[0].cast<double>(), seq[1].cast<double>(), seq[2].cast<double>());
+        auto x_caster = make_caster<double>();
+        auto y_caster = make_caster<double>();
+        auto z_caster = make_caster<double>();
+        // call below with "true": allow implicit type conversion to target double type
+        if(!x_caster.load(seq[0], true) || !y_caster.load(seq[1], true) ||
+           !z_caster.load(seq[2], true)) {
+            return false;
+        }
+        value = Point3D(
+            cast_op<double&&>(std::move(x_caster)),
+            cast_op<double&&>(std::move(y_caster)),
+            cast_op<double&&>(std::move(z_caster)));
         return true;
     }
 
@@ -116,12 +133,15 @@ struct type_caster<WalkableSurface::Polygon> {
     {
         auto exterior = optional_attr(src, "exterior");
         auto interiors = optional_attr(src, "interiors");
-        if(!exterior || !interiors || !isinstance<sequence>(*interiors) ||
-           isinstance<str>(*interiors)) {
+        if(!exterior || !interiors || !isinstance<sequence>(*interiors)) {
+            return false;
+        }
+        auto boundary_coords = optional_attr(*exterior, "coords");
+        if(!boundary_coords) {
             return false;
         }
         auto caster = make_caster<WalkableSurface::Ring>();
-        if(!caster.load((*exterior).attr("coords"), convert)) {
+        if(!caster.load(*boundary_coords, convert)) {
             return false;
         }
         value.boundary = cast_op<WalkableSurface::Ring&&>(std::move(caster));
@@ -130,8 +150,12 @@ struct type_caster<WalkableSurface::Polygon> {
         std::vector<WalkableSurface::Ring> holes{};
         holes.reserve(seq.size());
         for(auto ring : seq) {
+            auto hole_coords = optional_attr(ring, "coords");
+            if(!hole_coords) {
+                return false;
+            }
             auto caster = make_caster<WalkableSurface::Ring>();
-            if(!caster.load(ring.attr("coords"), convert)) {
+            if(!caster.load(*hole_coords, convert)) {
                 return false;
             }
             holes.emplace_back(cast_op<WalkableSurface::Ring&&>(std::move(caster)));
