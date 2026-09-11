@@ -121,9 +121,59 @@ size_t WalkableSurface::ConnectRegions(
 
     Region connector{.polygons = {connector_polygon}, .connectable = false};
     const auto connectorRegion = boost::add_vertex(connector, _regionGraph);
-    boost::add_edge(fromRegion, connectorRegion, _regionGraph);
-    boost::add_edge(connectorRegion, toRegion, _regionGraph);
+    boost::add_edge(fromRegion, connectorRegion, fromEdge, _regionGraph);
+    boost::add_edge(connectorRegion, toRegion, toEdge, _regionGraph);
     return connectorRegion;
+}
+
+WalkableSurface::RegionGraph2D WalkableSurface::CreateRegionGraph2D() const
+{
+    const auto as_point_2d = [this](size_t vertexID) {
+        const Point3D& v = _globalVertices[vertexID];
+        return Point2D(v[0], v[1]);
+    };
+    const auto as_poly = [&as_point_2d](const std::vector<size_t>& ring) {
+        Poly poly{};
+        for(const size_t vertexID : ring) {
+            poly.push_back(as_point_2d(vertexID));
+        }
+        return poly;
+    };
+
+    RegionGraph2D graph{};
+
+    // PolyWithHoles needs boundary counterclockwise and holes clockwise.
+    const auto oriented = [&as_poly](const std::vector<size_t>& ring, CGAL::Orientation wanted) {
+        Poly poly = as_poly(ring);
+        if(poly.orientation() != wanted) {
+            poly.reverse_orientation();
+        }
+        return poly;
+    };
+
+    for(const auto regionID : boost::make_iterator_range(boost::vertices(_regionGraph))) {
+        const auto& polygons = _regionGraph[regionID].polygons;
+        std::vector<Poly> holes{};
+        holes.reserve(polygons.size() - 1);
+        for(size_t index = 1; index < polygons.size(); ++index) {
+            holes.emplace_back(oriented(polygons[index], CGAL::CLOCKWISE));
+        }
+        boost::add_vertex(
+            PolyWithHoles(
+                oriented(polygons[0], CGAL::COUNTERCLOCKWISE), std::begin(holes), std::end(holes)),
+            graph);
+    }
+
+    // Add seams.
+    for(const auto& edge : boost::make_iterator_range(boost::edges(_regionGraph))) {
+        const auto from = boost::source(edge, _regionGraph);
+        const auto to = boost::target(edge, _regionGraph);
+        const Seam& seam = _regionGraph[edge];
+        boost::add_edge(from, to, Segment2D(as_point_2d(seam[0]), as_point_2d(seam[1])), graph);
+        boost::add_edge(to, from, Segment2D(as_point_2d(seam[1]), as_point_2d(seam[0])), graph);
+    }
+
+    return graph;
 }
 
 std::unique_ptr<SurfaceMesh> WalkableSurface::CreateMesh()
