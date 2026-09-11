@@ -19,29 +19,25 @@ public:
         std::vector<Ring> holes;
     };
 
-private:
-    struct Region {
-        Polygon polygon;
-        double height;
-    };
-
-    /// Seam for RegionGraph below
-    struct Connector {
-        LineSegment fromSegment;
-        LineSegment toSegment;
-    };
-
-    using RegionGraph =
-        boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS, Region, Connector>;
-
-    RegionGraph _regionGraph{};
-
-public:
     size_t AddRegion(Polygon polygon, double height);
     size_t ConnectRegions(size_t fromRegion, LineSegment from, size_t toRegion, LineSegment to);
 
     /// For debugging purposes
     std::unique_ptr<SurfaceMesh> CreateMesh();
+
+private:
+    std::vector<Point3D> _globalVertices;
+
+    struct Region {
+        // Store boundary (index 0) + holes as vector of indices into globalVertices
+        std::vector<std::vector<size_t>> polygons;
+        bool connectable = false; // E.g. right now do not allow to connect to Connectors
+    };
+
+    using RegionGraph = boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS, Region>;
+    RegionGraph _regionGraph{};
+
+    size_t FindVertex(size_t regionId, const Point& p) const;
 };
 
 template <>

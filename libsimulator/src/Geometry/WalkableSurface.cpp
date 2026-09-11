@@ -4,13 +4,60 @@
 #include "SimulationError.hpp"
 
 #include <CGAL/mark_domain_in_triangulation.h>
+#include <boost/range/iterator_range.hpp>
+
+#include <memory>
+#include <unordered_map>
+#include <vector>
 
 //==================================================================================================
 // WalkableSurface
 //==================================================================================================
 size_t WalkableSurface::AddRegion(Polygon polygon, double height)
 {
-    return boost::add_vertex(Region{std::move(polygon), height}, _regionGraph);
+    auto convert_ring = [this, height](const Ring& ring) {
+        // Deal with first and last point being the same.
+        const size_t count = ring.size() > 1 && (ring.back() - ring.front()).isZeroLength() ?
+                                 ring.size() - 1 :
+                                 ring.size();
+        if(count < 3) {
+            throw SimulationError("boundary/hole needs at least 3 different points");
+        }
+        std::vector<size_t> converted_ring;
+        converted_ring.reserve(count);
+        for(size_t index = 0; index < count; ++index) {
+            converted_ring.push_back(_globalVertices.size());
+            _globalVertices.push_back({ring[index].x, ring[index].y, height});
+        }
+        return converted_ring;
+    };
+
+    std::vector<std::vector<size_t>> polygons{convert_ring(polygon.boundary)};
+    for(const Ring& ring : polygon.holes) {
+        polygons.emplace_back(convert_ring(ring));
+    }
+
+    const Region region{.polygons = std::move(polygons), .connectable = true};
+    return boost::add_vertex(region, _regionGraph);
+}
+
+size_t WalkableSurface::FindVertex(size_t regionId, const Point& p) const
+{
+    const Region& region = _regionGraph[regionId];
+    for(const auto& polygon : region.polygons) {
+        for(const size_t vertexID : polygon) {
+            const Point3D& globalVertex = _globalVertices[vertexID];
+            // no need to compare z as regions by design cannot overlap in xy within a single region
+            if((Point(globalVertex[0], globalVertex[1]) - p).isZeroLength()) {
+                return vertexID;
+            }
+        }
+    }
+    throw SimulationError(
+        "Point {} is not a vertex of region {}. Connectors have to start and end on polygon "
+        "vertices.",
+        p,
+        regionId);
 }
 
 size_t WalkableSurface::ConnectRegions(
@@ -19,25 +66,20 @@ size_t WalkableSurface::ConnectRegions(
     size_t toRegion,
     LineSegment to)
 {
-    if(fromRegion >= boost::num_vertices(_regionGraph)) {
-        throw SimulationError("Unknown region id used for fromRegion: {}", fromRegion);
-    }
-    if(toRegion >= boost::num_vertices(_regionGraph)) {
-        throw SimulationError("Unknown region id used for toRegion: {}", toRegion);
-    }
+    auto check_region = [this](size_t region_id, std::string_view name) {
+        if(region_id >= boost::num_vertices(_regionGraph)) {
+            throw SimulationError("Unknown region id used for {}: {}", name, region_id);
+        }
+        const Region& region = _regionGraph[region_id];
+        if(!region.connectable) {
+            throw SimulationError("{} {} is not connectable", name, region_id);
+        }
+    };
+    check_region(fromRegion, "fromRegion");
+    check_region(toRegion, "toRegion");
     if(fromRegion == toRegion) {
         throw SimulationError("fromRegion and toRegion may not be the same region.");
     }
-    const auto asPoint3D = [](const Point& p, double height) { return Point3D{p.x, p.y, height}; };
-    const auto fromHeight = _regionGraph[fromRegion].height;
-    const auto toHeight = _regionGraph[toRegion].height;
-    if(!CGAL::coplanar(
-           asPoint3D(from.p1, fromHeight),
-           asPoint3D(from.p2, fromHeight),
-           asPoint3D(to.p1, toHeight),
-           asPoint3D(to.p2, toHeight))) {
-        throw SimulationError("Connector not planar");
-    };
 
     if(CGAL::do_intersect(
            Segment2D({from.p2.x, from.p2.y}, {to.p1.x, to.p1.y}),
@@ -46,47 +88,90 @@ size_t WalkableSurface::ConnectRegions(
         std::swap(from.p1, from.p2);
     }
 
-    boost::add_edge(fromRegion, toRegion, Connector{from, to}, _regionGraph);
-    return boost::num_edges(_regionGraph) - 1;
+    std::vector<size_t> connector_polygon{
+        FindVertex(fromRegion, from.p1),
+        FindVertex(fromRegion, from.p2),
+        FindVertex(toRegion, to.p1),
+        FindVertex(toRegion, to.p2)};
+    const Point3D& p1 = _globalVertices[connector_polygon[0]];
+    const Point3D& p2 = _globalVertices[connector_polygon[1]];
+    const Point3D& p3 = _globalVertices[connector_polygon[2]];
+    const Point3D& p4 = _globalVertices[connector_polygon[3]];
+    if(!CGAL::coplanar(p1, p2, p3, p4)) {
+        throw SimulationError("Connector not planar");
+    };
+
+    Region connector{.polygons = {connector_polygon}, .connectable = false};
+    const auto connectorRegion = boost::add_vertex(connector, _regionGraph);
+    boost::add_edge(fromRegion, connectorRegion, _regionGraph);
+    boost::add_edge(connectorRegion, toRegion, _regionGraph);
+    return connectorRegion;
 }
 
 std::unique_ptr<SurfaceMesh> WalkableSurface::CreateMesh()
 {
-    // 1. Build mesh object
-    // 1.1 Delauny Triangulate all input polygons and add to mesh
     SurfaceMesh mesh{};
-    for(const auto& region : boost::make_iterator_range(boost::vertices(_regionGraph))) {
-        const auto& r = _regionGraph[region];
-        const auto as_point_2d =
-            std::views::transform([](const Point& p) { return Point2D(p.x, p.y); });
+
+    // Map _globalVertices to CGAL mesh vertices.
+    std::vector<SurfaceMesh::Vertex_index> meshVertices(
+        _globalVertices.size(), SurfaceMesh::null_vertex());
+    auto mesh_vertex = [this, &mesh, &meshVertices](size_t vertexID) {
+        auto& meshVertex = meshVertices[vertexID];
+        if(meshVertex == SurfaceMesh::null_vertex()) {
+            meshVertex = mesh.add_vertex(_globalVertices[vertexID]);
+        }
+        return meshVertex;
+    };
+
+    for(const auto regionID : boost::make_iterator_range(boost::vertices(_regionGraph))) {
+        const Region& region = _regionGraph[regionID];
+
+        // Triangulate the region in 2D.
         CDT cdt{};
-        // 1.1.1 Mark outer and interior boundaries in 2D
-        auto boundary = r.polygon.boundary | as_point_2d;
-        cdt.insert_constraint(std::begin(boundary), std::end(boundary), true);
-        for(const auto& hole : r.polygon.holes) {
-            auto ring = hole | as_point_2d;
-            cdt.insert_constraint(std::begin(ring), std::end(ring), true);
+        std::unordered_map<CDT::Vertex_handle, size_t> cdtVertices{};
+        for(const auto& polygon : region.polygons) {
+            std::vector<CDT::Vertex_handle> handles{};
+            handles.reserve(polygon.size());
+            for(const size_t vertexID : polygon) {
+                const Point3D& globalVertex = _globalVertices[vertexID];
+                const auto handle = cdt.insert(Point2D(globalVertex[0], globalVertex[1]));
+                // Remember CGAL-->globalVertices mapping
+                cdtVertices.emplace(handle, vertexID);
+                handles.emplace_back(handle);
+            }
+            for(size_t index = 1; index < handles.size(); ++index) {
+                cdt.insert_constraint(handles[index - 1], handles[index]);
+            }
+            cdt.insert_constraint(handles.back(), handles.front()); // close the ring
         }
         CGAL::mark_domain_in_triangulation(cdt);
 
-        // 1.1.2 While add vertices, add the height
-        std::unordered_map<CDT::Vertex_handle, SurfaceMesh::Vertex_index> vmap{};
-        for(const auto& v : cdt.finite_vertex_handles()) {
-            const auto& p = v->point();
-            Point3D p_3d{p.x(), p.y(), r.height};
-            vmap.emplace(v, mesh.add_vertex(p_3d));
-        }
+        auto global_vertex = [&cdtVertices, regionID](CDT::Vertex_handle handle) {
+            const auto iter = cdtVertices.find(handle);
+            if(iter == cdtVertices.end()) {
+                // A vertex not in the map got added by triangulation ("Steiner point")
+                throw SimulationError("Region {} has self-intersecting boundaries.", regionID);
+            }
+            return iter->second;
+        };
 
-        // 1.1.3 Add faces
-        for(const auto& f : cdt.finite_face_handles()) {
-            if(!f->get_in_domain()) { // Only add faces inside the polygon.
+        for(const auto& face : cdt.finite_face_handles()) {
+            if(!face->get_in_domain()) { // Only add faces inside the polygon.
                 continue;
             }
-            mesh.add_face(vmap[f->vertex(0)], vmap[f->vertex(1)], vmap[f->vertex(2)]);
+            // Note: CDT faces are oriented ccw in 2D. This means we do not need to check the
+            //       order of points for connectors.
+            const auto added = mesh.add_face(
+                mesh_vertex(global_vertex(face->vertex(0))),
+                mesh_vertex(global_vertex(face->vertex(1))),
+                mesh_vertex(global_vertex(face->vertex(2))));
+            if(added == SurfaceMesh::null_face()) {
+                throw SimulationError(
+                    "Region {} does turn fit to a walkable surface, check its connectors.",
+                    regionID);
+            }
         }
     }
-    // 1.2
 
-    //
     return std::make_unique<SurfaceMesh>(std::move(mesh));
 }
