@@ -37,7 +37,7 @@ private:
     using RegionGraph = boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS, Region>;
     RegionGraph _regionGraph{};
 
-    size_t FindVertex(size_t regionId, const Point& p) const;
+    std::array<size_t, 2> FindEdge(size_t regionId, const LineSegment& edge) const;
 };
 
 template <>

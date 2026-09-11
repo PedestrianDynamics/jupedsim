@@ -33,9 +33,9 @@ bool AllFacesInMeshPlanar(const SurfaceMesh& mesh);
 
 /// Validate that the given mesh can be processed by jupedsim.
 /// Ensures the mesh is a single connected component, has no degenerate faces, all faces are
-/// planar, and no incline exceeds 50deg. Non-triangular faces are triangulated and if the
-/// surface normals point downwards, all face orientations are reversed, i.e. the mesh may be
-/// modified.
+/// planar, no incline exceeds 50deg, and no faces pass through each other. Non-triangular faces
+/// are triangulated and if the surface normals point downwards, all face orientations are
+/// reversed, i.e. the mesh may be modified.
 /// @param mesh to check
 /// @throws SimulationError with a description of the issue encountered.
 void NormaliseAndValidateMesh(SurfaceMesh& mesh);

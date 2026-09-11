@@ -6,6 +6,7 @@
 #include <CGAL/Polygon_mesh_processing/compute_normal.h>
 #include <CGAL/Polygon_mesh_processing/connected_components.h>
 #include <CGAL/Polygon_mesh_processing/orientation.h>
+#include <CGAL/Polygon_mesh_processing/self_intersections.h>
 #include <CGAL/Polygon_mesh_processing/triangulate_faces.h>
 #include <CGAL/boost/graph/helpers.h>
 
@@ -88,5 +89,9 @@ void NormaliseAndValidateMesh(SurfaceMesh& mesh)
         if(!IsWalkableNormal(n)) {
             throw SimulationError("Face {} inclination exceeds 50deg.", face.idx());
         }
+    }
+
+    if(PMP::does_self_intersect(mesh)) {
+        throw SimulationError("Mesh faces pass through each other.");
     }
 }

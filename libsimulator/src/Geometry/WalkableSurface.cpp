@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Geometry/WalkableSurface.hpp"
 
+#include "Geometry/Validation.hpp"
 #include "SimulationError.hpp"
 
 #include <CGAL/mark_domain_in_triangulation.h>
 #include <boost/range/iterator_range.hpp>
 
+#include <cmath>
 #include <memory>
 #include <unordered_map>
 #include <vector>
@@ -41,23 +43,28 @@ size_t WalkableSurface::AddRegion(Polygon polygon, double height)
     return boost::add_vertex(region, _regionGraph);
 }
 
-size_t WalkableSurface::FindVertex(size_t regionId, const Point& p) const
+std::array<size_t, 2> WalkableSurface::FindEdge(size_t regionId, const LineSegment& edge) const
 {
+    // no need to compare z as regions by design cannot overlap in xy within a single region
+    auto match_in_2d = [this](size_t vertexID, const Point& p) {
+        const Point3D& globalVertex = _globalVertices[vertexID];
+        return (Point(globalVertex[0], globalVertex[1]) - p).isZeroLength();
+    };
+
     const Region& region = _regionGraph[regionId];
     for(const auto& polygon : region.polygons) {
-        for(const size_t vertexID : polygon) {
-            const Point3D& globalVertex = _globalVertices[vertexID];
-            // no need to compare z as regions by design cannot overlap in xy within a single region
-            if((Point(globalVertex[0], globalVertex[1]) - p).isZeroLength()) {
-                return vertexID;
+        for(size_t index = 0; index < polygon.size(); ++index) {
+            const size_t current = polygon[index];
+            const size_t next = polygon[(index + 1) % polygon.size()];
+            if(match_in_2d(current, edge.p1) && match_in_2d(next, edge.p2)) {
+                return {current, next};
+            }
+            if(match_in_2d(current, edge.p2) && match_in_2d(next, edge.p1)) {
+                return {next, current};
             }
         }
     }
-    throw SimulationError(
-        "Point {} is not a vertex of region {}. Connectors have to start and end on polygon "
-        "vertices.",
-        p,
-        regionId);
+    throw SimulationError("{} is not an edge of region {}.", edge, regionId);
 }
 
 size_t WalkableSurface::ConnectRegions(
@@ -88,11 +95,9 @@ size_t WalkableSurface::ConnectRegions(
         std::swap(from.p1, from.p2);
     }
 
-    std::vector<size_t> connector_polygon{
-        FindVertex(fromRegion, from.p1),
-        FindVertex(fromRegion, from.p2),
-        FindVertex(toRegion, to.p1),
-        FindVertex(toRegion, to.p2)};
+    const auto fromEdge = FindEdge(fromRegion, from);
+    const auto toEdge = FindEdge(toRegion, to);
+    std::vector<size_t> connector_polygon{fromEdge[0], fromEdge[1], toEdge[0], toEdge[1]};
     const Point3D& p1 = _globalVertices[connector_polygon[0]];
     const Point3D& p2 = _globalVertices[connector_polygon[1]];
     const Point3D& p3 = _globalVertices[connector_polygon[2]];
@@ -100,6 +105,19 @@ size_t WalkableSurface::ConnectRegions(
     if(!CGAL::coplanar(p1, p2, p3, p4)) {
         throw SimulationError("Connector not planar");
     };
+
+    const K::Plane_3 plane(p1, p2, p3);
+    if(plane.is_degenerate()) {
+        throw SimulationError("Connector between {} and {} has no area.", from, to);
+    }
+    auto normal = plane.orthogonal_vector() / std::sqrt(plane.orthogonal_vector().squared_length());
+    if(normal.z() < 0) {
+        // IsWalkableNormal expects a certain orientation.
+        normal = -normal;
+    }
+    if(!IsWalkableNormal(normal)) {
+        throw SimulationError("Connector between {} and {} is too steep.", from, to);
+    }
 
     Region connector{.polygons = {connector_polygon}, .connectable = false};
     const auto connectorRegion = boost::add_vertex(connector, _regionGraph);
@@ -167,11 +185,13 @@ std::unique_ptr<SurfaceMesh> WalkableSurface::CreateMesh()
                 mesh_vertex(global_vertex(face->vertex(2))));
             if(added == SurfaceMesh::null_face()) {
                 throw SimulationError(
-                    "Region {} does turn fit to a walkable surface, check its connectors.",
+                    "Region {} does not fit to a walkable surface, check its connectors.",
                     regionID);
             }
         }
     }
+
+    NormaliseAndValidateMesh(mesh);
 
     return std::make_unique<SurfaceMesh>(std::move(mesh));
 }
