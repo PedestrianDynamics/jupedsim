@@ -38,5 +38,5 @@ __pycache__/
 /build*
 
 # Rust build artifacts
-/third-party/floorfield/target/
+/libfloorfield/target/
 Cargo.lock
