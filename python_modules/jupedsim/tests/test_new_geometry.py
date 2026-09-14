@@ -1,12 +1,9 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
 import jupedsim as jps
-import pytest
-from shapely import Polygon, LinearRing
 
 
 def test_new_geometry_definition_v1():
-
     ground_floor = {
         "exterior": [(0, 0), (10, 0), (10, 10), (0, 10)],
         "interior": [[(2, 2), (6, 2), (6, 2.2), (6, 3.8), (6, 4), (2, 4)]],
@@ -29,6 +26,7 @@ def test_new_geometry_definition_v1():
         to_region=id_1,
         to_edge=((2, 2.2), (2, 3.8)),
     )
+    assert [id_0, id_1, id_0_to_1] == [0, 1, 2]
 
     # layer_0 = geo.add_layer(polygon=p1, height=0)
     # layer_1 = geo.add_layer(polygon=p2, height=3.6)

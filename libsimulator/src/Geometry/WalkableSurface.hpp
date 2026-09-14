@@ -11,6 +11,8 @@
 #include <array>
 #include <vector>
 
+class Geometry;
+
 class WalkableSurface
 {
 public:
@@ -28,8 +30,7 @@ public:
 
     RegionGraph2D CreateRegionGraph2D() const;
 
-    /// For debugging purposes
-    std::unique_ptr<SurfaceMesh> CreateMesh();
+    std::unique_ptr<Geometry> CreateGeometry();
 
 private:
     std::vector<Point3D> _globalVertices;
@@ -40,7 +41,7 @@ private:
         bool connectable = false; // E.g. right now do not allow to connect to Connectors
     };
 
-    /// Gloabl vertex IDs of the shared edge of connected regions.
+    /// Global vertex IDs of the shared edge of connected regions.
     using Seam = std::array<size_t, 2>;
 
     using RegionGraph =

@@ -32,8 +32,10 @@ public:
         K::Point_3 point;
     };
 
-    /// Take an already-built surface mesh (e.g. from a mesh builder or a test).
+    /// 3D mesh. Perform auto-split into regions.
     explicit Geometry(SurfaceMesh mesh);
+    /// 3D mesh plus region split - internal only: Used by WalkableSurface.
+    explicit Geometry(SurfaceMesh&& mesh, RegionSplit&& regionSplit);
 
     /// Build from a 2D walkable area, lifted flat to z=0 by constrained Delaunay
     /// triangulation. Keeps the polygon it was lifted from (see polygon()).
