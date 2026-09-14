@@ -9,10 +9,13 @@
 #include <CGAL/Polygon_mesh_processing/self_intersections.h>
 #include <CGAL/Polygon_mesh_processing/triangulate_faces.h>
 #include <CGAL/boost/graph/helpers.h>
+#include <boost/property_map/property_map.hpp>
 
 #include <algorithm>
 #include <cmath>
+#include <iterator>
 #include <numbers>
+#include <utility>
 #include <vector>
 
 bool IsWalkableNormal(const Vector3D& n)
@@ -61,18 +64,30 @@ bool AllFacesInMeshPlanar(const SurfaceMesh& mesh)
         });
 }
 
-void NormaliseAndValidateMesh(SurfaceMesh& mesh)
+void NormaliseAndValidateMesh(SurfaceMesh& mesh, const RegionMap* regions)
 {
     namespace PMP = CGAL::Polygon_mesh_processing;
     if(!CGAL::is_triangle_mesh(mesh)) {
         PMP::triangulate_faces(mesh);
     }
 
-    auto fcc = mesh.add_property_map<SurfaceMesh::Face_index, size_t>("f:cc").first;
-    const auto count = PMP::connected_components(mesh, fcc);
-    mesh.remove_property_map(fcc);
-    if(count != 1) {
-        throw SimulationError("Expected exactly 1 connected component, got: {}", count);
+    std::vector<size_t> component(mesh.number_of_faces(), 0);
+    const auto component_of =
+        boost::make_iterator_property_map(std::begin(component), get(CGAL::face_index, mesh));
+    const auto count = PMP::connected_components(mesh, component_of);
+    if(count > 1) {
+        if(regions == nullptr) {
+            throw SimulationError("Expected exactly 1 connected component, got: {}", count);
+        }
+        const auto first = *mesh.faces().begin();
+        for(const auto face : mesh.faces()) {
+            if(component[face] != component[first]) {
+                throw SimulationError(
+                    "Region {} is not connected to region {}.",
+                    (*regions)[face],
+                    (*regions)[first]);
+            }
+        }
     }
 
     if(!AllFacesInMeshPlanar(mesh)) {
@@ -91,7 +106,14 @@ void NormaliseAndValidateMesh(SurfaceMesh& mesh)
         }
     }
 
-    if(PMP::does_self_intersect(mesh)) {
-        throw SimulationError("Mesh faces pass through each other.");
+    std::vector<std::pair<SurfaceMesh::Face_index, SurfaceMesh::Face_index>> intersecting{};
+    PMP::self_intersections(mesh, std::back_inserter(intersecting));
+    if(!intersecting.empty()) {
+        if(regions == nullptr) {
+            throw SimulationError("Mesh faces pass through each other.");
+        }
+        const auto& [one, other] = intersecting.front();
+        throw SimulationError(
+            "Region {} and region {} pass through each other.", (*regions)[one], (*regions)[other]);
     }
 }

@@ -126,6 +126,7 @@ if (BUILD_TESTS)
         test/TestStage.cpp
         test/TestUniqueID.cpp
         test/TestValidation.cpp
+        test/TestWalkableSurface.cpp
     )
 
     target_link_libraries(libsimulator-tests PRIVATE

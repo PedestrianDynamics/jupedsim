@@ -2,6 +2,7 @@
 #pragma once
 
 #include "CfgCgal.hpp"
+#include "Geometry/RegionSplit.hpp"
 
 #include <vector>
 
@@ -37,5 +38,6 @@ bool AllFacesInMeshPlanar(const SurfaceMesh& mesh);
 /// are triangulated and if the surface normals point downwards, all face orientations are
 /// reversed, i.e. the mesh may be modified.
 /// @param mesh to check
+/// @param regions face -> region map of @p mesh.
 /// @throws SimulationError with a description of the issue encountered.
-void NormaliseAndValidateMesh(SurfaceMesh& mesh);
+void NormaliseAndValidateMesh(SurfaceMesh& mesh, const RegionMap* regions = nullptr);
