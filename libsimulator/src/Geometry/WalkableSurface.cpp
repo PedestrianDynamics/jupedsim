@@ -2,23 +2,108 @@
 #include "Geometry/WalkableSurface.hpp"
 
 #include "Geometry/Geometry.hpp"
+#include "Geometry/ProjectedBoundary.hpp"
 #include "Geometry/Validation.hpp"
 #include "SimulationError.hpp"
 
+#include <CGAL/Polygon_mesh_processing/connected_components.h>
+#include <CGAL/Polygon_mesh_processing/self_intersections.h>
 #include <CGAL/mark_domain_in_triangulation.h>
 #include <boost/range/iterator_range.hpp>
 
 #include <cmath>
 #include <memory>
+#include <optional>
 #include <unordered_map>
 #include <vector>
+
+namespace
+{
+/// Triangulate one region (boundary + holes)
+/// Returns the triangles as triples of those same indices, or nothing when the rings intersect each
+/// other.
+std::optional<std::vector<std::array<size_t, 3>>> triangulate_rings(
+    const std::vector<std::vector<size_t>>& rings,
+    const std::vector<Point3D>& vertices)
+{
+    CDT cdt{};
+    std::unordered_map<CDT::Vertex_handle, size_t> cdtVertices{};
+    for(const auto& ring : rings) {
+        std::vector<CDT::Vertex_handle> handles{};
+        handles.reserve(ring.size());
+        for(const size_t vertexID : ring) {
+            const Point3D& vertex = vertices[vertexID];
+            const auto handle = cdt.insert(Point2D(vertex[0], vertex[1]));
+            cdtVertices.emplace(handle, vertexID);
+            handles.emplace_back(handle);
+        }
+        for(size_t index = 1; index < handles.size(); ++index) {
+            cdt.insert_constraint(handles[index - 1], handles[index]);
+        }
+        cdt.insert_constraint(handles.back(), handles.front()); // close the ring
+    }
+    CGAL::mark_domain_in_triangulation(cdt);
+
+    std::vector<std::array<size_t, 3>> triangles{};
+    for(const auto& face : cdt.finite_face_handles()) {
+        if(!face->get_in_domain()) { // Only faces inside the polygon.
+            continue;
+        }
+        // Note: CDT faces are oriented ccw in 2D. This means we do not need to check the
+        //       order of points for connectors.
+        std::array<size_t, 3> triangle{};
+        for(int corner = 0; corner < 3; ++corner) {
+            const auto iter = cdtVertices.find(face->vertex(corner));
+            if(iter == cdtVertices.end()) {
+                // A vertex not in the map got added by triangulation ("Steiner point")
+                return std::nullopt;
+            }
+            triangle[corner] = iter->second;
+        }
+        triangles.emplace_back(triangle);
+    }
+    return triangles;
+}
+
+/// Create temporary mesh and call `is_projection_strictly_simple`.
+bool is_strictly_simple(
+    const std::vector<std::array<size_t, 3>>& triangles,
+    const std::vector<Point3D>& vertices)
+{
+    SurfaceMesh mesh{};
+    std::unordered_map<size_t, SurfaceMesh::Vertex_index> meshVertices{};
+    const auto mesh_vertex = [&mesh, &meshVertices, &vertices](size_t vertexID) {
+        const auto [iter, inserted] =
+            meshVertices.try_emplace(vertexID, SurfaceMesh::null_vertex());
+        if(inserted) {
+            iter->second = mesh.add_vertex(vertices[vertexID]);
+        }
+        return iter->second;
+    };
+
+    for(const auto& triangle : triangles) {
+        const auto added = mesh.add_face(
+            mesh_vertex(triangle[0]), mesh_vertex(triangle[1]), mesh_vertex(triangle[2]));
+        if(added == SurfaceMesh::null_face()) {
+            return false;
+        }
+    }
+    return is_projection_strictly_simple(
+        mesh, region_boundary(mesh, [](SurfaceMesh::Face_index) { return true; }));
+}
+
+} // namespace
 
 //==================================================================================================
 // WalkableSurface
 //==================================================================================================
 size_t WalkableSurface::AddRegion(Polygon polygon, double height)
 {
-    auto convert_ring = [this, height](const Ring& ring) {
+    // Build up locally first. If an error is thrown, the internal structures are still fine.
+    std::vector<Point3D> vertices{};
+    std::vector<std::vector<size_t>> polygons{};
+
+    auto convert_ring = [&vertices, &polygons, height](const Ring& ring) {
         // Deal with first and last point being the same.
         const size_t count = ring.size() > 1 && (ring.back() - ring.front()).isZeroLength() ?
                                  ring.size() - 1 :
@@ -29,16 +114,33 @@ size_t WalkableSurface::AddRegion(Polygon polygon, double height)
         std::vector<size_t> converted_ring;
         converted_ring.reserve(count);
         for(size_t index = 0; index < count; ++index) {
-            converted_ring.push_back(_globalVertices.size());
-            _globalVertices.push_back({ring[index].x, ring[index].y, height});
+            converted_ring.push_back(vertices.size());
+            vertices.push_back({ring[index].x, ring[index].y, height});
         }
-        return converted_ring;
+        polygons.emplace_back(std::move(converted_ring));
     };
 
-    std::vector<std::vector<size_t>> polygons{convert_ring(polygon.boundary)};
+    convert_ring(polygon.boundary);
     for(const Ring& ring : polygon.holes) {
-        polygons.emplace_back(convert_ring(ring));
+        convert_ring(ring);
     }
+
+    const auto triangles = triangulate_rings(polygons, vertices);
+    if(!triangles) {
+        throw SimulationError("Region outline crosses itself.");
+    }
+    if(!is_strictly_simple(*triangles, vertices)) {
+        throw SimulationError("Region is not built out of simple polygons.");
+    }
+
+    // Fix vertex indices and insert them into the global map.
+    const size_t base = _globalVertices.size();
+    for(auto& ring : polygons) {
+        for(auto& index : ring) {
+            index += base;
+        }
+    }
+    _globalVertices.insert(std::end(_globalVertices), std::begin(vertices), std::end(vertices));
 
     const Region region{.polygons = std::move(polygons), .connectable = true};
     return boost::add_vertex(region, _regionGraph);
@@ -194,47 +296,14 @@ std::unique_ptr<Geometry> WalkableSurface::CreateGeometry()
     };
 
     for(const auto regionID : boost::make_iterator_range(boost::vertices(_regionGraph))) {
-        const Region& region = _regionGraph[regionID];
-
-        // Triangulate the region in 2D.
-        CDT cdt{};
-        std::unordered_map<CDT::Vertex_handle, size_t> cdtVertices{};
-        for(const auto& polygon : region.polygons) {
-            std::vector<CDT::Vertex_handle> handles{};
-            handles.reserve(polygon.size());
-            for(const size_t vertexID : polygon) {
-                const Point3D& globalVertex = _globalVertices[vertexID];
-                const auto handle = cdt.insert(Point2D(globalVertex[0], globalVertex[1]));
-                // Remember CGAL-->globalVertices mapping
-                cdtVertices.emplace(handle, vertexID);
-                handles.emplace_back(handle);
-            }
-            for(size_t index = 1; index < handles.size(); ++index) {
-                cdt.insert_constraint(handles[index - 1], handles[index]);
-            }
-            cdt.insert_constraint(handles.back(), handles.front()); // close the ring
+        const auto triangles = triangulate_rings(_regionGraph[regionID].polygons, _globalVertices);
+        if(!triangles) {
+            throw SimulationError("Region {} has self-intersecting boundaries.", regionID);
         }
-        CGAL::mark_domain_in_triangulation(cdt);
 
-        auto global_vertex = [&cdtVertices, regionID](CDT::Vertex_handle handle) {
-            const auto iter = cdtVertices.find(handle);
-            if(iter == cdtVertices.end()) {
-                // A vertex not in the map got added by triangulation ("Steiner point")
-                throw SimulationError("Region {} has self-intersecting boundaries.", regionID);
-            }
-            return iter->second;
-        };
-
-        for(const auto& face : cdt.finite_face_handles()) {
-            if(!face->get_in_domain()) { // Only add faces inside the polygon.
-                continue;
-            }
-            // Note: CDT faces are oriented ccw in 2D. This means we do not need to check the
-            //       order of points for connectors.
+        for(const auto& triangle : *triangles) {
             const auto added = mesh.add_face(
-                mesh_vertex(global_vertex(face->vertex(0))),
-                mesh_vertex(global_vertex(face->vertex(1))),
-                mesh_vertex(global_vertex(face->vertex(2))));
+                mesh_vertex(triangle[0]), mesh_vertex(triangle[1]), mesh_vertex(triangle[2]));
             if(added == SurfaceMesh::null_face()) {
                 throw SimulationError(
                     "Region {} does not fit to a walkable surface, check its connectors.",
@@ -250,7 +319,7 @@ std::unique_ptr<Geometry> WalkableSurface::CreateGeometry()
         }
     }
 
-    NormaliseAndValidateMesh(mesh);
+    NormaliseAndValidateMesh(mesh, &region_split.region);
 
     return std::make_unique<Geometry>(std::move(mesh), std::move(region_split));
 }
