@@ -114,50 +114,6 @@
 
   
     <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
-<div class="bd-header__inner bd-page-width">
-  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
-    <span class="fa-solid fa-bars"></span>
-  </button>
-  
-  
-  <div class="col-lg-9 navbar-header-items">
-    
-    
-    <div class="navbar-header-items__end">
-      
-        <div class="navbar-item navbar-persistent--container">
-          
-
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button>
-        </div>
-      
-      
-    </div>
-    
-  </div>
-  
-  
-    <div class="navbar-persistent--mobile">
-
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button>
-    </div>
-  
-
-  
-    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
-      <span class="fa-solid fa-outdent"></span>
-    </button>
-  
-</div>
-
     </header>
   
 
@@ -742,7 +698,7 @@ the user.</p>
 <section id="known-limitations">
 <h2>Known limitations<a class="headerlink" href="#known-limitations" title="Link to this heading">#</a></h2>
 <ul class="simple">
-<li><p><strong><span class="math notranslate nohighlight">\(W_\text{ref}\)</span> uses straight-line frame change only.</strong> The thesis defines graph-based variants (Algorithm 3) that warp space along navigable paths, enabling anticipatory avoidance around corners and bends. The routing infrastructure exists (<code class="docutils literal notranslate"><span class="pre">RoutingEngine::ComputeAllWaypoints</span></code>); integrating it with the warp chain is a future extension.</p></li>
+<li><p><strong><span class="math notranslate nohighlight">\(W_\text{ref}\)</span> uses straight-line frame change only.</strong> The thesis defines graph-based variants (Algorithm 3) that warp space along navigable paths, enabling anticipatory avoidance around corners and bends. The routing infrastructure exists (<code class="docutils literal notranslate"><span class="pre">RoutingEngine::GetShortestPath</span></code>); integrating it with the warp chain is a future extension.</p></li>
 </ul>
 </section>
 <section id="references">

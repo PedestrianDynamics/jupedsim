@@ -21,6 +21,7 @@ Classes
    jupedsim.Geometry
    jupedsim.JourneyDescription
    jupedsim.LineSegment
+   jupedsim.Location
    jupedsim.NeighborView
    jupedsim.NotifiableQueueStage
    jupedsim.Recording
@@ -187,10 +188,13 @@ Attributes
       .. important::
 
           When setting the target, the given coordinates must lie within the
-          walkable area. Otherwise, an error will be thrown at the next
-          iteration call.
+          walkable area. Otherwise, an error will be thrown immediately.
 
-      :returns: Current final target of the agent.
+      Accepts a :class:`~jupedsim.location.Location` as well as an
+      ``(x, y)`` tuple. Over stacked floors only the location says which
+      floor is meant; the tuple is located around the agent's own height.
+
+      :returns: Current final target of the agent, as ``(x, y)``.
 
 
    .. py:property:: id
@@ -205,6 +209,19 @@ Attributes
 
 
       Id of the :class:`~jupedsim.journey.JourneyDescription` the agent is currently following.
+
+
+   .. py:property:: location
+      :type: jupedsim.location.Location
+
+
+      Place the agent stands at, as a
+      :class:`~jupedsim.location.Location`.
+
+      The same position :attr:`position` reports, plus the height of the
+      floor it is on -- and in a form that can be handed back to the
+      simulation, e.g. as another agent's
+      :attr:`final_target`.
 
 
    .. py:property:: next_target
@@ -284,11 +301,13 @@ Attributes
       Duration of this simulation step in seconds.
 
 
-   .. py:property:: to_next_target
+   .. py:property:: orientation_to_next_target
       :type: tuple[float, float]
 
 
-      Vector from the agent to its next target.
+      Unit vector pointing at the agent's next target.
+
+      Zero when the agent has already reached it.
 
 
 .. py:class:: AgentView(obj: jupedsim.native.AgentView)
@@ -304,29 +323,24 @@ Attributes
    Example — visibility-filtered neighborhood::
 
        def compute_next_state(self, state, step):
-           boundaries = step.walls_nearby()
+           boundaries = step.walls_in_range(1.0)
            neighbors = step.other_agents_in_range(
                5.0,
-               lambda n: step.no_geometry_between(n.relative_position, boundaries),
+               lambda n: step.no_geometry_between(n),
            )
 
 
-   .. py:method:: inside_geometry(relative_position: tuple[float, float]) -> bool
+   .. py:method:: no_geometry_between(target: NeighborView | tuple[float, float]) -> bool
 
-      Return ``True`` when the point reached by moving *relative_position*
-      lies inside the walkable area.
+      Return ``True`` when nothing blocks the straight line to *target*.
 
-      :param relative_position: Offset from the agent as ``(dx, dy)``.
+      Given a :class:`NeighborView`, this answers whether that neighbor can be
+      seen. Given an offset, it answers whether the straight line to that point
+      is free of geometry — which is also whether the agent can move there, as
+      what blocks the line of sight blocks the step.
 
-
-
-   .. py:method:: no_geometry_between(relative_position: tuple[float, float], boundaries: list[WallView]) -> bool
-
-      Return ``True`` when the straight line from the agent to the point
-      *relative_position* away is not intersected by any of *walls*.
-
-      :param relative_position: Offset from the agent as ``(dx, dy)``.
-      :param boundaries: List of geometry boundary segments.
+      :param target: A :class:`NeighborView`, or an offset from the agent as
+                     ``(dx, dy)``.
 
 
 
@@ -354,18 +368,7 @@ Attributes
 
 
 
-   .. py:method:: walls_nearby() -> list[WallView]
-
-      Return the walls in the grid cells around the agent.
-
-      Faster than :meth:`walls_in_range`, but an approximation of proximity
-      rather than a radius: it returns whatever shares a cell neighborhood.
-
-      :returns: List of :class:`WallView`, each as seen from the agent.
-
-
-
-   .. py:method:: with_neighbor_state_mapping(repack: Callable[[Any], Any]) -> AgentStep
+   .. py:method:: with_neighbor_state_mapping(repack: Callable[[Any], Any]) -> AgentView
 
       Return this view with every neighbor seen through *repack*.
 
@@ -552,50 +555,11 @@ Attributes
 
 
 
-   .. py:method:: get_walls_close_to(point: tuple[float, float]) -> list[jupedsim.linesegment.LineSegment]
-
-      Find line segments of the geometry that are within a certain distance to a point.
-
-      :param point: The point to check against.
-      :type point: tuple[float, float]
-      :param distance: The maximum distance for line segments to be included.
-      :type distance: float
-
-      :returns: List of LineSegment objects that are close to the given point.
-
-
-
-   .. py:method:: get_walls_in_distance_to(point: tuple[float, float], distance: float) -> list[jupedsim.linesegment.LineSegment]
-
-      Find line segments of the geometry that are within a certain distance to a point.
-
-      :param point: The point to check against.
-      :type point: tuple[float, float]
-      :param distance: The maximum distance for line segments to be included.
-      :type distance: float
-
-      :returns: List of LineSegment objects that are close to the given point.
-
-
-
    .. py:method:: holes() -> list[list[tuple[float, float]]]
 
       Access holes (inner boundaries) of the walkable area.
 
       :returns: A list of polygons forming holes inside the boundary.
-
-
-
-   .. py:method:: linesegments_close_to(point: tuple[float, float]) -> list[jupedsim.linesegment.LineSegment]
-
-      Find line segments of the geometry that are within a certain distance to a point.
-
-      :param point: The point to check against.
-      :type point: tuple[float, float]
-      :param distance: The maximum distance for line segments to be included.
-      :type distance: float
-
-      :returns: List of LineSegment objects that are close to the given point.
 
 
 
@@ -669,6 +633,53 @@ Attributes
 
 
       Get the second endpoint of the line segment.
+
+
+.. py:class:: Location(obj: jupedsim.native.Location)
+
+   A place on the walkable surface.
+
+   Locations are always obtained from the simulation and never built
+   directly:
+
+   .. code:: python
+
+       sim.get_location(x, y, z_hint=3.0)
+       sim.agent(id).location
+
+   Raw coordinates become a place exactly once, in
+   :meth:`~jupedsim.simulation.Simulation.get_location`: the geometry has to
+   stand for a location, and on stacked floors an ``(x, y)`` on its own does
+   not say which floor is meant. Afterwards the location travels -- pass it
+   wherever a place is wanted instead of coordinates.
+
+   A location is read-only and reads only what a caller can act on. It stays
+   valid as long as the simulation it came from exists, and it does not
+   follow an agent: reading :attr:`~jupedsim.agent.Agent.location` again
+   gives where the agent stands now.
+
+
+   .. py:property:: x
+      :type: float
+
+
+      x coordinate in metres.
+
+
+   .. py:property:: y
+      :type: float
+
+
+      y coordinate in metres.
+
+
+   .. py:property:: z
+      :type: float
+
+
+      Height of the surface here, in metres.
+
+      Zero throughout a simulation built from a polygon.
 
 
 .. py:class:: NeighborView(obj: jupedsim.native.NeighborView)
@@ -846,10 +857,9 @@ Attributes
                                provided as list[tuple[float, float]].
 
       :returns: List of points (path) from 'frm' to 'to' including from and to.
+                Intermediate points may be collinear: the path is reported wherever
+                it passes a triangle edge, not only where it turns.
 
-
-
-   .. py:method:: edges_for(vertex_id: int)
 
 
    .. py:method:: is_routable(p: tuple[float, float]) -> bool
@@ -864,7 +874,7 @@ Attributes
 
       Access the navigation mesh geometry.
 
-      The navigation mesh is store as a collection of convex polygons in CCW order.
+      The navigation mesh is stored as a collection of triangles in CCW order.
 
       The returned data is to be interpreted as:
 
@@ -882,7 +892,7 @@ Attributes
 
 
 
-.. py:class:: Simulation(*, model: jupedsim.models.collision_free_speed.CollisionFreeSpeedModel | jupedsim.models.collision_free_speed_v2.CollisionFreeSpeedModelV2 | jupedsim.models.collision_free_speed_v3.CollisionFreeSpeedModelV3 | jupedsim.models.generalized_centrifugal_force.GeneralizedCentrifugalForceModel | jupedsim.models.social_force.SocialForceModel | jupedsim.models.anticipation_velocity_model.AnticipationVelocityModel | jupedsim.models.warp_driver.WarpDriverModel | jupedsim.models.custom_model.CustomOperationalModel, geometry: str | shapely.GeometryCollection | shapely.Polygon | shapely.MultiPolygon | shapely.MultiPoint | list[tuple[float, float]], dt: float = 0.01, trajectory_writer: jupedsim.serialization.TrajectoryWriter | None = None, timer_log_level: int = 1, **kwargs: Any)
+.. py:class:: Simulation(*, model: jupedsim.models.collision_free_speed.CollisionFreeSpeedModel | jupedsim.models.collision_free_speed_v2.CollisionFreeSpeedModelV2 | jupedsim.models.collision_free_speed_v3.CollisionFreeSpeedModelV3 | jupedsim.models.generalized_centrifugal_force.GeneralizedCentrifugalForceModel | jupedsim.models.social_force.SocialForceModel | jupedsim.models.anticipation_velocity_model.AnticipationVelocityModel | jupedsim.models.warp_driver.WarpDriverModel | jupedsim.models.custom_model.CustomOperationalModel, geometry: str | os.PathLike | shapely.GeometryCollection | shapely.Polygon | shapely.MultiPolygon | shapely.MultiPoint | list[tuple[float, float]], dt: float = 0.01, trajectory_writer: jupedsim.serialization.TrajectoryWriter | None = None, timer_log_level: int = 1, **kwargs: Any)
 
    Defines a simulation of pedestrian movement over a continuous walkable area.
 
@@ -893,13 +903,19 @@ Attributes
    simulation.
 
 
-   .. py:method:: add_agent(*, journey_id: int, stage_id: int, position: tuple[float, float], state: jupedsim.models.generalized_centrifugal_force.GeneralizedCentrifugalForceModelState | jupedsim.models.collision_free_speed.CollisionFreeSpeedModelState | jupedsim.models.collision_free_speed_v2.CollisionFreeSpeedModelV2State | jupedsim.models.collision_free_speed_v3.CollisionFreeSpeedModelV3State | jupedsim.models.anticipation_velocity_model.AnticipationVelocityModelState | jupedsim.models.social_force.SocialForceModelState | jupedsim.models.warp_driver.WarpDriverModelState | Any) -> int
+   .. py:method:: add_agent(*, journey_id: int, stage_id: int, position: tuple[float, float], state: jupedsim.models.generalized_centrifugal_force.GeneralizedCentrifugalForceModelState | jupedsim.models.collision_free_speed.CollisionFreeSpeedModelState | jupedsim.models.collision_free_speed_v2.CollisionFreeSpeedModelV2State | jupedsim.models.collision_free_speed_v3.CollisionFreeSpeedModelV3State | jupedsim.models.anticipation_velocity_model.AnticipationVelocityModelState | jupedsim.models.social_force.SocialForceModelState | jupedsim.models.warp_driver.WarpDriverModelState | Any, z_hint: float = 0.0) -> int
 
       Add an agent to the simulation.
 
       :param journey_id: Id of the journey the agent follows.
       :param stage_id: Id of the stage the agent initially targets.
       :param position: Position to spawn the agent at, as ``(x, y)`` in metres.
+      :param z_hint: Height the agent is meant to stand at, in metres. On a
+                     surface with stacked floors one ``(x, y)`` carries several of
+                     them, and this says which. The agent lands on the floor whose
+                     height comes closest, and that floor has to come within
+                     0.1 m -- so the hint is a floor level, not a measurement. On a
+                     single-floor world it does not matter.
       :param state: Initial per-agent model state. For built-in models this is
                     the matching ``XModelState`` instance, e.g.
                     :class:`~jupedsim.CollisionFreeSpeedModelState`. For custom
@@ -929,10 +945,12 @@ Attributes
 
 
 
-   .. py:method:: add_exit_stage(polygon: str | shapely.GeometryCollection | shapely.Polygon | shapely.MultiPolygon | shapely.MultiPoint | list[tuple[float, float]]) -> int
+   .. py:method:: add_exit_stage(polygon: str | shapely.GeometryCollection | shapely.Polygon | shapely.MultiPolygon | shapely.MultiPoint | list[tuple[float, float]], z_hint: float = 0.0) -> int
 
       Add an exit stage to the simulation.
 
+      :param z_hint: Height the exit is meant to sit at. On stacked floors this
+                     picks the one, see :func:`add_agent`.
       :param polygon: Polygon without holes representing the exit stage. Polygon can be passed as:
 
                       * list of 2d points describing the outer boundary
@@ -961,7 +979,7 @@ Attributes
 
 
 
-   .. py:method:: add_queue_stage(positions: list[tuple[float, float]]) -> int
+   .. py:method:: add_queue_stage(positions: list[tuple[float, float]], z_hint: float = 0.0) -> int
 
       Add a new queue state to this simulation.
 
@@ -969,28 +987,34 @@ Attributes
            positions: Ordered list of the waiting
                points of this queue. The first one in the list is the head of
                the queue while the last one is the back of the queue.
+           z_hint: Height the queue is meant to sit at. On stacked floors
+               this picks the one, see :func:`add_agent`.
       :returns: Id of the new stage.
 
 
 
-   .. py:method:: add_waiting_set_stage(positions: list[tuple[float, float]]) -> int
+   .. py:method:: add_waiting_set_stage(positions: list[tuple[float, float]], z_hint: float = 0.0) -> int
 
       Add a new waiting set stage to this simulation.
 
       :param positions: Ordered list of the waiting points of this waiting set.
                         The agents will fill the waiting points in the given order. If more agents
                         are targeting the waiting, the remaining will wait at the last given point.
+      :param z_hint: Height the waiting set is meant to sit at. On stacked floors
+                     this picks the one, see :func:`add_agent`.
 
       :returns: Id of the new stage.
 
 
 
-   .. py:method:: add_waypoint_stage(position: tuple[float, float], distance) -> int
+   .. py:method:: add_waypoint_stage(position: tuple[float, float], distance, z_hint: float = 0.0) -> int
 
       Add a new waypoint stage to this simulation.
 
       :param position: Position of the waypoint
       :param distance: Minimum distance required to reach this waypoint
+      :param z_hint: Height the waypoint is meant to sit at. On stacked floors
+                     this picks the one, see :func:`add_agent`.
 
       :returns: Id of the new stage.
 
@@ -1087,6 +1111,29 @@ Attributes
       Current geometry of the simulation.
 
       :returns: The geometry of the simulation.
+
+      :raises SimulationError: if this simulation was built from a surface mesh.
+          A surface has no polygon underneath to hand out.
+
+
+
+   .. py:method:: get_location(x: float, y: float, z_hint: float = 0.0) -> jupedsim.location.Location
+
+      The place at ``(x, y)`` on the floor closest to ``z_hint``.
+
+      This is where raw coordinates become a place. On a surface with
+      stacked floors one ``(x, y)`` carries several of them and the hint
+      says which; the floor found has to come within 0.1 m of it. Pass the
+      returned location on wherever a place is wanted -- it stays valid as
+      long as this simulation does.
+
+      :param x: x coordinate in metres.
+      :param y: y coordinate in metres.
+      :param z_hint: Height the place is meant to sit at, in metres.
+
+      :returns: The location.
+
+      :raises SimulationError: if no walkable floor lies there.
 
 
 
@@ -1428,9 +1475,8 @@ Attributes
 
    A wall segment as seen from the agent that asked for it.
 
-   Obtained from :meth:`AgentView.walls_nearby` or
-   :meth:`AgentView.walls_in_range`. The view is always relative to the
-   agent - as if the agent sits at the origin.
+   Obtained from :meth:`AgentView.walls_in_range`. The view is always
+   relative to the agent - as if the agent sits at the origin.
 
 
    .. py:property:: closest_point

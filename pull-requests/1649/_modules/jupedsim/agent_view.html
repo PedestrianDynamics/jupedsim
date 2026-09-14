@@ -109,46 +109,6 @@
 
   
     <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
-<div class="bd-header__inner bd-page-width">
-  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
-    <span class="fa-solid fa-bars"></span>
-  </button>
-  
-  
-  <div class="col-lg-9 navbar-header-items">
-    
-    
-    <div class="navbar-header-items__end">
-      
-        <div class="navbar-item navbar-persistent--container">
-          
-
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button>
-        </div>
-      
-      
-    </div>
-    
-  </div>
-  
-  
-    <div class="navbar-persistent--mobile">
-
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button>
-    </div>
-  
-
-  
-</div>
-
     </header>
   
 
@@ -424,9 +384,8 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">WallView</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""A wall segment as seen from the agent that asked for it.</span>
 
-<span class="sd">    Obtained from :meth:`AgentView.walls_nearby` or</span>
-<span class="sd">    :meth:`AgentView.walls_in_range`. The view is always relative to the</span>
-<span class="sd">    agent - as if the agent sits at the origin.</span>
+<span class="sd">    Obtained from :meth:`AgentView.walls_in_range`. The view is always</span>
+<span class="sd">    relative to the agent - as if the agent sits at the origin.</span>
 <span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">WallView</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -481,10 +440,10 @@
 <span class="sd">    Example — visibility-filtered neighborhood::</span>
 
 <span class="sd">        def compute_next_state(self, state, step):</span>
-<span class="sd">            boundaries = step.walls_nearby()</span>
+<span class="sd">            boundaries = step.walls_in_range(1.0)</span>
 <span class="sd">            neighbors = step.other_agents_in_range(</span>
 <span class="sd">                5.0,</span>
-<span class="sd">                lambda n: step.no_geometry_between(n.relative_position, boundaries),</span>
+<span class="sd">                lambda n: step.no_geometry_between(n),</span>
 <span class="sd">            )</span>
 <span class="sd">    """</span>
 
@@ -526,47 +485,22 @@
 <div class="viewcode-block" id="AgentView.no_geometry_between">
 <a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.AgentView.no_geometry_between">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">no_geometry_between</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">relative_position</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
-        <span class="n">boundaries</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">WallView</span><span class="p">],</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">NeighborView</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Return ``True`` when the straight line from the agent to the point</span>
-<span class="sd">        *relative_position* away is not intersected by any of *walls*.</span>
+<span class="w">        </span><span class="sd">"""Return ``True`` when nothing blocks the straight line to *target*.</span>
+
+<span class="sd">        Given a :class:`NeighborView`, this answers whether that neighbor can be</span>
+<span class="sd">        seen. Given an offset, it answers whether the straight line to that point</span>
+<span class="sd">        is free of geometry — which is also whether the agent can move there, as</span>
+<span class="sd">        what blocks the line of sight blocks the step.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            relative_position: Offset from the agent as ``(dx, dy)``.</span>
-<span class="sd">            boundaries: List of geometry boundary segments.</span>
+<span class="sd">            target: A :class:`NeighborView`, or an offset from the agent as</span>
+<span class="sd">                ``(dx, dy)``.</span>
 <span class="sd">        """</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">no_geometry_between</span><span class="p">(</span>
-            <span class="n">relative_position</span><span class="p">,</span> <span class="p">[</span><span class="n">b</span><span class="o">.</span><span class="n">_obj</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">boundaries</span><span class="p">]</span>
-        <span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="AgentView.inside_geometry">
-<a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.AgentView.inside_geometry">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">inside_geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">relative_position</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Return ``True`` when the point reached by moving *relative_position*</span>
-<span class="sd">        lies inside the walkable area.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            relative_position: Offset from the agent as ``(dx, dy)``.</span>
-<span class="sd">        """</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">inside_geometry</span><span class="p">(</span><span class="n">relative_position</span><span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="AgentView.walls_nearby">
-<a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.AgentView.walls_nearby">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">walls_nearby</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">WallView</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">"""Return the walls in the grid cells around the agent.</span>
-
-<span class="sd">        Faster than :meth:`walls_in_range`, but an approximation of proximity</span>
-<span class="sd">        rather than a radius: it returns whatever shares a cell neighborhood.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            List of :class:`WallView`, each as seen from the agent.</span>
-<span class="sd">        """</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">WallView</span><span class="p">(</span><span class="n">w</span><span class="p">)</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">walls_nearby</span><span class="p">()]</span></div>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">NeighborView</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">no_geometry_between</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">no_geometry_between</span><span class="p">(</span><span class="n">target</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="AgentView.walls_in_range">
@@ -587,7 +521,7 @@
 <a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.AgentView.with_neighbor_state_mapping">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">with_neighbor_state_mapping</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">repack</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Any</span><span class="p">]</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"AgentStep"</span><span class="p">:</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"AgentView"</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Return this view with every neighbor seen through *repack*.</span>
 
 <span class="sd">        Use this to delegate a view to a built-in model whose</span>
@@ -630,9 +564,12 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">dt</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">to_next_target</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">"""Vector from the agent to its next target."""</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">to_next_target</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">orientation_to_next_target</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""Unit vector pointing at the agent's next target.</span>
+
+<span class="sd">        Zero when the agent has already reached it.</span>
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">orientation_to_next_target</span>
 
 <div class="viewcode-block" id="AgentStep.with_neighbor_state_mapping">
 <a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.AgentStep.with_neighbor_state_mapping">[docs]</a>

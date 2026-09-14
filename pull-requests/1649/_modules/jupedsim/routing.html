@@ -109,46 +109,6 @@
 
   
     <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
-<div class="bd-header__inner bd-page-width">
-  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
-    <span class="fa-solid fa-bars"></span>
-  </button>
-  
-  
-  <div class="col-lg-9 navbar-header-items">
-    
-    
-    <div class="navbar-header-items__end">
-      
-        <div class="navbar-item navbar-persistent--container">
-          
-
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button>
-        </div>
-      
-      
-    </div>
-    
-  </div>
-  
-  
-    <div class="navbar-persistent--mobile">
-
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button>
-    </div>
-  
-
-  
-</div>
-
     </header>
   
 
@@ -400,8 +360,9 @@
         <span class="p">),</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span> <span class="o">=</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">RoutingEngine</span><span class="p">(</span>
-            <span class="n">build_geometry</span><span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">_obj</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_geometry</span> <span class="o">=</span> <span class="n">build_geometry</span><span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span> <span class="o">=</span> <span class="n">py_jps</span><span class="o">.</span><span class="n">SurfaceMeshShortestPathRoutingEngine</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_geometry</span><span class="o">.</span><span class="n">_obj</span>
         <span class="p">)</span>
 
 <div class="viewcode-block" id="RoutingEngine.compute_waypoints">
@@ -436,9 +397,14 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            List of points (path) from 'frm' to 'to' including from and to.</span>
+<span class="sd">            Intermediate points may be collinear: the path is reported wherever</span>
+<span class="sd">            it passes a triangle edge, not only where it turns.</span>
 
 <span class="sd">        """</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">compute_waypoints</span><span class="p">(</span><span class="n">frm</span><span class="p">,</span> <span class="n">to</span><span class="p">)</span></div>
+        <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">get_shortest_path</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">frm</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">frm</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">),</span> <span class="p">(</span><span class="n">to</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">to</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="p">[(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">path</span><span class="p">]</span></div>
 
 
 <div class="viewcode-block" id="RoutingEngine.is_routable">
@@ -450,7 +416,7 @@
 <span class="sd">            If the point is inside the geometry.</span>
 
 <span class="sd">        """</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">is_routable</span><span class="p">(</span><span class="n">p</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">is_valid_location</span><span class="p">((</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="RoutingEngine.mesh">
@@ -460,7 +426,7 @@
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]:</span>
 <span class="w">        </span><span class="sd">"""Access the navigation mesh geometry.</span>
 
-<span class="sd">        The navigation mesh is store as a collection of convex polygons in CCW order.</span>
+<span class="sd">        The navigation mesh is stored as a collection of triangles in CCW order.</span>
 
 <span class="sd">        The returned data is to be interpreted as:</span>
 
@@ -477,13 +443,8 @@
 <span class="sd">            A tuple of vertices and list of polygons which in turn are a list of indices</span>
 <span class="sd">            tuple[list[tuple[float, float]],list[list[int]]]</span>
 <span class="sd">        """</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">mesh</span><span class="p">()</span></div>
-
-
-<div class="viewcode-block" id="RoutingEngine.edges_for">
-<a class="viewcode-back" href="../../api/jupedsim/index.html#jupedsim.RoutingEngine.edges_for">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">edges_for</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vertex_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">edges_for</span><span class="p">(</span><span class="n">vertex_id</span><span class="p">)</span></div>
+        <span class="n">vertices</span> <span class="o">=</span> <span class="p">[(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geometry</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">vertices</span><span class="p">()]</span>
+        <span class="k">return</span> <span class="n">vertices</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geometry</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">triangles</span><span class="p">()</span></div>
 </div>
 
 </pre></div>

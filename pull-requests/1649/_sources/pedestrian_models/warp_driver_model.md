@@ -238,7 +238,7 @@ Typical bottleneck: the warp composition in the inner loop.
 
 ## Known limitations
 
-- **$W_\text{ref}$ uses straight-line frame change only.** The thesis defines graph-based variants (Algorithm 3) that warp space along navigable paths, enabling anticipatory avoidance around corners and bends. The routing infrastructure exists (`RoutingEngine::ComputeAllWaypoints`); integrating it with the warp chain is a future extension.
+- **$W_\text{ref}$ uses straight-line frame change only.** The thesis defines graph-based variants (Algorithm 3) that warp space along navigable paths, enabling anticipatory avoidance around corners and bends. The routing infrastructure exists (`RoutingEngine::GetShortestPath`); integrating it with the warp chain is a future extension.
 
 ## References
 
