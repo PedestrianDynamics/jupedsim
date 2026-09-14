@@ -44,9 +44,8 @@ class NeighborView:
 class WallView:
     """A wall segment as seen from the agent that asked for it.
 
-    Obtained from :meth:`AgentView.walls_nearby` or
-    :meth:`AgentView.walls_in_range`. The view is always relative to the
-    agent - as if the agent sits at the origin.
+    Obtained from :meth:`AgentView.walls_in_range`. The view is always
+    relative to the agent - as if the agent sits at the origin.
     """
 
     def __init__(self, obj: py_jps.WallView) -> None:
@@ -98,10 +97,10 @@ class AgentView:
     Example — visibility-filtered neighborhood::
 
         def compute_next_state(self, state, step):
-            boundaries = step.walls_nearby()
+            boundaries = step.walls_in_range(1.0)
             neighbors = step.other_agents_in_range(
                 5.0,
-                lambda n: step.no_geometry_between(n.relative_position, boundaries),
+                lambda n: step.no_geometry_between(n),
             )
     """
 
@@ -138,41 +137,22 @@ class AgentView:
         return [n for n in neighbors if predicate(n)]
 
     def no_geometry_between(
-        self,
-        relative_position: tuple[float, float],
-        boundaries: list[WallView],
+        self, target: NeighborView | tuple[float, float]
     ) -> bool:
-        """Return ``True`` when the straight line from the agent to the point
-        *relative_position* away is not intersected by any of *walls*.
+        """Return ``True`` when nothing blocks the straight line to *target*.
+
+        Given a :class:`NeighborView`, this answers whether that neighbor can be
+        seen. Given an offset, it answers whether the straight line to that point
+        is free of geometry — which is also whether the agent can move there, as
+        what blocks the line of sight blocks the step.
 
         Args:
-            relative_position: Offset from the agent as ``(dx, dy)``.
-            boundaries: List of geometry boundary segments.
+            target: A :class:`NeighborView`, or an offset from the agent as
+                ``(dx, dy)``.
         """
-
-        return self._obj.no_geometry_between(
-            relative_position, [b._obj for b in boundaries]
-        )
-
-    def inside_geometry(self, relative_position: tuple[float, float]) -> bool:
-        """Return ``True`` when the point reached by moving *relative_position*
-        lies inside the walkable area.
-
-        Args:
-            relative_position: Offset from the agent as ``(dx, dy)``.
-        """
-        return self._obj.inside_geometry(relative_position)
-
-    def walls_nearby(self) -> list[WallView]:
-        """Return the walls in the grid cells around the agent.
-
-        Faster than :meth:`walls_in_range`, but an approximation of proximity
-        rather than a radius: it returns whatever shares a cell neighborhood.
-
-        Returns:
-            List of :class:`WallView`, each as seen from the agent.
-        """
-        return [WallView(w) for w in self._obj.walls_nearby()]
+        if isinstance(target, NeighborView):
+            return self._obj.no_geometry_between(target._obj)
+        return self._obj.no_geometry_between(target)
 
     def walls_in_range(self, distance: float) -> list[WallView]:
         """Return the walls within *distance* of the agent.
@@ -187,7 +167,7 @@ class AgentView:
 
     def with_neighbor_state_mapping(
         self, repack: Callable[[Any], Any]
-    ) -> "AgentStep":
+    ) -> "AgentView":
         """Return this view with every neighbor seen through *repack*.
 
         Use this to delegate a view to a built-in model whose
@@ -226,9 +206,12 @@ class AgentStep(AgentView):
         return self._obj.dt
 
     @property
-    def to_next_target(self) -> tuple[float, float]:
-        """Vector from the agent to its next target."""
-        return self._obj.to_next_target
+    def orientation_to_next_target(self) -> tuple[float, float]:
+        """Unit vector pointing at the agent's next target.
+
+        Zero when the agent has already reached it.
+        """
+        return self._obj.orientation_to_next_target
 
     def with_neighbor_state_mapping(
         self, repack: Callable[[Any], Any]

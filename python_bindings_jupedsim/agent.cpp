@@ -26,13 +26,16 @@ void init_agent(py::module_& m)
         .def_property_readonly(
             "stage_id", [](const GenericAgent& agent) { return agent.stageId.getID(); })
         .def_property_readonly(
-            "position", [](const GenericAgent& agent) { return intoTuple(agent.Position()); })
-        .def_property(
+            "position", [](const GenericAgent& agent) { return intoTuple(agent.location.xy()); })
+        .def_property_readonly(
+            "location",
+            // The token points into geometry the simulation owns; this agent wrapper in turn
+            // keeps the simulation alive. keep_alive needs the cpp_function spelling here.
+            py::cpp_function(
+                [](const GenericAgent& agent) { return agent.location; }, py::keep_alive<0, 1>()))
+        .def_property_readonly(
             "final_target",
-            [](const GenericAgent& agent) { return intoTuple(agent.finalTarget); },
-            [](GenericAgent& agent, std::tuple<double, double> finalTarget) {
-                agent.finalTarget = intoPoint(finalTarget);
-            })
+            [](const GenericAgent& agent) { return intoTuple(agent.finalTarget.xy()); })
         .def_property_readonly(
             "next_target", [](const GenericAgent& agent) { return intoTuple(agent.nextTarget); })
         .def_property_readonly(

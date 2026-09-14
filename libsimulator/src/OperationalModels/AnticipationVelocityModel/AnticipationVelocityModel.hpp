@@ -48,19 +48,18 @@ private:
         const Point& direction) const;
     Point NeighborRepulsion(
         const State& currentState,
-        Point toNextTarget,
+        Point desiredDirection,
         const NeighborView& neighbor) const;
 
     Point HandleWallAvoidance(
         const Point& direction,
-        double agentRadius,
-        const auto& boundaries,
-        double wallBufferDistance,
+        const State& currentState,
+        const AgentStep& step,
         double pushoutStrength) const;
 
     Point UpdateDirection(
         const State& currentState,
-        Point toNextTarget,
+        Point desiredDirection,
         const Point& calculatedDirection,
         double dt) const;
 };

@@ -23,6 +23,7 @@ __pycache__/
 /build/
 /dist/
 /jupedsim.egg-info/
+/python_modules/trame_viewer/trame_viewer.egg-info/
 /docs/build
 /docs/source/citation/*.bib
 /docs/jupyter_execute/

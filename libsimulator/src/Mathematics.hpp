@@ -14,4 +14,8 @@ double hermite_interp(double x, double x1, double x2, double y1, double y2, doub
 
 std::complex<double> c_cbrt(std::complex<double> x);
 
-Point mollify_e0(const Point& to_target, double deltaT, int orientationDelay, const Point& e0);
+Point mollify_e0(
+    const Point& orientation_to_target,
+    double deltaT,
+    int orientationDelay,
+    const Point& e0);

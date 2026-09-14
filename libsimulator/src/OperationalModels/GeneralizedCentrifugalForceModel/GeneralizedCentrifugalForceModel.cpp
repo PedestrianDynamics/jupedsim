@@ -16,6 +16,13 @@
 #include <optional>
 #include <stdexcept>
 
+namespace
+{
+/// How far to ask for walls. The force reaches maxGeometryInteractionDistance beyond the
+/// agent's ellipse, 3.4 m with the default parameters. Use the 4m default of previous impl.
+constexpr double WallSearchRadius = 4.0;
+} // namespace
+
 GeneralizedCentrifugalForceModel::GeneralizedCentrifugalForceModel(
     double strengthNeighborRepulsion_,
     double strengthGeometryRepulsion_,
@@ -47,12 +54,8 @@ Point GeneralizedCentrifugalForceModel::ComputeNextState(
     const AgentStep& step) const
 {
     const auto& currentState = std::get<State>(current);
-    auto _w = step.WallsNearby();
-    const std::vector<WallView> boundaries(_w.begin(), _w.end());
-    const auto neighborhood =
-        step.OtherAgentsInRange(_cutOffRadius, [&step, &boundaries](const NeighborView& n) {
-            return step.NoGeometryBetween(n.RelativePosition, boundaries);
-        });
+    const auto neighborhood = step.OtherAgentsInRange(
+        _cutOffRadius, [&step](const NeighborView& n) { return step.NoGeometryBetween(n); });
     Point F_rep;
     for(const auto& neighbor : neighborhood) {
         F_rep += ForceRepPed(currentState, neighbor);
@@ -63,12 +66,17 @@ Point GeneralizedCentrifugalForceModel::ComputeNextState(
     Point e0{};
     // repulsive forces to the walls and transitions that are not my target
     Point repwall{};
-    for(const auto& wall : boundaries) {
+    for(const auto& wall : step.WallsInRange(WallSearchRadius)) {
         repwall += ForceRepWall(currentState, wall);
     }
 
     const Point fd = ForceDriv(
-        currentState, step.ToNextTarget(), currentState.mass, currentState.tau, step.dt(), e0);
+        currentState,
+        step.orientation_to_next_target(),
+        currentState.mass,
+        currentState.tau,
+        step.dt(),
+        e0);
     const Point acc = (fd + F_rep + repwall) / currentState.mass;
 
     const Point velocity = (currentState.orientation * currentState.speed) + acc * step.dt();
@@ -136,8 +144,8 @@ void GeneralizedCentrifugalForceModel::CheckModelConstraint(
                 "Model constraint violation: Agent at {} too close to agent at {}: distance {}, "
                 "contactDist {}, "
                 "effective distance {}",
-                agent.Position(),
-                agent.Position() + neighbor.RelativePosition,
+                agent.location.xy(),
+                agent.location.xy() + neighbor.RelativePosition,
                 distance,
                 contanctDist,
                 distance - contanctDist);
@@ -147,27 +155,25 @@ void GeneralizedCentrifugalForceModel::CheckModelConstraint(
     const auto maxRadius = std::max(AMin, BMax) / 2.;
     if(!view.WallsInRange(maxRadius).empty()) {
         throw SimulationError(
-            "Model constraint violation: Agent at {} too close to geometry boundaries, distance <= "
-            "{}",
-            agent.Position(),
+            "Model constraint violation: Agent {} too close to geometry boundaries, distance < {}",
+            agent.location.xy(),
             maxRadius);
     }
 }
 
 Point GeneralizedCentrifugalForceModel::ForceDriv(
     const State& currentState,
-    Point to_target,
+    Point orientationToTarget,
     double mass,
     double tau,
     double deltaT,
     Point& e0update) const
 {
     Point F_driv;
-    const auto dist = to_target.Norm();
-    if(dist > J_EPS_GOAL) {
-
+    if(orientationToTarget != Point{}) {
+        // expect this to never trigger as stage system should cover it.
         const Point e0 =
-            mollify_e0(to_target, deltaT, currentState.orientationDelay, currentState.e0);
+            mollify_e0(orientationToTarget, deltaT, currentState.orientationDelay, currentState.e0);
         e0update = e0;
         F_driv =
             ((e0 * currentState.v0 - (currentState.orientation * currentState.speed)) * mass) / tau;

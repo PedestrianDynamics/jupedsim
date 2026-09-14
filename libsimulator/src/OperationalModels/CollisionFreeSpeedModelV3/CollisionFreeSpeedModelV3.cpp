@@ -23,6 +23,9 @@ constexpr double SpacingBlendWeight =
 constexpr double TauTheta = 0.3; // Heading relaxation timescale [s] for temporal smoothing.
 constexpr double MinReverseSpeed =
     -0.01; // Deterministic tiny reverse floor [m/s] to release local blockages.
+/// How far to ask for walls. The repulsion decays with `rangeGeometryRepulsion` (0.02 m by
+/// default), so a wall this far off contributes "nothing".
+constexpr double WallSearchRadius = 4.0;
 
 double NeighborInfluence(
     const std::vector<NeighborView>& neighborhood,
@@ -71,19 +74,15 @@ Point CollisionFreeSpeedModelV3::ComputeNextState(
     const AgentStep& step) const
 {
     const auto& currentState = std::get<State>(current);
-    auto _w = step.WallsNearby();
-    const std::vector<WallView> boundaries(_w.begin(), _w.end());
-    auto neighborhood =
-        step.OtherAgentsInRange(_cutOffRadius, [&step, &boundaries](const NeighborView& n) {
-            return step.NoGeometryBetween(n.RelativePosition, boundaries);
-        });
+    auto neighborhood = step.OtherAgentsInRange(
+        _cutOffRadius, [&step](const NeighborView& n) { return step.NoGeometryBetween(n); });
 
     Point boundaryRepulsion{};
-    for(const auto& wall : boundaries) {
+    for(const auto& wall : step.WallsInRange(WallSearchRadius)) {
         boundaryRepulsion += BoundaryRepulsion(currentState, wall);
     }
 
-    const auto desired_direction = step.ToNextTarget().Normalized();
+    const auto desired_direction = step.orientation_to_next_target();
     auto reference_direction = (desired_direction + boundaryRepulsion).Normalized();
     if(reference_direction == Point{}) {
         reference_direction = currentState.orientation;
@@ -168,9 +167,9 @@ void CollisionFreeSpeedModelV3::CheckModelConstraint(
         const auto distance = neighbor.RelativePosition.Norm();
         if(contactDist >= distance) {
             throw SimulationError(
-                "Model constraint violation: Agent at {} too close to agent at {}: distance {}",
-                agent.Position(),
-                agent.Position() + neighbor.RelativePosition,
+                "Model constraint violation: Agent {} too close to agent {}: distance {}",
+                agent.location.xy(),
+                agent.location.xy() + neighbor.RelativePosition,
                 distance);
         }
     }
@@ -178,8 +177,8 @@ void CollisionFreeSpeedModelV3::CheckModelConstraint(
     if(!view.WallsInRange(currentState.radius).empty()) {
         throw SimulationError(
             "Model constraint violation: Agent at {} too close to geometry boundaries, distance "
-            "<= {}",
-            agent.Position(),
+            "< {}",
+            agent.location.xy(),
             currentState.radius);
     }
 }

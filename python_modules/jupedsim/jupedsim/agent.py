@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 import jupedsim.native as py_jps
+from jupedsim.location import Location
 
 if TYPE_CHECKING:
     from jupedsim.simulation import Simulation
@@ -133,6 +134,18 @@ class Agent:
         return self.__resolve().position
 
     @property
+    def location(self) -> Location:
+        """Place the agent stands at, as a
+        :class:`~jupedsim.location.Location`.
+
+        The same position :attr:`position` reports, plus the height of the
+        floor it is on -- and in a form that can be handed back to the
+        simulation, e.g. as another agent's
+        :attr:`final_target`.
+        """
+        return Location(self.__resolve().location)
+
+    @property
     def final_target(self) -> tuple[float, float]:
         """Current final target of the agent.
 
@@ -148,17 +161,27 @@ class Agent:
         .. important::
 
             When setting the target, the given coordinates must lie within the
-            walkable area. Otherwise, an error will be thrown at the next
-            iteration call.
+            walkable area. Otherwise, an error will be thrown immediately.
+
+        Accepts a :class:`~jupedsim.location.Location` as well as an
+        ``(x, y)`` tuple. Over stacked floors only the location says which
+        floor is meant; the tuple is located around the agent's own height.
 
         Returns:
-            Current final target of the agent.
+            Current final target of the agent, as ``(x, y)``.
         """
         return self.__resolve().final_target
 
     @final_target.setter
-    def final_target(self, final_target: tuple[float, float]) -> None:
-        self.__resolve().final_target = final_target
+    def final_target(
+        self, final_target: Location | tuple[float, float]
+    ) -> None:
+        target = (
+            final_target._obj
+            if isinstance(final_target, Location)
+            else final_target
+        )
+        self.__simulation._obj.set_agent_target(self.__id, target)
 
     @property
     def next_target(self) -> tuple[float, float]:

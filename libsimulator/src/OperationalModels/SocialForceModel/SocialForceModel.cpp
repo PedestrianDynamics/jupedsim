@@ -11,6 +11,13 @@
 #include <cmath>
 #include <string>
 
+namespace
+{
+/// How far to ask for walls. The obstacle force decays with `forceDistance` (0.08 m by
+/// default), so a wall this far off contributes "nothing".
+constexpr double WallSearchRadius = 4.0;
+} // namespace
+
 SocialForceModel::SocialForceModel(double bodyForce, double friction)
     : bodyForce(bodyForce), friction(friction)
 {
@@ -27,21 +34,17 @@ Point SocialForceModel::ComputeNextState(
     const AgentStep& step) const
 {
     const auto& currentState = std::get<State>(current);
-    auto forces = DrivingForce(currentState, step.ToNextTarget());
+    auto forces = DrivingForce(currentState, step.orientation_to_next_target());
 
-    auto _w = step.WallsNearby();
-    const std::vector<WallView> boundaries(_w.begin(), _w.end());
-    auto neighborhood =
-        step.OtherAgentsInRange(_cutOffRadius, [&step, &boundaries](const NeighborView& n) {
-            return step.NoGeometryBetween(n.RelativePosition, boundaries);
-        });
+    auto neighborhood = step.OtherAgentsInRange(
+        _cutOffRadius, [&step](const NeighborView& n) { return step.NoGeometryBetween(n); });
     Point F_rep;
     for(const auto& neighbor : neighborhood) {
         F_rep += AgentForce(currentState, neighbor);
     }
     forces += F_rep / currentState.mass;
     Point obstacle_f{};
-    for(const auto& wall : boundaries) {
+    for(const auto& wall : step.WallsInRange(WallSearchRadius)) {
         obstacle_f += ObstacleForce(currentState, wall);
     }
     forces += obstacle_f / currentState.mass;
@@ -88,8 +91,8 @@ void SocialForceModel::CheckModelConstraint(const GenericAgent& agent, const Age
             throw SimulationError(
                 "Model constraint violation: Agent at {} too close to agent at {}: distance {}, "
                 "radius {}",
-                agent.Position(),
-                agent.Position() + neighbor.RelativePosition,
+                agent.location.xy(),
+                agent.location.xy() + neighbor.RelativePosition,
                 distance,
                 currentState.radius);
         }
@@ -97,16 +100,15 @@ void SocialForceModel::CheckModelConstraint(const GenericAgent& agent, const Age
     const auto maxRadius = currentState.radius / 2;
     if(!view.WallsInRange(maxRadius).empty()) {
         throw SimulationError(
-            "Model constraint violation: Agent at {} too close to geometry boundaries, distance <= "
+            "Model constraint violation: Agent at {} too close to geometry boundaries, distance < "
             "{}/2",
-            agent.Position(),
+            agent.location.xy(),
             currentState.radius);
     }
 }
 
-Point SocialForceModel::DrivingForce(const State& currentState, Point ToNextTarget)
+Point SocialForceModel::DrivingForce(const State& currentState, Point e0)
 {
-    const Point e0 = ToNextTarget.Normalized();
     return (e0 * currentState.desiredSpeed - currentState.velocity) / currentState.reactionTime;
 };
 double SocialForceModel::PushingForceLength(double A, double B, double r, double distance)

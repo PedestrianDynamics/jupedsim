@@ -33,8 +33,9 @@ class StatsWriter(jps.TrajectoryWriter):
         self._trajectory_writer.write_iteration_state(simulation)
         self.write_stats(simulation)
 
-    def end_writing(self, simulation) -> None:
-        self._trajectory_writer.end_writing(simulation)
+    def close(self) -> None:
+        """Flush buffered frames and stats. Nothing is on disk without this."""
+        self._trajectory_writer.close()
 
     def every_nth_frame(self) -> int:
         return self._trajectory_writer.every_nth_frame()

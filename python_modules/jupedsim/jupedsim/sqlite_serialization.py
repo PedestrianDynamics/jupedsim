@@ -7,7 +7,7 @@ from typing import Final
 
 from shapely import from_wkt
 
-from jupedsim.serialization import TrajectoryWriter
+from jupedsim.serialization import TrajectoryWriter, walkable_area_as_wkt
 from jupedsim.simulation import Simulation
 
 DATABASE_VERSION: Final = 3
@@ -74,7 +74,7 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
         such as framerate etc...
         """
         fps = 1 / simulation.delta_time() / self._every_nth_frame
-        geo = simulation.get_geometry().as_wkt()
+        geo = walkable_area_as_wkt(simulation)
 
         cur = self._con.cursor()
         try:

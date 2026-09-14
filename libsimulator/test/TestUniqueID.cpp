@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
+#include "TestCommon.hpp"
 #include "UniqueID.hpp"
 
 #include <fmt/format.h>

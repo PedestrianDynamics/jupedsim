@@ -44345,22 +44345,12 @@ class RandomProfilePicker:
         self._mu_d = mu_d
         self._sigma_d = sigma_d
 
-    def randomise_radius_and_v0(
-        self, agent: jps.CollisionFreeSpeedModelAgentParameters
-    ) -> jps.CollisionFreeSpeedModelAgentParameters:
-        new_agent = jps.CollisionFreeSpeedModelAgentParameters()
-        new_agent.position = agent.position
-        new_agent.orientation = agent.orientation
-        new_agent.journey_id = agent.journey_id
-        new_agent.stage_id = agent.stage_id
-        new_agent.time_gap = agent.time_gap
-        new_agent.desired_speed = self._rnd.gauss(
-            mu=self._mu_v0, sigma=self._sigma_v0
+    def random_state(self) -> jps.CollisionFreeSpeedModelState:
+        return jps.CollisionFreeSpeedModelState(
+            orientation=(1.0, 0.0),
+            desired_speed=self._rnd.gauss(mu=self._mu_v0, sigma=self._sigma_v0),
+            radius=self._rnd.gauss(mu=self._mu_d / 2, sigma=self._sigma_d / 2),
         )
-        new_agent.radius = self._rnd.gauss(
-            mu=self._mu_d / 2, sigma=self._sigma_d / 2
-        )
-        return new_agent
 
 
 @jps.trace_event
@@ -44454,17 +44444,15 @@ def main():
     jps.enable_tracing()
     journeys = create_journeys(simulation)
 
-    agent_parameters = jps.CollisionFreeSpeedModelAgentParameters()
-    agent_parameters.orientation = (1.0, 0.0)
-    agent_parameters.position = (0.0, 0.0)
     with jps.trace_event("initialisation"):
         for pos in positions:
-            agent_parameters.position = pos
             journey, start_stage = random.choice(journeys)
-            agent_parameters.journey_id = journey
-            agent_parameters.stage_id = start_stage
-            p = profile_picker.randomise_radius_and_v0(agent_parameters)
-            simulation.add_agent(p)
+            simulation.add_agent(
+                journey_id=journey,
+                stage_id=start_stage,
+                position=pos,
+                state=profile_picker.random_state(),
+            )
 
     start_time = time.perf_counter_ns()
     iteration = simulation.iteration_count()
@@ -44488,8 +44476,10 @@ def main():
             )
         except KeyboardInterrupt:
             print("\nCTRL-C Received! Shutting down")
+            stats_writer.close()
             jps.dump_traces("grosser_stern_perf_test_traces.ptrace")
             sys.exit(1)
+    stats_writer.close()
     print(simulation.timer)
     jps.dump_traces("grosser_stern_perf_test_traces.ptrace")
 

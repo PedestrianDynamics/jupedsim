@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
+import os
+from pathlib import Path
 from typing import Any, Iterator
 
 import shapely
@@ -10,6 +12,7 @@ from jupedsim.geometry import Geometry
 from jupedsim.geometry_utils import build_geometry
 from jupedsim.internal.tracing import Timer
 from jupedsim.journey import JourneyDescription
+from jupedsim.location import Location
 from jupedsim.models.anticipation_velocity_model import (
     AnticipationVelocityModel,
     AnticipationVelocityModelState,
@@ -57,6 +60,24 @@ _STATE_TYPES = (
     WarpDriverModelState,
 )
 
+_MESH_SUFFIXES = (".obj",)
+
+
+def _as_surface_mesh(geometry: Any) -> py_jps.Geometry | None:
+    """The geometry argument read as a surface mesh, or None if it is a 2D one.
+
+    A ``Path`` always names a mesh file; a ``str`` only when it carries a mesh
+    suffix, since a plain string is also how a WKT walkable area arrives.
+    """
+    if isinstance(geometry, py_jps.Geometry):
+        return geometry
+    if isinstance(geometry, os.PathLike) or (
+        isinstance(geometry, str)
+        and Path(geometry).suffix.lower() in _MESH_SUFFIXES
+    ):
+        return py_jps.Geometry.from_obj(os.fspath(geometry))
+    return None
+
 
 class Simulation:
     """Defines a simulation of pedestrian movement over a continuous walkable area.
@@ -83,6 +104,7 @@ class Simulation:
         ),
         geometry: (
             str
+            | os.PathLike
             | shapely.GeometryCollection
             | shapely.Polygon
             | shapely.MultiPolygon
@@ -125,6 +147,8 @@ class Simulation:
 
                 * str with a valid Well Known Text. In this format the same WKT types as mentioned for the shapely types are supported: GEOMETRYCOLLETION, MULTIPOLYGON, POLYGON, MULTIPOINT. The same restrictions as mentioned for the shapely types apply.
 
+                * :class:`~pathlib.Path` (or a str ending in ``.obj``) naming an OBJ file holding a walkable surface. The world is then a surface: agents walk on it and are routed over it, floors may be stacked, and there is no polygon underneath -- :func:`get_geometry` has no answer for such a simulation.
+
             dt: Iteration step size in seconds. It is recommended to
                 leave this at its default value.
             trajectory_writer: Any object implementing the
@@ -148,41 +172,50 @@ class Simulation:
                 f"{type(model).__name__}"
             )
         self._writer = trajectory_writer
+        mesh = _as_surface_mesh(geometry)
         self._obj = py_jps.Simulation(
-            model=py_jps_model, geometry=build_geometry(geometry)._obj, dt=dt
+            model=py_jps_model,
+            geometry=mesh if mesh else build_geometry(geometry)._obj,
+            dt=dt,
         )
         self._timer = Timer(self._obj, timer_log_level=timer_log_level)
 
     def add_waypoint_stage(
-        self, position: tuple[float, float], distance
+        self, position: tuple[float, float], distance, z_hint: float = 0.0
     ) -> int:
         """Add a new waypoint stage to this simulation.
 
         Arguments:
             position: Position of the waypoint
             distance: Minimum distance required to reach this waypoint
+            z_hint: Height the waypoint is meant to sit at. On stacked floors
+                this picks the one, see :func:`add_agent`.
 
         Returns:
             Id of the new stage.
 
         """
-        return self._obj.add_waypoint_stage(position, distance)
+        return self._obj.add_waypoint_stage(position, distance, z_hint)
 
-    def add_queue_stage(self, positions: list[tuple[float, float]]) -> int:
+    def add_queue_stage(
+        self, positions: list[tuple[float, float]], z_hint: float = 0.0
+    ) -> int:
         """Add a new queue state to this simulation.
 
          Arguments:
              positions: Ordered list of the waiting
                  points of this queue. The first one in the list is the head of
                  the queue while the last one is the back of the queue.
+             z_hint: Height the queue is meant to sit at. On stacked floors
+                 this picks the one, see :func:`add_agent`.
         Returns:
              Id of the new stage.
 
         """
-        return self._obj.add_queue_stage(positions)
+        return self._obj.add_queue_stage(positions, z_hint)
 
     def add_waiting_set_stage(
-        self, positions: list[tuple[float, float]]
+        self, positions: list[tuple[float, float]], z_hint: float = 0.0
     ) -> int:
         """Add a new waiting set stage to this simulation.
 
@@ -190,11 +223,13 @@ class Simulation:
             positions: Ordered list of the waiting points of this waiting set.
                 The agents will fill the waiting points in the given order. If more agents
                 are targeting the waiting, the remaining will wait at the last given point.
+            z_hint: Height the waiting set is meant to sit at. On stacked floors
+                this picks the one, see :func:`add_agent`.
 
         Returns:
             Id of the new stage.
         """
-        return self._obj.add_waiting_set_stage(positions)
+        return self._obj.add_waiting_set_stage(positions, z_hint)
 
     def add_exit_stage(
         self,
@@ -206,10 +241,13 @@ class Simulation:
             | shapely.MultiPoint
             | list[tuple[float, float]]
         ),
+        z_hint: float = 0.0,
     ) -> int:
         """Add an exit stage to the simulation.
 
         Arguments:
+            z_hint: Height the exit is meant to sit at. On stacked floors this
+                picks the one, see :func:`add_agent`.
             polygon:
                 Polygon without holes representing the exit stage. Polygon can be passed as:
 
@@ -230,7 +268,7 @@ class Simulation:
 
         """
         exit_geometry = build_geometry(polygon)
-        return self._obj.add_exit_stage(exit_geometry.boundary())
+        return self._obj.add_exit_stage(exit_geometry.boundary(), z_hint)
 
     def add_direct_steering_stage(self) -> int:
         """Add an direct steering stage to the simulation.
@@ -278,6 +316,7 @@ class Simulation:
             | WarpDriverModelState
             | Any
         ),
+        z_hint: float = 0.0,
     ) -> int:
         """Add an agent to the simulation.
 
@@ -285,6 +324,12 @@ class Simulation:
             journey_id: Id of the journey the agent follows.
             stage_id: Id of the stage the agent initially targets.
             position: Position to spawn the agent at, as ``(x, y)`` in metres.
+            z_hint: Height the agent is meant to stand at, in metres. On a
+                surface with stacked floors one ``(x, y)`` carries several of
+                them, and this says which. The agent lands on the floor whose
+                height comes closest, and that floor has to come within
+                0.1 m -- so the hint is a floor level, not a measurement. On a
+                single-floor world it does not matter.
             state: Initial per-agent model state. For built-in models this is
                 the matching ``XModelState`` instance, e.g.
                 :class:`~jupedsim.CollisionFreeSpeedModelState`. For custom
@@ -303,13 +348,37 @@ class Simulation:
                 stage_id=stage_id,
                 position=position,
                 state=state,
+                z_hint=z_hint,
             )
         return self._obj.add_agent(
             journey_id=journey_id,
             stage_id=stage_id,
             position=position,
             state=py_jps._CustomModelState(state),
+            z_hint=z_hint,
         )
+
+    def get_location(self, x: float, y: float, z_hint: float = 0.0) -> Location:
+        """The place at ``(x, y)`` on the floor closest to ``z_hint``.
+
+        This is where raw coordinates become a place. On a surface with
+        stacked floors one ``(x, y)`` carries several of them and the hint
+        says which; the floor found has to come within 0.1 m of it. Pass the
+        returned location on wherever a place is wanted -- it stays valid as
+        long as this simulation does.
+
+        Arguments:
+            x: x coordinate in metres.
+            y: y coordinate in metres.
+            z_hint: Height the place is meant to sit at, in metres.
+
+        Returns:
+            The location.
+
+        Raises:
+            SimulationError: if no walkable floor lies there.
+        """
+        return Location(self._obj.get_location(x, y, z_hint))
 
     def mark_agent_for_removal(self, agent_id: int):
         """Marks an agent for removal.
@@ -522,6 +591,10 @@ class Simulation:
 
         Returns:
             The geometry of the simulation.
+
+        Raises:
+            SimulationError: if this simulation was built from a surface mesh.
+                A surface has no polygon underneath to hand out.
         """
         return Geometry(self._obj.get_geometry())
 

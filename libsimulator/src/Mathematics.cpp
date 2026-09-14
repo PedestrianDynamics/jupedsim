@@ -68,10 +68,14 @@ std::complex<double> c_cbrt(std::complex<double> x)
     return rn * cos(phi) + I * rn * s;
 }
 
-Point mollify_e0(const Point& to_target, double deltaT, int orientationDelay, const Point& e0)
+Point mollify_e0(
+    const Point& orientation_to_target,
+    double deltaT,
+    int orientationDelay,
+    const Point& e0)
 {
     constexpr double _tau = 0.5;
-    const Point new_e0 = to_target.Normalized();
+    const Point new_e0 = orientation_to_target;
     const double t = orientationDelay * deltaT;
 
     // Handover new target

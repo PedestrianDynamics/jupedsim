@@ -2,4 +2,3 @@
 #pragma once
 
 constexpr double J_EPS = 0.001;
-constexpr double J_EPS_GOAL = 0.005;

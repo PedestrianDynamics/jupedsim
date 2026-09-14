@@ -80,23 +80,14 @@ void init_agent_view(py::module_& m)
             "Neighbors within radius, each as the vector pointing to it.")
         .def(
             "no_geometry_between",
-            [](const AgentView& self,
-               std::tuple<double, double> relative_position,
-               const std::vector<WallView>& walls) {
-                return self.NoGeometryBetween(intoPoint(relative_position), walls);
-            },
+            py::overload_cast<Point>(&AgentView::NoGeometryBetween, py::const_),
             py::arg("relative_position"),
-            py::arg("walls"),
             "True when nothing blocks the straight line to relative_position.")
         .def(
-            "inside_geometry",
-            &AgentView::InsideGeometry,
-            py::arg("relative_position"),
-            "True when moving by relative_position stays inside the walkable area.")
-        .def(
-            "walls_nearby",
-            [](const AgentView& self) { return intoVec(self.WallsNearby()); },
-            "Geometry segments in the grid cells around the agent.")
+            "no_geometry_between",
+            py::overload_cast<const NeighborView&>(&AgentView::NoGeometryBetween, py::const_),
+            py::arg("neighbor"),
+            "True when the neighbor can be seen from here.")
         .def(
             "walls_in_range",
             [](const AgentView& self, double distance) {
@@ -123,5 +114,6 @@ void init_agent_view(py::module_& m)
             py::keep_alive<0, 2>(),
             "The same step, but with every neighbor seen through the given mapping.")
         .def_property_readonly("dt", &AgentStep::dt)
-        .def_property_readonly("to_next_target", &AgentStep::ToNextTarget);
+        .def_property_readonly(
+            "orientation_to_next_target", &AgentStep::orientation_to_next_target);
 }

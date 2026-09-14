@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Point.hpp"
+#include "TestCommon.hpp"
 
 #include <fmt/printf.h>
 #include <gtest/gtest.h>

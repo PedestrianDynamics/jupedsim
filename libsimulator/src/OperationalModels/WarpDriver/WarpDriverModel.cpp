@@ -22,7 +22,7 @@
 //   along navigable paths — W_el (environment layout), W_io (obstacle
 //   interactions), W_ob (observed behaviors). These would enable anticipatory
 //   avoidance around corners and bends. The routing infrastructure exists
-//   (RoutingEngine::ComputeAllWaypoints provides the full waypoint path);
+//   (RoutingEngine::GetShortestPath provides the full waypoint path);
 //   the path could serve as the graph for Algorithm 3's spatial projection.
 //
 #include "WarpDriverModel.hpp"
@@ -416,8 +416,8 @@ void WarpDriverModel::CheckModelConstraint(const GenericAgent& agent, const Agen
             throw SimulationError(
                 "Model constraint violation: Agent at {} too close to agent at {}: distance {}, "
                 "radius {}",
-                agent.Position(),
-                agent.Position() + neighbor.RelativePosition,
+                agent.location.xy(),
+                agent.location.xy() + neighbor.RelativePosition,
                 distance,
                 data->radius);
         }
@@ -425,9 +425,9 @@ void WarpDriverModel::CheckModelConstraint(const GenericAgent& agent, const Agen
     const auto maxRadius = data->radius / 2;
     if(!view.WallsInRange(maxRadius).empty()) {
         throw SimulationError(
-            "Model constraint violation: Agent at {} too close to geometry boundaries, distance <= "
+            "Model constraint violation: Agent at {} too close to geometry boundaries, distance < "
             "{}/2",
-            agent.Position(),
+            agent.location.xy(),
             data->radius);
     }
 }
@@ -450,11 +450,12 @@ Point WarpDriverModel::ComputeNextState(
     }
 
     // Direction towards destination
-    Point toTarget = step.ToNextTarget();
-    const double distToTarget = toTarget.Norm();
-    if(distToTarget < 1e-9) {
+    Point desiredDir = step.orientation_to_next_target();
+    if(desiredDir == Point{}) {
         // The old update carried default-initialized stuck/detour state here,
         // so applying it reset that state; replicate that reset.
+        // [RL, FIXME] This is expected to be dead code and should be removed in a subsequent
+        //             cleanup.
         nextData.orientation = orient;
         nextData.stuckTime = 0.0;
         nextData.displacementX = 0.0;
@@ -463,7 +464,6 @@ Point WarpDriverModel::ComputeNextState(
         nextData.detourSide = 1;
         return Point{0.0, 0.0};
     }
-    Point desiredDir = toTarget.Normalized();
 
     // Use desired direction as agent's effective orientation for the frame
     Point effectiveOrient = desiredDir;
@@ -473,12 +473,8 @@ Point WarpDriverModel::ComputeNextState(
     const double dtSample = this->_timeHorizon / std::max(this->_numSamples - 1, 1);
 
     // === Step 2: Perceive - build collision probability field ===
-    auto _w = step.WallsInRange(_cutOffRadius);
-    const std::vector<WallView> boundaries(_w.begin(), _w.end());
-    const auto neighbors =
-        step.OtherAgentsInRange(_cutOffRadius, [&step, &boundaries](const NeighborView& n) {
-            return step.NoGeometryBetween(n.RelativePosition, boundaries);
-        });
+    const auto neighbors = step.OtherAgentsInRange(
+        _cutOffRadius, [&step](const NeighborView& n) { return step.NoGeometryBetween(n); });
 
     // Short-range repulsion: not part of the original Wolinski et al. (2016)
     // model, which is purely anticipatory. Added as a practical safety net
@@ -650,12 +646,12 @@ Point WarpDriverModel::ComputeNextState(
     newVelWorld = newVelWorld + repulsion;
 
     // Boundary avoidance: steer agents away from walls
-    for(const auto& wall : boundaries) {
+    const double reach = agentData.radius * 3.0;
+    for(const auto& wall : step.WallsInRange(reach)) {
         if(wall.segment.LengthSquare() < 1e-12) {
             continue; // degenerate wall segment
         }
-        const double reach = agentData.radius * 3.0;
-        if(wall.distance < reach && wall.distance > 1e-6) {
+        if(wall.distance > 1e-6) {
             const double steering = agentData.v0 * (reach - wall.distance) / wall.distance;
             newVelWorld = newVelWorld + wall.normal * steering;
         }
@@ -684,14 +680,14 @@ Point WarpDriverModel::ComputeNextState(
         Point detourVel = detourDir * agentData.v0 * 0.5;
         Point movement = detourVel * step.dt();
         // If detour would leave the walkable area, try the other side
-        if(!step.InsideGeometry(movement)) {
+        if(!step.NoGeometryBetween(movement)) {
             detourSide = -detourSide;
             lateral = Point{-desiredDir.y * detourSide, desiredDir.x * detourSide};
             detourDir = (lateral * 0.8 + desiredDir * 0.2).Normalized();
             detourVel = detourDir * agentData.v0 * 0.5;
             movement = detourVel * step.dt();
             // If both sides fail, just creep toward goal
-            if(!step.InsideGeometry(movement)) {
+            if(!step.NoGeometryBetween(movement)) {
                 movement = desiredDir * agentData.v0 * 0.1 * step.dt();
                 detourDir = desiredDir;
             }

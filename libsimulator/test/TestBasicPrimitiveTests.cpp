@@ -2,6 +2,7 @@
 #include "GeometricFunctions.hpp"
 #include "Point.hpp"
 #include "Polygon.hpp"
+#include "TestCommon.hpp"
 
 #include <gtest/gtest.h>
 

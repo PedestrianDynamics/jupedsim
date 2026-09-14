@@ -53,10 +53,8 @@ class Spawner:
         self.point_a = point_a
         self.profile_picker = profile_picker
         self.dir = (point_b[0] - point_a[0], point_b[1] - point_a[1])
-        self.agent_parameters = jps.CollisionFreeSpeedModelAgentParameters()
-        self.agent_parameters.journey_id = journey_id
-        self.agent_parameters.stage_id = start_stage
-        self.agent_parameters.orientation = (1.0, 0.0)
+        self.journey_id = journey_id
+        self.start_stage = start_stage
         self._needs_placement = 0
         self.max_agents = max
         self.spawned = 0
@@ -75,11 +73,11 @@ class Spawner:
                 self.point_a[1] + offset * self.dir[1],
             )
             if len(list(self.sim.agents_in_range(p, 0.6))) == 0:
-                self.agent_parameters.position = p
                 self.sim.add_agent(
-                    self.profile_picker.randomise_radius_and_v0(
-                        self.agent_parameters
-                    )
+                    journey_id=self.journey_id,
+                    stage_id=self.start_stage,
+                    position=p,
+                    state=self.profile_picker.random_state(),
                 )
                 self._needs_placement -= 1
                 self.spawned += 1
@@ -93,22 +91,12 @@ class RandomProfilePicker:
         self._mu_d = mu_d
         self._sigma_d = sigma_d
 
-    def randomise_radius_and_v0(
-        self, agent: jps.CollisionFreeSpeedModelAgentParameters
-    ) -> jps.CollisionFreeSpeedModelAgentParameters:
-        new_agent = jps.CollisionFreeSpeedModelAgentParameters()
-        new_agent.position = agent.position
-        new_agent.orientation = agent.orientation
-        new_agent.journey_id = agent.journey_id
-        new_agent.stage_id = agent.stage_id
-        new_agent.time_gap = agent.time_gap
-        new_agent.desired_speed = self._rnd.gauss(
-            mu=self._mu_v0, sigma=self._sigma_v0
+    def random_state(self) -> jps.CollisionFreeSpeedModelState:
+        return jps.CollisionFreeSpeedModelState(
+            orientation=(1.0, 0.0),
+            desired_speed=self._rnd.gauss(mu=self._mu_v0, sigma=self._sigma_v0),
+            radius=self._rnd.gauss(mu=self._mu_d / 2, sigma=self._sigma_d / 2),
         )
-        new_agent.radius = self._rnd.gauss(
-            mu=self._mu_d / 2, sigma=self._sigma_d / 2
-        )
-        return new_agent
 
 
 def create_journey(sim: jps.Simulation):
@@ -244,8 +232,8 @@ def main():
             iteration = simulation.iteration_count()
 
             dt = (time.perf_counter_ns() - start_time) / 1000000000
-            duration = simulation.get_last_trace().iteration_duration
-            op_dur = simulation.get_last_trace().operational_level_duration
+            duration = simulation.timer.iteration_duration_us
+            op_dur = simulation.timer.operational_level_duration_us
 
             print(
                 f"WC-Time: {dt:6.2f}s "
@@ -258,7 +246,9 @@ def main():
             )
         except KeyboardInterrupt:
             print("\nCTRL-C Received! Shutting down")
+            stats_writer.close()
             sys.exit(1)
+    stats_writer.close()
 
 
 if __name__ == "__main__":

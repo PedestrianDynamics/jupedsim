@@ -160,6 +160,7 @@ html_theme_options = {
     },
     "primary_sidebar_end": ["version-switcher"],
     "show_toc_level": 2,
+    "navbar_persistent": [],
 }
 
 html_sidebars = {
