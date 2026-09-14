@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Geometry/WalkableSurface.hpp"
 
+#include "Geometry/Geometry.hpp"
 #include "Geometry/Validation.hpp"
 #include "SimulationError.hpp"
 
@@ -176,9 +177,10 @@ WalkableSurface::RegionGraph2D WalkableSurface::CreateRegionGraph2D() const
     return graph;
 }
 
-std::unique_ptr<SurfaceMesh> WalkableSurface::CreateMesh()
+std::unique_ptr<Geometry> WalkableSurface::CreateGeometry()
 {
     SurfaceMesh mesh{};
+    RegionSplit region_split{{}, boost::num_vertices(_regionGraph)};
 
     // Map _globalVertices to CGAL mesh vertices.
     std::vector<SurfaceMesh::Vertex_index> meshVertices(
@@ -238,10 +240,17 @@ std::unique_ptr<SurfaceMesh> WalkableSurface::CreateMesh()
                     "Region {} does not fit to a walkable surface, check its connectors.",
                     regionID);
             }
+            if(region_split.region.size() != added.idx()) {
+                throw SimulationError(
+                    "Internal Error: Added face id {} does not match expected id {}",
+                    added.idx(),
+                    region_split.region.size());
+            }
+            region_split.region.push_back(regionID);
         }
     }
 
     NormaliseAndValidateMesh(mesh);
 
-    return std::make_unique<SurfaceMesh>(std::move(mesh));
+    return std::make_unique<Geometry>(std::move(mesh), std::move(region_split));
 }

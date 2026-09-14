@@ -63,7 +63,7 @@ _STATE_TYPES = (
 _MESH_SUFFIXES = (".obj",)
 
 
-def _as_surface_mesh(geometry: Any) -> py_jps.Geometry | None:
+def _as_geometry(geometry: Any) -> py_jps.Geometry | None:
     """The geometry argument read as a surface mesh, or None if it is a 2D one.
 
     A ``Path`` always names a mesh file; a ``str`` only when it carries a mesh
@@ -71,6 +71,8 @@ def _as_surface_mesh(geometry: Any) -> py_jps.Geometry | None:
     """
     if isinstance(geometry, py_jps.Geometry):
         return geometry
+    if isinstance(geometry, py_jps.WalkableSurface):
+        return geometry.create_geometry()
     if isinstance(geometry, os.PathLike) or (
         isinstance(geometry, str)
         and Path(geometry).suffix.lower() in _MESH_SUFFIXES
@@ -172,7 +174,7 @@ class Simulation:
                 f"{type(model).__name__}"
             )
         self._writer = trajectory_writer
-        mesh = _as_surface_mesh(geometry)
+        mesh = _as_geometry(geometry)
         self._obj = py_jps.Simulation(
             model=py_jps_model,
             geometry=mesh if mesh else build_geometry(geometry)._obj,
