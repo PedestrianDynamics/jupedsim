@@ -1,0 +1,115 @@
+name: Deploy PR Previews
+
+on:
+  workflow_run:
+    workflows: ["Build Documentation"]
+    types: [completed]
+
+permissions:
+  actions: read
+  contents: read
+  pull-requests: write
+
+jobs:
+  deploy-preview:
+    name: Deploy PR preview
+    if: |
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main branch
+        uses: actions/checkout@v7
+        with:
+          path: jupedsim
+
+      - name: Checkout pr-previews
+        uses: actions/checkout@v7
+        with:
+          repository: PedestrianDynamics/jupedsim-pr-previews
+          token: ${{ secrets.JUPEDSIM_PR_PREVIEWS_TOKEN }}
+          ref: main
+          path: gh-pages
+
+      - name: Download pr-number artifact
+        uses: ./jupedsim/.github/actions/download-artefact
+        with:
+          artifact-name: pr-number
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download documentation artifact
+        uses: ./jupedsim/.github/actions/download-artefact
+        with:
+          artifact-name: documentation
+          run-id: ${{ github.event.workflow_run.id }}
+          download-path: ${{ runner.temp }}/html
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Read pr-number
+        id: read-pr-number
+        run: |
+          PR_NUMBER=$(cat ./pr-number)
+          echo "value=$PR_NUMBER" >> $GITHUB_OUTPUT
+
+      - name: Stage preview into working tree
+        run: |
+          cd gh-pages
+          mkdir -p pull-requests
+          cd pull-requests
+          rm -rf "${{ steps.read-pr-number.outputs.value }}"
+          mkdir -p "${{ steps.read-pr-number.outputs.value }}"
+          cd "${{ steps.read-pr-number.outputs.value }}"
+          cp -r ${{ runner.temp }}/html/. .
+
+      - name: Commit preview
+        working-directory: gh-pages
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add "pull-requests"
+          git commit -m "docs: preview for PR #${{ steps.read-pr-number.outputs.value }}"
+          git push
+
+      - name: Update PR body with preview link
+        uses: actions/github-script@v9
+        env:
+          PREVIEW_DIR: pull-requests/${{ steps.read-pr-number.outputs.value }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            // Read PR number from file
+            const prNumber = ${{ steps.read-pr-number.outputs.value }};
+
+            // Validate PR number
+            if (!prNumber || isNaN(prNumber)) {
+              core.setFailed('Invalid PR number');
+              return;
+            }
+
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber
+            });
+
+            const repo = context.repo;
+            const url = `https://pedestriandynamics.org/jupedsim-pr-previews/${process.env.PREVIEW_DIR}/`;
+
+            const start = '<!-- PREVIEW-URL-START -->';
+            const end = '<!-- PREVIEW-URL-END -->';
+            const snippet = `${start}\nPreview: ${url}\n${end}`;
+
+            const original = pr.body || '';
+            const updated = original.includes(start)
+              ? original.replace(new RegExp(`${start}[\\s\\S]*?${end}`), snippet)
+              : `${original}\n\n${snippet}`;
+
+            await github.rest.pulls.update({
+              owner: repo.owner,
+              repo: repo.repo,
+              pull_number: prNumber,
+              body: updated
+            });
+
+            core.info(`Updated PR #${prNumber} with preview link: ${url}`);
