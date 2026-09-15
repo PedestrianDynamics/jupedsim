@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
 import re
+from dataclasses import dataclass
 
 import jupedsim as jps
 import pytest
@@ -84,6 +85,59 @@ def test_gets_region_after_error():
 
 
 ########### Error cases: Connect Regions ###########
+@dataclass
+class TwoFloors:
+    surface: jps.WalkableSurface
+    id_0: int
+    id_1: int
+
+
+@pytest.fixture
+def two_floors():
+    walkable_surface = jps.WalkableSurface()
+    id_0 = walkable_surface.add_region(
+        exterior=rectangle((0, 0), (5, 5)), height=0.0
+    )
+    id_1 = walkable_surface.add_region(
+        exterior=rectangle((10, 0), (15, 5)), height=0.0
+    )
+    return TwoFloors(walkable_surface, id_0, id_1)
+
+
+def test_connect_same_region(two_floors):
+    with pytest.raises(jps.SimulationError, match="may not be the same region"):
+        two_floors.surface.connect_regions(
+            from_region=two_floors.id_0,
+            from_edge=((0, 0), (0, 5)),
+            to_region=two_floors.id_0,
+            to_edge=((5, 0), (5, 5)),
+        )
+
+
+def test_connect_with_nonexisting_point(two_floors):
+    with pytest.raises(
+        jps.SimulationError,
+        match=f"is not an edge of region {two_floors.id_1}",
+    ):
+        two_floors.surface.connect_regions(
+            from_region=two_floors.id_0,
+            from_edge=((5, 0), (5, 5)),
+            to_region=two_floors.id_1,
+            to_edge=((10, 1), (10, 5)),  # (10, 1) does not exist
+        )
+
+
+def test_connect_points_but_no_edge(two_floors):
+    with pytest.raises(
+        jps.SimulationError,
+        match=f"is not an edge of region {two_floors.id_0}",
+    ):
+        two_floors.surface.connect_regions(
+            from_region=two_floors.id_0,
+            from_edge=((0, 0), (5, 5)),  # diagonal
+            to_region=two_floors.id_1,
+            to_edge=((10, 0), (10, 5)),
+        )
 
 
 ########### Error cases: Create Geometry ###########
@@ -144,3 +198,23 @@ def test_new_geometry_definition_v1():
         to_edge=((2, 2.2), (2, 3.8)),
     )
     assert [id_0, id_1, id_0_to_1] == [0, 1, 2]
+
+
+def test_striped_floor():
+    walkable_surface = jps.WalkableSurface()
+    num = 10
+    prev_id = -1
+    for x in range(num):
+        stripe = rectangle((2 * x, 0), (2 * x + 1, 1))
+        new_id = walkable_surface.add_region(exterior=stripe)
+        if x > 0:
+            walkable_surface.connect_regions(
+                from_region=prev_id,
+                from_edge=((2 * x - 1, 0), (2 * x - 1, 1)),
+                to_region=new_id,
+                to_edge=((2 * x, 0), (2 * x, 1)),
+            )
+        prev_id = new_id
+
+    geo = walkable_surface.create_geometry()
+    assert geo.region_count() == 2 * num - 1
