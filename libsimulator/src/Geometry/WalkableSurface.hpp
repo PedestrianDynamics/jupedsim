@@ -9,6 +9,7 @@
 #include <fmt/ranges.h>
 
 #include <array>
+#include <optional>
 #include <vector>
 
 class Geometry;
@@ -38,7 +39,13 @@ private:
     struct Region {
         // Store boundary (index 0) + holes as vector of indices into globalVertices
         std::vector<std::vector<size_t>> polygons;
-        bool connectable = false; // E.g. right now do not allow to connect to Connectors
+        /// Empty for connectors, which are inclined instead of flat.
+        std::optional<double> height;
+        /// Polygons projected to x/y.
+        PolyWithHoles polyWithHoles;
+
+        /// Connectors may not be connected again.
+        bool is_connectable() const { return height.has_value(); }
     };
 
     /// Global vertex IDs of the shared edge of connected regions.
@@ -49,6 +56,9 @@ private:
     RegionGraph _regionGraph{};
 
     std::array<size_t, 2> FindEdge(size_t regionId, const LineSegment& edge) const;
+
+    /// Check whether floors at specified height overlap. Throws in case of error.
+    void ValidateFloorOverlap(const PolyWithHoles& polyWithHoles, double height) const;
 };
 
 template <>
