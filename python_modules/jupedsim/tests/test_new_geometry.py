@@ -1,17 +1,134 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
+import re
+
 import jupedsim as jps
+import pytest
 
 
+def rectangle(p1: tuple[float, float], p2: tuple[float, float]):
+    return [p1, (p1[0], p2[1]), p2, (p2[0], p1[1])]
+
+
+########### Error cases: Add Region ###########
+def test_add_region_too_few_points():
+    walkable_surface = jps.WalkableSurface()
+    points = [(0, 0), (1, 1)]
+    with pytest.raises(
+        jps.SimulationError, match="needs at least 3 different points"
+    ):  # as boundary
+        walkable_surface.add_region(exterior=points, height=0.0)
+    with pytest.raises(
+        jps.SimulationError, match="needs at least 3 different points"
+    ):  # as hole
+        walkable_surface.add_region(
+            exterior=rectangle((0, 0), (1, 1)), interior=[points], height=0.0
+        )
+    with pytest.raises(
+        jps.SimulationError, match="needs at least 3 different points"
+    ):  # as hole
+        walkable_surface.add_region(
+            exterior=rectangle((0, 0), (1, 1)), interior=[points], height=0.0
+        )
+
+
+def test_add_region_no_area():
+    walkable_surface = jps.WalkableSurface()
+    points = [(0, 0), (1, 1), (1, 2), (1, 1)]
+    with pytest.raises(
+        jps.SimulationError, match="polygon does not form an area"
+    ):
+        walkable_surface.add_region(exterior=points, height=0.0)
+
+
+def test_add_region_rejects_bowtie():
+    walkable_surface = jps.WalkableSurface()
+    polygon = [(0, 0), (1, 1), (0, 1), (1, 0)]
+    with pytest.raises(jps.SimulationError, match="crosses itself"):
+        walkable_surface.add_region(exterior=polygon, height=0.0)
+
+
+def test_overlapping_geometry():
+    walkable_surface = jps.WalkableSurface()
+    id_0 = walkable_surface.add_region(
+        exterior=rectangle((0, 0), (10, 10)), height=0.0
+    )
+    with pytest.raises(
+        jps.SimulationError, match=f"New region overlaps with region {id_0}"
+    ):
+        walkable_surface.add_region(
+            exterior=rectangle((5, 5), (15, 15)), height=0.0
+        )
+
+
+def test_touching_polygons():
+    walkable_surface = jps.WalkableSurface()
+    id_0 = walkable_surface.add_region(
+        exterior=rectangle((0, 0), (1, 1)), height=0.0
+    )
+    with pytest.raises(jps.SimulationError, match=f"touches region {id_0}"):
+        walkable_surface.add_region(
+            exterior=rectangle((1, 1), (3, 3)), height=0.0
+        )
+
+
+def test_gets_region_after_error():
+    walkable_surface = jps.WalkableSurface()
+    polygon = [(0, 0), (1, 1), (0, 1), (1, 0)]
+    with pytest.raises(jps.SimulationError, match="crosses itself"):
+        walkable_surface.add_region(exterior=polygon, height=0.0)
+    region_id = walkable_surface.add_region(
+        exterior=rectangle((0, 0), (1, 1)), height=0.0
+    )
+    assert region_id == 0
+
+
+########### Error cases: Connect Regions ###########
+
+
+########### Error cases: Create Geometry ###########
+def test_unconnected_geometry():
+    walkable_surface = jps.WalkableSurface()
+    polygon = rectangle((0, 0), (1, 1))
+    walkable_surface.add_region(exterior=polygon, height=0.0)
+    walkable_surface.add_region(exterior=polygon, height=3.0)
+    with pytest.raises(jps.SimulationError, match="is not connected"):
+        walkable_surface.create_geometry()
+
+
+def test_stairs_through_other_floor():
+    walkable_surface = jps.WalkableSurface()
+    floor = rectangle((0, 0), (100, 100))
+    ground_floor = walkable_surface.add_region(
+        exterior=floor, interior=[rectangle((20, 20), (24, 22))], height=0.0
+    )
+    first_floor = walkable_surface.add_region(exterior=floor, height=3.0)
+    second_floor = walkable_surface.add_region(
+        exterior=floor, interior=[rectangle((36, 40), (40, 42))], height=6.0
+    )
+    stairs = walkable_surface.connect_regions(
+        from_region=ground_floor,
+        from_edge=((20, 20), (20, 22)),
+        to_region=second_floor,
+        to_edge=((40, 40), (40, 42)),
+    )
+    with pytest.raises(jps.SimulationError) as error:
+        walkable_surface.create_geometry()
+    message = str(error.value)
+    assert "pass through each other" in message
+    assert re.search(rf"[Rr]egion {first_floor}\b", message)
+    assert re.search(rf"[Rr]egion {stairs}\b", message)
+
+
+########### Correct cases ###########
 def test_new_geometry_definition_v1():
     ground_floor = {
-        "exterior": [(0, 0), (10, 0), (10, 10), (0, 10)],
+        "exterior": rectangle((0, 0), (10, 10)),
         "interior": [[(2, 2), (6, 2), (6, 2.2), (6, 3.8), (6, 4), (2, 4)]],
         "height": 0.0,
     }
-
     first_floor = {
-        "exterior": [(0, 0), (10, 0), (10, 10), (0, 10)],
+        "exterior": rectangle((0, 0), (10, 10)),
         "interior": [[(2, 4), (2, 3.8), (2, 2.2), (2, 2), (6, 4), (2, 4)]],
         "height": 3.0,
     }
@@ -27,8 +144,3 @@ def test_new_geometry_definition_v1():
         to_edge=((2, 2.2), (2, 3.8)),
     )
     assert [id_0, id_1, id_0_to_1] == [0, 1, 2]
-
-    # layer_0 = geo.add_layer(polygon=p1, height=0)
-    # layer_1 = geo.add_layer(polygon=p2, height=3.6)
-    # layer 0, edge 2 connects to layer_1, 4
-    # connect(layer_0, 2, layer_1, 4),
