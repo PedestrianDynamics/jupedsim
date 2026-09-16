@@ -2,7 +2,6 @@
 #include "Geometry/WalkableSurface.hpp"
 
 #include "Geometry/Geometry.hpp"
-#include "Geometry/ProjectedBoundary.hpp"
 #include "Geometry/Validation.hpp"
 #include "SimulationError.hpp"
 
@@ -12,9 +11,11 @@
 #include <CGAL/mark_domain_in_triangulation.h>
 #include <boost/range/iterator_range.hpp>
 
+#include <algorithm>
 #include <cmath>
 #include <memory>
 #include <optional>
+#include <set>
 #include <unordered_map>
 #include <vector>
 
@@ -93,33 +94,6 @@ PolyWithHoles as_2d_poly_with_holes(
         oriented_poly(rings[0], CGAL::COUNTERCLOCKWISE), std::begin(holes), std::end(holes));
 }
 
-/// Create temporary mesh and call `is_projection_strictly_simple`.
-bool is_strictly_simple(
-    const std::vector<std::array<size_t, 3>>& triangles,
-    const std::vector<Point3D>& vertices)
-{
-    SurfaceMesh mesh{};
-    std::unordered_map<size_t, SurfaceMesh::Vertex_index> meshVertices{};
-    const auto mesh_vertex = [&mesh, &meshVertices, &vertices](size_t vertexID) {
-        const auto [iter, inserted] =
-            meshVertices.try_emplace(vertexID, SurfaceMesh::null_vertex());
-        if(inserted) {
-            iter->second = mesh.add_vertex(vertices[vertexID]);
-        }
-        return iter->second;
-    };
-
-    for(const auto& triangle : triangles) {
-        const auto added = mesh.add_face(
-            mesh_vertex(triangle[0]), mesh_vertex(triangle[1]), mesh_vertex(triangle[2]));
-        if(added == SurfaceMesh::null_face()) {
-            return false;
-        }
-    }
-    return is_projection_strictly_simple(
-        mesh, region_boundary(mesh, [](SurfaceMesh::Face_index) { return true; }));
-}
-
 } // namespace
 
 //==================================================================================================
@@ -139,11 +113,16 @@ size_t WalkableSurface::AddRegion(Polygon polygon, double height)
         if(count < 3) {
             throw SimulationError("boundary/hole needs at least 3 different points");
         }
+        Poly poly{};
         std::vector<size_t> converted_ring;
         converted_ring.reserve(count);
         for(size_t index = 0; index < count; ++index) {
+            poly.push_back(Point2D(ring[index].x, ring[index].y));
             converted_ring.push_back(vertices.size());
             vertices.push_back({ring[index].x, ring[index].y, height});
+        }
+        if(!poly.is_simple()) {
+            throw SimulationError("boundary/hole is not simple");
         }
         polygons.emplace_back(std::move(converted_ring));
     };
@@ -153,18 +132,17 @@ size_t WalkableSurface::AddRegion(Polygon polygon, double height)
         convert_ring(ring);
     }
 
-    const auto triangles = triangulate_rings(polygons, vertices);
-    if(!triangles) {
-        throw SimulationError("Region polygon crosses itself.");
-    }
-    if(triangles->empty()) {
-        throw SimulationError("Region polygon does not form an area.");
-    }
-    if(!is_strictly_simple(*triangles, vertices)) {
-        throw SimulationError("Region is not built out of simple polygons.");
+    const PolyWithHoles polyWithHoles = as_2d_poly_with_holes(polygons, vertices);
+    // CGAL's is_valid_polygon_with_holes() allows that boundary and holes touch at vertices:
+    // Check whether all vertices are unique.
+    std::set<Point2D> points{};
+    const bool pointsUnique = std::ranges::all_of(
+        vertices, [&points](const Point3D& v) { return points.emplace(v.x(), v.y()).second; });
+    if(!pointsUnique ||
+       !CGAL::is_valid_polygon_with_holes(polyWithHoles, CGAL::Gps_segment_traits_2<K>{})) {
+        throw SimulationError("Holes must lie strictly inside the boundary and may not overlap.");
     }
 
-    const PolyWithHoles polyWithHoles = as_2d_poly_with_holes(polygons, vertices);
     ValidateFloorOverlap(polyWithHoles, height);
 
     // Fix vertex indices and insert them into the global map.
@@ -240,21 +218,28 @@ size_t WalkableSurface::ConnectRegions(
     const Point3D& p2 = _globalVertices[connector_polygon[1]];
     const Point3D& p3 = _globalVertices[connector_polygon[2]];
     const Point3D& p4 = _globalVertices[connector_polygon[3]];
+    const std::array<Point2D, 4> corners_2d{
+        Point2D(p1.x(), p1.y()),
+        Point2D(p2.x(), p2.y()),
+        Point2D(p3.x(), p3.y()),
+        Point2D(p4.x(), p4.y())};
+    if(!Poly(std::begin(corners_2d), std::end(corners_2d)).is_simple()) {
+        throw SimulationError("Connector is no simple polygon in 2D.");
+    }
     if(!CGAL::coplanar(p1, p2, p3, p4)) {
-        throw SimulationError("Connector not planar");
+        throw SimulationError("Connector is not planar");
     };
 
-    const K::Plane_3 plane(p1, p2, p3);
-    if(plane.is_degenerate()) {
-        throw SimulationError("Connector between {} and {} has no area.", from, to);
-    }
+    // Accept the case where P1, P2, P3, P4 form a triangle in 2D (on same height).
+    const K::Plane_3 plane =
+        CGAL::collinear(p1, p2, p3) ? K::Plane_3(p1, p2, p4) : K::Plane_3(p1, p2, p3);
     auto normal = plane.orthogonal_vector() / std::sqrt(plane.orthogonal_vector().squared_length());
     if(normal.z() < 0) {
         // IsWalkableNormal expects a certain orientation.
         normal = -normal;
     }
     if(!IsWalkableNormal(normal)) {
-        throw SimulationError("Connector between {} and {} is too steep.", from, to);
+        throw SimulationError("Connector is too steep.");
     }
 
     Region connector{

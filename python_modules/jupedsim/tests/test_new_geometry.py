@@ -7,50 +7,73 @@ import jupedsim as jps
 import pytest
 
 
+########### Helper functions and fixtures ###########
 def rectangle(p1: tuple[float, float], p2: tuple[float, float]):
     return [p1, (p1[0], p2[1]), p2, (p2[0], p1[1])]
 
 
+@dataclass
+class TwoFloors:
+    surface: jps.WalkableSurface
+    id_0: int
+    id_1: int
+
+
+@pytest.fixture
+def walkable_surface():
+    return jps.WalkableSurface()
+
+
+@pytest.fixture
+def two_floors(walkable_surface):
+    id_0 = walkable_surface.add_region(
+        exterior=rectangle((0, 0), (5, 5)), height=0.0
+    )
+    id_1 = walkable_surface.add_region(
+        exterior=rectangle((10, 0), (15, 5)), height=3.0
+    )
+    return TwoFloors(walkable_surface, id_0, id_1)
+
+
 ########### Error cases: Add Region ###########
-def test_add_region_too_few_points():
-    walkable_surface = jps.WalkableSurface()
+def test_add_region_too_few_points(walkable_surface):
     points = [(0, 0), (1, 1)]
-    with pytest.raises(
-        jps.SimulationError, match="needs at least 3 different points"
-    ):  # as boundary
+    expected_error = "needs at least 3 different points"
+    # boundary
+    with pytest.raises(jps.SimulationError, match=expected_error):
         walkable_surface.add_region(exterior=points, height=0.0)
-    with pytest.raises(
-        jps.SimulationError, match="needs at least 3 different points"
-    ):  # as hole
-        walkable_surface.add_region(
-            exterior=rectangle((0, 0), (1, 1)), interior=[points], height=0.0
-        )
-    with pytest.raises(
-        jps.SimulationError, match="needs at least 3 different points"
-    ):  # as hole
+    # hole
+    with pytest.raises(jps.SimulationError, match=expected_error):
         walkable_surface.add_region(
             exterior=rectangle((0, 0), (1, 1)), interior=[points], height=0.0
         )
 
 
-def test_add_region_no_area():
-    walkable_surface = jps.WalkableSurface()
+def test_add_region_no_area(walkable_surface):
     points = [(0, 0), (1, 1), (1, 2), (1, 1)]
-    with pytest.raises(
-        jps.SimulationError, match="polygon does not form an area"
-    ):
+    with pytest.raises(jps.SimulationError, match="is not simple"):
         walkable_surface.add_region(exterior=points, height=0.0)
 
 
-def test_add_region_rejects_bowtie():
-    walkable_surface = jps.WalkableSurface()
+def test_add_region_rejects_bowtie(walkable_surface):
     polygon = [(0, 0), (1, 1), (0, 1), (1, 0)]
-    with pytest.raises(jps.SimulationError, match="crosses itself"):
+    with pytest.raises(jps.SimulationError, match="is not simple"):
         walkable_surface.add_region(exterior=polygon, height=0.0)
 
 
-def test_overlapping_geometry():
-    walkable_surface = jps.WalkableSurface()
+def test_add_region_duplicated_point(walkable_surface):
+    points = [(0, 0), (0, 0), (1, 0), (1, 1)]
+    # as boundary
+    with pytest.raises(jps.SimulationError, match="is not simple"):
+        walkable_surface.add_region(exterior=points, height=0.0)
+    # as hole
+    with pytest.raises(jps.SimulationError, match="is not simple"):
+        walkable_surface.add_region(
+            exterior=rectangle((-1, -1), (2, 2)), interior=[points], height=0.0
+        )
+
+
+def test_overlapping_geometry(walkable_surface):
     id_0 = walkable_surface.add_region(
         exterior=rectangle((0, 0), (10, 10)), height=0.0
     )
@@ -62,8 +85,7 @@ def test_overlapping_geometry():
         )
 
 
-def test_touching_polygons():
-    walkable_surface = jps.WalkableSurface()
+def test_touching_polygons(walkable_surface):
     id_0 = walkable_surface.add_region(
         exterior=rectangle((0, 0), (1, 1)), height=0.0
     )
@@ -73,35 +95,101 @@ def test_touching_polygons():
         )
 
 
-def test_gets_region_after_error():
-    walkable_surface = jps.WalkableSurface()
+HOLES_NOT_IN_BOUNDARY_ERROR = "Holes must lie strictly inside the boundary"
+
+
+def test_hole_touches_boundary(walkable_surface):
+    exterior = rectangle((0, 0), (3, 3))
+    # hole at a boundary corner
+    with pytest.raises(jps.SimulationError, match=HOLES_NOT_IN_BOUNDARY_ERROR):
+        walkable_surface.add_region(
+            exterior=exterior, interior=[((0, 0), (1, 1), (2, 1))]
+        )
+    # hole on a boundary edge
+    with pytest.raises(jps.SimulationError, match=HOLES_NOT_IN_BOUNDARY_ERROR):
+        walkable_surface.add_region(
+            exterior=exterior, interior=[((1, 0), (1, 1), (2, 1))]
+        )
+    # hole equal to boundary
+    with pytest.raises(jps.SimulationError, match=HOLES_NOT_IN_BOUNDARY_ERROR):
+        walkable_surface.add_region(exterior=exterior, interior=[exterior])
+
+
+def test_hole_outside_or_crossing_boundary(walkable_surface):
+    exterior = rectangle((0, 0), (3, 3))
+    # outside
+    with pytest.raises(jps.SimulationError, match=HOLES_NOT_IN_BOUNDARY_ERROR):
+        walkable_surface.add_region(
+            exterior=exterior, interior=[rectangle((5, 5), (7, 7))]
+        )
+    # crossing
+    with pytest.raises(jps.SimulationError, match=HOLES_NOT_IN_BOUNDARY_ERROR):
+        walkable_surface.add_region(
+            exterior=exterior, interior=[rectangle((2, 1), (5, 2))]
+        )
+
+
+def test_holes_overlap_or_touch_each_other(walkable_surface):
+    exterior = rectangle((0, 0), (10, 10))
+    # hole inside hole
+    with pytest.raises(jps.SimulationError, match=HOLES_NOT_IN_BOUNDARY_ERROR):
+        walkable_surface.add_region(
+            exterior=exterior,
+            interior=[rectangle((1, 1), (9, 9)), rectangle((3, 3), (5, 5))],
+        )
+    # identical holes
+    with pytest.raises(jps.SimulationError, match=HOLES_NOT_IN_BOUNDARY_ERROR):
+        walkable_surface.add_region(
+            exterior=exterior,
+            interior=[rectangle((1, 1), (3, 3)), rectangle((1, 1), (3, 3))],
+        )
+    # holes cross each other
+    with pytest.raises(jps.SimulationError, match=HOLES_NOT_IN_BOUNDARY_ERROR):
+        walkable_surface.add_region(
+            exterior=exterior,
+            interior=[rectangle((1, 1), (3, 3)), rectangle((2, 2), (4, 4))],
+        )
+    # holes touching at a corner
+    with pytest.raises(jps.SimulationError, match=HOLES_NOT_IN_BOUNDARY_ERROR):
+        walkable_surface.add_region(
+            exterior=exterior,
+            interior=[rectangle((1, 1), (3, 3)), rectangle((3, 3), (4, 4))],
+        )
+
+
+def test_gets_region_after_error_and_can_create_geometry(walkable_surface):
     polygon = [(0, 0), (1, 1), (0, 1), (1, 0)]
-    with pytest.raises(jps.SimulationError, match="crosses itself"):
+    with pytest.raises(jps.SimulationError, match="is not simple"):
         walkable_surface.add_region(exterior=polygon, height=0.0)
     region_id = walkable_surface.add_region(
         exterior=rectangle((0, 0), (1, 1)), height=0.0
     )
     assert region_id == 0
+    walkable_surface.create_geometry()
 
 
 ########### Error cases: Connect Regions ###########
-@dataclass
-class TwoFloors:
-    surface: jps.WalkableSurface
-    id_0: int
-    id_1: int
-
-
-@pytest.fixture
-def two_floors():
-    walkable_surface = jps.WalkableSurface()
-    id_0 = walkable_surface.add_region(
-        exterior=rectangle((0, 0), (5, 5)), height=0.0
-    )
-    id_1 = walkable_surface.add_region(
-        exterior=rectangle((10, 0), (15, 5)), height=0.0
-    )
-    return TwoFloors(walkable_surface, id_0, id_1)
+def test_connect_with_unknown_region(two_floors):
+    # from region
+    with pytest.raises(
+        jps.SimulationError, match="Unknown region id used for fromRegion"
+    ):
+        two_floors.surface.connect_regions(
+            from_region=42,
+            from_edge=((0, 0), (0, 5)),
+            to_region=two_floors.id_0,
+            to_edge=((5, 0), (5, 5)),
+        )
+    # to region
+    with pytest.raises(
+        jps.SimulationError, match="Unknown region id used for toRegion"
+    ):
+        two_floors.surface.connect_regions(
+            from_region=two_floors.id_0,
+            from_edge=((0, 0), (0, 5)),
+            to_region=42,
+            to_edge=((5, 0), (5, 5)),
+        )
 
 
 def test_connect_same_region(two_floors):
@@ -140,9 +228,115 @@ def test_connect_points_but_no_edge(two_floors):
         )
 
 
+def test_connect_too_steep_stairs(walkable_surface):
+    id_0 = walkable_surface.add_region(
+        exterior=rectangle((0, 0), (5, 5)), height=0.0
+    )
+    id_1 = walkable_surface.add_region(
+        exterior=rectangle((6, 0), (8, 5)), height=3.0
+    )
+    with pytest.raises(jps.SimulationError, match="too steep"):
+        walkable_surface.connect_regions(
+            from_region=id_0,
+            from_edge=((5, 0), (5, 5)),
+            to_region=id_1,
+            to_edge=((6, 0), (6, 5)),
+        )
+
+
+def test_connect_not_planar(walkable_surface):
+    id_0 = walkable_surface.add_region(
+        exterior=rectangle((0, 0), (5, 5)), height=0.0
+    )
+    id_1 = walkable_surface.add_region(
+        exterior=rectangle((10, 10), (15, 15)), height=3.0
+    )
+    # connector edges not parallel in 2D --> not planar
+    with pytest.raises(jps.SimulationError, match="not planar"):
+        walkable_surface.connect_regions(
+            from_region=id_0,
+            from_edge=((5, 0), (5, 5)),
+            to_region=id_1,
+            to_edge=((10, 10), (15, 10)),
+        )
+
+
+def test_connector_not_simple_in_2d(walkable_surface):
+    id_0 = walkable_surface.add_region(
+        exterior=rectangle((0, 0), (4, 4)), height=0.0
+    )
+    id_1 = walkable_surface.add_region(
+        exterior=rectangle((4, 6), (6, 8)), height=0.0
+    )
+    expected_error = "Connector is no simple polygon"
+    # edges collinear
+    with pytest.raises(jps.SimulationError, match=expected_error):
+        walkable_surface.connect_regions(
+            from_region=id_0,
+            from_edge=((4, 0), (4, 4)),
+            to_region=id_1,
+            to_edge=((4, 6), (4, 8)),
+        )
+    id_2 = walkable_surface.add_region(
+        exterior=rectangle((2, 2), (6, 3)), height=1.0
+    )
+    id_3 = walkable_surface.add_region(
+        exterior=rectangle((4, 1), (6, 3)), height=2.0
+    )
+    # edges cross in xy
+    with pytest.raises(jps.SimulationError, match=expected_error):
+        walkable_surface.connect_regions(
+            from_region=id_0,
+            from_edge=((4, 0), (4, 4)),
+            to_region=id_2,
+            to_edge=((2, 2), (6, 2)),
+        )
+    # edges overlap in xy
+    with pytest.raises(jps.SimulationError, match=expected_error):
+        walkable_surface.connect_regions(
+            from_region=id_0,
+            from_edge=((4, 0), (4, 4)),
+            to_region=id_3,
+            to_edge=((4, 1), (4, 3)),
+        )
+
+
+def test_connect_to_connector(two_floors):
+    connector = two_floors.surface.connect_regions(
+        from_region=two_floors.id_0,
+        from_edge=((5, 0), (5, 5)),
+        to_region=two_floors.id_1,
+        to_edge=((10, 0), (10, 5)),
+    )
+    # from connector
+    with pytest.raises(
+        jps.SimulationError, match=f"fromRegion {connector} is not connectable"
+    ):
+        two_floors.surface.connect_regions(
+            from_region=connector,
+            from_edge=((5, 0), (10, 0)),
+            to_region=two_floors.id_0,
+            to_edge=((0, 0), (0, 5)),
+        )
+    # to connector
+    with pytest.raises(
+        jps.SimulationError, match=f"toRegion {connector} is not connectable"
+    ):
+        two_floors.surface.connect_regions(
+            from_region=two_floors.id_0,
+            from_edge=((0, 0), (0, 5)),
+            to_region=connector,
+            to_edge=((5, 0), (10, 0)),
+        )
+
+
 ########### Error cases: Create Geometry ###########
-def test_unconnected_geometry():
-    walkable_surface = jps.WalkableSurface()
+def test_empty_mesh(walkable_surface):
+    with pytest.raises(jps.SimulationError, match="No Geometry"):
+        walkable_surface.create_geometry()
+
+
+def test_unconnected_geometry(walkable_surface):
     polygon = rectangle((0, 0), (1, 1))
     walkable_surface.add_region(exterior=polygon, height=0.0)
     walkable_surface.add_region(exterior=polygon, height=3.0)
@@ -150,8 +344,7 @@ def test_unconnected_geometry():
         walkable_surface.create_geometry()
 
 
-def test_stairs_through_other_floor():
-    walkable_surface = jps.WalkableSurface()
+def test_stairs_through_other_floor(walkable_surface):
     floor = rectangle((0, 0), (100, 100))
     ground_floor = walkable_surface.add_region(
         exterior=floor, interior=[rectangle((20, 20), (24, 22))], height=0.0
@@ -174,8 +367,31 @@ def test_stairs_through_other_floor():
     assert re.search(rf"[Rr]egion {stairs}\b", message)
 
 
+def test_edge_used_by_several_connectors(two_floors):
+    two_floors.surface.connect_regions(
+        from_region=two_floors.id_0,
+        from_edge=((5, 0), (5, 5)),
+        to_region=two_floors.id_1,
+        to_edge=((10, 0), (10, 5)),
+    )
+    floor3 = two_floors.surface.add_region(
+        exterior=rectangle((0, 0), (1, 5)), height=3.0
+    )
+    connector2 = two_floors.surface.connect_regions(
+        from_region=two_floors.id_0,
+        from_edge=((5, 0), (5, 5)),
+        to_region=floor3,
+        to_edge=((1, 0), (1, 5)),
+    )
+    with pytest.raises(
+        jps.SimulationError,
+        match=f"Region {connector2} does not fit to a walkable surface",
+    ):
+        two_floors.surface.create_geometry()
+
+
 ########### Correct cases ###########
-def test_new_geometry_definition_v1():
+def test_new_geometry_definition_v1(walkable_surface):
     ground_floor = {
         "exterior": rectangle((0, 0), (10, 10)),
         "interior": [[(2, 2), (6, 2), (6, 2.2), (6, 3.8), (6, 4), (2, 4)]],
@@ -186,8 +402,6 @@ def test_new_geometry_definition_v1():
         "interior": [[(2, 4), (2, 3.8), (2, 2.2), (2, 2), (6, 4), (2, 4)]],
         "height": 3.0,
     }
-
-    walkable_surface = jps.WalkableSurface()
 
     id_0 = walkable_surface.add_region(**ground_floor)
     id_1 = walkable_surface.add_region(**first_floor)
@@ -200,8 +414,7 @@ def test_new_geometry_definition_v1():
     assert [id_0, id_1, id_0_to_1] == [0, 1, 2]
 
 
-def test_striped_floor():
-    walkable_surface = jps.WalkableSurface()
+def test_striped_floor(walkable_surface):
     num = 10
     prev_id = -1
     for x in range(num):
