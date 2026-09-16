@@ -100,3 +100,30 @@ if (WIN32)
         NOMINMAX
     )
 endif (WIN32)
+
+
+################################################################################
+# Corrosion (Rust/CMake integration)
+################################################################################
+if(APPLE AND CMAKE_OSX_ARCHITECTURES)
+    list(LENGTH CMAKE_OSX_ARCHITECTURES _cnt)
+    if(_cnt GREATER 1)
+        message(FATAL_ERROR
+            "Multi-arch builds are not supprted by rust, "
+            "please set a single architecture target. "
+            "Currently set: CMAKE_OSX_ARCHITECTURES=\"${CMAKE_OSX_ARCHITECTURES}\""
+        )
+    endif()
+    if(CMAKE_OSX_ARCHITECTURES STREQUAL "x86_64")
+        set(Rust_CARGO_TARGET "x86_64-apple-darwin")
+    elseif(CMAKE_OSX_ARCHITECTURES STREQUAL "arm64")
+        set(Rust_CARGO_TARGET "aarch64-apple-darwin")
+    else()
+        message(
+            FATAL_ERROR
+            "Unknown architecture provided: "
+            "CMAKE_OSX_ARCHITECTURES=\"${CMAKE_OSX_ARCHITECTURES}\"")
+    endif()
+endif()
+add_subdirectory(corrosion)
+
