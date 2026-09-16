@@ -5,6 +5,7 @@ from dataclasses import dataclass
 
 import jupedsim as jps
 import pytest
+import shapely
 
 
 ########### Helper functions and fixtures ###########
@@ -403,27 +404,35 @@ def test_impossible_stairs(two_floors):
 
 
 ########### Correct cases ###########
-def test_new_geometry_definition_v1(walkable_surface):
-    ground_floor = {
-        "exterior": rectangle((0, 0), (10, 10)),
-        "interior": [[(2, 2), (6, 2), (6, 2.2), (6, 3.8), (6, 4), (2, 4)]],
-        "height": 0.0,
-    }
-    first_floor = {
-        "exterior": rectangle((0, 0), (10, 10)),
-        "interior": [[(2, 4), (2, 3.8), (2, 2.2), (2, 2), (6, 4), (2, 4)]],
-        "height": 3.0,
-    }
+def test_region_ids(two_floors):
+    stairs = two_floors.add_stairs()
+    assert [two_floors.ground_floor, two_floors.upper_floor, stairs] == [
+        0,
+        1,
+        2,
+    ]
+    assert two_floors.surface.create_geometry().region_count() == 3
 
-    id_0 = walkable_surface.add_region(**ground_floor)
-    id_1 = walkable_surface.add_region(**first_floor)
-    id_0_to_1 = walkable_surface.connect_regions(
+
+def test_add_region_from_shapely_polygon(walkable_surface):
+    floor = rectangle((0, 0), (10, 10))
+    ground_floor = shapely.Polygon(
+        floor, holes=[[(2, 2), (6, 2), (6, 2.2), (6, 3.8), (6, 4), (2, 4)]]
+    )
+    first_floor = shapely.Polygon(
+        floor, holes=[[(2, 4), (2, 3.8), (2, 2.2), (2, 2), (6, 4)]]
+    )
+
+    id_0 = walkable_surface.add_region(polygon=ground_floor, height=0.0)
+    id_1 = walkable_surface.add_region(polygon=first_floor, height=3.0)
+    # connecting hole edges only works if the holes were converted
+    walkable_surface.connect_regions(
         from_region=id_0,
         from_edge=((6, 2.2), (6, 3.8)),
         to_region=id_1,
         to_edge=((2, 2.2), (2, 3.8)),
     )
-    assert [id_0, id_1, id_0_to_1] == [0, 1, 2]
+    assert walkable_surface.create_geometry().region_count() == 3
 
 
 def test_striped_floor(walkable_surface):
