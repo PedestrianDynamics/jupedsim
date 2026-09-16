@@ -15,8 +15,18 @@ def rectangle(p1: tuple[float, float], p2: tuple[float, float]):
 @dataclass
 class TwoFloors:
     surface: jps.WalkableSurface
-    id_0: int
-    id_1: int
+    ground_floor: int
+    upper_floor: int
+    ground_conn_edge = ((5, 0), (5, 5))
+    upper_conn_edge = ((10, 0), (10, 5))
+
+    def add_stairs(self):
+        return self.surface.connect_regions(
+            from_region=self.ground_floor,
+            from_edge=self.ground_conn_edge,
+            to_region=self.upper_floor,
+            to_edge=self.upper_conn_edge,
+        )
 
 
 @pytest.fixture
@@ -26,13 +36,13 @@ def walkable_surface():
 
 @pytest.fixture
 def two_floors(walkable_surface):
-    id_0 = walkable_surface.add_region(
+    ground_floor = walkable_surface.add_region(
         exterior=rectangle((0, 0), (5, 5)), height=0.0
     )
-    id_1 = walkable_surface.add_region(
+    upper_floor = walkable_surface.add_region(
         exterior=rectangle((10, 0), (15, 5)), height=3.0
     )
-    return TwoFloors(walkable_surface, id_0, id_1)
+    return TwoFloors(walkable_surface, ground_floor, upper_floor)
 
 
 ########### Error cases: Add Region ###########
@@ -176,41 +186,41 @@ def test_connect_with_unknown_region(two_floors):
     ):
         two_floors.surface.connect_regions(
             from_region=42,
-            from_edge=((0, 0), (0, 5)),
-            to_region=two_floors.id_0,
-            to_edge=((5, 0), (5, 5)),
+            from_edge=two_floors.ground_conn_edge,
+            to_region=two_floors.upper_floor,
+            to_edge=two_floors.upper_conn_edge,
         )
     # to region
     with pytest.raises(
         jps.SimulationError, match="Unknown region id used for toRegion"
     ):
         two_floors.surface.connect_regions(
-            from_region=two_floors.id_0,
-            from_edge=((0, 0), (0, 5)),
+            from_region=two_floors.ground_floor,
+            from_edge=two_floors.ground_conn_edge,
             to_region=42,
-            to_edge=((5, 0), (5, 5)),
+            to_edge=two_floors.upper_conn_edge,
         )
 
 
 def test_connect_same_region(two_floors):
     with pytest.raises(jps.SimulationError, match="may not be the same region"):
         two_floors.surface.connect_regions(
-            from_region=two_floors.id_0,
+            from_region=two_floors.ground_floor,
             from_edge=((0, 0), (0, 5)),
-            to_region=two_floors.id_0,
-            to_edge=((5, 0), (5, 5)),
+            to_region=two_floors.ground_floor,
+            to_edge=two_floors.ground_conn_edge,
         )
 
 
 def test_connect_with_nonexisting_point(two_floors):
     with pytest.raises(
         jps.SimulationError,
-        match=f"is not an edge of region {two_floors.id_1}",
+        match=f"is not an edge of region {two_floors.upper_floor}",
     ):
         two_floors.surface.connect_regions(
-            from_region=two_floors.id_0,
-            from_edge=((5, 0), (5, 5)),
-            to_region=two_floors.id_1,
+            from_region=two_floors.ground_floor,
+            from_edge=two_floors.ground_conn_edge,
+            to_region=two_floors.upper_floor,
             to_edge=((10, 1), (10, 5)),  # (10, 1) does not exist
         )
 
@@ -218,13 +228,13 @@ def test_connect_with_nonexisting_point(two_floors):
 def test_connect_points_but_no_edge(two_floors):
     with pytest.raises(
         jps.SimulationError,
-        match=f"is not an edge of region {two_floors.id_0}",
+        match=f"is not an edge of region {two_floors.ground_floor}",
     ):
         two_floors.surface.connect_regions(
-            from_region=two_floors.id_0,
+            from_region=two_floors.ground_floor,
             from_edge=((0, 0), (5, 5)),  # diagonal
-            to_region=two_floors.id_1,
-            to_edge=((10, 0), (10, 5)),
+            to_region=two_floors.upper_floor,
+            to_edge=two_floors.upper_conn_edge,
         )
 
 
@@ -302,30 +312,25 @@ def test_connector_not_simple_in_2d(walkable_surface):
 
 
 def test_connect_to_connector(two_floors):
-    connector = two_floors.surface.connect_regions(
-        from_region=two_floors.id_0,
-        from_edge=((5, 0), (5, 5)),
-        to_region=two_floors.id_1,
-        to_edge=((10, 0), (10, 5)),
-    )
+    stairs = two_floors.add_stairs()
     # from connector
     with pytest.raises(
-        jps.SimulationError, match=f"fromRegion {connector} is not connectable"
+        jps.SimulationError, match=f"fromRegion {stairs} is not connectable"
     ):
         two_floors.surface.connect_regions(
-            from_region=connector,
+            from_region=stairs,
             from_edge=((5, 0), (10, 0)),
-            to_region=two_floors.id_0,
+            to_region=two_floors.ground_floor,
             to_edge=((0, 0), (0, 5)),
         )
     # to connector
     with pytest.raises(
-        jps.SimulationError, match=f"toRegion {connector} is not connectable"
+        jps.SimulationError, match=f"toRegion {stairs} is not connectable"
     ):
         two_floors.surface.connect_regions(
-            from_region=two_floors.id_0,
+            from_region=two_floors.ground_floor,
             from_edge=((0, 0), (0, 5)),
-            to_region=connector,
+            to_region=stairs,
             to_edge=((5, 0), (10, 0)),
         )
 
@@ -368,20 +373,15 @@ def test_stairs_through_other_floor(walkable_surface):
 
 
 def test_edge_used_by_several_connectors(two_floors):
-    two_floors.surface.connect_regions(
-        from_region=two_floors.id_0,
-        from_edge=((5, 0), (5, 5)),
-        to_region=two_floors.id_1,
-        to_edge=((10, 0), (10, 5)),
-    )
-    floor3 = two_floors.surface.add_region(
-        exterior=rectangle((0, 0), (1, 5)), height=3.0
+    two_floors.add_stairs()
+    lower_floor = two_floors.surface.add_region(
+        exterior=rectangle((10, 0), (15, 5)), height=-3.0
     )
     connector2 = two_floors.surface.connect_regions(
-        from_region=two_floors.id_0,
-        from_edge=((5, 0), (5, 5)),
-        to_region=floor3,
-        to_edge=((1, 0), (1, 5)),
+        from_region=two_floors.ground_floor,
+        from_edge=two_floors.ground_conn_edge,
+        to_region=lower_floor,
+        to_edge=two_floors.upper_conn_edge,
     )
     with pytest.raises(
         jps.SimulationError,
@@ -396,8 +396,8 @@ def test_impossible_stairs(two_floors):
     )
     # stairs cannot be entered or left along the surface
     stairs = two_floors.surface.connect_regions(
-        from_region=two_floors.id_0,
-        from_edge=((5, 0), (5, 5)),
+        from_region=two_floors.ground_floor,
+        from_edge=two_floors.ground_conn_edge,
         to_region=floor3,
         to_edge=((0, 0), (0, 5)),
     )
