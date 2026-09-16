@@ -94,6 +94,31 @@ PolyWithHoles as_2d_poly_with_holes(
         oriented_poly(rings[0], CGAL::COUNTERCLOCKWISE), std::begin(holes), std::end(holes));
 }
 
+WalkableSurface::SeamEdge
+find_seam_edge(const PolyWithHoles& poly, const Point2D& a, const Point2D& b)
+{
+    const auto find_in_ring = [&a, &b](const Poly& ring) -> std::optional<size_t> {
+        for(size_t index = 0; index < ring.size(); ++index) {
+            const Point2D& p = ring.vertex(index);
+            const Point2D& q = ring.vertex((index + 1) % ring.size());
+            if((p == a && q == b) || (p == b && q == a)) {
+                return index;
+            }
+        }
+        return std::nullopt;
+    };
+
+    if(const auto index = find_in_ring(poly.outer_boundary())) {
+        return {0, *index};
+    }
+    for(size_t hole = 0; hole < poly.number_of_holes(); ++hole) {
+        if(const auto index = find_in_ring(poly.holes()[hole])) {
+            return {hole + 1, *index};
+        }
+    }
+    throw SimulationError("Internal Error: Seam is not an edge of the region.");
+}
+
 } // namespace
 
 //==================================================================================================
@@ -270,8 +295,10 @@ WalkableSurface::RegionGraph2D WalkableSurface::CreateRegionGraph2D() const
         const auto from = boost::source(edge, _regionGraph);
         const auto to = boost::target(edge, _regionGraph);
         const Seam& seam = _regionGraph[edge];
-        boost::add_edge(from, to, Segment2D(as_point_2d(seam[0]), as_point_2d(seam[1])), graph);
-        boost::add_edge(to, from, Segment2D(as_point_2d(seam[1]), as_point_2d(seam[0])), graph);
+        const Point2D a = as_point_2d(seam[0]);
+        const Point2D b = as_point_2d(seam[1]);
+        boost::add_edge(from, to, find_seam_edge(graph[from], a, b), graph);
+        boost::add_edge(to, from, find_seam_edge(graph[to], a, b), graph);
     }
 
     return graph;

@@ -390,6 +390,24 @@ def test_edge_used_by_several_connectors(two_floors):
         two_floors.surface.create_geometry()
 
 
+def test_impossible_stairs(two_floors):
+    floor3 = two_floors.surface.add_region(
+        exterior=rectangle((0, 0), (5, 5)), height=3.0
+    )
+    # stairs cannot be entered or left along the surface
+    stairs = two_floors.surface.connect_regions(
+        from_region=two_floors.id_0,
+        from_edge=((5, 0), (5, 5)),
+        to_region=floor3,
+        to_edge=((0, 0), (0, 5)),
+    )
+    with pytest.raises(
+        jps.SimulationError,
+        match=f"Region {stairs} does not fit to a walkable surface",
+    ):
+        two_floors.surface.create_geometry()
+
+
 ########### Correct cases ###########
 def test_new_geometry_definition_v1(walkable_surface):
     ground_floor = {
