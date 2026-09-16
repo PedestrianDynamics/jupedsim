@@ -87,7 +87,7 @@ void NormaliseAndValidateMesh(SurfaceMesh& mesh, const RegionMap* regions)
     }
 
     if(mesh.number_of_faces() == 0) {
-        throw SimulationError("Mesh is empty.");
+        throw SimulationError("No Geometry defined.");
     }
 
     if(!AllFacesInMeshPlanar(mesh)) {
