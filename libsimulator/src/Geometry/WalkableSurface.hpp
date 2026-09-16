@@ -23,8 +23,19 @@ public:
         std::vector<Ring> holes;
     };
 
+    /// Seam as edge:
+    /// - ring 0 is boundary, ring k is hole k-1.
+    /// - edge goes from vertex index to successor.
+    /// - source region is always left of seam.
+    struct SeamEdge {
+        size_t ring;
+        size_t index;
+    };
+
+    // Note: There is always at most 1 connection between 2 regions as regions are connected
+    //       via Connectors which add a region of their own.
     using RegionGraph2D =
-        boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS, PolyWithHoles, Segment2D>;
+        boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS, PolyWithHoles, SeamEdge>;
 
     size_t AddRegion(Polygon polygon, double height);
     size_t ConnectRegions(size_t fromRegion, LineSegment from, size_t toRegion, LineSegment to);
