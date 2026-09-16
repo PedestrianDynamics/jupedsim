@@ -206,8 +206,9 @@ if(BUILD_TESTS)
                 --basetemp=${PROJECT_BINARY_DIR}/systemtest-out
                 --junit-xml=result-pythontests.xml
         DEPENDS py_jupedsim
+        USES_TERMINAL
     )
-    set(unittests_dependency_list libsimulator-unittests)
+    set(unittests_dependency_list libsimulator-unittests libfloorfield-unittests)
     add_custom_target(unittests
         DEPENDS ${unittests_dependency_list}
     )
@@ -216,6 +217,18 @@ if(BUILD_TESTS)
         COMMAND $<TARGET_FILE:libsimulator-tests>
                 --gtest_output=xml:result-libsimulator-unittests.xml
         DEPENDS libsimulator-tests
+    )
+    # Note: we explicitly set RUSTC here to be the same rustc that corrosion found.
+    # For some unknown reason cargo picks up the rustc in the ubuntu-latest image and
+    # not the one we installed with rustup. Corrosion finds both without issue.
+    add_custom_target(libfloorfield-unittests
+        COMMENT "Running libfloorfield tests (Rust)"
+        COMMAND ${CMAKE_COMMAND} -E env RUSTC=$<TARGET_FILE:Rust::Rustc>
+                $<TARGET_FILE:Rust::Cargo> test
+                --manifest-path ${CMAKE_CURRENT_SOURCE_DIR}/libfloorfield/Cargo.toml
+                --target-dir ${CMAKE_BINARY_DIR}/cargo/floorfield-tests
+                --locked
+        USES_TERMINAL
     )
 endif()
 
@@ -233,6 +246,7 @@ endif()
 # Add libraries / executables
 ################################################################################
 add_subdirectory(libcommon)
+add_subdirectory(libfloorfield)
 add_subdirectory(libsimulator)
 add_subdirectory(python_bindings_jupedsim)
 if(BUILD_TOOLS)

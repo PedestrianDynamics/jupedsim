@@ -56,6 +56,8 @@ jobs:
         uses: actions/setup-python@v7
         with:
           python-version: "3.13"
+      - name: install rust toolchain
+        uses: dtolnay/rust-toolchain@stable
       - name: Install dependencies
         run: pip install -r requirements.txt
       - name: Build & test with ${{ matrix.toolchain.cc }} / ${{ matrix.toolchain.cxx }}
@@ -75,6 +77,8 @@ jobs:
         uses: actions/setup-python@v7
         with:
           python-version: "3.13"
+      - name: install rust toolchain
+        uses: dtolnay/rust-toolchain@stable
       - name: Install jupedsim
         run: |
           python3 -m pip install .
@@ -175,9 +179,12 @@ jobs:
     name: Build wheels on ${{ matrix.os }} for ${{ matrix.cibw_archs }}
     runs-on: ${{ matrix.os }}
     env:
-      CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
+      CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_34
       CIBW_SKIP: "*musllinux*"
-      MACOSX_DEPLOYMENT_TARGET: 12.05
+      MACOSX_DEPLOYMENT_TARGET: 15.4
+      # Install Rust inside the build container before building the wheel
+      CIBW_BEFORE_ALL_LINUX: "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable"
+      CIBW_ENVIRONMENT_LINUX: 'PATH="$HOME/.cargo/bin:$PATH"'
     strategy:
       matrix:
         include:
@@ -211,45 +218,55 @@ jobs:
           - os: windows-latest
             cibw_archs: "auto64"
             cibw_build: "cp314-*"
-          - os: macos-14
+          - os: macos-15
             cibw_archs: "x86_64"
             cibw_build: "cp310-*"
-          - os: macos-14
+          - os: macos-15
             cibw_archs: "x86_64"
             cibw_build: "cp311-*"
-          - os: macos-14
+          - os: macos-15
             cibw_archs: "x86_64"
             cibw_build: "cp312-*"
-          - os: macos-14
+          - os: macos-15
             cibw_archs: "x86_64"
             cibw_build: "cp313-*"
-          - os: macos-14
+          - os: macos-15
             cibw_archs: "x86_64"
             cibw_build: "cp314-*"
-          - os: macos-14
+          - os: macos-15
             cibw_archs: "arm64"
             cibw_build: "cp310-*"
-          - os: macos-14
+          - os: macos-15
             cibw_archs: "arm64"
             cibw_build: "cp311-*"
-          - os: macos-14
+          - os: macos-15
             cibw_archs: "arm64"
             cibw_build: "cp312-*"
-          - os: macos-14
+          - os: macos-15
             cibw_archs: "arm64"
             cibw_build: "cp313-*"
-          - os: macos-14
+          - os: macos-15
             cibw_archs: "arm64"
             cibw_build: "cp314-*"
     steps:
       - uses: actions/checkout@v7
         with:
           submodules: true
+      - name: Install Rust toolchain Windows
+        if: runner.os == 'Windows'
+        uses: dtolnay/rust-toolchain@stable
+      - name: Install Rust toolchain MacOS
+        if: runner.os == 'macOS'
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-apple-darwin,aarch64-apple-darwin
       - name: Build wheels for CPython ${{ matrix.cibw_build }} on ${{ matrix.cibw_archs }}
         uses: pypa/cibuildwheel@v4.2.0
         env:
           CIBW_BUILD: ${{ matrix.cibw_build }}
           CIBW_ARCHS: ${{ matrix.cibw_archs }}
+          # Early smoke test to ensure whl can be loaded
+          CIBW_TEST_COMMAND: python -c "import jupedsim"
       - name: Extract Python Version (Unix/Mac)
         shell: bash
         run: echo "PYTHON_VERSION=$(echo ${{ matrix.cibw_build }} | cut -d'-' -f1)" >> $GITHUB_ENV
@@ -272,7 +289,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-14, macos-15, macos-26]
+        os: [ubuntu-latest, windows-latest, macos-15, macos-26, macos-15-intel, macos-26-intel]
         python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
     steps:
       - name: Set up Python ${{ matrix.python-version }}
@@ -301,6 +318,8 @@ jobs:
         uses: actions/setup-python@v7
         with:
           python-version: 3.13
+      - name: install rust toolchain
+        uses: dtolnay/rust-toolchain@stable
       - name: Download packages
         uses: actions/Download-artifact@v8
         with:
