@@ -46,41 +46,40 @@ def two_floors(walkable_surface):
 
 
 ########### Error cases: Add Region ###########
-def test_add_region_too_few_points(walkable_surface):
-    points = [(0, 0), (1, 1)]
-    expected_error = "needs at least 3 different points"
-    # boundary
-    with pytest.raises(jps.SimulationError, match=expected_error):
-        walkable_surface.add_region(exterior=points, height=0.0)
-    # hole
-    with pytest.raises(jps.SimulationError, match=expected_error):
-        walkable_surface.add_region(
-            exterior=rectangle((0, 0), (1, 1)), interior=[points], height=0.0
-        )
+@pytest.mark.parametrize(
+    "exterior, interior",
+    [
+        pytest.param([(0, 0), (1, 1)], [], id="boundary"),
+        pytest.param(rectangle((0, 0), (1, 1)), [[(0, 0), (1, 1)]], id="hole"),
+    ],
+)
+def test_add_region_too_few_points(walkable_surface, exterior, interior):
+    with pytest.raises(
+        jps.SimulationError, match="needs at least 3 different points"
+    ):
+        walkable_surface.add_region(exterior=exterior, interior=interior)
 
 
-def test_add_region_no_area(walkable_surface):
-    points = [(0, 0), (1, 1), (1, 2), (1, 1)]
+@pytest.mark.parametrize(
+    "exterior, interior",
+    [
+        pytest.param([(0, 0), (1, 1), (1, 2), (1, 1)], [], id="no-area"),
+        pytest.param([(0, 0), (1, 1), (0, 1), (1, 0)], [], id="bowtie"),
+        pytest.param(
+            [(0, 0), (0, 0), (1, 0), (1, 1)],
+            [],
+            id="duplicated-point-in-boundary",
+        ),
+        pytest.param(
+            rectangle((-1, -1), (2, 2)),
+            [[(0, 0), (0, 0), (1, 0), (1, 1)]],
+            id="duplicated-point-in-hole",
+        ),
+    ],
+)
+def test_add_region_not_simple(walkable_surface, exterior, interior):
     with pytest.raises(jps.SimulationError, match="is not simple"):
-        walkable_surface.add_region(exterior=points, height=0.0)
-
-
-def test_add_region_rejects_bowtie(walkable_surface):
-    polygon = [(0, 0), (1, 1), (0, 1), (1, 0)]
-    with pytest.raises(jps.SimulationError, match="is not simple"):
-        walkable_surface.add_region(exterior=polygon, height=0.0)
-
-
-def test_add_region_duplicated_point(walkable_surface):
-    points = [(0, 0), (0, 0), (1, 0), (1, 1)]
-    # as boundary
-    with pytest.raises(jps.SimulationError, match="is not simple"):
-        walkable_surface.add_region(exterior=points, height=0.0)
-    # as hole
-    with pytest.raises(jps.SimulationError, match="is not simple"):
-        walkable_surface.add_region(
-            exterior=rectangle((-1, -1), (2, 2)), interior=[points], height=0.0
-        )
+        walkable_surface.add_region(exterior=exterior, interior=interior)
 
 
 def test_overlapping_geometry(walkable_surface):
@@ -105,66 +104,61 @@ def test_touching_polygons(walkable_surface):
         )
 
 
-HOLES_NOT_IN_BOUNDARY_ERROR = "Holes must lie strictly inside the boundary"
-
-
-def test_hole_touches_boundary(walkable_surface):
-    exterior = rectangle((0, 0), (3, 3))
-    # hole at a boundary corner
-    with pytest.raises(jps.SimulationError, match=HOLES_NOT_IN_BOUNDARY_ERROR):
-        walkable_surface.add_region(
-            exterior=exterior, interior=[((0, 0), (1, 1), (2, 1))]
-        )
-    # hole on a boundary edge
-    with pytest.raises(jps.SimulationError, match=HOLES_NOT_IN_BOUNDARY_ERROR):
-        walkable_surface.add_region(
-            exterior=exterior, interior=[((1, 0), (1, 1), (2, 1))]
-        )
-    # hole equal to boundary
-    with pytest.raises(jps.SimulationError, match=HOLES_NOT_IN_BOUNDARY_ERROR):
-        walkable_surface.add_region(exterior=exterior, interior=[exterior])
-
-
-def test_hole_outside_or_crossing_boundary(walkable_surface):
-    exterior = rectangle((0, 0), (3, 3))
-    # outside
-    with pytest.raises(jps.SimulationError, match=HOLES_NOT_IN_BOUNDARY_ERROR):
-        walkable_surface.add_region(
-            exterior=exterior, interior=[rectangle((5, 5), (7, 7))]
-        )
-    # crossing
-    with pytest.raises(jps.SimulationError, match=HOLES_NOT_IN_BOUNDARY_ERROR):
-        walkable_surface.add_region(
-            exterior=exterior, interior=[rectangle((2, 1), (5, 2))]
-        )
-
-
-def test_holes_overlap_or_touch_each_other(walkable_surface):
-    exterior = rectangle((0, 0), (10, 10))
-    # hole inside hole
-    with pytest.raises(jps.SimulationError, match=HOLES_NOT_IN_BOUNDARY_ERROR):
-        walkable_surface.add_region(
-            exterior=exterior,
-            interior=[rectangle((1, 1), (9, 9)), rectangle((3, 3), (5, 5))],
-        )
-    # identical holes
-    with pytest.raises(jps.SimulationError, match=HOLES_NOT_IN_BOUNDARY_ERROR):
-        walkable_surface.add_region(
-            exterior=exterior,
-            interior=[rectangle((1, 1), (3, 3)), rectangle((1, 1), (3, 3))],
-        )
-    # holes cross each other
-    with pytest.raises(jps.SimulationError, match=HOLES_NOT_IN_BOUNDARY_ERROR):
-        walkable_surface.add_region(
-            exterior=exterior,
-            interior=[rectangle((1, 1), (3, 3)), rectangle((2, 2), (4, 4))],
-        )
-    # holes touching at a corner
-    with pytest.raises(jps.SimulationError, match=HOLES_NOT_IN_BOUNDARY_ERROR):
-        walkable_surface.add_region(
-            exterior=exterior,
-            interior=[rectangle((1, 1), (3, 3)), rectangle((3, 3), (4, 4))],
-        )
+@pytest.mark.parametrize(
+    "exterior, interior",
+    [
+        pytest.param(
+            rectangle((0, 0), (3, 3)),
+            [[(0, 0), (1, 1), (2, 1)]],
+            id="hole-at-boundary-corner",
+        ),
+        pytest.param(
+            rectangle((0, 0), (3, 3)),
+            [[(1, 0), (1, 1), (2, 1)]],
+            id="hole-on-boundary-edge",
+        ),
+        pytest.param(
+            rectangle((0, 0), (3, 3)),
+            [rectangle((0, 0), (3, 3))],
+            id="hole-equal-to-boundary",
+        ),
+        pytest.param(
+            rectangle((0, 0), (3, 3)),
+            [rectangle((5, 5), (7, 7))],
+            id="hole-outside-boundary",
+        ),
+        pytest.param(
+            rectangle((0, 0), (3, 3)),
+            [rectangle((2, 1), (5, 2))],
+            id="hole-crosses-boundary",
+        ),
+        pytest.param(
+            rectangle((0, 0), (10, 10)),
+            [rectangle((1, 1), (9, 9)), rectangle((3, 3), (5, 5))],
+            id="hole-inside-hole",
+        ),
+        pytest.param(
+            rectangle((0, 0), (10, 10)),
+            [rectangle((1, 1), (3, 3)), rectangle((1, 1), (3, 3))],
+            id="identical-holes",
+        ),
+        pytest.param(
+            rectangle((0, 0), (10, 10)),
+            [rectangle((1, 1), (3, 3)), rectangle((2, 2), (4, 4))],
+            id="holes-cross-each-other",
+        ),
+        pytest.param(
+            rectangle((0, 0), (10, 10)),
+            [rectangle((1, 1), (3, 3)), rectangle((3, 3), (4, 4))],
+            id="holes-touch-at-corner",
+        ),
+    ],
+)
+def test_add_region_invalid_holes(walkable_surface, exterior, interior):
+    with pytest.raises(
+        jps.SimulationError, match="Holes must lie strictly inside the boundary"
+    ):
+        walkable_surface.add_region(exterior=exterior, interior=interior)
 
 
 def test_gets_region_after_error_and_can_create_geometry(walkable_surface):
