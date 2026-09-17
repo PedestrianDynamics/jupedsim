@@ -64,7 +64,7 @@ Geometry::Geometry(SurfaceMesh mesh) : _mesh(std::move(mesh))
     build();
 }
 
-Geometry::Geometry(SurfaceMesh&& mesh, RegionSplit&& regionSplit)
+Geometry::Geometry(SurfaceMesh&& mesh, RegionSplit&& regionSplit, PassKey<WalkableSurface>)
     : _mesh(std::move(mesh)), _regionSplit(std::move(regionSplit))
 {
     // safety only: hand-crafted mesh/region-split combo should not run into this
