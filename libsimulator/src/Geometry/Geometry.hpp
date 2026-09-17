@@ -6,6 +6,7 @@
 #include "Geometry/Location.hpp"
 #include "Geometry/RegionSplit.hpp"
 #include "LineSegment.hpp"
+#include "PassKey.hpp"
 #include "Point.hpp"
 
 #include <array>
@@ -13,6 +14,8 @@
 #include <memory>
 #include <optional>
 #include <vector>
+
+class WalkableSurface;
 
 /// Default z-hint tolerance: When a `Location` is created, how far the z-value
 /// is allowed to be away from the surface to still be accepted.
@@ -34,8 +37,8 @@ public:
 
     /// 3D mesh. Perform auto-split into regions.
     explicit Geometry(SurfaceMesh mesh);
-    /// 3D mesh plus region split - internal only: Used by WalkableSurface.
-    explicit Geometry(SurfaceMesh&& mesh, RegionSplit&& regionSplit);
+    /// Special constructor for WalkableSurface: Ensures consistency of parameters.
+    explicit Geometry(SurfaceMesh&& mesh, RegionSplit&& regionSplit, PassKey<WalkableSurface>);
 
     /// Build from a 2D walkable area, lifted flat to z=0 by constrained Delaunay
     /// triangulation. Keeps the polygon it was lifted from (see polygon()).

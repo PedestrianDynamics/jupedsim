@@ -365,5 +365,6 @@ std::unique_ptr<Geometry> WalkableSurface::CreateGeometry()
 
     NormaliseAndValidateMesh(mesh, &region_split.region);
 
-    return std::make_unique<Geometry>(std::move(mesh), std::move(region_split));
+    return std::make_unique<Geometry>(
+        std::move(mesh), std::move(region_split), PassKey<WalkableSurface>{});
 }
