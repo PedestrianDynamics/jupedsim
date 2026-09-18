@@ -6,7 +6,6 @@
 #include "Geometry/Location.hpp"
 #include "Geometry/RegionSplit.hpp"
 #include "LineSegment.hpp"
-#include "PassKey.hpp"
 #include "Point.hpp"
 
 #include <array>
@@ -38,7 +37,7 @@ public:
     /// 3D mesh. Perform auto-split into regions.
     explicit Geometry(SurfaceMesh mesh);
     /// Special constructor for WalkableSurface: Ensures consistency of parameters.
-    explicit Geometry(SurfaceMesh&& mesh, RegionSplit&& regionSplit, PassKey<WalkableSurface>);
+    explicit Geometry(SurfaceMesh&& mesh, RegionSplit&& regionSplit);
 
     /// Build from a 2D walkable area, lifted flat to z=0 by constrained Delaunay
     /// triangulation. Keeps the polygon it was lifted from (see polygon()).
