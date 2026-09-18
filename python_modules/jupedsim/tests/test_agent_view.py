@@ -245,5 +245,5 @@ def test_wall_view_carries_the_projection_onto_the_wall():
     # The normal points from the wall back at the agent, i.e. against +x here.
     assert nearest.normal == pytest.approx((-1.0, 0.0))
     # The segment is relative to the agent too: a vertical face at x = 1.9.
-    assert nearest.segment.p1[0] == pytest.approx(1.9)
-    assert nearest.segment.p2[0] == pytest.approx(1.9)
+    assert nearest.segment[0][0] == pytest.approx(1.9)
+    assert nearest.segment[1][0] == pytest.approx(1.9)

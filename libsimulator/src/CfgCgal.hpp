@@ -29,6 +29,7 @@ using Vector3D = K::Vector_3;
 using Direction3D = K::Direction_3;
 using Line3D = K::Line_3;
 using Ray3D = K::Ray_3;
+using Segment2D = K::Segment_2;
 
 using Poly = CGAL::Polygon_2<K>;
 using PolyWithHoles = CGAL::Polygon_with_holes_2<K>;

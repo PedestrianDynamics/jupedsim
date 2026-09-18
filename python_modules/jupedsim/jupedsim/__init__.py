@@ -34,7 +34,6 @@ from jupedsim.library import (
     set_info_callback,
     set_warning_callback,
 )
-from jupedsim.linesegment import LineSegment
 from jupedsim.location import Location
 from jupedsim.models.anticipation_velocity_model import (
     AnticipationVelocityModel,
@@ -65,6 +64,7 @@ from jupedsim.models.warp_driver import (
     WarpDriverModel,
     WarpDriverModelState,
 )
+from jupedsim.native import WalkableSurface
 from jupedsim.recording import Recording, RecordingAgent, RecordingFrame
 from jupedsim.routing import RoutingEngine
 from jupedsim.serialization import TrajectoryWriter
@@ -128,7 +128,6 @@ __all__ = [
     "Hdf5TrajectoryWriter",
     "IncorrectParameterError",
     "JourneyDescription",
-    "LineSegment",
     "Location",
     "NegativeValueError",
     "NeighborView",
@@ -148,9 +147,10 @@ __all__ = [
     "Transition",
     "WaitingSetStage",
     "WaitingSetState",
+    "WalkableSurface",
+    "WallView",
     "WarpDriverModel",
     "WarpDriverModelState",
-    "WallView",
     "WaypointStage",
     "__commit__",
     "__compiler__",

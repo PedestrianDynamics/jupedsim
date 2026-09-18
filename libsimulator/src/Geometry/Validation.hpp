@@ -2,6 +2,7 @@
 #pragma once
 
 #include "CfgCgal.hpp"
+#include "Geometry/RegionSplit.hpp"
 
 #include <vector>
 
@@ -33,9 +34,10 @@ bool AllFacesInMeshPlanar(const SurfaceMesh& mesh);
 
 /// Validate that the given mesh can be processed by jupedsim.
 /// Ensures the mesh is a single connected component, has no degenerate faces, all faces are
-/// planar, and no incline exceeds 50deg. Non-triangular faces are triangulated and if the
-/// surface normals point downwards, all face orientations are reversed, i.e. the mesh may be
-/// modified.
+/// planar, no incline exceeds 50deg, and no faces pass through each other. Non-triangular faces
+/// are triangulated and if the surface normals point downwards, all face orientations are
+/// reversed, i.e. the mesh may be modified.
 /// @param mesh to check
+/// @param regions face -> region map of @p mesh.
 /// @throws SimulationError with a description of the issue encountered.
-void NormaliseAndValidateMesh(SurfaceMesh& mesh);
+void NormaliseAndValidateMesh(SurfaceMesh& mesh, const RegionMap* regions = nullptr);

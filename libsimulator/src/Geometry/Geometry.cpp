@@ -57,6 +57,18 @@ SurfaceMesh mesh_from_polygon(const PolyWithHoles& poly)
 
 Geometry::Geometry(SurfaceMesh mesh) : _mesh(std::move(mesh))
 {
+    // Compact vertex/face indices so vertices()/triangles()/region_id_per_face() are
+    // contiguous.
+    _mesh.collect_garbage();
+    _regionSplit = split_into_regions(_mesh);
+    build();
+}
+
+Geometry::Geometry(SurfaceMesh&& mesh, RegionSplit&& regionSplit)
+    : _mesh(std::move(mesh)), _regionSplit(std::move(regionSplit))
+{
+    // safety only: hand-crafted mesh/region-split combo should not run into this
+    assert(!_mesh.has_garbage());
     build();
 }
 
@@ -67,12 +79,7 @@ Geometry::Geometry(PolyWithHoles poly) : Geometry(mesh_from_polygon(poly))
 
 void Geometry::build()
 {
-    // Compact vertex/face indices so vertices()/triangles()/region_id_per_face() are
-    // contiguous and 1:1 with each other (triangulate_faces may leave removed
-    // faces behind).
-    _mesh.collect_garbage();
     _aabbTree = std::make_unique<AABBTree>(_mesh.faces().begin(), _mesh.faces().end(), _mesh);
-    _regionSplit = split_into_regions(_mesh);
     _region = _regionSplit.region;
     _regionCount = _regionSplit.count;
     _boundaryIndex = MakePortalBoundaryIndex(_mesh, _regionSplit);
