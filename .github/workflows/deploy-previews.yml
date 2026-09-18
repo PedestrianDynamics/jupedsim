@@ -10,6 +10,10 @@ permissions:
   contents: read
   pull-requests: write
 
+env:
+  PREVIEWS_REPOSITORY: PedestrianDynamics/jupedsim-pr-previews
+  PREVIEWS_BASE_URL: https://jupedsim-pr-previews.pedestriandynamics.org
+
 jobs:
   deploy-preview:
     name: Deploy PR preview
@@ -18,87 +22,123 @@ jobs:
       github.event.workflow_run.event == 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout main branch
-        uses: actions/checkout@v7
-        with:
-          path: jupedsim
-
-      - name: Checkout pr-previews
-        uses: actions/checkout@v7
-        with:
-          repository: PedestrianDynamics/jupedsim-pr-previews
-          token: ${{ secrets.JUPEDSIM_PR_PREVIEWS_TOKEN }}
-          ref: main
-          path: gh-pages
-
-      - name: Download pr-number artifact
-        uses: ./jupedsim/.github/actions/download-artefact
-        with:
-          artifact-name: pr-number
-          run-id: ${{ github.event.workflow_run.id }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Download documentation artifact
-        uses: ./jupedsim/.github/actions/download-artefact
-        with:
-          artifact-name: documentation
-          run-id: ${{ github.event.workflow_run.id }}
-          download-path: ${{ runner.temp }}/html
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Read pr-number
-        id: read-pr-number
-        run: |
-          PR_NUMBER=$(cat ./pr-number)
-          echo "value=$PR_NUMBER" >> $GITHUB_OUTPUT
-
-      - name: Stage preview into working tree
-        run: |
-          cd gh-pages
-          mkdir -p pull-requests
-          cd pull-requests
-          rm -rf "${{ steps.read-pr-number.outputs.value }}"
-          mkdir -p "${{ steps.read-pr-number.outputs.value }}"
-          cd "${{ steps.read-pr-number.outputs.value }}"
-          cp -r ${{ runner.temp }}/html/. .
-
-      - name: Commit preview
-        working-directory: gh-pages
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add "pull-requests"
-          git commit -m "docs: preview for PR #${{ steps.read-pr-number.outputs.value }}"
-          git push
-
-      - name: Update PR body with preview link
+      - name: Resolve PR number
+        id: pr
         uses: actions/github-script@v9
-        env:
-          PREVIEW_DIR: pull-requests/${{ steps.read-pr-number.outputs.value }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            // Read PR number from file
-            const prNumber = ${{ steps.read-pr-number.outputs.value }};
+            // List open PRs whose head is <fork-owner>:<branch>. The payload's
+            // own pull_requests list cannot be used: it is empty for fork PRs.
+            const run = context.payload.workflow_run;
+            const head = `${run.head_repository.owner.login}:${run.head_branch}`;
 
-            // Validate PR number
-            if (!prNumber || isNaN(prNumber)) {
-              core.setFailed('Invalid PR number');
+            const { data: prs } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              head,
+            });
+
+            const pr = prs[0];
+            if (!pr) {
+              core.setFailed(`No open PR found for head ${head}`);
               return;
             }
+            core.info(`Head ${head} belongs to PR #${pr.number}`);
+            core.setOutput('number', pr.number);
+
+            // The PR moved on since this build started. A newer build is
+            // already running for the new head, so publishing these docs
+            // would be stale (and could overwrite newer ones). Skip.
+            if (pr.head.sha !== run.head_sha) {
+              const msg = `Skipping preview for PR #${pr.number}: built ${run.head_sha}, PR head is now ${pr.head.sha}`;
+              core.notice(msg);
+              await core.summary.addRaw(`:fast_forward: ${msg}`).write();
+              core.setOutput('deploy', 'false');
+              return;
+            }
+            core.setOutput('deploy', 'true');
+
+      - name: Checkout previews repository
+        if: steps.pr.outputs.deploy == 'true'
+        uses: actions/checkout@v7
+        with:
+          repository: ${{ env.PREVIEWS_REPOSITORY }}
+          token: ${{ secrets.JUPEDSIM_PR_PREVIEWS_TOKEN }}
+          ref: main
+          path: previews
+
+      - name: Download documentation artifact
+        if: steps.pr.outputs.deploy == 'true'
+        uses: actions/download-artifact@v8
+        with:
+          name: documentation
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: ${{ runner.temp }}/html
+
+      - name: Commit and push preview
+        if: steps.pr.outputs.deploy == 'true'
+        working-directory: previews
+        env:
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Deploys for different PRs run in parallel and share one branch, so
+          # a push can be rejected as non-fast-forward. On rejection, restart
+          # from the current remote tip and re-stage the preview.
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+
+            target="pull-requests/$PR_NUMBER"
+            rm -rf "$target"
+            mkdir -p "$target"
+            cp -r "$RUNNER_TEMP/html/." "$target/"
+
+            git add pull-requests
+            git diff --cached --quiet || git commit -m "docs: preview for PR #$PR_NUMBER"
+
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "Push rejected (attempt $attempt), retrying"
+            sleep $((attempt * 5))
+          done
+
+          echo "::error::Failed to push preview after 5 attempts"
+          exit 1
+
+      - name: Update PR body with preview link
+        if: steps.pr.outputs.deploy == 'true'
+        uses: actions/github-script@v9
+        env:
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+          PREVIEW_URL: ${{ env.PREVIEWS_BASE_URL }}/pull-requests/${{ steps.pr.outputs.number }}/
+          BUILT_SHA: ${{ github.event.workflow_run.head_sha }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const prNumber = Number(process.env.PR_NUMBER);
+            if (!Number.isInteger(prNumber) || prNumber <= 0) {
+              core.setFailed(`Invalid PR number: ${process.env.PR_NUMBER}`);
+              return;
+            }
+            const url = process.env.PREVIEW_URL;
+            const builtSha = process.env.BUILT_SHA.slice(0, 7);
 
             const { data: pr } = await github.rest.pulls.get({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              pull_number: prNumber
+              pull_number: prNumber,
             });
 
-            const repo = context.repo;
-            const url = `https://pedestriandynamics.org/jupedsim-pr-previews/${process.env.PREVIEW_DIR}/`;
-
-            const start = '<!-- PREVIEW-URL-START -->';
-            const end = '<!-- PREVIEW-URL-END -->';
-            const snippet = `${start}\nPreview: ${url}\n${end}`;
+            const start = '<!-- PREVIEW-URL-2-START -->';
+            const end = '<!-- PREVIEW-URL-2-END -->';
+            const snippet = `${start}\nNew preview: ${url} (built from ${builtSha})\n${end}`;
 
             const original = pr.body || '';
             const updated = original.includes(start)
@@ -106,10 +146,10 @@ jobs:
               : `${original}\n\n${snippet}`;
 
             await github.rest.pulls.update({
-              owner: repo.owner,
-              repo: repo.repo,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
               pull_number: prNumber,
-              body: updated
+              body: updated,
             });
 
             core.info(`Updated PR #${prNumber} with preview link: ${url}`);
