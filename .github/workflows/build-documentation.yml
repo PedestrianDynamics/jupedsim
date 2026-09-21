@@ -10,6 +10,8 @@ on:
     branches:
       - master
       - rls-*
+  release:
+    types: [published]
 
 permissions:
   contents: read
@@ -31,16 +33,5 @@ jobs:
           docs-requirements-path: "docs/requirements.txt"
           docs-source-path: "docs/source"
           docs-build-path: "docs/build"
-          retention-days: "1"
-      - name: Save PR number
-        if: github.event_name == 'pull_request'
-        run: |
-          printf "%s" "${{ github.event.pull_request.number }}" > pr-number
-
-      - name: Upload PR number
-        if: github.event_name == 'pull_request'
-        uses: actions/upload-artifact@v7
-        with:
-          name: pr-number
-          path: pr-number
-          retention-days: 1
+          # Keep release builds around long enough to re-run a failed deployment.
+          retention-days: ${{ github.event_name == 'release' && '30' || '1' }}

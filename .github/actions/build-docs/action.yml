@@ -23,7 +23,7 @@ runs:
   using: 'composite'
   steps:
     - name: Set up Python
-      uses: actions/setup-python@v6
+      uses: actions/setup-python@v7
       with:
         python-version: ${{ inputs.python-version }}
 
@@ -44,7 +44,7 @@ runs:
 
     - name: Store documentation artifact
       id: upload-docs
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: documentation
         path: ${{ inputs.docs-build-path }}/
