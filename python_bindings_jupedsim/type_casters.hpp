@@ -17,7 +17,7 @@ template <>
 struct type_caster<Point> {
     PYBIND11_TYPE_CASTER(Point, const_name("tuple[float, float]"));
 
-    bool load(handle src, bool)
+    bool load(handle src, bool convert)
     {
         if(!isinstance<sequence>(src) || isinstance<bytes>(src)) {
             return false;
@@ -28,8 +28,7 @@ struct type_caster<Point> {
         }
         auto x_caster = make_caster<double>();
         auto y_caster = make_caster<double>();
-        // call below with "true": allow implicit type conversion to target double type
-        if(!x_caster.load(seq[0], true) || !y_caster.load(seq[1], true)) {
+        if(!x_caster.load(seq[0], convert) || !y_caster.load(seq[1], convert)) {
             return false;
         }
         value.x = cast_op<double&&>(std::move(x_caster));
@@ -81,7 +80,7 @@ struct type_caster<CGAL::Exact_predicates_inexact_constructions_kernel::Point_3>
     using Point3D = CGAL::Exact_predicates_inexact_constructions_kernel::Point_3;
     PYBIND11_TYPE_CASTER(Point3D, const_name("tuple[float, float, float]"));
 
-    bool load(handle src, bool)
+    bool load(handle src, bool convert)
     {
         if(!isinstance<sequence>(src) || isinstance<bytes>(src)) {
             return false;
@@ -93,9 +92,8 @@ struct type_caster<CGAL::Exact_predicates_inexact_constructions_kernel::Point_3>
         auto x_caster = make_caster<double>();
         auto y_caster = make_caster<double>();
         auto z_caster = make_caster<double>();
-        // call below with "true": allow implicit type conversion to target double type
-        if(!x_caster.load(seq[0], true) || !y_caster.load(seq[1], true) ||
-           !z_caster.load(seq[2], true)) {
+        if(!x_caster.load(seq[0], convert) || !y_caster.load(seq[1], convert) ||
+           !z_caster.load(seq[2], convert)) {
             return false;
         }
         value = Point3D(
