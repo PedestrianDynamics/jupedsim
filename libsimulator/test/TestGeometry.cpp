@@ -104,8 +104,8 @@ TEST(GeometryFromPolygon, KeepsThePolygonItWasLiftedFrom)
 {
     const auto geo = test_geometries::rectangle_with_hole({0, 0}, {10, 10}, {4, 4}, {6, 6});
 
-    const auto* poly = geo->polygon();
-    ASSERT_NE(poly, nullptr);
+    const auto poly = geo->polygon();
+    ASSERT_NE(poly, std::nullopt);
     EXPECT_EQ(poly->outer_boundary().size(), 4u);
     EXPECT_EQ(poly->holes().size(), 1u);
 }
@@ -114,7 +114,7 @@ TEST(GeometryFromMesh, HasNoPolygon)
 {
     const auto geo = test_geometries::switchback_stair();
     // A surface that may fold over itself has no polygon underneath.
-    EXPECT_EQ(geo->polygon(), nullptr);
+    EXPECT_EQ(geo->polygon(), std::nullopt);
 }
 
 TEST(GeometryModelQueries, EverythingAnsweredIsWithinTheRadius)

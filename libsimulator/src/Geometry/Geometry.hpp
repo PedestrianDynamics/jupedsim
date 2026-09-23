@@ -34,14 +34,27 @@ public:
         K::Point_3 point;
     };
 
+    /// Seam as edge:
+    /// - ring 0 is boundary, ring k is hole k-1.
+    /// - edge goes from vertex index to successor.
+    /// - source region is always left of seam.
+    struct SeamEdge {
+        size_t ring;
+        size_t index;
+    };
+
+    // Note: There is always at most 1 connection between 2 regions as regions are connected
+    //       via Connectors which add a region of their own.
+    using RegionGraph2D =
+        boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS, PolyWithHoles, SeamEdge>;
+
     /// 3D mesh. Perform auto-split into regions.
     explicit Geometry(SurfaceMesh mesh);
     /// Special constructor for WalkableSurface: Ensures consistency of parameters.
-    explicit Geometry(SurfaceMesh&& mesh, RegionSplit&& regionSplit);
-
-    /// Build from a 2D walkable area, lifted flat to z=0 by constrained Delaunay
-    /// triangulation. Keeps the polygon it was lifted from (see polygon()).
-    explicit Geometry(PolyWithHoles poly);
+    explicit Geometry(
+        SurfaceMesh&& mesh,
+        RegionSplit&& regionSplit,
+        std::unique_ptr<RegionGraph2D> regionGraph2d);
 
     ~Geometry() = default;
 
@@ -55,9 +68,8 @@ public:
     const SurfaceMesh& mesh() const { return _mesh; }
     const AABBTree& aabb_tree() const { return *_aabbTree; }
 
-    /// Returns the polygon iff the geometry was built from one. Otherwise returns
-    /// nullptr.
-    const PolyWithHoles* polygon() const { return _polygon ? &*_polygon : nullptr; }
+    /// Returns the 2D polygon iff the geometry has just a single region.
+    std::optional<PolyWithHoles> polygon() const;
 
     /// Face and on-surface point hit by the -z ray through @p p, or
     /// `null_face()` if the ray misses the walkable surface.
@@ -98,7 +110,7 @@ public:
 
     // -- region related API ---------------------------------------------------
 
-    std::size_t region_count() const { return _regionCount; }
+    std::size_t region_count() const { return _regionSplit.count; }
 
     /// Region id (0-based) of a single face, as assigned by the region overlay.
     std::size_t region_of(SurfaceMesh::Face_index face) const { return _region[face]; }
@@ -125,11 +137,10 @@ private:
     std::optional<std::size_t> region_reached(const Location& who, Point direction) const;
 
     SurfaceMesh _mesh{};
-    std::optional<PolyWithHoles> _polygon{};
     std::unique_ptr<AABBTree> _aabbTree{};
     std::unique_ptr<BoundaryIndex> _boundaryIndex{};
     std::unique_ptr<RegionGraph> _regionGraph{};
+    std::unique_ptr<RegionGraph2D> _regionGraph2D{};
     RegionMap _region{};
-    std::size_t _regionCount{0};
     RegionSplit _regionSplit{};
 };

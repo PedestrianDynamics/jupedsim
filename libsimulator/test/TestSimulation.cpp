@@ -128,8 +128,8 @@ TEST(MeshBuiltSimulation, HasNoPolygonToHandOut)
 {
     // The geometry itself is handed out either way -- it is the polygon underneath that a mesh
     // world does not have, and that is what the viewer and the systemtests read.
-    EXPECT_EQ(on_the_switchback_stair()->Geo().polygon(), nullptr);
-    EXPECT_NE(on_a_flat_room()->Geo().polygon(), nullptr);
+    EXPECT_EQ(on_the_switchback_stair()->Geo().polygon(), std::nullopt);
+    EXPECT_NE(on_a_flat_room()->Geo().polygon(), std::nullopt);
 }
 
 TEST(MeshBuiltSimulation, WalkingUpAStairToTheExitAtTheTop)
