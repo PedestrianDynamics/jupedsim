@@ -51,12 +51,16 @@ void Geometry::build()
     _regionGraph = CreateRegionGraph(_mesh, _regionSplit);
 }
 
-std::optional<PolyWithHoles> Geometry::polygon() const
+PolyWithHoles Geometry::polygon(size_t region_id) const
 {
-    if(_regionGraph2D && region_count() == 1) {
-        return (*_regionGraph2D)[0];
+    if(!_regionGraph2D) {
+        throw SimulationError("Geometry is built from mesh and has no 2D polygons");
     }
-    return std::nullopt;
+    if(region_id >= region_count()) {
+        throw SimulationError(
+            "Region ID {} outside range: Must be < {}", region_id, region_count());
+    }
+    return (*_regionGraph2D)[region_id];
 }
 
 Geometry::FaceLocation Geometry::face_below(const Point3D& p) const

@@ -10,7 +10,7 @@ from vtkmodules.vtkInteractionStyle import vtkInteractorStyleUser
 from vtkmodules.vtkRenderingCore import vtkRenderer
 
 from jupedsim_visualizer.config import Colors
-from jupedsim_visualizer.geometry import HoverInfo
+from jupedsim_visualizer.geometry import Geometry, HoverInfo
 from jupedsim_visualizer.grid import Grid
 from jupedsim_visualizer.move_controller import MoveController
 
@@ -26,7 +26,7 @@ class RenderWidget(QVTKRenderWindowInteractor):
 
     def __init__(
         self,
-        geo: jps.Geometry,
+        geo: Geometry,
         navi: jps.RoutingEngine,
         actor_sources,
         parent=None,

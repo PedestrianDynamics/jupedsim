@@ -151,7 +151,7 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
                 frame_data,
             )
 
-            geo_wkt = simulation.get_geometry().as_wkt()
+            geo_wkt = walkable_area_as_wkt(simulation)
             geo_hash = hash(geo_wkt)
             cur.execute(
                 "INSERT OR IGNORE INTO geometry(hash, wkt) VALUES(?,?)",

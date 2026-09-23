@@ -68,8 +68,8 @@ public:
     const SurfaceMesh& mesh() const { return _mesh; }
     const AABBTree& aabb_tree() const { return *_aabbTree; }
 
-    /// Returns the 2D polygon iff the geometry has just a single region.
-    std::optional<PolyWithHoles> polygon() const;
+    /// Returns the 2D polygon of the specified region. Throws in case of error.
+    PolyWithHoles polygon(size_t region_id) const;
 
     /// Face and on-surface point hit by the -z ray through @p p, or
     /// `null_face()` if the ray misses the walkable surface.

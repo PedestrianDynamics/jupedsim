@@ -24,9 +24,7 @@ class RoutingEngine:
         **kwargs: Any,
     ) -> None:
         self._geometry = build_geometry(geometry, **kwargs)
-        self._obj = py_jps.SurfaceMeshShortestPathRoutingEngine(
-            self._geometry._obj
-        )
+        self._obj = py_jps.SurfaceMeshShortestPathRoutingEngine(self._geometry)
 
     def compute_waypoints(
         self, frm: tuple[float, float], to: tuple[float, float]
