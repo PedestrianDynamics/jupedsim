@@ -2,6 +2,7 @@
 #include "Geometry/Geometry.hpp"
 
 #include "Geometry/Validation.hpp"
+#include "Geometry/WalkableSurface.hpp"
 #include "GeometryBuilder.hpp"
 #include "Point.hpp"
 #include "SimulationError.hpp"
@@ -30,19 +31,16 @@ std::vector<Point> ring_of(const Poly& ring)
     return out;
 }
 
-/// The polygon a geometry was lifted from.
-///
-/// A mesh-built world has none, and it is not merely missing: the outline of a surface is a
-/// bundle of loops per region, and saying which of them is "the" boundary and which are holes
-/// is a question of its own.
-const PolyWithHoles& polygon_of(const Geometry& geo)
+/// Polygon of the geometry if it exists. Raise exception otherwise.
+PolyWithHoles polygon_of(const Geometry& geo)
 {
-    const auto* poly = geo.polygon();
-    if(poly == nullptr) {
+    auto poly = geo.polygon();
+    if(!poly) {
         throw SimulationError(
-            "This geometry was built from a surface mesh, which has no polygon underneath.");
+            "This geometry has no polygon underneath: it was built from a "
+            "surface mesh or from more than one region.");
     }
-    return *poly;
+    return std::move(*poly);
 }
 } // namespace
 
@@ -92,7 +90,8 @@ void init_geometry(py::module_& m)
             })
         .def("holes", [](const Geometry& geo) {
             std::vector<std::vector<std::tuple<double, double>>> res{};
-            for(const auto& hole : polygon_of(geo).holes()) {
+            const PolyWithHoles poly = polygon_of(geo);
+            for(const auto& hole : poly.holes()) {
                 res.emplace_back(intoTuples(ring_of(hole)));
             }
             return res;
@@ -111,6 +110,8 @@ void init_geometry(py::module_& m)
                 builder.ExcludeFromAccessibleArea(intoPoints(points));
             })
         .def("build", [](GeometryBuilder& builder) {
-            return std::make_unique<Geometry>(builder.Build());
+            WalkableSurface surface{};
+            surface.AddRegion(builder.Build(), 0.0);
+            return surface.CreateGeometry();
         });
 }

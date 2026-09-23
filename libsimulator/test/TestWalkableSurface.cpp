@@ -56,8 +56,8 @@ TEST(WalkableSurface, UnconnectedFloors)
     const auto second = surface.AddRegion({{{0, 0}, {1, 0}, {1, 1}, {0, 1}}, {}}, 3.0);
 
     const auto graph = surface.CreateRegionGraph2D();
-    EXPECT_EQ(boost::num_vertices(graph), 2);
-    EXPECT_EQ(boost::num_edges(graph), 0);
+    EXPECT_EQ(boost::num_vertices(*graph), 2);
+    EXPECT_EQ(boost::num_edges(*graph), 0);
     EXPECT_EQ(first, 0);
     EXPECT_EQ(second, 1);
 }
@@ -69,7 +69,7 @@ TEST(WalkableSurface, PolygonRingsHaveCorrectOrientation)
         {{{0, 0}, {0, 10}, {10, 10}, {10, 0}}, {{{2, 2}, {4, 2}, {4, 4}, {2, 4}}}}, 0.0);
 
     const auto graph = surface.CreateRegionGraph2D();
-    const PolyWithHoles& poly = graph[region];
+    const PolyWithHoles& poly = (*graph)[region];
     // boundaryshould be counterclockwise, hole clockwise.
     EXPECT_EQ(poly.outer_boundary(), make_poly({{0, 0}, {10, 0}, {10, 10}, {0, 10}}));
     ASSERT_EQ(poly.number_of_holes(), 1);
@@ -81,8 +81,8 @@ TEST(WalkableSurface, CheckStairsPoly)
     TwoFloors floors{};
 
     const auto graph = floors.surface.CreateRegionGraph2D();
-    ASSERT_EQ(boost::num_vertices(graph), 3);
-    const PolyWithHoles& stairs = graph[floors.stairs];
+    ASSERT_EQ(boost::num_vertices(*graph), 3);
+    const PolyWithHoles& stairs = (*graph)[floors.stairs];
     EXPECT_EQ(stairs.outer_boundary(), make_poly({{5, 0}, {10, 0}, {10, 5}, {5, 5}}));
     EXPECT_EQ(stairs.number_of_holes(), 0);
 }
@@ -92,14 +92,14 @@ TEST(WalkableSurface, SeamsOfConnection)
     TwoFloors floors{};
 
     const auto graph = floors.surface.CreateRegionGraph2D();
-    EXPECT_EQ(boost::num_edges(graph), 4); // both directions at each seam
-    EXPECT_FALSE(boost::edge(floors.ground, floors.upper, graph).second);
-    EXPECT_FALSE(boost::edge(floors.upper, floors.ground, graph).second);
+    EXPECT_EQ(boost::num_edges(*graph), 4); // both directions at each seam
+    EXPECT_FALSE(boost::edge(floors.ground, floors.upper, *graph).second);
+    EXPECT_FALSE(boost::edge(floors.upper, floors.ground, *graph).second);
 
-    expect_seam(graph, floors.ground, floors.stairs, {5, 0}, {5, 5}, floors.onGround);
-    expect_seam(graph, floors.stairs, floors.ground, {5, 5}, {5, 0}, floors.onStairs);
-    expect_seam(graph, floors.stairs, floors.upper, {10, 0}, {10, 5}, floors.onStairs);
-    expect_seam(graph, floors.upper, floors.stairs, {10, 5}, {10, 0}, floors.onUpper);
+    expect_seam(*graph, floors.ground, floors.stairs, {5, 0}, {5, 5}, floors.onGround);
+    expect_seam(*graph, floors.stairs, floors.ground, {5, 5}, {5, 0}, floors.onStairs);
+    expect_seam(*graph, floors.stairs, floors.upper, {10, 0}, {10, 5}, floors.onStairs);
+    expect_seam(*graph, floors.upper, floors.stairs, {10, 5}, {10, 0}, floors.onUpper);
 }
 
 TEST(WalkableSurface, SeamOnHoleEdge)
@@ -113,9 +113,9 @@ TEST(WalkableSurface, SeamOnHoleEdge)
     const auto stairs = surface.ConnectRegions(ground, {{2, 3}, {2, 7}}, upper, {{12, 3}, {12, 7}});
 
     const auto graph = surface.CreateRegionGraph2D();
-    const auto [edge, exists] = boost::edge(ground, stairs, graph);
+    const auto [edge, exists] = boost::edge(ground, stairs, *graph);
     ASSERT_TRUE(exists);
-    EXPECT_EQ(graph[edge].ring, 1);
-    expect_seam(graph, ground, stairs, {2, 3}, {2, 7}, {1, 5});
-    expect_seam(graph, stairs, ground, {2, 7}, {2, 3}, {7, 5});
+    EXPECT_EQ((*graph)[edge].ring, 1);
+    expect_seam(*graph, ground, stairs, {2, 3}, {2, 7}, {1, 5});
+    expect_seam(*graph, stairs, ground, {2, 7}, {2, 3}, {7, 5});
 }
