@@ -21,40 +21,6 @@
 #include <variant>
 #include <vector>
 
-namespace
-{
-/// Lift a 2D walkable area to a flat surface mesh at z=0.
-SurfaceMesh mesh_from_polygon(const PolyWithHoles& poly)
-{
-    CDT cdt{};
-    cdt.insert_constraint(
-        poly.outer_boundary().vertices_begin(), poly.outer_boundary().vertices_end(), true);
-    for(const auto& hole : poly.holes()) {
-        cdt.insert_constraint(hole.vertices_begin(), hole.vertices_end(), true);
-    }
-    CGAL::mark_domain_in_triangulation(cdt);
-
-    SurfaceMesh mesh{};
-    std::map<CDT::Vertex_handle, SurfaceMesh::Vertex_index> idx{};
-    const auto vertex_of = [&](CDT::Vertex_handle v) {
-        const auto it = idx.find(v);
-        if(it != idx.end()) {
-            return it->second;
-        }
-        const auto& p = v->point();
-        return idx[v] = mesh.add_vertex({p.x(), p.y(), 0.0});
-    };
-    for(auto f = cdt.finite_faces_begin(); f != cdt.finite_faces_end(); ++f) {
-        if(f->get_in_domain()) {
-            mesh.add_face(
-                vertex_of(f->vertex(0)), vertex_of(f->vertex(1)), vertex_of(f->vertex(2)));
-        }
-    }
-    return mesh;
-}
-
-} // namespace
-
 Geometry::Geometry(SurfaceMesh mesh) : _mesh(std::move(mesh))
 {
     // Compact vertex/face indices so vertices()/triangles()/region_id_per_face() are
@@ -64,26 +30,33 @@ Geometry::Geometry(SurfaceMesh mesh) : _mesh(std::move(mesh))
     build();
 }
 
-Geometry::Geometry(SurfaceMesh&& mesh, RegionSplit&& regionSplit)
-    : _mesh(std::move(mesh)), _regionSplit(std::move(regionSplit))
+Geometry::Geometry(
+    SurfaceMesh&& mesh,
+    RegionSplit&& regionSplit,
+    std::unique_ptr<RegionGraph2D> regionGraph2d)
+    : _mesh(std::move(mesh))
+    , _regionGraph2D(std::move(regionGraph2d))
+    , _regionSplit(std::move(regionSplit))
 {
-    // safety only: hand-crafted mesh/region-split combo should not run into this
+    // safety only: hand-crafted mesh/region-split/regionGraph2d combo should not run into this
     assert(!_mesh.has_garbage());
     build();
-}
-
-Geometry::Geometry(PolyWithHoles poly) : Geometry(mesh_from_polygon(poly))
-{
-    _polygon = std::move(poly);
 }
 
 void Geometry::build()
 {
     _aabbTree = std::make_unique<AABBTree>(_mesh.faces().begin(), _mesh.faces().end(), _mesh);
     _region = _regionSplit.region;
-    _regionCount = _regionSplit.count;
     _boundaryIndex = MakePortalBoundaryIndex(_mesh, _regionSplit);
     _regionGraph = CreateRegionGraph(_mesh, _regionSplit);
+}
+
+std::optional<PolyWithHoles> Geometry::polygon() const
+{
+    if(_regionGraph2D && region_count() == 1) {
+        return (*_regionGraph2D)[0];
+    }
+    return std::nullopt;
 }
 
 Geometry::FaceLocation Geometry::face_below(const Point3D& p) const

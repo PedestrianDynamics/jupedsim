@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "CfgCgal.hpp"
-#include "LineSegment.hpp"
-#include "Point.hpp"
+#include "Geometry/Geometry.hpp"
 
 #include <boost/graph/adjacency_list.hpp>
 #include <fmt/ranges.h>
@@ -23,24 +21,12 @@ public:
         std::vector<Ring> holes;
     };
 
-    /// Seam as edge:
-    /// - ring 0 is boundary, ring k is hole k-1.
-    /// - edge goes from vertex index to successor.
-    /// - source region is always left of seam.
-    struct SeamEdge {
-        size_t ring;
-        size_t index;
-    };
-
-    // Note: There is always at most 1 connection between 2 regions as regions are connected
-    //       via Connectors which add a region of their own.
-    using RegionGraph2D =
-        boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS, PolyWithHoles, SeamEdge>;
-
     size_t AddRegion(Polygon polygon, double height);
+    size_t AddRegion(const PolyWithHoles& polygon, double height);
     size_t ConnectRegions(size_t fromRegion, LineSegment from, size_t toRegion, LineSegment to);
 
-    RegionGraph2D CreateRegionGraph2D() const;
+    using RegionGraph2D = Geometry::RegionGraph2D;
+    std::unique_ptr<RegionGraph2D> CreateRegionGraph2D() const;
 
     std::unique_ptr<Geometry> CreateGeometry();
 
@@ -65,6 +51,11 @@ private:
     using RegionGraph =
         boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS, Region, Seam>;
     RegionGraph _regionGraph{};
+
+    size_t insert_region(
+        std::vector<std::vector<size_t>> polygons,
+        const std::vector<Point3D>& vertices,
+        double height);
 
     std::array<size_t, 2> FindEdge(size_t regionId, const LineSegment& edge) const;
 
