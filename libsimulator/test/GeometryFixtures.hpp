@@ -2,6 +2,7 @@
 #pragma once
 
 #include "Geometry/Geometry.hpp"
+#include "Geometry/WalkableSurface.hpp"
 #include "GeometryBuilder.hpp"
 #include "MeshFixtures.hpp"
 #include "Point.hpp"
@@ -31,7 +32,9 @@ inline std::unique_ptr<Geometry> from_polygons(
     for(const auto& loop : holes) {
         builder.ExcludeFromAccessibleArea(loop);
     }
-    return std::make_unique<Geometry>(builder.Build());
+    WalkableSurface surface{};
+    surface.AddRegion(builder.Build(), 0.0);
+    return surface.CreateGeometry();
 }
 
 /// Flat rectangle at z = 0.
