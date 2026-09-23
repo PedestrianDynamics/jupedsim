@@ -8,6 +8,7 @@
 #include <CGAL/Boolean_set_operations_2.h>
 
 #include <ranges>
+#include <string>
 #include <tuple>
 #include <vector>
 
@@ -60,3 +61,6 @@ PolyWithHoles CombinePolygons(R1&& polygons, R2&& exclusions)
     }
     return combinedArea;
 }
+
+/// Throws if @p polygon is empty.
+std::string as_wkt(const PolyWithHoles& polygon);

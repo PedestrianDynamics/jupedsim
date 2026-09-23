@@ -2,9 +2,9 @@
 #include "Geometry/Geometry.hpp"
 
 #include "Geometry/Validation.hpp"
-#include "Geometry/WalkableSurface.hpp"
 #include "GeometryBuilder.hpp"
 #include "Point.hpp"
+#include "Polygon.hpp"
 #include "SimulationError.hpp"
 #include "conversion.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep
@@ -14,6 +14,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h> // IWYU pragma: keep
 
+#include <string>
 #include <tuple>
 #include <vector>
 
@@ -30,22 +31,34 @@ std::vector<Point> ring_of(const Poly& ring)
     }
     return out;
 }
-
-/// Polygon of the geometry if it exists. Raise exception otherwise.
-PolyWithHoles polygon_of(const Geometry& geo)
-{
-    auto poly = geo.polygon();
-    if(!poly) {
-        throw SimulationError(
-            "This geometry has no polygon underneath: it was built from a "
-            "surface mesh or from more than one region.");
-    }
-    return std::move(*poly);
-}
 } // namespace
 
 void init_geometry(py::module_& m)
 {
+    py::class_<PolyWithHoles> polygon2d(m, "Polygon2D");
+    polygon2d.doc() = R"(
+        A polygon with holes in the (x, y) plane, e.g. the walkable area of one region.
+    )";
+    polygon2d
+        .def(
+            "boundary",
+            [](const PolyWithHoles& p) { return intoTuples(ring_of(p.outer_boundary())); },
+            "Outer boundary as a list of (x, y) points.")
+        .def(
+            "holes",
+            [](const PolyWithHoles& p) {
+                std::vector<std::vector<std::tuple<double, double>>> res{};
+                for(const auto& hole : p.holes()) {
+                    res.emplace_back(intoTuples(ring_of(hole)));
+                }
+                return res;
+            },
+            "Holes, each as a list of (x, y) points.")
+        .def(
+            "as_wkt",
+            &as_wkt,
+            "The polygon as WKT; every coordinate reads back to the exact same value.");
+
     // smart_holder: a Simulation shares ownership of its geometry with Python.
     py::class_<Geometry, py::smart_holder>(m, "Geometry")
         .def_static(
@@ -84,18 +97,11 @@ void init_geometry(py::module_& m)
         .def("vertices", &Geometry::vertices)
         .def("triangles", &Geometry::triangles)
         .def(
-            "boundary",
-            [](const Geometry& geo) {
-                return intoTuples(ring_of(polygon_of(geo).outer_boundary()));
-            })
-        .def("holes", [](const Geometry& geo) {
-            std::vector<std::vector<std::tuple<double, double>>> res{};
-            const PolyWithHoles poly = polygon_of(geo);
-            for(const auto& hole : poly.holes()) {
-                res.emplace_back(intoTuples(ring_of(hole)));
-            }
-            return res;
-        });
+            "polygon",
+            &Geometry::polygon,
+            py::kw_only(),
+            py::arg("region_id") = 0,
+            "Polygon2D for the specified region ID");
 
     py::class_<GeometryBuilder>(m, "GeometryBuilder")
         .def(py::init<>())
@@ -109,9 +115,5 @@ void init_geometry(py::module_& m)
             [](GeometryBuilder& builder, const std::vector<std::tuple<double, double>>& points) {
                 builder.ExcludeFromAccessibleArea(intoPoints(points));
             })
-        .def("build", [](GeometryBuilder& builder) {
-            WalkableSurface surface{};
-            surface.AddRegion(builder.Build(), 0.0);
-            return surface.CreateGeometry();
-        });
+        .def("build", &GeometryBuilder::Build);
 }
