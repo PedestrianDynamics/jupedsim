@@ -80,5 +80,5 @@ def build() -> jps.Simulation:
 
 if __name__ == "__main__":
     sim = build()
-    viewer = SimulationViewer(sim, geometry_obj=OBJ)
+    viewer = SimulationViewer(sim)
     viewer.run()

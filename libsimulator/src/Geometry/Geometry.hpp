@@ -14,6 +14,8 @@
 #include <optional>
 #include <vector>
 
+class WalkableSurface;
+
 /// Default z-hint tolerance: When a `Location` is created, how far the z-value
 /// is allowed to be away from the surface to still be accepted.
 inline constexpr double ZHintTolerance = 0.1;
@@ -32,8 +34,10 @@ public:
         K::Point_3 point;
     };
 
-    /// Take an already-built surface mesh (e.g. from a mesh builder or a test).
+    /// 3D mesh. Perform auto-split into regions.
     explicit Geometry(SurfaceMesh mesh);
+    /// Special constructor for WalkableSurface: Ensures consistency of parameters.
+    explicit Geometry(SurfaceMesh&& mesh, RegionSplit&& regionSplit);
 
     /// Build from a 2D walkable area, lifted flat to z=0 by constrained Delaunay
     /// triangulation. Keeps the polygon it was lifted from (see polygon()).

@@ -12,7 +12,6 @@ add_library(py_jupedsim MODULE
     generalized_centrifugal_force_model.cpp
     geometry.cpp
     journey.cpp
-    linesegment.cpp
     logging.cpp
     logging.hpp
     python_model.cpp
@@ -26,6 +25,7 @@ add_library(py_jupedsim MODULE
     trace.cpp
     transition.cpp
     type_casters.hpp
+    walkable_surface.cpp
     warp_driver_model.cpp
 )
 

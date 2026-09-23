@@ -29,6 +29,8 @@ target_sources(simulator PRIVATE
     src/Geometry/SegmentGrid.hpp
     src/Geometry/Validation.cpp
     src/Geometry/Validation.hpp
+    src/Geometry/WalkableSurface.cpp
+    src/Geometry/WalkableSurface.hpp
     src/GeometryBuilder.cpp
     src/GeometryBuilder.hpp
     src/HashCombine.hpp
@@ -124,6 +126,7 @@ if (BUILD_TESTS)
         test/TestStage.cpp
         test/TestUniqueID.cpp
         test/TestValidation.cpp
+        test/TestWalkableSurface.cpp
     )
 
     target_link_libraries(libsimulator-tests PRIVATE

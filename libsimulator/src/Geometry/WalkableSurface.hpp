@@ -1,0 +1,84 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later
+#pragma once
+
+#include "CfgCgal.hpp"
+#include "LineSegment.hpp"
+#include "Point.hpp"
+
+#include <boost/graph/adjacency_list.hpp>
+#include <fmt/ranges.h>
+
+#include <array>
+#include <optional>
+#include <vector>
+
+class Geometry;
+
+class WalkableSurface
+{
+public:
+    using Ring = std::vector<Point>;
+    struct Polygon {
+        Ring boundary;
+        std::vector<Ring> holes;
+    };
+
+    /// Seam as edge:
+    /// - ring 0 is boundary, ring k is hole k-1.
+    /// - edge goes from vertex index to successor.
+    /// - source region is always left of seam.
+    struct SeamEdge {
+        size_t ring;
+        size_t index;
+    };
+
+    // Note: There is always at most 1 connection between 2 regions as regions are connected
+    //       via Connectors which add a region of their own.
+    using RegionGraph2D =
+        boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS, PolyWithHoles, SeamEdge>;
+
+    size_t AddRegion(Polygon polygon, double height);
+    size_t ConnectRegions(size_t fromRegion, LineSegment from, size_t toRegion, LineSegment to);
+
+    RegionGraph2D CreateRegionGraph2D() const;
+
+    std::unique_ptr<Geometry> CreateGeometry();
+
+private:
+    std::vector<Point3D> _globalVertices;
+
+    struct Region {
+        // Store boundary (index 0) + holes as vector of indices into globalVertices
+        std::vector<std::vector<size_t>> polygons;
+        /// Empty for connectors, which are inclined instead of flat.
+        std::optional<double> height;
+        /// Polygons projected to x/y.
+        PolyWithHoles polyWithHoles;
+
+        /// Connectors may not be connected again.
+        bool is_connectable() const { return height.has_value(); }
+    };
+
+    /// Global vertex IDs of the shared edge of connected regions.
+    using Seam = std::array<size_t, 2>;
+
+    using RegionGraph =
+        boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS, Region, Seam>;
+    RegionGraph _regionGraph{};
+
+    std::array<size_t, 2> FindEdge(size_t regionId, const LineSegment& edge) const;
+
+    /// Check whether floors at specified height overlap. Throws in case of error.
+    void ValidateFloorOverlap(const PolyWithHoles& polyWithHoles, double height) const;
+};
+
+template <>
+struct fmt::formatter<WalkableSurface::Polygon> {
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+
+    template <typename FormatContext>
+    auto format(const WalkableSurface::Polygon& p, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "({}, {})", p.boundary, p.holes);
+    }
+};

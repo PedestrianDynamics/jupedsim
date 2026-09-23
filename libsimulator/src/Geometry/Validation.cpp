@@ -6,12 +6,17 @@
 #include <CGAL/Polygon_mesh_processing/compute_normal.h>
 #include <CGAL/Polygon_mesh_processing/connected_components.h>
 #include <CGAL/Polygon_mesh_processing/orientation.h>
+#include <CGAL/Polygon_mesh_processing/self_intersections.h>
 #include <CGAL/Polygon_mesh_processing/triangulate_faces.h>
 #include <CGAL/boost/graph/helpers.h>
+#include <boost/property_map/property_map.hpp>
 
 #include <algorithm>
 #include <cmath>
+#include <iterator>
 #include <numbers>
+#include <optional>
+#include <utility>
 #include <vector>
 
 bool IsWalkableNormal(const Vector3D& n)
@@ -22,6 +27,20 @@ bool IsWalkableNormal(const Vector3D& n)
     static const double min_z = std::cos(max_incline_rad);
     return n.z() >= min_z;
 }
+
+namespace
+{
+std::optional<std::pair<SurfaceMesh::Face_index, SurfaceMesh::Face_index>>
+first_self_intersection(const SurfaceMesh& mesh)
+{
+    std::vector<std::pair<SurfaceMesh::Face_index, SurfaceMesh::Face_index>> intersecting{};
+    CGAL::Polygon_mesh_processing::self_intersections(mesh, std::back_inserter(intersecting));
+    if(intersecting.empty()) {
+        return std::nullopt;
+    }
+    return intersecting.front();
+}
+} // namespace
 
 bool IsFaceInMeshPlanar(
     const SurfaceMesh& mesh,
@@ -60,18 +79,15 @@ bool AllFacesInMeshPlanar(const SurfaceMesh& mesh)
         });
 }
 
-void NormaliseAndValidateMesh(SurfaceMesh& mesh)
+void NormaliseAndValidateMesh(SurfaceMesh& mesh, const RegionMap* regions)
 {
     namespace PMP = CGAL::Polygon_mesh_processing;
     if(!CGAL::is_triangle_mesh(mesh)) {
         PMP::triangulate_faces(mesh);
     }
 
-    auto fcc = mesh.add_property_map<SurfaceMesh::Face_index, size_t>("f:cc").first;
-    const auto count = PMP::connected_components(mesh, fcc);
-    mesh.remove_property_map(fcc);
-    if(count != 1) {
-        throw SimulationError("Expected exactly 1 connected component, got: {}", count);
+    if(mesh.number_of_faces() == 0) {
+        throw SimulationError("No Geometry defined.");
     }
 
     if(!AllFacesInMeshPlanar(mesh)) {
@@ -87,6 +103,35 @@ void NormaliseAndValidateMesh(SurfaceMesh& mesh)
         const auto n = PMP::compute_face_normal(face, mesh);
         if(!IsWalkableNormal(n)) {
             throw SimulationError("Face {} inclination exceeds 50deg.", face.idx());
+        }
+    }
+
+    if(const auto intersection = first_self_intersection(mesh)) {
+        if(regions == nullptr) {
+            throw SimulationError("Mesh faces pass through each other.");
+        }
+        throw SimulationError(
+            "Region {} and region {} pass through each other.",
+            (*regions)[intersection->first],
+            (*regions)[intersection->second]);
+    }
+
+    std::vector<size_t> component(mesh.number_of_faces(), 0);
+    const auto component_of =
+        boost::make_iterator_property_map(std::begin(component), get(CGAL::face_index, mesh));
+    const auto count = PMP::connected_components(mesh, component_of);
+    if(count > 1) {
+        if(regions == nullptr) {
+            throw SimulationError("Expected exactly 1 connected component, got: {}", count);
+        }
+        const auto first = *mesh.faces().begin();
+        for(const auto face : mesh.faces()) {
+            if(component[face] != component[first]) {
+                throw SimulationError(
+                    "Region {} is not connected to region {}.",
+                    (*regions)[face],
+                    (*regions)[first]);
+            }
         }
     }
 }

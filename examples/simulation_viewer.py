@@ -19,7 +19,6 @@ import socket
 import threading
 import time
 import urllib.request
-from pathlib import Path
 from typing import Callable, Optional
 
 # pyvista/VTK must go offscreen *before* they initialise: frames render to an FBO and stream to
@@ -84,8 +83,6 @@ class SimulationViewer:
             faster. Editable live in the toolbar.
         target_fps: Frame-pacing rate (default 30). The loop sleeps out the rest of each frame
             period, so playback speed is roughly ``steps_per_frame * target_fps`` steps/second.
-        geometry_obj: Optional path to the OBJ the sim was built from; when given, its surface
-            is drawn once as static context under the agents.
     """
 
     def __init__(
@@ -95,7 +92,6 @@ class SimulationViewer:
         *,
         steps_per_frame: int = 10,
         target_fps: float = 30.0,
-        geometry_obj: Optional[os.PathLike | str] = None,
     ) -> None:
         self._sim = sim
         self._on_step = on_step
@@ -105,7 +101,6 @@ class SimulationViewer:
         # Frame pacing period: we sleep out the rest of it after each frame, so the sim advances
         # steps_per_frame per ~1/target_fps and the event loop stays free for camera/input.
         self._min_frame_dt = 1.0 / max(1.0, float(target_fps))
-        self._geometry_obj = Path(geometry_obj) if geometry_obj else None
 
         self._plotter = pv.Plotter()
         self._plotter.set_background("white")
@@ -128,12 +123,8 @@ class SimulationViewer:
     def _load_floor_mesh(self) -> None:
         """Build the walkable-surface mesh once. Holds both a height scalar and a per-cell
         region id so the floor can be recoloured (see _draw_floor) without reloading."""
-        if self._geometry_obj is None:
-            return
-        from jupedsim.internal.routing import Geometry
-
-        # Read a second time rather than borrowed from the simulation, which owns its geometry.
-        geo = Geometry.from_obj(str(self._geometry_obj))
+        # Native geometry obj has the 3D info.
+        geo = self._sim._obj.get_geometry()
         verts = np.asarray(geo.vertices(), dtype=float)
         tris = np.asarray(geo.triangles(), dtype=np.int64)
         faces = np.hstack(
