@@ -184,6 +184,11 @@ def test_touching_polygons():
             [rectangle((1, 1), (3, 3)), rectangle((3, 3), (4, 4))],
             id="holes-touch-at-corner",
         ),
+        pytest.param(
+            rectangle((0, 0), (10, 10)),
+            [rectangle((1, 1), (3, 3)), [(3, 2), (5, 3), (5, 1)]],
+            id="hole-corner-on-other-hole-edge",
+        ),
     ],
 )
 def test_add_region_invalid_holes(exterior, interior):
@@ -192,6 +197,26 @@ def test_add_region_invalid_holes(exterior, interior):
         jps.SimulationError, match="Holes must lie strictly inside the boundary"
     ):
         walkable_surface.add_region(exterior=exterior, interior=interior)
+
+
+def circle(center, radius):
+    return list(shapely.Point(center).buffer(radius).exterior.coords)
+
+
+@pytest.mark.parametrize(
+    "exterior, interior",
+    [
+        pytest.param(circle((5, 5), 1), [], id="circular-boundary"),
+        pytest.param(
+            rectangle((0, 0), (10, 10)),
+            [circle((5, 5), 1)],
+            id="circular-hole",
+        ),
+    ],
+)
+def test_add_region_with_slanted_edges(exterior, interior):
+    walkable_surface = jps.WalkableSurface()
+    walkable_surface.add_region(exterior=exterior, interior=interior)
 
 
 def test_gets_region_after_error_and_can_create_geometry():

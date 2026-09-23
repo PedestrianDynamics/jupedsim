@@ -5,9 +5,11 @@
 #include "Geometry/Validation.hpp"
 #include "SimulationError.hpp"
 
+#include <CGAL/Arr_segment_traits_2.h>
 #include <CGAL/Boolean_set_operations_2.h>
 #include <CGAL/Polygon_mesh_processing/connected_components.h>
 #include <CGAL/Polygon_mesh_processing/self_intersections.h>
+#include <CGAL/Surface_sweep_2_algorithms.h>
 #include <CGAL/mark_domain_in_triangulation.h>
 #include <boost/range/iterator_range.hpp>
 
@@ -92,6 +94,53 @@ PolyWithHoles as_2d_poly_with_holes(
     }
     return PolyWithHoles(
         oriented_poly(rings[0], CGAL::COUNTERCLOCKWISE), std::begin(holes), std::end(holes));
+}
+
+/// Rings neither touch nor cross, every hole lies inside the boundary and outside the other holes.
+/// This uses predicates only. In contrast, CGAL's is_valid_polygon_with_holes() rejects valid rings
+/// under EPICK.
+bool holes_strictly_inside(const PolyWithHoles& poly)
+{
+    using Traits = CGAL::Arr_segment_traits_2<K>;
+
+    std::vector<const Poly*> rings{&poly.outer_boundary()};
+    for(const Poly& hole : poly.holes()) {
+        rings.push_back(&hole);
+    }
+
+    // sweep::do_intersect below ignores common endpoints -> Check for a vertex shared by two rings.
+    std::set<Point2D> points{};
+    std::vector<Traits::X_monotone_curve_2> edges{};
+    for(const Poly* ring : rings) {
+        for(auto edge = ring->edges_begin(); edge != ring->edges_end(); ++edge) {
+            if(!points.insert(edge->source()).second) {
+                return false;
+            }
+            edges.emplace_back(edge->source(), edge->target());
+        }
+    }
+    Traits traits{};
+    if(CGAL::Surface_sweep_2::do_intersect(edges.begin(), edges.end(), false, traits)) {
+        return false;
+    }
+
+    // No two rings touch or cross. Therefore to figure out whether a hole is inside or outside the
+    // boundary/another hole, checking any single vertex is sufficient.
+    const auto inside = [](const Poly& ring, const Poly& other) {
+        return other.bounded_side(ring.vertex(0)) == CGAL::ON_BOUNDED_SIDE;
+    };
+    for(size_t hole = 1; hole < rings.size(); ++hole) {
+        if(!inside(*rings[hole], *rings[0])) {
+            return false;
+        }
+        // Quadratic in the number of holes: prefilter by bounding box if this gets too slow.
+        for(size_t other = 1; other < rings.size(); ++other) {
+            if(other != hole && inside(*rings[hole], *rings[other])) {
+                return false;
+            }
+        }
+    }
+    return true;
 }
 
 Geometry::SeamEdge find_seam_edge(const PolyWithHoles& poly, const Point2D& a, const Point2D& b)
@@ -193,14 +242,7 @@ size_t WalkableSurface::insert_region(
         }
     }
     const PolyWithHoles polyWithHoles = as_2d_poly_with_holes(polygons, vertices);
-
-    // CGAL's is_valid_polygon_with_holes() allows that boundary and holes touch at vertices:
-    // Check whether all vertices are unique.
-    std::set<Point2D> points{};
-    const bool pointsUnique = std::ranges::all_of(
-        vertices, [&points](const Point3D& v) { return points.emplace(v.x(), v.y()).second; });
-    if(!pointsUnique ||
-       !CGAL::is_valid_polygon_with_holes(polyWithHoles, CGAL::Gps_segment_traits_2<K>{})) {
+    if(!holes_strictly_inside(polyWithHoles)) {
         throw SimulationError("Holes must lie strictly inside the boundary and may not overlap.");
     }
 
