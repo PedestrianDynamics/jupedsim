@@ -15,7 +15,6 @@ from jupedsim.distributions import (
     distribute_in_circles_by_number,
     distribute_until_filled,
 )
-from jupedsim.geometry import Geometry
 from jupedsim.internal.tracing import (
     Timer,
     disable_tracing,
@@ -124,7 +123,6 @@ __all__ = [
     "ExitStage",
     "GeneralizedCentrifugalForceModel",
     "GeneralizedCentrifugalForceModelState",
-    "Geometry",
     "Hdf5TrajectoryWriter",
     "IncorrectParameterError",
     "JourneyDescription",

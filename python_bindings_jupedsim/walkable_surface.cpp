@@ -32,6 +32,14 @@ void init_walkable_surface(py::module_& m)
             py::arg("interior") = std::vector<Point>{},
             py::arg("height") = 0.0)
         .def(
+            "add_region",
+            [](WalkableSurface& ws, const PolyWithHoles& polygon, double height) {
+                return ws.AddRegion(polygon, height);
+            },
+            py::kw_only(),
+            py::arg("polygon"),
+            py::arg("height") = 0.0)
+        .def(
             "connect_regions",
             [](WalkableSurface& ws,
                size_t fromRegion,

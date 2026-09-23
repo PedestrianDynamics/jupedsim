@@ -6,8 +6,11 @@
 
 #include <CGAL/enum.h>
 #include <CGAL/number_utils.h>
+#include <fmt/format.h>
 
 #include <algorithm>
+#include <iterator>
+#include <string>
 #include <tuple>
 #include <vector>
 
@@ -68,4 +71,28 @@ std::tuple<Point, double> Polygon::ContainingCircle() const
         distance = std::max(distance, (center - pt).Norm());
     });
     return {center, distance};
+}
+
+std::string as_wkt(const PolyWithHoles& polygon)
+{
+    if(polygon.is_unbounded()) {
+        throw SimulationError("Empty polygon.");
+    }
+    // fmt's "{}" is the shortest decimal that reads back to the same double.
+    std::string wkt{"POLYGON ("};
+    const auto append_ring = [&wkt](const Poly& ring) {
+        wkt += '(';
+        for(const Point2D& q : ring.container()) {
+            fmt::format_to(std::back_inserter(wkt), "{} {}, ", q.x(), q.y());
+        }
+        const Point2D& first = ring.container().front();
+        fmt::format_to(std::back_inserter(wkt), "{} {})", first.x(), first.y());
+    };
+    append_ring(polygon.outer_boundary());
+    for(const Poly& hole : polygon.holes()) {
+        wkt += ", ";
+        append_ring(hole);
+    }
+    wkt += ')';
+    return wkt;
 }

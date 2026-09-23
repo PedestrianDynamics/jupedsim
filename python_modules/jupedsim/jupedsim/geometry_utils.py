@@ -4,7 +4,6 @@ from typing import Any, List, Optional, Tuple
 import shapely
 
 import jupedsim.native as py_jps
-from jupedsim.geometry import Geometry
 
 
 class GeometryError(Exception):
@@ -19,7 +18,7 @@ class GeometryError(Exception):
         self.message = message
 
 
-def _geometry_from_wkt(wkt_input: str) -> Geometry:
+def _polygon_from_wkt(wkt_input: str) -> py_jps.Polygon2D:
     geometry_collection = None
     try:
         wkt_type = shapely.from_wkt(wkt_input)
@@ -41,28 +40,28 @@ def _geometry_from_wkt(wkt_input: str) -> Geometry:
             ) from exc
 
     polygons = _polygons_from_geometry_collection(geometry_collection)
-    return Geometry(_internal_build_geometry(polygons))
+    return _internal_build_polygon(polygons)
 
 
-def _geometry_from_shapely(
+def _polygon_from_shapely(
     geometry_input: (
         shapely.Polygon
         | shapely.MultiPolygon
         | shapely.GeometryCollection
         | shapely.MultiPoint
     ),
-) -> Geometry:
+) -> py_jps.Polygon2D:
     polygons = _polygons_from_geometry_collection(
         shapely.GeometryCollection([geometry_input])
     )
-    return Geometry(_internal_build_geometry(polygons))
+    return _internal_build_polygon(polygons)
 
 
-def _geometry_from_coordinates(
+def _polygon_from_coordinates(
     coordinates: List[Tuple], *, excluded_areas: Optional[List[Tuple]] = None
-) -> Geometry:
+) -> py_jps.Polygon2D:
     polygon = shapely.Polygon(coordinates, holes=excluded_areas)
-    return Geometry(_internal_build_geometry([polygon]))
+    return _internal_build_polygon([polygon])
 
 
 def _polygons_from_geometry_collection(
@@ -105,9 +104,9 @@ def _polygons_from_geometry_collection(
     return polygons
 
 
-def _internal_build_geometry(
+def _internal_build_polygon(
     polygons: List[shapely.Polygon],
-) -> py_jps.Geometry:
+) -> py_jps.Polygon2D:
     geo_builder = py_jps.GeometryBuilder()
 
     for polygon in polygons:
@@ -117,7 +116,7 @@ def _internal_build_geometry(
     return geo_builder.build()
 
 
-def build_geometry(
+def build_polygon(
     geometry: (
         list[tuple[float, float]]
         | shapely.GeometryCollection
@@ -127,8 +126,8 @@ def build_geometry(
         | str
     ),
     **kwargs: Any,
-) -> Geometry:
-    """Create a :class:`~jupedsim.geometry.Geometry` from different input representations.
+) -> py_jps.Polygon2D:
+    """Create a :class:`~jupedsim.native.Polygon2D` from different input representations.
 
     .. note ::
         The geometric data supplied need to form a single "simple" polygon with holes. In case
@@ -155,23 +154,23 @@ def build_geometry(
             provided as list[tuple[float, float]].
     """
     if isinstance(geometry, str):
-        return _geometry_from_wkt(geometry)
+        return _polygon_from_wkt(geometry)
     elif (
         isinstance(geometry, shapely.GeometryCollection)
         or isinstance(geometry, shapely.Polygon)
         or isinstance(geometry, shapely.MultiPolygon)
         or isinstance(geometry, shapely.MultiPoint)
     ):
-        return _geometry_from_shapely(geometry)
+        return _polygon_from_shapely(geometry)
     else:
-        return _geometry_from_coordinates(
+        return _polygon_from_coordinates(
             geometry, excluded_areas=kwargs.get("excluded_areas")
         )
 
 
-def build_geometry_3d(
+def build_geometry(
     geometry: (
-        Geometry
+        py_jps.Geometry
         | list[tuple[float, float]]
         | shapely.GeometryCollection
         | shapely.Polygon
@@ -183,18 +182,19 @@ def build_geometry_3d(
 ) -> py_jps.Geometry:
     """The native geometry behind a walkable area.
 
-    Accepts everything :func:`build_geometry` accepts, plus an already built
-    :class:`~jupedsim.geometry.Geometry`. A walkable area given as a polygon is
-    lifted to a flat surface at z=0, reusing the constrained Delaunay
-    triangulation the polygon produces.
+    Accepts everything :func:`build_polygon` accepts, plus an already built
+    :class:`~jupedsim.native.Geometry`. A walkable area given as a polygon
+    becomes a single region at z=0.
 
     Arguments:
-        geometry: See :func:`build_geometry`, or a
-            :class:`~jupedsim.geometry.Geometry`.
+        geometry: See :func:`build_polygon`, or a
+            :class:`~jupedsim.native.Geometry`.
 
     Keyword Arguments:
-        excluded_areas: See :func:`build_geometry`.
+        excluded_areas: See :func:`build_polygon`.
     """
-    if not isinstance(geometry, Geometry):
-        geometry = build_geometry(geometry, **kwargs)
-    return geometry._obj
+    if isinstance(geometry, py_jps.Geometry):
+        return geometry
+    surface = py_jps.WalkableSurface()
+    surface.add_region(polygon=build_polygon(geometry, **kwargs))
+    return surface.create_geometry()
