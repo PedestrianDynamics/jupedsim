@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 import shapely
-from jupedsim.geometry_utils import build_geometry_3d
+from jupedsim.geometry_utils import build_geometry
 from jupedsim.internal.routing import (
     Geometry,
     SurfaceMeshShortestPathRoutingEngine,
@@ -70,12 +70,12 @@ def test_orientation_is_unit_vector(engine):
     assert math.hypot(*d) == pytest.approx(1.0)
 
 
-def test_build_geometry_3d_lifts_shapely_polygon():
+def test_build_geometry_lifts_shapely_polygon():
     poly = shapely.Polygon(
         [(0, 0), (10, 0), (10, 10), (0, 10)],
         holes=[[(4, 4), (6, 4), (6, 6), (4, 6)]],
     )
-    geo = build_geometry_3d(poly)
+    geo = build_geometry(poly)
 
     assert geo.region_count() == 1
     assert geo.is_valid_location((1, 1, 1))
@@ -107,8 +107,8 @@ def test_build_geometry_3d_lifts_shapely_polygon():
     assert all(p[2] == pytest.approx(0.0) for p in path)
 
 
-def test_build_geometry_3d_accepts_wkt():
-    geo = build_geometry_3d("POLYGON((0 0, 10 0, 10 10, 0 10, 0 0))")
+def test_build_geometry_accepts_wkt():
+    geo = build_geometry("POLYGON((0 0, 10 0, 10 10, 0 10, 0 0))")
     assert geo.region_count() == 1
     assert geo.is_valid_location((5, 5, 1))
 

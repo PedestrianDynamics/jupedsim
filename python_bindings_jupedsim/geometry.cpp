@@ -10,9 +10,12 @@
 
 #include <CGAL/Polygon_mesh_processing/IO/polygon_mesh_io.h>
 #include <CGAL/number_utils.h>
+#include <fmt/format.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h> // IWYU pragma: keep
 
+#include <iterator>
+#include <string>
 #include <tuple>
 #include <vector>
 
@@ -29,25 +32,46 @@ std::vector<Point> ring_of(const Poly& ring)
     }
     return out;
 }
-
-/// The polygon a geometry was lifted from.
-///
-/// A mesh-built world has none, and it is not merely missing: the outline of a surface is a
-/// bundle of loops per region, and saying which of them is "the" boundary and which are holes
-/// is a question of its own.
-const PolyWithHoles& polygon_of(const Geometry& geo)
-{
-    const auto* poly = geo.polygon();
-    if(poly == nullptr) {
-        throw SimulationError(
-            "This geometry was built from a surface mesh, which has no polygon underneath.");
-    }
-    return *poly;
-}
 } // namespace
 
 void init_geometry(py::module_& m)
 {
+    py::class_<PolyWithHoles>(m, "Polygon2D")
+        .def(
+            "boundary",
+            [](const PolyWithHoles& p) { return intoTuples(ring_of(p.outer_boundary())); })
+        .def(
+            "holes",
+            [](const PolyWithHoles& p) {
+                std::vector<std::vector<std::tuple<double, double>>> res{};
+                for(const auto& hole : p.holes()) {
+                    res.emplace_back(intoTuples(ring_of(hole)));
+                }
+                return res;
+            })
+        .def("as_wkt", [](const PolyWithHoles& p) {
+            if(p.is_unbounded()) {
+                throw SimulationError("Empty polygon.");
+            }
+            // fmt's "{}" is the shortest decimal that reads back to the same double.
+            std::string wkt{"POLYGON ("};
+            const auto append_ring = [&wkt](const Poly& ring) {
+                wkt += '(';
+                for(const Point2D& q : ring.container()) {
+                    fmt::format_to(std::back_inserter(wkt), "{} {}, ", q.x(), q.y());
+                }
+                const Point2D& first = ring.container().front();
+                fmt::format_to(std::back_inserter(wkt), "{} {})", first.x(), first.y());
+            };
+            append_ring(p.outer_boundary());
+            for(const Poly& hole : p.holes()) {
+                wkt += ", ";
+                append_ring(hole);
+            }
+            wkt += ')';
+            return wkt;
+        });
+
     // smart_holder: a Simulation shares ownership of its geometry with Python.
     py::class_<Geometry, py::smart_holder>(m, "Geometry")
         .def_static(
@@ -86,17 +110,11 @@ void init_geometry(py::module_& m)
         .def("vertices", &Geometry::vertices)
         .def("triangles", &Geometry::triangles)
         .def(
-            "boundary",
-            [](const Geometry& geo) {
-                return intoTuples(ring_of(polygon_of(geo).outer_boundary()));
-            })
-        .def("holes", [](const Geometry& geo) {
-            std::vector<std::vector<std::tuple<double, double>>> res{};
-            for(const auto& hole : polygon_of(geo).holes()) {
-                res.emplace_back(intoTuples(ring_of(hole)));
-            }
-            return res;
-        });
+            "polygon",
+            &Geometry::polygon,
+            py::kw_only(),
+            py::arg("region_id") = 0,
+            "Polygon2D for the specified region ID");
 
     py::class_<GeometryBuilder>(m, "GeometryBuilder")
         .def(py::init<>())
@@ -110,7 +128,5 @@ void init_geometry(py::module_& m)
             [](GeometryBuilder& builder, const std::vector<std::tuple<double, double>>& points) {
                 builder.ExcludeFromAccessibleArea(intoPoints(points));
             })
-        .def("build", [](GeometryBuilder& builder) {
-            return std::make_unique<Geometry>(builder.Build());
-        });
+        .def("build", &GeometryBuilder::Build);
 }

@@ -2,6 +2,7 @@
 #include "Geometry/Geometry.hpp"
 #include "GeometryFixtures.hpp"
 #include "LineSegment.hpp"
+#include "SimulationError.hpp"
 #include "TestCommon.hpp"
 
 #include <gtest/gtest.h>
@@ -104,17 +105,22 @@ TEST(GeometryFromPolygon, KeepsThePolygonItWasLiftedFrom)
 {
     const auto geo = test_geometries::rectangle_with_hole({0, 0}, {10, 10}, {4, 4}, {6, 6});
 
-    const auto* poly = geo->polygon();
-    ASSERT_NE(poly, nullptr);
-    EXPECT_EQ(poly->outer_boundary().size(), 4u);
-    EXPECT_EQ(poly->holes().size(), 1u);
+    const auto poly = geo->polygon(0);
+    EXPECT_EQ(poly.outer_boundary().size(), 4u);
+    EXPECT_EQ(poly.holes().size(), 1u);
+}
+
+TEST(GeometryFromPolygon, RegionIdOutOfRangeThrows)
+{
+    const auto geo = test_geometries::rectangle_with_hole({0, 0}, {10, 10}, {4, 4}, {6, 6});
+    EXPECT_THROW(geo->polygon(1), SimulationError);
 }
 
 TEST(GeometryFromMesh, HasNoPolygon)
 {
     const auto geo = test_geometries::switchback_stair();
     // A surface that may fold over itself has no polygon underneath.
-    EXPECT_EQ(geo->polygon(), nullptr);
+    EXPECT_THROW(geo->polygon(0), SimulationError);
 }
 
 TEST(GeometryModelQueries, EverythingAnsweredIsWithinTheRadius)

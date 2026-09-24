@@ -6,6 +6,7 @@ from dataclasses import dataclass
 import jupedsim as jps
 import pytest
 import shapely
+from jupedsim.geometry_utils import build_geometry
 
 
 ########### Helper functions and fixtures ###########
@@ -64,6 +65,16 @@ def test_add_region_too_few_points(exterior, interior):
         pytest.param([(0, 0), (1, 1), (1, 2), (1, 1)], [], id="no-area"),
         pytest.param([(0, 0), (1, 1), (0, 1), (1, 0)], [], id="bowtie"),
         pytest.param(
+            [(0, 0), (1, 0), (1, 1), (2, 1), (2, 2), (1, 2), (1, 1), (0, 1)],
+            [],
+            id="boundary-touches-itself-at-vertex",
+        ),
+        pytest.param(
+            [(0, 0), (4, 0), (4, 4), (3, 4), (2, 0), (1, 4), (0, 4)],
+            [],
+            id="boundary-vertex-on-own-edge",
+        ),
+        pytest.param(
             [(0, 0), (0, 0), (1, 0), (1, 1)],
             [],
             id="duplicated-point-in-boundary",
@@ -79,6 +90,26 @@ def test_add_region_not_simple(exterior, interior):
     walkable_surface = jps.WalkableSurface()
     with pytest.raises(jps.SimulationError, match="is not simple"):
         walkable_surface.add_region(exterior=exterior, interior=interior)
+
+
+@pytest.mark.parametrize(
+    "polygons",
+    [
+        pytest.param(
+            [rectangle((0, 0), (1, 1)), rectangle((1, 1), (2, 2))],
+            id="touching-at-vertex",
+        ),
+        pytest.param(
+            [rectangle((0, 0), (2, 2)), [(2, 1), (3, 0), (3, 2)]],
+            id="vertex-on-other-edge",
+        ),
+    ],
+)
+def test_combined_polygons_not_simple(polygons):
+    with pytest.raises(jps.SimulationError, match="is not simple"):
+        build_geometry(
+            shapely.MultiPolygon([shapely.Polygon(p) for p in polygons])
+        )
 
 
 def test_overlapping_geometry():
@@ -153,6 +184,11 @@ def test_touching_polygons():
             [rectangle((1, 1), (3, 3)), rectangle((3, 3), (4, 4))],
             id="holes-touch-at-corner",
         ),
+        pytest.param(
+            rectangle((0, 0), (10, 10)),
+            [rectangle((1, 1), (3, 3)), [(3, 2), (5, 3), (5, 1)]],
+            id="hole-corner-on-other-hole-edge",
+        ),
     ],
 )
 def test_add_region_invalid_holes(exterior, interior):
@@ -161,6 +197,26 @@ def test_add_region_invalid_holes(exterior, interior):
         jps.SimulationError, match="Holes must lie strictly inside the boundary"
     ):
         walkable_surface.add_region(exterior=exterior, interior=interior)
+
+
+def circle(center, radius):
+    return list(shapely.Point(center).buffer(radius).exterior.coords)
+
+
+@pytest.mark.parametrize(
+    "exterior, interior",
+    [
+        pytest.param(circle((5, 5), 1), [], id="circular-boundary"),
+        pytest.param(
+            rectangle((0, 0), (10, 10)),
+            [circle((5, 5), 1)],
+            id="circular-hole",
+        ),
+    ],
+)
+def test_add_region_with_slanted_edges(exterior, interior):
+    walkable_surface = jps.WalkableSurface()
+    walkable_surface.add_region(exterior=exterior, interior=interior)
 
 
 def test_gets_region_after_error_and_can_create_geometry():

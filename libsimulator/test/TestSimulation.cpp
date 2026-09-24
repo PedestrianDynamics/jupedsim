@@ -126,10 +126,8 @@ TEST(MeshBuiltSimulation, ATargetWrittenFromOutsideLandsOnTheAgentsOwnStorey)
 
 TEST(MeshBuiltSimulation, HasNoPolygonToHandOut)
 {
-    // The geometry itself is handed out either way -- it is the polygon underneath that a mesh
-    // world does not have, and that is what the viewer and the systemtests read.
-    EXPECT_EQ(on_the_switchback_stair()->Geo().polygon(), nullptr);
-    EXPECT_NE(on_a_flat_room()->Geo().polygon(), nullptr);
+    EXPECT_THROW(on_the_switchback_stair()->Geo().polygon(0), SimulationError);
+    EXPECT_NO_THROW(on_a_flat_room()->Geo().polygon(0));
 }
 
 TEST(MeshBuiltSimulation, WalkingUpAStairToTheExitAtTheTop)
