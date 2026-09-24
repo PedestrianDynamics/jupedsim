@@ -89,7 +89,7 @@ SurfaceMesh two_row_strip(int n)
 /// tolerance). Fails the calling test if the point is off the walkable area.
 Location location_at(const Geometry& geo, double x, double y)
 {
-    auto loc = geo.get_location(x, y, 0.0, 100.0);
+    auto loc = geo.get_location_near_z(x, y, 0.0, 100.0);
     EXPECT_TRUE(loc.has_value()) << "location (" << x << "," << y << ") is off the surface";
     return *loc;
 }
@@ -100,7 +100,7 @@ TEST(Location, LocationOnFlatGround)
     const auto geo = test_geometries::rectangle({0, 0}, {10, 10});
     ASSERT_EQ(geo->region_count(), 1);
 
-    const auto loc = geo->get_location(5, 5, 0.0);
+    const auto loc = geo->get_location_near_z(5, 5, 0.0);
     ASSERT_TRUE(loc.has_value());
     EXPECT_DOUBLE_EQ(loc->xy().x, 5.0);
     EXPECT_DOUBLE_EQ(loc->xy().y, 5.0);
@@ -113,7 +113,7 @@ TEST(Location, XyIsTheExactAndZCorrectlyCalculated)
     const auto geo = test_geometries::ramp({5, 0}, {15, 10}, 4.0);
 
     // On the ramp z == 0.4*y; the location keeps the exact (x,y) and caches z.
-    const auto loc = geo->get_location(10, 2, 0.0, 1.0);
+    const auto loc = geo->get_location_near_z(10, 2, 0.0, 1.0);
     ASSERT_TRUE(loc.has_value());
     EXPECT_DOUBLE_EQ(loc->xy().x, 10.0);
     EXPECT_DOUBLE_EQ(loc->xy().y, 2.0);
@@ -124,7 +124,7 @@ TEST(Location, Position3DCombinesXyAndCachedZ)
 {
     const auto geo = test_geometries::ramp({5, 0}, {15, 10}, 4.0);
 
-    const auto loc = geo->get_location(10, 9, 3.6, 0.1);
+    const auto loc = geo->get_location_near_z(10, 9, 3.6, 0.1);
     ASSERT_TRUE(loc.has_value());
     EXPECT_NEAR(loc->z(), 3.6, 1e-9);
     const auto p = loc->position_3d();
@@ -133,16 +133,16 @@ TEST(Location, Position3DCombinesXyAndCachedZ)
     EXPECT_NEAR(p.z(), 3.6, 1e-9);
 }
 
-TEST(Location, ZHintDisambiguatesStackedSheets)
+TEST(Location, NearZDisambiguatesStackedSheets)
 {
     const auto geo = test_geometries::stacked_floors({0, 0}, {10, 10}, 3.0);
     ASSERT_EQ(geo->region_count(), 2);
 
-    const auto lower = geo->get_location(5, 5, 0.0);
+    const auto lower = geo->get_location_near_z(5, 5, 0.0);
     ASSERT_TRUE(lower.has_value());
     EXPECT_NEAR(lower->z(), 0.0, 1e-9);
 
-    const auto upper = geo->get_location(5, 5, 3.0);
+    const auto upper = geo->get_location_near_z(5, 5, 3.0);
     ASSERT_TRUE(upper.has_value());
     EXPECT_NEAR(upper->z(), 3.0, 1e-9);
 
@@ -150,25 +150,25 @@ TEST(Location, ZHintDisambiguatesStackedSheets)
     EXPECT_NE(lower->region(), upper->region());
 }
 
-TEST(Location, ZHintPicksTheNearerSheetWithinTolerance)
+TEST(Location, NearZPicksTheNearerSheetWithinTolerance)
 {
     const auto geo = test_geometries::stacked_floors({0, 0}, {10, 10}, 3.0);
 
     // Hint closer to the upper sheet -- default tolerance still resolves it.
-    const auto loc = geo->get_location(5, 5, 2.95);
+    const auto loc = geo->get_location_near_z(5, 5, 2.95);
     ASSERT_TRUE(loc.has_value());
     EXPECT_NEAR(loc->z(), 3.0, 1e-9);
 }
 
-TEST(Location, ZHintBeyondToleranceOfAnySheetMisses)
+TEST(Location, NearZBeyondToleranceOfAnySheetMisses)
 {
     const auto geo = test_geometries::stacked_floors({0, 0}, {10, 10}, 3.0);
 
     // Midway between the sheets (z=0 and z=3): 1.4 m from the nearer one,
     // beyond the 0.1 default tolerance -> no location.
-    EXPECT_FALSE(geo->get_location(5, 5, 1.4).has_value());
+    EXPECT_FALSE(geo->get_location_near_z(5, 5, 1.4).has_value());
     // A generous explicit tolerance recovers the nearer sheet.
-    const auto loc = geo->get_location(5, 5, 1.4, 1.5);
+    const auto loc = geo->get_location_near_z(5, 5, 1.4, 1.5);
     ASSERT_TRUE(loc.has_value());
     EXPECT_NEAR(loc->z(), 0.0, 1e-9);
 }
@@ -176,15 +176,15 @@ TEST(Location, ZHintBeyondToleranceOfAnySheetMisses)
 TEST(Location, PointOutsideFootprintMisses)
 {
     const auto geo = test_geometries::rectangle({0, 0}, {10, 10});
-    EXPECT_FALSE(geo->get_location(20, 20, 0.0).has_value());
+    EXPECT_FALSE(geo->get_location_near_z(20, 20, 0.0).has_value());
 }
 
 TEST(Location, PointInsideHoleMisses)
 {
     const auto geo = test_geometries::rectangle_with_hole({0, 0}, {10, 10}, {4, 4}, {6, 6});
 
-    EXPECT_TRUE(geo->get_location(1, 1, 0.0).has_value());
-    EXPECT_FALSE(geo->get_location(5, 5, 0.0).has_value()); // inside the hole
+    EXPECT_TRUE(geo->get_location_near_z(1, 1, 0.0).has_value());
+    EXPECT_FALSE(geo->get_location_near_z(5, 5, 0.0).has_value()); // inside the hole
 }
 
 // -- move_on_surface --

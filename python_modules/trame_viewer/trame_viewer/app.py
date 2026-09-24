@@ -26,6 +26,7 @@ from vtkmodules.vtkRenderingCore import vtkCellPicker  # noqa: E402
 
 pv.OFF_SCREEN = True
 
+from jupedsim import SimulationError  # noqa: E402
 from jupedsim.internal.routing import (  # noqa: E402
     Geometry,
     SurfaceMeshShortestPathRoutingEngine,
@@ -580,13 +581,16 @@ def build_app(obj_path: str | None):
         pos = _pick_world_fraction(fx, fy)
         if pos is None:
             return
-        # The picked point sits exactly on the rendered surface, so its z is
-        # the hint that selects the right floor in stacked geometry.
-        loc = current["geometry"].get_location(
-            float(pos[0]), float(pos[1]), z_hint=float(pos[2])
-        )
-        if loc is None:
-            return  # pick does not project onto the walkable surface
+        # Read the region from the picked cell's data, not via its index: clipping by
+        # height renumbers the cells.
+        regions = picker.GetDataSet().GetCellData().GetArray("region")
+        region_id = int(regions.GetValue(picker.GetCellId()))
+        try:
+            loc = current["geometry"].get_location(
+                float(pos[0]), float(pos[1]), region_id=region_id
+            )
+        except SimulationError:
+            return  # pick rounds off the region's edge
         boundary["loc"] = loc
         _place_marker("boundary_query", pos, "dodgerblue")
         _run_boundary_query()

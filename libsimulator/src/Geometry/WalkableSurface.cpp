@@ -5,9 +5,11 @@
 #include "Geometry/Validation.hpp"
 #include "SimulationError.hpp"
 
+#include <CGAL/Arr_segment_traits_2.h>
 #include <CGAL/Boolean_set_operations_2.h>
 #include <CGAL/Polygon_mesh_processing/connected_components.h>
 #include <CGAL/Polygon_mesh_processing/self_intersections.h>
+#include <CGAL/Surface_sweep_2_algorithms.h>
 #include <CGAL/mark_domain_in_triangulation.h>
 #include <boost/range/iterator_range.hpp>
 
@@ -94,8 +96,54 @@ PolyWithHoles as_2d_poly_with_holes(
         oriented_poly(rings[0], CGAL::COUNTERCLOCKWISE), std::begin(holes), std::end(holes));
 }
 
-WalkableSurface::SeamEdge
-find_seam_edge(const PolyWithHoles& poly, const Point2D& a, const Point2D& b)
+/// Rings neither touch nor cross, every hole lies inside the boundary and outside the other holes.
+/// This uses predicates only. In contrast, CGAL's is_valid_polygon_with_holes() rejects valid rings
+/// under EPICK.
+bool holes_strictly_inside(const PolyWithHoles& poly)
+{
+    using Traits = CGAL::Arr_segment_traits_2<K>;
+
+    std::vector<const Poly*> rings{&poly.outer_boundary()};
+    for(const Poly& hole : poly.holes()) {
+        rings.push_back(&hole);
+    }
+
+    // sweep::do_intersect below ignores common endpoints -> Check for a vertex shared by two rings.
+    std::set<Point2D> points{};
+    std::vector<Traits::X_monotone_curve_2> edges{};
+    for(const Poly* ring : rings) {
+        for(auto edge = ring->edges_begin(); edge != ring->edges_end(); ++edge) {
+            if(!points.insert(edge->source()).second) {
+                return false;
+            }
+            edges.emplace_back(edge->source(), edge->target());
+        }
+    }
+    Traits traits{};
+    if(CGAL::Surface_sweep_2::do_intersect(edges.begin(), edges.end(), false, traits)) {
+        return false;
+    }
+
+    // No two rings touch or cross. Therefore to figure out whether a hole is inside or outside the
+    // boundary/another hole, checking any single vertex is sufficient.
+    const auto inside = [](const Poly& ring, const Poly& other) {
+        return other.bounded_side(ring.vertex(0)) == CGAL::ON_BOUNDED_SIDE;
+    };
+    for(size_t hole = 1; hole < rings.size(); ++hole) {
+        if(!inside(*rings[hole], *rings[0])) {
+            return false;
+        }
+        // Quadratic in the number of holes: prefilter by bounding box if this gets too slow.
+        for(size_t other = 1; other < rings.size(); ++other) {
+            if(other != hole && inside(*rings[hole], *rings[other])) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+Geometry::SeamEdge find_seam_edge(const PolyWithHoles& poly, const Point2D& a, const Point2D& b)
 {
     const auto find_in_ring = [&a, &b](const Poly& ring) -> std::optional<size_t> {
         for(size_t index = 0; index < ring.size(); ++index) {
@@ -138,16 +186,11 @@ size_t WalkableSurface::AddRegion(Polygon polygon, double height)
         if(count < 3) {
             throw SimulationError("boundary/hole needs at least 3 different points");
         }
-        Poly poly{};
         std::vector<size_t> converted_ring;
         converted_ring.reserve(count);
         for(size_t index = 0; index < count; ++index) {
-            poly.push_back(Point2D(ring[index].x, ring[index].y));
             converted_ring.push_back(vertices.size());
             vertices.push_back({ring[index].x, ring[index].y, height});
-        }
-        if(!poly.is_simple()) {
-            throw SimulationError("boundary/hole is not simple");
         }
         polygons.emplace_back(std::move(converted_ring));
     };
@@ -157,14 +200,49 @@ size_t WalkableSurface::AddRegion(Polygon polygon, double height)
         convert_ring(ring);
     }
 
+    return insert_region(std::move(polygons), vertices, height);
+}
+
+size_t WalkableSurface::AddRegion(const PolyWithHoles& polygon, double height)
+{
+    std::vector<Point3D> vertices{};
+    std::vector<std::vector<size_t>> polygons{};
+
+    auto convert_ring = [&vertices, &polygons, height](const Poly& ring) {
+        std::vector<size_t> converted_ring{};
+        converted_ring.reserve(ring.size());
+        for(const Point2D& p : ring.container()) {
+            converted_ring.push_back(vertices.size());
+            vertices.push_back({p.x(), p.y(), height});
+        }
+        polygons.emplace_back(std::move(converted_ring));
+    };
+
+    convert_ring(polygon.outer_boundary());
+    for(const Poly& hole : polygon.holes()) {
+        convert_ring(hole);
+    }
+
+    return insert_region(std::move(polygons), vertices, height);
+}
+
+size_t WalkableSurface::insert_region(
+    std::vector<std::vector<size_t>> polygons,
+    const std::vector<Point3D>& vertices,
+    double height)
+{
+    // Before orienting the rings: CGAL's orientation() requires simple polygons.
+    for(const auto& ring : polygons) {
+        Poly poly{};
+        for(const size_t vertexID : ring) {
+            poly.push_back(Point2D(vertices[vertexID][0], vertices[vertexID][1]));
+        }
+        if(!poly.is_simple()) {
+            throw SimulationError("boundary/hole is not simple");
+        }
+    }
     const PolyWithHoles polyWithHoles = as_2d_poly_with_holes(polygons, vertices);
-    // CGAL's is_valid_polygon_with_holes() allows that boundary and holes touch at vertices:
-    // Check whether all vertices are unique.
-    std::set<Point2D> points{};
-    const bool pointsUnique = std::ranges::all_of(
-        vertices, [&points](const Point3D& v) { return points.emplace(v.x(), v.y()).second; });
-    if(!pointsUnique ||
-       !CGAL::is_valid_polygon_with_holes(polyWithHoles, CGAL::Gps_segment_traits_2<K>{})) {
+    if(!holes_strictly_inside(polyWithHoles)) {
         throw SimulationError("Holes must lie strictly inside the boundary and may not overlap.");
     }
 
@@ -277,17 +355,17 @@ size_t WalkableSurface::ConnectRegions(
     return connectorRegion;
 }
 
-WalkableSurface::RegionGraph2D WalkableSurface::CreateRegionGraph2D() const
+std::unique_ptr<WalkableSurface::RegionGraph2D> WalkableSurface::CreateRegionGraph2D() const
 {
     const auto as_point_2d = [this](size_t vertexID) {
         const Point3D& v = _globalVertices[vertexID];
         return Point2D(v[0], v[1]);
     };
 
-    RegionGraph2D graph{};
+    auto graph = std::make_unique<RegionGraph2D>();
     // Add vertices.
     for(const auto regionID : boost::make_iterator_range(boost::vertices(_regionGraph))) {
-        boost::add_vertex(_regionGraph[regionID].polyWithHoles, graph);
+        boost::add_vertex(_regionGraph[regionID].polyWithHoles, *graph);
     }
 
     // Add seams.
@@ -297,8 +375,8 @@ WalkableSurface::RegionGraph2D WalkableSurface::CreateRegionGraph2D() const
         const Seam& seam = _regionGraph[edge];
         const Point2D a = as_point_2d(seam[0]);
         const Point2D b = as_point_2d(seam[1]);
-        boost::add_edge(from, to, find_seam_edge(graph[from], a, b), graph);
-        boost::add_edge(to, from, find_seam_edge(graph[to], a, b), graph);
+        boost::add_edge(from, to, find_seam_edge((*graph)[from], a, b), *graph);
+        boost::add_edge(to, from, find_seam_edge((*graph)[to], a, b), *graph);
     }
 
     return graph;
@@ -365,5 +443,6 @@ std::unique_ptr<Geometry> WalkableSurface::CreateGeometry()
 
     NormaliseAndValidateMesh(mesh, &region_split.region);
 
-    return std::make_unique<Geometry>(std::move(mesh), std::move(region_split));
+    return std::make_unique<Geometry>(
+        std::move(mesh), std::move(region_split), CreateRegionGraph2D());
 }

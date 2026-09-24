@@ -21,6 +21,7 @@
 #include <cstdint>
 #include <map>
 #include <memory>
+#include <optional>
 #include <stdexcept>
 #include <tuple>
 #include <vector>
@@ -51,38 +52,47 @@ void init_simulation(py::module_& m)
             py::arg("dt"))
         .def(
             "add_waypoint_stage",
-            [](Simulation& sim, std::tuple<double, double> position, double distance, double z) {
-                return sim.AddStage(WaypointDescription{intoPoint(position), distance}, z).getID();
+            [](Simulation& sim,
+               std::tuple<double, double> position,
+               double distance,
+               std::optional<std::size_t> region_id) {
+                return sim.AddStage(WaypointDescription{intoPoint(position), distance}, region_id)
+                    .getID();
             },
             py::arg("position"),
             py::arg("distance"),
-            py::arg("z_hint") = 0.0)
+            py::arg("region_id") = py::none())
         .def(
             "add_queue_stage",
             [](Simulation& sim,
                const std::vector<std::tuple<double, double>>& positions,
-               double z) {
-                return sim.AddStage(NotifiableQueueDescription{intoPoints(positions)}, z).getID();
+               std::optional<std::size_t> region_id) {
+                return sim.AddStage(NotifiableQueueDescription{intoPoints(positions)}, region_id)
+                    .getID();
             },
             py::arg("positions"),
-            py::arg("z_hint") = 0.0)
+            py::arg("region_id") = py::none())
         .def(
             "add_waiting_set_stage",
             [](Simulation& sim,
                const std::vector<std::tuple<double, double>>& positions,
-               double z) {
-                return sim.AddStage(NotifiableWaitingSetDescription{intoPoints(positions)}, z)
+               std::optional<std::size_t> region_id) {
+                return sim
+                    .AddStage(NotifiableWaitingSetDescription{intoPoints(positions)}, region_id)
                     .getID();
             },
             py::arg("positions"),
-            py::arg("z_hint") = 0.0)
+            py::arg("region_id") = py::none())
         .def(
             "add_exit_stage",
-            [](Simulation& sim, const std::vector<std::tuple<double, double>>& polygon, double z) {
-                return sim.AddStage(ExitDescription{Polygon{intoPoints(polygon)}}, z).getID();
+            [](Simulation& sim,
+               const std::vector<std::tuple<double, double>>& polygon,
+               std::optional<std::size_t> region_id) {
+                return sim.AddStage(ExitDescription{Polygon{intoPoints(polygon)}}, region_id)
+                    .getID();
             },
             py::arg("polygon"),
-            py::arg("z_hint") = 0.0)
+            py::arg("region_id") = py::none())
         .def(
             "add_direct_steering_stage",
             [](Simulation& sim) { return sim.AddStage(DirectSteeringDescription{}).getID(); })
@@ -103,8 +113,9 @@ void init_simulation(py::module_& m)
                uint64_t stageId,
                std::tuple<double, double> position,
                OperationalModelState state,
-               double z) {
-                return sim.AddAgent(journeyId, stageId, intoPoint(position), std::move(state), z)
+               std::optional<std::size_t> region_id) {
+                return sim
+                    .AddAgent(journeyId, stageId, intoPoint(position), std::move(state), region_id)
                     .getID();
             },
             py::kw_only(),
@@ -112,7 +123,7 @@ void init_simulation(py::module_& m)
             py::arg("stage_id"),
             py::arg("position"),
             py::arg("state"),
-            py::arg("z_hint") = 0.0)
+            py::arg("region_id") = py::none())
         .def(
             "mark_agent_for_removal",
             [](Simulation& sim, uint64_t id) { sim.MarkAgentForRemoval(id); })
@@ -157,12 +168,10 @@ void init_simulation(py::module_& m)
             py::keep_alive<0, 1>())
         .def(
             "get_location",
-            [](const Simulation& sim, double x, double y, double z_hint) {
-                return sim.GetLocation(x, y, z_hint);
-            },
+            &Simulation::GetLocation,
             py::arg("x"),
             py::arg("y"),
-            py::arg("z_hint") = 0.0,
+            py::arg("region_id") = py::none(),
             // The returned token points into geometry the simulation owns.
             py::keep_alive<0, 1>())
         .def(

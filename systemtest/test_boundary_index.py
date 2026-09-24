@@ -12,6 +12,7 @@ import math
 from pathlib import Path
 
 import pytest
+from jupedsim import SimulationError
 from jupedsim.internal.routing import (
     Geometry,
     make_portal_boundary_index,
@@ -39,6 +40,15 @@ def distance_to_segment(p, a, b) -> float:
     return math.hypot(px - nx, py - ny)
 
 
+def locations_at(geometry, x, y):
+    """Every location over (x, y), one per region that contains it."""
+    for region_id in range(geometry.region_count()):
+        try:
+            yield geometry.get_location(x, y, region_id)
+        except SimulationError:
+            pass
+
+
 def canonical(segment) -> tuple:
     a = tuple(round(c, 9) for c in segment[0])
     b = tuple(round(c, 9) for c in segment[1])
@@ -63,14 +73,11 @@ def test_query_invariants_hold_over_a_grid(geometry) -> None:
     queries = 0
     for x in range(0, 26, 2):
         for y in range(0, 26, 2):
-            for z_hint in (0.0, 1.5, 3.0, 4.5):
-                location = geometry.get_location(x, y, z_hint)
-                if location is None:
-                    continue
+            for location in locations_at(geometry, x, y):
                 for radius in (1.0, 3.0, 100.0):
                     seen = index.query(location, radius)
                     keys = {canonical(s) for s in seen}
-                    at = f"({x}, {y}, z_hint={z_hint}), radius={radius}"
+                    at = f"({x}, {y}, region_id={location.region_id}), radius={radius}"
                     assert len(keys) == len(seen), f"duplicate piece at {at}"
                     for segment in seen:
                         reach = distance_to_segment(
@@ -86,7 +93,6 @@ def test_query_invariants_hold_over_a_grid(geometry) -> None:
 
 def test_fixed_sample_points_see_walls(geometry) -> None:
     index = make_portal_boundary_index(geometry)
-    for x, y, z_hint in ((1.0, 1.0, 0.0), (20.0, 14.5, 0.0)):
-        location = geometry.get_location(x, y, z_hint)
-        assert location is not None
-        assert len(index.query(location, 5.0)) > 0
+    for x, y in ((1.0, 1.0), (20.0, 14.5)):
+        ground_floor = min(locations_at(geometry, x, y), key=lambda loc: loc.z)
+        assert len(index.query(ground_floor, 5.0)) > 0

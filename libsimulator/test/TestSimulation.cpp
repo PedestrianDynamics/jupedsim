@@ -13,6 +13,7 @@
 
 #include <cstddef>
 #include <memory>
+#include <optional>
 #include <utility>
 #include <vector>
 
@@ -40,96 +41,103 @@ std::unique_ptr<Simulation> on_a_flat_room()
         model(), test_geometries::rectangle({0, 0}, {20, 20}), 0.01);
 }
 
+/// Both floors of the U-stair carry this (x, y).
+const Point stacked_point{2, 10};
+
 /// A journey of one waypoint, so that agents have somewhere to be routed to.
-std::pair<Journey::ID, BaseStage::ID>
-journey_to(Simulation& sim, Point position, double z_hint, double distance = 0.5)
+std::pair<Journey::ID, BaseStage::ID> journey_to(
+    Simulation& sim,
+    Point position,
+    std::optional<std::size_t> region_id,
+    double distance = 0.5)
 {
-    const auto stage = sim.AddStage(WaypointDescription{position, distance}, z_hint);
+    const auto stage = sim.AddStage(WaypointDescription{position, distance}, region_id);
     const auto journey = sim.AddJourney({{stage, NonTransitionDescription{}}});
     return {journey, stage};
 }
 
 } // namespace
 
-TEST(MeshBuiltSimulation, RunsOnASurfaceMesh)
+TEST(MultiStoreySimulation, RunsOnAMultiStoreySurface)
 {
-    auto sim = on_the_switchback_stair();
-    const auto [journey, stage] = journey_to(*sim, Point{16, 6}, 3.0);
+    auto stair = test_geometries::u_stair();
+    Simulation sim{model(), std::move(stair.geometry), 0.01};
+    const auto [journey, stage] = journey_to(sim, stacked_point, stair.upper);
 
-    const auto id = sim->AddAgent(journey, stage, Point{2, 2}, State{}, 0.0);
-    ASSERT_EQ(sim->AgentCount(), 1u);
-    EXPECT_NO_THROW(sim->Iterate());
+    const auto id = sim.AddAgent(journey, stage, Point{2, 2}, State{}, stair.ground);
+    ASSERT_EQ(sim.AgentCount(), 1u);
+    EXPECT_NO_THROW(sim.Iterate());
 
     // Heading for the stair, which is the only way up: over there in plan, and still on the
     // ground floor.
-    const auto& agent = sim->Agent(id);
+    const auto& agent = sim.Agent(id);
     EXPECT_GT(agent.nextTarget.x, agent.location.xy().x);
     EXPECT_EQ(agent.location.z(), 0.0);
 }
 
-TEST(MeshBuiltSimulation, AnAgentIsPutOnTheStoreyItsHintNames)
+TEST(MultiStoreySimulation, AnAgentIsPutInTheRegionItNames)
 {
-    auto sim = on_the_switchback_stair();
-    const auto [journey, stage] = journey_to(*sim, Point{16, 6}, 3.0);
+    auto stair = test_geometries::u_stair();
+    Simulation sim{model(), std::move(stair.geometry), 0.01};
+    const auto [journey, stage] = journey_to(sim, stacked_point, stair.upper);
 
-    // The same (x, y) twice: the ground floor lies at z=0 and the upper floor at z=3, and
-    // without the hint there is nothing to tell them apart.
-    const auto downstairs = sim->AddAgent(journey, stage, Point{5, 6}, State{}, 0.0);
-    const auto upstairs = sim->AddAgent(journey, stage, Point{5, 6}, State{}, 3.0);
+    const auto downstairs = sim.AddAgent(journey, stage, stacked_point, State{}, stair.ground);
+    const auto upstairs = sim.AddAgent(journey, stage, stacked_point, State{}, stair.upper);
 
-    EXPECT_EQ(sim->Agent(downstairs).location.z(), 0.0);
-    EXPECT_NEAR(sim->Agent(upstairs).location.z(), 3.0, 1e-9);
-    EXPECT_NE(sim->Agent(downstairs).location.region(), sim->Agent(upstairs).location.region());
+    EXPECT_EQ(sim.Agent(downstairs).location.region(), stair.ground);
+    EXPECT_EQ(sim.Agent(upstairs).location.region(), stair.upper);
+    EXPECT_NEAR(sim.Agent(upstairs).location.z(), 3.0, 1e-9);
 }
 
-TEST(MeshBuiltSimulation, NoStoreyNearTheHintIsNoPlaceToStand)
+TEST(MultiStoreySimulation, StackedFloorsNeedARegionId)
 {
-    auto sim = on_the_switchback_stair();
-    const auto [journey, stage] = journey_to(*sim, Point{16, 6}, 3.0);
+    auto stair = test_geometries::u_stair();
+    Simulation sim{model(), std::move(stair.geometry), 0.01};
+    const auto [journey, stage] = journey_to(sim, stacked_point, stair.upper);
 
-    // Between the two floors: walkable surface above and below, none within reach of the hint.
-    EXPECT_THROW(sim->AddAgent(journey, stage, Point{5, 6}, State{}, 1.5), SimulationError);
+    EXPECT_THROW(sim.AddAgent(journey, stage, stacked_point, State{}), SimulationError);
+    EXPECT_THROW(journey_to(sim, stacked_point, std::nullopt), SimulationError);
 }
 
-TEST(MeshBuiltSimulation, AStageIsPutOnTheStoreyItsHintNames)
+TEST(MultiStoreySimulation, AStageIsPutInTheRegionItNames)
 {
-    auto sim = on_the_switchback_stair();
-    const auto [up_journey, up_stage] = journey_to(*sim, Point{5, 6}, 3.0);
-    const auto [down_journey, down_stage] = journey_to(*sim, Point{5, 6}, 0.0);
+    auto stair = test_geometries::u_stair();
+    Simulation sim{model(), std::move(stair.geometry), 0.01};
+    const auto [up_journey, up_stage] = journey_to(sim, stacked_point, stair.upper);
+    const auto [down_journey, down_stage] = journey_to(sim, stacked_point, stair.ground);
 
-    const auto id = sim->AddAgent(up_journey, up_stage, Point{2, 2}, State{}, 0.0);
-    sim->Iterate();
+    const auto id = sim.AddAgent(up_journey, up_stage, Point{2, 2}, State{}, stair.ground);
+    sim.Iterate();
     // The waypoint of the journey the agent is on, so its target says which storey the stage
     // was put on.
-    EXPECT_NEAR(sim->Agent(id).finalTarget.z(), 3.0, 1e-9);
+    EXPECT_EQ(sim.Agent(id).finalTarget.region(), stair.upper);
 
-    sim->SwitchAgentJourney(id, down_journey, down_stage);
-    sim->Iterate();
-    EXPECT_EQ(sim->Agent(id).finalTarget.z(), 0.0);
+    sim.SwitchAgentJourney(id, down_journey, down_stage);
+    sim.Iterate();
+    EXPECT_EQ(sim.Agent(id).finalTarget.region(), stair.ground);
 }
 
-TEST(MeshBuiltSimulation, ATargetWrittenFromOutsideLandsOnTheAgentsOwnStorey)
+TEST(MultiStoreySimulation, ATargetWrittenFromOutsideLandsOnTheAgentsOwnStorey)
 {
-    auto sim = on_the_switchback_stair();
-    const auto [journey, stage] = journey_to(*sim, Point{16, 6}, 3.0);
-    const auto upstairs = sim->AddAgent(journey, stage, Point{5, 6}, State{}, 3.0);
+    auto stair = test_geometries::u_stair();
+    Simulation sim{model(), std::move(stair.geometry), 0.01};
+    const auto [journey, stage] = journey_to(sim, stacked_point, stair.upper);
+    const auto upstairs = sim.AddAgent(journey, stage, stacked_point, State{}, stair.upper);
 
     // Only (x, y) is given, and two storeys carry it. It has to mean the one the agent is on --
     // anything else routes it through the wrong floor.
-    sim->SetAgentTarget(upstairs, Point{2, 6});
-    EXPECT_NEAR(sim->Agent(upstairs).finalTarget.z(), 3.0, 1e-9);
+    sim.SetAgentTarget(upstairs, Point{2, 6});
+    EXPECT_EQ(sim.Agent(upstairs).finalTarget.region(), stair.upper);
 
-    const auto downstairs = sim->AddAgent(journey, stage, Point{5, 6}, State{}, 0.0);
-    sim->SetAgentTarget(downstairs, Point{2, 6});
-    EXPECT_EQ(sim->Agent(downstairs).finalTarget.z(), 0.0);
+    const auto downstairs = sim.AddAgent(journey, stage, stacked_point, State{}, stair.ground);
+    sim.SetAgentTarget(downstairs, Point{2, 6});
+    EXPECT_EQ(sim.Agent(downstairs).finalTarget.region(), stair.ground);
 }
 
 TEST(MeshBuiltSimulation, HasNoPolygonToHandOut)
 {
-    // The geometry itself is handed out either way -- it is the polygon underneath that a mesh
-    // world does not have, and that is what the viewer and the systemtests read.
-    EXPECT_EQ(on_the_switchback_stair()->Geo().polygon(), nullptr);
-    EXPECT_NE(on_a_flat_room()->Geo().polygon(), nullptr);
+    EXPECT_THROW(on_the_switchback_stair()->Geo().polygon(0), SimulationError);
+    EXPECT_NO_THROW(on_a_flat_room()->Geo().polygon(0));
 }
 
 TEST(MeshBuiltSimulation, WalkingUpAStairToTheExitAtTheTop)
@@ -140,9 +148,9 @@ TEST(MeshBuiltSimulation, WalkingUpAStairToTheExitAtTheTop)
     // Start on the ground floor, exit on the landing three metres up: the whole way there leads
     // over the flight, so arriving at all means the climb worked.
     const Polygon outline{{{17, 2}, {19, 2}, {19, 6}, {17, 6}}};
-    const auto exit = sim->AddStage(ExitDescription{outline}, 3.0);
+    const auto exit = sim->AddStage(ExitDescription{outline});
     const auto journey = sim->AddJourney({{exit, NonTransitionDescription{}}});
-    const auto id = sim->AddAgent(journey, exit, Point{2, 4}, State{}, 0.0);
+    const auto id = sim->AddAgent(journey, exit, Point{2, 4}, State{});
 
     std::vector<double> heights{};
     std::vector<Point> positions{};
@@ -171,34 +179,29 @@ TEST(MeshBuiltSimulation, WalkingUpAStairToTheExitAtTheTop)
     }
 }
 
-TEST(MeshBuiltSimulation, WalkingUpTheUStairToTheExitAbove)
+TEST(MultiStoreySimulation, WalkingUpTheUStairToTheExitAbove)
 {
-    auto sim = on_the_switchback_stair();
+    auto stair = test_geometries::u_stair();
+    Simulation sim{model(), std::move(stair.geometry), 0.01};
 
     // The exit lies on the upper floor, and the agent starts on the ground floor directly below
-    // it -- inside its outline in plan. Four metres apart on paper, some thirty along the only way
-    // there: east around the corner at (10, 4), up the flight, over the landing, and back west on
-    // the upper floor.
+    // it -- inside its outline in plan. The only way there: east to the stairwell, up both
+    // flights, and back west on the upper floor.
     const Polygon outline{{{0, 4}, {3, 4}, {3, 8}, {0, 8}}};
-    const auto exit = sim->AddStage(ExitDescription{outline}, 3.0);
-    const auto journey = sim->AddJourney({{exit, NonTransitionDescription{}}});
-    const auto id = sim->AddAgent(journey, exit, Point{2, 6}, State{}, 0.0);
+    const auto exit = sim.AddStage(ExitDescription{outline}, stair.upper);
+    const auto journey = sim.AddJourney({{exit, NonTransitionDescription{}}});
+    const auto id = sim.AddAgent(journey, exit, Point{2, 6}, State{}, stair.ground);
 
     std::vector<double> heights{};
     std::vector<Point> positions{};
-    bool past_the_corner = false;
-    for(int step = 0; step < 6000 && sim->AgentCount() > 0; ++step) {
-        const auto& agent = sim->Agent(id);
+    for(int step = 0; step < 6000 && sim.AgentCount() > 0; ++step) {
+        const auto& agent = sim.Agent(id);
         heights.push_back(agent.location.z());
         positions.push_back(agent.location.xy());
-        // East of the corner and already climbing: he went around it rather than into it.
-        past_the_corner = past_the_corner || (agent.location.xy().x > 10.5 &&
-                                              agent.location.z() > 0.0 && agent.location.z() < 3.0);
-        sim->Iterate();
+        sim.Iterate();
     }
 
-    EXPECT_EQ(sim->AgentCount(), 0u) << "never made it to the exit";
-    EXPECT_TRUE(past_the_corner) << "never went around the corner at the foot of the flight";
+    EXPECT_EQ(sim.AgentCount(), 0u) << "never made it to the exit";
     ASSERT_FALSE(heights.empty());
 
     // Standing in the exit's outline is not standing in the exit: from the ground floor the way to

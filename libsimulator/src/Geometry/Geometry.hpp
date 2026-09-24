@@ -16,9 +16,8 @@
 
 class WalkableSurface;
 
-/// Default z-hint tolerance: When a `Location` is created, how far the z-value
-/// is allowed to be away from the surface to still be accepted.
-inline constexpr double ZHintTolerance = 0.1;
+/// Default tolerance of get_location_near_z: how far the surface may lie from the given z.
+inline constexpr double NearZTolerance = 0.1;
 
 /// Height difference above which two people cannot touch each other. This is used
 /// as a quick pre-filter.
@@ -34,14 +33,27 @@ public:
         K::Point_3 point;
     };
 
+    /// Seam as edge:
+    /// - ring 0 is boundary, ring k is hole k-1.
+    /// - edge goes from vertex index to successor.
+    /// - source region is always left of seam.
+    struct SeamEdge {
+        size_t ring;
+        size_t index;
+    };
+
+    // Note: There is always at most 1 connection between 2 regions as regions are connected
+    //       via Connectors which add a region of their own.
+    using RegionGraph2D =
+        boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS, PolyWithHoles, SeamEdge>;
+
     /// 3D mesh. Perform auto-split into regions.
     explicit Geometry(SurfaceMesh mesh);
     /// Special constructor for WalkableSurface: Ensures consistency of parameters.
-    explicit Geometry(SurfaceMesh&& mesh, RegionSplit&& regionSplit);
-
-    /// Build from a 2D walkable area, lifted flat to z=0 by constrained Delaunay
-    /// triangulation. Keeps the polygon it was lifted from (see polygon()).
-    explicit Geometry(PolyWithHoles poly);
+    explicit Geometry(
+        SurfaceMesh&& mesh,
+        RegionSplit&& regionSplit,
+        std::unique_ptr<RegionGraph2D> regionGraph2d);
 
     ~Geometry() = default;
 
@@ -55,9 +67,8 @@ public:
     const SurfaceMesh& mesh() const { return _mesh; }
     const AABBTree& aabb_tree() const { return *_aabbTree; }
 
-    /// Returns the polygon iff the geometry was built from one. Otherwise returns
-    /// nullptr.
-    const PolyWithHoles* polygon() const { return _polygon ? &*_polygon : nullptr; }
+    /// Returns the 2D polygon of the specified region. Throws in case of error.
+    PolyWithHoles polygon(size_t region_id) const;
 
     /// Face and on-surface point hit by the -z ray through @p p, or
     /// `null_face()` if the ray misses the walkable surface.
@@ -73,11 +84,19 @@ public:
     /// from the provided z. `null_face()` if no mesh face comes within @p tolerance.
     FaceLocation locate_near_z(const Point2D& xy, double z, double tolerance) const;
 
-    /// Creates a `Location` object by ray-casting the 3D point in z-direction and
-    /// finding the closest point to hit any part of the 3D surface. If there is no
-    /// such point within @p tol on z coordinate, returns no value.
+    /// The place at (@p x, @p y) in region @p region_id.
+    /// Without @p region_id, searches for the region containing (@p x, @p y). On a seam,
+    /// takes the lowest id of the regions meeting there.
+    /// Throws if (@p x, @p y) is not on the walkable surface (not in region @p region_id, if
+    /// given), if @p region_id does not exist, or if region-id is not specified and several
+    /// regions lie on top of each other at (@p x, @p y).
+    Location
+    get_location(double x, double y, std::optional<std::size_t> region_id = std::nullopt) const;
+
+    /// The place at (@p x, @p y) on the surface closest to height @p z, if one comes within
+    /// @p tol.
     std::optional<Location>
-    get_location(double x, double y, double z_hint, double tol = ZHintTolerance) const;
+    get_location_near_z(double x, double y, double z, double tol = NearZTolerance) const;
 
     /// True iff @p p projects (along -z) onto the walkable surface.
     bool is_valid_location(const Point3D& p) const;
@@ -98,7 +117,7 @@ public:
 
     // -- region related API ---------------------------------------------------
 
-    std::size_t region_count() const { return _regionCount; }
+    std::size_t region_count() const { return _regionSplit.count; }
 
     /// Region id (0-based) of a single face, as assigned by the region overlay.
     std::size_t region_of(SurfaceMesh::Face_index face) const { return _region[face]; }
@@ -120,16 +139,21 @@ private:
     /// Create internal structures like building the AABB tree and the region overlay.
     void build();
 
+    /// Every face the vertical line through @p xy crosses, with its on-surface point, ordered
+    /// by region id, then by face index.
+    std::vector<FaceLocation> faces_at(const Point2D& xy) const;
+
+    Location location_at(Point xy, const FaceLocation& where) const;
+
     /// The region a straight horizontal step from @p who along @p direction ends up in, or
     /// nothing when a wall stops it or it runs off the surface.
     std::optional<std::size_t> region_reached(const Location& who, Point direction) const;
 
     SurfaceMesh _mesh{};
-    std::optional<PolyWithHoles> _polygon{};
     std::unique_ptr<AABBTree> _aabbTree{};
     std::unique_ptr<BoundaryIndex> _boundaryIndex{};
     std::unique_ptr<RegionGraph> _regionGraph{};
+    std::unique_ptr<RegionGraph2D> _regionGraph2D{};
     RegionMap _region{};
-    std::size_t _regionCount{0};
     RegionSplit _regionSplit{};
 };

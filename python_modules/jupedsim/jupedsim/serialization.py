@@ -55,22 +55,26 @@ class TrajectoryWriter(metaclass=abc.ABCMeta):
 def walkable_area_as_wkt(simulation) -> str:
     """The simulation's walkable area as WKT, for a writer's header.
 
-    The trajectory formats JuPedSim ships are planar -- a WKT walkable area
-    and (x, y) per agent -- and so are the tools reading them, PedPy among
-    them. A simulation built from a surface mesh has no such area, and what a
-    3D trajectory file should look like is still open. Rather than invent one
-    here, the writers say so and stop.
+    Right now this only works for a geometry built from exactly 1 region.
 
     Raises:
-        TrajectoryWriter.Exception: if the simulation was built from a surface
-            mesh.
+        TrajectoryWriter.Exception: if the geometry has more than 1 region.
     """
+    geometry = simulation.get_geometry()
+    num_regions = geometry.region_count()
+    if num_regions != 1:
+        raise TrajectoryWriter.Exception(
+            "Trajectories cannot be written for geometries so far that "
+            "do not consist of a single region. Your geometry contains "
+            f"{num_regions} regions."
+        )
     try:
-        return simulation.get_geometry().as_wkt()
+        return geometry.polygon().as_wkt()
     except py_jps.SimulationError as e:
         raise TrajectoryWriter.Exception(
-            "Cannot write trajectories for a simulation built from a surface "
-            "mesh: the trajectory formats JuPedSim ships are 2D, and so are "
-            "the tools reading them. Build the simulation from a polygon, or "
+            "Cannot write trajectories for a simulation with a geometry "
+            "built from a surface "
+            "mesh: the trajectory formats JuPedSim ships are 2D so far. "
+            "Build the simulation from a polygon, or "
             "pass a trajectory_writer of your own."
         ) from e

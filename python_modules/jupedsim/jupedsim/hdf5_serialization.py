@@ -242,7 +242,7 @@ class Hdf5TrajectoryWriter(TrajectoryWriter):
                 )
             )
 
-        wkt = simulation.get_geometry().as_wkt()
+        wkt = walkable_area_as_wkt(simulation)
         wkt_hash = _stable_geometry_hash(wkt)
         self._update_bounds(wkt, wkt_hash)
         self._record_frame_geometry(frame, wkt, wkt_hash)

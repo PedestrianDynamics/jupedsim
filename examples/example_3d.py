@@ -48,7 +48,7 @@ sim = jps.Simulation(model=jps.CollisionFreeSpeedModel(), geometry=surface)
 
 exit_id = sim.add_exit_stage(
     [(3.5, 12.5), (4.5, 12.5), (4.5, 13.5), (3.5, 13.5)],
-    z_hint=UPPER_FLOOR,
+    region_id=upper,
 )
 journey_id = sim.add_journey(jps.JourneyDescription([exit_id]))
 
@@ -65,7 +65,7 @@ for position in start_positions:
         stage_id=exit_id,
         position=position,
         state=jps.CollisionFreeSpeedModelState(),
-        z_hint=GROUND_FLOOR,
+        region_id=ground,
     )
 
 

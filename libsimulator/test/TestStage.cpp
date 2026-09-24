@@ -16,7 +16,7 @@ public:
 
     void TearDown() override {}
 
-    Location At(Point p) const { return *geometry->get_location(p.x, p.y, 0.0); }
+    Location At(Point p) const { return *geometry->get_location_near_z(p.x, p.y, 0.0); }
 
     std::vector<Location> AllAt(const std::vector<Point>& points) const
     {
@@ -69,7 +69,7 @@ public:
     const std::unique_ptr<Geometry> geometry =
         test_geometries::stacked_floors({0, 0}, {10, 10}, 3.0);
 
-    Location At(Point p, double z) const { return *geometry->get_location(p.x, p.y, z); }
+    Location At(Point p, double z) const { return *geometry->get_location_near_z(p.x, p.y, z); }
 
     GenericAgent AgentAt(Point p, double z, BaseStage::ID stageId) const
     {
@@ -179,13 +179,13 @@ TEST(StagesOnAStair, WaypointIsReachedFromTheStairItStandsOn)
     // A stair climbing 3 m over 5 m: an agent 0.8 m short of the waypoint in plan is
     // half a metre below it.
     const auto geometry = test_geometries::two_levels_with_stair();
-    Waypoint waypoint(*geometry->get_location(12.5, 2.0, 1.5), 1.0);
+    Waypoint waypoint(*geometry->get_location_near_z(12.5, 2.0, 1.5), 1.0);
 
     const GenericAgent agent(
         GenericAgent::ID::Invalid,
         Journey::ID::Invalid,
         waypoint.Id(),
-        *geometry->get_location(11.7, 2.0, 1.02),
+        *geometry->get_location_near_z(11.7, 2.0, 1.02),
         CollisionFreeSpeedModelState{});
 
     EXPECT_TRUE(waypoint.IsCompleted(agent));

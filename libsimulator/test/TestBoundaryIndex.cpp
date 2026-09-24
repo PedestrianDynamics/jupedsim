@@ -40,11 +40,11 @@ TEST_F(TestBoundaryIndexTwoLevelsWithStairs, Neighboors1)
 {
     std::unique_ptr<BoundaryIndex> sut = MakeNaiveBoundaryIndex(mesh, split);
 
-    auto loc = geo->get_location(2, 2, 0).value();
+    auto loc = geo->get_location_near_z(2, 2, 0).value();
     auto res = sut->Query(loc, 100); // Ensure we get everything.
     EXPECT_EQ(res.size(), 7);
 
-    loc = geo->get_location(16, 6, 3).value();
+    loc = geo->get_location_near_z(16, 6, 3).value();
     res = sut->Query(loc, 100); // Ensure we get everything.
     EXPECT_EQ(res.size(), 7);
 }
@@ -53,11 +53,11 @@ TEST_F(TestBoundaryIndexTwoLevelsWithStairs, Neighboors2)
 {
     std::unique_ptr<BoundaryIndex> sut = MakeNaiveBoundaryIndex(mesh, split);
 
-    auto loc = geo->get_location(2, 2, 0).value();
+    auto loc = geo->get_location_near_z(2, 2, 0).value();
     auto res = sut->Query(loc, 100); // Ensure we get everything.
     EXPECT_EQ(res.size(), 7);
 
-    loc = geo->get_location(16, 6, 3).value();
+    loc = geo->get_location_near_z(16, 6, 3).value();
     res = sut->Query(loc, 100); // Ensure we get everything.
     EXPECT_EQ(res.size(), 7);
 }
@@ -164,7 +164,7 @@ protected:
 
     Location At(double x, double y, double z) const
     {
-        const auto loc = geo->get_location(x, y, z);
+        const auto loc = geo->get_location_near_z(x, y, z);
         EXPECT_TRUE(loc.has_value()) << "no surface at " << fmt::format("({}, {}, {})", x, y, z);
         return loc.value();
     }

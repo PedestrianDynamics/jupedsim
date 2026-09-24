@@ -485,7 +485,7 @@ def test_agent_can_not_be_added_outside_geometry():
 
     with pytest.raises(
         jps.SimulationError,
-        match=r"Agent \(-50, -50\) not inside walkable area",
+        match=r"Point \(-50, -50\) is not on the walkable surface",
     ):
         assert simulation.add_agent(
             journey_id=journey_id,

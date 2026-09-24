@@ -4,26 +4,19 @@ import jupedsim.native as py_jps
 
 
 class Location:
-    """A place on the walkable surface.
+    """A point on the walkable surface, together with the region it lies in.
 
-    Locations are always obtained from the simulation and never built
-    directly:
+    Locations cannot be created directly, get them from the simulation:
 
     .. code:: python
 
-        sim.get_location(x, y, z_hint=3.0)
-        sim.agent(id).location
+        sim.get_location(x, y, region_id=upper_floor)
+        sim.agent(agent_id).location
 
-    Raw coordinates become a place exactly once, in
-    :meth:`~jupedsim.simulation.Simulation.get_location`: the geometry has to
-    stand for a location, and on stacked floors an ``(x, y)`` on its own does
-    not say which floor is meant. Afterwards the location travels -- pass it
-    wherever a place is wanted instead of coordinates.
-
-    A location is read-only and reads only what a caller can act on. It stays
-    valid as long as the simulation it came from exists, and it does not
-    follow an agent: reading :attr:`~jupedsim.agent.Agent.location` again
-    gives where the agent stands now.
+    A location is read-only and stays valid as long as its simulation exists.
+    It does not move with an agent: read
+    :attr:`~jupedsim.agent.Agent.location` again to get the agent's current
+    location.
     """
 
     def __init__(self, obj: py_jps.Location) -> None:
@@ -45,11 +38,13 @@ class Location:
 
     @property
     def z(self) -> float:
-        """Height of the surface here, in metres.
-
-        Zero throughout a simulation built from a polygon.
-        """
+        """Height of the surface here, in metres."""
         return self._obj.z
+
+    @property
+    def region_id(self) -> int:
+        """Region this location lies in."""
+        return self._obj.region_id
 
     def __repr__(self) -> str:
         return f"Location({self.x}, {self.y}, {self.z})"
