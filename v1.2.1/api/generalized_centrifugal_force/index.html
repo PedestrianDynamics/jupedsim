@@ -1,0 +1,903 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="" data-theme="light">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <link href="../../_static/logo.png" sizes="482x536" rel="icon" type="image/png">
+    <title>generalized_centrifugal_force &#8212; JuPedSim  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" href="../../_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="../../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
+
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/clipboard.min.js"></script>
+    <script src="../../_static/copybutton.js"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'api/generalized_centrifugal_force/index';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.15.2';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://www.jupedsim.org/versions.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'v1.2.1';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
+        </script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="light">
+
+  
+  
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+    
+    <img src="../../_static/jupedsim.svg" class="logo__image only-light" alt="JuPedSim  documentation - Home"/>
+    <script>document.write(`<img src="../../_static/jupedsim.svg" class="logo__image only-dark" alt="JuPedSim  documentation - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/PedestrianDynamics/jupedsim" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/jupedsim/" title="PyPI" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://img.shields.io/pypi/v/jupedsim" class="icon-link-image" alt="PyPI"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://doi.org/10.5281/zenodo.1293771" title="DOI" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.1293771.svg" class="icon-link-image" alt="DOI"/></a>
+        </li>
+</ul></div>
+        <div class="sidebar-primary-item">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../notebooks/getting_started.html">Getting started</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../concepts/index.html">Concepts</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../concepts/geometry.html">Geometry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../concepts/routing.html">Routing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../pedestrian_models/index.html">Pedestrian Models</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../notebooks/index.html">Notebooks</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../notebooks/corner.html">Movement around Corners</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../../notebooks/double-bottleneck.html">Movement through Bottlenecks</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../../notebooks/journey.html">How to work with Journeys</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../../notebooks/lane-formation.html">Lane formation in bi-directional flow</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../../notebooks/motivation.html">Modelling Motivation</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../../notebooks/queues_waiting.html">Waiting in Queues</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../../notebooks/routing.html">How Route Choice can Impact Evacuation Times</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../../notebooks/single-file.html">Simulating Single-File Movement</a></li>
+
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../history.html">History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../disclaimer.html">Disclaimer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../jupedsim/index.html">API reference</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-2"
+      type="button"
+      class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-2"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-2"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-2">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script></div>
+      
+        <div class="header-article-item"><label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>generalized_centrifugal_force</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModel"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModel</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModel.strength_neighbor_repulsion"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModel.strength_neighbor_repulsion</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModel.strength_geometry_repulsion"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModel.strength_geometry_repulsion</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModel.max_neighbor_interaction_distance"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModel.max_neighbor_interaction_distance</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModel.max_geometry_interaction_distance"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModel.max_geometry_interaction_distance</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModel.max_neighbor_interpolation_distance"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModel.max_neighbor_interpolation_distance</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModel.max_geometry_interpolation_distance"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModel.max_geometry_interpolation_distance</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModel.max_neighbor_repulsion_force"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModel.max_neighbor_repulsion_force</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModel.max_geometry_repulsion_force"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModel.max_geometry_repulsion_force</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id0"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModel.strength_neighbor_repulsion</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id1"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModel.strength_geometry_repulsion</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id2"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModel.max_neighbor_interaction_distance</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id3"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModel.max_geometry_interaction_distance</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id4"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModel.max_neighbor_interpolation_distance</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id5"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModel.max_geometry_interpolation_distance</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id6"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModel.max_neighbor_repulsion_force</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id7"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModel.max_geometry_repulsion_force</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.speed"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.speed</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.e0"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.e0</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.position"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.position</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.orientation"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.orientation</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.journey_id"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.journey_id</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.stage_id"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.stage_id</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.mass"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.mass</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.tau"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.tau</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.v0"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.v0</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.a_v"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.a_v</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.a_min"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.a_min</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.b_min"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.b_min</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.b_max"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.b_max</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id8"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.speed</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id9"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.e0</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id10"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.position</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id11"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.orientation</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id12"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.journey_id</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id13"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.stage_id</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id14"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.mass</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id15"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.tau</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id16"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.v0</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id17"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.a_v</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id18"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.a_min</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id19"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.b_min</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id20"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.b_max</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelState"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelState</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelState.speed"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelState.speed</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelState.e0"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelState.e0</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelState.tau"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelState.tau</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelState.v0"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelState.v0</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelState.a_v"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelState.a_v</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelState.a_min"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelState.a_min</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelState.b_min"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelState.b_min</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelState.b_max"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelState.b_max</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="module-generalized_centrifugal_force">
+<span id="generalized-centrifugal-force"></span><h1><a class="reference internal" href="#module-generalized_centrifugal_force" title="generalized_centrifugal_force"><code class="xref py py-mod docutils literal notranslate"><span class="pre">generalized_centrifugal_force</span></code></a><a class="headerlink" href="#module-generalized_centrifugal_force" title="Permalink to this heading">#</a></h1>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Permalink to this heading">#</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="generalized_centrifugal_force.GeneralizedCentrifugalForceModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GeneralizedCentrifugalForceModel</span></span><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModel" title="Permalink to this definition">#</a></dt>
+<dd><p>Parameters for Generalized Centrifugal Force Model</p>
+<p>All attributes are initialized with reasonably good defaults.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="generalized_centrifugal_force.GeneralizedCentrifugalForceModel.strength_neighbor_repulsion">
+<span class="sig-name descname"><span class="pre">strength_neighbor_repulsion</span></span><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModel.strength_neighbor_repulsion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModel.strength_neighbor_repulsion" title="Permalink to this definition">#</a></dt>
+<dd><p>Strength of the repulsion from neighbors</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="generalized_centrifugal_force.GeneralizedCentrifugalForceModel.strength_geometry_repulsion">
+<span class="sig-name descname"><span class="pre">strength_geometry_repulsion</span></span><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModel.strength_geometry_repulsion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModel.strength_geometry_repulsion" title="Permalink to this definition">#</a></dt>
+<dd><p>Strength of the repulsion from geometry boundaries</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="generalized_centrifugal_force.GeneralizedCentrifugalForceModel.max_neighbor_interaction_distance">
+<span class="sig-name descname"><span class="pre">max_neighbor_interaction_distance</span></span><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModel.max_neighbor_interaction_distance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModel.max_neighbor_interaction_distance" title="Permalink to this definition">#</a></dt>
+<dd><p>cut-off-radius for ped-ped repulsion (r_c in FIG. 7)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="generalized_centrifugal_force.GeneralizedCentrifugalForceModel.max_geometry_interaction_distance">
+<span class="sig-name descname"><span class="pre">max_geometry_interaction_distance</span></span><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModel.max_geometry_interaction_distance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModel.max_geometry_interaction_distance" title="Permalink to this definition">#</a></dt>
+<dd><p>cut-off-radius for ped-wall repulsion (r_c in FIG. 7)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="generalized_centrifugal_force.GeneralizedCentrifugalForceModel.max_neighbor_interpolation_distance">
+<span class="sig-name descname"><span class="pre">max_neighbor_interpolation_distance</span></span><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModel.max_neighbor_interpolation_distance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModel.max_neighbor_interpolation_distance" title="Permalink to this definition">#</a></dt>
+<dd><p>distance of interpolation of repulsive force for ped-ped interaction (r_eps in FIG. 7)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="generalized_centrifugal_force.GeneralizedCentrifugalForceModel.max_geometry_interpolation_distance">
+<span class="sig-name descname"><span class="pre">max_geometry_interpolation_distance</span></span><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModel.max_geometry_interpolation_distance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModel.max_geometry_interpolation_distance" title="Permalink to this definition">#</a></dt>
+<dd><p>distance of interpolation of repulsive force for ped-wall interaction (r_eps in FIG. 7)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="generalized_centrifugal_force.GeneralizedCentrifugalForceModel.max_neighbor_repulsion_force">
+<span class="sig-name descname"><span class="pre">max_neighbor_repulsion_force</span></span><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModel.max_neighbor_repulsion_force"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModel.max_neighbor_repulsion_force" title="Permalink to this definition">#</a></dt>
+<dd><p>maximum of the repulsion force for ped-ped interaction by contact of ellipses (f_m in FIG. 7)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="generalized_centrifugal_force.GeneralizedCentrifugalForceModel.max_geometry_repulsion_force">
+<span class="sig-name descname"><span class="pre">max_geometry_repulsion_force</span></span><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModel.max_geometry_repulsion_force"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModel.max_geometry_repulsion_force" title="Permalink to this definition">#</a></dt>
+<dd><p>maximum of the repulsion force for ped-wall interaction by contact of ellipses (f_m in FIG. 7)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">strength_neighbor_repulsion</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.3</span></em><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModel.strength_neighbor_repulsion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id0" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id1">
+<span class="sig-name descname"><span class="pre">strength_geometry_repulsion</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.2</span></em><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModel.strength_geometry_repulsion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id1" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id2">
+<span class="sig-name descname"><span class="pre">max_neighbor_interaction_distance</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModel.max_neighbor_interaction_distance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id2" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id3">
+<span class="sig-name descname"><span class="pre">max_geometry_interaction_distance</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModel.max_geometry_interaction_distance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id3" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id4">
+<span class="sig-name descname"><span class="pre">max_neighbor_interpolation_distance</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.1</span></em><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModel.max_neighbor_interpolation_distance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id4" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id5">
+<span class="sig-name descname"><span class="pre">max_geometry_interpolation_distance</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.1</span></em><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModel.max_geometry_interpolation_distance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id5" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id6">
+<span class="sig-name descname"><span class="pre">max_neighbor_repulsion_force</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">9</span></em><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModel.max_neighbor_repulsion_force"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id6" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id7">
+<span class="sig-name descname"><span class="pre">max_geometry_repulsion_force</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModel.max_geometry_repulsion_force"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id7" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters</span></span><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModelAgentParameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters" title="Permalink to this definition">#</a></dt>
+<dd><p>Parameters required to create an Agent in the Generalized Centrifugal Force
+Model.</p>
+<p>See the scientific publication for more details about this model
+<a class="reference external" href="https://arxiv.org/abs/1008.4297">https://arxiv.org/abs/1008.4297</a></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Instances of this type are copied when creating the agent, you can safely
+create one instance of this type and modify it between calls to <cite>add_agent</cite></p>
+<p>E.g.:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">positions</span> <span class="o">=</span> <span class="p">[</span><span class="o">...</span><span class="p">]</span> <span class="c1"># List of initial agent positions</span>
+<span class="n">params</span> <span class="o">=</span> <span class="n">GeneralizedCentrifugalForceModelAgentParameters</span><span class="p">(</span><span class="n">speed</span><span class="o">=</span><span class="mf">0.9</span><span class="p">)</span> <span class="c1"># all agents are slower</span>
+<span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">positions</span><span class="p">:</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">p</span>
+    <span class="n">sim</span><span class="o">.</span><span class="n">add_agent</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.speed">
+<span class="sig-name descname"><span class="pre">speed</span></span><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModelAgentParameters.speed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.speed" title="Permalink to this definition">#</a></dt>
+<dd><p>Speed of the agent.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.e0">
+<span class="sig-name descname"><span class="pre">e0</span></span><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModelAgentParameters.e0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.e0" title="Permalink to this definition">#</a></dt>
+<dd><p>Desired direction of the agent.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.position">
+<span class="sig-name descname"><span class="pre">position</span></span><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModelAgentParameters.position"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.position" title="Permalink to this definition">#</a></dt>
+<dd><p>Position of the agent.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.orientation">
+<span class="sig-name descname"><span class="pre">orientation</span></span><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModelAgentParameters.orientation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.orientation" title="Permalink to this definition">#</a></dt>
+<dd><p>Orientation of the agent.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.journey_id">
+<span class="sig-name descname"><span class="pre">journey_id</span></span><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModelAgentParameters.journey_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.journey_id" title="Permalink to this definition">#</a></dt>
+<dd><p>Id of the journey the agent follows.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.stage_id">
+<span class="sig-name descname"><span class="pre">stage_id</span></span><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModelAgentParameters.stage_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.stage_id" title="Permalink to this definition">#</a></dt>
+<dd><p>Id of the stage the agent targets.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.mass">
+<span class="sig-name descname"><span class="pre">mass</span></span><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModelAgentParameters.mass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.mass" title="Permalink to this definition">#</a></dt>
+<dd><p>Mass of the agent.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.tau">
+<span class="sig-name descname"><span class="pre">tau</span></span><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModelAgentParameters.tau"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.tau" title="Permalink to this definition">#</a></dt>
+<dd><p>Time constant that describes how fast the agent accelerates to its desired speed (v0).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.v0">
+<span class="sig-name descname"><span class="pre">v0</span></span><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModelAgentParameters.v0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.v0" title="Permalink to this definition">#</a></dt>
+<dd><p>Maximum speed of the agent.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.a_v">
+<span class="sig-name descname"><span class="pre">a_v</span></span><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModelAgentParameters.a_v"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.a_v" title="Permalink to this definition">#</a></dt>
+<dd><p>Stretch of the ellipsis semi-axis along the movement vector.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.a_min">
+<span class="sig-name descname"><span class="pre">a_min</span></span><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModelAgentParameters.a_min"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.a_min" title="Permalink to this definition">#</a></dt>
+<dd><p>Minimum length of the ellipsis semi-axis along the movement vector.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.b_min">
+<span class="sig-name descname"><span class="pre">b_min</span></span><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModelAgentParameters.b_min"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.b_min" title="Permalink to this definition">#</a></dt>
+<dd><p>Minimum length of the ellipsis semi-axis orthogonal to the movement vector.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.b_max">
+<span class="sig-name descname"><span class="pre">b_max</span></span><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModelAgentParameters.b_max"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.b_max" title="Permalink to this definition">#</a></dt>
+<dd><p>Maximum length of the ellipsis semi-axis orthogonal to the movement vector.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id8">
+<span class="sig-name descname"><span class="pre">speed</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.0</span></em><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModelAgentParameters.speed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id8" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id9">
+<span class="sig-name descname"><span class="pre">e0</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.12)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(0.0,</span> <span class="pre">0.0)</span></em><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModelAgentParameters.e0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id9" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id10">
+<span class="sig-name descname"><span class="pre">position</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.12)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(0.0,</span> <span class="pre">0.0)</span></em><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModelAgentParameters.position"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id10" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id11">
+<span class="sig-name descname"><span class="pre">orientation</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.12)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(0.0,</span> <span class="pre">0.0)</span></em><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModelAgentParameters.orientation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id11" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id12">
+<span class="sig-name descname"><span class="pre">journey_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><span class="pre">int</span></a></em><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModelAgentParameters.journey_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id12" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id13">
+<span class="sig-name descname"><span class="pre">stage_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><span class="pre">int</span></a></em><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModelAgentParameters.stage_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id13" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id14">
+<span class="sig-name descname"><span class="pre">mass</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModelAgentParameters.mass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id14" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id15">
+<span class="sig-name descname"><span class="pre">tau</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.5</span></em><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModelAgentParameters.tau"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id15" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id16">
+<span class="sig-name descname"><span class="pre">v0</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1.2</span></em><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModelAgentParameters.v0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id16" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id17">
+<span class="sig-name descname"><span class="pre">a_v</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModelAgentParameters.a_v"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id17" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id18">
+<span class="sig-name descname"><span class="pre">a_min</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.2</span></em><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModelAgentParameters.a_min"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id18" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id19">
+<span class="sig-name descname"><span class="pre">b_min</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.2</span></em><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModelAgentParameters.b_min"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id19" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id20">
+<span class="sig-name descname"><span class="pre">b_max</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.4</span></em><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModelAgentParameters.b_max"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id20" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="generalized_centrifugal_force.GeneralizedCentrifugalForceModelState">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GeneralizedCentrifugalForceModelState</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">backing</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModelState"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelState" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="generalized_centrifugal_force.GeneralizedCentrifugalForceModelState.speed">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">speed</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a></em><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModelState.speed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelState.speed" title="Permalink to this definition">#</a></dt>
+<dd><p>Speed of this agent.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="generalized_centrifugal_force.GeneralizedCentrifugalForceModelState.e0">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">e0</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.12)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></em><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModelState.e0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelState.e0" title="Permalink to this definition">#</a></dt>
+<dd><p>Desired direction of this agent.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.12)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)">float</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)">float</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="generalized_centrifugal_force.GeneralizedCentrifugalForceModelState.tau">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tau</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a></em><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModelState.tau"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelState.tau" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="generalized_centrifugal_force.GeneralizedCentrifugalForceModelState.v0">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">v0</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a></em><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModelState.v0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelState.v0" title="Permalink to this definition">#</a></dt>
+<dd><p>Maximum speed of this agent.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="generalized_centrifugal_force.GeneralizedCentrifugalForceModelState.a_v">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">a_v</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a></em><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModelState.a_v"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelState.a_v" title="Permalink to this definition">#</a></dt>
+<dd><p>Stretch of the ellipsis semi-axis along the movement vector.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="generalized_centrifugal_force.GeneralizedCentrifugalForceModelState.a_min">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">a_min</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a></em><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModelState.a_min"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelState.a_min" title="Permalink to this definition">#</a></dt>
+<dd><p>Minimum length of the ellipsis semi-axis along the movement vector.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="generalized_centrifugal_force.GeneralizedCentrifugalForceModelState.b_min">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">b_min</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a></em><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModelState.b_min"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelState.b_min" title="Permalink to this definition">#</a></dt>
+<dd><p>Minimum length of the ellipsis semi-axis orthogonal to the movement vector.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="generalized_centrifugal_force.GeneralizedCentrifugalForceModelState.b_max">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">b_max</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a></em><a class="reference internal" href="../../_modules/generalized_centrifugal_force.html#GeneralizedCentrifugalForceModelState.b_max"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelState.b_max" title="Permalink to this definition">#</a></dt>
+<dd><p>Maximum length of the ellipsis semi-axis orthogonal to the movement vector.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModel"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModel</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModel.strength_neighbor_repulsion"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModel.strength_neighbor_repulsion</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModel.strength_geometry_repulsion"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModel.strength_geometry_repulsion</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModel.max_neighbor_interaction_distance"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModel.max_neighbor_interaction_distance</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModel.max_geometry_interaction_distance"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModel.max_geometry_interaction_distance</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModel.max_neighbor_interpolation_distance"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModel.max_neighbor_interpolation_distance</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModel.max_geometry_interpolation_distance"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModel.max_geometry_interpolation_distance</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModel.max_neighbor_repulsion_force"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModel.max_neighbor_repulsion_force</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModel.max_geometry_repulsion_force"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModel.max_geometry_repulsion_force</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id0"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModel.strength_neighbor_repulsion</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id1"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModel.strength_geometry_repulsion</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id2"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModel.max_neighbor_interaction_distance</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id3"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModel.max_geometry_interaction_distance</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id4"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModel.max_neighbor_interpolation_distance</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id5"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModel.max_geometry_interpolation_distance</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id6"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModel.max_neighbor_repulsion_force</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id7"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModel.max_geometry_repulsion_force</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.speed"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.speed</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.e0"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.e0</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.position"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.position</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.orientation"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.orientation</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.journey_id"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.journey_id</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.stage_id"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.stage_id</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.mass"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.mass</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.tau"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.tau</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.v0"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.v0</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.a_v"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.a_v</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.a_min"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.a_min</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.b_min"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.b_min</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelAgentParameters.b_max"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.b_max</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id8"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.speed</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id9"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.e0</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id10"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.position</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id11"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.orientation</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id12"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.journey_id</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id13"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.stage_id</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id14"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.mass</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id15"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.tau</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id16"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.v0</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id17"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.a_v</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id18"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.a_min</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id19"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.b_min</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id20"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelAgentParameters.b_max</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelState"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelState</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelState.speed"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelState.speed</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelState.e0"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelState.e0</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelState.tau"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelState.tau</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelState.v0"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelState.v0</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelState.a_v"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelState.a_v</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelState.a_min"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelState.a_min</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelState.b_min"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelState.b_min</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generalized_centrifugal_force.GeneralizedCentrifugalForceModelState.b_max"><code class="docutils literal notranslate"><span class="pre">GeneralizedCentrifugalForceModelState.b_max</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2024, Forschungszentrum Jülich GmbH, IAS-7.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

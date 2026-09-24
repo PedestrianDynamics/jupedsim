@@ -1,0 +1,75 @@
+:orphan:
+
+:py:mod:`jupedsim.routing`
+==========================
+
+.. py:module:: jupedsim.routing
+
+
+Module Contents
+---------------
+
+.. py:class:: RoutingEngine(geometry: str | shapely.GeometryCollection | shapely.Polygon | shapely.MultiPolygon | shapely.MultiPoint | list[tuple[float, float]], **kwargs: Any)
+
+
+   RoutingEngine to compute the shortest paths with navigation meshes.
+
+   .. py:method:: compute_waypoints(frm: tuple[float, float], to: tuple[float, float]) -> list[tuple[float, float]]
+
+      Computes shortest path between specified points.
+
+      :param geometry: Data to create the geometry out of. Data may be supplied as:
+
+                       * list of 2d points describing the outer boundary, holes may be added with use of `excluded_areas` kw-argument
+
+                       * :class:`~shapely.GeometryCollection` consisting only out of :class:`Polygons <shapely.Polygon>`, :class:`MultiPolygons <shapely.MultiPolygon>` and :class:`MultiPoints <shapely.MultiPoint>`
+
+                       * :class:`~shapely.MultiPolygon`
+
+                       * :class:`~shapely.Polygon`
+
+                       * :class:`~shapely.MultiPoint` forming a "simple" polygon when points are interpreted as linear ring without repetition of the start/end point.
+
+                       * str with a valid Well Known Text. In this format the same WKT types as mentioned for the shapely types are supported: GEOMETRYCOLLETION, MULTIPOLYGON, POLYGON, MULTIPOINT. The same restrictions as mentioned for the shapely types apply.
+      :param frm: point from which to find the shortest path
+      :param to: point to which to find the shortest path
+
+      :keyword excluded_areas: describes exclusions
+                               from the walkable area. Only use this argument if `geometry` was
+                               provided as list[tuple[float, float]].
+
+      :returns: List of points (path) from 'frm' to 'to' including from and to.
+
+
+   .. py:method:: is_routable(p: tuple[float, float]) -> bool
+
+      Tests if the supplied point is inside the underlying geometry.
+
+      :returns: If the point is inside the geometry.
+
+
+   .. py:method:: mesh() -> tuple[list[tuple[float, float]], list[list[int]]]
+
+      Access the navigation mesh geometry.
+
+      The navigation mesh is store as a collection of convex polygons in CCW order.
+
+      The returned data is to be interpreted as:
+
+      .. code::
+
+          tuple[
+              list[tuple[float, float]], # All vertices in this mesh.
+              list[ # List of polygons
+                  list[int] # List of indices into the vertices that compose this polygon in CCW order
+              ]
+          ]
+
+      :returns: A tuple of vertices and list of polygons which in turn are a list of indices
+                tuple[list[tuple[float, float]],list[list[int]]]
+
+
+   .. py:method:: edges_for(vertex_id: int)
+
+
+
