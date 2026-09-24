@@ -9,12 +9,12 @@
 
 class Geometry;
 
-/// General `Location` interface. The "truth" is 2D + region, but it provides
-/// a cached z-coordinate.
+/// A point on the walkable surface: its (x, y) and the region it lies in. z is derived
+/// from these and cached.
 class Location
 {
 public:
-    /// "horizonal" part. Common between 3D and 2D+regin views.
+    /// Horizontal position.
     Point xy() const { return _xy; }
 
     std::size_t region() const { return _regionId; }

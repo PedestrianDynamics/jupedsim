@@ -55,6 +55,29 @@ inline std::unique_ptr<Geometry> rectangle_with_hole(
         {rectangle_points(hole_lower_left, hole_upper_right)});
 }
 
+/// Ground and upper floor over the same 20 x 20 footprint, joined through a stairwell by a
+/// U-stair: one flight up to a landing, one back to the upper floor.
+struct UStair {
+    std::unique_ptr<Geometry> geometry;
+    std::size_t ground;
+    std::size_t upper;
+    std::size_t landing;
+};
+
+inline UStair u_stair()
+{
+    // (8, 9) and (13, 9) split the stairwell sides so each flight has an edge of its own.
+    const WalkableSurface::Ring stairwell{{8, 6}, {14, 6}, {14, 12}, {8, 12}, {8, 9}};
+    WalkableSurface surface{};
+    const auto ground = surface.AddRegion({rectangle_points({0, 0}, {20, 20}), {stairwell}}, 0.0);
+    const auto upper = surface.AddRegion({rectangle_points({0, 0}, {20, 20}), {stairwell}}, 3.0);
+    const auto landing =
+        surface.AddRegion({{{13, 6}, {14, 6}, {14, 12}, {13, 12}, {13, 9}}, {}}, 1.5);
+    surface.ConnectRegions(ground, {{8, 6}, {8, 9}}, landing, {{13, 6}, {13, 9}});
+    surface.ConnectRegions(landing, {{13, 9}, {13, 12}}, upper, {{8, 9}, {8, 12}});
+    return {surface.CreateGeometry(), ground, upper, landing};
+}
+
 /// A ramp climbing along y, from z = 0 to "height".
 inline std::unique_ptr<Geometry> ramp(Point lower_left, Point upper_right, double height)
 {

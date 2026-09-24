@@ -135,13 +135,11 @@ class Agent:
 
     @property
     def location(self) -> Location:
-        """Place the agent stands at, as a
-        :class:`~jupedsim.location.Location`.
+        """Current location of the agent.
 
-        The same position :attr:`position` reports, plus the height of the
-        floor it is on -- and in a form that can be handed back to the
-        simulation, e.g. as another agent's
-        :attr:`final_target`.
+        Same as :attr:`position`, plus the region and the height of the surface.
+        Can be used wherever the simulation accepts a location, e.g. to set
+        another agent's :attr:`final_target`.
         """
         return Location(self.__resolve().location)
 
@@ -163,9 +161,10 @@ class Agent:
             When setting the target, the given coordinates must lie within the
             walkable area. Otherwise, an error will be thrown immediately.
 
-        Accepts a :class:`~jupedsim.location.Location` as well as an
-        ``(x, y)`` tuple. Over stacked floors only the location says which
-        floor is meant; the tuple is located around the agent's own height.
+        Accepts a :class:`~jupedsim.location.Location` or an ``(x, y)`` tuple. A
+        tuple is placed on the surface closest to the agent's own height; to
+        target another floor, pass a location from
+        :meth:`~jupedsim.simulation.Simulation.get_location`.
 
         Returns:
             Current final target of the agent, as ``(x, y)``.

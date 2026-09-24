@@ -16,9 +16,8 @@
 
 class WalkableSurface;
 
-/// Default z-hint tolerance: When a `Location` is created, how far the z-value
-/// is allowed to be away from the surface to still be accepted.
-inline constexpr double ZHintTolerance = 0.1;
+/// Default tolerance of get_location_near_z: how far the surface may lie from the given z.
+inline constexpr double NearZTolerance = 0.1;
 
 /// Height difference above which two people cannot touch each other. This is used
 /// as a quick pre-filter.
@@ -97,7 +96,7 @@ public:
     /// The place at (@p x, @p y) on the surface closest to height @p z, if one comes within
     /// @p tol.
     std::optional<Location>
-    get_location_near_z(double x, double y, double z, double tol = ZHintTolerance) const;
+    get_location_near_z(double x, double y, double z, double tol = NearZTolerance) const;
 
     /// True iff @p p projects (along -z) onto the walkable surface.
     bool is_valid_location(const Point3D& p) const;

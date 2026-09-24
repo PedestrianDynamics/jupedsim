@@ -133,7 +133,7 @@ TEST(Location, Position3DCombinesXyAndCachedZ)
     EXPECT_NEAR(p.z(), 3.6, 1e-9);
 }
 
-TEST(Location, ZHintDisambiguatesStackedSheets)
+TEST(Location, NearZDisambiguatesStackedSheets)
 {
     const auto geo = test_geometries::stacked_floors({0, 0}, {10, 10}, 3.0);
     ASSERT_EQ(geo->region_count(), 2);
@@ -150,7 +150,7 @@ TEST(Location, ZHintDisambiguatesStackedSheets)
     EXPECT_NE(lower->region(), upper->region());
 }
 
-TEST(Location, ZHintPicksTheNearerSheetWithinTolerance)
+TEST(Location, NearZPicksTheNearerSheetWithinTolerance)
 {
     const auto geo = test_geometries::stacked_floors({0, 0}, {10, 10}, 3.0);
 
@@ -160,7 +160,7 @@ TEST(Location, ZHintPicksTheNearerSheetWithinTolerance)
     EXPECT_NEAR(loc->z(), 3.0, 1e-9);
 }
 
-TEST(Location, ZHintBeyondToleranceOfAnySheetMisses)
+TEST(Location, NearZBeyondToleranceOfAnySheetMisses)
 {
     const auto geo = test_geometries::stacked_floors({0, 0}, {10, 10}, 3.0);
 

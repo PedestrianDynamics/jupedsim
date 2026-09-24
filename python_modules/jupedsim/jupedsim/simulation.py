@@ -179,24 +179,28 @@ class Simulation:
         self._timer = Timer(self._obj, timer_log_level=timer_log_level)
 
     def add_waypoint_stage(
-        self, position: tuple[float, float], distance, z_hint: float = 0.0
+        self,
+        position: tuple[float, float],
+        distance,
+        region_id: int | None = None,
     ) -> int:
         """Add a new waypoint stage to this simulation.
 
         Arguments:
             position: Position of the waypoint
             distance: Minimum distance required to reach this waypoint
-            z_hint: Height the waypoint is meant to sit at. On stacked floors
-                this picks the one, see :func:`add_agent`.
+            region_id: Region the waypoint lies in, see :func:`add_agent`.
 
         Returns:
             Id of the new stage.
 
         """
-        return self._obj.add_waypoint_stage(position, distance, z_hint)
+        return self._obj.add_waypoint_stage(position, distance, region_id)
 
     def add_queue_stage(
-        self, positions: list[tuple[float, float]], z_hint: float = 0.0
+        self,
+        positions: list[tuple[float, float]],
+        region_id: int | None = None,
     ) -> int:
         """Add a new queue state to this simulation.
 
@@ -204,16 +208,18 @@ class Simulation:
              positions: Ordered list of the waiting
                  points of this queue. The first one in the list is the head of
                  the queue while the last one is the back of the queue.
-             z_hint: Height the queue is meant to sit at. On stacked floors
-                 this picks the one, see :func:`add_agent`.
+             region_id: Region the waiting points lie in, see
+                 :func:`add_agent`.
         Returns:
              Id of the new stage.
 
         """
-        return self._obj.add_queue_stage(positions, z_hint)
+        return self._obj.add_queue_stage(positions, region_id)
 
     def add_waiting_set_stage(
-        self, positions: list[tuple[float, float]], z_hint: float = 0.0
+        self,
+        positions: list[tuple[float, float]],
+        region_id: int | None = None,
     ) -> int:
         """Add a new waiting set stage to this simulation.
 
@@ -221,13 +227,13 @@ class Simulation:
             positions: Ordered list of the waiting points of this waiting set.
                 The agents will fill the waiting points in the given order. If more agents
                 are targeting the waiting, the remaining will wait at the last given point.
-            z_hint: Height the waiting set is meant to sit at. On stacked floors
-                this picks the one, see :func:`add_agent`.
+            region_id: Region the waiting points lie in, see
+                :func:`add_agent`.
 
         Returns:
             Id of the new stage.
         """
-        return self._obj.add_waiting_set_stage(positions, z_hint)
+        return self._obj.add_waiting_set_stage(positions, region_id)
 
     def add_exit_stage(
         self,
@@ -239,13 +245,11 @@ class Simulation:
             | shapely.MultiPoint
             | list[tuple[float, float]]
         ),
-        z_hint: float = 0.0,
+        region_id: int | None = None,
     ) -> int:
         """Add an exit stage to the simulation.
 
         Arguments:
-            z_hint: Height the exit is meant to sit at. On stacked floors this
-                picks the one, see :func:`add_agent`.
             polygon:
                 Polygon without holes representing the exit stage. Polygon can be passed as:
 
@@ -261,12 +265,14 @@ class Simulation:
 
                 * str with a valid Well Known Text. In this format the same WKT types as mentioned for the shapely types are supported: GEOMETRYCOLLETION, MULTIPOLYGON, POLYGON, MULTIPOINT. The same restrictions as mentioned for the shapely types apply.
 
+            region_id: Region the exit lies in, see :func:`add_agent`.
+
         Returns:
             Id of the added exit stage.
 
         """
         return self._obj.add_exit_stage(
-            build_polygon(polygon).boundary(), z_hint
+            build_polygon(polygon).boundary(), region_id
         )
 
     def add_direct_steering_stage(self) -> int:
@@ -315,7 +321,7 @@ class Simulation:
             | WarpDriverModelState
             | Any
         ),
-        z_hint: float = 0.0,
+        region_id: int | None = None,
     ) -> int:
         """Add an agent to the simulation.
 
@@ -323,12 +329,12 @@ class Simulation:
             journey_id: Id of the journey the agent follows.
             stage_id: Id of the stage the agent initially targets.
             position: Position to spawn the agent at, as ``(x, y)`` in metres.
-            z_hint: Height the agent is meant to stand at, in metres. On a
-                surface with stacked floors one ``(x, y)`` carries several of
-                them, and this says which. The agent lands on the floor whose
-                height comes closest, and that floor has to come within
-                0.1 m -- so the hint is a floor level, not a measurement. On a
-                single-floor world it does not matter.
+            region_id: Region the agent stands in, as returned by
+                :meth:`~jupedsim.WalkableSurface.add_region` or
+                :meth:`~jupedsim.WalkableSurface.connect_regions`. Only needed
+                where regions lie on top of each other at ``position``; without
+                it, the region containing ``position`` is used. On a seam,
+                where regions meet, that is the one with the lowest id.
             state: Initial per-agent model state. For built-in models this is
                 the matching ``XModelState`` instance, e.g.
                 :class:`~jupedsim.CollisionFreeSpeedModelState`. For custom
@@ -347,37 +353,37 @@ class Simulation:
                 stage_id=stage_id,
                 position=position,
                 state=state,
-                z_hint=z_hint,
+                region_id=region_id,
             )
         return self._obj.add_agent(
             journey_id=journey_id,
             stage_id=stage_id,
             position=position,
             state=py_jps._CustomModelState(state),
-            z_hint=z_hint,
+            region_id=region_id,
         )
 
-    def get_location(self, x: float, y: float, z_hint: float = 0.0) -> Location:
-        """The place at ``(x, y)`` on the floor closest to ``z_hint``.
+    def get_location(
+        self, x: float, y: float, region_id: int | None = None
+    ) -> Location:
+        """Get the location at ``(x, y)`` in region ``region_id``.
 
-        This is where raw coordinates become a place. On a surface with
-        stacked floors one ``(x, y)`` carries several of them and the hint
-        says which; the floor found has to come within 0.1 m of it. Pass the
-        returned location on wherever a place is wanted -- it stays valid as
-        long as this simulation does.
+        The location stays valid as long as this simulation exists.
 
         Arguments:
             x: x coordinate in metres.
             y: y coordinate in metres.
-            z_hint: Height the place is meant to sit at, in metres.
+            region_id: Region the place lies in, see :func:`add_agent`.
 
         Returns:
             The location.
 
         Raises:
-            SimulationError: if no walkable floor lies there.
+            SimulationError: if ``(x, y)`` is not on the walkable surface (not
+                in region ``region_id``, if given), or if ``region_id`` is
+                missing where regions lie on top of each other.
         """
-        return Location(self._obj.get_location(x, y, z_hint))
+        return Location(self._obj.get_location(x, y, region_id))
 
     def mark_agent_for_removal(self, agent_id: int):
         """Marks an agent for removal.

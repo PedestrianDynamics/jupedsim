@@ -93,16 +93,11 @@ void init_geometry(py::module_& m)
             py::arg("obj_path"))
         .def("is_valid_location", &Geometry::is_valid_location)
         .def(
-            // Ray-cast (x, y) against the surface near z_hint -> Location, or None if no
-            // sheet comes within tol of the hint.
             "get_location",
-            [](const Geometry& geo, double x, double y, double z_hint, double tol) {
-                return geo.get_location_near_z(x, y, z_hint, tol);
-            },
+            &Geometry::get_location,
             py::arg("x"),
             py::arg("y"),
-            py::arg("z_hint") = 0.0,
-            py::arg("tol") = ZHintTolerance,
+            py::arg("region_id") = py::none(),
             // The returned token points into this geometry.
             py::keep_alive<0, 1>())
         .def("region_count", &Geometry::region_count)

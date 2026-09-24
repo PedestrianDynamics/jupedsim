@@ -200,12 +200,13 @@ Journey::ID Simulation::AddJourney(const std::map<BaseStage::ID, TransitionDescr
     return id;
 }
 
-BaseStage::ID Simulation::AddStage(const StageDescription stageDescription, double z_hint)
+BaseStage::ID
+Simulation::AddStage(const StageDescription stageDescription, std::optional<std::size_t> region_id)
 {
     ThrowIfIterating("AddStage");
     JPS_SCOPED_TIMER_AND_TRACE(_timer, "Add Stage", Detailed);
     return _stageManager.AddStage(
-        stageDescription, _removedAgentsInLastIteration, *_geometry, z_hint);
+        stageDescription, _removedAgentsInLastIteration, *_geometry, region_id);
 }
 
 GenericAgent::ID Simulation::AddAgent(
@@ -213,14 +214,11 @@ GenericAgent::ID Simulation::AddAgent(
     BaseStage::ID stageId,
     Point position,
     OperationalModelState model,
-    double z_hint)
+    std::optional<std::size_t> region_id)
 {
     ThrowIfIterating("AddAgent");
     JPS_SCOPED_TIMER_AND_TRACE(_timer, "Add Agent", Detailed);
-    const auto location = _geometry->get_location_near_z(position.x, position.y, z_hint);
-    if(!location) {
-        throw SimulationError("Agent {} not inside walkable area", position);
-    }
+    const auto location = _geometry->get_location(position.x, position.y, region_id);
     if(_journeys.count(journeyId) == 0) {
         throw SimulationError("Unknown journey id: {}", journeyId);
     }
@@ -238,7 +236,7 @@ GenericAgent::ID Simulation::AddAgent(
             ToString(_operationalDecisionSystem.ModelType()));
     }
 
-    GenericAgent agent{GenericAgent::ID::Invalid, journeyId, stageId, *location, std::move(model)};
+    GenericAgent agent{GenericAgent::ID::Invalid, journeyId, stageId, location, std::move(model)};
 
     _operationalDecisionSystem.ValidateAgent(agent, _neighborhoodSearch, *_geometry);
 
@@ -252,13 +250,9 @@ GenericAgent::ID Simulation::AddAgent(
     return _agents.back().id.getID();
 }
 
-Location Simulation::GetLocation(double x, double y, double z_hint) const
+Location Simulation::GetLocation(double x, double y, std::optional<std::size_t> region_id) const
 {
-    const auto located = _geometry->get_location_near_z(x, y, z_hint);
-    if(!located) {
-        throw SimulationError("Point {} is outside of accessible area", Point{x, y});
-    }
-    return *located;
+    return _geometry->get_location(x, y, region_id);
 }
 
 void Simulation::SetAgentTarget(GenericAgent::ID id, Point target)

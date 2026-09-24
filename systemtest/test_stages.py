@@ -211,7 +211,7 @@ def test_can_not_add_waypoint_outside_geometry(square_room_5x5):
     simulation = square_room_5x5
 
     with pytest.raises(
-        jps.SimulationError, match="WayPoint .* not inside walkable area"
+        jps.SimulationError, match="not on the walkable surface"
     ):
         simulation.add_waypoint_stage((10, 10), 1)
 
@@ -220,7 +220,7 @@ def test_can_not_add_exit_completely_outside_geometry(square_room_5x5):
     simulation = square_room_5x5
 
     with pytest.raises(
-        jps.SimulationError, match=r"Exit .* not inside walkable area"
+        jps.SimulationError, match="not on the walkable surface"
     ):
         simulation.add_exit_stage([(-10, -10), (-8, -10), (-8, -8), (-10, -8)])
 
@@ -236,7 +236,7 @@ def test_can_not_add_exit_partly_outside_geometry_centroid_outside(
     simulation = square_room_5x5
 
     with pytest.raises(
-        jps.SimulationError, match=r"Exit .* not inside walkable area"
+        jps.SimulationError, match="not on the walkable surface"
     ):
         simulation.add_exit_stage([(-4, -4), (-4, -2), (-2, -2), (-2, -4)])
 
@@ -246,7 +246,7 @@ def test_can_not_add_notifiable_waiting_set_outside_geometry(square_room_5x5):
 
     with pytest.raises(
         jps.SimulationError,
-        match=r"NotifiableWaitingSet point .* not inside walkable area",
+        match="not on the walkable surface",
     ):
         simulation.add_waiting_set_stage([(2, -2), (-10, -10)])
 
@@ -256,6 +256,6 @@ def test_can_not_add_notifiable_queue_outside_geometry(square_room_5x5):
 
     with pytest.raises(
         jps.SimulationError,
-        match=r"NotifiableQueue point .* not inside walkable area",
+        match="not on the walkable surface",
     ):
         simulation.add_queue_stage([(2, -2), (-10, -10)])
