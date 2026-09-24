@@ -16,7 +16,7 @@ static GenericAgent make_agent(OperationalModelState model)
         GenericAgent::ID{},
         jps::UniqueID<Journey>::Invalid,
         jps::UniqueID<BaseStage>::Invalid,
-        *geometry->get_location(0.0, 0.0, 0.0),
+        *geometry->get_location_near_z(0.0, 0.0, 0.0),
         std::move(model));
 }
 

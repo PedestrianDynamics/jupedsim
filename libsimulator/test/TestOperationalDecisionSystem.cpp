@@ -41,7 +41,7 @@ GenericAgent make_agent(const Geometry& geometry, Point start, Point velocity)
         GenericAgent::ID::Invalid,
         jps::UniqueID<Journey>::Invalid,
         jps::UniqueID<BaseStage>::Invalid,
-        *geometry.get_location(start.x, start.y, 0.0),
+        *geometry.get_location_near_z(start.x, start.y, 0.0),
         CustomModel::State{ConstantVelocity{velocity}});
 }
 

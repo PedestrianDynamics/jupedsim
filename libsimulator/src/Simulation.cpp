@@ -217,7 +217,7 @@ GenericAgent::ID Simulation::AddAgent(
 {
     ThrowIfIterating("AddAgent");
     JPS_SCOPED_TIMER_AND_TRACE(_timer, "Add Agent", Detailed);
-    const auto location = _geometry->get_location(position.x, position.y, z_hint);
+    const auto location = _geometry->get_location_near_z(position.x, position.y, z_hint);
     if(!location) {
         throw SimulationError("Agent {} not inside walkable area", position);
     }
@@ -254,7 +254,7 @@ GenericAgent::ID Simulation::AddAgent(
 
 Location Simulation::GetLocation(double x, double y, double z_hint) const
 {
-    const auto located = _geometry->get_location(x, y, z_hint);
+    const auto located = _geometry->get_location_near_z(x, y, z_hint);
     if(!located) {
         throw SimulationError("Point {} is outside of accessible area", Point{x, y});
     }
@@ -264,7 +264,7 @@ Location Simulation::GetLocation(double x, double y, double z_hint) const
 void Simulation::SetAgentTarget(GenericAgent::ID id, Point target)
 {
     auto& agent = Agent(id);
-    const auto located = _geometry->get_location(
+    const auto located = _geometry->get_location_near_z(
         target.x, target.y, agent.location.z(), std::numeric_limits<double>::max());
     if(!located) {
         throw SimulationError("Point {} is outside of accessible area", target);

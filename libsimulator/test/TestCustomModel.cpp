@@ -68,7 +68,7 @@ GenericAgent MakeAgent(OperationalModelState model, Point position = {})
         GenericAgent::ID::Invalid,
         jps::UniqueID<Journey>::Invalid,
         jps::UniqueID<BaseStage>::Invalid,
-        *flat_square().get_location(position.x, position.y, 0.0),
+        *flat_square().get_location_near_z(position.x, position.y, 0.0),
         std::move(model));
 }
 } // namespace
