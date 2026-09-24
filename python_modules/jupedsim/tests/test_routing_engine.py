@@ -68,7 +68,9 @@ def test_orientation_is_unit_vector():
     geo = Geometry.from_obj(str(OBJ))
     engine = SurfaceMeshShortestPathRoutingEngine(geo)
     d = engine.get_orientation(
-        geo.get_location(3, 4, z_hint=0.0), geo.get_location(13, 14, z_hint=3.0)
+        # from the ground floor (region 0) to the upper floor (region 1)
+        geo.get_location(3, 4, region_id=0),
+        geo.get_location(13, 14, region_id=1),
     )
     assert len(d) == 2
     assert math.hypot(*d) == pytest.approx(1.0)

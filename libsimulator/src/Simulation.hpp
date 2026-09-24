@@ -68,8 +68,9 @@ public:
     void SetTracing(bool on);
     void Iterate();
     Journey::ID AddJourney(const std::map<BaseStage::ID, TransitionDescription>& stages);
-    /// @param z_hint "stage point" is the closest z on the surface related to @p z_hint
-    BaseStage::ID AddStage(const StageDescription stageDescription, double z_hint = 0.0);
+    /// @param region_id Region the stage's points lie in, see `Geometry::get_location`.
+    BaseStage::ID AddStage(const StageDescription stageDescription, std::size_t region_id);
+    BaseStage::ID AddStage(DirectSteeringDescription stageDescription);
     void MarkAgentForRemoval(GenericAgent::ID id);
     const std::vector<GenericAgent::ID>& RemovedAgents() const;
     size_t AgentCount() const;
@@ -82,18 +83,16 @@ public:
     /// Returns IDs of all agents inside the defined polygon
     /// @param polygon Required to be a simple convex polygon with CCW ordering.
     std::vector<GenericAgent::ID> AgentsInPolygon(const std::vector<Point>& polygon);
-    /// @param z_hint Agent will land on the closest z on the surface matching @p position.
+    /// @param region_id Region @p position lies in, see `Geometry::get_location`.
     GenericAgent::ID AddAgent(
         Journey::ID journeyId,
         BaseStage::ID stageId,
         Point position,
         OperationalModelState model,
-        double z_hint = 0.0);
-    /// The place at @p x, @p y on the sheet closest to @p z_hint.
-    /// @throws SimulationError if no walkable sheet lies within the hint's tolerance.
-    Location GetLocation(double x, double y, double z_hint = 0.0) const;
-    /// Raycast 2D @p target along z-axis. The closest intersection with the geometry to agent's
-    /// z coordinate is the one taken.
+        std::size_t region_id);
+    /// See `Geometry::get_location`.
+    Location GetLocation(double x, double y, std::size_t region_id) const;
+    /// Locates @p target on the surface closest to the agent's height.
     void SetAgentTarget(GenericAgent::ID id, Point target);
     void SetAgentTarget(GenericAgent::ID id, const Location& target);
     const GenericAgent& Agent(GenericAgent::ID id) const;

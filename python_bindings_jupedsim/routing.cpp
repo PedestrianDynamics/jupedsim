@@ -26,6 +26,7 @@ void init_routing(py::module_& m)
         .def_property_readonly("x", [](const Location& l) { return l.xy().x; })
         .def_property_readonly("y", [](const Location& l) { return l.xy().y; })
         .def_property_readonly("z", &Location::z)
+        .def_property_readonly("region_id", &Location::region)
         .def("__repr__", [](const Location& l) {
             return fmt::format("Location({}, {}, {})", l.xy().x, l.xy().y, l.z());
         });
