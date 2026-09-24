@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "Geometry/Geometry.hpp"
+#include "Geometry/WalkableSurface.hpp"
 #include "GeometryFixtures.hpp"
 #include "LineSegment.hpp"
 #include "SimulationError.hpp"
@@ -85,7 +86,100 @@ TEST(GeometryLocate, RegionIdDisambiguatesStackedFloors)
 
 namespace
 {
+/// Ground floor and upper floor side by side, joined by stairs: seams at x = 5 and x = 10.
+struct FloorsJoinedByStairs {
+    WalkableSurface surface{};
+    size_t ground = surface.AddRegion({test_geometries::rectangle_points({0, 0}, {5, 5}), {}}, 0.0);
+    size_t upper =
+        surface.AddRegion({test_geometries::rectangle_points({10, 0}, {15, 5}), {}}, 3.0);
+    size_t stairs = surface.ConnectRegions(ground, {{5, 0}, {5, 5}}, upper, {{10, 0}, {10, 5}});
+    std::unique_ptr<Geometry> geo = surface.CreateGeometry();
+};
+
+/// As above, but the upper floor wraps around the stairs and covers the ground floor.
+struct UpperFloorOverGroundFloor {
+    WalkableSurface surface{};
+    size_t ground = surface.AddRegion({test_geometries::rectangle_points({0, 0}, {5, 5}), {}}, 0.0);
+    size_t upper = surface.AddRegion(
+        {{{10, 0}, {15, 0}, {15, 10}, {0, 10}, {0, 0}, {5, 0}, {5, 5}, {10, 5}}, {}},
+        3.0);
+    size_t stairs = surface.ConnectRegions(ground, {{5, 0}, {5, 5}}, upper, {{10, 0}, {10, 5}});
+    std::unique_ptr<Geometry> geo = surface.CreateGeometry();
+};
 } // namespace
+
+TEST(GeometryGetLocation, SingleRegionNeedsNoRegionId)
+{
+    const auto geo = test_geometries::rectangle({0, 0}, {10, 10});
+    // (5, 5) lies on the diagonal splitting the rectangle: two faces, one region.
+    const auto loc = geo->get_location(5, 5);
+    EXPECT_EQ(loc.region(), 0);
+    EXPECT_EQ(loc.z(), 0.0);
+}
+
+TEST(GeometryGetLocation, OffTheSurfaceThrows)
+{
+    const auto geo = test_geometries::rectangle_with_hole({0, 0}, {10, 10}, {4, 4}, {6, 6});
+    EXPECT_THROW(geo->get_location(20, 20), SimulationError);
+    EXPECT_THROW(geo->get_location(5, 5), SimulationError);
+}
+
+TEST(GeometryGetLocation, RegionIdPicksAmongFloorsOnTopOfEachOther)
+{
+    const UpperFloorOverGroundFloor floors{};
+    const auto loc = floors.geo->get_location(2.5, 2.5, floors.upper);
+    EXPECT_EQ(loc.region(), floors.upper);
+    EXPECT_NEAR(loc.z(), 3.0, 1e-9);
+}
+
+TEST(GeometryGetLocation, FloorsOnTopOfEachOtherNeedARegionId)
+{
+    const UpperFloorOverGroundFloor floors{};
+    EXPECT_THROW(floors.geo->get_location(2.5, 2.5), SimulationError);
+}
+
+TEST(GeometryGetLocation, PointOffTheGivenRegionThrows)
+{
+    const FloorsJoinedByStairs floors{};
+    EXPECT_THROW(floors.geo->get_location(2.5, 2.5, floors.upper), SimulationError);
+}
+
+TEST(GeometryGetLocation, UnknownRegionIdThrows)
+{
+    const FloorsJoinedByStairs floors{};
+    EXPECT_THROW(floors.geo->get_location(2.5, 2.5, 3), SimulationError);
+}
+
+TEST(GeometryGetLocation, OnASeamTakesTheLowestRegionId)
+{
+    const FloorsJoinedByStairs floors{};
+
+    const auto foot = floors.geo->get_location(5, 2.5);
+    EXPECT_EQ(foot.region(), std::min(floors.ground, floors.stairs));
+    EXPECT_NEAR(foot.z(), 0.0, 1e-9);
+
+    const auto head = floors.geo->get_location(10, 2.5);
+    EXPECT_EQ(head.region(), std::min(floors.stairs, floors.upper));
+    EXPECT_NEAR(head.z(), 3.0, 1e-9);
+}
+
+TEST(GeometryGetLocation, NearZPicksOnASeamSameAsWithoutRegionId)
+{
+    const FloorsJoinedByStairs floors{};
+    EXPECT_EQ(
+        floors.geo->get_location_near_z(5, 2.5, 0.0)->region(),
+        floors.geo->get_location(5, 2.5).region());
+    EXPECT_EQ(
+        floors.geo->get_location_near_z(10, 2.5, 3.0)->region(),
+        floors.geo->get_location(10, 2.5).region());
+}
+
+TEST(GeometryGetLocation, OnASeamEitherRegionIdIsAccepted)
+{
+    const FloorsJoinedByStairs floors{};
+    EXPECT_EQ(floors.geo->get_location(5, 2.5, floors.ground).region(), floors.ground);
+    EXPECT_EQ(floors.geo->get_location(5, 2.5, floors.stairs).region(), floors.stairs);
+}
 
 TEST(GeometryFromPolygon, HoleIsNotWalkable)
 {
@@ -126,7 +220,7 @@ TEST(GeometryFromMesh, HasNoPolygon)
 TEST(GeometryModelQueries, EverythingAnsweredIsWithinTheRadius)
 {
     const auto geo = test_geometries::rectangle_with_hole({0, 0}, {10, 10}, {4, 4}, {6, 6});
-    const auto who = geo->get_location(2, 5, 0.0);
+    const auto who = geo->get_location_near_z(2, 5, 0.0);
     ASSERT_TRUE(who.has_value());
 
     const auto walls = geo->line_segments_in_range(*who, 5.0);
@@ -144,9 +238,9 @@ TEST(GeometryModelQueries, EverythingAnsweredIsWithinTheRadius)
 TEST(GeometryModelQueries, NoGeometryBetweenMatchesFlatView)
 {
     const auto geo = test_geometries::rectangle_with_hole({0, 0}, {10, 10}, {4, 4}, {6, 6});
-    const auto left = geo->get_location(2, 5, 0.0);
-    const auto right = geo->get_location(8, 5, 0.0);
-    const auto below = geo->get_location(2, 2, 0.0);
+    const auto left = geo->get_location_near_z(2, 5, 0.0);
+    const auto right = geo->get_location_near_z(8, 5, 0.0);
+    const auto below = geo->get_location_near_z(2, 2, 0.0);
     ASSERT_TRUE(left.has_value() && right.has_value() && below.has_value());
 
     // Straight line 2,5 -> 8,5 runs through the central hole: blocked.
@@ -158,7 +252,7 @@ TEST(GeometryModelQueries, NoGeometryBetweenMatchesFlatView)
 TEST(GeometryModelQueries, AStepIsJudgedByTheWayThereNotByWhereItLands)
 {
     const auto geo = test_geometries::rectangle_with_hole({0, 0}, {10, 10}, {4, 4}, {6, 6});
-    const auto who = geo->get_location(2, 5, 0.0);
+    const auto who = geo->get_location_near_z(2, 5, 0.0);
     ASSERT_TRUE(who.has_value());
 
     const Point to_free{1, 1}; // free
@@ -178,9 +272,9 @@ TEST(GeometryModelQueries, AStepIsJudgedByTheWayThereNotByWhereItLands)
 TEST(GeometryVisibility, TheFloorAboveIsNotInSightThoughNothingStandsBetween)
 {
     const auto geo = test_geometries::stacked_floors({0, 0}, {10, 10}, 3.0);
-    const auto below = geo->get_location(2, 5, 0.0);
-    const auto beside = geo->get_location(8, 5, 0.0);
-    const auto above = geo->get_location(8, 5, 3.0);
+    const auto below = geo->get_location_near_z(2, 5, 0.0);
+    const auto beside = geo->get_location_near_z(8, 5, 0.0);
+    const auto above = geo->get_location_near_z(8, 5, 3.0);
     ASSERT_TRUE(below.has_value() && beside.has_value() && above.has_value());
 
     // The two floors are not joined, so the chord crosses no seam and meets no wall either
@@ -194,7 +288,7 @@ TEST(GeometryVisibility, LeavingTheSurfaceOverASeamBlocksTheView)
     const auto geo = test_geometries::two_levels_with_stair();
 
     // Standing on the stair, two metres short of its head at x = 15.
-    const auto who = geo->get_location(13.0, 2.0, 1.8, 0.5);
+    const auto who = geo->get_location_near_z(13.0, 2.0, 1.8, 0.5);
     ASSERT_TRUE(who.has_value());
 
     // Back down the stair: same region, no seam, and nothing in the way.
@@ -212,13 +306,13 @@ TEST(GeometryVisibility, CrossingASeamOntoWalkableSurfaceDoesNotBlock)
     // Flight and landing meet at x = 14, which is also where the region overlay cuts (the
     // coplanar landing + upper floor fuse into one region). Walking across the seam stays
     // on the surface all the way.
-    const auto who = geo->get_location(12.0, 2.0, 1.5, 0.5);
+    const auto who = geo->get_location_near_z(12.0, 2.0, 1.5, 0.5);
     ASSERT_TRUE(who.has_value());
     EXPECT_TRUE(geo->no_geometry_between(*who, {4.0, 0.0}));
 
     // And someone standing where that walk comes out is in sight, even though the query
     // started in a different region than the one they are in.
-    const auto beyond = geo->get_location(16.0, 2.0, 3.0, 0.5);
+    const auto beyond = geo->get_location_near_z(16.0, 2.0, 3.0, 0.5);
     ASSERT_TRUE(beyond.has_value());
     ASSERT_NE(who->region(), beyond->region());
     EXPECT_TRUE(geo->no_geometry_between(*who, *beyond));
@@ -232,7 +326,7 @@ TEST(GeometryModelQueries, ASeamBringsTheNextRegionsWallsIntoTheAnswer)
     // changes. The wall along y = 0 runs straight on past that boundary, where it is the
     // next region's -- and an answer that stopped at the boundary would leave the agent
     // with half the wall he is walking along.
-    const auto who = geo->get_location(11.5, 1.0, 1.5, 0.5);
+    const auto who = geo->get_location_near_z(11.5, 1.0, 1.5, 0.5);
     ASSERT_TRUE(who.has_value());
 
     const auto walls = geo->line_segments_in_range(*who, 4.0);
@@ -248,7 +342,7 @@ TEST(GeometryModelQueries, AWallBorderingTwoRegionsIsDeliveredOnce)
 
     // The wall along y = 8 runs across landing and upper floor, and the agent stands where
     // both are in sight. Nothing may be answered twice, however many ways lead to it.
-    const auto who = geo->get_location(13.0, 7.0, 3.0, 0.5);
+    const auto who = geo->get_location_near_z(13.0, 7.0, 3.0, 0.5);
     ASSERT_TRUE(who.has_value());
 
     const auto delivered = geo->line_segments_in_range(*who, 100.0);
@@ -264,7 +358,7 @@ TEST(GeometryModelQueries, AWallOfTheStoreyAboveIsNotInTheAnswer)
     // ends at x = 10, and the upper floor's, which runs on to the landing at x = 18. In plan
     // they fall on the same line, so what tells them apart is how many answers come back from
     // it -- the one the agent stands under, and not the one three metres over his head.
-    const auto who = geo->get_location(5.0, 6.0, 0.0, 0.5);
+    const auto who = geo->get_location_near_z(5.0, 6.0, 0.0, 0.5);
     ASSERT_TRUE(who.has_value());
 
     const auto walls = geo->line_segments_in_range(*who, 2.2);
@@ -281,7 +375,7 @@ TEST(GeometryModelQueries, TheFlightAboveIsNotAWallEvenInTheSameRegion)
     // at y = 2 is his own flight's and 1 m away, its far wall at y = 3 belongs to the flight
     // above and stands 3 m up, 2 m away in plan. What keeps the far one out is the near one:
     // to reach across the well a sight line has to pass through the wall along its near side.
-    const auto who = geo->get_location(1.0, 1.0, 0.5, 0.2);
+    const auto who = geo->get_location_near_z(1.0, 1.0, 0.5, 0.2);
     ASSERT_TRUE(who.has_value());
 
     const auto walls = geo->line_segments_in_range(*who, 2.2);
@@ -301,7 +395,7 @@ TEST(GeometryModelQueries, AWallRisingFromTheAgentsLevelStaysInTheAnswer)
     // The wall along y = 0 runs from the ground floor up the flight to the landing, so it
     // starts at the agent's feet and ends 3 m up. Nothing may drop it: how far a wall reaches
     // up is not in the surface, and it is right there next to him.
-    const auto who = geo->get_location(5.0, 1.0, 0.0, 0.5);
+    const auto who = geo->get_location_near_z(5.0, 1.0, 0.0, 0.5);
     ASSERT_TRUE(who.has_value());
 
     const auto walls = geo->line_segments_in_range(*who, 2.2);
@@ -315,7 +409,7 @@ TEST(GeometryModelQueries, AWallOfTheStoreyBelowIsNotInTheAnswer)
     // Upstairs, over the ground floor. Its east wall (10,4)-(10,8) stands three metres below and
     // comes within reach over the seam -- and it is what the upper floor's own floor rests on, so
     // it cannot reach up here.
-    const auto who = geo->get_location(10.5, 6.0, 3.0, 0.5);
+    const auto who = geo->get_location_near_z(10.5, 6.0, 3.0, 0.5);
     ASSERT_TRUE(who.has_value());
 
     const auto walls = geo->line_segments_in_range(*who, 4.0);
@@ -334,7 +428,7 @@ TEST(GeometryModelQueries, AWallOfTheFlightBelowIsNotInTheAnswerEither)
     // At the top of the second flight, six metres up. The foot of the first flight lies in the
     // same region, two metres away in plan, and on the same line x = 0 -- and still across the
     // well, so the wall along its far side stands between the two.
-    const auto who = geo->get_location(0.5, 4.0, 5.75, 0.5);
+    const auto who = geo->get_location_near_z(0.5, 4.0, 5.75, 0.5);
     ASSERT_TRUE(who.has_value());
 
     const auto walls = geo->line_segments_in_range(*who, 4.0);

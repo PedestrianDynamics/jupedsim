@@ -85,11 +85,19 @@ public:
     /// from the provided z. `null_face()` if no mesh face comes within @p tolerance.
     FaceLocation locate_near_z(const Point2D& xy, double z, double tolerance) const;
 
-    /// Creates a `Location` object by ray-casting the 3D point in z-direction and
-    /// finding the closest point to hit any part of the 3D surface. If there is no
-    /// such point within @p tol on z coordinate, returns no value.
+    /// The place at (@p x, @p y) in region @p region_id.
+    /// Without @p region_id, searches for the region containing (@p x, @p y). On a seam,
+    /// takes the lowest id of the regions meeting there.
+    /// Throws if (@p x, @p y) is not on the walkable surface (not in region @p region_id, if
+    /// given), if @p region_id does not exist, or if region-id is not specified and several
+    /// regions lie on top of each other at (@p x, @p y).
+    Location
+    get_location(double x, double y, std::optional<std::size_t> region_id = std::nullopt) const;
+
+    /// The place at (@p x, @p y) on the surface closest to height @p z, if one comes within
+    /// @p tol.
     std::optional<Location>
-    get_location(double x, double y, double z_hint, double tol = ZHintTolerance) const;
+    get_location_near_z(double x, double y, double z, double tol = ZHintTolerance) const;
 
     /// True iff @p p projects (along -z) onto the walkable surface.
     bool is_valid_location(const Point3D& p) const;
@@ -131,6 +139,12 @@ public:
 private:
     /// Create internal structures like building the AABB tree and the region overlay.
     void build();
+
+    /// Every face the vertical line through @p xy crosses, with its on-surface point, ordered
+    /// by region id, then by face index.
+    std::vector<FaceLocation> faces_at(const Point2D& xy) const;
+
+    Location location_at(Point xy, const FaceLocation& where) const;
 
     /// The region a straight horizontal step from @p who along @p direction ends up in, or
     /// nothing when a wall stops it or it runs off the surface.

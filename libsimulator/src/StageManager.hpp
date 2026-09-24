@@ -21,7 +21,7 @@ namespace detail
 inline Location
 locate_stage_point(const Geometry& geometry, Point point, std::string_view what, double z_hint)
 {
-    const auto location = geometry.get_location(point.x, point.y, z_hint);
+    const auto location = geometry.get_location_near_z(point.x, point.y, z_hint);
     if(!location) {
         throw SimulationError("{} {} not inside walkable area", what, point);
     }

@@ -97,7 +97,7 @@ void init_geometry(py::module_& m)
             // sheet comes within tol of the hint.
             "get_location",
             [](const Geometry& geo, double x, double y, double z_hint, double tol) {
-                return geo.get_location(x, y, z_hint, tol);
+                return geo.get_location_near_z(x, y, z_hint, tol);
             },
             py::arg("x"),
             py::arg("y"),

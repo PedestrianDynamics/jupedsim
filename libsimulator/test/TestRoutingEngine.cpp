@@ -221,8 +221,8 @@ TEST(RoutingEngineLShape, WaypointIsTheNextTurnOfTheGeodesic)
     const auto geometry = test_geometries::from_polygons({l_shape});
     SurfaceMeshShortestPathRoutingEngine engine{*geometry};
 
-    const auto from = geometry->get_location(2.5, 0.5, 0.0);
-    const auto to = geometry->get_location(0.5, 2.5, 0.0);
+    const auto from = geometry->get_location_near_z(2.5, 0.5, 0.0);
+    const auto to = geometry->get_location_near_z(0.5, 2.5, 0.0);
     ASSERT_TRUE(from.has_value() && to.has_value());
 
     // Where the route bends, held off the corner it bends around.
@@ -270,8 +270,8 @@ TEST(RoutingEngineCorridor, TheWaypointIsNeverTheSpotAlreadyStoodOn)
     const auto geometry = test_geometries::corridor_with_door_recesses();
     SurfaceMeshShortestPathRoutingEngine engine{*geometry};
 
-    auto walker = geometry->get_location(2.0, 0.9, 0.0);
-    const auto exit = geometry->get_location(44.0, 1.0, 0.0);
+    auto walker = geometry->get_location_near_z(2.0, 0.9, 0.0);
+    const auto exit = geometry->get_location_near_z(44.0, 1.0, 0.0);
     ASSERT_TRUE(walker.has_value() && exit.has_value());
 
     // Never overshoot the waypoint, so a step is as long as the way on is -- which is what
