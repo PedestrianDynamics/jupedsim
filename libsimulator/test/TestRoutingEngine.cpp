@@ -50,7 +50,7 @@ double length_along_the_surface(const std::vector<Point3D>& path)
 
 Location located(const Geometry& geometry, double x, double y, double z_hint = 0.0)
 {
-    return geometry.get_location(x, y, z_hint).value();
+    return geometry.get_location_near_z(x, y, z_hint).value();
 }
 } // namespace
 
@@ -254,8 +254,8 @@ TEST(RoutingEngineCorridor, TheOrientationNeverVanishesOnTheWay)
     const auto geometry = test_geometries::corridor_with_door_recesses();
     SurfaceMeshShortestPathRoutingEngine engine{*geometry};
 
-    auto walker = geometry->get_location(2.0, 0.9, 0.0);
-    const auto exit = geometry->get_location(44.0, 1.0, 0.0);
+    auto walker = geometry->get_location_near_z(2.0, 0.9, 0.0);
+    const auto exit = geometry->get_location_near_z(44.0, 1.0, 0.0);
     ASSERT_TRUE(walker.has_value() && exit.has_value());
 
     constexpr double stride = 0.05;

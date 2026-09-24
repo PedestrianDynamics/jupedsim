@@ -124,54 +124,73 @@ std::optional<std::size_t> Geometry::region_reached(const Location& who, Point d
     return arrival.has_value() ? std::optional{arrival->region()} : std::nullopt;
 }
 
-Geometry::FaceLocation Geometry::locate_in_region(std::size_t region_id, const Point2D& xy) const
+std::vector<Geometry::FaceLocation> Geometry::faces_at(const Point2D& xy) const
 {
-    // All intersections along z. Search for the one with the region_id.
     const Line3D vertical(Point3D{xy.x(), xy.y(), 0}, Direction3D(0, 0, 1));
     std::vector<AABBTree::Intersection_and_primitive_id<Line3D>::Type> hits{};
     aabb_tree().all_intersections(vertical, std::back_inserter(hits));
 
+    std::vector<FaceLocation> faces{};
+    faces.reserve(hits.size());
     for(const auto& [where, face] : hits) {
-        if(_region[face] != region_id) {
-            continue;
-        }
         const auto* point = std::get_if<Point3D>(&where);
         // Assert against vertical faces - purely defensive.
         assert(point && "FATAL: vertical face hit by the locate line");
-        return {face, *point};
+        faces.push_back({face, *point});
+    }
+    // The tree's traversal order is not specified; make it deterministic.
+    std::sort(faces.begin(), faces.end(), [this](const auto& a, const auto& b) {
+        return std::pair{region_of(a.face), a.face} < std::pair{region_of(b.face), b.face};
+    });
+    return faces;
+}
+
+Location Geometry::location_at(Point xy, const FaceLocation& where) const
+{
+    return Location{this, xy, region_of(where.face), where.face, where.point.z()};
+}
+
+Geometry::FaceLocation Geometry::locate_in_region(std::size_t region_id, const Point2D& xy) const
+{
+    for(const auto& where : faces_at(xy)) {
+        if(region_of(where.face) == region_id) {
+            return where;
+        }
     }
     return {SurfaceMesh::null_face(), Point3D{}};
 }
 
-std::optional<Location> Geometry::get_location(double x, double y, double z_hint, double tol) const
+Location Geometry::get_location(double x, double y, std::size_t region_id) const
 {
-    const auto face_location = locate_near_z(Point2D{x, y}, z_hint, tol);
+    if(region_id >= region_count()) {
+        throw SimulationError("Unknown region ID {}", region_id);
+    }
+    const auto face_location = locate_in_region(region_id, {x, y});
     if(face_location.face == SurfaceMesh::null_face()) {
+        throw SimulationError("Point {} is not in region {}", Point{x, y}, region_id);
+    }
+    return location_at(Point{x, y}, face_location);
+}
+
+std::optional<Location>
+Geometry::get_location_near_z(double x, double y, double z, double tol) const
+{
+    const auto where = locate_near_z(Point2D{x, y}, z, tol);
+    if(where.face == SurfaceMesh::null_face()) {
         return std::nullopt;
     }
-    return Location{
-        this,
-        Point{x, y},
-        region_of(face_location.face),
-        face_location.face,
-        face_location.point.z()};
+    return location_at(Point{x, y}, where);
 }
 
 Geometry::FaceLocation Geometry::locate_near_z(const Point2D& xy, double z, double tolerance) const
 {
-    const Line3D vertical(Point3D{xy.x(), xy.y(), 0}, Direction3D(0, 0, 1));
-    std::vector<AABBTree::Intersection_and_primitive_id<Line3D>::Type> hits{};
-    aabb_tree().all_intersections(vertical, std::back_inserter(hits));
-
     FaceLocation best{SurfaceMesh::null_face(), Point3D{}};
     auto bestDeviation = tolerance;
-    for(const auto& [where, face] : hits) {
-        const auto* point = std::get_if<Point3D>(&where);
-        // Assert against vertical faces - purely defensive.
-        assert(point && "FATAL: vertical face hit by the locate line");
-        if(const auto deviation = std::abs(point->z() - z); deviation <= bestDeviation) {
+    for(const auto& face_location : faces_at(xy)) {
+        const auto deviation = std::abs(face_location.point.z() - z);
+        if(deviation < bestDeviation) {
             bestDeviation = deviation;
-            best = {face, *point};
+            best = face_location;
         }
     }
     return best;

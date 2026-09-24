@@ -137,7 +137,7 @@ Point3D SurfaceMeshShortestPathRoutingEngine::held_off_the_wall(
     // the storey the corner belongs to. Half a metre is far more than the clearance can climb
     // and far less than one storey.
     constexpr double sameStorey = 0.5;
-    const auto located = _geometry.get_location(moved.x, moved.y, corner.z(), sameStorey);
+    const auto located = _geometry.get_location_near_z(moved.x, moved.y, corner.z(), sameStorey);
     return located ? located->position_3d() : Point3D{moved.x, moved.y, corner.z()};
 }
 
