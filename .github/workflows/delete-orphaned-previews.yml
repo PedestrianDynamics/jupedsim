@@ -1,0 +1,81 @@
+name: Delete Orphaned PR Previews
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *"
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  cleanup:
+    name: Delete Orphaned PR Previews
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout CI scripts
+        uses: actions/checkout@v7
+        with:
+          path: jupedsim
+          sparse-checkout: scripts/ci
+          sparse-checkout-cone-mode: true
+
+      - name: Checkout PR previews
+        uses: actions/checkout@v7
+        with:
+          repository: PedestrianDynamics/jupedsim-pr-previews
+          token: ${{ secrets.JUPEDSIM_PR_PREVIEWS_TOKEN }}
+          ref: main
+          path: pr-previews
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.15"
+
+      - name: Install PyGithub
+        run: python -m pip install 'PyGithub~=2.10'
+
+      - name: Delete orphaned previews
+        working-directory: pr-previews
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Preview deploys push to the same branch, so a push can be rejected
+          # as non-fast-forward. Rebasing a stale deletion commit onto the new
+          # tip could strip files of a preview that was re-deployed in the
+          # meantime (PR reopened, build in flight) or stop on modify/delete
+          # conflicts. On rejection, restart from the current remote tip and
+          # recompute the deletions.
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+
+            python3 "$GITHUB_WORKSPACE/jupedsim/scripts/ci/delete_orphaned_previews.py" \
+              pull-requests --repo "$GITHUB_REPOSITORY"
+
+            git add -A
+            if git diff --cached --quiet; then
+              echo "No orphaned previews to delete."
+              exit 0
+            fi
+            # Record which previews go, e.g. "#12, #34"; the run log expires.
+            numbers=$(git diff --cached --name-only --diff-filter=D \
+              | cut -d/ -f2 | sort -un | sed 's/^/#/' | paste -sd ',' - | sed 's/,/, /g')
+            git commit -m "docs: delete orphaned PR previews ($numbers)"
+
+            if git push origin HEAD:main; then
+              echo "Deleted orphaned previews: $numbers" >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            echo "Push rejected (attempt $attempt), retrying"
+            sleep $((attempt * 5))
+          done
+
+          echo "::error::Failed to push cleanup after 5 attempts"
+          exit 1
