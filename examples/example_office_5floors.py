@@ -59,11 +59,29 @@ SCATTERED = [
 ]
 
 
+def region_at(sim: jps.Simulation, x: float, y: float, height: float) -> int:
+    """The region at (x, y) on the storey at `height`.
+
+    A mesh brings no region ids along, so look them up.
+    """
+    geometry = sim.get_geometry()
+    for region_id in range(geometry.region_count()):
+        try:
+            location = geometry.get_location(x, y, region_id)
+        except jps.SimulationError:
+            continue
+        if abs(location.z - height) < 0.1:
+            return region_id
+    raise ValueError(f"No storey at height {height} over ({x}, {y})")
+
+
 def build() -> jps.Simulation:
     sim = jps.Simulation(
         model=jps.CollisionFreeSpeedModel(), geometry=OBJ, dt=0.01
     )
-    exit_id = sim.add_exit_stage(EXIT_POLYGON, z_hint=FLOORS[0])
+    exit_id = sim.add_exit_stage(
+        EXIT_POLYGON, region_id=region_at(sim, 21.3, 0.8, FLOORS[0])
+    )
     journey_id = sim.add_journey(jps.JourneyDescription([exit_id]))
 
     starts = [(x, y, FLOORS[-1]) for x, y in TOP_FLOOR_GROUP] + SCATTERED
@@ -73,7 +91,7 @@ def build() -> jps.Simulation:
             stage_id=exit_id,
             position=(x, y),
             state=jps.CollisionFreeSpeedModelState(),
-            z_hint=z,
+            region_id=region_at(sim, x, y, z),
         )
     return sim
 
