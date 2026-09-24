@@ -24,6 +24,8 @@ __pycache__/
 /dist/
 /jupedsim.egg-info/
 /python_modules/trame_viewer/trame_viewer.egg-info/
+/python_modules/jupedsim_visualizer/jupedsim_visualizer.egg-info/
+/python_modules/jupedsim_visualizer/dist/
 /docs/build
 /docs/source/citation/*.bib
 /docs/jupyter_execute/
