@@ -1,0 +1,49 @@
+# SPDX-License-Identifier: LGPL-3.0-or-later
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "jupedsim-visualizer"
+version = "1.0.0"
+description = "Qt/VTK viewer for JuPedSim geometries and trajectory recordings"
+readme = "README.md"
+license = "LGPL-3.0-or-later"
+license-files = ["LICENSE"]
+requires-python = ">=3.10"
+maintainers = [{ name = "JuPedSim Development Core Team", email = "dev@jupedsim.org" }]
+dependencies = [
+    "jupedsim",
+    "pyside6~=6.8",
+    "vtk~=9.4",
+    "shapely~=2.0",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: X11 Applications :: Qt",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Scientific/Engineering :: Visualization",
+]
+
+[project.urls]
+Documentation = "https://www.jupedsim.org"
+Source = "https://github.com/PedestrianDynamics/jupedsim/tree/master/python_modules/jupedsim_visualizer"
+Tracker = "https://github.com/PedestrianDynamics/jupedsim/issues"
+
+[project.scripts]
+jupedsim-visualizer = "jupedsim_visualizer.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["jupedsim_visualizer*"]
+
+# Lint config: inherit the repository-wide settings, add rules that only
+# make sense for a separately released package.
+[tool.ruff]
+extend = "../../pyproject.toml"
+
+[tool.ruff.lint]
+extend-select = ["TID251"]
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"jupedsim.internal".msg = "jupedsim-visualizer is released separately from jupedsim and may only use the public API (jupedsim.__all__)."

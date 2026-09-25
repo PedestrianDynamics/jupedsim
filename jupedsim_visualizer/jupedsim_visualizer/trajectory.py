@@ -1,5 +1,4 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
-from jupedsim.internal.aabb import AABB
 from jupedsim.recording import Recording, RecordingFrame
 from vtkmodules.vtkCommonCore import vtkPoints
 from vtkmodules.vtkCommonDataModel import vtkPolyData
@@ -7,6 +6,7 @@ from vtkmodules.vtkFiltersCore import vtkGlyph2D
 from vtkmodules.vtkFiltersSources import vtkRegularPolygonSource
 from vtkmodules.vtkRenderingCore import vtkActor, vtkPolyDataMapper
 
+from jupedsim_visualizer.aabb import AABB
 from jupedsim_visualizer.config import Colors, ZLayers
 
 

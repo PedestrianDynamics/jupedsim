@@ -2,7 +2,6 @@
 import sys
 
 from jupedsim import RoutingEngine
-from jupedsim.internal.aabb import AABB
 from PySide6.QtCore import QObject, Signal
 from vtkmodules.vtkCommonCore import vtkCommand, vtkPoints
 from vtkmodules.vtkCommonDataModel import vtkCellArray, vtkPolyData, vtkPolygon
@@ -14,6 +13,7 @@ from vtkmodules.vtkRenderingCore import (
     vtkRenderer,
 )
 
+from jupedsim_visualizer.aabb import AABB
 from jupedsim_visualizer.config import Colors, ZLayers
 
 

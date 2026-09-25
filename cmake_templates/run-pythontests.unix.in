@@ -1,8 +1,10 @@
 #! /usr/bin/env bash
 export JPSCORE_SOURCE_PATH="@PROJECT_SOURCE_DIR@"
+# jupedsim_visualizer tests import Qt; run headless
+export QT_QPA_PLATFORM="${QT_QPA_PLATFORM:-offscreen}"
 export PYTHONPATH="@PROJECT_SOURCE_DIR@/performancetest:@PROJECT_SOURCE_DIR@/python_modules/jupedsim:@PROJECT_SOURCE_DIR@/python_modules/jupedsim_visualizer:@PROJECT_SOURCE_DIR@/python_modules/jupedsim_examples:@CMAKE_LIBRARY_OUTPUT_DIRECTORY@"
 
 echo "Source path ${JPSCORE_SOURCE_PATH}"
 echo "PYTHONPATH=${PYTHONPATH}"
 
-@Python_EXECUTABLE@ -m pytest  ${JPSCORE_SOURCE_PATH}/systemtest ${JPSCORE_SOURCE_PATH}/python_modules/jupedsim/tests ${JPSCORE_SOURCE_PATH}/python_modules/jupedsim_examples/tests --basetemp="$(pwd)/test-results" "$@"
+@Python_EXECUTABLE@ -m pytest  ${JPSCORE_SOURCE_PATH}/systemtest ${JPSCORE_SOURCE_PATH}/python_modules/jupedsim/tests ${JPSCORE_SOURCE_PATH}/python_modules/jupedsim_examples/tests ${JPSCORE_SOURCE_PATH}/python_modules/jupedsim_visualizer/tests --basetemp="$(pwd)/test-results" "$@"

@@ -1,8 +1,10 @@
 numpy~=2.2
 shapely~=2.0
+deprecated~=1.2.18
+# jupedsim_visualizer runtime deps (separate distribution, needed to run
+# it from the checkout and for its tests)
 pyside6~=6.8
 vtk~=9.4
-deprecated~=1.2.18
 # build deps
 wheel
 build

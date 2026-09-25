@@ -4,11 +4,11 @@ import sys
 import jupedsim as jps
 import vtkmodules.qt
 import vtkmodules.vtkRenderingOpenGL2  # noqa: F401
-from jupedsim.internal.aabb import AABB
 from PySide6.QtCore import Signal
 from vtkmodules.vtkInteractionStyle import vtkInteractorStyleUser
 from vtkmodules.vtkRenderingCore import vtkRenderer
 
+from jupedsim_visualizer.aabb import AABB
 from jupedsim_visualizer.config import Colors
 from jupedsim_visualizer.geometry import HoverInfo
 from jupedsim_visualizer.grid import Grid
