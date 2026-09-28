@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 import math
 
-from jupedsim import RoutingEngine
-from jupedsim.recording import Recording
 from PySide6.QtCore import QSignalBlocker, Qt, QTimer
 from PySide6.QtGui import QFont, QPaintEvent
 from PySide6.QtStateMachine import QState, QStateMachine
@@ -18,9 +16,11 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from jupedsim_visualizer.geometry import Geometry
-from jupedsim_visualizer.geometry_widget import RenderWidget
-from jupedsim_visualizer.trajectory import Trajectory
+from jupedsim_vis.geometry import Geometry
+from jupedsim_vis.geometry_widget import RenderWidget
+from jupedsim_vis.recording import Recording
+from jupedsim_vis.routing import Routing
+from jupedsim_vis.trajectory import Trajectory
 
 
 class PlayerControlWidget(QWidget):
@@ -130,18 +130,21 @@ class PlayerControlWidget(QWidget):
 class ReplayWidget(QWidget):
     def __init__(
         self,
-        navi: RoutingEngine,
         rec: Recording,
         geo: Geometry,
         trajectory: Trajectory,
+        *,
+        routing: Routing,
         parent=None,
     ):
         QWidget.__init__(self, parent)
         self.rec = rec
         self.trajectory = trajectory
+        self.routing = routing
+        self.routing_status = routing.unavailable_reason
         self.control = PlayerControlWidget(parent=self)
         self.render_widget = RenderWidget(
-            geo, navi, [geo, trajectory], parent=self
+            geo, [geo, trajectory], router=routing.router, parent=self
         )
         self.geo = geo
         layout = QVBoxLayout()

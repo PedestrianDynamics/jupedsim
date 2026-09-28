@@ -73,9 +73,7 @@ def build_jupedsim():
 
 def run_test(test, args, build_dir, result_dir):
     test_env = os.environ.copy()
-    test_env["PYTHONPATH"] = (
-        "/src/python_modules/jupedsim:/src/python_modules/jupedsim_visualizer:/build/lib"
-    )
+    test_env["PYTHONPATH"] = "/src/python_modules/jupedsim:/build/lib"
 
     perf_data_file_name = f"{test}.perf.data"
     perf_file_name = f"{test}.perf"

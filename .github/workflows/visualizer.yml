@@ -1,0 +1,248 @@
+name: jupedsim-vis
+on:
+  push:
+    # Same branches as cibuildwheel.yml: the long lived branches, not every
+    # topic branch someone pushes.
+    branches:
+      - master
+      - rls-*
+    paths:
+      - 'jupedsim_vis/**'
+      - '.github/workflows/visualizer.yml'
+  pull_request:
+    branches:
+      - master
+      - rls-*
+    paths:
+      - 'jupedsim_vis/**'
+      - '.github/workflows/visualizer.yml'
+permissions:
+  contents: read
+# One run per ref: a new push supersedes the one still running on it.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+defaults:
+  run:
+    # One shell on all three runners, so the same script works everywhere
+    # (git-bash on Windows). Globs such as dist/*.whl expand as expected.
+    shell: bash
+env:
+  # The visualizer is a Qt application; everything CI runs is headless.
+  # The render job overrides this at step level.
+  QT_QPA_PLATFORM: offscreen
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - name: Install dependencies
+        run: python -m pip install "ruff~=0.14"
+      - name: Run ruff check
+        run: ruff check jupedsim_vis
+      - name: Run ruff format check
+        run: ruff format --check jupedsim_vis
+  test:
+    name: Test on ${{ matrix.os }} (jupedsim=${{ matrix.with_jupedsim }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-15, windows-latest]
+        # The visualizer works with and without jupedsim installed; both
+        # have to be exercised, the optional import is the whole point.
+        with_jupedsim: [false, true]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - name: Install Qt system libraries
+        if: runner.os == 'Linux'
+        # Qt links these at load time; the GitHub Ubuntu image ships only
+        # some of them, and a missing one aborts the import with
+        # "could not load the Qt platform plugin".
+        run: |
+          set -eux
+          sudo apt-get update
+          # Ubuntu 24.04 renamed libglib2.0-0 to libglib2.0-0t64; pick
+          # whichever name this image knows, so a runner image bump does
+          # not break the job.
+          glib=libglib2.0-0t64
+          apt-cache show "$glib" >/dev/null 2>&1 || glib=libglib2.0-0
+          sudo apt-get install -y --no-install-recommends \
+            libegl1 \
+            libgl1 \
+            libglx-mesa0 \
+            libopengl0 \
+            "$glib" \
+            libdbus-1-3 \
+            libfontconfig1 \
+            libfreetype6 \
+            libxkbcommon0 \
+            libxkbcommon-x11-0 \
+            libxcb-cursor0 \
+            libxcb-icccm4 \
+            libxcb-image0 \
+            libxcb-keysyms1 \
+            libxcb-randr0 \
+            libxcb-render-util0 \
+            libxcb-shape0 \
+            libxcb-xinerama0 \
+            libxcb-xkb1 \
+            libxrender1 \
+            libsm6 \
+            libice6
+      - name: Install jupedsim_vis and pytest
+        working-directory: jupedsim_vis
+        run: python -m pip install . pytest
+      - name: Install jupedsim
+        if: matrix.with_jupedsim
+        run: python -m pip install jupedsim
+      - name: Assert jupedsim is absent
+        if: ${{ !matrix.with_jupedsim }}
+        # Guards the leg itself: if jupedsim ever slipped in as a transitive
+        # dependency this leg would silently stop testing the absent case.
+        run: |
+          if python -c "import jupedsim" 2>/dev/null; then
+            echo "jupedsim must not be installed in this matrix leg"
+            exit 1
+          fi
+      - name: Run tests
+        working-directory: jupedsim_vis
+        run: python -m pytest tests -v
+      - name: Build wheel and sdist
+        working-directory: jupedsim_vis
+        run: |
+          python -m pip install build
+          python -m build
+      - name: Create recording fixtures
+        # Schema v3 (current) and v1 (oldest supported) exercise both ends
+        # of the read-only recording reader. The script is stdlib only, so
+        # it runs with the bare interpreter.
+        run: |
+          set -eux
+          python jupedsim_vis/tests/make_fixture_recording.py \
+            "$RUNNER_TEMP/recording_v3.sqlite" --version 3
+          python jupedsim_vis/tests/make_fixture_recording.py \
+            "$RUNNER_TEMP/recording_v1.sqlite" --version 1
+      - name: Smoke test the built wheel
+        # A clean venv, so the wheel's own dependency metadata is what gets
+        # installed - the development install above cannot mask a gap.
+        # set -eux: fail on the first error, and show each command, which is
+        # what makes a failing CI log readable.
+        run: |
+          set -eux
+          # RUNNER_TEMP is a Windows path (D:\a\_temp) that git-bash does
+          # not understand in "$VBIN/python"; cd + pwd turns it into the
+          # POSIX form the shell can use.
+          TMP_POSIX="$(cd "$RUNNER_TEMP" && pwd)"
+          python -m venv "$TMP_POSIX/smoke-venv"
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            VBIN="$TMP_POSIX/smoke-venv/Scripts"
+          else
+            VBIN="$TMP_POSIX/smoke-venv/bin"
+          fi
+          "$VBIN/python" -m pip install --upgrade pip
+          "$VBIN/python" -m pip install jupedsim_vis/dist/*.whl
+          if [ "${{ matrix.with_jupedsim }}" = "true" ]; then
+            "$VBIN/python" -m pip install jupedsim
+          fi
+          "$VBIN/jupedsim-vis" --smoke-test
+          "$VBIN/jupedsim-vis" --smoke-test \
+            --wkt jupedsim_vis/tests/data/simple.wkt \
+            --recording "$RUNNER_TEMP/recording_v3.sqlite" \
+            --recording "$RUNNER_TEMP/recording_v1.sqlite"
+      - name: Upload packages
+        if: matrix.os == 'ubuntu-latest' && !matrix.with_jupedsim
+        uses: actions/upload-artifact@v7
+        with:
+          name: jupedsim-vis-packages
+          path: |
+            jupedsim_vis/dist/*.whl
+            jupedsim_vis/dist/*.tar.gz
+          if-no-files-found: error
+  render:
+    name: Render smoke test (informational)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # Informational only: this is the one job that creates real render tabs,
+    # on a software OpenGL stack under Xvfb. Until that has proven stable on
+    # the hosted runners a failure here must not block a pull request.
+    continue-on-error: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - name: Install Qt system libraries
+        # Same list as the test job, plus xvfb (the virtual X server) and
+        # libgl1-mesa-dri (the llvmpipe software rasterizer VTK renders on).
+        # xauth and xfonts-base are only Recommends of xvfb, which
+        # --no-install-recommends drops: without them xvfb-run fails with
+        # "xauth: command not found" and Xvfb with "could not open default
+        # font 'fixed'". Name them explicitly.
+        run: |
+          set -eux
+          sudo apt-get update
+          glib=libglib2.0-0t64
+          apt-cache show "$glib" >/dev/null 2>&1 || glib=libglib2.0-0
+          sudo apt-get install -y --no-install-recommends \
+            xvfb \
+            xauth \
+            xfonts-base \
+            libgl1-mesa-dri \
+            libegl1 \
+            libgl1 \
+            libglx-mesa0 \
+            libopengl0 \
+            "$glib" \
+            libdbus-1-3 \
+            libfontconfig1 \
+            libfreetype6 \
+            libxkbcommon0 \
+            libxkbcommon-x11-0 \
+            libxcb-cursor0 \
+            libxcb-icccm4 \
+            libxcb-image0 \
+            libxcb-keysyms1 \
+            libxcb-randr0 \
+            libxcb-render-util0 \
+            libxcb-shape0 \
+            libxcb-xinerama0 \
+            libxcb-xkb1 \
+            libxrender1 \
+            libsm6 \
+            libice6
+      - name: Install jupedsim_vis
+        working-directory: jupedsim_vis
+        run: python -m pip install .
+      - name: Create recording fixture
+        run: |
+          set -eux
+          python jupedsim_vis/tests/make_fixture_recording.py \
+            "$RUNNER_TEMP/recording_v3.sqlite" --version 3
+      - name: Run render smoke test under Xvfb
+        env:
+          # Overrides the workflow-level offscreen platform: a render tab
+          # needs a real window handle, which only a real X server provides.
+          QT_QPA_PLATFORM: xcb
+          LIBGL_ALWAYS_SOFTWARE: "1"
+          GALLIUM_DRIVER: llvmpipe
+        run: |
+          set -eux
+          xvfb-run -a --server-args="-screen 0 1280x1024x24" \
+            jupedsim-vis --smoke-test-render \
+            --wkt jupedsim_vis/tests/data/simple.wkt \
+            --recording "$RUNNER_TEMP/recording_v3.sqlite"

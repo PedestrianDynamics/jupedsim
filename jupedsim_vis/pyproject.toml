@@ -1,0 +1,62 @@
+# SPDX-License-Identifier: LGPL-3.0-or-later
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "jupedsim-vis"
+version = "1.0.0"
+description = "Qt/VTK viewer for JuPedSim geometries and trajectory recordings"
+readme = "README.md"
+license = "LGPL-3.0-or-later"
+license-files = ["LICENSE"]
+requires-python = ">=3.10"
+maintainers = [{ name = "JuPedSim Development Core Team", email = "dev@jupedsim.org" }]
+dependencies = [
+    "pyside6~=6.8",
+    "vtk~=9.4",
+    "shapely>=2.1",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: X11 Applications :: Qt",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Scientific/Engineering :: Visualization",
+]
+
+[project.urls]
+Documentation = "https://www.jupedsim.org"
+Source = "https://github.com/PedestrianDynamics/jupedsim/tree/master/jupedsim_vis"
+Tracker = "https://github.com/PedestrianDynamics/jupedsim/issues"
+
+[project.scripts]
+jupedsim-vis = "jupedsim_vis.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["jupedsim_vis*"]
+
+# Lint config: inherit the repository-wide settings, add rules that only
+# make sense for a separately released package.
+[tool.ruff]
+extend = "../pyproject.toml"
+
+[tool.ruff.lint]
+extend-select = ["TID251"]
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"jupedsim".msg = "Only jupedsim_vis/routing.py may import jupedsim; it is an optional dependency."
+"jupedsim.internal".msg = "jupedsim-vis may only use the public jupedsim API (jupedsim.__all__)."
+
+# Extend (not replace) the per-file-ignores inherited from ../pyproject.toml,
+# which turns pep8-naming off for this package. Paths are relative to this
+# file.
+[tool.ruff.lint.extend-per-file-ignores]
+"jupedsim_vis/routing.py" = ["TID251"]
+"tests/*" = ["TID251"]
+
+# Make this directory the pytest rootdir. Without an ini section here the
+# repository root wins, gets prepended to sys.path and shadows the installed
+# package with the distribution directory of the same name.
+[tool.pytest.ini_options]
+addopts = "--import-mode=importlib"

@@ -1,17 +1,20 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
-from jupedsim.internal.aabb import AABB
-from jupedsim.recording import Recording, RecordingFrame
 from vtkmodules.vtkCommonCore import vtkPoints
 from vtkmodules.vtkCommonDataModel import vtkPolyData
 from vtkmodules.vtkFiltersCore import vtkGlyph2D
 from vtkmodules.vtkFiltersSources import vtkRegularPolygonSource
 from vtkmodules.vtkRenderingCore import vtkActor, vtkPolyDataMapper
 
-from jupedsim_visualizer.config import Colors, ZLayers
+from jupedsim_vis.aabb import AABB
+from jupedsim_vis.config import Colors, ZLayers
+from jupedsim_vis.recording import Recording, RecordingFrame
 
 
 def to_vtk_points(frame: RecordingFrame) -> vtkPoints:
     points = vtkPoints()
+    # Keep the double precision the recording stores; see
+    # ``geometry.to_polydata``.
+    points.SetDataTypeToDouble()
     for agent in frame.agents:
         points.InsertNextPoint(
             agent.position[0], agent.position[1], ZLayers.agents

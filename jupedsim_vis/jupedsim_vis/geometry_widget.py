@@ -1,18 +1,18 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 import sys
 
-import jupedsim as jps
 import vtkmodules.qt
 import vtkmodules.vtkRenderingOpenGL2  # noqa: F401
-from jupedsim.internal.aabb import AABB
 from PySide6.QtCore import Signal
 from vtkmodules.vtkInteractionStyle import vtkInteractorStyleUser
 from vtkmodules.vtkRenderingCore import vtkRenderer
 
-from jupedsim_visualizer.config import Colors
-from jupedsim_visualizer.geometry import HoverInfo
-from jupedsim_visualizer.grid import Grid
-from jupedsim_visualizer.move_controller import MoveController
+from jupedsim_vis.aabb import AABB
+from jupedsim_vis.config import Colors
+from jupedsim_vis.geometry import Geometry, HoverInfo
+from jupedsim_vis.grid import Grid
+from jupedsim_vis.move_controller import MoveController
+from jupedsim_vis.routing import Router
 
 # On macOS with Qt6/PySide6, QOpenGLWidget is required so Qt manages the OpenGL context;
 # QWidget (the default) does not expose a native handle that VTK can attach to there.
@@ -26,13 +26,13 @@ class RenderWidget(QVTKRenderWindowInteractor):
 
     def __init__(
         self,
-        geo: jps.Geometry,
-        navi: jps.RoutingEngine,
+        geo: Geometry,
         actor_sources,
+        *,
+        router: Router | None = None,
         parent=None,
     ):
         QVTKRenderWindowInteractor.__init__(self, parent)
-        self.navi = navi
         self.actor_sources = actor_sources
 
         self.ren = vtkRenderer()
@@ -51,7 +51,7 @@ class RenderWidget(QVTKRenderWindowInteractor):
         self.iren.Initialize()
 
         self.move_controller = MoveController(style, cam)
-        self.move_controller.set_navi(self.navi)
+        self.move_controller.set_router(router)
         self.hover_info = HoverInfo(geo, self.ren, style, self.move_controller)
         self.hover_info.hovered.connect(self.on_hover_triangle)
 

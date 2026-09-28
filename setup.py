@@ -259,23 +259,18 @@ setup(
         "jupedsim.models",
         "jupedsim.internal",
         "jupedsim.native",
-        "jupedsim_visualizer",
     ],
     package_dir={
         "jupedsim": "python_modules/jupedsim/jupedsim",
         "jupedsim.models": "python_modules/jupedsim/jupedsim/models",
         "jupedsim.internal": "python_modules/jupedsim/jupedsim/internal",
         "jupedsim.native": "python_modules/jupedsim/jupedsim/native",
-        "jupedsim_visualizer": "python_modules/jupedsim_visualizer/jupedsim_visualizer",
     },
     install_requires=[
         "numpy~=2.2",
         "shapely~=2.0",
-        "pyside6~=6.8",
-        "vtk~=9.4",
         "deprecated~=1.2.18",
     ],
-    scripts=["python_modules/jupedsim_visualizer/bin/jupedsim-visualizer"],
     url="https://www.jupedsim.org",
     project_urls={
         "Documentation": "https://www.jupedsim.org",
