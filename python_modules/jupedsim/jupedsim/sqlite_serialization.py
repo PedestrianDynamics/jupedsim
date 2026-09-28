@@ -144,7 +144,7 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
                     agent.position[0],
                     agent.position[1],
                 )
-                for agent in simulation.agents()
+                for agent in simulation._obj.agents()
             ]
             cur.executemany(
                 "INSERT INTO trajectory_data VALUES(?, ?, ?, ?)",
