@@ -1,5 +1,4 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
-import jupedsim as jps
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPaintEvent
 from PySide6.QtWidgets import (
@@ -10,21 +9,25 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from jupedsim_visualizer.geometry import Geometry
-from jupedsim_visualizer.geometry_widget import RenderWidget
+from jupedsim_vis.geometry import Geometry
+from jupedsim_vis.geometry_widget import RenderWidget
+from jupedsim_vis.routing import Routing
 
 
 class ViewGeometryWidget(QWidget):
     def __init__(
         self,
-        navi: jps.RoutingEngine,
         geo: Geometry,
         name_text: str,
         info_text: str,
+        *,
+        routing: Routing,
         parent=None,
     ):
         QWidget.__init__(self, parent)
         self.geo = geo
+        self.routing = routing
+        self.routing_status = routing.unavailable_reason
         bottom_layout = QHBoxLayout()
         geometry_label = QLabel(name_text)
         geometry_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
@@ -41,7 +44,9 @@ class ViewGeometryWidget(QWidget):
         reset_cam_bt = QPushButton("Reset Camera")
         layout.addWidget(reset_cam_bt)
 
-        self.render_widget = RenderWidget(geo, navi, [geo], parent=self)
+        self.render_widget = RenderWidget(
+            geo, [geo], router=routing.router, parent=self
+        )
         layout.addWidget(self.render_widget)
 
         self.hover_label = QLabel("")

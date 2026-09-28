@@ -10,7 +10,7 @@ from vtkmodules.vtkRenderingCore import (
     vtkRenderer,
 )
 
-from jupedsim_visualizer.config import Colors, ZLayers
+from jupedsim_vis.config import Colors, ZLayers
 
 
 class Grid:

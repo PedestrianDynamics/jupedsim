@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 import math
 
-from jupedsim import RoutingEngine
 from vtkmodules.vtkCommonCore import vtkCommand, vtkPoints
 from vtkmodules.vtkCommonDataModel import (
     vtkCellArray,
@@ -11,7 +10,8 @@ from vtkmodules.vtkCommonDataModel import (
 from vtkmodules.vtkInteractionStyle import vtkInteractorStyleUser
 from vtkmodules.vtkRenderingCore import vtkActor, vtkCamera, vtkPolyDataMapper
 
-from jupedsim_visualizer.config import ZLayers
+from jupedsim_vis.config import ZLayers
+from jupedsim_vis.routing import Router
 
 
 class MoveController:
@@ -22,7 +22,7 @@ class MoveController:
         self.route_to = None
         self.lmb_pressed = False
         self.cam = cam
-        self.navi = None
+        self.router: Router | None = None
         self.actor = None
         self.interactor_style = interactor_style
         self.dist = 0
@@ -42,8 +42,8 @@ class MoveController:
             vtkCommand.MouseMoveEvent, self._on_mouse_move
         )
 
-    def set_navi(self, navi: RoutingEngine | None):
-        self.navi = navi
+    def set_router(self, router: Router | None):
+        self.router = router
 
     def _on_char(self, obj, evt):
         char = chr(obj.GetChar())
@@ -81,7 +81,7 @@ class MoveController:
         pass
 
     def _on_lmb_pressed(self, obj, evt):
-        if not self.navi:
+        if self.router is None:
             return
         interactor = obj.GetInteractor()
         if not self.lmb_pressed:
@@ -95,7 +95,7 @@ class MoveController:
         if not self.lmb_pressed:
             return
 
-        if not self.navi:
+        if self.router is None:
             return
         self.lmb_pressed = True
         display_pos = interactor.GetEventPosition()
@@ -110,7 +110,7 @@ class MoveController:
         self.dist = 0
 
     def _render_path(self):
-        if not self.navi:
+        if self.router is None:
             return
 
         interactor = self.interactor_style.GetInteractor()
@@ -121,21 +121,24 @@ class MoveController:
         if (
             not self.route_to
             or not self.route_from
-            or not self.navi.is_routable(self.route_from)
-            or not self.navi.is_routable(self.route_to)
+            or not self.router.is_routable(self.route_from)
+            or not self.router.is_routable(self.route_to)
         ):
             if self.actor:
                 renderer.RemoveActor(self.actor)
                 self.actor = None
             return
 
-        points = self.navi.compute_waypoints(self.route_from, self.route_to)
+        points = self.router.compute_waypoints(self.route_from, self.route_to)
 
         self.dist = 0
         for a, b in zip(points[:-1], points[1:]):
             self.dist += math.sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2)
 
         vtk_points = vtkPoints()
+        # Double precision, as everywhere else in the scene; see
+        # ``geometry.to_polydata``.
+        vtk_points.SetDataTypeToDouble()
         polyline = vtkPolyLine()
         polyline.GetPointIds().SetNumberOfIds(len(points))
         for idx, pt in enumerate(points):
