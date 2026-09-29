@@ -259,3 +259,71 @@ def test_can_not_add_notifiable_queue_outside_geometry(square_room_5x5):
         match=r"NotifiableQueue point .* not inside walkable area",
     ):
         simulation.add_queue_stage([(2, -2), (-10, -10)])
+
+
+def _iterate_until(simulation, predicate, max_iterations=2000):
+    for _ in range(max_iterations):
+        if predicate():
+            return True
+        simulation.iterate()
+    return predicate()
+
+
+def test_queue_enqueued_returns_agent_ids_as_ints(square_room_5x5):
+    simulation = square_room_5x5
+    queue_id = simulation.add_queue_stage([(0, 0), (0, 1)])
+    exit_id = simulation.add_exit_stage(
+        [(2, 2), (2.5, 2), (2.5, 2.5), (2, 2.5)]
+    )
+    journey = jps.JourneyDescription([queue_id, exit_id])
+    journey.set_transition_for_stage(
+        queue_id, jps.Transition.create_fixed_transition(exit_id)
+    )
+    journey_id = simulation.add_journey(journey)
+    queue = simulation.get_stage(queue_id)
+
+    agent_id = simulation.add_agent(
+        journey_id=journey_id,
+        stage_id=queue_id,
+        position=(-2, 0),
+        state=jps.CollisionFreeSpeedModelState(),
+    )
+
+    assert _iterate_until(simulation, lambda: queue.count_enqueued() == 1)
+    enqueued = queue.enqueued()
+    assert enqueued == [agent_id]
+    assert all(type(i) is int for i in enqueued)
+
+
+def test_waiting_set_waiting_returns_agent_ids_as_ints(square_room_5x5):
+    simulation = square_room_5x5
+    waiting_set_id = simulation.add_waiting_set_stage([(0, 0), (0, 1)])
+    exit_id = simulation.add_exit_stage(
+        [(2, 2), (2.5, 2), (2.5, 2.5), (2, 2.5)]
+    )
+    journey = jps.JourneyDescription([waiting_set_id, exit_id])
+    journey.set_transition_for_stage(
+        waiting_set_id, jps.Transition.create_fixed_transition(exit_id)
+    )
+    journey_id = simulation.add_journey(journey)
+    waiting_set = simulation.get_stage(waiting_set_id)
+
+    first_id = simulation.add_agent(
+        journey_id=journey_id,
+        stage_id=waiting_set_id,
+        position=(-2, 0),
+        state=jps.CollisionFreeSpeedModelState(),
+    )
+    second_id = simulation.add_agent(
+        journey_id=journey_id,
+        stage_id=waiting_set_id,
+        position=(-2, 1),
+        state=jps.CollisionFreeSpeedModelState(),
+    )
+    # The caster must not draw ids from UniqueID's global counter.
+    assert second_id == first_id + 1
+
+    assert _iterate_until(simulation, lambda: waiting_set.count_waiting() == 2)
+    waiting = waiting_set.waiting()
+    assert sorted(waiting) == [first_id, second_id]
+    assert all(type(i) is int for i in waiting)

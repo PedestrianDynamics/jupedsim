@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 export JPSCORE_SOURCE_PATH="@PROJECT_SOURCE_DIR@"
-export PYTHONPATH="@PROJECT_SOURCE_DIR@/performancetest:@PROJECT_SOURCE_DIR@/python_modules/jupedsim:@PROJECT_SOURCE_DIR@/python_modules/jupedsim_examples:@CMAKE_LIBRARY_OUTPUT_DIRECTORY@"
+export PYTHONPATH="@PROJECT_SOURCE_DIR@/performancetest:@PROJECT_BINARY_DIR@/stage:@PROJECT_SOURCE_DIR@/python_modules/jupedsim_examples"
 
 echo "Source path ${JPSCORE_SOURCE_PATH}"
 echo "PYTHONPATH=${PYTHONPATH}"

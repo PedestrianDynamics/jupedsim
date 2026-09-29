@@ -4,6 +4,8 @@
 #include <pybind11/detail/common.h>
 #include <pybind11/pybind11.h>
 
+#include <string>
+
 namespace py = pybind11;
 
 void init_logging(py::module_& m);
@@ -20,7 +22,6 @@ void init_geometry(py::module_& m);
 void init_routing(py::module_& m);
 void init_agent(py::module_& m);
 void init_transition(py::module_& m);
-void init_journey(py::module_& m);
 void init_stage(py::module_& m);
 void init_simulation(py::module_& m);
 void init_agent_view(py::module_& m);
@@ -29,12 +30,30 @@ void init_boundary_index(py::module_& m);
 void init_floorfield(py::module_& m);
 void init_walkable_surface(py::module_& m);
 
+// Export every public name, recursing into submodules. Must run after all bindings are registered.
+static void set_all(py::module_& m)
+{
+    py::list names{};
+    for(const auto& item : m.attr("__dict__").cast<py::dict>()) {
+        const auto name = item.first.cast<std::string>();
+        if(name.starts_with('_')) {
+            continue;
+        }
+        names.append(name);
+        if(py::isinstance<py::module_>(item.second)) {
+            auto sub = py::reinterpret_borrow<py::module_>(item.second);
+            set_all(sub);
+        }
+    }
+    names.attr("sort")();
+    m.attr("__all__") = names;
+}
+
 PYBIND11_MODULE(py_jupedsim, m)
 {
     py::register_exception<SimulationError>(m, "SimulationError");
     init_logging(m);
     init_build_info(m);
-    init_journey(m);
     init_trace(m);
     init_python_model(m);
     init_generalized_centrifugal_force_model(m);
@@ -54,4 +73,5 @@ PYBIND11_MODULE(py_jupedsim, m)
     init_boundary_index(m);
     init_floorfield(m);
     init_walkable_surface(m);
+    set_all(m);
 }

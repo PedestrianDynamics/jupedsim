@@ -1,14 +1,13 @@
 numpy~=2.2
 shapely~=2.1
-deprecated~=1.2.18
 # runtime deps of the separate jupedsim-vis distribution in
 # jupedsim_vis/, needed to run it from the checkout and for its tests
 pyside6~=6.8
 vtk~=9.4
 # build deps
-wheel
 build
-setuptools
+scikit-build-core~=1.1
+pybind11-stubgen>=3.0,<4
 
 # test deps
 pytest~=9.1
@@ -18,3 +17,5 @@ pandas~=2.2
 jinja2~=3.1
 ruff~=0.14
 pre-commit~=4.5
+mypy~=2.3
+types-shapely~=2.1
