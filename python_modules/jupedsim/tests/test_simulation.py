@@ -222,6 +222,23 @@ def test_a_direct_steering_target_can_be_given_as_a_location():
     assert agent.location.z == pytest.approx(UPPER_Z)
 
 
+def test_an_agent_reports_the_orientation_of_its_route():
+    sim = polygon_simulation()
+    steering = sim.add_direct_steering_stage()
+    journey_id = sim.add_journey(jps.JourneyDescription([steering]))
+    agent = sim.agent(
+        sim.add_agent(
+            journey_id=journey_id,
+            stage_id=steering,
+            position=(2.0, 5.0),
+            state=jps.CollisionFreeSpeedModelState(),
+        )
+    )
+    agent.final_target = (8.0, 5.0)
+    sim.iterate()
+    assert agent.route_orientation == pytest.approx((1.0, 0.0))
+
+
 # The models that carry a whole storey change today. The two force models
 # (SocialForceModel, GeneralizedCentrifugalForceModel) stall at the stair's
 # turn and are deliberately absent.

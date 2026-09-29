@@ -37,7 +37,8 @@ void init_agent(py::module_& m)
             "final_target",
             [](const GenericAgent& agent) { return intoTuple(agent.finalTarget.xy()); })
         .def_property_readonly(
-            "next_target", [](const GenericAgent& agent) { return intoTuple(agent.nextTarget); })
+            "route_orientation",
+            [](const GenericAgent& agent) { return intoTuple(agent.routeOrientation); })
         .def_property_readonly(
             "state",
             [](GenericAgent& agent) -> OperationalModelState& { return agent.state; },

@@ -63,7 +63,7 @@ TEST(MeshBuiltSimulation, RunsOnASurfaceMesh)
     // Heading for the stair, which is the only way up: over there in plan, and still on the
     // ground floor.
     const auto& agent = sim->Agent(id);
-    EXPECT_GT(agent.nextTarget.x, agent.location.xy().x);
+    EXPECT_GT(agent.routeOrientation.x, 0.0);
     EXPECT_EQ(agent.location.z(), 0.0);
 }
 

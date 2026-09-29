@@ -46,7 +46,7 @@ Point CollisionFreeSpeedModelV2::ComputeNextState(
         boundaryRepulsion += BoundaryRepulsion(currentState, wall);
     }
 
-    const auto desired_direction = step.orientation_to_next_target();
+    const auto desired_direction = step.route_orientation();
     auto direction = (desired_direction + neighborRepulsion + boundaryRepulsion).Normalized();
     if(direction == Point{}) {
         direction = currentState.orientation;

@@ -82,7 +82,7 @@ Point CollisionFreeSpeedModelV3::ComputeNextState(
         boundaryRepulsion += BoundaryRepulsion(currentState, wall);
     }
 
-    const auto desired_direction = step.orientation_to_next_target();
+    const auto desired_direction = step.route_orientation();
     auto reference_direction = (desired_direction + boundaryRepulsion).Normalized();
     if(reference_direction == Point{}) {
         reference_direction = currentState.orientation;

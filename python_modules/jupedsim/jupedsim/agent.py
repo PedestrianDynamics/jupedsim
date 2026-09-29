@@ -184,16 +184,13 @@ class Agent:
         self.__simulation._obj.set_agent_target(self.__id, target)
 
     @property
-    def next_target(self) -> tuple[float, float]:
-        """Current next target of the agent.
+    def route_orientation(self) -> tuple[float, float]:
+        """Unit vector along the route to the agent's final target.
 
-        Next destination is the next waypoint of the current stage of the agent's journey.
         It is used by the operational model to compute the next state of the agent.
-
-        Returns:
-            Current next destination of the agent.
+        Zero when the agent has already reached its final target.
         """
-        return self.__resolve().next_destination
+        return self.__resolve().route_orientation
 
     @property
     def state(self) -> Any:

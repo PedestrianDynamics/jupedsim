@@ -16,7 +16,8 @@ public:
     void Run(RoutingEngine& routingEngine, auto&& agents) const
     {
         for(auto& agent : agents) {
-            agent.nextTarget = routingEngine.ComputeWaypoint(agent.location, agent.finalTarget);
+            agent.routeOrientation =
+                routingEngine.GetOrientation(agent.location, agent.finalTarget);
         }
     }
 };

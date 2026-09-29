@@ -201,12 +201,12 @@ class AgentStep(AgentView):
         return self._obj.dt
 
     @property
-    def orientation_to_next_target(self) -> tuple[float, float]:
-        """Unit vector pointing at the agent's next target.
+    def route_orientation(self) -> tuple[float, float]:
+        """Unit vector along the route to the agent's final target.
 
         Zero when the agent has already reached it.
         """
-        return self._obj.orientation_to_next_target
+        return self._obj.route_orientation
 
     def with_neighbor_state_mapping(
         self, repack: Callable[[Any], Any]

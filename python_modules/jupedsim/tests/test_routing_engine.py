@@ -64,8 +64,12 @@ def test_geometry_regions_and_render_data():
     assert max(ids) == geo.region_count() - 1
 
 
-def test_orientation_is_unit_vector(engine):
-    d = engine.get_orientation((3, 4, 2), (13, 14, 15))
+def test_orientation_is_unit_vector():
+    geo = Geometry.from_obj(str(OBJ))
+    engine = SurfaceMeshShortestPathRoutingEngine(geo)
+    d = engine.get_orientation(
+        geo.get_location(3, 4, z_hint=0.0), geo.get_location(13, 14, z_hint=3.0)
+    )
     assert len(d) == 2
     assert math.hypot(*d) == pytest.approx(1.0)
 

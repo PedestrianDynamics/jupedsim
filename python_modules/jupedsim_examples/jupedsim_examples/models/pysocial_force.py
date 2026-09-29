@@ -182,7 +182,7 @@ class PythonSocialForceModel(CustomOperationalModel):
         """
 
         # eq 1 in paper
-        target_dir = step.orientation_to_next_target
+        target_dir = step.route_orientation
 
         # Initialize acceleration from desired force
         acc_x, acc_y = self._desired_force(

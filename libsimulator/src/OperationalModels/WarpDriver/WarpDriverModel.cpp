@@ -450,7 +450,7 @@ Point WarpDriverModel::ComputeNextState(
     }
 
     // Direction towards destination
-    Point desiredDir = step.orientation_to_next_target();
+    Point desiredDir = step.route_orientation();
     if(desiredDir == Point{}) {
         // The old update carried default-initialized stuck/detour state here,
         // so applying it reset that state; replicate that reset.

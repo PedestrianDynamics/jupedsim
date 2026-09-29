@@ -186,12 +186,9 @@ public:
 
     double dt() const { return _dt; }
 
-    /// Normalized 2D vector pointing at the next target. Zero when the agent has already
+    /// Unit vector along the route to the final target. Zero when the agent has already
     /// reached it.
-    Point orientation_to_next_target() const
-    {
-        return (_agent.nextTarget - location().xy()).Normalized();
-    }
+    Point route_orientation() const { return _agent.routeOrientation; }
 
 private:
     double _dt;

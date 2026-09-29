@@ -114,6 +114,5 @@ void init_agent_view(py::module_& m)
             py::keep_alive<0, 2>(),
             "The same step, but with every neighbor seen through the given mapping.")
         .def_property_readonly("dt", &AgentStep::dt)
-        .def_property_readonly(
-            "orientation_to_next_target", &AgentStep::orientation_to_next_target);
+        .def_property_readonly("route_orientation", &AgentStep::route_orientation);
 }

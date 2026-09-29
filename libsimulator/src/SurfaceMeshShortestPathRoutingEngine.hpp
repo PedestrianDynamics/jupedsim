@@ -26,9 +26,7 @@ public:
     std::vector<Point3D>
     GetShortestPath(const Point3D& source, const RoutingTarget& target) override;
 
-    Point GetOrientation(const Point3D& source, const RoutingTarget& target) override;
-
-    Point ComputeWaypoint(const Location& from, const Location& to) override;
+    Point GetOrientation(const Location& from, const Location& to) override;
 
 private:
     using Traits = CGAL::Surface_mesh_shortest_path_traits<K, SurfaceMesh>;
