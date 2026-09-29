@@ -71,12 +71,7 @@ Point GeneralizedCentrifugalForceModel::ComputeNextState(
     }
 
     const Point fd = ForceDriv(
-        currentState,
-        step.orientation_to_next_target(),
-        currentState.mass,
-        currentState.tau,
-        step.dt(),
-        e0);
+        currentState, step.route_orientation(), currentState.mass, currentState.tau, step.dt(), e0);
     const Point acc = (fd + F_rep + repwall) / currentState.mass;
 
     const Point velocity = (currentState.orientation * currentState.speed) + acc * step.dt();

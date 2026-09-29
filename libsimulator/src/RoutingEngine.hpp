@@ -43,17 +43,9 @@ public:
     virtual std::vector<Point3D>
     GetShortestPath(const Point3D& source, const RoutingTarget& target) = 0;
 
-    /// Get orientation to next point of the shortest path from @p source to
-    /// @p target, projected to x/y.
-    /// @param source where to route from
-    /// @param target where to route to
-    /// @return 2D orientation to the next waypoint
-    virtual Point GetOrientation(const Point3D& source, const RoutingTarget& target) = 0;
-
-    /// The very next point to target from @p from to @p to, projected to x/y.
-    ///
-    /// Interim: The idea is to move to `GetOrientation`.
-    virtual Point ComputeWaypoint(const Location& from, const Location& to) = 0;
+    /// Unit vector from @p from along the route to @p to, projected to x/y. Zero once @p from
+    /// has reached @p to.
+    virtual Point GetOrientation(const Location& from, const Location& to) = 0;
 
     double WallClearance() const { return _wallClearance; }
 

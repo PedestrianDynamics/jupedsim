@@ -47,6 +47,11 @@ double length_along_the_surface(const std::vector<Point3D>& path)
     }
     return ::testing::AssertionSuccess();
 }
+
+Location located(const Geometry& geometry, double x, double y, double z_hint = 0.0)
+{
+    return geometry.get_location(x, y, z_hint).value();
+}
 } // namespace
 
 class FlatSquare : public ::testing::Test
@@ -112,7 +117,7 @@ TEST_F(FlatSquare, CrossingInternalEdgeStaysStraight)
 
 TEST_F(FlatSquare, OrientationPointsToTarget)
 {
-    const Point dir = engine->GetOrientation({6, 2, 1}, {9, 5, 1});
+    const Point dir = engine->GetOrientation(located(*geometry, 6, 2), located(*geometry, 9, 5));
 
     // Direction to the target (3, 3) normalized.
     const double inv_sqrt2 = 1.0 / std::sqrt(2.0);
@@ -125,9 +130,7 @@ TEST_F(FlatSquare, OrientationRobustWhenSourceOnEdge)
     // source sits exactly on the shared diagonal (y=x). CGAL then emits a
     // duplicate leading waypoint; GetOrientation must skip it and still return
     // the real heading instead of a spurious (0,0).
-    const Point3D source{4, 4, 1};
-
-    const Point dir = engine->GetOrientation(source, {8, 7, 1});
+    const Point dir = engine->GetOrientation(located(*geometry, 4, 4), located(*geometry, 8, 7));
 
     // Heading towards (8,7) from (4,4): (4,3) normalized = (0.8, 0.6).
     EXPECT_NEAR(dir.x, 0.8, 1e-6);
@@ -204,35 +207,16 @@ TEST(RoutingEngineLShape, OrientationBendsTowardsReflexCorner)
     // the target -- at the turn the route makes, which is held off the corner itself. Heading for
     // the corner exactly is what leaves an agent stuck against it.
     const Point turn = Point{1, 1} + Point{-1, -1}.Normalized() * engine.WallClearance();
-    const Point dir = engine.GetOrientation({2.5, 0.5, 1}, {0.5, 2.5, 1});
+    const auto from = located(*geometry, 2.5, 0.5);
+    const Point dir = engine.GetOrientation(from, located(*geometry, 0.5, 2.5));
     const Point expected = (turn - Point{2.5, 0.5}).Normalized();
     EXPECT_NEAR(dir.x, expected.x, 1e-6);
     EXPECT_NEAR(dir.y, expected.y, 1e-6);
 
     // Already at the target: no heading.
-    const Point at_goal = engine.GetOrientation({2.5, 0.5, 1}, {2.5, 0.5, 1});
+    const Point at_goal = engine.GetOrientation(from, from);
     EXPECT_EQ(at_goal.x, 0.0);
     EXPECT_EQ(at_goal.y, 0.0);
-}
-
-TEST(RoutingEngineLShape, WaypointIsTheNextTurnOfTheGeodesic)
-{
-
-    const auto geometry = test_geometries::from_polygons({l_shape});
-    SurfaceMeshShortestPathRoutingEngine engine{*geometry};
-
-    const auto from = geometry->get_location(2.5, 0.5, 0.0);
-    const auto to = geometry->get_location(0.5, 2.5, 0.0);
-    ASSERT_TRUE(from.has_value() && to.has_value());
-
-    // Where the route bends, held off the corner it bends around.
-    const Point turn = Point{1, 1} + Point{-1, -1}.Normalized() * engine.WallClearance();
-    const Point waypoint = engine.ComputeWaypoint(*from, *to);
-    EXPECT_NEAR(waypoint.x, turn.x, 1e-6);
-    EXPECT_NEAR(waypoint.y, turn.y, 1e-6);
-
-    // Standing on the target: nowhere else to head for.
-    EXPECT_EQ(engine.ComputeWaypoint(*to, *to), to->xy());
 }
 
 TEST(RoutingEngineWallClearance, NegativeIsNoDistance)
@@ -262,7 +246,7 @@ TEST(RoutingEngineWallClearance, TheSurfaceEngineKeepsItToo)
     EXPECT_NEAR((turn - Point{1, 1}).Norm(), 0.3, 1e-9);
 }
 
-TEST(RoutingEngineCorridor, TheWaypointIsNeverTheSpotAlreadyStoodOn)
+TEST(RoutingEngineCorridor, TheOrientationNeverVanishesOnTheWay)
 {
     // On triangles this long the path comes back with its own source point far enough off to
     // survive as a waypoint of its own -- and a step that short has no direction, so the agent
@@ -274,14 +258,13 @@ TEST(RoutingEngineCorridor, TheWaypointIsNeverTheSpotAlreadyStoodOn)
     const auto exit = geometry->get_location(44.0, 1.0, 0.0);
     ASSERT_TRUE(walker.has_value() && exit.has_value());
 
-    // Never overshoot the waypoint, so a step is as long as the way on is -- which is what
-    // makes standing still show up as never arriving.
     constexpr double stride = 0.05;
     int steps = 0;
     while(walker->distance_to(*exit) > stride) {
-        const Point onwards = engine.ComputeWaypoint(*walker, *exit) - walker->xy();
-        ASSERT_LT(++steps, 2000) << "stuck at x=" << walker->xy().x;
-        walker->move_on_surface(onwards.Normalized() * std::min(stride, onwards.Norm()));
+        const Point onwards = engine.GetOrientation(*walker, *exit);
+        ASSERT_FALSE(onwards.isZeroLength()) << "stuck at x=" << walker->xy().x;
+        ASSERT_LT(++steps, 2000) << "no progress at x=" << walker->xy().x;
+        walker->move_on_surface(onwards * stride);
     }
     EXPECT_LE(walker->distance_to(*exit), stride);
 }

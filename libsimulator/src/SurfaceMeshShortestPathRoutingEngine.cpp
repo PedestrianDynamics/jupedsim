@@ -173,19 +173,8 @@ Point SurfaceMeshShortestPathRoutingEngine::next_waypoint(
     return here;
 }
 
-Point SurfaceMeshShortestPathRoutingEngine::ComputeWaypoint(
-    const Location& from,
-    const Location& to)
+Point SurfaceMeshShortestPathRoutingEngine::GetOrientation(const Location& from, const Location& to)
 {
-    const Point next = next_waypoint(from.position_3d(), to.position_3d());
-    return next == from.xy() ? to.xy() : next;
-}
-
-Point SurfaceMeshShortestPathRoutingEngine::GetOrientation(
-    const Point3D& source,
-    const RoutingTarget& target)
-{
-    const Point here{source.x(), source.y()};
     // Zero when the way heads for where it already is: nowhere left to go.
-    return (next_waypoint(source, target) - here).Normalized();
+    return (next_waypoint(from.position_3d(), to.position_3d()) - from.xy()).Normalized();
 }

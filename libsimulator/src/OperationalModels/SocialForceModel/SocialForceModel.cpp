@@ -34,7 +34,7 @@ Point SocialForceModel::ComputeNextState(
     const AgentStep& step) const
 {
     const auto& currentState = std::get<State>(current);
-    auto forces = DrivingForce(currentState, step.orientation_to_next_target());
+    auto forces = DrivingForce(currentState, step.route_orientation());
 
     auto neighborhood = step.OtherAgentsInRange(
         _cutOffRadius, [&step](const NeighborView& n) { return step.NoGeometryBetween(n); });

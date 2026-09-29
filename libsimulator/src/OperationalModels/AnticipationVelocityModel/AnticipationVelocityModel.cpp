@@ -37,7 +37,7 @@ Point AnticipationVelocityModel::ComputeNextState(
     auto neighborhood = step.OtherAgentsInRange(
         _cutOffRadius, [&step](const NeighborView& n) { return step.NoGeometryBetween(n); });
 
-    const auto desiredDirection = step.orientation_to_next_target();
+    const auto desiredDirection = step.route_orientation();
     Point neighborRepulsion{};
     for(const auto& neighbor : neighborhood) {
         neighborRepulsion += NeighborRepulsion(currentState, desiredDirection, neighbor);

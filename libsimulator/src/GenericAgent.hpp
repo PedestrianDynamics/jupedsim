@@ -26,7 +26,8 @@ struct GenericAgent {
     Location location;
 
     // This is evaluated by the "operational level"
-    Point nextTarget{};
+    /// Unit vector along the route to the final target. Zero if the agent has reached it.
+    Point routeOrientation{};
     Location finalTarget;
 
     OperationalModelState state{};
@@ -89,12 +90,12 @@ struct fmt::formatter<GenericAgent> {
             [&ctx, &agent](const auto& m) {
                 return fmt::format_to(
                     ctx.out(),
-                    "Agent[id={}, journey={}, stage={}, destination={}, waypoint={}, pos={}, "
+                    "Agent[id={}, journey={}, stage={}, route_orientation={}, target={}, pos={}, "
                     "state={})",
                     agent.id,
                     agent.journeyId,
                     agent.stageId,
-                    agent.nextTarget,
+                    agent.routeOrientation,
                     agent.finalTarget.xy(),
                     agent.location.xy(),
                     m);
