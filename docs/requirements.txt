@@ -16,3 +16,7 @@ plotly-express
 numpy
 pandas
 pedpy
+
+# Citation information is fetched from Zenodo at build time.
+# Pinned to a branch until the tool is released to PyPI.
+zenodo-bibtex-exporter @ git+https://github.com/schroedtert/zenodo-bibtex-exporter.git@create-zenodo-bibtex-exporter
