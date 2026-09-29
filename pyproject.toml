@@ -1,6 +1,112 @@
 [build-system]
-requires = ["setuptools>=40.8.0", "cmake>=3.19", "ninja"]
-build-backend = "setuptools.build_meta"
+requires = [
+    "scikit-build-core>=1.1",
+    # Stubs are generated during the build, see python_bindings_jupedsim/CMakeLists.txt
+    "pybind11-stubgen>=3.0,<4",
+    # pybind11-stubgen imports shapely to resolve the shapely.Polygon annotation
+    "shapely>=2.0",
+]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "jupedsim"
+dynamic = ["version"]
+description = "JuPedSim is an open source pedestrian dynamics simulator"
+readme = "pypi-readme.md"
+license = "LGPL-3.0-or-later"
+license-files = ["LICENSE"]
+maintainers = [
+    { name = "JuPedSim Development Core Team", email = "dev@jupedsim.org" },
+]
+requires-python = ">=3.10,<3.15"
+dependencies = [
+    "numpy~=2.2",
+    "shapely~=2.0",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: Unix",
+    "Operating System :: MacOS",
+    "Natural Language :: English",
+    "Programming Language :: C++",
+    "Programming Language :: C",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+]
+
+[project.urls]
+Homepage = "https://www.jupedsim.org"
+Documentation = "https://www.jupedsim.org"
+Source = "https://github.com/PedestrianDynamics/jupedsim"
+Tracker = "https://github.com/PedestrianDynamics/jupedsim/issues"
+
+[tool.scikit-build]
+minimum-version = "build-system.requires"
+cmake.version = ">=3.22"
+cmake.build-type = "Release"
+wheel.packages = { jupedsim = "python_modules/jupedsim/jupedsim" }
+install.components = ["python"]
+sdist.inclusion-mode = "explicit"
+sdist.include = [
+    "/CMakeLists.txt",
+    "/pyproject.toml",
+    "/README.md",
+    "/pypi-readme.md",
+    "/LICENSE",
+    "/cmake_modules/",
+    "/cmake_templates/",
+    "/libcommon/",
+    "/libfloorfield/",
+    "/libsimulator/",
+    "/python_bindings_jupedsim/",
+    "/python_modules/jupedsim/",
+    "/third-party/",
+]
+sdist.exclude = [
+    "/libfloorfield/target/",
+    "__pycache__/",
+    ".git",
+    "*.pdf",
+    "*.html",
+    "*.off",
+    "*.png",
+    "*.dat",
+    "*.bff",
+    "/third-party/**/examples/",
+    "/third-party/**/doc/",
+    "/third-party/**/test/",
+    "/third-party/**/benchmark/",
+    "/third-party/**/demo/",
+    "/third-party/**/Data/data/",
+    "/third-party/**/Documentation/",
+    "/third-party/**/tests/",
+    "/third-party/**/docs/",
+    "/third-party/**/Maintenance/",
+    "/third-party/**/.github/",
+    "/third-party/**/testbed/",
+    "/third-party/**/unittest/",
+]
+messages.after-failure = """
+Building JuPedSim from source failed. The output above names the missing
+prerequisite and how to install it. If you only want to use JuPedSim, install
+a prebuilt wheel instead:
+    pip install --only-binary=jupedsim jupedsim
+Building from source: https://github.com/PedestrianDynamics/jupedsim#building-from-source
+"""
+
+[[tool.dynamic-metadata]]
+provider = "scikit_build_core.metadata.regex"
+field = "version"
+input = "CMakeLists.txt"
+regex = 'project\(JuPedSim\s+VERSION\s+(?P<value>[0-9]+\.[0-9]+\.[0-9]+)'
 
 [tool.pytest.ini_options]
 addopts = "--import-mode=importlib"

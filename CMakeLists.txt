@@ -80,12 +80,16 @@ target_compile_options(project_options INTERFACE
     $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:-fno-omit-frame-pointer>
     $<$<CXX_COMPILER_ID:MSVC>:/W2>
     $<$<CXX_COMPILER_ID:MSVC>:/EHsc>
-    $<$<CXX_COMPILER_ID:MSVC>:/MP>
     $<$<AND:$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>,$<BOOL:${BUILD_WITH_SANITIZERS}>>:-fsanitize=address,undefined>
     $<$<AND:$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>,$<BOOL:${BUILD_WITH_SANITIZERS}>>:-fno-optimize-sibling-calls>
     $<$<AND:$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>,$<BOOL:${BUILD_WITH_SANITIZERS}>>:-fno-sanitize-recover=all>
     $<$<AND:$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<BOOL:${BUILD_WITH_SANITIZERS}>>:-shared-libasan>
 )
+
+# Compile the sources of each target in parallel with MSVC, for all targets
+# including the vendored dependencies. Visual Studio builds the targets
+# themselves one after another unless the build is started with -j.
+add_compile_options($<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/MP> $<$<COMPILE_LANG_AND_ID:C,MSVC>:/MP>)
 
 ################################################################################
 # Dependencies
@@ -205,7 +209,7 @@ if(BUILD_TESTS)
         COMMAND ${pytest-wrapper-out} -vv -s
                 --basetemp=${PROJECT_BINARY_DIR}/systemtest-out
                 --junit-xml=result-pythontests.xml
-        DEPENDS py_jupedsim
+        DEPENDS py_jupedsim py_jupedsim_stubs
         USES_TERMINAL
     )
     set(unittests_dependency_list libsimulator-unittests libfloorfield-unittests)

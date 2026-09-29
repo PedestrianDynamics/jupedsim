@@ -81,19 +81,16 @@ your PR because it may not fit into our vision of JuPedSim.
 
 Here you have two options.
 
-### With setuptools
+### With pip
 
-You will need a C++20 capable compiler, CMake >= 3.22 as well as a Rust
-toolchain (`rustc` and `cargo`, >= 1.88) installed on your system. Then install
-our python dependencies via pip. Our python package dependencies are listed in
-`requirements.txt` in the root of this repository. Now you can call
-`pip install .`
-
-E.g.:
+You will need a C++20 capable compiler and a Rust toolchain (`rustc` and
+`cargo`, >= 1.88) installed on your system. CMake and Ninja are installed
+automatically if they are missing. Then call `pip install .` in the source
+directory:
 
 ```bash
 cd jupedsim
-pip install -r requirements.txt
+git submodule update --init
 pip install .
 ```
 
@@ -115,8 +112,10 @@ make -j
 source ./environment
 ```
 
-The last line in the above description will populate the python path with the
-location of our python code and the native library.
+The last line puts `<build>/stage` on your `PYTHONPATH`. The stage is an
+importable `jupedsim` package: the Python sources (linked from the source
+tree), the compiled module and its type stubs. After every `make`/`ninja` you
+can use the result from Python right away, without reinstalling.
 
 > [!TIP]
 > Enable automatic recursion into submodules for this repo by calling:

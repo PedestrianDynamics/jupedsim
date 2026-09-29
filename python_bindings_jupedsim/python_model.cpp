@@ -7,6 +7,7 @@
 #include "OperationalModels/CustomModel/CustomModel.hpp"
 #include "SimulationError.hpp"
 #include "conversion.hpp"
+#include "type_casters.hpp" // IWYU pragma: keep
 
 #include <fmt/format.h>
 #include <pybind11/pybind11.h>
@@ -179,6 +180,13 @@ static const AgentStep& asAgentStep(const py::object& step)
 
 void init_python_model(py::module_& m)
 {
+    py::class_<CustomModel::State>(m, "_CustomModelState")
+        .def(py::init([](py::object model) {
+            return CustomModel::State{GilSafePyObject{std::move(model)}};
+        }))
+        .def_property_readonly(
+            "model", [](CustomModel::State& data) { return data.Get<GilSafePyObject>().Get(); });
+
     py::class_<OperationalModel, py::smart_holder>(m, "OperationalModel")
         .def(
             "compute_next_state",
@@ -216,13 +224,6 @@ void init_python_model(py::module_& m)
             py::arg("step"),
             "Run this model for one step on 'state', as perceived through 'step'. Returns "
             "(next_state, movement). The agent's stored state is not touched.");
-
-    py::class_<CustomModel::State>(m, "_CustomModelState")
-        .def(py::init([](py::object model) {
-            return CustomModel::State{GilSafePyObject{std::move(model)}};
-        }))
-        .def_property_readonly(
-            "model", [](CustomModel::State& data) { return data.Get<GilSafePyObject>().Get(); });
 
     py::class_<PythonModel, OperationalModel, py::smart_holder>(m, "_PythonModel")
         .def(py::init<py::object>(), py::arg("model"));
