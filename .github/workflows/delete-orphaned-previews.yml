@@ -1,0 +1,84 @@
+name: Delete Orphaned PR Previews
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *"
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  cleanup:
+    name: Delete Orphaned PR Previews
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout jupedsim
+        uses: actions/checkout@v7
+        with:
+          path: jupedsim
+
+      - name: Checkout PR previews
+        uses: actions/checkout@v7
+        with:
+          repository: PedestrianDynamics/jupedsim-pr-previews
+          token: ${{ secrets.JUPEDSIM_PR_PREVIEWS_TOKEN }}
+          ref: main
+          path: pr-previews
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install PyGithub
+        run: python -m pip install PyGithub
+
+      - name: Delete orphaned previews
+        run: |
+          python jupedsim/scripts/ci/delete_orphaned_previews.py \
+            pr-previews/pull-requests \
+            --github-token "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Commit cleanup
+        id: commit-cleanup
+        working-directory: pr-previews
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add pull-requests
+
+          if git diff --cached --quiet; then
+            echo "No orphaned previews to delete."
+            echo "committed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git commit -m "docs: delete orphaned PR previews"
+          echo "committed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Push cleanup
+        if: steps.commit-cleanup.outputs.committed == 'true'
+        working-directory: pr-previews
+        run: |
+          for attempt in {1..5}; do
+            echo "Push attempt ${attempt}/5"
+
+            if git push origin main; then
+              echo "Push succeeded."
+              exit 0
+            fi
+
+            echo "Push failed because the remote may have changed."
+
+            if [ "$attempt" -eq 5 ]; then
+              echo "Push failed after 5 attempts."
+              exit 1
+            fi
+
+            sleep $((RANDOM % 10 + 1))
+            git fetch origin main
+            git rebase origin/main
+          done
