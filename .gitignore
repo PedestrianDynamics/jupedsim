@@ -44,3 +44,9 @@ __pycache__/
 # Rust build artifacts
 /libfloorfield/target/
 
+# doc-split theme fixture and site build output
+/docs/_theme/tests/_build/
+/docs/_theme/tests/fixture/_build/
+/docs/_theme/tests/fixture/api/
+/docs/_theme/tests/fixture/jupyter_execute/
+/site/_build/

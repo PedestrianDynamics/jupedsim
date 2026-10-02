@@ -53,6 +53,9 @@ print_var(BUILD_TOOLS)
 set(USE_IPO ON CACHE BOOL "Build with interprocedural optimization (LTO) where supported")
 print_var(USE_IPO)
 
+set(BUILD_SITE OFF CACHE BOOL "Build the website (site/ + docs/) with Sphinx")
+print_var(BUILD_SITE)
+
 set(WITH_FORMAT OFF CACHE BOOL "Create format tools")
 print_var(WITH_FORMAT)
 if(WITH_FORMAT AND WIN32)
@@ -255,6 +258,29 @@ add_subdirectory(libsimulator)
 add_subdirectory(python_bindings_jupedsim)
 if(BUILD_TOOLS)
     add_subdirectory(tools)
+endif()
+
+################################################################################
+# Website
+################################################################################
+if(BUILD_SITE AND UNIX)
+    configure_file(
+        ${PROJECT_SOURCE_DIR}/cmake_templates/build-site.unix.in
+        ${PROJECT_BINARY_DIR}/build-site
+        @ONLY
+    )
+    add_custom_target(site
+        COMMENT "Building website (site + docs, notebooks executed)"
+        COMMAND ${PROJECT_BINARY_DIR}/build-site
+        DEPENDS py_jupedsim
+        USES_TERMINAL
+    )
+    add_custom_target(site-fast
+        COMMENT "Building website (site + docs, notebooks not executed)"
+        COMMAND ${PROJECT_BINARY_DIR}/build-site --no-notebooks
+        DEPENDS py_jupedsim
+        USES_TERMINAL
+    )
 endif()
 
 ################################################################################

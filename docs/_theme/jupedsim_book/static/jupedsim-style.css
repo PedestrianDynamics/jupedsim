@@ -1,0 +1,220 @@
+/* jupedsim-style.css — base article styles for jupedsim.org: tokens, typography,
+   callouts, tables, figures, light print palette. Theme layout lives in book.css;
+   the Sphinx markup adapter in sphinx.css. */
+
+:root {
+  --paper: #ffffff;
+  --ink: #16181d;
+  --ink-soft: #515761;
+  --ink-faint: #6b7179;
+  --rule: #e4e7eb;
+  --panel: #f6f7f9;
+  --accent: #4b52e0;
+  --accent-ink: #353cb8;
+  --sans: "Inter", "Helvetica Neue", "Segoe UI", Roboto, Arial, sans-serif;
+  --mono: ui-monospace, "JetBrains Mono", "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --measure: 44rem;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  font-feature-settings: "kern", "liga", "calt";
+  text-rendering: optimizeLegibility;
+}
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.report { max-width: var(--measure); margin: 0 auto; padding: 4.5rem 1.5rem 6rem; }
+
+/* Header --------------------------------------------------------------- */
+.report-header { padding-bottom: 2rem; margin-bottom: 2.5rem; border-bottom: 1px solid var(--rule); }
+.report-kicker {
+  margin: 0 0 1.1rem;
+  font: 600 0.72rem/1 var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.report-title {
+  margin: 0;
+  font-size: 2.5rem;
+  line-height: 1.12;
+  font-weight: 600;
+  letter-spacing: -0.022em;
+  text-wrap: balance;
+}
+.report-title code { font-size: 0.8em; }
+.report-subtitle { margin: 1rem 0 0; font-size: 1.2rem; line-height: 1.45; color: var(--ink-soft); text-wrap: pretty; }
+.report-meta { margin: 1.4rem 0 0; font-size: 0.875rem; color: var(--ink-soft); }
+.meta-item + .meta-item::before { content: "\00b7"; margin: 0 0.6em; color: var(--ink-faint); }
+
+/* Body typography ------------------------------------------------------ */
+.report-body > :first-child { margin-top: 0; }
+.report-body p { margin: 0 0 1.1em; text-wrap: pretty; }
+.report-body h1, .report-body h2, .report-body h3, .report-body h4, .report-body h5, .report-body h6 {
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.012em;
+  text-wrap: balance;
+  scroll-margin-top: 1rem;
+}
+.report-body h1 { font-size: 1.9rem; margin: 3rem 0 1rem; }
+.report-body h2 { font-size: 1.5rem; margin: 2.8rem 0 0.9rem; padding-top: 1.6rem; border-top: 1px solid var(--rule); }
+.report-body h3 { font-size: 1.2rem; margin: 2.1rem 0 0.6rem; }
+.report-body h4 { font-size: 1rem; margin: 1.8rem 0 0.5rem; }
+.report-body h5, .report-body h6 { font-size: 0.9rem; margin: 1.5rem 0 0.4rem; color: var(--ink-soft); }
+.report-body h2 + h3, .report-body h3 + h4 { margin-top: 1.2rem; }
+
+.report-body a { color: var(--accent-ink); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.16em; text-decoration-color: rgba(53, 60, 184, 0.4); }
+.report-body a:hover { text-decoration-color: currentColor; }
+.report-body strong { font-weight: 600; }
+.report-body s, .report-body del { color: var(--ink-faint); }
+.report-body hr { border: 0; border-top: 1px solid var(--rule); margin: 2.6rem 0; }
+.report-body img { max-width: 100%; height: auto; border-radius: 6px; }
+
+.report-body ul, .report-body ol { margin: 0 0 1.1em; padding-left: 1.5em; }
+.report-body li { margin: 0.3em 0; }
+.report-body li > ul, .report-body li > ol { margin: 0.3em 0 0.4em; }
+.report-body li > p { margin-bottom: 0.5em; }
+.report-body ul.contains-task-list { list-style: none; padding-left: 0.4em; }
+.report-body .task-list-item > input[type="checkbox"] { margin: 0 0.55em 0 0; vertical-align: 0.05em; accent-color: var(--accent); }
+
+.report-body dl { margin: 0 0 1.2em; }
+.report-body dt { font-weight: 600; margin-top: 0.8em; }
+.report-body dd { margin: 0.2em 0 0.6em 1.5em; }
+
+/* Code ---------------------------------------------------------------- */
+.report-body code {
+  font-family: var(--mono);
+  font-size: 0.86em;
+  background: var(--panel);
+  border-radius: 4px;
+  padding: 0.12em 0.36em;
+  overflow-wrap: anywhere;
+}
+.report-body pre.highlight {
+  position: relative;
+  margin: 1.5rem 0;
+  padding: 1rem 1.15rem;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  font-size: 0.84rem;
+  line-height: 1.55;
+  overflow-x: auto;
+  tab-size: 4;
+}
+.report-body pre.highlight code { display: block; padding: 0; background: none; border-radius: 0; font-size: inherit; overflow-wrap: normal; }
+.report-body pre[data-lang]::before {
+  content: attr(data-lang);
+  position: absolute;
+  top: 0.5rem;
+  right: 0.75rem;
+  font: 600 0.64rem/1 var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+/* Tables -------------------------------------------------------------- */
+.table-wrap { margin: 1.6rem 0; overflow-x: auto; }
+.report-body table { width: 100%; border-collapse: collapse; font-size: 0.92rem; line-height: 1.45; }
+.report-body th { text-align: left; font-weight: 600; padding: 0.55em 0.8em; border-bottom: 2px solid var(--ink); vertical-align: bottom; }
+.report-body td { padding: 0.55em 0.8em; border-bottom: 1px solid var(--rule); vertical-align: top; }
+.report-body th:first-child, .report-body td:first-child { padding-left: 0; }
+.report-body th:last-child, .report-body td:last-child { padding-right: 0; }
+.report-body td code { font-size: 0.88em; }
+
+/* Quotes and callouts ------------------------------------------------- */
+.report-body blockquote { margin: 1.6rem 0; padding: 0.1rem 0 0.1rem 1.2rem; border-left: 3px solid #c9ced5; color: var(--ink-soft); }
+.report-body blockquote > :last-child { margin-bottom: 0; }
+
+.report-body .callout {
+  --callout: var(--accent-ink);
+  margin: 1.6rem 0;
+  padding: 0.9rem 1.15rem 0.95rem;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-left: 4px solid var(--callout);
+  border-radius: 8px;
+  color: var(--ink);
+}
+.report-body .callout > :last-child { margin-bottom: 0; }
+.report-body .callout-title { margin: 0 0 0.45rem; font: 600 0.72rem/1 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--callout); }
+.report-body .callout-note      { --callout: #3566c9; }
+.report-body .callout-tip       { --callout: #2a8a5c; }
+.report-body .callout-important { --callout: #7a4fd6; }
+.report-body .callout-warning   { --callout: #c07a0a; }
+.report-body .callout-caution   { --callout: #c83b3b; }
+
+/* Footnotes, details, footer ----------------------------------------- */
+.report-body sup.footnote-ref { font-size: 0.75em; line-height: 0; }
+.report-body sup.footnote-ref a { text-decoration: none; }
+.report-body .footnotes-sep { margin: 3rem 0 1rem; }
+.report-body .footnotes { font-size: 0.9rem; color: var(--ink-soft); }
+.report-body .footnotes-list { padding-left: 1.3em; }
+.report-body .footnote-backref { text-decoration: none; margin-left: 0.3em; }
+
+.report-body details { margin: 1.2rem 0; padding: 0.6rem 1rem; border: 1px solid var(--rule); border-radius: 8px; }
+.report-body summary { cursor: pointer; font-weight: 600; }
+.report-body details[open] > summary { margin-bottom: 0.6rem; }
+
+.report-footer { margin-top: 4rem; padding-top: 1.2rem; border-top: 1px solid var(--rule); font-size: 0.8rem; color: var(--ink-faint); }
+.report-footer code { font-family: var(--mono); font-size: 0.95em; }
+
+@media (max-width: 640px) {
+  .report { padding: 2.5rem 1.1rem 4rem; }
+  .report-title { font-size: 2rem; }
+  .report-subtitle { font-size: 1.05rem; }
+  body { font-size: 1rem; }
+}
+
+/* Print --------------------------------------------------------------- */
+@page { size: A4; margin: 20mm 18mm 22mm; }
+
+@media print {
+  :root { --ink: #000; --ink-soft: #333; --ink-faint: #666; --rule: #bbb; --panel: #f3f3f3; --accent-ink: #000; }
+  *, *::before, *::after { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  html { font-size: 10.5pt; }
+  body { font-size: 10.5pt; line-height: 1.5; background: #fff; }
+  .report { max-width: none; padding: 0; }
+  .report-header { break-after: avoid; page-break-after: avoid; padding-bottom: 1.2rem; margin-bottom: 1.6rem; }
+  .report-title { font-size: 22pt; }
+  .report-subtitle { font-size: 12pt; }
+  .report-kicker, .report-body .callout-title { color: #000; }
+
+  .report-body h1, .report-body h2, .report-body h3, .report-body h4 { break-after: avoid; page-break-after: avoid; }
+  .report-body h2 { margin-top: 2rem; padding-top: 1rem; }
+  .report-body p, .report-body li { orphans: 3; widows: 3; }
+
+  .report-body a { color: inherit; text-decoration: none; }
+  .report-body p a[href^="http"]:not(.bare-link)::after, .report-body li a[href^="http"]:not(.bare-link)::after {
+    content: " (" attr(href) ")";
+    font: 0.8em var(--mono);
+    color: #555;
+    word-break: break-all;
+  }
+  .report-body .footnote-backref { display: none; }
+
+  .report-body pre.highlight {
+    break-inside: avoid; page-break-inside: avoid;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    overflow: visible;
+    font-size: 8.5pt;
+    border-color: #bbb;
+  }
+  .table-wrap { overflow: visible; }
+  .report-body table { font-size: 9pt; }
+  .report-body thead { display: table-header-group; }
+  .report-body tr, .report-body blockquote, .report-body .callout, .report-body img, .report-body dl { break-inside: avoid; page-break-inside: avoid; }
+  .report-body .callout { background: #fff; }
+  .report-body details { border: 0; padding: 0; }
+  .report-footer { margin-top: 2.5rem; }
+}

@@ -1,0 +1,23 @@
+{#- SPDX-License-Identifier: LGPL-3.0-or-later -#}
+{#- Left track: the site nav for the narrow-screen drawer (site.css shows it
+    below 56rem only) and, on docs pages (nav_section set), the version
+    select and the docs tree. Brand, search and theme toggle live in
+    topbar.html. -#}
+<nav class="site-nav-drawer" aria-label="Site (menu)">
+<ul>
+{%- for item in nav_items %}
+<li><a class="bracket-label" href="{{ item.url|e }}"{% if item.active %} aria-current="page"{% endif %}>[{{ item.title|e }}{% if item.external %}&nbsp;<span aria-hidden="true">↗</span>{% endif %}]</a></li>
+{%- endfor %}
+</ul>
+</nav>
+{%- if docs_tree %}
+{%- if theme_switcher_json_url %}
+<select id="book-version-switcher" class="book-version-switcher" aria-label="Documentation version" data-json="{{ theme_switcher_json_url }}" data-match="{{ theme_switcher_version_match }}" data-page="{{ pagename }}.html" hidden></select>
+{%- endif %}
+{%- set tree = toctree(maxdepth=2, collapse=False, includehidden=True, titles_only=True) if sidebar_tree else "" %}
+{%- if tree %}
+<nav class="book-tree" aria-label="Documentation">
+{{ tree }}
+</nav>
+{%- endif %}
+{%- endif %}

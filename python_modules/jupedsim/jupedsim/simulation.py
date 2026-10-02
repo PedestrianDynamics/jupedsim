@@ -208,14 +208,14 @@ class Simulation:
     ) -> int:
         """Add a new queue state to this simulation.
 
-         Arguments:
-             positions: Ordered list of the waiting
-                 points of this queue. The first one in the list is the head of
-                 the queue while the last one is the back of the queue.
-             region_id: Region the waiting points lie in, see
-                 :func:`add_agent`.
+        Arguments:
+            positions: Ordered list of the waiting
+                points of this queue. The first one in the list is the head of
+                the queue while the last one is the back of the queue.
+            region_id: Region the waiting points lie in, see
+                :func:`add_agent`.
         Returns:
-             Id of the new stage.
+            Id of the new stage.
 
         """
         return self._obj.add_queue_stage(positions, region_id)

@@ -14,6 +14,22 @@
 
 {% endif %}
 
+{% block subpackages %}
+{% set visible_subpackages = obj.subpackages|selectattr("display")|list %}
+{% if visible_subpackages %}
+Subpackages
+-----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+{% for subpackage in visible_subpackages %}
+   {{ subpackage.short_name }}/index.rst
+{% endfor %}
+
+
+{% endif %}
+{% endblock %}
 {% block submodules %}
 {% set visible_submodules = obj.submodules|selectattr("display")|list %}
 {% if visible_submodules %}

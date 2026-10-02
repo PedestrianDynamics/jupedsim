@@ -1,19 +1,16 @@
 # .github/actions/build-docs/action.yml
 name: 'Build Documentation'
-description: 'Builds Sphinx documentation for jupedsim'
+description: 'Builds the jupedsim website (site/ + docs/) with Sphinx, warnings are errors'
 
 inputs:
   python-version:
     description: 'Python version to use'
     required: true
-  docs-requirements-path:
-    description: 'Path to documentation requirements file'
+  version:
+    description: 'Docs version directory name under docs/ (release tag, or dev)'
     required: true
-  docs-source-path:
-    description: 'Path to documentation source directory'
-    required: true
-  docs-build-path:
-    description: 'Path to documentation build output directory'
+  out-path:
+    description: 'Output directory of the assembled site (build state goes to <out-path>-cache)'
     required: true
   retention-days:
     description: 'Number of days to retain the artifact'
@@ -35,18 +32,47 @@ runs:
     - name: Install documentation dependencies
       shell: bash
       run: |
-        python3 -m pip install -r ${{ inputs.docs-requirements-path }}
+        # Whatever site/ needs (incl. Pagefind) is listed in
+        # site/requirements.txt; docs/ needs docs/requirements.txt.
+        python3 -m pip install -r docs/requirements.txt -r site/requirements.txt
 
-    - name: Build Documentation
+    - name: Build site and documentation
       shell: bash
+      env:
+        OUT_PATH: ${{ inputs.out-path }}
+        DOCS_VERSION: ${{ inputs.version }}
       run: |
-        sphinx-build -T -E -b html ${{ inputs.docs-source-path }} ${{ inputs.docs-build-path }} -j $(nproc)
+        # --strict: Sphinx warnings in site/ or docs/ fail the build.
+        # Notebooks are executed. Pagefind is not installed, so the artifact
+        # has no search index (the deploy workflows build their own).
+        python3 scripts/build_site.py --source . --out "$OUT_PATH" \
+          --version "$DOCS_VERSION" --strict
+
+    - name: Check and prune the assembled site
+      shell: bash
+      env:
+        OUT_PATH: ${{ inputs.out-path }}
+        DOCS_VERSION: ${{ inputs.version }}
+      run: |
+        set -euo pipefail
+        for f in "$OUT_PATH/index.html" "$OUT_PATH/docs/$DOCS_VERSION/index.html"; do
+          if [ ! -f "$f" ]; then
+            echo "::error::Site build did not produce $f"
+            exit 1
+          fi
+        done
+        # A release build links docs/stable to docs/<tag>; the upload would
+        # follow the symlink and store the docs twice. Only docs/<tag> is
+        # published from the artifact.
+        if [ -L "$OUT_PATH/docs/stable" ]; then
+          rm "$OUT_PATH/docs/stable"
+        fi
 
     - name: Store documentation artifact
       id: upload-docs
       uses: actions/upload-artifact@v7
       with:
         name: documentation
-        path: ${{ inputs.docs-build-path }}/
+        path: ${{ inputs.out-path }}/
         retention-days: ${{ inputs.retention-days }}
         if-no-files-found: error

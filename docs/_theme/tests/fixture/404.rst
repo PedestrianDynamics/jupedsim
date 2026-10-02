@@ -1,0 +1,8 @@
+.. SPDX-License-Identifier: LGPL-3.0-or-later
+
+:orphan:
+
+Page not found
+==============
+
+The page you are looking for does not exist.

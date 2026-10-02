@@ -69,6 +69,16 @@ jobs:
           ref: main
           path: previews
 
+      # Only the CI scripts of the default branch (this workflow_run runs
+      # with the default branch's workflow file); no PR code is executed.
+      - name: Checkout CI scripts
+        if: steps.pr.outputs.deploy == 'true'
+        uses: actions/checkout@v7
+        with:
+          path: jupedsim
+          sparse-checkout: scripts/ci
+          sparse-checkout-cone-mode: true
+
       - name: Download documentation artifact
         if: steps.pr.outputs.deploy == 'true'
         uses: actions/download-artifact@v8
@@ -87,6 +97,11 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
+          # The artifact is the whole site (site at the root, docs under
+          # docs/dev/). The site links root-absolute (/docs/stable/,
+          # /articles/, /pagefind/...), but the preview lives under
+          # /pull-requests/<N>/: rebase_preview_links.py moves those links
+          # under that prefix and adds docs/stable -> dev.
           # Deploys for different PRs run in parallel and share one branch, so
           # a push can be rejected as non-fast-forward. On rejection, restart
           # from the current remote tip and re-stage the preview.
@@ -98,6 +113,8 @@ jobs:
             rm -rf "$target"
             mkdir -p "$target"
             cp -r "$RUNNER_TEMP/html/." "$target/"
+            python3 "$GITHUB_WORKSPACE/jupedsim/scripts/ci/rebase_preview_links.py" \
+              "$target" "/$target/" --stable dev
 
             git add pull-requests
             git diff --cached --quiet || git commit -m "docs: preview for PR #$PR_NUMBER"
@@ -112,12 +129,17 @@ jobs:
           echo "::error::Failed to push preview after 5 attempts"
           exit 1
 
-      - name: Update PR body with preview link
+      # Links stay inside the preview (rebase_preview_links.py above), except
+      # [DOCS V1] (/docs/v1x/...): previews have no 1.x archive, so it 404s.
+      # Search covers the site pages; PR builds index no docs (their
+      # docs/stable only exists in the published preview).
+      - name: Update PR body with preview links
         if: steps.pr.outputs.deploy == 'true'
         uses: actions/github-script@v9
         env:
           PR_NUMBER: ${{ steps.pr.outputs.number }}
           PREVIEW_URL: ${{ env.PREVIEWS_BASE_URL }}/pull-requests/${{ steps.pr.outputs.number }}/
+          DOCS_URL: ${{ env.PREVIEWS_BASE_URL }}/pull-requests/${{ steps.pr.outputs.number }}/docs/stable/
           BUILT_SHA: ${{ github.event.workflow_run.head_sha }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -128,6 +150,7 @@ jobs:
               return;
             }
             const url = process.env.PREVIEW_URL;
+            const docsUrl = process.env.DOCS_URL;
             const builtSha = process.env.BUILT_SHA.slice(0, 7);
 
             const { data: pr } = await github.rest.pulls.get({
@@ -138,7 +161,13 @@ jobs:
 
             const start = '<!-- PREVIEW-URL-2-START -->';
             const end = '<!-- PREVIEW-URL-2-END -->';
-            const snippet = `${start}\nNew preview: ${url} (built from ${builtSha})\n${end}`;
+            const snippet = [
+              start,
+              `New preview (built from ${builtSha}):`,
+              `- Website: ${url}`,
+              `- Documentation: ${docsUrl}`,
+              end,
+            ].join('\n');
 
             const original = pr.body || '';
             const updated = original.includes(start)
@@ -152,4 +181,4 @@ jobs:
               body: updated,
             });
 
-            core.info(`Updated PR #${prNumber} with preview link: ${url}`);
+            core.info(`Updated PR #${prNumber} with preview links: ${url}, ${docsUrl}`);

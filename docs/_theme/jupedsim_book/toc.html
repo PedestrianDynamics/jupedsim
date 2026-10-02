@@ -1,0 +1,8 @@
+{#- SPDX-License-Identifier: LGPL-3.0-or-later -#}
+{#- Right-hand "On this page" column; mirrors the Hugo theme's _partials/toc.html. -#}
+{%- if toc_enabled %}
+<p class="book-toc-title">{{ theme_toc_title }}</p>
+<nav id="TableOfContents">
+{{ toc }}
+</nav>
+{%- endif %}
