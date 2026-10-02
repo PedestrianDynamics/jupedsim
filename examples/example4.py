@@ -35,22 +35,27 @@ def main():
         ),
     )
     exit_left = simulation.add_exit_stage(
-        [(-24, -8), (-24, 8), (-23, 8), (-23, -8)]
+        [(-24, -8), (-24, 8), (-23, 8), (-23, -8)],
+        region_id=0,
     )
-    exit_top = simulation.add_exit_stage([(-8, 24), (8, 24), (8, 23), (-8, 23)])
+    exit_top = simulation.add_exit_stage(
+        [(-8, 24), (8, 24), (8, 23), (-8, 23)], region_id=0
+    )
     exit_right = simulation.add_exit_stage(
-        [(24, -8), (24, 8), (23, 8), (23, -8)]
+        [(24, -8), (24, 8), (23, 8), (23, -8)],
+        region_id=0,
     )
 
     queue_id = simulation.add_queue_stage(
         [
             (0, -4),
             (0, -8),
-        ]
+        ],
+        region_id=0,
     )
     queue = simulation.get_stage(queue_id)
 
-    waypoint_middle = simulation.add_waypoint_stage((0, 0), 1)
+    waypoint_middle = simulation.add_waypoint_stage((0, 0), 1, region_id=0)
 
     journey = jps.JourneyDescription(
         [queue_id, waypoint_middle, exit_left, exit_top, exit_right]
@@ -75,7 +80,7 @@ def main():
     for y in range(-23, -12, 2):
         for x in range(-7, 8, 2):
             agent_parameters.position = (x, y)
-            simulation.add_agent(agent_parameters)
+            simulation.add_agent(agent_parameters, region_id=0)
 
     while simulation.agent_count() > 0:
         try:

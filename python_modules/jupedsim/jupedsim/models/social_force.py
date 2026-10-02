@@ -20,6 +20,7 @@ the model instance, which is passed to the simulation:
         stage_id=stage_id,
         position=(1.0, 1.0),
         state=jupedsim.SocialForceModelState(mass=75.0),
+        region_id=0,
     )
 
 .. warning::

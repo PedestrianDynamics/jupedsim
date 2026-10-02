@@ -56,7 +56,7 @@ def test_desired_speed_can_be_set_via_state(
 ):
     """Test that desired_speed passed to the state constructor is applied."""
     sim = create_simulation(model_class)
-    wp = sim.add_waypoint_stage((10, 1), 0.5)
+    wp = sim.add_waypoint_stage((10, 1), 0.5, region_id=0)
     journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
     agent_id = sim.add_agent(
@@ -64,6 +64,7 @@ def test_desired_speed_can_be_set_via_state(
         stage_id=wp,
         position=(1, 1),
         state=state_class(desired_speed=1.5, **extra_state_kwargs),
+        region_id=0,
     )
 
     assert sim.agent(agent_id).state.desired_speed == 1.5
@@ -81,7 +82,7 @@ def test_desired_speed_can_be_mutated_via_agent_handle(
 ):
     """Test that desired_speed can be changed through the agent handle."""
     sim = create_simulation(model_class)
-    wp = sim.add_waypoint_stage((10, 1), 0.5)
+    wp = sim.add_waypoint_stage((10, 1), 0.5, region_id=0)
     journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
     agent_id = sim.add_agent(
@@ -89,6 +90,7 @@ def test_desired_speed_can_be_mutated_via_agent_handle(
         stage_id=wp,
         position=(1, 1),
         state=state_class(**extra_state_kwargs),
+        region_id=0,
     )
 
     sim.agent(agent_id).state.desired_speed = 1.5
@@ -108,7 +110,7 @@ def test_removed_parameter_names_raise(
 ):
     """Test that pre-2.0 parameter names are gone without replacement."""
     sim = create_simulation(model_class)
-    wp = sim.add_waypoint_stage((10, 1), 0.5)
+    wp = sim.add_waypoint_stage((10, 1), 0.5, region_id=0)
     journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
     for removed_attr in removed_attrs:
@@ -124,6 +126,7 @@ def test_removed_parameter_names_raise(
         stage_id=wp,
         position=(1, 1),
         state=state_class(**extra_state_kwargs),
+        region_id=0,
     )
 
     for removed_attr in removed_attrs:

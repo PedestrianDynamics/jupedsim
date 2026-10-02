@@ -22,7 +22,7 @@ def main():
         ),
     )
 
-    exit_id = simulation.add_exit_stage(exit_polygon)
+    exit_id = simulation.add_exit_stage(exit_polygon, region_id=0)
     journey = jps.JourneyDescription([exit_id])
     journey_id = simulation.add_journey(journey)
 
@@ -44,7 +44,8 @@ def main():
                 range_neighbor_repulsion=0.1,
                 strength_geometry_repulsion=5,
                 range_geometry_repulsion=0.1,
-            )
+            ),
+            region_id=0,
         )
 
     slow_start_positions = jps.distribute_by_number(
@@ -66,7 +67,8 @@ def main():
                 strength_geometry_repulsion=15,
                 range_geometry_repulsion=0.1,
                 desired_speed=0.3,
-            )
+            ),
+            region_id=0,
         )
 
     while simulation.agent_count() > 0:

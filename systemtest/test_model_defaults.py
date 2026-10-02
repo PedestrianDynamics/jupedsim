@@ -123,13 +123,16 @@ def _default_state(state_cls):
 def _trajectory(model, state_cls):
     """Run a short simulation and collect the agent's positions."""
     simulation = jps.Simulation(model=model, geometry=_GEOMETRY)
-    exit_id = simulation.add_exit_stage([(49, -3), (49, 3), (50, 3), (50, -3)])
+    exit_id = simulation.add_exit_stage(
+        [(49, -3), (49, 3), (50, 3), (50, -3)], region_id=0
+    )
     journey_id = simulation.add_journey(jps.JourneyDescription([exit_id]))
     agent_id = simulation.add_agent(
         journey_id=journey_id,
         stage_id=exit_id,
         position=(0, 0),
         state=_default_state(state_cls),
+        region_id=0,
     )
     positions = []
     for _ in range(20):

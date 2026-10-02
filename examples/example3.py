@@ -29,10 +29,13 @@ def main():
             (56, 50),
             (55, 50),
             (54, 50),
-        ]
+        ],
+        region_id=0,
     )
     queue = simulation.get_stage(stage_id)
-    exit = simulation.add_exit_stage([(99, 40), (99, 60), (100, 60), (100, 40)])
+    exit = simulation.add_exit_stage(
+        [(99, 40), (99, 60), (100, 60), (100, 40)], region_id=0
+    )
 
     journey = jps.JourneyDescription([stage_id, exit])
     journey.set_transition_for_stage(
@@ -47,7 +50,7 @@ def main():
 
     for y in range(1, 16):
         agent_parameters.position = (0.5, y)
-        simulation.add_agent(agent_parameters)
+        simulation.add_agent(agent_parameters, region_id=0)
 
     while (
         simulation.agent_count() > 0 and simulation.iteration_count() < 20_000

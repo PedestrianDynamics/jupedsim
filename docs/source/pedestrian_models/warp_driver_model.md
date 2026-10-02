@@ -206,6 +206,7 @@ agent_id = sim.add_agent(
     stage_id=stage_id,
     position=(2.0, 2.0), 
     state=jps.WarpDriverModelState(orientation=(1.0, 0.0), desired_speed=1.2, radius=0.15),
+    region_id=0,
 )
 
 # Runtime state access through the agent handle. The handle resolves the

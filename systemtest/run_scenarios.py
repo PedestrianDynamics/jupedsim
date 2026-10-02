@@ -29,7 +29,7 @@ def grid_positions():
 
 def run(model, make_state, out_path):
     sim = jps.Simulation(model=model, geometry=ROOM, dt=DT)
-    exit_id = sim.add_exit_stage(EXIT_POLY)
+    exit_id = sim.add_exit_stage(EXIT_POLY, region_id=0)
     journey_id = sim.add_journey(jps.JourneyDescription([exit_id]))
     for pos in grid_positions():
         sim.add_agent(
@@ -37,6 +37,7 @@ def run(model, make_state, out_path):
             stage_id=exit_id,
             position=pos,
             state=make_state(),
+            region_id=0,
         )
 
     lines = []

@@ -103,7 +103,9 @@ def main(
         for exit in exits.geoms:
             exit_polygons.append(shapely.Polygon(list(exit.exterior.coords)))
             exit_ids.append(
-                simulation.add_exit_stage(list(exit.exterior.coords))
+                simulation.add_exit_stage(
+                    list(exit.exterior.coords), region_id=0
+                )
             )
 
         journey = jps.JourneyDescription(exit_ids)
@@ -168,6 +170,7 @@ def main(
                 stage_id=exit_ids[min_exit_id],
                 position=agent_position,
                 state=agent_parameters,
+                region_id=0,
             )
 
         start_time = time.perf_counter_ns()

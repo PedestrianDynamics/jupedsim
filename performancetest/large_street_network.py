@@ -78,6 +78,7 @@ class Spawner:
                     stage_id=self.start_stage,
                     position=p,
                     state=self.profile_picker.random_state(),
+                    region_id=0,
                 )
                 self._needs_placement -= 1
                 self.spawned += 1
@@ -111,13 +112,14 @@ def create_journey(sim: jps.Simulation):
                 (1387.84, 636.44),
                 (1387.56, 634.27),
                 (1388.91, 634.85),
-            ]
+            ],
+            region_id=0,
         ),
-        sim.add_waypoint_stage((1283.35, 510.25), 1.5),
-        sim.add_waypoint_stage((1159.81, 693.19), 1.5),
-        sim.add_waypoint_stage((1223.74, 768.90), 1.5),
-        sim.add_waypoint_stage((1214.52, 766.20), 1.5),
-        sim.add_waypoint_stage((962.36, 555.14), 1.5),
+        sim.add_waypoint_stage((1283.35, 510.25), 1.5, region_id=0),
+        sim.add_waypoint_stage((1159.81, 693.19), 1.5, region_id=0),
+        sim.add_waypoint_stage((1223.74, 768.90), 1.5, region_id=0),
+        sim.add_waypoint_stage((1214.52, 766.20), 1.5, region_id=0),
+        sim.add_waypoint_stage((962.36, 555.14), 1.5, region_id=0),
         sim.add_queue_stage(
             [
                 (950.56, 538.72),
@@ -126,7 +128,8 @@ def create_journey(sim: jps.Simulation):
                 (955.61, 536.76),
                 (957.04, 536.47),
                 (958.46, 536.88),
-            ]
+            ],
+            region_id=0,
         ),
         sim.add_exit_stage(
             [
@@ -134,7 +137,8 @@ def create_journey(sim: jps.Simulation):
                 (630.03, 27.63),
                 (625.97, 28.03),
                 (625.92, 26.18),
-            ]
+            ],
+            region_id=0,
         ),
     ]
 

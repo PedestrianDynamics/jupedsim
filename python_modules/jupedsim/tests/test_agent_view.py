@@ -22,7 +22,9 @@ def _make_sim(model, geometry=None):
     if geometry is None:
         geometry = _open_room()
     sim = jps.Simulation(model=model, geometry=geometry, dt=0.05)
-    exit_id = sim.add_exit_stage([(19, 9), (19, 11), (20, 11), (20, 9)])
+    exit_id = sim.add_exit_stage(
+        [(19, 9), (19, 11), (20, 11), (20, 9)], region_id=0
+    )
     journey_id = sim.add_journey(jps.JourneyDescription([exit_id]))
     return sim, exit_id, journey_id
 
@@ -33,6 +35,7 @@ def _add_agent(sim, journey_id, stage_id, position, group=0, probe=False):
         stage_id=stage_id,
         position=position,
         state=_State(group=group, probe=probe),
+        region_id=0,
     )
 
 

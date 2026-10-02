@@ -14,7 +14,9 @@ def corridor_simulation():
     model = PythonSocialForceModel()
     geometry = shapely.Polygon([(0, 0), (20, 0), (20, 20), (0, 20)])
     sim = jps.Simulation(model=model, geometry=geometry, dt=0.05)
-    exit_id = sim.add_exit_stage([(19, 9), (19, 11), (20, 11), (20, 9)])
+    exit_id = sim.add_exit_stage(
+        [(19, 9), (19, 11), (20, 11), (20, 9)], region_id=0
+    )
     journey = jps.JourneyDescription([exit_id])
     journey_id = sim.add_journey(journey)
     return sim, exit_id, journey_id
@@ -26,6 +28,7 @@ def _add_agent(sim, journey_id, stage_id, position, velocity=(0.0, 0.0)):
         stage_id=stage_id,
         position=position,
         state=PythonSocialForceModelState(velocity=velocity),
+        region_id=0,
     )
 
 
@@ -92,7 +95,9 @@ def test_social_force_prevents_agent_collapse():
     model = PythonSocialForceModel()
     geometry = shapely.Polygon([(0, 0), (20, 0), (20, 20), (0, 20)])
     sim = jps.Simulation(model=model, geometry=geometry, dt=0.05)
-    exit_id = sim.add_exit_stage([(19, 9), (19, 11), (20, 11), (20, 9)])
+    exit_id = sim.add_exit_stage(
+        [(19, 9), (19, 11), (20, 11), (20, 9)], region_id=0
+    )
     journey = jps.JourneyDescription([exit_id])
     journey_id = sim.add_journey(journey)
 
@@ -120,7 +125,9 @@ def test_custom_desired_speed_affects_movement():
     model = PythonSocialForceModel()
     geometry = shapely.Polygon([(0, 0), (20, 0), (20, 20), (0, 20)])
     sim = jps.Simulation(model=model, geometry=geometry, dt=0.05)
-    exit_id = sim.add_exit_stage([(19, 9), (19, 11), (20, 11), (20, 9)])
+    exit_id = sim.add_exit_stage(
+        [(19, 9), (19, 11), (20, 11), (20, 9)], region_id=0
+    )
     journey = jps.JourneyDescription([exit_id])
     journey_id = sim.add_journey(journey)
 
@@ -132,6 +139,7 @@ def test_custom_desired_speed_affects_movement():
         state=PythonSocialForceModelState(
             velocity=(0.0, 0.0), desired_speed=0.5
         ),
+        region_id=0,
     )
 
     # Fast agent
@@ -142,6 +150,7 @@ def test_custom_desired_speed_affects_movement():
         state=PythonSocialForceModelState(
             velocity=(0.0, 0.0), desired_speed=2.0
         ),
+        region_id=0,
     )
 
     for _ in range(100):
@@ -157,7 +166,9 @@ def test_obstacle_force_keeps_agents_from_walls():
     model = PythonSocialForceModel()
     geometry = shapely.Polygon([(0, 0), (20, 0), (20, 20), (0, 20)])
     sim = jps.Simulation(model=model, geometry=geometry, dt=0.05)
-    exit_id = sim.add_exit_stage([(19, 9), (19, 11), (20, 11), (20, 9)])
+    exit_id = sim.add_exit_stage(
+        [(19, 9), (19, 11), (20, 11), (20, 9)], region_id=0
+    )
     journey = jps.JourneyDescription([exit_id])
     journey_id = sim.add_journey(journey)
 
@@ -189,6 +200,7 @@ def test_per_agent_state_survives_iterations(corridor_simulation):
             desired_speed=2.0,
             reaction_time=0.25,
         ),
+        region_id=0,
     )
 
     for _ in range(20):

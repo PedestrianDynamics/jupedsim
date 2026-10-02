@@ -17,6 +17,7 @@ The model instance is passed to the simulation:
         stage_id=stage_id,
         position=(1.0, 1.0),
         state=jupedsim.CollisionFreeSpeedModelV2State(strength_neighbor_repulsion=9.0),
+        region_id=0,
     )
 
 .. warning::

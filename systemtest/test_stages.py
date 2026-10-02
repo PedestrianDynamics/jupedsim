@@ -28,7 +28,7 @@ def square_room_5x5_with_obstacle():
 def test_exception_on_empty_polygon_in_exit_stage(square_room_5x5):
     sim = square_room_5x5
     with pytest.raises(Exception, match=r"Polygon must have at least 3 points"):
-        sim.add_exit_stage([])
+        sim.add_exit_stage([], region_id=0)
 
 
 def test_can_share_queue_between_stages():
@@ -50,14 +50,16 @@ def test_can_share_queue_between_stages():
         model=jps.CollisionFreeSpeedModel(), geometry=polygon
     )
 
-    wp_j1 = simulation.add_waypoint_stage((-1, 0), 0.5)
+    wp_j1 = simulation.add_waypoint_stage((-1, 0), 0.5, region_id=0)
 
     common_exit = simulation.add_exit_stage(
-        [(-2.5, -9.5), (-2.5, -10), (2.5, -10), (2.5, -9.5)]
+        [(-2.5, -9.5), (-2.5, -10), (2.5, -10), (2.5, -9.5)],
+        region_id=0,
     )
 
     common_queue = simulation.add_queue_stage(
-        [(0, -9), (0, -8), (0, -7), (0, -6), (0, -5), (0, -4)]
+        [(0, -9), (0, -8), (0, -7), (0, -6), (0, -5), (0, -4)],
+        region_id=0,
     )
     queue = simulation.get_stage(common_queue)
 
@@ -74,7 +76,7 @@ def test_can_share_queue_between_stages():
     journey1.set_transition_for_stage(
         common_queue, jps.Transition.create_fixed_transition(common_exit)
     )
-    wp_j2 = simulation.add_waypoint_stage((1, 0), 0.5)
+    wp_j2 = simulation.add_waypoint_stage((1, 0), 0.5, region_id=0)
     journey2 = jps.JourneyDescription([wp_j2, common_queue, common_exit])
     journey2.set_transition_for_stage(
         wp_j2, jps.Transition.create_fixed_transition(common_queue)
@@ -107,6 +109,7 @@ def test_can_share_queue_between_stages():
             stage_id=stage_id,
             position=pos,
             state=jps.CollisionFreeSpeedModelState(),
+            region_id=0,
         )
 
     while simulation.agent_count() > 0:
@@ -140,10 +143,11 @@ def test_can_use_stage_proxy():
     )
 
     exit_id = simulation.add_exit_stage(
-        [(-2.5, -9.5), (-2.5, -10), (2.5, -10), (2.5, -9.5)]
+        [(-2.5, -9.5), (-2.5, -10), (2.5, -10), (2.5, -9.5)],
+        region_id=0,
     )
 
-    waypoint_id = simulation.add_waypoint_stage((9.5, 0), 1)
+    waypoint_id = simulation.add_waypoint_stage((9.5, 0), 1, region_id=0)
 
     exit_journey_id = simulation.add_journey(
         jps.JourneyDescription(
@@ -172,6 +176,7 @@ def test_can_use_stage_proxy():
         stage_id=exit_id,
         position=(-9.5, 0),
         state=jps.CollisionFreeSpeedModelState(),
+        region_id=0,
     )
 
     assert exit.count_targeting() == 1
@@ -201,7 +206,9 @@ def test_can_use_stage_proxy():
 )
 def test_can_add_waypoint(square_room_5x5_with_obstacle, waypoint_position):
     simulation = square_room_5x5_with_obstacle
-    waypoint_id = simulation.add_waypoint_stage(waypoint_position, 1)
+    waypoint_id = simulation.add_waypoint_stage(
+        waypoint_position, 1, region_id=0
+    )
     waypoint_stage = simulation.get_stage(waypoint_id)
 
     assert type(waypoint_stage) is jps.WaypointStage
@@ -211,19 +218,23 @@ def test_can_not_add_waypoint_outside_geometry(square_room_5x5):
     simulation = square_room_5x5
 
     with pytest.raises(jps.SimulationError, match="is not in region 0"):
-        simulation.add_waypoint_stage((10, 10), 1)
+        simulation.add_waypoint_stage((10, 10), 1, region_id=0)
 
 
 def test_can_not_add_exit_completely_outside_geometry(square_room_5x5):
     simulation = square_room_5x5
 
     with pytest.raises(jps.SimulationError, match="is not in region 0"):
-        simulation.add_exit_stage([(-10, -10), (-8, -10), (-8, -8), (-10, -8)])
+        simulation.add_exit_stage(
+            [(-10, -10), (-8, -10), (-8, -8), (-10, -8)], region_id=0
+        )
 
 
 def test_can_add_exit_partly_outside_geometry_centroid_inside(square_room_5x5):
     simulation = square_room_5x5
-    simulation.add_exit_stage([(-3, -3), (-3, -1), (-1, -1), (-1, -3)])
+    simulation.add_exit_stage(
+        [(-3, -3), (-3, -1), (-1, -1), (-1, -3)], region_id=0
+    )
 
 
 def test_can_not_add_exit_partly_outside_geometry_centroid_outside(
@@ -232,7 +243,9 @@ def test_can_not_add_exit_partly_outside_geometry_centroid_outside(
     simulation = square_room_5x5
 
     with pytest.raises(jps.SimulationError, match="is not in region 0"):
-        simulation.add_exit_stage([(-4, -4), (-4, -2), (-2, -2), (-2, -4)])
+        simulation.add_exit_stage(
+            [(-4, -4), (-4, -2), (-2, -2), (-2, -4)], region_id=0
+        )
 
 
 def test_can_not_add_notifiable_waiting_set_outside_geometry(square_room_5x5):
@@ -242,7 +255,7 @@ def test_can_not_add_notifiable_waiting_set_outside_geometry(square_room_5x5):
         jps.SimulationError,
         match="is not in region 0",
     ):
-        simulation.add_waiting_set_stage([(2, -2), (-10, -10)])
+        simulation.add_waiting_set_stage([(2, -2), (-10, -10)], region_id=0)
 
 
 def test_can_not_add_notifiable_queue_outside_geometry(square_room_5x5):
@@ -252,7 +265,7 @@ def test_can_not_add_notifiable_queue_outside_geometry(square_room_5x5):
         jps.SimulationError,
         match="is not in region 0",
     ):
-        simulation.add_queue_stage([(2, -2), (-10, -10)])
+        simulation.add_queue_stage([(2, -2), (-10, -10)], region_id=0)
 
 
 def _iterate_until(simulation, predicate, max_iterations=2000):
@@ -265,9 +278,10 @@ def _iterate_until(simulation, predicate, max_iterations=2000):
 
 def test_queue_enqueued_returns_agent_ids_as_ints(square_room_5x5):
     simulation = square_room_5x5
-    queue_id = simulation.add_queue_stage([(0, 0), (0, 1)])
+    queue_id = simulation.add_queue_stage([(0, 0), (0, 1)], region_id=0)
     exit_id = simulation.add_exit_stage(
-        [(2, 2), (2.5, 2), (2.5, 2.5), (2, 2.5)]
+        [(2, 2), (2.5, 2), (2.5, 2.5), (2, 2.5)],
+        region_id=0,
     )
     journey = jps.JourneyDescription([queue_id, exit_id])
     journey.set_transition_for_stage(
@@ -281,6 +295,7 @@ def test_queue_enqueued_returns_agent_ids_as_ints(square_room_5x5):
         stage_id=queue_id,
         position=(-2, 0),
         state=jps.CollisionFreeSpeedModelState(),
+        region_id=0,
     )
 
     assert _iterate_until(simulation, lambda: queue.count_enqueued() == 1)
@@ -291,9 +306,12 @@ def test_queue_enqueued_returns_agent_ids_as_ints(square_room_5x5):
 
 def test_waiting_set_waiting_returns_agent_ids_as_ints(square_room_5x5):
     simulation = square_room_5x5
-    waiting_set_id = simulation.add_waiting_set_stage([(0, 0), (0, 1)])
+    waiting_set_id = simulation.add_waiting_set_stage(
+        [(0, 0), (0, 1)], region_id=0
+    )
     exit_id = simulation.add_exit_stage(
-        [(2, 2), (2.5, 2), (2.5, 2.5), (2, 2.5)]
+        [(2, 2), (2.5, 2), (2.5, 2.5), (2, 2.5)],
+        region_id=0,
     )
     journey = jps.JourneyDescription([waiting_set_id, exit_id])
     journey.set_transition_for_stage(
@@ -307,12 +325,14 @@ def test_waiting_set_waiting_returns_agent_ids_as_ints(square_room_5x5):
         stage_id=waiting_set_id,
         position=(-2, 0),
         state=jps.CollisionFreeSpeedModelState(),
+        region_id=0,
     )
     second_id = simulation.add_agent(
         journey_id=journey_id,
         stage_id=waiting_set_id,
         position=(-2, 1),
         state=jps.CollisionFreeSpeedModelState(),
+        region_id=0,
     )
     # The caster must not draw ids from UniqueID's global counter.
     assert second_id == first_id + 1

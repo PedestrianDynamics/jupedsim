@@ -202,6 +202,7 @@ agent_id = sim.add_agent(
     stage_id=stage_id,
     position=(1.0, 1.0),
     state=jps.CollisionFreeSpeedModelV3State(),
+    region_id=0,
 )
 
 # modify at runtime

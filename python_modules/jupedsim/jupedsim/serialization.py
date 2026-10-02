@@ -69,7 +69,7 @@ def walkable_area_as_wkt(simulation) -> str:
             f"{num_regions} regions."
         )
     try:
-        return geometry.polygon().as_wkt()
+        return geometry.polygon(region_id=0).as_wkt()
     except py_jps.SimulationError as e:
         raise TrajectoryWriter.Exception(
             "Cannot write trajectories for a simulation with a geometry "

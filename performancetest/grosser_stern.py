@@ -44375,8 +44375,8 @@ def create_journeys(sim: jps.Simulation):
         (-1655.71, -154.36),
         (-1660.21, -117.91),
     ]
-    gates_stages = [sim.add_waypoint_stage(g, 0.5) for g in gates]
-    exit_stage = sim.add_exit_stage(exit)
+    gates_stages = [sim.add_waypoint_stage(g, 0.5, region_id=0) for g in gates]
+    exit_stage = sim.add_exit_stage(exit, region_id=0)
 
     journeys = []
     for gate_stage in gates_stages:
@@ -44452,6 +44452,7 @@ def main():
                 stage_id=start_stage,
                 position=pos,
                 state=profile_picker.random_state(),
+                region_id=0,
             )
 
     start_time = time.perf_counter_ns()
