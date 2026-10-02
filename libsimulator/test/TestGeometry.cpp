@@ -2,6 +2,7 @@
 #include "Geometry/Geometry.hpp"
 #include "GeometryFixtures.hpp"
 #include "LineSegment.hpp"
+#include "Polygon.hpp"
 #include "SimulationError.hpp"
 #include "TestCommon.hpp"
 
@@ -9,6 +10,7 @@
 
 #include <algorithm>
 #include <array>
+#include <map>
 #include <set>
 #include <vector>
 
@@ -41,6 +43,16 @@ std::ptrdiff_t pieces_along(const std::vector<LineSegment>& answer, double y)
     return std::count_if(answer.begin(), answer.end(), [y](const LineSegment& piece) {
         return piece.p1.y == y && piece.p2.y == y;
     });
+}
+
+/// Area of the pieces, summed per region they lie in.
+std::map<std::size_t, double> area_per_region(const std::vector<AreaPiece>& pieces)
+{
+    std::map<std::size_t, double> areas{};
+    for(const auto& piece : pieces) {
+        areas[piece.region] += CGAL::to_double(piece.polygon.area());
+    }
+    return areas;
 }
 
 } // namespace
@@ -82,10 +94,6 @@ TEST(GeometryLocate, RegionIdDisambiguatesStackedFloors)
     EXPECT_NEAR(geo->locate_in_region(0, {5, 5}).point.z(), 0.0, 1e-9);
     EXPECT_NEAR(geo->locate_in_region(1, {5, 5}).point.z(), 3.0, 1e-9);
 }
-
-namespace
-{
-} // namespace
 
 TEST(GeometryFromPolygon, HoleIsNotWalkable)
 {
@@ -342,4 +350,112 @@ TEST(GeometryModelQueries, AWallOfTheFlightBelowIsNotInTheAnswerEither)
         << "the wall right in front of him";
     EXPECT_FALSE(sees_part_of(walls, LineSegment{{0, 0}, {0, 2}}))
         << "the foot of the flight below";
+}
+
+TEST(GeometryAreaSplit, AnAreaWithinOneRegionStaysWhole)
+{
+    const auto geo = test_geometries::two_rooms();
+    const auto first_room_id = geo->get_location(3, 3, 0)->region();
+    const auto pieces = geo->split_into_region_pieces(
+        Polygon(test_geometries::rectangle_points({2, 2}, {4, 4})), first_room_id);
+    const auto areas = area_per_region(pieces); // sanity check
+    ASSERT_EQ(pieces.size(), 1u);
+    EXPECT_NEAR(areas.at(pieces[0].region), 4.0, 1e-9);
+    EXPECT_EQ(pieces[0].region, geo->get_location(3, 3, 0)->region());
+}
+
+TEST(GeometryAreaSplit, AnAreaAcrossSeamsIsCutPerRegion)
+{
+    const auto geo = test_geometries::two_rooms();
+    // x in [9, 12]: the end of room a, the whole connector, the start of room b.
+    const auto exit_id = geo->get_location(9, 6, 0)->region();
+    const auto pieces = geo->split_into_region_pieces(
+        Polygon(test_geometries::rectangle_points({9, 2}, {12, 8})), exit_id);
+
+    const auto areas = area_per_region(pieces);
+    EXPECT_EQ(areas.size(), 3u);
+    double area_sum = 0.0;
+    for(const auto& area : areas) {
+        area_sum += area.second;
+    }
+    EXPECT_NEAR(area_sum, 3.0 * 6.0, 1e-9);
+}
+
+TEST(GeometryAreaSplit, AnAreaReachingOffTheSurfaceIsClipped)
+{
+    const auto geo = test_geometries::two_rooms();
+    const auto exit_id = geo->get_location(2, 2, 0)->region();
+    // A quarter of it lies below y = 0, off the walkable surface.
+    const auto pieces = geo->split_into_region_pieces(
+        Polygon(test_geometries::rectangle_points({2, -1}, {4, 3})), exit_id);
+    const auto areas = area_per_region(pieces);
+    ASSERT_EQ(pieces.size(), 1u);
+    EXPECT_NEAR(areas.at(pieces[0].region), 2.0 * 3.0, 1e-9);
+}
+
+/// Without a 2D region graph there are no footprints to cut along.
+TEST(GeometryAreaSplit, MeshBuiltGeometriesFailToSplit)
+{
+    // Ground floor, a flight up 3 m, a landing: straight from a surface mesh.
+    const auto geo = test_geometries::straight_stair_to_a_landing();
+    EXPECT_THROW(
+        geo->split_into_region_pieces(
+            Polygon(test_geometries::rectangle_points({18, 2}, {20, 6})), 3.0),
+        SimulationError);
+}
+
+/// Without a 2D region graph there are no footprints to cut along.
+TEST(GeometryAreaSplit, WrongRegionIDLeadsToException)
+{
+    // Ground floor, a flight up 3 m, a landing: straight from a surface mesh.
+    const auto geo = test_geometries::two_rooms();
+    const auto wrong_room_id = geo->get_location(12, 20, 0)->region();
+    EXPECT_THROW(
+        geo->split_into_region_pieces(
+            Polygon(test_geometries::rectangle_points({0, 2}, {0, 2})), wrong_room_id),
+        SimulationError);
+}
+
+TEST(GeometryAreaSplit, AnAreaOnTheFootOfARampIsCutBetweenRampAndGroundFloor)
+{
+    const auto& geo = test_geometries::stacked_floors_with_ramp();
+    const auto ground = geo->get_location(3, 5, 0.0)->region();
+    const auto upper = geo->get_location(3, 5, 3.0)->region();
+    const auto ramp = geo->get_location(10, 5, 1.5)->region();
+    ASSERT_EQ(std::set<std::size_t>({ground, upper, ramp}).size(), 3u);
+
+    // x in [2, 6] on the ground floor -- under the upper floor in plan -- and x in [6, 8] on
+    // the foot of the ramp.
+    const auto pieces = geo->split_into_region_pieces(
+        Polygon(test_geometries::rectangle_points({2, 4}, {8, 6})), ground);
+
+    ASSERT_EQ(pieces.size(), 2u);
+    const auto areas = area_per_region(pieces);
+    ASSERT_EQ(areas.size(), 2u);
+    EXPECT_NEAR(areas.at(ground), 4.0 * 2.0, 1e-9);
+    EXPECT_NEAR(areas.at(ramp), 2.0 * 2.0, 1e-9);
+    // The upper floor lies right overhead, but is only reached over the top of the ramp.
+    EXPECT_EQ(areas.count(upper), 0u);
+}
+
+TEST(GeometryAreaSplit, AnAreaOnTheTopOfARampIsCutBetweenRampAndUpperFloor)
+{
+    const auto geo = test_geometries::stacked_floors_with_ramp();
+    const auto ground = geo->get_location(17, 5, 0.0)->region();
+    const auto upper = geo->get_location(17, 5, 3.0)->region();
+    const auto ramp = geo->get_location(10, 5, 1.5)->region();
+    ASSERT_EQ(std::set<std::size_t>({ground, upper, ramp}).size(), 3u);
+
+    // x in [12, 14] on the top of the ramp, x in [14, 18] on the upper floor -- over the
+    // ground floor in plan.
+    const auto pieces = geo->split_into_region_pieces(
+        Polygon(test_geometries::rectangle_points({12, 4}, {18, 6})), upper);
+
+    ASSERT_EQ(pieces.size(), 2u);
+    const auto areas = area_per_region(pieces);
+    ASSERT_EQ(areas.size(), 2u);
+    EXPECT_NEAR(areas.at(ramp), 2.0 * 2.0, 1e-9);
+    EXPECT_NEAR(areas.at(upper), 4.0 * 2.0, 1e-9);
+    // The ground floor lies right below, but is only reached over the foot of the ramp.
+    EXPECT_EQ(areas.count(ground), 0u);
 }

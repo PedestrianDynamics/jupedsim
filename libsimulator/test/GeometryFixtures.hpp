@@ -43,6 +43,33 @@ inline std::unique_ptr<Geometry> rectangle(Point lower_left, Point upper_right)
     return from_polygons({rectangle_points(lower_left, upper_right)});
 }
 
+inline std::unique_ptr<Geometry> two_rooms()
+{
+    WalkableSurface surface{};
+    const auto a =
+        surface.AddRegion(WalkableSurface::Polygon{rectangle_points({0, 0}, {10, 10}), {}}, 0.0);
+    const auto b =
+        surface.AddRegion(WalkableSurface::Polygon{rectangle_points({11, 0}, {21, 10}), {}}, 0.0);
+    surface.ConnectRegions(a, {{10, 0}, {10, 10}}, b, {{11, 0}, {11, 10}});
+    return surface.CreateGeometry();
+}
+
+/// Two floors over the same 20 x 10 footprint, the ground floor at z = 0 and the upper one at
+/// z = 3, joined by a ramp in the middle. The ramp climbs along x in [6, 14], y in [4, 6],
+/// through an opening of that size in both floors: its foot on the ground floor's opening edge at
+/// x = 6, its top on the upper floor's at x = 14. Built from regions, so that areas are cut
+/// along their footprints.
+inline std::unique_ptr<Geometry> stacked_floors_with_ramp()
+{
+    const auto footprint = rectangle_points({0, 0}, {20, 10});
+    const auto opening = rectangle_points({6, 4}, {14, 6});
+    WalkableSurface surface{};
+    const auto ground = surface.AddRegion(WalkableSurface::Polygon{footprint, {opening}}, 0.0);
+    const auto upper = surface.AddRegion(WalkableSurface::Polygon{footprint, {opening}}, 3.0);
+    surface.ConnectRegions(ground, {{6, 4}, {6, 6}}, upper, {{14, 4}, {14, 6}});
+    return surface.CreateGeometry();
+}
+
 /// Flat rectangle with rectangular hole, z = 0.
 inline std::unique_ptr<Geometry> rectangle_with_hole(
     Point lower_left,
