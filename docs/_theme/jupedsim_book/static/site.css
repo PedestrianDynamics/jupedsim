@@ -41,8 +41,12 @@
 .site-bar .book-logo { width: auto; height: 2rem; }
 .site-bar .book-brand-title { font-weight: 600; font-size: 1.05rem; letter-spacing: -0.01em; }
 
-/* Bracketed monospace labels: bar/drawer items, theme toggle. */
-.bracket-label {
+/* Bracketed monospace labels: bar/drawer items, theme toggle.
+   Link colours are element-qualified (a.class, specificity 0,1,1, later in
+   the cascade) so basic.css's a:visited { color: #551A8B } cannot repaint
+   visited links: the theme has no visited style. Same for the buttons. */
+.bracket-label,
+a.bracket-label {
   font: 500 0.72rem/1 var(--mono);
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -225,6 +229,8 @@ body { display: flex; flex-direction: column; min-height: 100vh; }
    ink; hover swaps ink and paper. */
 .btn,
 .btn-solid,
+a.btn,
+a.btn-solid,
 .report-body a:is(.btn, .btn-solid) {
   display: inline-block;
   padding: 0.7rem 0.9rem;
@@ -241,6 +247,7 @@ body { display: flex; flex-direction: column; min-height: 100vh; }
 .btn:hover,
 .report-body a.btn:hover { color: var(--paper); background: var(--ink); }
 .btn-solid,
+a.btn-solid,
 .report-body a.btn-solid { color: var(--paper); background: var(--ink); }
 .btn-solid:hover,
 .report-body a.btn-solid:hover { color: var(--ink); background: var(--paper); }

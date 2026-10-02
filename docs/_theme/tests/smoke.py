@@ -278,6 +278,48 @@ def single_hairline(browser):
     page.close()
 
 
+def visited_contrast(browser):
+    """Visited links stay readable. Browsers hide :visited from scripts, so
+    simulate it: basic.css has ``a:visited { color: #551A8B }`` (0,1,1);
+    insert ``a[href]`` (also 0,1,1) with that colour right after basic.css,
+    then every link must keep >= 4.5:1 against its background."""
+    sim = """() => {
+      const basic = [...document.querySelectorAll('link[rel=stylesheet]')]
+        .find(l => /basic\\.css/.test(l.href));
+      const st = document.createElement('style');
+      st.textContent = 'a[href] { color: #551A8B; }';
+      basic.after(st);
+    }"""
+    measure = r"""() => {
+      const rgb = c => c.match(/[\d.]+/g).map(Number);
+      const lum = ([r, g, b]) => { const f = v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+        return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b); };
+      const bg = el => { for (let e = el; e; e = e.parentElement) { const c = rgb(getComputedStyle(e).backgroundColor);
+        if (c.length < 4 || c[3] > 0) return c; } return rgb(getComputedStyle(document.body).backgroundColor); };
+      const bad = [];
+      for (const a of document.querySelectorAll('a[href]')) {
+        if (!a.offsetParent || !a.textContent.trim()) continue;
+        const f = lum(rgb(getComputedStyle(a).color)), b = lum(bg(a));
+        const cr = (Math.max(f, b) + 0.05) / (Math.min(f, b) + 0.05);
+        if (cr < 4.5) bad.push(`${a.className || a.parentElement.className}:${a.textContent.trim().slice(0, 20)}:${cr.toFixed(1)}`);
+      }
+      return bad;
+    }"""
+    for scheme in ("light", "dark"):
+        ctx = browser.new_context(
+            viewport={"width": 1440, "height": 900}, color_scheme=scheme
+        )
+        page = ctx.new_page()
+        for path in ("/", ARTICLE, "/notes/", CONCEPT):
+            page.goto(BASE + path)
+            page.evaluate(sim)
+            bad = page.evaluate(measure)
+            check(
+                f"visited-contrast {scheme} {path}", not bad, "; ".join(bad[:6])
+            )
+        ctx.close()
+
+
 def anchor_below_bar(browser):
     targets = [CONCEPT + "#stages"]
     probe = browser.new_page()
@@ -1040,6 +1082,7 @@ with sync_playwright() as p:
         slash_shortcut,
         escape_closes,
         single_hairline,
+        visited_contrast,
         bar_one_line,
         bar_sticky,
         same_column,
