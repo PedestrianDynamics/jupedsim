@@ -72,7 +72,7 @@ def test_a_string_naming_an_obj_file_is_a_mesh_not_a_wkt():
 def test_a_mesh_built_simulation_has_no_polygon_to_hand_out():
     sim = mesh_simulation()
     with pytest.raises(jps.SimulationError, match="built from mesh"):
-        sim.get_geometry().polygon()
+        sim.get_geometry().polygon(region_id=0)
 
 
 def polygon_simulation():
@@ -84,14 +84,14 @@ def polygon_simulation():
 
 
 def test_polygon_input_still_builds_a_polygon_world():
-    assert polygon_simulation().get_geometry().polygon().boundary()
+    assert polygon_simulation().get_geometry().polygon(region_id=0).boundary()
 
 
 def test_a_polygon_world_is_one_floor_at_height_zero():
     sim = polygon_simulation()
-    assert sim.get_location(5.0, 5.0).z == 0.0
+    assert sim.get_location(5.0, 5.0, region_id=0).z == 0.0
     with pytest.raises(jps.SimulationError, match="not in region 0"):
-        sim.get_location(50.0, 50.0)
+        sim.get_location(50.0, 50.0, region_id=0)
 
 
 def journey_to_upper_exit(sim, upper):
@@ -256,6 +256,7 @@ def test_an_agent_reports_the_orientation_of_its_route():
             stage_id=steering,
             position=(2.0, 5.0),
             state=jps.CollisionFreeSpeedModelState(),
+            region_id=0,
         )
     )
     agent.final_target = (8.0, 5.0)
@@ -353,7 +354,7 @@ def ground_floor_region(sim, x, y):
     located = []
     for region_id in range(geometry.region_count()):
         try:
-            located.append(geometry.get_location(x, y, region_id))
+            located.append(geometry.get_location(x, y, region_id=region_id))
         except jps.SimulationError:
             pass
     return min(located, key=lambda location: location.z).region_id

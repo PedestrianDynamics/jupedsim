@@ -73,7 +73,8 @@ goal_1 = simulation.add_exit_stage(
         (113.502, 106.082),
         (113.022, 103.660),
         (114.308, 103.700),
-    ]
+    ],
+    region_id=0,
 )
 goal_2 = simulation.add_exit_stage(
     [
@@ -81,7 +82,8 @@ goal_2 = simulation.add_exit_stage(
         (110.907, 68.319),
         (109.883, 65.822),
         (108.334, 67.112),
-    ]
+    ],
+    region_id=0,
 )
 
 journey1 = jps.JourneyDescription([goal_1])
@@ -111,7 +113,8 @@ for i, pos in enumerate(pos_in_spawning_area):
             stage_id=goal_id,
             radius=0.15,
             desired_speed=1,
-        )
+        ),
+        region_id=0,
     )
 
 while (

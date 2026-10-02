@@ -81,7 +81,9 @@ def main():
         ),
     )
 
-    exit_id = simulation.add_exit_stage([(18, 4), (20, 4), (20, 6), (18, 6)])
+    exit_id = simulation.add_exit_stage(
+        [(18, 4), (20, 4), (20, 6), (18, 6)], region_id=0
+    )
     journey = jps.JourneyDescription([exit_id])
     journey_id = simulation.add_journey(journey)
 
@@ -91,7 +93,7 @@ def main():
 
     for pos in [(1, 2), (3, 8), (5, 5)]:
         agent_parameters.position = pos
-        simulation.add_agent(agent_parameters)
+        simulation.add_agent(agent_parameters, region_id=0)
 
     print(f"Running simulation with CsvTrajectoryWriter -> {output_file}")
 

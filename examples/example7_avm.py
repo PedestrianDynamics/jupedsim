@@ -33,7 +33,7 @@ def main():
         ),
     )
 
-    exit_id = simulation.add_exit_stage(exit_polygon)
+    exit_id = simulation.add_exit_stage(exit_polygon, region_id=0)
     journey = jps.JourneyDescription([exit_id])
     journey_id = simulation.add_journey(journey)
 
@@ -53,7 +53,8 @@ def main():
                 anticipation_time=0.5,
                 reaction_time=0.3,
                 wall_buffer_distance=0.05,
-            )
+            ),
+            region_id=0,
         )
 
     while simulation.agent_count() > 0 and simulation.iteration_count() < 3000:

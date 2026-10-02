@@ -46,7 +46,9 @@ def _open_room():
 
 def _make_sim(model):
     sim = jps.Simulation(model=model, geometry=_open_room(), dt=0.05)
-    exit_id = sim.add_exit_stage([(19, 9), (19, 11), (20, 11), (20, 9)])
+    exit_id = sim.add_exit_stage(
+        [(19, 9), (19, 11), (20, 11), (20, 9)], region_id=0
+    )
     journey_id = sim.add_journey(jps.JourneyDescription([exit_id]))
     return sim, exit_id, journey_id
 
@@ -57,6 +59,7 @@ def _run(sim, journey_id, stage_id, state, steps=40):
         stage_id=stage_id,
         position=(1.0, 10.0),
         state=state,
+        region_id=0,
     )
     trajectory = [sim.agent(agent_id).position]
     for _ in range(steps):
@@ -116,6 +119,7 @@ def test_delegated_state_is_advanced():
         stage_id=exit_id,
         position=(1.0, 3.0),
         state=_Wrapped(sub=initial),
+        region_id=0,
     )
     sim.iterate()
 
@@ -133,6 +137,7 @@ def test_wrong_state_type_is_reported_with_both_names():
         stage_id=exit_id,
         position=(1.0, 10.0),
         state=_Wrapped(sub=jps.CollisionFreeSpeedModelV3State()),
+        region_id=0,
     )
 
     with pytest.raises(
@@ -148,12 +153,14 @@ def _run_pair(sim, journey_id, stage_id, state_of, steps=40):
         stage_id=stage_id,
         position=(1.0, 10.0),
         state=state_of(),
+        region_id=0,
     )
     ahead = sim.add_agent(
         journey_id=journey_id,
         stage_id=stage_id,
         position=(2.2, 10.0),
         state=state_of(),
+        region_id=0,
     )
     trajectory = []
     for _ in range(steps):

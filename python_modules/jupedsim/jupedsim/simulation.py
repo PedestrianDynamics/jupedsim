@@ -151,6 +151,8 @@ class Simulation:
 
                 * :class:`~pathlib.Path` (or a str ending in ``.obj``) naming an OBJ file holding a walkable surface. The world is then a surface: agents walk on it and are routed over it, floors may be stacked, and there is no polygon underneath -- :func:`get_geometry` has no answer for such a simulation.
 
+                A walkable area given as a polygon (all forms but the OBJ file) is a single region with id ``0``.
+
             dt: Iteration step size in seconds. It is recommended to
                 leave this at its default value.
             trajectory_writer: Any object implementing the
@@ -182,7 +184,8 @@ class Simulation:
         self,
         position: tuple[float, float],
         distance,
-        region_id: int = 0,
+        *,
+        region_id: int,
     ) -> int:
         """Add a new waypoint stage to this simulation.
 
@@ -200,7 +203,8 @@ class Simulation:
     def add_queue_stage(
         self,
         positions: list[tuple[float, float]],
-        region_id: int = 0,
+        *,
+        region_id: int,
     ) -> int:
         """Add a new queue state to this simulation.
 
@@ -219,7 +223,8 @@ class Simulation:
     def add_waiting_set_stage(
         self,
         positions: list[tuple[float, float]],
-        region_id: int = 0,
+        *,
+        region_id: int,
     ) -> int:
         """Add a new waiting set stage to this simulation.
 
@@ -245,7 +250,8 @@ class Simulation:
             | shapely.MultiPoint
             | list[tuple[float, float]]
         ),
-        region_id: int = 0,
+        *,
+        region_id: int,
     ) -> int:
         """Add an exit stage to the simulation.
 
@@ -321,7 +327,7 @@ class Simulation:
             | WarpDriverModelState
             | Any
         ),
-        region_id: int = 0,
+        region_id: int,
     ) -> int:
         """Add an agent to the simulation.
 
@@ -360,7 +366,7 @@ class Simulation:
             region_id=region_id,
         )
 
-    def get_location(self, x: float, y: float, region_id: int = 0) -> Location:
+    def get_location(self, x: float, y: float, *, region_id: int) -> Location:
         """Get the location at ``(x, y)`` in region ``region_id``.
 
         The location stays valid as long as this simulation exists.

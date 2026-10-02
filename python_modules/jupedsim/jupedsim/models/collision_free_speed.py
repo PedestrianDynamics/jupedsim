@@ -20,6 +20,7 @@ is passed to the simulation:
         stage_id=stage_id,
         position=(1.0, 1.0),
         state=jupedsim.CollisionFreeSpeedModelState(desired_speed=1.4),
+        region_id=0,
     )
 
 .. warning::

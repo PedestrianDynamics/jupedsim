@@ -67,7 +67,7 @@ def region_at(sim: jps.Simulation, x: float, y: float, height: float) -> int:
     geometry = sim.get_geometry()
     for region_id in range(geometry.region_count()):
         try:
-            location = geometry.get_location(x, y, region_id)
+            location = geometry.get_location(x, y, region_id=region_id)
         except jps.SimulationError:
             continue
         if abs(location.z - height) < 0.1:

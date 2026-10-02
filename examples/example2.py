@@ -28,19 +28,24 @@ def main():
             (60, 50),
             (59, 50),
             (58, 50),
-        ]
+        ],
+        region_id=0,
     )
     stage = simulation.get_stage(stage_id)
     exits = [
-        simulation.add_exit_stage([(99, 40), (99, 60), (100, 60), (100, 40)]),
-        simulation.add_exit_stage([(99, 50), (99, 70), (100, 70), (100, 50)]),
+        simulation.add_exit_stage(
+            [(99, 40), (99, 60), (100, 60), (100, 40)], region_id=0
+        ),
+        simulation.add_exit_stage(
+            [(99, 50), (99, 70), (100, 70), (100, 50)], region_id=0
+        ),
     ]
     waypoints = [
-        simulation.add_waypoint_stage((50, 50), 1),
-        simulation.add_waypoint_stage((60, 40), 1),
-        simulation.add_waypoint_stage((40, 40), 1),
-        simulation.add_waypoint_stage((40, 60), 1),
-        simulation.add_waypoint_stage((60, 60), 1),
+        simulation.add_waypoint_stage((50, 50), 1, region_id=0),
+        simulation.add_waypoint_stage((60, 40), 1, region_id=0),
+        simulation.add_waypoint_stage((40, 40), 1, region_id=0),
+        simulation.add_waypoint_stage((40, 60), 1, region_id=0),
+        simulation.add_waypoint_stage((60, 60), 1, region_id=0),
     ]
 
     short_journey = jps.JourneyDescription([waypoints[0], stage_id, exits[0]])
@@ -73,13 +78,13 @@ def main():
     )
 
     agent_parameters.position = (10, 50)
-    simulation.add_agent(agent_parameters)
+    simulation.add_agent(agent_parameters, region_id=0)
 
     agent_parameters.position = (8, 50)
-    simulation.add_agent(agent_parameters)
+    simulation.add_agent(agent_parameters, region_id=0)
 
     agent_parameters.position = (6, 50)
-    simulation.add_agent(agent_parameters)
+    simulation.add_agent(agent_parameters, region_id=0)
 
     redirect_once = True
     signal_once = True

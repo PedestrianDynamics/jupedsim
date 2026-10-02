@@ -44,7 +44,7 @@ def locations_at(geometry, x, y):
     """Every location over (x, y), one per region that contains it."""
     for region_id in range(geometry.region_count()):
         try:
-            yield geometry.get_location(x, y, region_id)
+            yield geometry.get_location(x, y, region_id=region_id)
         except SimulationError:
             pass
 

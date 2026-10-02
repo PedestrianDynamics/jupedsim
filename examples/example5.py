@@ -35,12 +35,16 @@ def main():
         ),
     )
 
-    exit_top = simulation.add_exit_stage([(-2, 24), (2, 24), (2, 25), (-2, 25)])
+    exit_top = simulation.add_exit_stage(
+        [(-2, 24), (2, 24), (2, 25), (-2, 25)], region_id=0
+    )
     exit_right = simulation.add_exit_stage(
-        [(34, -2), (34, 2), (35, 2), (35, -2)]
+        [(34, -2), (34, 2), (35, 2), (35, -2)],
+        region_id=0,
     )
     exit_bottom = simulation.add_exit_stage(
-        [(-2, -24), (2, -24), (2, -25), (-2, -25)]
+        [(-2, -24), (2, -24), (2, -25), (-2, -25)],
+        region_id=0,
     )
 
     waypoint_middle = simulation.add_queue_stage(
@@ -48,7 +52,8 @@ def main():
             (0, 0),
             (0, -2),
             (0, -8),
-        ]
+        ],
+        region_id=0,
     )
     queue = simulation.get_stage(waypoint_middle)
 
@@ -71,7 +76,7 @@ def main():
 
     for x in range(-49, -9, 1):
         agent_parameters.position = (x, 0)
-        simulation.add_agent(agent_parameters)
+        simulation.add_agent(agent_parameters, region_id=0)
 
     while simulation.agent_count() > 0:
         try:

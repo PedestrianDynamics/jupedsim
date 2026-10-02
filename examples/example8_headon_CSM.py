@@ -24,7 +24,7 @@ def main():
         ),
     )
 
-    exit_id = simulation.add_exit_stage(exit_polygon)
+    exit_id = simulation.add_exit_stage(exit_polygon, region_id=0)
     journey = jps.JourneyDescription([exit_id])
     journey_id = simulation.add_journey(journey)
 
@@ -46,7 +46,7 @@ def main():
         ),
     ]
     for position, param in zip(start_positions, parameters):
-        simulation.add_agent(parameters=param)
+        simulation.add_agent(parameters=param, region_id=0)
 
     while simulation.agent_count() > 0 and simulation.iteration_count() < 1000:
         simulation.iterate()

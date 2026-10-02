@@ -122,8 +122,8 @@ def _setup_bidirectional(model, writer, dt, length=50.0, width=4.0):
     exit_right = shapely.Polygon(
         [(length - 1, 0), (length, 0), (length, width), (length - 1, width)]
     )
-    eid_l = sim.add_exit_stage(exit_left)
-    eid_r = sim.add_exit_stage(exit_right)
+    eid_l = sim.add_exit_stage(exit_left, region_id=0)
+    eid_r = sim.add_exit_stage(exit_right, region_id=0)
     jid_r = sim.add_journey(jps.JourneyDescription([eid_r]))
     jid_l = sim.add_journey(jps.JourneyDescription([eid_l]))
     return sim, area, {"right": (jid_r, eid_r), "left": (jid_l, eid_l)}
@@ -151,7 +151,8 @@ def _add_bidirectional(sim, agent_cls, routes, n=50, agent_kwargs=None):
                 eid_r,
                 orientation=(1, 0),
                 agent_kwargs=agent_kwargs,
-            )
+            ),
+            region_id=0,
         )
         streams["right"].append(aid)
     pos_l = jps.distributions.distribute_by_number(
@@ -170,7 +171,8 @@ def _add_bidirectional(sim, agent_cls, routes, n=50, agent_kwargs=None):
                 eid_l,
                 orientation=(-1, 0),
                 agent_kwargs=agent_kwargs,
-            )
+            ),
+            region_id=0,
         )
         streams["left"].append(aid)
     return streams
@@ -190,7 +192,7 @@ def _setup_bottleneck(model, writer, dt):
         model=model, geometry=geometry, dt=dt, trajectory_writer=writer
     )
     exit_area = geometry.intersection(shapely.box(13, -5, 15, 5))
-    eid = sim.add_exit_stage(exit_area)
+    eid = sim.add_exit_stage(exit_area, region_id=0)
     jid = sim.add_journey(jps.JourneyDescription([eid]))
     return sim, geometry, {"exit": (jid, eid)}
 
@@ -214,7 +216,8 @@ def _add_bottleneck(sim, agent_cls, routes, geometry, n=100, agent_kwargs=None):
                 eid,
                 orientation=(1, 0),
                 agent_kwargs=agent_kwargs,
-            )
+            ),
+            region_id=0,
         )
     return None  # single stream, no color splitting
 
@@ -243,7 +246,7 @@ def _setup_crossing(model, writer, dt):
     }
     routes = {}
     for name, poly in exits.items():
-        eid = sim.add_exit_stage(poly)
+        eid = sim.add_exit_stage(poly, region_id=0)
         jid = sim.add_journey(jps.JourneyDescription([eid]))
         routes[name] = (jid, eid)
     return sim, geometry, routes
@@ -296,7 +299,8 @@ def _add_crossing(sim, agent_cls, routes, n=15, agent_kwargs=None):
                     eid,
                     orientation=orient,
                     agent_kwargs=agent_kwargs,
-                )
+                ),
+                region_id=0,
             )
             ids.append(aid)
         streams[stream_name] = ids

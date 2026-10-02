@@ -70,7 +70,7 @@ A Waypoint at :math:`(0.6, -1.4)` with an accepted distance of 2m can be added t
 
 .. code:: python
 
-    waypoint_id = simulation.add_waypoint_stage([0.6, -1.4], 2)
+    waypoint_id = simulation.add_waypoint_stage([0.6, -1.4], 2, region_id=0)
 
 Exit
 ^^^^
@@ -96,11 +96,11 @@ An exit located in the polygon :math:`(-0.2, -1.9), (0.2, -1.9), (0.2, -1.7), (-
 .. code:: python
 
     # create exit from coordinates
-    exit_id = simulation.add_exit_stage([(-0.2, -1.9), (0.2, -1.9), (0.2, -1.7), (-0.2, -1.7)])
+    exit_id = simulation.add_exit_stage([(-0.2, -1.9), (0.2, -1.9), (0.2, -1.7), (-0.2, -1.7)], region_id=0)
 
     # create exit from shapely.Polygon
     exit_polygon = shapely.Polygon([(-0.2, -1.9), (0.2, -1.9), (0.2, -1.7), (-0.2, -1.7)])
-    exit_id = simulation.add_exit_stage(exit_polygon)
+    exit_id = simulation.add_exit_stage(exit_polygon, region_id=0)
 
 .. note::
 
@@ -148,6 +148,8 @@ Afterwards, it retrieves the Queue object from the simulation and then releases 
             (0, 10),
             (0, 15),
             (0, 20),
+        ],
+        region_id=0,
     )
     # retrieve queue from the simulation
     queue = simulation.get_stage(queue_id)
@@ -192,7 +194,8 @@ In the following, you can see how to add a waiting set to a simulation and how t
             (60, 50),
             (59, 50),
             (58, 50),
-        ]
+        ],
+        region_id=0,
     )
     # retrieve waiting set from the simulation
     waiting_set = simulation.get_stage(waiting_set_id)

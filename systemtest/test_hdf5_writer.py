@@ -27,7 +27,8 @@ def square_simulation(tmp_path: pathlib.Path):
         dt=0.01,
     )
     exit_id = sim.add_exit_stage(
-        shapely.Polygon([(9, 0), (10, 0), (10, 10), (9, 10)])
+        shapely.Polygon([(9, 0), (10, 0), (10, 10), (9, 10)]),
+        region_id=0,
     )
     journey_id = sim.add_journey(jps.JourneyDescription([exit_id]))
     for x, y in [(2, 5), (3, 4), (3, 6)]:
@@ -36,6 +37,7 @@ def square_simulation(tmp_path: pathlib.Path):
             stage_id=exit_id,
             position=(x, y),
             state=jps.CollisionFreeSpeedModelV2State(),
+            region_id=0,
         )
     for _ in range(50):
         sim.iterate()

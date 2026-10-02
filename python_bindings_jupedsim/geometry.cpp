@@ -84,7 +84,8 @@ void init_geometry(py::module_& m)
             &Geometry::get_location,
             py::arg("x"),
             py::arg("y"),
-            py::arg("region_id") = 0,
+            py::kw_only(),
+            py::arg("region_id"),
             // The returned token points into this geometry.
             py::keep_alive<0, 1>())
         .def("region_count", &Geometry::region_count)
@@ -95,7 +96,7 @@ void init_geometry(py::module_& m)
             "polygon",
             &Geometry::polygon,
             py::kw_only(),
-            py::arg("region_id") = 0,
+            py::arg("region_id"),
             "Polygon2D for the specified region ID");
 
     py::class_<GeometryBuilder>(m, "GeometryBuilder")

@@ -92,7 +92,9 @@ def _corridor():
 
 def _make_sim(model):
     sim = jps.Simulation(model=model, geometry=_corridor(), dt=0.01)
-    exit_id = sim.add_exit_stage([(29, 3), (29, 5), (30, 5), (30, 3)])
+    exit_id = sim.add_exit_stage(
+        [(29, 3), (29, 5), (30, 5), (30, 3)], region_id=0
+    )
     journey_id = sim.add_journey(jps.JourneyDescription([exit_id]))
     return sim, exit_id, journey_id
 
@@ -117,6 +119,7 @@ def _add(sim, journey_id, stage_id, position, state):
         stage_id=stage_id,
         position=position,
         state=state,
+        region_id=0,
     )
 
 

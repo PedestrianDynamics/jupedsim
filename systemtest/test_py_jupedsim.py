@@ -18,7 +18,9 @@ def test_can_query_agents_in_range():
         model=jps.CollisionFreeSpeedModel(),
         geometry=[(0, 0), (100, 0), (100, 100), (0, 100)],
     )
-    exit = simulation.add_exit_stage([(99, 45), (99, 55), (100, 55), (100, 45)])
+    exit = simulation.add_exit_stage(
+        [(99, 45), (99, 55), (100, 55), (100, 45)], region_id=0
+    )
 
     journey = jps.JourneyDescription([exit])
 
@@ -44,6 +46,7 @@ def test_can_query_agents_in_range():
                 stage_id=exit,
                 position=new_pos,
                 state=jps.CollisionFreeSpeedModelState(),
+                region_id=0,
             )
         )
 
@@ -87,7 +90,8 @@ def test_can_run_simulation():
         model=jps.CollisionFreeSpeedModel(), geometry=p1.union(p2)
     )
     exit_stage_id = simulation.add_exit_stage(
-        [(18, 4), (20, 4), (20, 6), (18, 6)]
+        [(18, 4), (20, 4), (20, 6), (18, 6)],
+        region_id=0,
     )
 
     journey = jps.JourneyDescription([exit_stage_id])
@@ -105,6 +109,7 @@ def test_can_run_simulation():
                 stage_id=exit_stage_id,
                 position=new_pos,
                 state=jps.CollisionFreeSpeedModelState(),
+                region_id=0,
             )
         )
 
@@ -117,6 +122,7 @@ def test_can_run_simulation():
         stage_id=exit_stage_id,
         position=(6, 6),
         state=jps.CollisionFreeSpeedModelState(),
+        region_id=0,
     )
 
     for actual, expected in zip(simulation.agents(), initial_agent_positions):
@@ -147,7 +153,7 @@ def test_can_wait():
         model=jps.CollisionFreeSpeedModel(),
         geometry=[(0, 0), (100, 0), (100, 100), (0, 100)],
     )
-    wp = simulation.add_waypoint_stage((50, 50), 1)
+    wp = simulation.add_waypoint_stage((50, 50), 1, region_id=0)
     waiting_set_id = simulation.add_waiting_set_stage(
         [
             (70, 50),
@@ -157,10 +163,13 @@ def test_can_wait():
             (66, 50),
             (65, 50),
             (64, 50),
-        ]
+        ],
+        region_id=0,
     )
     waiting_set = simulation.get_stage(waiting_set_id)
-    exit = simulation.add_exit_stage([(99, 40), (99, 60), (100, 60), (100, 40)])
+    exit = simulation.add_exit_stage(
+        [(99, 40), (99, 60), (100, 60), (100, 40)], region_id=0
+    )
     journey = jps.JourneyDescription([wp, waiting_set_id, exit])
     journey.set_transition_for_stage(
         wp, jps.Transition.create_fixed_transition(waiting_set_id)
@@ -191,6 +200,7 @@ def test_can_wait():
                 stage_id=wp,
                 position=new_pos,
                 state=jps.CollisionFreeSpeedModelState(),
+                region_id=0,
             )
         )
 
@@ -203,6 +213,7 @@ def test_can_wait():
         stage_id=wp,
         position=(30, 30),
         state=jps.CollisionFreeSpeedModelState(),
+        region_id=0,
     )
 
     for actual, expected in zip(simulation.agents(), initial_agent_positions):
@@ -234,17 +245,19 @@ def test_can_change_journey_while_waiting():
         model=jps.CollisionFreeSpeedModel(),
         geometry=[(0, 0), (100, 0), (100, 100), (0, 100)],
     )
-    wp = simulation.add_waypoint_stage((50, 50), 1)
+    wp = simulation.add_waypoint_stage((50, 50), 1, region_id=0)
     stage_id = simulation.add_waiting_set_stage(
         [
             (60, 50),
             (59, 50),
             (58, 50),
-        ]
+        ],
+        region_id=0,
     )
     stage = simulation.get_stage(stage_id)
     exit1 = simulation.add_exit_stage(
-        [(99, 40), (99, 60), (100, 60), (100, 40)]
+        [(99, 40), (99, 60), (100, 60), (100, 40)],
+        region_id=0,
     )
 
     journey1 = jps.JourneyDescription([wp, stage_id, exit1])
@@ -255,11 +268,13 @@ def test_can_change_journey_while_waiting():
         stage_id, jps.Transition.create_fixed_transition(exit1)
     )
     journey2_stages = [
-        simulation.add_waypoint_stage((60, 40), 1),
-        simulation.add_waypoint_stage((40, 40), 1),
-        simulation.add_waypoint_stage((40, 60), 1),
-        simulation.add_waypoint_stage((60, 60), 1),
-        simulation.add_exit_stage([(99, 50), (99, 70), (100, 70), (100, 50)]),
+        simulation.add_waypoint_stage((60, 40), 1, region_id=0),
+        simulation.add_waypoint_stage((40, 40), 1, region_id=0),
+        simulation.add_waypoint_stage((40, 60), 1, region_id=0),
+        simulation.add_waypoint_stage((60, 60), 1, region_id=0),
+        simulation.add_exit_stage(
+            [(99, 50), (99, 70), (100, 70), (100, 50)], region_id=0
+        ),
     ]
     journey2 = jps.JourneyDescription(journey2_stages)
     for src, dst in zip(journey2_stages[:-1], journey2_stages[1:]):
@@ -276,6 +291,7 @@ def test_can_change_journey_while_waiting():
         stage_id=wp,
         position=(10, 50),
         state=jps.CollisionFreeSpeedModelState(),
+        region_id=0,
     )
 
     simulation.add_agent(
@@ -283,6 +299,7 @@ def test_can_change_journey_while_waiting():
         stage_id=wp,
         position=(8, 50),
         state=jps.CollisionFreeSpeedModelState(),
+        region_id=0,
     )
 
     simulation.add_agent(
@@ -290,6 +307,7 @@ def test_can_change_journey_while_waiting():
         stage_id=wp,
         position=(6, 50),
         state=jps.CollisionFreeSpeedModelState(),
+        region_id=0,
     )
 
     redirect_once = True
@@ -328,7 +346,9 @@ def test_get_single_agent_from_simulation():
     simulation = jps.Simulation(
         model=jps.CollisionFreeSpeedModel(), geometry=p1.union(p2)
     )
-    exit_id = simulation.add_exit_stage([(18, 4), (20, 4), (20, 6), (18, 6)])
+    exit_id = simulation.add_exit_stage(
+        [(18, 4), (20, 4), (20, 6), (18, 6)], region_id=0
+    )
 
     journey = jps.JourneyDescription([exit_id])
 
@@ -344,6 +364,7 @@ def test_get_single_agent_from_simulation():
                 stage_id=exit_id,
                 position=new_pos,
                 state=jps.CollisionFreeSpeedModelState(),
+                region_id=0,
             )
         )
 
@@ -368,7 +389,9 @@ def test_get_agent_non_existing_agent_from_simulation():
         model=jps.CollisionFreeSpeedModel(), geometry=p1.union(p2)
     )
 
-    exit_id = simulation.add_exit_stage([(18, 4), (20, 4), (20, 6), (18, 6)])
+    exit_id = simulation.add_exit_stage(
+        [(18, 4), (20, 4), (20, 6), (18, 6)], region_id=0
+    )
     journey = jps.JourneyDescription([exit_id])
 
     journey_id = simulation.add_journey(journey)
@@ -378,6 +401,7 @@ def test_get_agent_non_existing_agent_from_simulation():
         stage_id=exit_id,
         position=(7, 7),
         state=jps.CollisionFreeSpeedModelState(),
+        region_id=0,
     )
 
     assert simulation.agent(agent_id).id == agent_id
@@ -405,7 +429,8 @@ def test_agent_can_be_removed_from_simulation():
         model=jps.CollisionFreeSpeedModel(), geometry=p1.union(p2)
     )
     exit_stage_id = simulation.add_exit_stage(
-        [(18, 4), (20, 4), (20, 6), (18, 6)]
+        [(18, 4), (20, 4), (20, 6), (18, 6)],
+        region_id=0,
     )
 
     journey = jps.JourneyDescription([exit_stage_id])
@@ -423,6 +448,7 @@ def test_agent_can_be_removed_from_simulation():
                 stage_id=exit_stage_id,
                 position=new_pos,
                 state=jps.CollisionFreeSpeedModelState(),
+                region_id=0,
             )
         )
 
@@ -468,7 +494,8 @@ def test_agent_can_not_be_added_outside_geometry():
     )
 
     exit_id = simulation.add_exit_stage(
-        [(99, 45), (99, 55), (100, 55), (100, 45)]
+        [(99, 45), (99, 55), (100, 55), (100, 45)],
+        region_id=0,
     )
 
     journey = jps.JourneyDescription([exit_id])
@@ -481,6 +508,7 @@ def test_agent_can_not_be_added_outside_geometry():
         stage_id=exit_id,
         position=agent_position,
         state=jps.CollisionFreeSpeedModelState(),
+        region_id=0,
     )
 
     with pytest.raises(
@@ -492,6 +520,7 @@ def test_agent_can_not_be_added_outside_geometry():
             stage_id=exit_id,
             position=(-50, -50),
             state=jps.CollisionFreeSpeedModelState(),
+            region_id=0,
         )
 
 
@@ -507,6 +536,7 @@ def test_direct_steering_target_must_be_inside_geometry():
         stage_id=stage_id,
         position=(50, 50),
         state=jps.CollisionFreeSpeedModelState(),
+        region_id=0,
     )
     agent = simulation.agent(agent_id)
 

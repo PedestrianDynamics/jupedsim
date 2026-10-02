@@ -4,7 +4,7 @@ JuPedSim 2.0 is a clean break: the model builder classes and the
 `XModelAgentParameters` dataclasses have been **removed without deprecation
 shims**. This guide maps every 1.x construct to its 2.0 replacement.
 
-The three changes you will encounter in every script:
+The four changes you will encounter in every script:
 
 1. **Simulation construction** — every model is passed as a *configured
    instance* carrying its model-level parameters (e.g.
@@ -16,6 +16,9 @@ The three changes you will encounter in every script:
    {class}`~jupedsim.CollisionFreeSpeedModelState`.
 3. **Agent access** — {class}`~jupedsim.Agent` objects are lightweight
    *handles by id* that resolve the agent freshly on every attribute access.
+4. **Regions** — everything placed in the walkable area (agents and stages)
+   takes a required `region_id`. A walkable area given as a polygon is a
+   single region with id `0`.
 
 ## Constructing a Simulation
 
@@ -113,6 +116,7 @@ agent_id = sim.add_agent(
     stage_id=stage_id,
     position=(1.0, 1.0),
     state=jps.CollisionFreeSpeedModelState(desired_speed=1.4),
+    region_id=0,
 )
 ```
 
@@ -124,8 +128,51 @@ For custom models the state is your own object, of whatever type your
 recommended):
 
 ```python
-sim.add_agent(journey_id=journey_id, stage_id=stage_id, position=(1.0, 1.0), state=MyState())
+sim.add_agent(
+    journey_id=journey_id,
+    stage_id=stage_id,
+    position=(1.0, 1.0),
+    state=MyState(),
+    region_id=0,
+)
 ```
+
+## Regions
+
+The walkable area consists of regions, and regions may lie on top of each
+other, e.g. the floors of a building. An `(x, y)` alone therefore does not
+say where a place is: `add_agent`, `add_waypoint_stage`, `add_queue_stage`,
+`add_waiting_set_stage`, `add_exit_stage` and `get_location` take a
+**required keyword argument `region_id`**.
+
+A walkable area given as a polygon (WKT, shapely or a list of points) is a
+single region with id `0`:
+
+```python
+# 1.x
+exit_id = sim.add_exit_stage(exit_polygon)
+
+# 2.0
+exit_id = sim.add_exit_stage(exit_polygon, region_id=0)
+```
+
+With a {class}`~jupedsim.WalkableSurface`, `add_region` and `connect_regions`
+return the region ids:
+
+```python
+surface = jps.WalkableSurface()
+ground = surface.add_region(exterior=ground_outline, height=0.0)
+upper = surface.add_region(exterior=upper_outline, height=3.0)
+surface.connect_regions(
+    from_region=ground, from_edge=foot_of_stairs,
+    to_region=upper, to_edge=head_of_stairs,
+)
+sim = jps.Simulation(model=jps.CollisionFreeSpeedModel(), geometry=surface)
+exit_id = sim.add_exit_stage(exit_polygon, region_id=upper)
+```
+
+An unknown region id, or a point outside the given region, raises
+{class}`~jupedsim.SimulationError`.
 
 ## Old → new mapping per model
 

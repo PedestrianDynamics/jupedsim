@@ -26,10 +26,14 @@ def main():
         ),
     )
 
-    stage_id = simulation.add_waiting_set_stage([(16, 5), (15, 5), (14, 5)])
+    stage_id = simulation.add_waiting_set_stage(
+        [(16, 5), (15, 5), (14, 5)], region_id=0
+    )
     waiting_stage = simulation.get_stage(stage_id)
     assert isinstance(waiting_stage, jps.WaitingSetStage)
-    exit_id = simulation.add_exit_stage([(18, 4), (20, 4), (20, 6), (18, 6)])
+    exit_id = simulation.add_exit_stage(
+        [(18, 4), (20, 4), (20, 6), (18, 6)], region_id=0
+    )
 
     journey = jps.JourneyDescription()
     journey.add(stage_id)
@@ -45,7 +49,7 @@ def main():
 
     for new_pos in [(7, 7), (1, 3), (1, 5), (1, 7), (2, 7)]:
         agent_parameters.position = new_pos
-        simulation.add_agent(agent_parameters)
+        simulation.add_agent(agent_parameters, region_id=0)
 
     print("Running simulation")
 
