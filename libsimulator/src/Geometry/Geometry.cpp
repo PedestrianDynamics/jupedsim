@@ -4,8 +4,14 @@
 #include "GeometricFunctions.hpp"
 #include "Geometry/BoundaryIndex.hpp"
 #include "LineSegment.hpp"
+#include "Polygon.hpp"
+#include "SimulationError.hpp"
 
+#include <CGAL/Boolean_set_operations_2.h>
+#include <CGAL/Cartesian_converter.h>
+#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 #include <CGAL/mark_domain_in_triangulation.h>
+#include <boost/iterator/function_output_iterator.hpp>
 #include <boost/range/iterator_range.hpp>
 
 #include <algorithm>
@@ -211,4 +217,126 @@ std::vector<std::array<std::size_t, 3>> Geometry::triangles() const
         out.push_back(tri);
     }
     return out;
+}
+
+namespace
+{
+/// The seam @p e as a segment of its source region's footprint.
+Segment2D seam_segment(const Geometry::RegionGraph2D& g, Geometry::RegionGraph2D::edge_descriptor e)
+{
+    const auto& footprint = g[boost::source(e, g)];
+    const auto& seam = g[e];
+    const Poly& ring =
+        seam.ring == 0 ? footprint.outer_boundary() : footprint.holes()[seam.ring - 1];
+    return ring.edge(seam.index);
+}
+
+/// Whether @p s lies inside @p area or crosses or touches its boundary.
+bool meets(const Poly& area, const Segment2D& s)
+{
+    if(area.bounded_side(s.source()) != CGAL::ON_UNBOUNDED_SIDE) {
+        return true;
+    }
+    return std::any_of(area.edges_begin(), area.edges_end(), [&s](const Segment2D& edge) {
+        return CGAL::do_intersect(edge, s);
+    });
+}
+
+/// Exact arithmetic for cutting areas. Boolean set operations construct the points where
+/// edges cross and run predicates on them again; with inexact constructions the two can
+/// disagree on (nearly) degenerate input the result is a crash or a wrong cut, not a small error.
+/// With EPECK the one rounding step is the conversion of the finished pieces back to doubles.
+using ExactKernel = CGAL::Exact_predicates_exact_constructions_kernel;
+using ExactPoly = CGAL::Polygon_2<ExactKernel>;
+using ExactPolyWithHoles = CGAL::Polygon_with_holes_2<ExactKernel>;
+
+ExactPoly to_exact(const Poly& ring)
+{
+    const CGAL::Cartesian_converter<K, ExactKernel> convert{};
+    ExactPoly exact{};
+    for(auto v = ring.vertices_begin(); v != ring.vertices_end(); ++v) {
+        exact.push_back(convert(*v));
+    }
+    return exact;
+}
+
+ExactPolyWithHoles to_exact(const PolyWithHoles& area)
+{
+    std::vector<ExactPoly> holes{};
+    holes.reserve(area.number_of_holes());
+    for(const auto& hole : area.holes()) {
+        holes.push_back(to_exact(hole));
+    }
+    return ExactPolyWithHoles(to_exact(area.outer_boundary()), holes.begin(), holes.end());
+}
+
+/// Rounds @p ring to doubles, dropping vertices that round onto their predecessor.
+Poly to_inexact(const ExactPoly& ring)
+{
+    const CGAL::Cartesian_converter<ExactKernel, K> convert{};
+    Poly inexact{};
+    for(auto v = ring.vertices_begin(); v != ring.vertices_end(); ++v) {
+        const auto p = convert(*v);
+        if(inexact.is_empty() || p != inexact.vertex(inexact.size() - 1)) {
+            inexact.push_back(p);
+        }
+    }
+    if(inexact.size() > 1 && inexact.vertex(0) == inexact.vertex(inexact.size() - 1)) {
+        inexact.erase(std::prev(inexact.vertices_end()));
+    }
+    return inexact;
+}
+
+} // namespace
+
+/// Split @p p into pieces that lie in a single region each. The pieces are clipped to the
+/// region's footprint. A vector of AreaPiece is returned, each with the piece's polygon and the
+/// region id it lies in.
+std::vector<AreaPiece> Geometry::split_into_region_pieces(const Poly& p, size_t region_id) const
+{
+
+    const auto* g = _regionGraph2D.get();
+    if(!g) {
+        throw SimulationError("Geometry is built from mesh and has no 2D polygons");
+    }
+    // convert the polygon to exact arithmetic for cutting, and intersection test
+    const auto seed_poly = to_exact((*g)[region_id]);
+    const auto exact_area = to_exact(p);
+    if(!CGAL::do_intersect(seed_poly, exact_area)) {
+        throw SimulationError("Seed region {} does not intersect the area to be split", region_id);
+    }
+    std::vector<bool> seen(boost::num_vertices(*g), false);
+
+    std::vector<AreaPiece> pieces{};
+
+    // define lambda function to add pieces of a region to the pieces vector
+    const auto add_pieces_of = [&pieces, &exact_area, &g, &seen](std::size_t r) {
+        // CGAL::intersection returns a range of polygons with holes, however for the routing
+        // we only need the outer boundary of each piece, since agents never walk on holes.
+        seen[r] = true;
+        CGAL::intersection(
+            to_exact((*g)[r]),
+            exact_area,
+            boost::make_function_output_iterator([&pieces, r](const ExactPolyWithHoles& piece) {
+                pieces.push_back(AreaPiece{to_inexact(piece.outer_boundary()), r});
+            }));
+    };
+
+    // we start a graph traversal from the seed region, and add pieces of each region
+    // where a seam segment intersects the polygon p.
+    // We keep track of seen regions to avoid cycles.
+    std::set<std::size_t> todo;
+    todo.insert(region_id);
+    while(!todo.empty()) {
+        const auto r = *todo.begin();
+        todo.erase(todo.begin());
+        add_pieces_of(r);
+        for(auto e : boost::make_iterator_range(boost::out_edges(r, *g))) {
+            const auto n = boost::target(e, *g);
+            if(!seen[n] && meets(p, seam_segment(*g, e))) {
+                todo.insert(n);
+            }
+        }
+    }
+    return pieces;
 }
