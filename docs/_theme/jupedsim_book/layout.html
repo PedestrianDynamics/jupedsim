@@ -1,0 +1,57 @@
+{#- SPDX-License-Identifier: LGPL-3.0-or-later -#}
+{#- Book shell around every page: top bar, left track (drawer nav, docs tree),
+    report, TOC, footer. Grew out of the Hugo theme's baseof.html. Block
+    page_main (report + prev/next) is replaced by landing.html. -#}
+{%- extends "basic/layout.html" %}
+
+{%- block extrahead %}
+{{ super() }}
+<script>(function(){var s=null;try{s=localStorage.getItem('theme')}catch(e){}var d=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;var r=document.documentElement;r.dataset.theme=(s==='light'||s==='dark')?s:(d?'dark':'light');r.dataset.themeMode=(s==='light'||s==='dark')?s:'auto';})();</script>
+{%- if theme_feed_url %}
+<link rel="alternate" type="application/rss+xml" href="{{ theme_feed_url }}" title="{{ theme_site_name|e }}">
+{%- endif %}
+{%- endblock %}
+
+{%- block relbar1 %}{% endblock %}
+{%- block relbar2 %}{% endblock %}
+{%- block sidebar1 %}{% endblock %}
+{%- block sidebar2 %}{% endblock %}
+{%- block footer %}{% endblock %}
+
+{%- block content %}
+<input type="checkbox" class="book-control" id="menu-control" aria-label="Toggle navigation" aria-controls="book-menu">
+<input type="checkbox" class="book-control" id="search-control" aria-label="Show search">
+{%- if toc_enabled %}
+<input type="checkbox" class="book-control" id="toc-control" aria-label="Toggle table of contents" aria-controls="book-toc">
+{%- endif %}
+<label for="menu-control" class="book-overlay book-overlay-menu" aria-hidden="true"></label>
+{%- if toc_enabled %}
+<label for="toc-control" class="book-overlay book-overlay-toc" aria-hidden="true"></label>
+{%- endif %}
+{%- include "topbar.html" %}
+<main class="book{% if not docs_tree %} book--no-tree{% endif %}{% if landing %} book--landing{% endif %}">
+<aside class="book-menu" id="book-menu">
+{%- include "sidebar.html" %}
+</aside>
+<div class="book-page">
+{%- block page_main %}
+<article class="report" {% if page_kicker %}data-pagefind-filter="section:{{ page_kicker|e }}" {% endif %}data-pagefind-meta="title:{{ title|striptags|e }}">
+{%- include "report-header.html" %}
+<div class="report-body"{% if pagefind_index %} data-pagefind-body{% endif %}>
+{% block body %}{% endblock %}
+</div>
+{%- if last_updated %}
+<footer class="report-footer">Last updated {{ last_updated|e }}</footer>
+{%- endif %}
+</article>
+{%- if pagenav_enabled %}{% include "pagenav.html" %}{% endif %}
+{%- endblock %}
+</div>
+{%- if toc_enabled %}
+<aside class="book-toc" id="book-toc">
+{%- include "toc.html" %}
+</aside>
+{%- endif %}
+</main>
+{%- include "footer.html" %}
+{%- endblock %}

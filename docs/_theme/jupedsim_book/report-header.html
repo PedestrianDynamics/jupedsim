@@ -1,0 +1,19 @@
+{#- SPDX-License-Identifier: LGPL-3.0-or-later -#}
+{#- Report header; mirrors the Hugo theme's _partials/report-header.html. -#}
+{%- set m = meta or {} %}
+<header class="report-header">
+{%- if page_kicker %}
+<p class="report-kicker">{{ page_kicker|e }}</p>
+{%- endif %}
+<h1 class="report-title">{{ title }}</h1>
+{%- if m.description %}
+<p class="report-subtitle">{{ m.description|e }}</p>
+{%- endif %}
+{%- if m.author or page_date or page_stats %}
+<p class="report-meta">
+{%- if m.author %}<span class="meta-item">{{ m.author|e }}</span>{% endif %}
+{%- if page_date %}<span class="meta-item">{% if page_date.iso %}<time datetime="{{ page_date.iso }}" data-pagefind-meta="date[datetime]">{{ page_date.text|e }}</time>{% else %}{{ page_date.text|e }}{% endif %}</span>{% endif %}
+{%- if page_stats %}<span class="meta-item">{{ page_stats.words }} words</span><span class="meta-item">{{ page_stats.minutes }} min read</span>{% endif %}
+</p>
+{%- endif %}
+</header>

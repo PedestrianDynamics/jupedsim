@@ -1,0 +1,8 @@
+{#- SPDX-License-Identifier: LGPL-3.0-or-later -#}
+{#- Page footer after </main> on every page: text left (footer_text, else
+    the copyright, else the site name), footer_links right; the inner box
+    sits on the same grid as the top bar (site.css). -#}
+<footer class="site-footer"><div class="site-footer-inner">
+<p class="site-footer-text">{{ theme_footer_text or ('© ' ~ copyright if copyright else theme_site_name) }}</p>
+<ul class="site-footer-links">{% for l in footer_links %}<li><a href="{{ l.url|e }}">{{ l.title|e }}</a></li>{% endfor %}</ul>
+</div></footer>

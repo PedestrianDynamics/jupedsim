@@ -30,8 +30,9 @@ jobs:
         uses: ./.github/actions/build-docs
         with:
           python-version: "3.13"
-          docs-requirements-path: "docs/requirements.txt"
-          docs-source-path: "docs/source"
-          docs-build-path: "docs/build"
+          # The artifact holds the whole site with the docs under
+          # docs/<version>/: the release tag for releases, dev otherwise.
+          version: ${{ github.event_name == 'release' && github.event.release.tag_name || 'dev' }}
+          out-path: ${{ runner.temp }}/site
           # Keep release builds around long enough to re-run a failed deployment.
           retention-days: ${{ github.event_name == 'release' && '30' || '1' }}

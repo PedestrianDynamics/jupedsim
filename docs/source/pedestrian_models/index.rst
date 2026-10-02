@@ -61,14 +61,14 @@ situations.
 See the `V3 specification <collision_free_speed_model_v3.html>`_ for full details.
 
 A `detailed description
-<https://pedestriandynamics.org/models/collision_free_speed_model/>`_ is
+<https://pedestriandynamics.org/models/collision_free_speed_model/>`__ is
 available on `PedestrianDynamics`_.
 
 The original publication can be found at https://arxiv.org/abs/1512.05597
 
-**************************
+***************************
 Anticipation Velocity Model
-**************************
+***************************
 The anticipation velocity model (AVM) is a mathematical approach for pedestrian
 dynamics that prevents collisions through anticipatory behavior. The model divides
 anticipation into three components: situation perception, future prediction, and
@@ -135,7 +135,7 @@ parameters are per-agent parameters that can be set individually via
 changed at any time.
 
 For an in-depth explanation of the model, refer to the 
-`detailed description <https://pedestriandynamics.org/models/anticipation_velocity_model/>`_ 
+`detailed description <https://pedestriandynamics.org/models/anticipation_velocity_model/>`__ 
 available on the `PedestrianDynamics`_ website.
 
 The original research is published in 
@@ -154,7 +154,7 @@ increases proportionally as speed increases. Conversely, the semi-axis along
 the shoulder direction decreases with higher velocities.
 
 A `detailed description
-<https://pedestriandynamics.org/models/generalized_centrifugal_force_model/>`_
+<https://pedestriandynamics.org/models/generalized_centrifugal_force_model/>`__
 is available on `PedestrianDynamics`_.
 
 .. note::
@@ -186,7 +186,7 @@ order to avoid collisions. The obstacle force acts in a similar way to the
 person force to avoid collisions with obstacles in the environment.
 
 A `detailed description
-<https://pedestriandynamics.org/models/social_force_model/>`_ is available on
+<https://pedestriandynamics.org/models/social_force_model/>`__ is available on
 `PedestrianDynamics`_.
 
 ****************

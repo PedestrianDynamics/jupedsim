@@ -1,0 +1,75 @@
+/* chroma-dark.css — syntax colours for the dark theme, scoped to
+   html[data-theme="dark"]. The head snippet always resolves "auto" into an
+   explicit data-theme value. Wrapped in @media screen so the light print palette
+   in jupedsim-style.css is not outranked. Palette follows
+   GitHub's dark syntax colours (readable on --panel #1b1e25). */
+@media screen {
+  [data-theme="dark"] .highlight .hll,
+  [data-theme="dark"] .highlight .hl { background-color: rgba(255, 255, 0, 0.12) }
+  [data-theme="dark"] .highlight .c,
+  [data-theme="dark"] .highlight .ch,
+  [data-theme="dark"] .highlight .cm,
+  [data-theme="dark"] .highlight .cpf,
+  [data-theme="dark"] .highlight .c1,
+  [data-theme="dark"] .highlight .cs { color: #8b949e; background: none }
+  [data-theme="dark"] .highlight .cp { color: #ff7b72 }
+  [data-theme="dark"] .highlight .err { border-color: #f85149 }
+  [data-theme="dark"] .highlight .k,
+  [data-theme="dark"] .highlight .kc,
+  [data-theme="dark"] .highlight .kd,
+  [data-theme="dark"] .highlight .kn,
+  [data-theme="dark"] .highlight .kp,
+  [data-theme="dark"] .highlight .kr,
+  [data-theme="dark"] .highlight .ow { color: #ff7b72 }
+  [data-theme="dark"] .highlight .kt { color: #ffa657 }
+  [data-theme="dark"] .highlight .o { color: #c9d1d9 }
+  [data-theme="dark"] .highlight .p { color: #c9d1d9 }
+  [data-theme="dark"] .highlight .gd { color: #ffdcd7; background-color: #67060c }
+  [data-theme="dark"] .highlight .gi { color: #aff5b4; background-color: #033a16 }
+  [data-theme="dark"] .highlight .gr,
+  [data-theme="dark"] .highlight .gt { color: #f85149 }
+  [data-theme="dark"] .highlight .gh,
+  [data-theme="dark"] .highlight .gu { color: #79c0ff; font-weight: bold }
+  [data-theme="dark"] .highlight .go { color: #8b949e }
+  [data-theme="dark"] .highlight .gp { color: #ffa657; font-weight: bold }
+  [data-theme="dark"] .highlight .m,
+  [data-theme="dark"] .highlight .mb,
+  [data-theme="dark"] .highlight .mf,
+  [data-theme="dark"] .highlight .mh,
+  [data-theme="dark"] .highlight .mi,
+  [data-theme="dark"] .highlight .mo,
+  [data-theme="dark"] .highlight .il { color: #79c0ff }
+  [data-theme="dark"] .highlight .s,
+  [data-theme="dark"] .highlight .sa,
+  [data-theme="dark"] .highlight .sb,
+  [data-theme="dark"] .highlight .sc,
+  [data-theme="dark"] .highlight .dl,
+  [data-theme="dark"] .highlight .sd,
+  [data-theme="dark"] .highlight .s2,
+  [data-theme="dark"] .highlight .sh,
+  [data-theme="dark"] .highlight .sx,
+  [data-theme="dark"] .highlight .s1,
+  [data-theme="dark"] .highlight .ss { color: #a5d6ff }
+  [data-theme="dark"] .highlight .se { color: #79c0ff; font-weight: bold }
+  [data-theme="dark"] .highlight .si { color: #a5d6ff; font-style: italic }
+  [data-theme="dark"] .highlight .sr { color: #7ee787 }
+  [data-theme="dark"] .highlight .na { color: #79c0ff }
+  [data-theme="dark"] .highlight .nb,
+  [data-theme="dark"] .highlight .bp { color: #ffa657 }
+  [data-theme="dark"] .highlight .nc,
+  [data-theme="dark"] .highlight .nn { color: #ffa657; font-weight: bold }
+  [data-theme="dark"] .highlight .no { color: #79c0ff }
+  [data-theme="dark"] .highlight .nd { color: #d2a8ff; font-weight: bold }
+  [data-theme="dark"] .highlight .ni { color: #ffa657; font-weight: bold }
+  [data-theme="dark"] .highlight .ne { color: #ff7b72 }
+  [data-theme="dark"] .highlight .nf,
+  [data-theme="dark"] .highlight .fm { color: #d2a8ff }
+  [data-theme="dark"] .highlight .nl { color: #79c0ff; font-weight: bold }
+  [data-theme="dark"] .highlight .nt { color: #7ee787; font-weight: bold }
+  [data-theme="dark"] .highlight .nv,
+  [data-theme="dark"] .highlight .vc,
+  [data-theme="dark"] .highlight .vg,
+  [data-theme="dark"] .highlight .vi,
+  [data-theme="dark"] .highlight .vm { color: #ffa657 }
+  [data-theme="dark"] .highlight .w { color: #484f58 }
+}

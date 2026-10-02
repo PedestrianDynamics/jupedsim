@@ -15,6 +15,18 @@ jobs:
     if: |
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.event == 'release'
+    # One release deploy at a time. The group is set on the job, not the
+    # workflow: every docs build (PRs, master, weekly) triggers this workflow,
+    # and a workflow-level group would let each of those skipped runs replace a
+    # pending release deploy. Any other gh-pages publisher must use its own
+    # group so it never cancels a pending release deploy; the publish loop
+    # starts from the current gh-pages tip and retries on a rejected push. A newer
+    # pending release deploy can still replace an older pending one; that job
+    # then shows as cancelled and has to be re-run (within the artifact's
+    # 30-day retention).
+    concurrency:
+      group: gh-pages-docs
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     steps:
       - name: Resolve release tag
@@ -28,7 +40,7 @@ jobs:
             // Tags are immutable, so unlike PR previews there is no
             // "head moved on" race to guard against here.
             const run = context.payload.workflow_run;
-            const pattern = /^v[0-9]+\.[0-9]+\.[0-9]+$/;
+            const pattern = /^v([0-9]+)\.[0-9]+\.[0-9]+$/;
 
             const tags = await github.paginate(github.rest.repos.listTags, {
               owner: context.repo.owner,
@@ -47,6 +59,18 @@ jobs:
 
             if (run.head_branch !== tag) {
               core.setFailed(`Triggering run was for '${run.head_branch}', but the commit is tagged '${tag}'`);
+              return;
+            }
+
+            // Only 2.x+ releases are published under docs/<tag>/. The 1.x
+            // line is closed; its documentation is frozen in the docs/v1x/
+            // archive on gh-pages.
+            const major = Number.parseInt(pattern.exec(tag)[1], 10);
+            if (major < 2) {
+              core.setFailed(
+                `Refusing to publish ${tag}: 1.x is closed (no further 1.x ` +
+                `releases; the 1.x docs are frozen at /docs/v1x/).`
+              );
               return;
             }
 
@@ -89,7 +113,7 @@ jobs:
           python-version: "3.13"
 
       - name: Install script dependencies
-        run: python3 -m pip install --quiet packaging
+        run: python3 -m pip install --quiet packaging 'pagefind[bin]~=1.5'
 
       - name: Commit and push documentation
         working-directory: gh-pages
@@ -99,23 +123,66 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          # Other jobs may push to gh-pages concurrently, so a push can be
-          # rejected as non-fast-forward. On rejection, restart from the
-          # current remote tip and re-stage the release.
+          # The artifact is the whole site (build-docs action); only its
+          # docs/<tag>/ is published here; the site itself is published
+          # separately. An artifact of an older docs-only build has no
+          # docs/<tag>/.
+          html="$RUNNER_TEMP/html/docs/$TAG"
+          if [ ! -f "$html/index.html" ]; then
+            echo "::error::The documentation artifact has no docs/$TAG/index.html (built with a different version, or by a docs-only build before the site build). Nothing was published."
+            exit 1
+          fi
+
+          # Other pushes to gh-pages (manual ones, or a publisher that got
+          # past the concurrency group) can reject this push as
+          # non-fast-forward. On rejection, restart from the current remote
+          # tip and re-stage the release.
           for attempt in 1 2 3 4 5; do
             git fetch origin gh-pages
             git reset --hard origin/gh-pages
+            git clean -ffdx
 
-            rm -rf "$TAG"
-            mkdir "$TAG"
-            cp -r "$RUNNER_TEMP/html/." "$TAG/"
-
-            if ! python3 "$GITHUB_WORKSPACE/jupedsim/scripts/ci/write_docs_versions.py" .; then
-              echo "::error::Could not update versions.json and stable symlink"
+            # The 2.x layout (docs/<tag>/, docs/stable, docs/versions.json)
+            # only exists once gh-pages was migrated and the 1.x builds moved
+            # into the docs/v1x/ archive.
+            if [ ! -d docs/v1x ]; then
+              echo "::error::gh-pages has no docs/v1x archive: the layout was not migrated yet (1.x builds must live in docs/v1x/ first). Nothing was published."
               exit 1
             fi
 
-            git add -A "$TAG" stable versions.json
+            rm -rf "docs/$TAG" && mkdir -p "docs/$TAG" && cp -r "$html/." "docs/$TAG/"
+
+            # Rewrites docs/versions.json and docs/stable only; the root
+            # versions.json is the frozen copy the 1.x builds read.
+            if ! python3 "$GITHUB_WORKSPACE/jupedsim/scripts/ci/write_docs_versions.py" docs; then
+              echo "::error::Could not update docs/versions.json and the docs/stable symlink"
+              exit 1
+            fi
+
+            # The migration left docs/index.html redirecting to the 1.x
+            # archive; from the first 2.x release on, /docs/ leads to
+            # /docs/stable/.
+            cat > docs/index.html <<'EOF'
+          <!doctype html>
+          <html lang="en">
+          <head>
+          <meta charset="utf-8">
+          <title>Redirecting to /docs/stable/</title>
+          <link rel="canonical" href="https://www.jupedsim.org/docs/stable/">
+          <meta name="robots" content="noindex">
+          <script>location.replace("/docs/stable/" + location.search + location.hash)</script>
+          <meta http-equiv="refresh" content="0; url=/docs/stable/">
+          </head>
+          <body><a href="/docs/stable/">Redirecting to /docs/stable/</a></body>
+          </html>
+          EOF
+
+            if ! bash "$GITHUB_WORKSPACE/jupedsim/scripts/ci/build_pagefind.sh" .; then
+              echo "::error::Could not rebuild the Pagefind search index"
+              exit 1
+            fi
+
+            git add -A "docs/$TAG" docs/stable docs/versions.json docs/index.html pagefind
             git diff --cached --quiet || git commit -m "docs: publish $TAG"
 
             if git push origin HEAD:gh-pages; then

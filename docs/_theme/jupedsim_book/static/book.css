@@ -1,0 +1,231 @@
+/* book.css — jupedsim-book additions on top of jupedsim-style.css:
+   page grid, left track (docs tree), TOC, search box, post lists, prev/next,
+   shortcodes, dark tokens, print hides. Everything article-level stays in
+   jupedsim-style.css; the top bar and the drawer offsets under it are in
+   site.css.
+
+   Breakpoints:  < 56rem  menu drawer + toc drawer, opened from the bar
+                 56-72rem left track column, toc drawer (bar button)
+                 >= 72rem left track + text + toc columns                   */
+
+:root {
+  --book-menu-w: 17rem;
+  --book-toc-w: 14rem;
+}
+
+/* Dark tokens ------------------------------------------------------------ */
+/* Screen only: jupedsim-style.css forces a light palette for print, and these
+   selectors would otherwise outrank it. The head snippet resolves "auto" into
+   data-theme="light|dark" before paint; the prefers-color-scheme block only
+   serves visitors without JavaScript. */
+@media screen {
+  :root[data-theme="dark"] {
+    --paper: #111318;
+    --panel: #1b1e25;
+    --ink: #e6e8ec;
+    --ink-soft: #a9afb8;
+    --ink-faint: #878e97;
+    --rule: #2a2e36;
+    --accent: #8b90ff;
+    --accent-ink: #a5a9ff;
+    color-scheme: dark;
+  }
+  [data-theme="dark"] .report-body a { text-decoration-color: rgba(165, 169, 255, 0.4); }
+  [data-theme="dark"] .report-body blockquote { border-left-color: var(--rule); }
+  [data-theme="dark"] .report-body .callout-note      { --callout: #6b93ff; }
+  [data-theme="dark"] .report-body .callout-tip       { --callout: #4cbf86; }
+  [data-theme="dark"] .report-body .callout-important { --callout: #a98bf0; }
+  [data-theme="dark"] .report-body .callout-warning   { --callout: #e0a030; }
+  [data-theme="dark"] .report-body .callout-caution   { --callout: #ef6a6a; }
+}
+@media screen and (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --paper: #111318;
+    --panel: #1b1e25;
+    --ink: #e6e8ec;
+    --ink-soft: #a9afb8;
+    --ink-faint: #878e97;
+    --rule: #2a2e36;
+    --accent: #8b90ff;
+    --accent-ink: #a5a9ff;
+    color-scheme: dark;
+  }
+}
+
+/* Page grid ------------------------------------------------------------ */
+.book-control { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+.book { display: grid; grid-template-columns: minmax(0, 1fr); }
+.book-page { min-width: 0; display: flex; flex-direction: column; }
+.book-page > .report { width: 100%; flex: 1; }
+.book-menu, .book-toc { background: var(--paper); }
+
+.book-pagenav {
+  max-width: var(--measure);
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+.book-pagenav { display: flex; justify-content: space-between; gap: 1rem; margin-top: -3rem; padding-bottom: 2rem; font-size: 0.9rem; }
+.book-pagenav a { color: var(--ink-soft); text-decoration: none; max-width: 48%; }
+.book-pagenav a:hover { color: var(--ink); }
+.book-pagenav-next { margin-left: auto; text-align: right; }
+.book-pagenav small { display: block; font: 600 0.64rem/1 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 0.25rem; }
+@media (max-width: 640px) { .book-pagenav { padding: 0 1.1rem; } }
+
+/* Drawer overlays (offsets under the bar: site.css). */
+.book-overlay { display: none; position: fixed; right: 0; bottom: 0; left: 0; background: rgba(0, 0, 0, 0.35); }
+#menu-control:checked ~ .book-overlay-menu, #toc-control:checked ~ .book-overlay-toc { display: block; }
+
+/* Left track: version select + docs tree (sidebar.html) ----------------- */
+.book-menu { padding: 1.5rem 1.25rem; display: flex; flex-direction: column; font-size: 0.92rem; }
+.book-tree ul { list-style: none; margin: 0; padding: 0; }
+.book-tree ul ul { margin: 0.2rem 0 0.6rem 0.4rem; padding-left: 0.6rem; border-left: 1px solid var(--rule); }
+.book-tree a { display: block; padding: 0.3rem 0.5rem; color: var(--ink-soft); text-decoration: none; border-radius: 4px; line-height: 1.35; }
+.book-tree a:hover { color: var(--ink); background: var(--panel); }
+
+/* Search -------------------------------------------------------------- */
+.book-search { position: relative; }
+#book-search-input {
+  width: 100%;
+  padding: 0.45rem 0.65rem;
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--ink);
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+}
+#book-search-input::placeholder { color: var(--ink-faint); }
+.book-search-results {
+  position: absolute;
+  left: 0; right: 0; top: 100%;
+  margin: 0.3rem 0 0;
+  padding: 0.25rem 0;
+  list-style: none;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  overflow: auto;
+  font-size: 0.9rem;
+}
+.book-search-results[hidden] { display: none; }
+.book-search-results a { display: block; padding: 0.45rem 0.7rem; color: var(--ink); text-decoration: none; }
+.book-search-results a:hover, .book-search-results a:focus { background: var(--panel); }
+.book-search-results small { display: block; margin-bottom: 0.15rem; font: 600 0.64rem/1 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); }
+.book-search-empty { padding: 0.45rem 0.7rem; color: var(--ink-faint); }
+
+/* TOC ----------------------------------------------------------------- */
+.book-toc { padding: 4.5rem 1.25rem 2rem 0; font-size: 0.85rem; }
+.book-toc-title { margin: 0 0 0.5rem; font: 600 0.72rem/1 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); }
+#TableOfContents ul { list-style: none; margin: 0; padding: 0; }
+#TableOfContents ul ul { padding-left: 0.85rem; }
+#TableOfContents a { display: block; padding: 0.2rem 0; color: var(--ink-soft); text-decoration: none; line-height: 1.4; overflow-wrap: anywhere; }
+#TableOfContents a:hover { color: var(--ink); }
+#TableOfContents :is(code, .pre) { white-space: normal; }
+
+/* Breakpoints --------------------------------------------------------- */
+/* Menu drawer below 56rem. Closed drawers are visibility:hidden so their
+   links leave the tab order and the accessibility tree. Their top offset
+   and z-index (under the sticky bar) are in site.css. */
+@media (max-width: 55.99rem) {
+  .book-menu {
+    position: fixed;
+    bottom: 0; left: 0;
+    width: min(var(--book-menu-w), 85vw);
+    overflow-y: auto;
+    border-right: 1px solid var(--rule);
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition: transform 0.2s ease, visibility 0.2s;
+  }
+  #menu-control:checked ~ .book .book-menu { transform: none; visibility: visible; }
+}
+/* TOC drawer below 72rem (the column only fits from 72rem up). */
+@media (max-width: 71.99rem) {
+  .book-toc {
+    position: fixed;
+    bottom: 0; right: 0;
+    width: min(var(--book-toc-w), 85vw);
+    padding: 1.5rem 1.25rem;
+    overflow-y: auto;
+    border-left: 1px solid var(--rule);
+    transform: translateX(100%);
+    visibility: hidden;
+    transition: transform 0.2s ease, visibility 0.2s;
+  }
+  #toc-control:checked ~ .book .book-toc { transform: none; visibility: visible; }
+}
+@media (min-width: 56rem) {
+  .book { grid-template-columns: var(--book-menu-w) minmax(0, 1fr); }
+  .book-menu { border-right: 1px solid var(--rule); }
+  /* The left track is inline: its checkbox and overlay are not needed. */
+  #menu-control, .book-overlay-menu { display: none !important; }
+}
+@media (min-width: 72rem) {
+  .book { grid-template-columns: var(--book-menu-w) minmax(0, 1fr) var(--book-toc-w); }
+  .book-overlay, #toc-control { display: none !important; }
+}
+
+/* Post lists (home, sections) ----------------------------------------- */
+.post-list { list-style: none; margin: 0; padding: 0; }
+.post-list-item { padding: 1.2rem 0; border-bottom: 1px solid var(--rule); }
+.post-list-item:first-child { padding-top: 0; }
+.post-list-kicker { margin: 0 0 0.35rem; font: 600 0.68rem/1 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); }
+/* .post-list scope: outranks `.report-body a` (the list sits in the body). */
+.post-list .post-list-title { font-size: 1.15rem; font-weight: 600; letter-spacing: -0.012em; color: var(--ink); text-decoration: none; }
+.post-list .post-list-title:hover { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+.post-list-desc { margin: 0.35rem 0 0; color: var(--ink-soft); }
+
+/* Markup not covered by jupedsim-style.css --------------------------------- */
+/* Goldmark task lists carry no classes; use :has() instead. */
+.report-body ul:has(> li > input[type="checkbox"]) { list-style: none; padding-left: 0.4em; }
+.report-body li > input[type="checkbox"] { margin: 0 0.55em 0 0; vertical-align: 0.05em; accent-color: var(--accent); }
+/* Goldmark footnotes: class sits on the <a>, list is a plain <ol>. */
+.report-body sup:has(> a.footnote-ref) { font-size: 0.75em; line-height: 0; }
+.report-body a.footnote-ref { text-decoration: none; }
+.report-body .footnotes ol { padding-left: 1.3em; }
+.report-body figure { margin: 1.6rem 0; }
+.report-body figure img { display: block; margin: 0 auto; }
+.report-body figcaption { margin-top: 0.5rem; font-size: 0.85rem; color: var(--ink-soft); text-align: center; }
+/* transform.ToMath (output "mathml") wraps MathML in span.katex / span.katex-display;
+   no KaTeX CSS or fonts are loaded, the browser renders the MathML natively. */
+.report-body .katex-display { display: block; margin: 1.2rem 0; overflow-x: auto; text-align: center; }
+.report-body math[display="block"] { display: block; margin: 0; }
+.report-body .highlight .line { display: block; }
+
+/* Shortcodes ---------------------------------------------------------- */
+.book-tabs { display: flex; flex-wrap: wrap; margin: 1.5rem 0; border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; }
+.book-tabs::after { content: ""; order: 0; flex: 1; border-bottom: 1px solid var(--rule); background: var(--panel); }
+.book-tabs input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; }
+.book-tabs label {
+  order: 0;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  background: var(--panel);
+  border-bottom: 1px solid var(--rule);
+  border-right: 1px solid var(--rule);
+  cursor: pointer;
+}
+.book-tabs input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: -2px; }
+.book-tabs input:checked + label { color: var(--ink); background: var(--paper); border-bottom-color: var(--paper); }
+.book-tab { order: 1; width: 100%; display: none; padding: 1rem 1.15rem; }
+.book-tabs input:checked + label + .book-tab { display: block; }
+.book-tab > :first-child { margin-top: 0; }
+.book-tab > :last-child { margin-bottom: 0; }
+
+.book-columns { display: flex; gap: 1.5rem; margin: 1.5rem 0; }
+.book-column { flex: 1 1 0; min-width: 0; }
+.book-column > :first-child { margin-top: 0; }
+.book-column > :last-child { margin-bottom: 0; }
+@media (max-width: 40rem) { .book-columns { flex-direction: column; gap: 0.5rem; } }
+
+/* Print --------------------------------------------------------------- */
+@media print {
+  .book { display: block; }
+  .book-menu, .book-toc, .book-overlay, .book-pagenav, .book-control { display: none !important; }
+  .book-tab { display: block !important; }
+  .book-tabs label { border: 0; }
+}

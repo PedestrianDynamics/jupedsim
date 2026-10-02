@@ -1,0 +1,104 @@
+name: Deploy next-doc (pre-go-live test)
+
+# Builds the whole website (site/ + docs/, notebooks executed) from master and
+# publishes it to PedestrianDynamics/jupedsim-next-doc, served at
+# https://next-doc.jupedsim.org/ (Pages from the root of its main branch).
+# Same layout as production: site at the root, master's docs as
+# docs/v<version>/ (version from CMakeLists.txt) with docs/stable and
+# docs/versions.json. The 1.x archive at docs/v1x/ is copied there by hand and
+# never touched; robots.txt keeps the test copy out of search engines.
+# Manual only: Actions -> "Deploy next-doc (pre-go-live test)" -> Run workflow.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: Build site and publish to next-doc.jupedsim.org
+    if: github.repository == 'PedestrianDynamics/jupedsim' && github.ref == 'refs/heads/master'
+    # Separate from the production docs publisher (gh-pages-docs).
+    concurrency:
+      group: next-doc-publish
+      cancel-in-progress: false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v7
+        with:
+          submodules: true
+
+      - name: Read version
+        id: version
+        run: |
+          v=$(sed -nE 's/^project\(JuPedSim VERSION ([0-9]+\.[0-9]+\.[0-9]+).*/\1/p' CMakeLists.txt)
+          if [ -z "$v" ]; then
+            echo "::error::No 'project(JuPedSim VERSION x.y.z' line in CMakeLists.txt"
+            exit 1
+          fi
+          echo "tag=v$v" >> "$GITHUB_OUTPUT"
+
+      - name: Build site
+        uses: ./.github/actions/build-docs
+        with:
+          python-version: "3.13"
+          version: ${{ steps.version.outputs.tag }}
+          out-path: ${{ runner.temp }}/site-out
+          retention-days: "1"
+
+      # client-id: v3 input (app-id is deprecated); older actionlint metadata
+      # does not know it yet and reports a false positive here.
+      - name: Create app token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.DOCS_DEPLOY_APP_CLIENT_ID }}
+          private-key: ${{ secrets.DOCS_DEPLOY_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: jupedsim-next-doc
+          permission-contents: write
+
+      # Not "path: site": the source checkout already has a site/ directory.
+      - name: Checkout pages repository
+        uses: actions/checkout@v7
+        with:
+          repository: PedestrianDynamics/jupedsim-next-doc
+          token: ${{ steps.app-token.outputs.token }}
+          ref: main
+          path: next-doc
+
+      - name: Publish
+        working-directory: next-doc
+        env:
+          OUT: ${{ runner.temp }}/site-out
+          TAG: ${{ steps.version.outputs.tag }}
+          SRC_SHA: ${{ github.sha }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Retry on a rejected push (e.g. Kai pushed a 1.x copy meanwhile):
+          # restart from the current remote tip and publish again.
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            git clean -fdx -e docs/v1x
+            bash "$GITHUB_WORKSPACE/scripts/ci/publish_site_tree.sh" "$OUT" .
+            git add -A
+            if git diff --cached --quiet; then
+              echo "Nothing changed on next-doc.jupedsim.org"
+              exit 0
+            fi
+            git commit -m "next-doc: publish ${SRC_SHA::9} ($TAG)"
+            if git push origin HEAD:main; then
+              echo "Published to https://next-doc.jupedsim.org/ ($TAG, ${SRC_SHA::9})" >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            echo "Push rejected (attempt $attempt), retrying"
+            sleep $((attempt * 5))
+          done
+
+          echo "::error::Failed to push to jupedsim-next-doc after 5 attempts"
+          exit 1

@@ -1,0 +1,42 @@
+{#- SPDX-License-Identifier: LGPL-3.0-or-later -#}
+{#- Sticky top bar on every page: menu button (narrow), brand, section nav,
+    search button (narrow) + form, theme toggle, TOC button (below 72rem).
+    The labels toggle the checkboxes that precede the bar in layout.html.
+    Brand: light-ink logo for the light theme, light-on-dark copy for the
+    dark theme; sphinx.css shows one (dark only on screen). The link's
+    aria-label names it in every theme (the hidden <img> leaves the
+    accessibility tree); the dark copy is aria-hidden. Without a distinct
+    logo_dark the one <img> has no -light class, so the dark rules never
+    hide it. width/height come from each file's viewBox (logo_*_size,
+    __init__.py) so the layout box exists before load; omitted when the size
+    is unknown. -#}
+{%- set logo_light = theme_logo_light|trim %}
+{%- set logo_dark = theme_logo_dark|trim or logo_light %}
+<header class="site-bar">
+<div class="site-bar-inner">
+<label for="menu-control" class="site-bar-btn site-bar-menu" aria-label="Open navigation"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></label>
+<a class="book-brand" href="{{ theme_nav_home_url }}" aria-label="{{ theme_site_name|e }}">
+{%- if logo_light -%}
+{%- set two_logos = logo_dark != logo_light -%}
+<img class="book-logo{% if two_logos %} book-logo-light{% endif %}" src="{{ pathto('_static/' ~ logo_light, 1) }}" alt="{{ theme_site_name|e }}"{% if logo_light_size %} width="{{ logo_light_size[0] }}" height="{{ logo_light_size[1] }}"{% endif %}>
+{%- if two_logos %}<img class="book-logo book-logo-dark" src="{{ pathto('_static/' ~ logo_dark, 1) }}" alt="" aria-hidden="true"{% if logo_dark_size %} width="{{ logo_dark_size[0] }}" height="{{ logo_dark_size[1] }}"{% endif %}>{% endif -%}
+{%- else %}<span class="book-brand-title">{{ theme_site_name }}</span>{% endif -%}
+</a>
+<nav class="site-nav" aria-label="Site">
+<ul>
+{%- for item in nav_items %}
+<li><a class="bracket-label" href="{{ item.url|e }}"{% if item.active %} aria-current="page"{% endif %}>[{{ item.title|e }}{% if item.external %}&nbsp;<span aria-hidden="true">↗</span>{% endif %}]</a></li>
+{%- endfor %}
+</ul>
+</nav>
+<label for="search-control" class="site-bar-btn site-bar-search-btn" aria-label="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></label>
+<form class="book-search" action="{{ pathto('search') }}" method="get" role="search">
+<input type="search" id="book-search-input" name="q" data-pagefind="{{ theme_pagefind_url }}" placeholder="Search  /" aria-label="Search" autocomplete="off" spellcheck="false">
+<ul class="book-search-results" id="book-search-results" hidden></ul>
+</form>
+<button type="button" id="book-theme-toggle" class="book-theme-toggle bracket-label" aria-live="polite">Theme: auto</button>
+{%- if toc_enabled %}
+<label for="toc-control" class="site-bar-btn site-bar-toc" aria-label="On this page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg></label>
+{%- endif %}
+</div>
+</header>

@@ -1,0 +1,454 @@
+/* SPDX-License-Identifier: LGPL-3.0-or-later */
+/* Adapter: stock Sphinx markup -> jupedsim-style tokens (filled in later tasks). */
+
+/* base ----------------------------------------------------------------- */
+/* The report header repeats the page title; hide the document's own h1
+   (of-type: a `.. _label:` before the title puts a span in front of it). */
+.report-body > section:first-of-type > h1:first-of-type { display: none; }
+/* Template pages (search, genindex, py-modindex, 404) put their h1 directly
+   in .report-body. */
+.report-body > h1:first-child { display: none; }
+/* basic.css toggles visibility; fade instead and keep the anchor quiet. */
+.report-body a.headerlink {
+  visibility: visible;
+  opacity: 0;
+  margin-left: 0.35em;
+  font-weight: 400;
+  color: var(--ink-faint);
+  text-decoration: none;
+  transition: opacity 0.15s;
+}
+.report-body :is(h1, h2, h3, h4, h5, h6, dt, caption, p.caption, div.code-block-caption, div.math):hover > a.headerlink,
+.report-body a.headerlink:focus-visible { opacity: 1; }
+.report-body a.headerlink:hover { color: var(--accent-ink); }
+
+/* code ----------------------------------------------------------------- */
+/* Sphinx: div.highlight-<lang>[data-lang] > div.highlight > pre (+ button.copybtn).
+   Node classes may precede highlight-* (doctest, :class:); myst-nb outputs are 3c's.
+   Mirrors jupedsim-style' pre.highlight panel; the label sits on the outer div. */
+.report-body div:is([class^="highlight-"], [class*=" highlight-"]):not(.output) { position: relative; margin: 1.5rem 0; }
+.report-body div.code-block-caption + div { margin-top: 0; }
+.report-body div:is([class^="highlight-"], [class*=" highlight-"]):not(.output) > div.highlight {
+  position: relative;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+}
+.report-body div:is([class^="highlight-"], [class*=" highlight-"]):not(.output) > div.highlight > pre {
+  margin: 0;
+  padding: 1rem 1.15rem;
+  background: none;
+  border: 0;
+  font-family: var(--mono);
+  font-size: 0.84rem;
+  line-height: 1.55;
+  overflow-x: auto;
+  tab-size: 4;
+}
+.report-body div:is([class^="highlight-"], [class*=" highlight-"]):not(.output)[data-lang]::before {
+  content: attr(data-lang);
+  position: absolute;
+  z-index: 1;
+  top: 0.5rem;
+  right: 2.6rem;
+  font: 600 0.64rem/1 var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  pointer-events: none;
+}
+.report-body button.copybtn {
+  z-index: 2;
+  top: 0.3rem;
+  right: 0.3rem;
+  width: 1.8rem;
+  height: 1.8rem;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background-color: var(--paper);
+  color: var(--ink-faint);
+  cursor: pointer;
+}
+.report-body .highlight button.copybtn:hover { background-color: var(--panel); color: var(--ink); }
+.report-body .highlight button.copybtn:active { background-color: var(--rule); }
+.report-body button.copybtn.success { border-color: #2a8a5c; color: #2a8a5c; }
+.report-body button.copybtn:focus-visible { opacity: 1; }
+
+/* admonitions ---------------------------------------------------------- */
+/* div.admonition.<kind> > p.admonition-title = jupedsim-style .callout/.callout-title. */
+.report-body div.admonition,
+.report-body div.deprecated, div.versionremoved,
+.report-body div.versionadded,
+.report-body div.versionchanged {
+  --callout: var(--accent-ink);
+  clear: both;
+  margin: 1.6rem 0;
+  padding: 0.9rem 1.15rem 0.95rem;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-left: 4px solid var(--callout);
+  border-radius: 8px;
+  color: var(--ink);
+}
+.report-body :is(div.admonition, div.deprecated, div.versionremoved, div.versionadded, div.versionchanged) > :last-child { margin-bottom: 0; }
+.report-body :is(div.admonition, div.deprecated, div.versionremoved, div.versionadded, div.versionchanged) > :first-child { margin-top: 0; }
+.report-body p.admonition-title {
+  margin: 0 0 0.45rem;
+  font: 600 0.72rem/1 var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--callout);
+}
+.report-body .versionmodified {
+  font: 600 0.72rem/1.6 var(--mono);
+  font-style: normal;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--callout);
+  margin-right: 0.4em;
+}
+.report-body :is(div.admonition.note, div.admonition.seealso, div.admonition.hint, div.versionadded, div.versionchanged) { --callout: #3566c9; }
+.report-body div.admonition.tip { --callout: #2a8a5c; }
+.report-body div.admonition.important { --callout: #7a4fd6; }
+.report-body :is(div.admonition.warning, div.admonition.attention, div.deprecated, div.versionremoved) { --callout: #c07a0a; }
+.report-body :is(div.admonition.caution, div.admonition.danger, div.admonition.error) { --callout: #c83b3b; }
+@media screen {
+  [data-theme="dark"] .report-body :is(div.admonition.note, div.admonition.seealso, div.admonition.hint, div.versionadded, div.versionchanged) { --callout: #6b93ff; }
+  [data-theme="dark"] .report-body div.admonition.tip { --callout: #4cbf86; }
+  [data-theme="dark"] .report-body div.admonition.important { --callout: #a98bf0; }
+  [data-theme="dark"] .report-body :is(div.admonition.warning, div.admonition.attention, div.deprecated, div.versionremoved) { --callout: #e0a030; }
+  [data-theme="dark"] .report-body :is(div.admonition.caution, div.admonition.danger, div.admonition.error) { --callout: #ef6a6a; }
+  [data-theme="dark"] .report-body button.copybtn.success { border-color: #4cbf86; color: #4cbf86; }
+}
+@media print {
+  .report-body :is(div.admonition, div.deprecated, div.versionremoved, div.versionadded, div.versionchanged) { background: #fff; break-inside: avoid; }
+  .report-body :is(p.admonition-title, .versionmodified) { color: #000; }
+}
+
+/* tables --------------------------------------------------------------- */
+/* table.docutils (+ .longtable/.autosummary) = jupedsim-style table rules. basic.css
+   sets `table.docutils td/th` (0,1,2) with #aaa rules and 1px padding, and centres
+   .align-default; out-specify it. Stock markup has no .table-wrap, so the table
+   itself is the scroll box (display:block): wide tables scroll inside the column,
+   narrow ones keep their content width. */
+.report-body table.docutils {
+  display: block;
+  max-width: 100%;
+  width: fit-content;
+  margin: 1.6rem 0;
+  overflow-x: auto;
+  border: 0;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+.report-body table.docutils > caption {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  text-align: left;
+}
+.report-body table.docutils :is(th, td) {
+  padding: 0.55em 0.8em;
+  border: 0;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: top;
+  text-align: left;
+}
+.report-body table.docutils th {
+  font-weight: 600;
+  border-bottom: 2px solid var(--ink);
+  vertical-align: bottom;
+}
+.report-body table.docutils :is(th, td):first-child { padding-left: 0; }
+.report-body table.docutils :is(th, td):last-child { padding-right: 0; }
+.report-body table.docutils :is(th, td) > p { margin: 0; }
+.report-body table.docutils td code { font-size: 0.88em; }
+
+/* api ------------------------------------------------------------------ */
+/* dl.py > dt.sig: mono panel with accent left rule; long signatures scroll. */
+.report-body dl.py { margin: 1.6rem 0; }
+.report-body dl.py dl.py { margin: 1.1rem 0; }
+.report-body dl.py > dt.sig {
+  position: relative;
+  margin: 0;
+  padding: 0.55rem 0.9rem;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  font-family: var(--mono);
+  font-size: 0.84rem;
+  font-weight: 400;
+  line-height: 1.5;
+  overflow-x: auto;
+  overflow-wrap: normal;
+}
+.report-body dl.py > dt.sig :is(em.property, em.sig-param) { font-style: normal; }
+.report-body dl.py > dt.sig em.property { color: var(--ink-soft); }
+.report-body dl.py > dt.sig .sig-prename { color: var(--ink-soft); }
+.report-body dl.py > dt.sig .sig-name { font-family: inherit; font-size: 1em; font-weight: 700; color: var(--ink); }
+.report-body dl.py > dt.sig :is(.sig-paren, .sig-return-icon) { color: var(--ink-faint); }
+.report-body dl.py > dt.sig code,
+.report-body dl.py > dt.sig a code { padding: 0; background: none; font-size: 1em; }
+.report-body dl.py > dt.sig a { text-decoration: none; }
+.report-body dl.py > dt.sig:target { background: color-mix(in srgb, var(--accent) 12%, var(--panel)); }
+.report-body dl.py > dt.sig > a:has(> span.viewcode-link) {
+  float: right;
+  margin-left: 1rem;
+  font: 600 0.66rem/1.9 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  text-decoration: none;
+}
+.report-body dl.py > dt.sig > a:has(> span.viewcode-link):hover { color: var(--accent-ink); }
+.report-body dl.py > dd { margin: 0.7rem 0 0 1.2rem; }
+.report-body dl.py > dd > :last-child { margin-bottom: 0; }
+.report-body dl.field-list > dt { font-weight: 600; font-size: 0.9rem; }
+.report-body dl.field-list > dd > ul { padding-left: 1.2em; }
+.report-body dl.field-list > dd p { margin: 0; }
+.report-body p.rubric { margin: 1.4rem 0 0.5rem; font: 600 0.72rem/1 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-soft); }
+
+/* notebooks ------------------------------------------------------------ */
+/* myst-nb: div.cell > div.cell_input > div.highlight-<lang> (code panel, 3b) and
+   div.cell_output > div.output.<kind>. The cell_input div is the panel; the
+   inner highlight panel is unboxed. mystnb.css reads --mystnb-*: map to tokens. */
+.report-body {
+  --mystnb-source-bg-color: var(--panel);
+  --mystnb-source-border-color: var(--rule);
+  --mystnb-source-border-radius: 8px;
+  --mystnb-source-border-width: 1px;
+  --mystnb-source-margin-color: var(--accent);
+  --mystnb-stdout-bg-color: transparent;
+  --mystnb-stdout-border-color: transparent;
+  --mystnb-stderr-bg-color: color-mix(in srgb, #c83b3b 8%, var(--paper));
+  --mystnb-stderr-border-color: color-mix(in srgb, #c83b3b 30%, var(--rule));
+  --mystnb-traceback-bg-color: color-mix(in srgb, #c83b3b 6%, var(--paper));
+  --mystnb-traceback-border-color: color-mix(in srgb, #c83b3b 30%, var(--rule));
+  --mystnb-scrollbar-thumb-color: var(--rule);
+  --mystnb-scrollbar-thumb-hover-color: var(--ink-faint);
+}
+.report-body div.cell { margin: 1.5rem 0; }
+.report-body div.cell > div.cell_input,
+.report-body div.cell details.hide > div.cell_input {
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  background: var(--panel);
+}
+/* mystnb.css squares the bottom corners of an input followed by output
+   (div.cell:has(> *:nth-child(2)) div.cell_input:first-child, (0,4,2)); our
+   output is unboxed, so restore the radius with a stronger selector. */
+.report-body div.cell > div.cell_input.cell_input:is(:first-child, :last-child) { border-radius: 8px; }
+.report-body div.cell_input > div:is([class^="highlight-"], [class*=" highlight-"]) { margin: 0; }
+.report-body div.cell_input > div:is([class^="highlight-"], [class*=" highlight-"]) > div.highlight { background: none; border: 0; border-radius: 0; }
+.report-body div.cell_output { margin-top: 0.6rem; padding-left: 1.15rem; }
+.report-body div.cell_output .output { margin-top: 0.4rem; }
+.report-body div.cell_output .output div.highlight { background: none; border: 0; }
+.report-body div.cell_output pre {
+  margin: 0;
+  padding: 0.3rem 0;
+  background: none;
+  border: 0;
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  overflow-x: auto;
+}
+.report-body div.cell_output .output:is(.stderr, .traceback) pre { padding: 0.5rem 0.8rem; }
+.report-body div.cell_output img { display: block; max-width: 100%; }
+
+/* math ----------------------------------------------------------------- */
+.report-body div.math {
+  position: relative;
+  margin: 1.4rem 0;
+  text-align: center;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.report-body div.math > p { margin: 0; text-align: center; }
+.report-body div.math:hover a.headerlink { opacity: 1; }
+.report-body div.math > a.headerlink { position: absolute; right: 0; top: 0; }
+.report-body span.eqno { float: right; color: var(--ink-faint); }
+/* book.css sets plain "display: block", which disables MathML layout. */
+.report-body math[display="block"] { display: block math; }
+
+/* footnotes ------------------------------------------------------------ */
+/* Mirrors jupedsim-style .footnotes; stock docutils uses aside.footnote-list. */
+.report-body a.footnote-reference { font-size: 0.75em; line-height: 0; vertical-align: super; text-decoration: none; }
+.report-body a.footnote-reference .fn-bracket { display: none; }
+.report-body aside.footnote-list {
+  margin: 3rem 0 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--rule);
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+}
+.report-body aside.footnote { display: flex; gap: 0.5em; margin: 0.4em 0; }
+.report-body aside.footnote > span.label { float: none; flex: none; padding: 0; font-variant-numeric: tabular-nums; }
+.report-body aside.footnote > span.label a { text-decoration: none; }
+.report-body aside.footnote > span.label .fn-bracket { display: none; }
+.report-body aside.footnote > p { margin: 0; }
+.report-body aside.footnote:target { background: color-mix(in srgb, var(--accent) 10%, transparent); border-radius: 4px; }
+
+/* figures -------------------------------------------------------------- */
+.report-body figure { margin-block: 1.6rem; padding: 0; }
+.report-body figure img { display: block; margin: 0 auto; }
+.report-body figcaption {
+  margin-top: 0.5rem;
+  padding: 0;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  text-align: center;
+}
+.report-body figcaption > p { margin: 0; }
+.report-body :is(figcaption, table.docutils > caption) span.caption-number { font-style: normal; font-weight: 600; color: var(--ink); }
+
+/* lists ---------------------------------------------------------------- */
+/* Definition lists follow jupedsim-style dl rules; basic.css adds nothing but
+   dl.simple spacing. classifier = type after the term (numpydoc/rst). */
+.report-body dl:not(.py, .field-list) > dt { font-weight: 600; margin-top: 0.8em; }
+.report-body dl:not(.py, .field-list) > dd { margin: 0.2em 0 0.6em 1.5em; }
+.report-body dl.simple > dd > p { margin-bottom: 0.3em; }
+.report-body dt .classifier { font-weight: 400; font-style: italic; color: var(--ink-soft); }
+.report-body dt .classifier::before { content: ":"; margin: 0 0.4em; font-style: normal; }
+.report-body div.toctree-wrapper { margin: 1.2rem 0 1.6rem; }
+.report-body div.toctree-wrapper p.caption { margin: 0 0 0.5rem; font: 600 0.72rem/1 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-soft); }
+.report-body div.toctree-wrapper ul { list-style: none; margin: 0; padding-left: 0; }
+.report-body div.toctree-wrapper ul ul { margin: 0.2em 0 0.4em; padding-left: 1.1em; border-left: 1px solid var(--rule); }
+.report-body div.toctree-wrapper li { margin: 0.25em 0; }
+.report-body div.toctree-wrapper li.toctree-l1 > a { font-weight: 600; }
+
+/* search-genindex ------------------------------------------------------ */
+/* search.html (searchtools.js): ul.search > li > a + p.context; highlighting
+   (span.highlighted) also lands in pages opened from a result. */
+/* sphinx_highlight.js marks the whole <body> (no div.body here), so title,
+   sidebar and TOC get basic.css yellow too: restyle everywhere. */
+:root span.highlighted,
+.report-body dt:target { background-color: color-mix(in srgb, var(--accent) 20%, transparent); border-radius: 2px; }
+.report-body form:has(> input[name="q"]) { display: flex; gap: 0.5rem; margin: 1rem 0 1.5rem; }
+.report-body form input[name="q"] {
+  flex: 1;
+  padding: 0.5rem 0.7rem;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.92rem;
+}
+.report-body form input[type="submit"] {
+  padding: 0.5rem 0.9rem;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  color: var(--ink-soft);
+  font: 600 0.72rem/1 var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.report-body #search-results > h2 { margin-top: 1.6rem; }
+.report-body #search-results > p { color: var(--ink-soft); }
+.report-body ul.search { list-style: none; margin: 1rem 0; padding: 0; }
+.report-body ul.search li { margin: 0; padding: 0.7rem 0; border-bottom: 1px solid var(--rule); }
+.report-body ul.search li a { font-weight: 600; }
+.report-body ul.search li p.context { margin: 0.3rem 0 0; font-size: 0.88rem; color: var(--ink-soft); }
+.report-body div.genindex-jumpbox {
+  margin: 1rem 0 1.6rem;
+  padding: 0.6rem 0;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  font-family: var(--mono);
+  font-size: 0.84rem;
+}
+.report-body table.indextable { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+.report-body table.indextable td { padding: 0 1rem 0 0; border: 0; vertical-align: top; }
+.report-body table.genindextable td { width: 50%; }
+.report-body table.indextable ul { margin: 0; padding-left: 0; list-style: none; }
+.report-body table.indextable ul ul { padding-left: 1.2em; }
+.report-body table.indextable li { margin: 0.2em 0; }
+.report-body table.indextable tr.cap { background: none; }
+.report-body table.indextable tr.cap td { padding-top: 1rem; border-bottom: 1px solid var(--rule); }
+.report-body table.indextable tr.cap strong { font: 600 0.8rem/1 var(--mono); letter-spacing: 0.1em; }
+
+@media print {
+  .report-body pre,
+  .report-body div:is([class^="highlight-"], [class*=" highlight-"]):not(.output) > div.highlight > pre { white-space: pre-wrap; overflow: visible; }
+  .report-body :is(table.docutils, dl.py > dt.sig, div.math, div.cell_output pre) { overflow: visible; }
+}
+
+/* logo ----------------------------------------------------------------- */
+/* topbar.html: a.book-brand > img.book-logo-light + img.book-logo-dark
+   (sized in site.css). The head snippet sets data-theme before paint (auto
+   resolved from prefers-color-scheme); the media query covers visitors
+   without JavaScript. Dark rules are screen-only, so print always gets the
+   light logo. */
+.book-brand .book-logo { display: block; }
+.book-brand .book-logo-dark { display: none; }
+@media screen {
+  :root[data-theme="dark"] .book-brand .book-logo-light { display: none; }
+  :root[data-theme="dark"] .book-brand .book-logo-dark { display: block; }
+}
+@media screen and (prefers-color-scheme: dark) {
+  :root:not([data-theme]) .book-brand .book-logo-light { display: none; }
+  :root:not([data-theme]) .book-brand .book-logo-dark { display: block; }
+}
+
+/* sidebar -------------------------------------------------------------- */
+/* sidebar.html puts the stock toctree (ul > li.toctree-l1 > a + ul) in
+   nav.book-tree (docs pages only). Expansion is CSS-only: only the current
+   l1 branch shows its children. */
+.book-tree li.toctree-l1 > ul { display: none; }
+.book-tree li.toctree-l1.current > ul { display: block; }
+.book-tree li.toctree-l1 { margin: 0.1rem 0; }
+/* Sphinx marks the current page with a.current (no aria-current). */
+.book-tree a.current { color: var(--accent-ink); font-weight: 600; background: var(--panel); }
+/* Version select above the tree: same box as #book-search-input;
+   switcher.js unhides it. */
+.book-version-switcher {
+  display: block;
+  width: 100%;
+  margin: 0 0 1rem;
+  padding: 0.35rem 0.65rem;
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--ink);
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+}
+.book-version-switcher[hidden] { display: none; }
+.book-version-switcher:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+/* Pagefind results (search.js): title line, then a muted excerpt. */
+.book-search-results .book-search-title { display: block; }
+.book-search-results .book-search-excerpt { display: block; margin-top: 0.15rem; font-size: 0.8rem; color: var(--ink-faint); }
+.book-search-results mark { background: none; color: var(--ink); font-weight: 600; }
+
+/* Pages without a TOC (toc: false, search, genindex) drop the TOC column. */
+@media (min-width: 72rem) {
+  .book:not(:has(> .book-toc)) { grid-template-columns: var(--book-menu-w) minmax(0, 1fr); }
+}
+
+/* wide-screens ----------------------------------------------------------
+   From 72rem up (sidebar + report + TOC inline) the report column may grow
+   20% (--measure 44rem -> 53rem; ~92 instead of ~75 characters per line).
+   It only raises a max-width cap, so it takes effect once the viewport
+   exceeds ~75rem; phones, tablets and the drawer layouts are unchanged. */
+@media screen and (min-width: 72rem) { :root { --measure: 53rem; } }
+
+/* Centred book: from 72rem up the three columns keep their widths and the
+   group is centred, so spare width ends up outside the sidebars instead of
+   between them and the text. Pages without a TOC keep the (empty) TOC track,
+   so the text column sits in the same place on every page. */
+@media screen and (min-width: 72rem) {
+  .book,
+  .book:not(:has(> .book-toc)) {
+    grid-template-columns: var(--book-menu-w) minmax(0, var(--measure)) var(--book-toc-w);
+    justify-content: center;
+  }
+}

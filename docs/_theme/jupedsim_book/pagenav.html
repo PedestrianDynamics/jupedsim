@@ -1,0 +1,8 @@
+{#- SPDX-License-Identifier: LGPL-3.0-or-later -#}
+{#- Previous/next links; mirrors the Hugo theme's _partials/pagenav.html (kept on one line). -#}
+{%- if prev or next %}
+<nav class="book-pagenav" aria-label="Previous and next page">
+{%- if prev %}<a class="book-pagenav-prev" href="{{ prev.link|e }}" rel="prev"><small>Previous</small>{{ prev.title }}</a>{% endif %}
+{%- if next %}<a class="book-pagenav-next" href="{{ next.link|e }}" rel="next"><small>Next</small>{{ next.title }}</a>{% endif %}
+</nav>
+{%- endif %}
