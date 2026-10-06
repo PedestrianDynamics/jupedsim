@@ -15,7 +15,6 @@ add_library(py_jupedsim MODULE
     logging.hpp
     python_model.cpp
     python_model.hpp
-    floorfield.cpp
     routing.cpp
     simulation.cpp
     social_force_model.cpp
@@ -41,7 +40,6 @@ target_link_libraries(py_jupedsim
         common
         perfetto
         project_options
-        floorfield_cxx
 )
 
 pybind11_extension(py_jupedsim)
@@ -94,7 +92,6 @@ endif()
 set(STUB_FILES
     ${STUB_DIR}/__init__.pyi
     ${STUB_DIR}/buildinfo.pyi
-    ${STUB_DIR}/floorfield.pyi
 )
 # The module is found via the working directory (python -m puts it first on
 # sys.path), not PYTHONPATH: pip's isolated build exposes the build requirements
