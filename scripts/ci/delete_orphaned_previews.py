@@ -3,28 +3,18 @@
 """Find PR preview directories whose pull requests are no longer open."""
 
 import argparse
+import os
 import shutil
 from pathlib import Path
 
 from github import Auth, Github
+from github.GithubException import GithubException
 
 
-def list_open_pr_numbers(github: Github, repository: str) -> set[int]:
-    repo = github.get_repo(repository)
-    return {pr.number for pr in repo.get_pulls(state="open")}
+def find_orphaned_previews(root: Path, repo) -> list[Path]:
+    if not root.exists():
+        return []
 
-
-def list_stable_open_pr_numbers(github: Github, repository: str) -> set[int]:
-    prs = list_open_pr_numbers(github, repository)
-
-    while True:
-        again = list_open_pr_numbers(github, repository)
-        if again == prs:
-            return prs
-        prs = again
-
-
-def find_orphaned_previews(root: Path, open_prs: set[int]) -> list[Path]:
     orphaned = []
 
     for preview in root.iterdir():
@@ -36,7 +26,17 @@ def find_orphaned_previews(root: Path, open_prs: set[int]) -> list[Path]:
         except ValueError:
             continue
 
-        if pr_number not in open_prs:
+        try:
+            pr = repo.get_pull(pr_number)
+        except GithubException as error:
+            if error.status == 404:
+                print(
+                    f"::notice::Pull request #{pr_number} not found; keeping preview"
+                )
+                continue
+            raise
+
+        if pr.state != "open":
             orphaned.append(preview)
 
     return orphaned
@@ -56,21 +56,21 @@ def main() -> None:
         help="Path to the pull-requests preview directory",
     )
     parser.add_argument(
-        "--github-token",
+        "--repo",
         required=True,
-        help="GitHub token used to query pull requests",
+        help="GitHub repository in owner/name format",
     )
     args = parser.parse_args()
 
-    auth = Auth.Token(args.github_token)
+    github_token = os.environ.get("GITHUB_TOKEN")
+    if not github_token:
+        raise RuntimeError("GITHUB_TOKEN environment variable is not set")
+
+    auth = Auth.Token(github_token)
     github = Github(auth=auth)
+    repo = github.get_repo(args.repo)
 
-    open_prs = list_stable_open_pr_numbers(
-        github, "PedestrianDynamics/jupedsim"
-    )
-    print(f"Open PRs: {sorted(open_prs)}")
-
-    orphaned = find_orphaned_previews(args.root, open_prs)
+    orphaned = find_orphaned_previews(args.root, repo)
     delete_orphaned_previews(orphaned)
 
 

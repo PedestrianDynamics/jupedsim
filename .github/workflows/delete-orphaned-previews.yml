@@ -37,10 +37,12 @@ jobs:
         run: python -m pip install PyGithub
 
       - name: Delete orphaned previews
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           python jupedsim/scripts/ci/delete_orphaned_previews.py \
             pr-previews/pull-requests \
-            --github-token "${{ secrets.GITHUB_TOKEN }}"
+            --repo "$GITHUB_REPOSITORY"
 
       - name: Commit cleanup
         id: commit-cleanup
@@ -48,7 +50,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add pull-requests
+          git add -A
 
           if git diff --cached --quiet; then
             echo "No orphaned previews to delete."
