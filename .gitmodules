@@ -19,3 +19,6 @@
 [submodule "third-party/corrosion"]
 	path = third-party/corrosion
 	url = https://github.com/corrosion-rs/corrosion.git
+[submodule "jupedsim.org/themes/hugo-book"]
+	path = jupedsim.org/themes/hugo-book
+	url = https://github.com/alex-shpak/hugo-book.git
