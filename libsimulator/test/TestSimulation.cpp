@@ -120,6 +120,12 @@ TEST(MultiStoreySimulation, ATargetWrittenFromOutsideLandsOnTheAgentsOwnStorey)
     EXPECT_EQ(sim.Agent(downstairs).finalTarget.region(), stair.ground);
 }
 
+TEST(Simulation, AWaypointNeedsAPositiveDistance)
+{
+    auto sim = on_a_flat_room();
+    EXPECT_THROW(sim->AddStage(WaypointDescription{{5, 5}, 0.0, 0}), SimulationError);
+}
+
 TEST(MeshBuiltSimulation, IsRejected)
 {
     EXPECT_THROW(on_the_switchback_stair(), SimulationError);
