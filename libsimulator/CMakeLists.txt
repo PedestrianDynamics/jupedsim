@@ -109,6 +109,7 @@ if (BUILD_TESTS)
         test/TestBoundaryIndex.cpp
         test/TestCommon.hpp
         test/TestCustomModel.cpp
+        test/TestFloorfield.cpp
         test/TestGenericAgentFormatter.cpp
         test/TestGeometry.cpp
         test/TestJourney.cpp
@@ -134,6 +135,8 @@ if (BUILD_TESTS)
         GTest::gtest_main
         GTest::gtest
         simulator
+        # Floor fields are only exercised by the tests so far; the simulator does not use them.
+        floorfield_cxx
     )
 
     target_link_libraries(libsimulator-tests PRIVATE project_options)

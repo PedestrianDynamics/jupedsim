@@ -77,6 +77,10 @@ public:
     /// Returns the 2D polygon of the specified region. Throws in case of error.
     PolyWithHoles polygon(size_t region_id) const;
 
+    /// The exact 2D footprint of every region and the seams between them, as authored.
+    /// `nullptr` unless the geometry was built by `WalkableSurface`.
+    const RegionGraph2D* region_graph_2d() const { return _regionGraph2D.get(); }
+
     /// Face and on-surface point hit by the -z ray through @p p, or
     /// `null_face()` if the ray misses the walkable surface.
     FaceLocation face_below(const Point3D& p) const;
