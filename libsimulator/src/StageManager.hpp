@@ -35,6 +35,10 @@ public:
         std::unique_ptr<BaseStage> stage = std::visit(
             overloaded{
                 [&geometry](const WaypointDescription& d) -> std::unique_ptr<BaseStage> {
+                    if(d.distance <= 0.0) {
+                        throw SimulationError(
+                            "Waypoint distance must be positive, got {}", d.distance);
+                    }
                     return std::make_unique<Waypoint>(
                         geometry.get_location(d.position.x, d.position.y, d.region_id), d.distance);
                 },

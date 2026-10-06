@@ -181,7 +181,8 @@ class Simulation:
 
         Arguments:
             position: Position of the waypoint
-            distance: Minimum distance required to reach this waypoint
+            distance: Minimum distance required to reach this waypoint.
+                Must be positive.
             region_id: Region the waypoint lies in, see :func:`add_agent`.
 
         Returns:
