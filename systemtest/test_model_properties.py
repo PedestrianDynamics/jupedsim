@@ -458,6 +458,54 @@ def test_social_force_model_body_force_and_friction_are_model_level():
     assert sim.agent(agent_id).position != (1, 1)
 
 
+def _velocity_along_wall(friction, y):
+    """return x-velocity after 20 ms of an agent (radius 0.3 m) at height y in a
+    corridor whose wall runs along y = 0. It starts at its desired speed of
+    1 m/s along +x, so without other forces its speed stays constant."""
+    sim = jps.Simulation(
+        model=jps.SocialForceModel(body_force=120000.0, friction=friction),
+        geometry=[(0, 0), (60, 0), (60, 4), (0, 4)],
+        dt=0.001,
+    )
+    exit_id = sim.add_exit_stage(
+        [(58, 0), (60, 0), (60, 4), (58, 4)], region_id=0
+    )
+    journey_id = sim.add_journey(jps.JourneyDescription([exit_id]))
+    agent_id = sim.add_agent(
+        journey_id=journey_id,
+        stage_id=exit_id,
+        position=(1, y),
+        state=jps.SocialForceModelState(
+            velocity=(1.0, 0.0),
+            desired_speed=1.0,
+            reaction_time=0.5,
+            radius=0.3,
+        ),
+        region_id=0,
+    )
+    for _ in range(20):
+        sim.iterate()
+    return sim.agent(agent_id).state.velocity[0]
+
+
+def test_social_force_model_wall_friction_slows_down_an_agent_sliding_along():
+    """An agent overlapping a wall by 5 cm slides along it. Friction acts
+    against the motion: it slows the agent down, but does not reverse it.
+    With the wrong sign it would push the agent forward instead (to about
+    10 m/s within these 20 ms)."""
+    frictionless = _velocity_along_wall(friction=0.0, y=0.25)
+    with_friction = _velocity_along_wall(friction=240000.0, y=0.25)
+    assert frictionless == pytest.approx(1.0, abs=0.01)
+    assert 0.0 <= with_friction < 0.5 * frictionless
+
+
+def test_social_force_model_wall_friction_needs_contact():
+    """Away from the wall (no overlap) friction has no effect at all."""
+    assert _velocity_along_wall(friction=240000.0, y=1.0) == pytest.approx(
+        _velocity_along_wall(friction=0.0, y=1.0)
+    )
+
+
 def test_agent_handle_raises_after_removal(
     simulation_with_social_force_model,
 ):

@@ -139,7 +139,7 @@ Point SocialForceModel::ObstacleForce(const State& currentState, const WallView&
         currentState.obstacleScale,
         currentState.forceDistance,
         currentState.radius,
-        currentState.velocity,
+        -currentState.velocity,
         this->bodyForce,
         this->friction);
 }
