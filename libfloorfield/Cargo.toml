@@ -10,3 +10,5 @@ crate-type = ["staticlib"]
 
 [dependencies]
 cxx = "1.0"
+geo = { version = "0.28", default-features = false }
+rstar = "0.12"
