@@ -1,397 +1,313 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
-"""HDF5 trajectory writer.
+"""HDF5 trajectory writer, schema version 2.
 
-Writes simulation output in an HDF5 layout that is compatible with the
-loaders provided by `PedPy
-<https://github.com/PedestrianDynamics/PedPy>`_ for the
-`Pedestrian Dynamics Data Archive
-<https://ped.fz-juelich.de/da/doku.php?id=info>`_ format. ``h5py`` is an
-optional dependency; importing this module raises an informative error
-if it is not installed.
+File Layout:
+```txt
+    /
+    │  @schema_version   int  layout version, currently 2
+    │  @producer         str  "JuPedSim"
+    │  @producer_version str  JuPedSim version that wrote the file
+    │  @dt               f8   simulation time step [s]
+    │  @every_nth_frame  int  iterations between two recorded frames
+    │  @created          str  creation time, ISO 8601 in UTC
+    ├── trajectory
+    │   │  One row per recorded agent and frame, ordered by frame
+    │   │  shuffle + zstd
+    │   │  type compound {
+    │   │    frame     <u8 recorded-frame index
+    │   │    id        <u8 agent id
+    │   │    x         <f4 position x [m]
+    │   │    y         <f4 position y [m]
+    │   │    z         <f4 position z [m]
+    │   │    region_id <u8 region the agent is in, see /regions
+    │   │  }
+    │   │  @frame     str "Frame this record belongs to"
+    │   │  @id        str "Id of this agent"
+    │   │  @x         str "X position of the agent [m] x/y forms the ground plane"
+    │   │  @y         str "Y position of the agent [m] x/y forms the ground plane"
+    │   │  @z         str "Z position of the agent [m] z is up"
+    │   └─ @region_id str "Region the agent is in"
+    ├── frame_offsets
+    │   │  <u8, shuffle + zstd
+    │   │  Row in /trajectory at which each recorded frame starts, followed
+    │   │  by the total row count: rows of frame i are
+    │   └─ trajectory[frame_offsets[i]:frame_offsets[i + 1]]
+    ├── regions
+    │   │  One row per region
+    │   │  type compound {
+    │   │    id  <u8 region id
+    │   │    wkt str 2D region polygon as WKT
+    │   │  }
+    │   │  @id  str "id of the region"
+    │   └─ @wkt str "2D WKT describing the region polygon."
+    │               "This is always a projection onto X/Y for connectors."
+    └── mesh
+        ├── vertices
+        │   │  All vertices of the geometry
+        │   └─ [N, 3] <f4
+        ├── triangles
+        │   │  Vertex indices of each triangle
+        │   └─ [M, 3] <u8
+        └── regions
+            │  Region id of each triangle
+            └─ [M] <u8
+```
+
+Reading the file requires the Zstd filter: ``import hdf5plugin`` before
+opening it with h5py.
 """
 
 from __future__ import annotations
 
-import datetime as _dt
-import hashlib
-import json
-import pathlib
-from typing import Final
+import typing
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Final, override
 
-from shapely import from_wkt
+import h5py
+import hdf5plugin
+import numpy as np
+import numpy.typing as npt
 
-from jupedsim.serialization import TrajectoryWriter, walkable_area_as_wkt
+from jupedsim.library import get_build_info
+from jupedsim.native import Geometry
+from jupedsim.serialization import TrajectoryWriter
 from jupedsim.simulation import Simulation
-
-try:
-    import h5py
-    import numpy as np
-except ImportError as e:  # pragma: no cover - dependency is optional
-    raise ImportError(
-        "Hdf5TrajectoryWriter requires the optional dependency 'h5py' "
-        "(and numpy). Install with: pip install h5py"
-    ) from e
-
 
 SCHEMA_VERSION: Final = 2
 
 
-def _trajectory_dtype() -> "np.dtype":
-    """Compound dtype of the /trajectory dataset.
-
-    The leading four columns (``frame``, ``id``, ``x``, ``y``) match the
-    Pedestrian Dynamics Data Archive convention used by PedPy's loader.
-    ``z`` is included for byte-level compatibility with the archive
-    format and is always written as ``0.0`` (planar simulation).
-    """
-    return np.dtype(
-        [
-            ("frame", "<u4"),
-            ("id", "<u4"),
-            ("x", "<f8"),
-            ("y", "<f8"),
-            ("z", "<f8"),
-        ]
-    )
-
-
-def _stable_geometry_hash(wkt: str) -> int:
-    """Deterministic 64-bit signed identifier for a WKT string.
-
-    We use a truncated BLAKE2b digest rather than ``hash(wkt)``: Python's
-    built-in string hash is salted with ``PYTHONHASHSEED`` and changes
-    between processes, so it cannot be persisted into a file format and
-    expected to match a future read.
-    """
-    digest = hashlib.blake2b(wkt.encode("utf-8"), digest_size=8).digest()
-    return int.from_bytes(digest, "big", signed=True)
-
-
 class Hdf5TrajectoryWriter(TrajectoryWriter):
-    """Write trajectory data to an HDF5 file.
+    """Write trajectory data to an HDF5 file, see the module docs for the layout.
 
-    The output is laid out as follows:
+    Rows are buffered and written in chunks of 64 KiB. The file is flushed after
+    every chunk, so an interrupted run keeps the metadata, the geometry and the
+    trajectory rows up to the last chunk; /frame_offsets may be incomplete then.
+    Call :meth:`close` when the simulation is done to write the remaining rows
+    and the frame index, or use the writer in a ``with`` block.
 
-    - ``/trajectory`` -- compound, resizable dataset with one row per
-      agent per recorded frame. Columns: ``frame``, ``id``, ``x``,
-      ``y``, ``z``. Carries an ``fps`` attribute (the attribute PedPy
-      reads).
-    - Root attribute ``wkt_geometry`` -- the initial walkable area as
-      WKT (the attribute PedPy reads).
-    - Additional root attributes describing the producer, schema
-      version, time step, frame interval, bounding box, and creation
-      timestamp.
-    - ``/geometry/{wkt,hash}`` and ``/frame_geometry`` -- only created
-      when the simulation geometry actually changes during the run; for
-      runs with a single static geometry the per-frame mapping is
-      redundant with the root ``wkt_geometry`` attribute and is
-      omitted. PedPy ignores these in any case.
-
-    Parameters
-    ----------
-    output_file:
-        Output HDF5 file path. The file is opened immediately; data is
-        flushed in batches.
-    every_nth_frame:
-        Write every n-th simulation iteration (1 = every frame).
-    commit_every_nth_write:
-        How many recorded frames to buffer in memory before extending
-        the on-disk dataset. Each recorded frame contributes one row
-        per agent.
-    compression_level:
-        gzip level for the trajectory dataset, 0 (off) to 9 (max).
-        On trajectory data the bulk of the size reduction is already
-        achieved at level 1 (combined with the byte-shuffle filter,
-        which is enabled whenever compression is on); higher levels
-        give only a few percent extra savings at noticeable extra
-        write cost.
+    Arguments:
+        output_file: File to write to; an existing file is overwritten.
+        every_nth_frame: Record every n-th iteration, 1 records all of them.
     """
 
     def __init__(
         self,
         *,
-        output_file: pathlib.Path,
+        output_file: Path,
         every_nth_frame: int = 4,
-        commit_every_nth_write: int = 100,
-        compression_level: int = 1,
-    ) -> None:
+    ):
         if every_nth_frame < 1:
             raise TrajectoryWriter.Exception("'every_nth_frame' has to be > 0")
-        if commit_every_nth_write < 1:
-            raise TrajectoryWriter.Exception(
-                "'commit_every_nth_write' has to be > 0"
-            )
-        if not 0 <= compression_level <= 9:
-            raise TrajectoryWriter.Exception(
-                "'compression_level' must be between 0 and 9"
-            )
+        self._output_file: Path = output_file
+        self._every_nth_frame: int = every_nth_frame
+        self._records_to_cache: int = 2**16 // self._trajectory_dtype().itemsize
+        self._trajectory_buffer: npt.NDArray[typing.Any] = np.empty(
+            self._records_to_cache, dtype=self._trajectory_dtype()
+        )
+        self._record_idx: int = 0
+        self._frame_offset_buffer: npt.NDArray[typing.Any] = np.empty(
+            1024, dtype=np.dtype("<u8")
+        )
+        self._is_writing: bool = False
 
-        self._output_file = pathlib.Path(output_file)
-        self._every_nth_frame = every_nth_frame
-        self._commit_every_nth_write = commit_every_nth_write
-        self._compression_level = compression_level
-
-        self._file: h5py.File | None = h5py.File(self._output_file, "w")
-        self._traj_ds: h5py.Dataset | None = None
-        self._geom_wkt_ds: h5py.Dataset | None = None
-        self._geom_hash_ds: h5py.Dataset | None = None
-        self._frame_geom_ds: h5py.Dataset | None = None
-
-        self._buffer: list[tuple] = []
-        self._frames_since_flush: int = 0
-
-        # Cache of bounds keyed by deterministic WKT hash so we don't
-        # re-parse WKT every frame for static geometry.
-        self._bounds_cache: dict[int, tuple[float, float, float, float]] = {}
-
-        # Tracks the unique-geometry registry. Datasets in /geometry are
-        # only created once a *second* distinct WKT is observed.
-        self._initial_wkt_hash: int | None = None
-        self._extra_geometry_hashes: set[int] = set()
-        self._frame_geometry_buffer: list[tuple[int, int]] = []
-        self._last_recorded_geometry_hash: int | None = None
-
-        self._xmin = float("inf")
-        self._xmax = float("-inf")
-        self._ymin = float("inf")
-        self._ymax = float("-inf")
-
+    @override
     def begin_writing(self, simulation: Simulation) -> None:
-        if self._file is None:
-            raise TrajectoryWriter.Exception("File already closed.")
+        """Begin writing trajectory data.
 
-        fps = 1.0 / simulation.delta_time() / self._every_nth_frame
-        wkt = walkable_area_as_wkt(simulation)
+        This method is intended to handle all data writing that has to be done
+        once before the trajectory data can be written. E.g. Meta information
+        such as frame rate etc...
 
-        comp_kwargs: dict[str, object] = {}
-        if self._compression_level > 0:
-            comp_kwargs = {
-                "compression": "gzip",
-                "compression_opts": self._compression_level,
-                "shuffle": True,
-            }
+        """
+        if self._is_writing:
+            raise TrajectoryWriter.Exception(
+                "'begin_writing()' already called!"
+            )
+        self._file: h5py.File = h5py.File(str(self._output_file), "w")
+        try:
+            self._write_header(simulation)
+        except BaseException:
+            # Don't leave a locked, half-written file behind.
+            self._file.close()
+            Path(self._output_file).unlink(missing_ok=True)
+            raise
+        self._record_idx = 0
+        self._records_written = 0
+        self._frame_idx = 0
+        self._is_writing = True
+        self._file.flush()
 
-        self._traj_ds = self._file.create_dataset(
+    def _write_header(self, simulation: Simulation) -> None:
+        """Write the root attributes, create the datasets and store the geometry."""
+        self._file.attrs["schema_version"] = SCHEMA_VERSION
+        self._file.attrs["producer"] = "JuPedSim"
+        self._file.attrs["producer_version"] = get_build_info().library_version
+        self._file.attrs["dt"] = simulation.delta_time()
+        self._file.attrs["every_nth_frame"] = self._every_nth_frame
+        self._file.attrs["created"] = datetime.now(timezone.utc).isoformat()
+
+        self._trajectory_ds: h5py.Dataset = self._file.create_dataset(
             "trajectory",
             shape=(0,),
             maxshape=(None,),
-            dtype=_trajectory_dtype(),
-            chunks=(max(1024, self._commit_every_nth_write * 64),),
-            **comp_kwargs,
+            dtype=self._trajectory_dtype(),
+            chunks=self._records_to_cache,
+            shuffle=True,
+            **hdf5plugin.Zstd(clevel=3),  # pyright: ignore[reportUnknownArgumentType]
+        )
+        self._trajectory_ds.attrs["frame"] = "Frame this record belongs to"
+        self._trajectory_ds.attrs["id"] = "Id of this agent"
+        self._trajectory_ds.attrs["x"] = (
+            "X position of the agent [m] x/y forms the ground plane"
+        )
+        self._trajectory_ds.attrs["y"] = (
+            "Y position of the agent [m] x/y forms the ground plane"
+        )
+        self._trajectory_ds.attrs["z"] = "Z position of the agent [m] z is up"
+        self._trajectory_ds.attrs["region_id"] = "Region the agent is in"
+
+        self._frame_offsets_ds: h5py.Dataset = self._file.create_dataset(
+            "frame_offsets",
+            shape=(0,),
+            maxshape=(None,),
+            dtype=np.dtype("<u8"),
+            chunks=1024,
+            shuffle=True,
+            **hdf5plugin.Zstd(clevel=3),  # pyright: ignore[reportUnknownArgumentType]
+        )
+        geo: Geometry = simulation.get_geometry()
+
+        regions = [
+            (idx, geo.polygon(region_id=idx).as_wkt())
+            for idx in range(geo.region_count())
+        ]
+        regions_dt = np.dtype(
+            [("id", "<u8"), ("wkt", h5py.string_dtype())], align=True
+        )
+        regions_arr = np.array(regions, dtype=regions_dt)
+        regions_ds = self._file.create_dataset("regions", data=regions_arr)
+        regions_ds.attrs["id"] = "Id of the region."
+        regions_ds.attrs["wkt"] = (
+            "2D WKT describing the region polygon. This is always a projection onto X/Y for connectors."
         )
 
-        # PedPy reads `fps` from the *dataset* attrs; mirror it on the file
-        # for parity with the Jülich data archive convention.
-        self._traj_ds.attrs["fps"] = fps
-        self._traj_ds.attrs["column_units"] = json.dumps(
-            {
-                "frame": "-",
-                "id": "-",
-                "x": "m",
-                "y": "m",
-                "z": "m",
-            }
-        )
-        self._traj_ds.attrs["column_descriptions"] = json.dumps(
-            {
-                "frame": "frame index",
-                "id": "agent id",
-                "x": "position (x)",
-                "y": "position (y)",
-                "z": "position (z), always 0 for planar simulations",
-            }
-        )
+        vertices = geo.vertices()
+        vertices_arr = np.asarray(vertices, dtype="<f4")
+        self._file.create_dataset("mesh/vertices", data=vertices_arr)
 
-        self._file.attrs["schema_version"] = SCHEMA_VERSION
-        self._file.attrs["producer"] = "JuPedSim"
-        try:
-            from jupedsim import __version__ as _jps_version
+        triangles = geo.triangles()
+        triangles_arr = np.asarray(triangles, dtype="<u8")
+        self._file.create_dataset("mesh/triangles", data=triangles_arr)
 
-            self._file.attrs["producer_version"] = _jps_version
-        except Exception:
-            pass
-        self._file.attrs["dt"] = float(simulation.delta_time())
-        self._file.attrs["every_nth_frame"] = self._every_nth_frame
-        self._file.attrs["fps"] = fps
-        self._file.attrs["wkt_geometry"] = wkt
-        self._file.attrs["created"] = _dt.datetime.now(
-            _dt.timezone.utc
-        ).isoformat()
+        triangle_regions = geo.region_id_per_face()
+        triangle_regions_arr = np.array(triangle_regions, dtype=np.dtype("<u8"))
+        self._file.create_dataset("mesh/regions", data=triangle_regions_arr)
 
-        self._initial_wkt_hash = _stable_geometry_hash(wkt)
-        self._update_bounds(wkt, self._initial_wkt_hash)
-
+    @override
     def write_iteration_state(self, simulation: Simulation) -> None:
-        if self._file is None or self._traj_ds is None:
-            raise TrajectoryWriter.Exception("File not opened.")
+        """Write trajectory data of one simulation iteration.
 
+        This method is intended to handle serialization of the trajectory data
+        of a single iteration.
+
+        """
+        if not self._is_writing:
+            raise TrajectoryWriter.Exception(
+                "Need to call 'begin_writing()' before calling 'write_iteration_state()'"
+            )
         iteration = simulation.iteration_count()
         if iteration % self._every_nth_frame != 0:
             return
         frame = iteration // self._every_nth_frame
 
-        for agent in simulation.agents():
-            self._buffer.append(
-                (
-                    frame,
-                    agent.id,
-                    agent.position[0],
-                    agent.position[1],
-                    0.0,
-                )
+        self._frame_offset_buffer[self._frame_idx] = self._records_written
+        self._frame_idx += 1
+        if self._frame_idx == 1024:
+            self._append(
+                self._frame_offsets_ds,
+                self._frame_offset_buffer,
+                self._frame_idx,
             )
+            self._frame_idx = 0
 
-        wkt = walkable_area_as_wkt(simulation)
-        wkt_hash = _stable_geometry_hash(wkt)
-        self._update_bounds(wkt, wkt_hash)
-        self._record_frame_geometry(frame, wkt, wkt_hash)
+        for agent in simulation._obj.agents():
+            self._records_written += 1
+            loc = agent.location
+            self._trajectory_buffer[self._record_idx] = (
+                frame,
+                agent.id,
+                loc.x,
+                loc.y,
+                loc.z,
+                loc.region_id,
+            )
+            self._record_idx += 1
+            if self._record_idx == self._records_to_cache:
+                self._append(
+                    self._trajectory_ds,
+                    self._trajectory_buffer,
+                    self._record_idx,
+                )
+                self._record_idx = 0
 
-        self._frames_since_flush += 1
-        if self._frames_since_flush >= self._commit_every_nth_write:
-            self._flush()
-
-    def close(self) -> None:
-        """Flush remaining buffers, write final attributes, and close."""
-        if self._file is None:
-            return
-        if self._traj_ds is not None:
-            self._flush()
-        if all(
-            v not in (float("inf"), float("-inf"))
-            for v in (self._xmin, self._xmax, self._ymin, self._ymax)
-        ):
-            self._file.attrs["xmin"] = self._xmin
-            self._file.attrs["xmax"] = self._xmax
-            self._file.attrs["ymin"] = self._ymin
-            self._file.attrs["ymax"] = self._ymax
-        try:
-            self._file.close()
-        finally:
-            self._file = None
-            self._traj_ds = None
-
+    @override
     def every_nth_frame(self) -> int:
+        """Returns the interval of this writer in frames between writes.
+
+        1 indicates all frames are written, 10 indicates every 10th frame is
+        written and so on.
+
+        Returns:
+            Number of frames between writes as int
+
+        """
         return self._every_nth_frame
 
-    # ----- internal helpers --------------------------------------------------
-
-    def _update_bounds(self, wkt: str, wkt_hash: int) -> None:
-        bounds = self._bounds_cache.get(wkt_hash)
-        if bounds is None:
-            xmin, ymin, xmax, ymax = from_wkt(wkt).bounds
-            bounds = (xmin, ymin, xmax, ymax)
-            self._bounds_cache[wkt_hash] = bounds
-        xmin, ymin, xmax, ymax = bounds
-        self._xmin = min(self._xmin, xmin)
-        self._xmax = max(self._xmax, xmax)
-        self._ymin = min(self._ymin, ymin)
-        self._ymax = max(self._ymax, ymax)
-
-    def _record_frame_geometry(
-        self, frame: int, wkt: str, wkt_hash: int
-    ) -> None:
-        if self._initial_wkt_hash is None:
-            # begin_writing always sets this; defensive only.
-            self._initial_wkt_hash = wkt_hash
-            self._last_recorded_geometry_hash = wkt_hash
+    @override
+    def close(self) -> None:
+        """Write the remaining rows and the frame index, then close the file."""
+        if not self._is_writing:
             return
-        if (
-            wkt_hash == self._initial_wkt_hash
-            and not self._extra_geometry_hashes
-        ):
-            # Static geometry so far -- nothing to record.
-            self._last_recorded_geometry_hash = wkt_hash
-            return
-
-        # Geometry has changed at some point during the run. Make sure
-        # the geometry datasets exist and back-fill the registry on the
-        # first transition.
-        if not self._extra_geometry_hashes:
-            self._ensure_geometry_datasets()
-            assert self._initial_wkt_hash is not None
-            self._append_unique_geometry_record(
-                "<initial>", self._initial_wkt_hash, use_initial=True
+        self._is_writing = False
+        try:
+            self._frame_offset_buffer[self._frame_idx] = self._records_written
+            self._frame_idx += 1
+            self._append(
+                self._frame_offsets_ds,
+                self._frame_offset_buffer,
+                self._frame_idx,
             )
-        if (
-            wkt_hash not in self._extra_geometry_hashes
-            and wkt_hash != self._initial_wkt_hash
-        ):
-            self._extra_geometry_hashes.add(wkt_hash)
-            self._append_unique_geometry_record(wkt, wkt_hash)
+            if self._record_idx != 0:
+                self._append(
+                    self._trajectory_ds,
+                    self._trajectory_buffer,
+                    self._record_idx,
+                )
+        finally:
+            self._file.close()
 
-        if wkt_hash != self._last_recorded_geometry_hash:
-            self._frame_geometry_buffer.append((frame, wkt_hash))
-            self._last_recorded_geometry_hash = wkt_hash
-
-    def _flush(self) -> None:
-        if self._traj_ds is None:
-            return
-        if self._buffer:
-            arr = np.array(self._buffer, dtype=_trajectory_dtype())
-            old = self._traj_ds.shape[0]
-            self._traj_ds.resize((old + arr.shape[0],))
-            self._traj_ds[old:] = arr
-            self._buffer.clear()
-
-        if self._frame_geometry_buffer:
-            self._append_frame_geometry(self._frame_geometry_buffer)
-            self._frame_geometry_buffer.clear()
-
-        self._frames_since_flush = 0
-        if self._file is not None:
-            self._file.flush()
-
-    def _ensure_geometry_datasets(self) -> None:
-        assert self._file is not None
-        if self._geom_wkt_ds is None:
-            grp = self._file.require_group("geometry")
-            str_dtype = h5py.string_dtype(encoding="utf-8")
-            self._geom_wkt_ds = grp.create_dataset(
-                "wkt",
-                shape=(0,),
-                maxshape=(None,),
-                dtype=str_dtype,
-                chunks=(8,),
-            )
-            self._geom_hash_ds = grp.create_dataset(
-                "hash",
-                shape=(0,),
-                maxshape=(None,),
-                dtype="<i8",
-                chunks=(8,),
-            )
-            fg_dtype = np.dtype([("frame", "<u4"), ("geometry_hash", "<i8")])
-            self._frame_geom_ds = self._file.create_dataset(
-                "frame_geometry",
-                shape=(0,),
-                maxshape=(None,),
-                dtype=fg_dtype,
-                chunks=(max(1024, self._commit_every_nth_write),),
-            )
-
-    def _append_unique_geometry_record(
-        self, wkt: str, wkt_hash: int, *, use_initial: bool = False
-    ) -> None:
-        assert self._geom_wkt_ds is not None
-        assert self._geom_hash_ds is not None
-        old = self._geom_wkt_ds.shape[0]
-        self._geom_wkt_ds.resize((old + 1,))
-        self._geom_hash_ds.resize((old + 1,))
-        # The initial WKT is already preserved as the root `wkt_geometry`
-        # attribute; we only need a hash entry for the registry.
-        if use_initial and self._file is not None:
-            self._geom_wkt_ds[old] = self._file.attrs["wkt_geometry"]
-        else:
-            self._geom_wkt_ds[old] = wkt
-        self._geom_hash_ds[old] = wkt_hash
-
-    def _append_frame_geometry(self, rows: list[tuple[int, int]]) -> None:
-        assert self._frame_geom_ds is not None
-        arr = np.array(
-            rows,
-            dtype=np.dtype([("frame", "<u4"), ("geometry_hash", "<i8")]),
+    @staticmethod
+    def _trajectory_dtype() -> "np.dtype":
+        """Compound dtype of the /trajectory dataset."""
+        return np.dtype(
+            [
+                ("frame", "<u8"),
+                ("id", "<u8"),
+                ("x", "<f4"),
+                ("y", "<f4"),
+                ("z", "<f4"),
+                ("region_id", "<u8"),
+            ],
+            align=True,
         )
-        old = self._frame_geom_ds.shape[0]
-        self._frame_geom_ds.resize((old + arr.shape[0],))
-        self._frame_geom_ds[old:] = arr
+
+    @staticmethod
+    def _append(
+        dset: h5py.Dataset, data: npt.NDArray[typing.Any], count: int
+    ) -> None:
+        n: int = dset.shape[0]
+        dset.resize(n + count, axis=0)
+        dset[n:] = data[:count]
+        dset.file.flush()

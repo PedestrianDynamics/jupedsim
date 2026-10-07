@@ -8,7 +8,7 @@ name = "trame_viewer"
 version = "0.1.0"
 description = "3D viewer for multi-level JuPedSim navigation meshes, via pyvista + trame"
 license = "LGPL-3.0-or-later"
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 # jupedsim is deliberately NOT listed: this tool is developed in tandem with the
 # in-tree jupedsim (source `<build-dir>/environment` to make it importable) and
 # must not pull a released jupedsim from PyPI on `pip install -e`.

@@ -102,35 +102,6 @@ def journey_to_upper_exit(sim, upper):
     return journey_id, exit_id
 
 
-@pytest.mark.parametrize(
-    "writer_of",
-    [
-        lambda path: jps.SqliteTrajectoryWriter(output_file=path / "t.sqlite"),
-        pytest.param(
-            lambda path: jps.Hdf5TrajectoryWriter(output_file=path / "t.h5"),
-            marks=pytest.mark.skipif(
-                jps.Hdf5TrajectoryWriter is None, reason="h5py not installed"
-            ),
-        ),
-    ],
-    ids=["sqlite", "hdf5"],
-)
-def test_the_shipped_trajectory_writers_stay_out_of_a_multi_region_world(
-    tmp_path, writer_of
-):
-    sim, ground, upper = u_stair(trajectory_writer=writer_of(tmp_path))
-    journey_id, exit_id = journey_to_upper_exit(sim, upper)
-    sim.add_agent(
-        journey_id=journey_id,
-        stage_id=exit_id,
-        position=STACKED_XY,
-        state=jps.CollisionFreeSpeedModelState(),
-        region_id=ground,
-    )
-    with pytest.raises(jps.TrajectoryWriter.Exception, match="single region"):
-        sim.iterate()
-
-
 def test_agents_spawn_on_either_of_two_stacked_floors():
     sim, ground, upper = u_stair()
     journey_id, exit_id = journey_to_upper_exit(sim, upper)

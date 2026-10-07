@@ -187,29 +187,27 @@ Using the custom writer is identical to using the built-in SQLite writer:
 
     import jupedsim as jps
 
-    simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(),
-        geometry=my_geometry,
-        trajectory_writer=CsvTrajectoryWriter(
-            output_file=Path("output.csv"),
-            every_nth_frame=5,
-        ),
-    )
+    # Leaving the block calls close(), which flushes the remaining data
+    with CsvTrajectoryWriter(
+        output_file=Path("output.csv"),
+        every_nth_frame=5,
+    ) as writer:
+        simulation = jps.Simulation(
+            model=jps.CollisionFreeSpeedModel(),
+            geometry=my_geometry,
+            trajectory_writer=writer,
+        )
 
-    # Run the simulation — writing happens automatically
-    while simulation.agent_count() > 0:
-        simulation.iterate()
-
-    # Flush remaining data
-    simulation._writer.close()
+        # Run the simulation — writing happens automatically
+        while simulation.agent_count() > 0:
+            simulation.iterate()
 
 
 .. note::
 
-    Currently, ``close()`` is not part of the ``TrajectoryWriter`` interface
-    and must be called manually via ``simulation._writer``. If your custom
-    writer manages resources (file handles, network connections, etc.),
-    make sure to call ``close()`` when the simulation is done.
+    Every ``TrajectoryWriter`` is a context manager: leaving the ``with``
+    block calls ``close()``, also when the simulation raises. Without a
+    ``with`` block, call ``close()`` yourself when the simulation is done.
 
 
 .. _resource-cleanup:
@@ -224,9 +222,9 @@ Tips for custom writers
 - **Buffering**: For performance, consider buffering writes in memory and
   flushing periodically, as the built-in SQLite writer does.
 
-- **Resource cleanup**: Implement a ``close()`` method if your writer opens
-  files, connections, or other resources. Call it after the simulation loop
-  completes.
+- **Resource cleanup**: Override ``close()`` if your writer buffers data or
+  opens files, connections, or other resources. It is called when leaving a
+  ``with`` block and must be safe to call more than once.
 
 - **Error handling**: Raise ``TrajectoryWriter.Exception`` for writer-specific
   errors to keep error reporting consistent.
@@ -238,87 +236,54 @@ Built-in HDF5 writer
 ======================
 
 JuPedSim provides a built-in HDF5 trajectory writer at
-:class:`jupedsim.hdf5_serialization.Hdf5TrajectoryWriter`. ``h5py`` is an
-optional dependency; install it with ``pip install h5py`` to use this
-writer. The schema is aligned with the
-`Pedestrian Dynamics Data Archive (PDA) <https://ped.fz-juelich.de/da/doku.php?id=info>`_
-HDF5 format used by the
-`PedPy <https://github.com/PedestrianDynamics/PedPy>`_ analysis library,
-so simulator output and experimental recordings can be analysed with the
-same tools.
+:class:`jupedsim.Hdf5TrajectoryWriter`. It stores one row per recorded
+agent and frame in a simple table. Additionally geometry is stored
+as 2D regions for easy analysis with pedpy and as full 3D mesh.
 
 Usage::
 
     import jupedsim as jps
     from pathlib import Path
 
-    writer = jps.Hdf5TrajectoryWriter(
+    with jps.Hdf5TrajectoryWriter(
         output_file=Path("traj.h5"),
         every_nth_frame=4,
-        compression_level=1,
-    )
-    sim = jps.Simulation(
-        model=..., geometry=..., trajectory_writer=writer, dt=0.01,
-    )
-    while sim.agent_count() > 0:
-        sim.iterate()
-    writer.close()
+    ) as writer:
+        sim = jps.Simulation(
+            model=..., geometry=..., trajectory_writer=writer, dt=0.01,
+        )
+        while sim.agent_count() > 0:
+            sim.iterate()
 
-Reading the output with PedPy::
+The last buffered rows and the frame index are only written when the
+writer is closed, i.e. when leaving the ``with`` block. Without a ``with``
+block, call ``writer.close()`` once the simulation is done.
 
-    from pedpy.io import load_trajectory_from_ped_data_archive_hdf5
-    traj = load_trajectory_from_ped_data_archive_hdf5(
-        trajectory_file="traj.h5"
-    )
+File layout
+-----------
 
-What we adopt from the PDA schema
------------------------------------
+- Root attributes ``schema_version`` (currently ``2``), ``producer``,
+  ``producer_version``, ``dt``, ``every_nth_frame`` and ``created``
+  (ISO 8601, UTC).
+- ``/trajectory``: compound dataset with the columns ``frame``, ``id``
+  (``uint64``), ``x``, ``y``, ``z`` (``float32``, metres) and
+  ``region_id`` (``uint64``), ordered by frame.
+- ``/frame_offsets``: the row in ``/trajectory`` at which each recorded
+  frame starts, followed by the total row count. The rows of frame ``i``
+  are ``trajectory[frame_offsets[i]:frame_offsets[i + 1]]``.
+- ``/regions``: one row per region with its ``id`` and its polygon as
+  ``wkt``.
+- ``/mesh/vertices``, ``/mesh/triangles`` and ``/mesh/regions``: the
+  triangulated walkable area and the region of each triangle.
 
-The PDA schema is described in `the data archive documentation
-<https://ped.fz-juelich.de/da/doku.php?id=info>`_ and accompanied by a
-`JSON schema <https://ped.fz-juelich.de/data/experiments/RDM_Information/schema_v2.json>`_
-covering experiment metadata. JuPedSim writes a subset that is
-sufficient for analysis tooling:
+``/trajectory`` and ``/frame_offsets`` are compressed with Zstandard via
+`hdf5plugin <https://github.com/silx-kit/hdf5plugin>`_. Import it before
+reading the file with h5py::
 
-- ``/trajectory`` compound dataset with the columns
-  ``frame``, ``id``, ``x``, ``y``, ``z``, plus the JuPedSim-specific
-  orientation columns ``ox`` and ``oy``. The four leading columns and
-  the dataset name match the PDA convention exactly, so the dataset is
-  consumed without modification by
-  ``pedpy.io.load_trajectory_from_ped_data_archive_hdf5``.
-- ``fps`` attribute on the ``/trajectory`` dataset (the attribute that
-  PedPy reads to recover the frame rate).
-- Root attribute ``wkt_geometry`` carrying the simulation walkable area
-  as WKT (the attribute that
-  ``pedpy.io.load_walkable_area_from_ped_data_archive_hdf5`` reads).
-- Per-column ``column_units`` and ``column_descriptions`` attributes on
-  ``/trajectory`` (JSON-encoded), in the spirit of the PDA self-
-  documentation requirement.
+    import h5py
+    import hdf5plugin  # registers the Zstd filter
 
-What we do not write
------------------------
-
-The PDA schema is designed for *experimental* recordings, where many
-fields describe physical setups that have no simulator counterpart.
-JuPedSim deliberately does **not** populate these fields:
-
-- ``participants``, ``persons`` (with ``orcid``, ``affiliations``, ROR
-  identifiers) -- there are no human participants in a simulation.
-- ``sensors`` (camera/lidar models, brand) -- no physical capture
-  devices.
-- ``locations`` (institution, postal address) and ``funding`` -- not
-  applicable to a model run.
-- ``date_modified`` / ``date_published`` and DOI / publication
-  metadata -- belong to the eventual archival of a *dataset*, not the
-  raw simulator output.
-
-JuPedSim adds a small set of producer-oriented attributes on the file
-root in their place: ``producer = "JuPedSim"``, ``producer_version``,
-``schema_version``, ``dt``, ``every_nth_frame``, ``created``, and the
-final bounding box (``xmin``, ``xmax``, ``ymin``, ``ymax``). For runs
-in which the geometry changes during the simulation, the writer
-additionally records ``/geometry/wkt``, ``/geometry/hash`` and
-``/frame_geometry`` to preserve the per-frame mapping; these are
-ignored by the PedPy loader and are intended for tools that need the
-full time history.
-
+    with h5py.File("traj.h5", "r") as f:
+        traj = f["trajectory"][:]
+        offsets = f["frame_offsets"][:]
+        first_frame = traj[offsets[0] : offsets[1]]

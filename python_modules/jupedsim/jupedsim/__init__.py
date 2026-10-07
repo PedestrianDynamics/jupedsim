@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
-import jupedsim.native as py_jps
 from jupedsim.agent import Agent
 from jupedsim.agent_view import AgentStep, AgentView, NeighborView, WallView
 from jupedsim.distributions import (
@@ -15,6 +14,7 @@ from jupedsim.distributions import (
     distribute_in_circles_by_number,
     distribute_until_filled,
 )
+from jupedsim.hdf5_serialization import Hdf5TrajectoryWriter
 from jupedsim.internal.tracing import (
     Timer,
     disable_tracing,
@@ -63,26 +63,16 @@ from jupedsim.models.warp_driver import (
     WarpDriverModel,
     WarpDriverModelState,
 )
-from jupedsim.native import WalkableSurface
+from jupedsim.native import Geometry, SimulationError, WalkableSurface
 from jupedsim.recording import Recording, RecordingAgent, RecordingFrame
 from jupedsim.routing import RoutingEngine
 from jupedsim.serialization import TrajectoryWriter
 from jupedsim.simulation import Simulation
 from jupedsim.sqlite_serialization import SqliteTrajectoryWriter
-
-try:
-    from jupedsim.hdf5_serialization import Hdf5TrajectoryWriter
-except ImportError:  # h5py not installed; HDF5 writer remains unavailable.
-    Hdf5TrajectoryWriter = None  # type: ignore[assignment, misc]
 from jupedsim.stages import (
     ExitStage,
     WaypointStage,
 )
-
-SimulationError = py_jps.SimulationError
-"""Raised for simulation errors, e.g. when accessing an agent handle whose
-agent no longer exists or when calling mutating simulation methods from a
-custom-model callback."""
 
 __version__ = get_build_info().library_version
 """
@@ -120,6 +110,7 @@ __all__ = [
     "ExitStage",
     "GeneralizedCentrifugalForceModel",
     "GeneralizedCentrifugalForceModelState",
+    "Geometry",
     "Hdf5TrajectoryWriter",
     "IncorrectParameterError",
     "JourneyDescription",
