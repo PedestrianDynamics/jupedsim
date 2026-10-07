@@ -97,11 +97,6 @@ void Simulation::Iterate()
     }
 
     {
-        JPS_SCOPED_TIMER_AND_TRACE(_timer, "Stage System", Detailed);
-        _stageSystem.Run(_stageManager, _neighborhoodSearch, *_geometry);
-    }
-
-    {
         JPS_SCOPED_TIMER_AND_TRACE(_timer, "Strategical Decision System", General);
         _stategicalDecisionSystem.Run(_journeys, _agents, _stageManager);
     }

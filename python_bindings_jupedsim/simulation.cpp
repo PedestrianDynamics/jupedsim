@@ -62,27 +62,6 @@ void init_simulation(py::module_& m)
             py::arg("distance"),
             py::arg("region_id"))
         .def(
-            "add_queue_stage",
-            [](Simulation& sim,
-               const std::vector<std::tuple<double, double>>& positions,
-               std::size_t region_id) {
-                return sim.AddStage(NotifiableQueueDescription{intoPoints(positions)}, region_id)
-                    .getID();
-            },
-            py::arg("positions"),
-            py::arg("region_id"))
-        .def(
-            "add_waiting_set_stage",
-            [](Simulation& sim,
-               const std::vector<std::tuple<double, double>>& positions,
-               std::size_t region_id) {
-                return sim
-                    .AddStage(NotifiableWaitingSetDescription{intoPoints(positions)}, region_id)
-                    .getID();
-            },
-            py::arg("positions"),
-            py::arg("region_id"))
-        .def(
             "add_exit_stage",
             [](Simulation& sim,
                const std::vector<std::tuple<double, double>>& polygon,

@@ -42,8 +42,7 @@ Stages
 ------
 
 In *JuPedSim*, a stage refers to an interim target that the agent aims to reach.
-When a stage is reached, the agent will wait for its completion and then continue to the next stage.
-A stage may already count as completed when the stage is reached or when some condition is fulfilled.
+A stage counts as completed when the agent reaches it; the agent then continues to the next stage.
 The various types of stages will be explained below.
 
 .. note::
@@ -113,103 +112,6 @@ An exit located in the polygon :math:`(-0.2, -1.9), (0.2, -1.9), (0.2, -1.7), (-
     Therefore, creating wide exits could potentially lead to unpredictable behavior.
     In certain situations, it may be more appropriate to establish multiple exits rather than a single wide one.
 
-Waiting Queue
-^^^^^^^^^^^^^
-
-It is not only possible to steer agents with waypoints, it is also possible to let them wait in queues.
-*JuPedSim* offers :class:`Queues <jupedsim.stages.NotifiableQueueStage>` where the agents will wait at predefined positions.
-The positions given are arranged according to the sequence in which they are defined, and agents will wait at the first available spot.
-When agents leave the queue, the other agents will move up in their waiting positions until they reach the front.
-In order to allow agents to leave the queue, a signal must be sent to it, indicating that the first `n` agents in the queue are permitted to exit.
-
-.. note::
-
-    If the number of agents arriving at the queue exceeds the available waiting positions, all additional agents beyond capacity will wait at the last designated waiting position.
-
-.. figure:: /_static/stages/queue.svg
-    :width: 80%
-    :align: center
-    :alt: A series of dots represent the different waiting positions, connected with arrows which show in which direction the agents will move up.
-
-    Representation of the :class:`Queue <jupedsim.stages.NotifiableQueueStage>` (dots).
-    The first position is marked orange and the last position light-blue.
-    The movement of the agents to move up the queue is indicated by the red arrows.
-
-The following code snippet creates a Queue with five waiting spots at (0, 0), (0, 5), (0, 10), (0, 15), and (0, 20) and adds it to the simulation.
-Afterwards, it retrieves the Queue object from the simulation and then releases the first two and then the first agent from the simulation.
-
-.. code:: python
-
-    # add the queue to the simulation
-    queue_id = simulation.add_queue_stage(
-        [
-            (0, 0),
-            (0, 5),
-            (0, 10),
-            (0, 15),
-            (0, 20),
-        ],
-        region_id=0,
-    )
-    # retrieve queue from the simulation
-    queue = simulation.get_stage(queue_id)
-
-    ...
-
-    # notify that the first 2 agents can move to the next stage
-    queue.pop(2)
-
-    # notify that the first agent can move to the next stage
-    queue.pop(1)
-
-
-Waiting Set
-^^^^^^^^^^^
-
-A second option to introduce a waiting stage to the simulation are :class:`WaitingSets <jupedsim.stages.WaitingSetStage>`.
-They consists of multiple waiting positions which will be filled in the order of their definition, when creating the waiting set.
-A waiting set can either be active, which means the agents will wait there, or inactive, which will release all waiting agents.
-If a waiting set is inactive when an agents targets it, the first defined waiting position will be used as a waypoint.
-
-.. note::
-
-    When the number of agents targeting the waiting set exceeds the available waiting spots, the agents in excess will wait at the position where the last agent entered the waiting area.
-
-
-.. figure:: /_static/stages/waiting_set.svg
-    :width: 80%
-    :align: center
-    :alt: A waiting set is represented by a number of unevenly distributed circles. Two circles are highlighted.
-
-    Representation of the :class:`WaitingSet <jupedsim.stages.WaitingSetStage>`.
-    The first (colored orange) and last defined position (colored blue) are highlighted.
-
-In the following, you can see how to add a waiting set to a simulation and how to activate and deactivate it:
-
-.. code:: python
-
-    # add the waiting set to the simulation
-    waiting_set_id = simulation.add_waiting_set_stage(
-        [
-            (60, 50),
-            (59, 50),
-            (58, 50),
-        ],
-        region_id=0,
-    )
-    # retrieve waiting set from the simulation
-    waiting_set = simulation.get_stage(waiting_set_id)
-
-    ...
-
-    # deactivate the waiting
-    waiting_set.state = jupedsim.WaitingSetState.INACTIVE
-
-    ...
-
-    # activate the waiting again
-    waiting_set.state = jupedsim.WaitingSetState.ACTIVE
-
 Journeys
 --------
 
@@ -226,8 +128,6 @@ But before we can add transitions we have to create Journeys:
     journey = jps.JourneyDescription(
         [
             waypoint_id,
-            queue_id,
-            waiting_set_id,
             exit_id
         ]
     )

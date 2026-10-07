@@ -44,8 +44,6 @@ from jupedsim.models.warp_driver import (
 from jupedsim.serialization import TrajectoryWriter
 from jupedsim.stages import (
     ExitStage,
-    NotifiableQueueStage,
-    WaitingSetStage,
     WaypointStage,
 )
 
@@ -199,46 +197,6 @@ class Simulation:
 
         """
         return self._obj.add_waypoint_stage(position, distance, region_id)
-
-    def add_queue_stage(
-        self,
-        positions: list[tuple[float, float]],
-        *,
-        region_id: int,
-    ) -> int:
-        """Add a new queue state to this simulation.
-
-        Arguments:
-            positions: Ordered list of the waiting
-                points of this queue. The first one in the list is the head of
-                the queue while the last one is the back of the queue.
-            region_id: Region the waiting points lie in, see
-                :func:`add_agent`.
-        Returns:
-            Id of the new stage.
-
-        """
-        return self._obj.add_queue_stage(positions, region_id)
-
-    def add_waiting_set_stage(
-        self,
-        positions: list[tuple[float, float]],
-        *,
-        region_id: int,
-    ) -> int:
-        """Add a new waiting set stage to this simulation.
-
-        Arguments:
-            positions: Ordered list of the waiting points of this waiting set.
-                The agents will fill the waiting points in the given order. If more agents
-                are targeting the waiting, the remaining will wait at the last given point.
-            region_id: Region the waiting points lie in, see
-                :func:`add_agent`.
-
-        Returns:
-            Id of the new stage.
-        """
-        return self._obj.add_waiting_set_stage(positions, region_id)
 
     def add_exit_stage(
         self,
@@ -577,10 +535,6 @@ class Simulation:
                 return WaypointStage(stage)
             case py_jps.ExitProxy():
                 return ExitStage(stage)
-            case py_jps.NotifiableQueueProxy():
-                return NotifiableQueueStage(stage)
-            case py_jps.WaitingSetProxy():
-                return WaitingSetStage(stage)
             case _:
                 raise Exception(
                     f"Internal error, unexpected type: {type(stage)}"

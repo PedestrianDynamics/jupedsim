@@ -13,49 +13,44 @@ def main():
     jps.set_warning_callback(lambda x: print(x))
     jps.set_error_callback(lambda x: print(x))
 
-    area = [
-        (-2, -2),
-        (-50, -2),
-        (-50, 2),
-        (-2, 2),
-        (-2, 25),
-        (2, 25),
-        (2, 2),
-        (35, 2),
-        (35, -2),
-        (2, -2),
-        (2, -25),
-        (-2, -25),
-    ]
+    surface = jps.WalkableSurface()
+    region = surface.add_region(
+        exterior=[
+            (-2, -2),
+            (-50, -2),
+            (-50, 2),
+            (-2, 2),
+            (-2, 25),
+            (2, 25),
+            (2, 2),
+            (35, 2),
+            (35, -2),
+            (2, -2),
+            (2, -25),
+            (-2, -25),
+        ]
+    )
     simulation = jps.Simulation(
         model=jps.CollisionFreeSpeedModel(),
-        geometry=area,
+        geometry=surface,
         trajectory_writer=jps.SqliteTrajectoryWriter(
             output_file=pathlib.Path("example5_out.sqlite"),
         ),
     )
 
     exit_top = simulation.add_exit_stage(
-        [(-2, 24), (2, 24), (2, 25), (-2, 25)], region_id=0
+        [(-2, 24), (2, 24), (2, 25), (-2, 25)], region_id=region
     )
     exit_right = simulation.add_exit_stage(
         [(34, -2), (34, 2), (35, 2), (35, -2)],
-        region_id=0,
+        region_id=region,
     )
     exit_bottom = simulation.add_exit_stage(
         [(-2, -24), (2, -24), (2, -25), (-2, -25)],
-        region_id=0,
+        region_id=region,
     )
 
-    waypoint_middle = simulation.add_queue_stage(
-        [
-            (0, 0),
-            (0, -2),
-            (0, -8),
-        ],
-        region_id=0,
-    )
-    queue = simulation.get_stage(waypoint_middle)
+    waypoint_middle = simulation.add_waypoint_stage((0, 0), 1, region_id=region)
 
     journey = jps.JourneyDescription(
         [waypoint_middle, exit_top, exit_right, exit_bottom]
@@ -70,19 +65,17 @@ def main():
 
     journey_id = simulation.add_journey(journey)
 
-    agent_parameters = jps.CollisionFreeSpeedModelAgentParameters(
-        journey_id=journey_id, stage_id=waypoint_middle, radius=0.3
-    )
-
     for x in range(-49, -9, 1):
-        agent_parameters.position = (x, 0)
-        simulation.add_agent(agent_parameters, region_id=0)
+        simulation.add_agent(
+            journey_id=journey_id,
+            stage_id=waypoint_middle,
+            position=(x, 0),
+            state=jps.CollisionFreeSpeedModelState(radius=0.3),
+            region_id=region,
+        )
 
     while simulation.agent_count() > 0:
         try:
-            if simulation.iteration_count() % 200 == 0:
-                queue.pop(1)
-                print("Next!")
             simulation.iterate()
 
         except KeyboardInterrupt:

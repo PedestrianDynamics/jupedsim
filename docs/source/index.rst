@@ -64,5 +64,5 @@ And a force model with the Generalized Centrifugal Force Model.
 
 With *JuPedSim* different decisions-making processes in the agents route choice can be modeled.
 These routes may consist of multiple steps the agents have to complete.
-One step may already be completed when an agent reaches the target, but it may also only be completed when a condition like a waiting is fulfilled.
+A step is completed when an agent reaches its target.
 After each completion one of the built-in deciders can be used to conditionally modify the agents next target.

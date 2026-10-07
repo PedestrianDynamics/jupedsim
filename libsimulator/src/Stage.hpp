@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "EnvironmentQuery.hpp"
 #include "GenericAgent.hpp"
 #include "GeometricFunctions.hpp"
 #include "Geometry/Location.hpp"
 #include "LineSegment.hpp"
-#include "NeighborhoodSearch.hpp"
 #include "Point.hpp"
 #include "Polygon.hpp"
 #include "UniqueID.hpp"
@@ -18,8 +16,6 @@
 #include <cassert>
 #include <cstddef>
 #include <iterator>
-#include <limits>
-#include <set>
 #include <unordered_set>
 #include <variant>
 #include <vector>
@@ -27,11 +23,6 @@
 class BaseStage;
 class Geometry;
 class Simulation;
-
-enum class WaitingSetState {
-    Active,
-    Inactive,
-};
 
 class BaseProxy
 {
@@ -54,32 +45,6 @@ public:
     WaypointProxy(Simulation* simulation_, BaseStage* stage_) : BaseProxy(simulation_, stage_) {}
 };
 
-class NotifiableWaitingSetProxy : public BaseProxy
-{
-public:
-    NotifiableWaitingSetProxy(Simulation* simulation_, BaseStage* stage_)
-        : BaseProxy(simulation_, stage_)
-    {
-    }
-    void State(WaitingSetState newState);
-    WaitingSetState State() const;
-    size_t CountWaiting() const;
-    const std::vector<GenericAgent::ID>& Waiting() const;
-};
-
-class NotifiableQueueProxy : public BaseProxy
-{
-public:
-    NotifiableQueueProxy(Simulation* simulation_, BaseStage* stage_)
-        : BaseProxy(simulation_, stage_)
-    {
-    }
-
-    size_t CountEnqueued() const;
-    const std::vector<GenericAgent::ID>& Enqueued() const;
-    void Pop(size_t count);
-};
-
 class ExitProxy : public BaseProxy
 {
 public:
@@ -94,12 +59,7 @@ public:
     }
 };
 
-using StageProxy = std::variant<
-    WaypointProxy,
-    NotifiableWaitingSetProxy,
-    NotifiableQueueProxy,
-    ExitProxy,
-    DirectSteeringProxy>;
+using StageProxy = std::variant<WaypointProxy, ExitProxy, DirectSteeringProxy>;
 
 class BaseStage
 {
@@ -165,45 +125,6 @@ public:
     Location Target(const GenericAgent& agent) override;
     StageProxy Proxy(Simulation* simulation_) override;
     Polygon Position() const { return area; };
-};
-
-class NotifiableWaitingSet : public BaseStage
-{
-    std::vector<Location> slots;
-    std::vector<GenericAgent::ID> occupants{};
-    WaitingSetState state{WaitingSetState::Active};
-
-public:
-    NotifiableWaitingSet(std::vector<Location> slots_);
-    ~NotifiableWaitingSet() override = default;
-    bool IsCompleted(const GenericAgent& agent) override;
-    Location Target(const GenericAgent& agent) override;
-    StageProxy Proxy(Simulation* simulation_) override;
-    void State(WaitingSetState s);
-    WaitingSetState State() const;
-    void Update(const EnvironmentQuery& envQuery);
-    const std::vector<GenericAgent::ID>& Occupants() const;
-    const std::vector<Location>& Slots() const { return slots; };
-};
-
-class NotifiableQueue : public BaseStage
-{
-
-private:
-    std::vector<Location> slots;
-    std::vector<GenericAgent::ID> occupants{};
-    std::set<GenericAgent::ID> exitingThisUpdate{};
-
-public:
-    NotifiableQueue(std::vector<Location> slots_);
-    ~NotifiableQueue() override = default;
-    bool IsCompleted(const GenericAgent& agent) override;
-    Location Target(const GenericAgent& agent) override;
-    StageProxy Proxy(Simulation* simulation_) override;
-    void Update(const EnvironmentQuery& envQuery);
-    void Pop(size_t count);
-    const std::vector<GenericAgent::ID>& Occupants() const;
-    const std::vector<Location>& Slots() const { return slots; };
 };
 
 class DirectSteering : public BaseStage

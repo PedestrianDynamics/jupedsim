@@ -141,9 +141,8 @@ sim.add_agent(
 
 The walkable area consists of regions, and regions may lie on top of each
 other, e.g. the floors of a building. An `(x, y)` alone therefore does not
-say where a place is: `add_agent`, `add_waypoint_stage`, `add_queue_stage`,
-`add_waiting_set_stage`, `add_exit_stage` and `get_location` take a
-**required keyword argument `region_id`**.
+say where a place is: `add_agent`, `add_waypoint_stage`, `add_exit_stage`
+and `get_location` take a **required keyword argument `region_id`**.
 
 A walkable area given as a polygon (WKT, shapely or a list of points) is a
 single region with id `0`:
@@ -240,3 +239,6 @@ calls.
 - The `ModelType` enum; every model is now constructed directly as a
   configured instance (e.g.
   `jps.SocialForceModel(body_force=..., friction=...)`).
+- The queue and waiting set stages: `add_queue_stage`,
+  `add_waiting_set_stage`, `NotifiableQueueStage`, `WaitingSetStage` and
+  `WaitingSetState`.
