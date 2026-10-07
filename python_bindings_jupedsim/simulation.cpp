@@ -55,7 +55,7 @@ void init_simulation(py::module_& m)
                std::tuple<double, double> position,
                double distance,
                std::size_t region_id) {
-                return sim.AddStage(WaypointDescription{intoPoint(position), distance}, region_id)
+                return sim.AddStage(WaypointDescription{intoPoint(position), distance, region_id})
                     .getID();
             },
             py::arg("position"),
@@ -66,7 +66,7 @@ void init_simulation(py::module_& m)
             [](Simulation& sim,
                const std::vector<std::tuple<double, double>>& polygon,
                std::size_t region_id) {
-                return sim.AddStage(ExitDescription{Polygon{intoPoints(polygon)}}, region_id)
+                return sim.AddStage(ExitDescription{Polygon{intoPoints(polygon)}, region_id})
                     .getID();
             },
             py::arg("polygon"),

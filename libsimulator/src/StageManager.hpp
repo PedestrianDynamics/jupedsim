@@ -28,23 +28,22 @@ public:
     StageManager& operator=(StageManager&& other) = delete;
 
     BaseStage::ID AddStage(
-        const StageDescription stageDescription,
+        const StageDescription& stageDescription,
         std::vector<GenericAgent::ID>& removedAgentsInLastIteration,
-        const Geometry& geometry,
-        std::size_t region_id)
+        const Geometry& geometry)
     {
         std::unique_ptr<BaseStage> stage = std::visit(
             overloaded{
-                [&geometry, region_id](const WaypointDescription& d) -> std::unique_ptr<BaseStage> {
+                [&geometry](const WaypointDescription& d) -> std::unique_ptr<BaseStage> {
                     return std::make_unique<Waypoint>(
-                        geometry.get_location(d.position.x, d.position.y, region_id), d.distance);
+                        geometry.get_location(d.position.x, d.position.y, d.region_id), d.distance);
                 },
-                [&removedAgentsInLastIteration, &geometry, region_id](
-                    const ExitDescription& d) -> std::unique_ptr<BaseStage> {
+                [&removedAgentsInLastIteration,
+                 &geometry](const ExitDescription& d) -> std::unique_ptr<BaseStage> {
                     const auto centroid = d.polygon.Centroid();
                     return std::make_unique<Exit>(
                         d.polygon,
-                        geometry.get_location(centroid.x, centroid.y, region_id),
+                        geometry.get_location(centroid.x, centroid.y, d.region_id),
                         removedAgentsInLastIteration);
                 },
                 [](const DirectSteeringDescription&) -> std::unique_ptr<BaseStage> {

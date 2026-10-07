@@ -66,9 +66,7 @@ public:
     void SetTracing(bool on);
     void Iterate();
     Journey::ID AddJourney(const std::map<BaseStage::ID, TransitionDescription>& stages);
-    /// @param region_id Region the stage's points lie in, see `Geometry::get_location`.
-    BaseStage::ID AddStage(const StageDescription stageDescription, std::size_t region_id);
-    BaseStage::ID AddStage(DirectSteeringDescription stageDescription);
+    BaseStage::ID AddStage(const StageDescription& stageDescription);
     void MarkAgentForRemoval(GenericAgent::ID id);
     const std::vector<GenericAgent::ID>& RemovedAgents() const;
     size_t AgentCount() const;

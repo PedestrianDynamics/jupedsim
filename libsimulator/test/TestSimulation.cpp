@@ -47,7 +47,7 @@ const Point stacked_point{2, 10};
 std::pair<Journey::ID, BaseStage::ID>
 journey_to(Simulation& sim, Point position, std::size_t region_id, double distance = 0.5)
 {
-    const auto stage = sim.AddStage(WaypointDescription{position, distance}, region_id);
+    const auto stage = sim.AddStage(WaypointDescription{position, distance, region_id});
     const auto journey = sim.AddJourney({{stage, NonTransitionDescription{}}});
     return {journey, stage};
 }
@@ -176,7 +176,7 @@ TEST(MultiStoreySimulation, WalkingUpTheUStairToTheExitAbove)
     // it -- inside its outline in plan. The only way there: east to the stairwell, up both
     // flights, and back west on the upper floor.
     const Polygon outline{{{0, 4}, {3, 4}, {3, 8}, {0, 8}}};
-    const auto exit = sim.AddStage(ExitDescription{outline}, stair.upper);
+    const auto exit = sim.AddStage(ExitDescription{outline, stair.upper});
     const auto journey = sim.AddJourney({{exit, NonTransitionDescription{}}});
     const auto id = sim.AddAgent(journey, exit, Point{2, 6}, State{}, stair.ground);
 
