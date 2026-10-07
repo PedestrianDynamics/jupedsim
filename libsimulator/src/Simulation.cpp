@@ -194,18 +194,11 @@ Journey::ID Simulation::AddJourney(const std::map<BaseStage::ID, TransitionDescr
     return id;
 }
 
-BaseStage::ID Simulation::AddStage(const StageDescription stageDescription, std::size_t region_id)
+BaseStage::ID Simulation::AddStage(const StageDescription& stageDescription)
 {
     ThrowIfIterating("AddStage");
     JPS_SCOPED_TIMER_AND_TRACE(_timer, "Add Stage", Detailed);
-    return _stageManager.AddStage(
-        stageDescription, _removedAgentsInLastIteration, *_geometry, region_id);
-}
-
-BaseStage::ID Simulation::AddStage(DirectSteeringDescription stageDescription)
-{
-    // Direct steering has no location, the region id is unused.
-    return AddStage(stageDescription, 0);
+    return _stageManager.AddStage(stageDescription, _removedAgentsInLastIteration, *_geometry);
 }
 
 GenericAgent::ID Simulation::AddAgent(
