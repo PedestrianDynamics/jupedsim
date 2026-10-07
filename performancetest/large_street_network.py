@@ -9,6 +9,7 @@ import sys
 import time
 
 import jupedsim as jps
+import shapely
 from performancetest.stats_writer import StatsWriter
 
 from performancetest.geometry import geometries
@@ -38,6 +39,7 @@ class Spawner:
     def __init__(
         self,
         sim: jps.Simulation,
+        region_id: int,
         dt: int,
         stop_at: int,
         point_a: tuple[float, float],
@@ -48,6 +50,7 @@ class Spawner:
         max: int | None = None,
     ):
         self.sim = sim
+        self.region_id = region_id
         self.dt = dt
         self.stop_at = stop_at
         self.point_a = point_a
@@ -78,7 +81,7 @@ class Spawner:
                     stage_id=self.start_stage,
                     position=p,
                     state=self.profile_picker.random_state(),
-                    region_id=0,
+                    region_id=self.region_id,
                 )
                 self._needs_placement -= 1
                 self.spawned += 1
@@ -100,37 +103,15 @@ class RandomProfilePicker:
         )
 
 
-def create_journey(sim: jps.Simulation):
+def create_journey(sim: jps.Simulation, region_id: int):
     stages = [
-        sim.add_waiting_set_stage(
-            [
-                (1384.33, 635.51),
-                (1384.91, 636.33),
-                (1385.91, 637.61),
-                (1385.60, 634.71),
-                (1386.56, 635.85),
-                (1387.84, 636.44),
-                (1387.56, 634.27),
-                (1388.91, 634.85),
-            ],
-            region_id=0,
-        ),
-        sim.add_waypoint_stage((1283.35, 510.25), 1.5, region_id=0),
-        sim.add_waypoint_stage((1159.81, 693.19), 1.5, region_id=0),
-        sim.add_waypoint_stage((1223.74, 768.90), 1.5, region_id=0),
-        sim.add_waypoint_stage((1214.52, 766.20), 1.5, region_id=0),
-        sim.add_waypoint_stage((962.36, 555.14), 1.5, region_id=0),
-        sim.add_queue_stage(
-            [
-                (950.56, 538.72),
-                (952.46, 538.19),
-                (953.89, 537.66),
-                (955.61, 536.76),
-                (957.04, 536.47),
-                (958.46, 536.88),
-            ],
-            region_id=0,
-        ),
+        sim.add_waypoint_stage((1384.33, 635.51), 1.5, region_id=region_id),
+        sim.add_waypoint_stage((1283.35, 510.25), 1.5, region_id=region_id),
+        sim.add_waypoint_stage((1159.81, 693.19), 1.5, region_id=region_id),
+        sim.add_waypoint_stage((1223.74, 768.90), 1.5, region_id=region_id),
+        sim.add_waypoint_stage((1214.52, 766.20), 1.5, region_id=region_id),
+        sim.add_waypoint_stage((962.36, 555.14), 1.5, region_id=region_id),
+        sim.add_waypoint_stage((950.56, 538.72), 1.5, region_id=region_id),
         sim.add_exit_stage(
             [
                 (630.01, 25.88),
@@ -138,7 +119,7 @@ def create_journey(sim: jps.Simulation):
                 (625.97, 28.03),
                 (625.92, 26.18),
             ],
-            region_id=0,
+            region_id=region_id,
         ),
     ]
 
@@ -149,9 +130,7 @@ def create_journey(sim: jps.Simulation):
             jps.Transition.create_fixed_transition(stage_end),
         )
 
-    queue = sim.get_stage(stages[-2])
-    waiting_area = sim.get_stage(stages[0])
-    return sim.add_journey(journey), (stages[0], waiting_area, queue)
+    return sim.add_journey(journey), stages[0]
 
 
 def parse_args():
@@ -199,16 +178,22 @@ def main():
             ),
         )
     )
+    (street_network,) = shapely.from_wkt(
+        geometries["large_street_network"]
+    ).geoms
+    surface = jps.WalkableSurface()
+    region = surface.add_region(polygon=street_network)
     simulation = jps.Simulation(
         model=jps.CollisionFreeSpeedModel(),
-        geometry=geometries["large_street_network"],
+        geometry=surface,
         trajectory_writer=stats_writer,
     )
 
-    journey, (start_stage, waiting_area, queue) = create_journey(simulation)
+    journey, start_stage = create_journey(simulation, region)
     spawners = [
         Spawner(
             simulation,
+            region,
             5,
             90000,
             (1455.05, 533.89),
@@ -226,12 +211,6 @@ def main():
         try:
             for s in spawners:
                 s.spawn(iteration)
-            if (iteration + 100 * 30) % (100 * 60) == 0:
-                waiting_area.state = jps.WaitingSetState.INACTIVE
-            if iteration % (100 * 60) == 0:
-                waiting_area.state = jps.WaitingSetState.ACTIVE
-            if iteration % (100 * 8) == 0:
-                queue.pop(1)
             simulation.iterate()
             iteration = simulation.iteration_count()
 

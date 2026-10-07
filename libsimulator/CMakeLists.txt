@@ -61,8 +61,6 @@ target_sources(simulator PRIVATE
     src/StageDescription.hpp
     src/StageManager.cpp
     src/StageManager.hpp
-    src/StageSystem.cpp
-    src/StageSystem.hpp
     src/StrategicalDesicionSystem.hpp
     src/SurfaceMeshShortestPathRoutingEngine.cpp
     src/SurfaceMeshShortestPathRoutingEngine.hpp

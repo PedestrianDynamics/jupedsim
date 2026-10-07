@@ -76,9 +76,6 @@ except ImportError:  # h5py not installed; HDF5 writer remains unavailable.
     Hdf5TrajectoryWriter = None  # type: ignore[assignment, misc]
 from jupedsim.stages import (
     ExitStage,
-    NotifiableQueueStage,
-    WaitingSetStage,
-    WaitingSetState,
     WaypointStage,
 )
 
@@ -129,7 +126,6 @@ __all__ = [
     "Location",
     "NegativeValueError",
     "NeighborView",
-    "NotifiableQueueStage",
     "OverlappingCirclesError",
     "Recording",
     "RecordingAgent",
@@ -143,8 +139,6 @@ __all__ = [
     "Timer",
     "TrajectoryWriter",
     "Transition",
-    "WaitingSetStage",
-    "WaitingSetState",
     "WalkableSurface",
     "WallView",
     "WarpDriverModel",

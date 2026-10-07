@@ -5,7 +5,6 @@ import pathlib
 import sys
 
 import jupedsim as jps
-from shapely import GeometryCollection, Polygon
 
 
 def main():
@@ -14,38 +13,33 @@ def main():
     jps.set_warning_callback(lambda x: print(x))
     jps.set_error_callback(lambda x: print(x))
 
-    area = GeometryCollection(Polygon([(0, 0), (100, 0), (100, 100), (0, 100)]))
+    surface = jps.WalkableSurface()
+    region = surface.add_region(
+        exterior=[(0, 0), (100, 0), (100, 100), (0, 100)]
+    )
 
     simulation = jps.Simulation(
         model=jps.CollisionFreeSpeedModel(),
-        geometry=area,
+        geometry=surface,
         trajectory_writer=jps.SqliteTrajectoryWriter(
             output_file=pathlib.Path("example2_out.sqlite"),
         ),
     )
-    stage_id = simulation.add_waiting_set_stage(
-        [
-            (60, 50),
-            (59, 50),
-            (58, 50),
-        ],
-        region_id=0,
-    )
-    stage = simulation.get_stage(stage_id)
+    stage_id = simulation.add_waypoint_stage((60, 50), 1, region_id=region)
     exits = [
         simulation.add_exit_stage(
-            [(99, 40), (99, 60), (100, 60), (100, 40)], region_id=0
+            [(99, 40), (99, 60), (100, 60), (100, 40)], region_id=region
         ),
         simulation.add_exit_stage(
-            [(99, 50), (99, 70), (100, 70), (100, 50)], region_id=0
+            [(99, 50), (99, 70), (100, 70), (100, 50)], region_id=region
         ),
     ]
     waypoints = [
-        simulation.add_waypoint_stage((50, 50), 1, region_id=0),
-        simulation.add_waypoint_stage((60, 40), 1, region_id=0),
-        simulation.add_waypoint_stage((40, 40), 1, region_id=0),
-        simulation.add_waypoint_stage((40, 60), 1, region_id=0),
-        simulation.add_waypoint_stage((60, 60), 1, region_id=0),
+        simulation.add_waypoint_stage((50, 50), 1, region_id=region),
+        simulation.add_waypoint_stage((60, 40), 1, region_id=region),
+        simulation.add_waypoint_stage((40, 40), 1, region_id=region),
+        simulation.add_waypoint_stage((40, 60), 1, region_id=region),
+        simulation.add_waypoint_stage((60, 60), 1, region_id=region),
     ]
 
     short_journey = jps.JourneyDescription([waypoints[0], stage_id, exits[0]])
@@ -73,41 +67,29 @@ def main():
         simulation.add_journey(long_journey),
     ]
 
-    agent_parameters = jps.CollisionFreeSpeedModelAgentParameters(
-        journey_id=journeys[0], stage_id=waypoints[0], radius=0.3
-    )
-
-    agent_parameters.position = (10, 50)
-    simulation.add_agent(agent_parameters, region_id=0)
-
-    agent_parameters.position = (8, 50)
-    simulation.add_agent(agent_parameters, region_id=0)
-
-    agent_parameters.position = (6, 50)
-    simulation.add_agent(agent_parameters, region_id=0)
+    for position in [(10, 50), (8, 50), (6, 50)]:
+        simulation.add_agent(
+            journey_id=journeys[0],
+            stage_id=waypoints[0],
+            position=position,
+            state=jps.CollisionFreeSpeedModelState(radius=0.3),
+            region_id=region,
+        )
 
     redirect_once = True
-    signal_once = True
     while simulation.agent_count() > 0:
         try:
-            agents_at_head_of_waiting = list(
-                simulation.agents_in_range((60, 50), 1)
-            )
-            if redirect_once and len(agents_at_head_of_waiting) == 1:
+            agents_at_waypoint = simulation.agents_in_range((60, 50), 1)
+            if redirect_once and len(agents_at_waypoint) == 1:
                 simulation.switch_agent_journey(
-                    agent_id=agents_at_head_of_waiting[0],
+                    agent_id=agents_at_waypoint[0].id,
                     journey_id=journeys[1],
                     stage_id=waypoints[1],
                 )
                 redirect_once = False
                 print(
-                    f"Switched journey for agent {agents_at_head_of_waiting[0]} @{simulation.iteration_count()}"
+                    f"Switched journey for agent {agents_at_waypoint[0].id} @{simulation.iteration_count()}"
                 )
-
-            if signal_once and any(simulation.agents_in_range((60, 60), 1)):
-                stage.state = jps.WaitingSetState.INACTIVE
-                print(f"Stop Waiting @{simulation.iteration_count()}")
-                signal_once = False
             simulation.iterate()
         except KeyboardInterrupt:
             print("CTRL-C Recieved! Shuting down")

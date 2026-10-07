@@ -15,7 +15,6 @@
 #include "Stage.hpp"
 #include "StageDescription.hpp"
 #include "StageManager.hpp"
-#include "StageSystem.hpp"
 #include "StrategicalDesicionSystem.hpp"
 #include "TacticalDecisionSystem.hpp"
 #include "Timing.hpp"
@@ -36,7 +35,6 @@ class Simulation
     OperationalDecisionSystem _operationalDecisionSystem;
     AgentRemovalSystem<GenericAgent> _agentRemovalSystem{};
     StageManager _stageManager{};
-    StageSystem _stageSystem{};
     NeighborhoodSearch<GenericAgent> _neighborhoodSearch{2.2};
     std::unique_ptr<Geometry> _geometry{};
     std::unique_ptr<RoutingEngine> _routingEngine{};

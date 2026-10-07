@@ -14,20 +14,6 @@
 #include <variant>
 #include <vector>
 
-namespace detail
-{
-inline std::vector<Location>
-locate_slots(const Geometry& geometry, const std::vector<Point>& slots, std::size_t region_id)
-{
-    std::vector<Location> located{};
-    located.reserve(slots.size());
-    for(const auto& slot : slots) {
-        located.push_back(geometry.get_location(slot.x, slot.y, region_id));
-    }
-    return located;
-}
-} // namespace detail
-
 class StageManager
 {
 private:
@@ -60,16 +46,6 @@ public:
                         d.polygon,
                         geometry.get_location(centroid.x, centroid.y, region_id),
                         removedAgentsInLastIteration);
-                },
-                [&geometry, region_id](
-                    const NotifiableWaitingSetDescription& d) -> std::unique_ptr<BaseStage> {
-                    return std::make_unique<NotifiableWaitingSet>(
-                        detail::locate_slots(geometry, d.slots, region_id));
-                },
-                [&geometry,
-                 region_id](const NotifiableQueueDescription& d) -> std::unique_ptr<BaseStage> {
-                    return std::make_unique<NotifiableQueue>(
-                        detail::locate_slots(geometry, d.slots, region_id));
                 },
                 [](const DirectSteeringDescription&) -> std::unique_ptr<BaseStage> {
                     return std::make_unique<DirectSteering>();
