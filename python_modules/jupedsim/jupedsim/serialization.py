@@ -5,16 +5,51 @@ In this file you will find interfaces and implementations to serialize and
 deserialize different forms of input / output commonly used.
 """
 
+from __future__ import annotations
+
 import abc
+import types
+import typing
+
+if typing.TYPE_CHECKING:
+    from jupedsim.simulation import Simulation
 
 import jupedsim.native as py_jps
 
 
 class TrajectoryWriter(metaclass=abc.ABCMeta):
-    """Interface for trajectory serialization"""
+    """Interface for trajectory serialization
+
+    Writers are context managers: leaving a ``with`` block calls
+    :meth:`close`, also when the block raises::
+
+        with jps.Hdf5TrajectoryWriter(output_file=path) as writer:
+            sim = jps.Simulation(..., trajectory_writer=writer)
+            while sim.agent_count() > 0:
+                sim.iterate()
+    """
+
+    def __enter__(self) -> typing.Self:
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: types.TracebackType | None,
+    ) -> None:
+        self.close()
+
+    def close(self) -> None:
+        """Write all buffered data and release the writer's resources.
+
+        Called when leaving a ``with`` block. Must be safe to call more than
+        once. Does nothing by default; override it if the writer buffers data
+        or holds resources such as open files.
+        """
 
     @abc.abstractmethod
-    def begin_writing(self, simulation) -> None:
+    def begin_writing(self, simulation: Simulation) -> None:
         """Begin writing trajectory data.
 
         This method is intended to handle all data writing that has to be done
@@ -25,7 +60,7 @@ class TrajectoryWriter(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def write_iteration_state(self, simulation) -> None:
+    def write_iteration_state(self, simulation: Simulation) -> None:
         """Write trajectory data of one simulation iteration.
 
         This method is intended to handle serialization of the trajectory data
@@ -52,7 +87,7 @@ class TrajectoryWriter(metaclass=abc.ABCMeta):
         pass
 
 
-def walkable_area_as_wkt(simulation) -> str:
+def walkable_area_as_wkt(simulation: Simulation) -> str:
     """The simulation's walkable area as WKT, for a writer's header.
 
     Right now this only works for a geometry built from exactly 1 region.

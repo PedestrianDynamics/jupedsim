@@ -5,6 +5,9 @@ requires = [
     "pybind11-stubgen>=3.0,<4",
     # pybind11-stubgen imports shapely to resolve the shapely.Polygon annotation
     "shapely>=2.0",
+    # pybind11-stubgen imports the jupedsim package, which imports the HDF5 writer
+    "h5py~=3.11",
+    "hdf5plugin~=7.0",
 ]
 build-backend = "scikit_build_core.build"
 
@@ -18,10 +21,12 @@ license-files = ["LICENSE"]
 maintainers = [
     { name = "JuPedSim Development Core Team", email = "dev@jupedsim.org" },
 ]
-requires-python = ">=3.10,<3.15"
+requires-python = ">=3.12,<3.15"
 dependencies = [
     "numpy~=2.2",
     "shapely~=2.0",
+    "h5py~=3.11",
+    "hdf5plugin~=7.0",
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -33,8 +38,6 @@ classifiers = [
     "Programming Language :: C",
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
@@ -174,3 +177,9 @@ extend-ignore-names = ["desiredSpeed", "reactionTime", "agentScale", "obstacleSc
 "**{jupedsim_vis}/*" = ["N"]
 "serialization.py" = ["N"]
 "journey.ipynb" = ["N"]
+
+[tool.basedpyright]
+typeCheckingMode = "basic"
+# Oldest supported Python (requires-python), so newer-only APIs are flagged
+pythonVersion = "3.12"
+

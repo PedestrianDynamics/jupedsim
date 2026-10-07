@@ -188,10 +188,14 @@ class SqliteTrajectoryWriter(TrajectoryWriter):
 
     def close(self) -> None:
         """Flush buffer and close DB connection. Call at simulation end."""
-        if self._buffered_frame_count != 0:
-            cur = self._con.cursor()
-            cur.execute("COMMIT")
-        if self._con:
+        if self._con is None:
+            return
+        try:
+            if self._buffered_frame_count != 0:
+                self._buffered_frame_count = 0
+                cur = self._con.cursor()
+                cur.execute("COMMIT")
+        finally:
             try:
                 self._con.close()
             finally:

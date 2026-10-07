@@ -1,5 +1,7 @@
 numpy~=2.2
 shapely~=2.1
+h5py~=3.11
+hdf5plugin~=7.0
 # runtime deps of the separate jupedsim-vis distribution in
 # jupedsim_vis/, needed to run it from the checkout and for its tests
 pyside6~=6.8
