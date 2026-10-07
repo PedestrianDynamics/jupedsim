@@ -10,7 +10,7 @@ description = "Qt/VTK viewer for JuPedSim geometries and trajectory recordings"
 readme = "README.md"
 license = "LGPL-3.0-or-later"
 license-files = ["LICENSE"]
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 maintainers = [{ name = "JuPedSim Development Core Team", email = "dev@jupedsim.org" }]
 dependencies = [
     "pyside6~=6.8",
