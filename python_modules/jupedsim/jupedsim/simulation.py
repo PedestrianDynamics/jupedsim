@@ -63,8 +63,8 @@ _MESH_SUFFIXES = (".obj",)
 def _as_geometry(geometry: Any) -> py_jps.Geometry:
     """Convert to native geometry.
 
-    A ``Path`` and ``str`` ending with ".obj" read a mesh file; a geometry is
-    used untouched; fallback to build from 2D.
+    A ``Path`` and ``str`` ending with ".obj" read a mesh file; a geometry is used untouched;
+    fallback to build from 2D.
     """
     if isinstance(geometry, py_jps.Geometry):
         return geometry
@@ -81,11 +81,10 @@ def _as_geometry(geometry: Any) -> py_jps.Geometry:
 class Simulation:
     """Defines a simulation of pedestrian movement over a continuous walkable area.
 
-    Movement of agents is described with Journeys, Stages and Transitions.
-    Agents can be added and removed at will. The simulation processes one step
-    at a time. No automatic stop condition exists. You can simulate multiple
-    disconnected walkable areas by instantiating multiple instances of
-    simulation.
+    Movement of agents is described with Journeys, Stages and Transitions. Agents can be added and
+    removed at will. The simulation processes one step at a time. No automatic stop condition
+    exists. You can simulate multiple disconnected walkable areas by instantiating multiple
+    instances of simulation.
     """
 
     def __init__(
@@ -120,48 +119,54 @@ class Simulation:
 
         Arguments:
             model:
-                Defines the operational model used in the simulation. Every
-                built-in model is passed as a configured instance carrying its
-                model-level parameters, e.g.
-                :class:`~jupedsim.CollisionFreeSpeedModel` or
-                :class:`~jupedsim.SocialForceModel`. Custom Python models are
-                passed as instances of a
+                Defines the operational model used in the simulation. Every built-in model is passed
+                as a configured instance carrying its model-level parameters, e.g.
+                :class:`~jupedsim.CollisionFreeSpeedModel` or :class:`~jupedsim.SocialForceModel`.
+                Custom Python models are passed as instances of a
                 :class:`~jupedsim.CustomOperationalModel` subclass.
 
                 .. warning::
 
-                    Model instances are consumed by this constructor and must
-                    not be reused afterwards.
+                    Model instances are consumed by this constructor and must not be reused
+                    afterwards.
             geometry:
                 Data to create the geometry out of. Data may be supplied as:
 
-                * list of 2d points describing the outer boundary, holes may be added with use of `excluded_areas` kw-argument
+                * list of 2d points describing the outer boundary, holes may be added with use of
+                  `excluded_areas` kw-argument
 
-                * :class:`~shapely.GeometryCollection` consisting only out of :class:`Polygons <shapely.Polygon>`, :class:`MultiPolygons <shapely.MultiPolygon>` and :class:`MultiPoints <shapely.MultiPoint>`
+                * :class:`~shapely.GeometryCollection` consisting only out of
+                  :class:`Polygons <shapely.Polygon>`, :class:`MultiPolygons <shapely.MultiPolygon>`
+                  and :class:`MultiPoints <shapely.MultiPoint>`
 
                 * :class:`~shapely.MultiPolygon`
 
                 * :class:`~shapely.Polygon`
 
-                * :class:`~shapely.MultiPoint` forming a "simple" polygon when points are interpreted as linear ring without repetition of the start/end point.
+                * :class:`~shapely.MultiPoint` forming a "simple" polygon when points are
+                  interpreted as linear ring without repetition of the start/end point.
 
-                * str with a valid Well Known Text. In this format the same WKT types as mentioned for the shapely types are supported: GEOMETRYCOLLETION, MULTIPOLYGON, POLYGON, MULTIPOINT. The same restrictions as mentioned for the shapely types apply.
+                * str with a valid Well Known Text. In this format the same WKT types as mentioned
+                  for the shapely types are supported: GEOMETRYCOLLETION, MULTIPOLYGON, POLYGON,
+                  MULTIPOINT. The same restrictions as mentioned for the shapely types apply.
 
-                * :class:`~pathlib.Path` (or a str ending in ``.obj``) naming an OBJ file holding a walkable surface. The world is then a surface: agents walk on it and are routed over it, floors may be stacked, and there is no polygon underneath -- :func:`get_geometry` has no answer for such a simulation.
+                * :class:`~pathlib.Path` (or a str ending in ``.obj``) naming an OBJ file holding a
+                  walkable surface. The world is then a surface: agents walk on it and are routed
+                  over it, floors may be stacked, and there is no polygon underneath --
+                  :func:`get_geometry` has no answer for such a simulation.
 
-                A walkable area given as a polygon (all forms but the OBJ file) is a single region with id ``0``.
+                A walkable area given as a polygon (all forms but the OBJ file) is a single region
+                with id ``0``.
 
-            dt: Iteration step size in seconds. It is recommended to
-                leave this at its default value.
-            trajectory_writer: Any object implementing the
-                TrajectoryWriter interface. JuPedSim provides a writer that outputs trajectory data
-                in a sqlite database. If you want other formats such as CSV you need to provide
-                your own custom implementation.
+            dt: Iteration step size in seconds. It is recommended to leave this at its default
+                value.
+            trajectory_writer: Any object implementing the TrajectoryWriter interface. JuPedSim
+                provides a writer that outputs trajectory data in a sqlite database. If you want
+                other formats such as CSV you need to provide your own custom implementation.
 
         Keyword Arguments:
-            excluded_areas: describes exclusions
-                from the walkable area. Only use this argument if `geometry` was
-                provided as list[tuple[float, float]].
+            excluded_areas: describes exclusions from the walkable area. Only use this argument if
+                `geometry` was provided as list[tuple[float, float]].
         """
         if isinstance(model, py_jps.OperationalModel):
             py_jps_model = model
@@ -219,15 +224,20 @@ class Simulation:
 
                 * list of 2d points describing the outer boundary
 
-                * :class:`~shapely.GeometryCollection` consisting only out of :class:`Polygons <shapely.Polygon>`, :class:`MultiPolygons <shapely.MultiPolygon>` and :class:`MultiPoints <shapely.MultiPoint>`
+                * :class:`~shapely.GeometryCollection` consisting only out of
+                  :class:`Polygons <shapely.Polygon>`, :class:`MultiPolygons <shapely.MultiPolygon>`
+                  and :class:`MultiPoints <shapely.MultiPoint>`
 
                 * :class:`~shapely.MultiPolygon`
 
                 * :class:`~shapely.Polygon`
 
-                * :class:`~shapely.MultiPoint` forming a "simple" polygon when points are interpreted as linear ring without repetition of the start/end point.
+                * :class:`~shapely.MultiPoint` forming a "simple" polygon when points are
+                  interpreted as linear ring without repetition of the start/end point.
 
-                * str with a valid Well Known Text. In this format the same WKT types as mentioned for the shapely types are supported: GEOMETRYCOLLETION, MULTIPOLYGON, POLYGON, MULTIPOINT. The same restrictions as mentioned for the shapely types apply.
+                * str with a valid Well Known Text. In this format the same WKT types as mentioned
+                  for the shapely types are supported: GEOMETRYCOLLETION, MULTIPOLYGON, POLYGON,
+                  MULTIPOINT. The same restrictions as mentioned for the shapely types apply.
 
             region_id: Region the exit lies in, see :func:`add_agent`.
 
@@ -242,9 +252,9 @@ class Simulation:
     def add_direct_steering_stage(self) -> int:
         """Add an direct steering stage to the simulation.
 
-        This stage allows a direct control of the target the agent is walking to.
-        Thus, it will bypass the tactical and stragecial level of the simulation, but the
-        operational level will still be active.
+        This stage allows a direct control of the target the agent is walking to. Thus, it will
+        bypass the tactical and stragecial level of the simulation, but the operational level will
+        still be active.
 
         .. important::
 
@@ -296,14 +306,12 @@ class Simulation:
             region_id: Region the agent stands in, as returned by
                 :meth:`~jupedsim.WalkableSurface.add_region` or
                 :meth:`~jupedsim.WalkableSurface.connect_regions`.
-            state: Initial per-agent model state. For built-in models this is
-                the matching ``XModelState`` instance, e.g.
-                :class:`~jupedsim.CollisionFreeSpeedModelState`. For custom
-                models this is your own object, of whatever type your
-                :class:`~jupedsim.CustomOperationalModel` expects. The state
-                type has to match the model used in this simulation. When
-                adding agents with invalid parameters, or too close to the
-                boundary or other agents, this will cause an error.
+            state: Initial per-agent model state. For built-in models this is the matching
+                ``XModelState`` instance, e.g. :class:`~jupedsim.CollisionFreeSpeedModelState`. For
+                custom models this is your own object, of whatever type your
+                :class:`~jupedsim.CustomOperationalModel` expects. The state type has to match the
+                model used in this simulation. When adding agents with invalid parameters, or too
+                close to the boundary or other agents, this will cause an error.
 
         Returns:
             Id of the added agent.
@@ -338,18 +346,16 @@ class Simulation:
             The location.
 
         Raises:
-            SimulationError: if ``region_id`` does not exist or ``(x, y)`` is
-                not in it.
+            SimulationError: if ``region_id`` does not exist or ``(x, y)`` is not in it.
         """
         return Location(self._obj.get_location(x, y, region_id))
 
     def mark_agent_for_removal(self, agent_id: int):
         """Marks an agent for removal.
 
-        Marks the given agent for removal in the simulation. The agent will be
-        removed from the simulation in the start of the next :func:`iterate`
-        call. The removal will take place before any interaction between
-        agents will be computed.
+        Marks the given agent for removal in the simulation. The agent will be removed from the
+        simulation in the start of the next :func:`iterate` call. The removal will take place before
+        any interaction between agents will be computed.
 
         Arguments:
             agent_id: Id of the agent marked for removal
@@ -360,8 +366,8 @@ class Simulation:
     def removed_agents(self) -> list[int]:
         """All agents (given by Id) removed in the last iteration.
 
-        All agents removed from the simulation since the last call of :func:`iterate`.
-        These agents are can no longer be accessed.
+        All agents removed from the simulation since the last call of :func:`iterate`. These agents
+        are can no longer be accessed.
 
         Returns:
             Ids of all removed agents since the last call of :func:`iterate`.
@@ -432,14 +438,13 @@ class Simulation:
     def agents(self) -> Iterator[Agent]:
         """Agents in the simulation.
 
-        The set of agents is snapshot when this method is called; agents
-        added or removed afterwards are not reflected by the returned
-        iterator.
+        The set of agents is snapshot when this method is called; agents added or removed afterwards
+        are not reflected by the returned iterator.
 
         Returns:
-            Iterator over handles to all agents in the simulation. The
-            handles resolve the agent on every attribute access and stay
-            valid across :func:`iterate` as long as the agent exists.
+            Iterator over handles to all agents in the simulation. The handles resolve the agent on
+            every attribute access and stay valid across :func:`iterate` as long as the agent
+            exists.
         """
         ids = [agent.id for agent in self._obj.agents()]
         return iter(Agent(self, agent_id) for agent_id in ids)
@@ -451,9 +456,8 @@ class Simulation:
             agent_id: Id of the agent to access
 
         Returns:
-            Handle to the agent. The handle resolves the agent on every
-            attribute access and stays valid across :func:`iterate` as long
-            as the agent exists.
+            Handle to the agent. The handle resolves the agent on every attribute access and stays
+            valid across :func:`iterate` as long as the agent exists.
 
         Raises:
             SimulationError: if no agent with this id exists.
@@ -472,8 +476,7 @@ class Simulation:
              distance: search radius
 
         Returns:
-            List of handles to all agents within the given distance to the
-            given position.
+            List of handles to all agents within the given distance to the given position.
         """
         return [
             Agent(self, agent_id)
@@ -499,15 +502,20 @@ class Simulation:
 
                 * list of 2d points describing the outer boundary
 
-                * :class:`~shapely.GeometryCollection` consisting only out of :class:`Polygons <shapely.Polygon>`, :class:`MultiPolygons <shapely.MultiPolygon>` and :class:`MultiPoints <shapely.MultiPoint>`
+                * :class:`~shapely.GeometryCollection` consisting only out of
+                  :class:`Polygons <shapely.Polygon>`, :class:`MultiPolygons <shapely.MultiPolygon>`
+                  and :class:`MultiPoints <shapely.MultiPoint>`
 
                 * :class:`~shapely.MultiPolygon`
 
                 * :class:`~shapely.Polygon`
 
-                * :class:`~shapely.MultiPoint` forming a "simple" polygon when points are interpreted as linear ring without repetition of the start/end point.
+                * :class:`~shapely.MultiPoint` forming a "simple" polygon when points are
+                  interpreted as linear ring without repetition of the start/end point.
 
-                * str with a valid Well Known Text. In this format the same WKT types as mentioned for the shapely types are supported: GEOMETRYCOLLETION, MULTIPOLYGON, POLYGON, MULTIPOINT. The same restrictions as mentioned for the shapely types apply.
+                * str with a valid Well Known Text. In this format the same WKT types as mentioned
+                  for the shapely types are supported: GEOMETRYCOLLETION, MULTIPOLYGON, POLYGON,
+                  MULTIPOINT. The same restrictions as mentioned for the shapely types apply.
 
         Returns:
             List of handles to all agents inside the given polygon.
