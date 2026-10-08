@@ -10,6 +10,7 @@
 #include "Stage.hpp"
 #include "StageDescription.hpp"
 #include "conversion.hpp"
+#include "transition.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep
 
 #include <pybind11/attr.h>
@@ -17,6 +18,7 @@
 #include <pybind11/detail/common.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h> // IWYU pragma: keep
+#include <pybind11/typing.h>
 
 #include <cstdint>
 #include <map>
@@ -76,14 +78,14 @@ void init_simulation(py::module_& m)
             [](Simulation& sim) { return sim.AddStage(DirectSteeringDescription{}).getID(); })
         .def(
             "add_journey",
-            [](Simulation& sim, std::map<uint64_t, TransitionDescription>& journey) {
+            [](Simulation& sim, const std::map<uint64_t, PyTransition>& journey) {
                 auto native_journey = std::map<BaseStage::ID, TransitionDescription>{};
-                for(const auto& [stage_id, desc] : journey) {
-                    native_journey.emplace(stage_id, desc);
+                for(const auto& [stage_id, transition] : journey) {
+                    native_journey.emplace(stage_id, transition.description);
                 }
-
                 return sim.AddJourney(native_journey).getID();
-            })
+            },
+            py::arg("journey"))
         .def(
             "add_agent",
             [](Simulation& sim,
@@ -188,7 +190,18 @@ void init_simulation(py::module_& m)
                 }
                 return agents;
             })
-        .def("get_stage_proxy", [](Simulation& sim, uint64_t id) { return sim.Stage(id); })
+        .def(
+            "get_stage",
+            [](py::object self,
+               uint64_t id) -> py::typing::Union<WaypointProxy, ExitProxy, DirectSteeringProxy> {
+                // A stage object refers to its simulation. The keep-alive is set by hand:
+                // pybind11 3.1.0 runs py::keep_alive<0, 1>() also after a failed argument
+                // conversion and then crashes instead of raising TypeError.
+                auto stage = py::cast(self.cast<Simulation&>().Stage(id));
+                py::detail::keep_alive_impl(stage, self);
+                return stage;
+            },
+            py::arg("stage_id"))
         .def("set_tracing", [](Simulation& sim, bool status) { sim.SetTracing(status); })
         .def(
             "set_timer_log_level",

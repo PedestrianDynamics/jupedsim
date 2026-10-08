@@ -95,7 +95,7 @@ class Recording:
     def frame(self, index: int) -> RecordingFrame:
         """Access a single frame of the recording.
 
-        Arguments:
+        Args:
             index: index of the frame to access.
 
         Returns:

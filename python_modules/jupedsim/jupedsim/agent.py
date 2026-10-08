@@ -5,7 +5,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 import jupedsim.native as py_jps
-from jupedsim.location import Location
 
 if TYPE_CHECKING:
     from jupedsim.simulation import Simulation
@@ -120,7 +119,7 @@ class Agent:
 
     @property
     def journey_id(self) -> int:
-        """Id of the :class:`~jupedsim.journey.JourneyDescription` the agent is currently following."""
+        """Id of the :class:`~jupedsim.JourneyDescription` the agent is currently following."""
         return self.__resolve().journey_id
 
     @property
@@ -134,17 +133,17 @@ class Agent:
         return self.__resolve().position
 
     @property
-    def location(self) -> Location:
+    def location(self) -> py_jps.Location:
         """Current location of the agent.
 
         Same as :attr:`position`, plus the region and the height of the surface.
         Can be used wherever the simulation accepts a location, e.g. to set
         another agent's :attr:`final_target`.
         """
-        return Location(self.__resolve().location)
+        return self.__resolve().location
 
     @property
-    def final_target(self) -> Location | None:
+    def final_target(self) -> py_jps.Location | None:
         """Current final target of the agent.
 
         Can be used to directly steer an agent towards the given coordinate.
@@ -161,7 +160,7 @@ class Agent:
             When setting the target, the given coordinates must lie within the
             walkable area. Otherwise, an error will be thrown immediately.
 
-        Accepts a :class:`~jupedsim.location.Location` or an ``(x, y)`` tuple. A
+        Accepts a :class:`~jupedsim.Location` or an ``(x, y)`` tuple. A
         tuple is placed on the surface closest to the agent's own height; to
         target another floor, pass a location from
         :meth:`~jupedsim.simulation.Simulation.get_location`.
@@ -170,19 +169,13 @@ class Agent:
             Current final target of the agent, or ``None`` while it heads
             for an area such as an exit.
         """
-        target = self.__resolve().final_target
-        return Location(target) if target is not None else None
+        return self.__resolve().final_target
 
     @final_target.setter
     def final_target(
-        self, final_target: Location | tuple[float, float]
+        self, final_target: py_jps.Location | tuple[float, float]
     ) -> None:
-        target = (
-            final_target._obj
-            if isinstance(final_target, Location)
-            else final_target
-        )
-        self.__simulation._obj.set_agent_target(self.__id, target)
+        self.__simulation._obj.set_agent_target(self.__id, final_target)
 
     @property
     def route_orientation(self) -> tuple[float, float]:

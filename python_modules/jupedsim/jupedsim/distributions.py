@@ -85,7 +85,7 @@ def distribute_by_number(
     cannot do so without violating the constraints. In this case the function
     will stop after max_iterations and raise an Exception.
 
-    Arguments:
+    Args:
         polygon: polygon where the agents shall be placed
         number_of_agents: number of agents to be distributed
         distance_to_agents: minimal distance between the centers of agents
@@ -159,7 +159,7 @@ def distribute_by_density(
     the constraints. In this case the function will stop after max_iterations
     and raise an Exception.
 
-    Arguments:
+    Args:
         polygon: Area where to generate 2D coordinates in.
         density: desired density in agents per square meter
         distance_to_agents: minimal distance between the centers of agents
@@ -266,7 +266,7 @@ def distribute_in_circles_by_number(
     the constraints. In this case the function will stop after max_iterations
     and raise an Exception.
 
-    Arguments:
+    Args:
         polygon: polygon where agents can be placed.
         distance_to_agents: minimal distance between the centers of agents
         distance_to_polygon: minimal distance between the center of agents
@@ -407,7 +407,7 @@ def distribute_in_circles_by_density(
     violating the constraints. In this case the function will stop after
     max_iterations and raise an Exception.
 
-    Arguments:
+    Args:
         polygon: polygon where agents can be placed.
         distance_to_agents: minimal distance between the centers of agents
         distance_to_polygon: minimal distance between the center of agents
@@ -477,7 +477,7 @@ def distribute_until_filled(
     this case the function will stop after max_iterations and raise an
     Exception.
 
-    Arguments:
+    Args:
         polygon: polygon where agents can be placed.
         distance_to_agents: minimal distance between the centers of agents
         distance_to_polygon: minimal distance between the center of agents
@@ -617,7 +617,7 @@ def distribute_by_percentage(
     this case the function will stop after max_iterations and raise an
     Exception.
 
-    Arguments:
+    Args:
         polygon: polygon where agents can be placed.
         percent: percent value of occupancy to generate. needs to be in
             the intervall (0, 100]

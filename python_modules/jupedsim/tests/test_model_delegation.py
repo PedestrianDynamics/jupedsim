@@ -174,7 +174,9 @@ def test_neighbors_are_unreadable_without_the_hook():
     sim, exit_id, journey_id = _make_sim(
         _DelegatingModel(jps.CollisionFreeSpeedModelV3())
     )
-    with pytest.raises(jps.SimulationError, match="with_neighbor_states"):
+    with pytest.raises(
+        jps.SimulationError, match="with_neighbor_state_mapping"
+    ):
         _run_pair(
             sim,
             journey_id,
@@ -258,7 +260,7 @@ def test_a_wrong_mapping_blames_the_mapping():
     )
     with pytest.raises(
         jps.SimulationError,
-        match="mapping passed to with_neighbor_states.. has to return",
+        match="mapping passed to with_neighbor_state_mapping.. has to return",
     ):
         _run_pair(
             sim,

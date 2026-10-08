@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
+import math
 from dataclasses import dataclass, replace
 
 import jupedsim as jps
@@ -145,6 +146,41 @@ def test_predicate_never_called_with_self():
     assert (0.0, 0.0) not in model.predicate_neighbors
 
 
+class _NeighborTypeModel(jps.CustomOperationalModel):
+    """Records type and repr of the probe agent's neighbors."""
+
+    def __init__(self):
+        super().__init__()
+        self.seen: list[tuple] = []
+
+    def compute_next_state(self, state, step):
+        if state.probe:
+            self.seen = [
+                (type(n), repr(n), step.no_geometry_between(n))
+                for n in step.other_agents_in_range(5.0)
+            ]
+        return replace(state), _STAY_PUT
+
+
+def test_neighbors_are_the_native_type():
+    model = _NeighborTypeModel()
+    sim, exit_id, journey_id = _make_sim(model)
+    _add_agent(sim, journey_id, exit_id, (2.0, 10.0), probe=True)
+    _add_agent(sim, journey_id, exit_id, (3.0, 10.0))
+
+    sim.iterate()
+
+    [(kind, text, visible)] = model.seen
+    assert kind is jps.NeighborView
+    assert jps.NeighborView.__module__ == "jupedsim.py_jupedsim"
+    assert text == "NeighborView(relative_position=(1.0, 0.0))"
+    assert visible
+    assert "A neighboring agent as seen from" in jps.NeighborView.__doc__
+    assert "Vector from the querying agent" in (
+        jps.NeighborView.relative_position.__doc__
+    )
+
+
 # ---------------------------------------------------------------------------
 # no_geometry_between tests
 # ---------------------------------------------------------------------------
@@ -250,3 +286,175 @@ def test_wall_view_carries_the_projection_onto_the_wall():
     # The segment is relative to the agent too: a vertical face at x = 1.9.
     assert nearest.segment[0][0] == pytest.approx(1.9)
     assert nearest.segment[1][0] == pytest.approx(1.9)
+
+
+def test_walls_are_the_native_type():
+    model = _WallCapturingModel(distance=3.0)
+    sim, exit_id, journey_id = _make_sim(model, geometry=_walled_room())
+    _add_agent(sim, journey_id, exit_id, (8.0, 5.0), probe=True)
+
+    sim.iterate()
+
+    nearest = min(model.walls, key=lambda w: w.distance)
+    assert type(nearest) is jps.WallView
+    assert jps.WallView.__module__ == "jupedsim.py_jupedsim"
+    assert repr(nearest) == (
+        f"WallView(distance={nearest.distance!r}, normal={nearest.normal!r})"
+    )
+    assert "A wall segment as seen from the agent" in jps.WallView.__doc__
+    assert "Unit vector pointing from the wall" in jps.WallView.normal.__doc__
+
+
+def test_wall_segment_is_clipped_to_the_queried_distance():
+    model = _WallCapturingModel(distance=3.0)
+    sim, exit_id, journey_id = _make_sim(model, geometry=_walled_room())
+    _add_agent(sim, journey_id, exit_id, (8.0, 5.0), probe=True)
+
+    sim.iterate()
+
+    # The wall face runs from y = 0 to y = 15, but only the part within
+    # 3.0 of the agent is handed out.
+    nearest = min(model.walls, key=lambda w: w.distance)
+    for x, y in nearest.segment:
+        assert math.hypot(x, y) == pytest.approx(3.0)
+    assert "within the queried distance" in jps.WallView.segment.__doc__
+
+
+# ---------------------------------------------------------------------------
+# View lifetime
+# ---------------------------------------------------------------------------
+
+
+class _StoringModel(jps.CustomOperationalModel):
+    """Keeps every view it is handed, plus one derived from each step."""
+
+    def __init__(self):
+        super().__init__()
+        self.views: list = []
+        self.types: list = []
+
+    def compute_next_state(self, state, step):
+        self.types.append(
+            (type(step), isinstance(step, jps.AgentView), step.dt > 0)
+        )
+        self.views.append(step)
+        self.views.append(step.with_neighbor_state_mapping(lambda s: s))
+        return replace(state), _STAY_PUT
+
+    def check_model_constraint(self, state, view):
+        self.types.append((type(view), True, True))
+        self.views.append(view)
+
+
+def test_views_are_the_native_types():
+    model = _StoringModel()
+    sim, exit_id, journey_id = _make_sim(model)
+    _add_agent(sim, journey_id, exit_id, (2.0, 10.0), probe=True)
+    sim.iterate()
+    assert (jps.AgentView, True, True) in model.types  # check_model_constraint
+    assert (jps.AgentStep, True, True) in model.types  # compute_next_state
+    assert jps.AgentStep.__module__ == "jupedsim.py_jupedsim"
+    assert issubclass(jps.AgentStep, jps.AgentView)
+    assert "What an agent perceives" in jps.AgentView.__doc__
+    assert "Duration of this simulation step" in jps.AgentStep.dt.__doc__
+
+
+def test_views_cannot_be_used_after_the_callback():
+    model = _StoringModel()
+    sim, exit_id, journey_id = _make_sim(model)
+    _add_agent(sim, journey_id, exit_id, (2.0, 10.0), probe=True)
+    sim.iterate()
+    assert len(model.views) >= 3
+    for view in model.views:
+        with pytest.raises(jps.SimulationError, match="only valid during"):
+            view.walls_in_range(1.0)
+        with pytest.raises(jps.SimulationError, match="only valid during"):
+            view.other_agents_in_range(1.0)
+    step = next(v for v in model.views if isinstance(v, jps.AgentStep))
+    with pytest.raises(jps.SimulationError, match="only valid during"):
+        step.dt
+
+
+def test_a_raising_predicate_propagates():
+    model = _CapturingModel(radius=5.0, predicate=lambda step, n: 1 / 0)
+    sim, exit_id, journey_id = _make_sim(model)
+    _add_agent(sim, journey_id, exit_id, (2.0, 10.0), probe=True)
+    _add_agent(sim, journey_id, exit_id, (3.0, 10.0))
+    with pytest.raises(ZeroDivisionError):
+        sim.iterate()
+
+
+def test_predicate_results_are_used_by_truthiness():
+    # The relative x of the neighbor straight above is 0.0 -> falsy -> dropped.
+    model = _CapturingModel(
+        radius=5.0, predicate=lambda step, n: n.relative_position[0]
+    )
+    sim, exit_id, journey_id = _make_sim(model)
+    _add_agent(sim, journey_id, exit_id, (2.0, 10.0), probe=True)
+    _add_agent(sim, journey_id, exit_id, (3.0, 10.0))
+    _add_agent(sim, journey_id, exit_id, (2.0, 11.0))
+    sim.iterate()
+    assert model.neighbors == [(1.0, 0.0)]
+
+
+def test_views_from_a_raising_callback_expire_too():
+    class _RaisingModel(_StoringModel):
+        def compute_next_state(self, state, step):
+            self.views.append(step)
+            raise RuntimeError("boom")
+
+    model = _RaisingModel()
+    sim, exit_id, journey_id = _make_sim(model)
+    _add_agent(sim, journey_id, exit_id, (2.0, 10.0), probe=True)
+    with pytest.raises(RuntimeError, match="boom"):
+        sim.iterate()
+    step = next(v for v in model.views if isinstance(v, jps.AgentStep))
+    with pytest.raises(jps.SimulationError, match="only valid during"):
+        step.route_orientation
+
+
+class _NeighborStoringModel(jps.CustomOperationalModel):
+    """Keeps the probe agent's neighbors, plain and seen through a mapping."""
+
+    def __init__(self):
+        super().__init__()
+        self.neighbors: list = []
+        self.mapped_groups: list = []
+
+    def compute_next_state(self, state, step):
+        if state.probe:
+            self.neighbors = step.other_agents_in_range(5.0)
+            # The derived step is a temporary: its neighbors must keep its
+            # mapping alive.
+            self.mapped_groups = [
+                n.state.group
+                for n in step.with_neighbor_state_mapping(
+                    lambda s: replace(s, group=42)
+                ).other_agents_in_range(5.0)
+            ]
+        return replace(state), _STAY_PUT
+
+
+def test_neighbors_of_a_temporary_derived_view_see_the_mapping():
+    model = _NeighborStoringModel()
+    sim, exit_id, journey_id = _make_sim(model)
+    _add_agent(sim, journey_id, exit_id, (2.0, 10.0), probe=True)
+    _add_agent(sim, journey_id, exit_id, (3.0, 10.0), group=7)
+    sim.iterate()
+    assert model.mapped_groups == [42]
+
+
+def test_neighbors_cannot_be_used_after_the_callback():
+    model = _NeighborStoringModel()
+    sim, exit_id, journey_id = _make_sim(model)
+    _add_agent(sim, journey_id, exit_id, (2.0, 10.0), probe=True)
+    _add_agent(sim, journey_id, exit_id, (3.0, 10.0), group=7)
+    sim.iterate()
+    [neighbor] = model.neighbors
+    assert neighbor.relative_position == (1.0, 0.0)
+    assert repr(neighbor) == "NeighborView(relative_position=(1.0, 0.0))"
+    with pytest.raises(jps.SimulationError, match="only valid during"):
+        neighbor.state
+    del sim
+    with pytest.raises(jps.SimulationError, match="only valid during"):
+        neighbor.state

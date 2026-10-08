@@ -4,10 +4,10 @@
 #include "Geometry/Validation.hpp"
 #include "SimulationError.hpp"
 #include "SurfaceMeshShortestPathRoutingEngine.hpp"
+#include "conversion.hpp"
 #include "type_casters.hpp"
 
 #include <CGAL/Polygon_mesh_processing/IO/polygon_mesh_io.h>
-#include <fmt/format.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h> // IWYU pragma: keep
 
@@ -19,16 +19,38 @@ namespace py = pybind11;
 
 void init_routing(py::module_& m)
 {
-    // A place on the surface, handed out by the simulation and passed back to it. Read-only and
-    // deliberately narrow: no region ids, no face handles -- the coordinates are all a caller
-    // can do anything with, everything else is the geometry's business.
-    py::class_<Location>(m, "Location")
-        .def_property_readonly("x", [](const Location& l) { return l.xy().x; })
-        .def_property_readonly("y", [](const Location& l) { return l.xy().y; })
-        .def_property_readonly("z", &Location::z)
-        .def_property_readonly("region_id", &Location::region)
+    py::class_<Location> location(m, "Location");
+    location.doc() = cleanDoc(R"(
+        A point on the walkable surface, together with the region it lies in.
+
+        Locations cannot be created directly, get them from the simulation:
+
+        .. code:: python
+
+            sim.get_location(x, y, region_id=upper_floor)
+            sim.agent(agent_id).location
+
+        A location is read-only and stays valid as long as its simulation exists.
+        It does not move with an agent: read
+        :attr:`~jupedsim.Agent.location` again to get the agent's current
+        location.
+    )");
+    location
+        .def_property_readonly(
+            "x",
+            [](const Location& l) { return l.xy().x; },
+            cleanDoc("x coordinate in metres.").c_str())
+        .def_property_readonly(
+            "y",
+            [](const Location& l) { return l.xy().y; },
+            cleanDoc("y coordinate in metres.").c_str())
+        .def_property_readonly(
+            "z", &Location::z, cleanDoc("Height of the surface here, in metres.").c_str())
+        .def_property_readonly(
+            "region_id", &Location::region, cleanDoc("Region this location lies in.").c_str())
         .def("__repr__", [](const Location& l) {
-            return fmt::format("Location({}, {}, {})", l.xy().x, l.xy().y, l.z());
+            // Python float formatting (3.0, not fmt's 3), as the former Python wrapper printed.
+            return py::str("Location({!r}, {!r}, {!r})").format(l.xy().x, l.xy().y, l.z());
         });
 
     py::class_<SurfaceMeshShortestPathRoutingEngine>(m, "SurfaceMeshShortestPathRoutingEngine")

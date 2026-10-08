@@ -247,3 +247,15 @@ calls.
 - The queue and waiting set stages: `add_queue_stage`,
   `add_waiting_set_stage`, `NotifiableQueueStage`, `WaitingSetStage` and
   `WaitingSetState`.
+- The wrapper modules `jupedsim.location`, `jupedsim.stages`,
+  `jupedsim.library` and `jupedsim.agent_view`, and
+  `jupedsim.journey.Transition`. Their types and functions are the native
+  ones now; import them as `jupedsim.<Name>` (e.g. `jps.Location`,
+  `jps.WaypointStage`, `jps.get_build_info`, `jps.AgentView`,
+  `jps.Transition`).
+- `CustomOperationalModel._compute_next_state` and
+  `CustomOperationalModel._check_model_constraint`.
+- Keeping the {class}`~jupedsim.AgentView` or
+  {class}`~jupedsim.AgentStep` passed to a custom-model callback beyond the
+  callback: such views expire when the callback returns, and any later
+  access raises {class}`~jupedsim.SimulationError`.

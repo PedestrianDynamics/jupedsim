@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "SimulationError.hpp"
+#include "conversion.hpp"
 
 #include <pybind11/detail/common.h>
 #include <pybind11/pybind11.h>
@@ -50,10 +51,11 @@ static void set_all(py::module_& m)
 
 PYBIND11_MODULE(py_jupedsim, m)
 {
-    py::register_exception<SimulationError>(m, "SimulationError").attr("__doc__") =
-        "Raised for simulation errors, e.g. when accessing an agent handle whose"
-        "agent no longer exists or when calling mutating simulation methods from a"
-        "custom-model callback.";
+    py::register_exception<SimulationError>(m, "SimulationError").attr("__doc__") = cleanDoc(R"(
+        Raised for simulation errors, e.g. when accessing an agent handle whose
+        agent no longer exists or when calling mutating simulation methods from a
+        custom-model callback.
+    )");
     init_logging(m);
     init_build_info(m);
     init_trace(m);

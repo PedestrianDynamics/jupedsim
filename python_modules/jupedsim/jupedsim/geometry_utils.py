@@ -133,7 +133,7 @@ def build_polygon(
         The geometric data supplied need to form a single "simple" polygon with holes. In case
         the input contains multiple polygons this must hold true for the union of all polygons.
 
-    Arguments:
+    Args:
         geometry: Data to create the geometry out of. Data may be supplied as:
 
             * list of 2d points describing the outer boundary, holes may be added with use of `excluded_areas` kw-argument
@@ -148,7 +148,7 @@ def build_polygon(
 
             * str with a valid Well Known Text. In this format the same WKT types as mentioned for the shapely types are supported: GEOMETRYCOLLETION, MULTIPOLYGON, POLYGON, MULTIPOINT. The same restrictions as mentioned for the shapely types apply.
 
-    Keyword Arguments:
+    Keyword Args:
         excluded_areas: describes exclusions
             from the walkable area. Only use this argument if `geometry` was
             provided as list[tuple[float, float]].
@@ -186,11 +186,11 @@ def build_geometry(
     :class:`~jupedsim.native.Geometry`. A walkable area given as a polygon
     becomes a single region at z=0.
 
-    Arguments:
+    Args:
         geometry: See :func:`build_polygon`, or a
             :class:`~jupedsim.native.Geometry`.
 
-    Keyword Arguments:
+    Keyword Args:
         excluded_areas: See :func:`build_polygon`.
     """
     if isinstance(geometry, py_jps.Geometry):

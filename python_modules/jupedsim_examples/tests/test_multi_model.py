@@ -190,5 +190,7 @@ def test_an_unmapped_neighbor_is_reported():
     _add(sim, journey_id, exit_id, (2.0, 4.0), _collision_free_agent())
     _add(sim, journey_id, exit_id, (2.6, 4.0), _social_force_agent())
 
-    with pytest.raises(jps.SimulationError, match="with_neighbor_states"):
+    with pytest.raises(
+        jps.SimulationError, match="with_neighbor_state_mapping"
+    ):
         sim.iterate()

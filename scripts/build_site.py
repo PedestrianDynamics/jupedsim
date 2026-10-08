@@ -242,7 +242,7 @@ def main() -> None:
                 file=sys.stderr,
             )
 
-    print(f"serve with: python -m http.server -d {out}")
+    print(f"serve with:\npython -m http.server -b localhost -d {out}")
 
 
 if __name__ == "__main__":

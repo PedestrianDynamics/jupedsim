@@ -53,7 +53,7 @@ The various types of stages will be explained below.
 Waypoint
 ^^^^^^^^
 
-The most fundamental kind of stage is a :class:`Waypoint <jupedsim.stages.WaypointStage>`. It represents a target the agent needs to reach.
+The most fundamental kind of stage is a :class:`Waypoint <jupedsim.WaypointStage>`. It represents a target the agent needs to reach.
 For the way finding, the agent always targets the Waypoint directly.
 A Waypoint is considered completed once agents arrive within a designated distance from the defined Waypoint.
 The figure below shows how a Waypoint is used in the simulation. Here the center (colored orange) represents the Waypoint, and the surrounding blue area indicates the zone an agent must enter to complete the stage.
@@ -63,7 +63,7 @@ The figure below shows how a Waypoint is used in the simulation. Here the center
     :align: center
     :alt: A dot representing the Waypoint, with an circle around it, depicting the area an agent needs to enter to complete the stage.
 
-    Representation of a :class:`Waypoint <jupedsim.stages.WaypointStage>` (colored orange) with the given distance (orange line).
+    Representation of a :class:`Waypoint <jupedsim.WaypointStage>` (colored orange) with the given distance (orange line).
 
 A Waypoint at :math:`(0.6, -1.4)` with an accepted distance of 2m can be added to the simulation via:
 
@@ -74,7 +74,7 @@ A Waypoint at :math:`(0.6, -1.4)` with an accepted distance of 2m can be added t
 Exit
 ^^^^
 
-An other stage type is the :class:`Exit <jupedsim.stages.ExitStage>`. As the name suggests, this stage models the exits within the simulation.
+An other stage type is the :class:`Exit <jupedsim.ExitStage>`. As the name suggests, this stage models the exits within the simulation.
 The `ExitStage` designates an area where agents are marked for removal from the simulation upon their arrival.
 The removal itself is done at the beginning of the next iteration step.
 As a target the agents will aim for the center of the exit polygon.
@@ -88,7 +88,7 @@ As a target the agents will aim for the center of the exit polygon.
     :align: center
     :alt: A polygon representing the exit area is shown in blue, with the center highlighted in orange.
 
-    Representation of an :class:`Exit <jupedsim.stages.ExitStage>` (colored blue). The agents will aim for the center (colored orange).
+    Representation of an :class:`Exit <jupedsim.ExitStage>` (colored blue). The agents will aim for the center (colored orange).
 
 An exit located in the polygon :math:`(-0.2, -1.9), (0.2, -1.9), (0.2, -1.7), (-0.2, -1.7)` can be added to the simulation via:
 

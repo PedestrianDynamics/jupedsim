@@ -41,11 +41,9 @@ defaults: ``orientation``, ``speed``, ``desired_direction`` (e0),
 ``a_min``, ``b_min`` and ``b_max``.
 """
 
-import jupedsim.native as py_jps
-
-GeneralizedCentrifugalForceModel = py_jps.GeneralizedCentrifugalForceModel
-GeneralizedCentrifugalForceModelState = (
-    py_jps.GeneralizedCentrifugalForceModelState
+from jupedsim.native import (
+    GeneralizedCentrifugalForceModel,
+    GeneralizedCentrifugalForceModelState,
 )
 
 __all__ = [

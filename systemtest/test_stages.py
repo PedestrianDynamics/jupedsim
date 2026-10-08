@@ -1,4 +1,7 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
+import gc
+import weakref
+
 import jupedsim as jps
 import pytest
 import shapely
@@ -175,3 +178,44 @@ def test_an_agent_standing_at_the_edge_of_an_exit_leaves():
     assert simulation.agent_count() == 0, (
         f"Expected agent to exit simulation within {expected_iterations_to_finish} iterations."
     )
+
+
+def test_get_stage_returns_the_native_stage_types(square_room_5x5):
+    sim = square_room_5x5
+    waypoint_id = sim.add_waypoint_stage((0, 0), 1, region_id=0)
+    exit_id = sim.add_exit_stage(
+        [(2, -1), (2.5, -1), (2.5, 1), (2, 1)], region_id=0
+    )
+    steering_id = sim.add_direct_steering_stage()
+
+    waypoint = sim.get_stage(waypoint_id)
+    exit = sim.get_stage(exit_id)
+    steering = sim.get_stage(steering_id)
+
+    assert type(waypoint) is jps.WaypointStage
+    assert type(exit) is jps.ExitStage
+    assert type(steering) is jps.DirectSteeringStage
+    assert jps.WaypointStage.__module__ == "jupedsim.py_jupedsim"
+    assert "Models a waypoint" in jps.WaypointStage.__doc__
+    assert "Models an exit" in jps.ExitStage.__doc__
+    assert "direct control of the target" in jps.DirectSteeringStage.__doc__
+    assert steering.count_targeting() == 0
+
+
+def test_a_stage_keeps_its_simulation_alive():
+    sim = jps.Simulation(
+        model=jps.CollisionFreeSpeedModel(),
+        geometry=[(-2.5, -2.5), (2.5, -2.5), (2.5, 2.5), (-2.5, 2.5)],
+    )
+    stage = sim.get_stage(sim.add_waypoint_stage((0, 0), 1, region_id=0))
+    native = weakref.ref(sim._obj)
+    del sim
+    gc.collect()
+    assert native() is not None
+    assert stage.count_targeting() == 0
+
+
+@pytest.mark.parametrize("bad_id", [-1, 1.5, "3", 2**64])
+def test_get_stage_rejects_ids_of_the_wrong_type(square_room_5x5, bad_id):
+    with pytest.raises(TypeError):
+        square_room_5x5.get_stage(bad_id)

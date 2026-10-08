@@ -9,7 +9,6 @@ from jupedsim.agent import Agent
 from jupedsim.geometry_utils import build_geometry, build_polygon
 from jupedsim.internal.tracing import Timer
 from jupedsim.journey import JourneyDescription
-from jupedsim.location import Location
 from jupedsim.models.anticipation_velocity_model import (
     AnticipationVelocityModel,
     AnticipationVelocityModelState,
@@ -40,10 +39,6 @@ from jupedsim.models.warp_driver import (
     WarpDriverModelState,
 )
 from jupedsim.serialization import TrajectoryWriter
-from jupedsim.stages import (
-    ExitStage,
-    WaypointStage,
-)
 
 _STATE_TYPES = (
     GeneralizedCentrifugalForceModelState,
@@ -106,7 +101,7 @@ class Simulation:
     ) -> None:
         """Creates a Simulation.
 
-        Arguments:
+        Args:
             model:
                 Defines the operational model used in the simulation. Every built-in model is passed
                 as a configured instance carrying its model-level parameters, e.g.
@@ -151,7 +146,7 @@ class Simulation:
                 provides a writer that outputs trajectory data in a sqlite database. If you want
                 other formats such as CSV you need to provide your own custom implementation.
 
-        Keyword Arguments:
+        Keyword Args:
             excluded_areas: describes exclusions from the walkable area. Only use this argument if
                 `geometry` was provided as list[tuple[float, float]].
         """
@@ -179,7 +174,7 @@ class Simulation:
     ) -> int:
         """Add a new waypoint stage to this simulation.
 
-        Arguments:
+        Args:
             position: Position of the waypoint
             distance: Minimum distance required to reach this waypoint.
                 Must be positive.
@@ -206,7 +201,7 @@ class Simulation:
     ) -> int:
         """Add an exit stage to the simulation.
 
-        Arguments:
+        Args:
             polygon:
                 Polygon without holes representing the exit stage. Polygon can be passed as:
 
@@ -256,16 +251,14 @@ class Simulation:
     def add_journey(self, journey: JourneyDescription) -> int:
         """Add a journey to the simulation.
 
-        Arguments:
+        Args:
             journey: Description of the journey.
 
         Returns:
             Id of the added Journey.
 
         """
-        return self._obj.add_journey(
-            {k: v._obj for k, v in journey._transitions.items()}
-        )
+        return self._obj.add_journey(dict(journey._transitions))
 
     def add_agent(
         self,
@@ -287,7 +280,7 @@ class Simulation:
     ) -> int:
         """Add an agent to the simulation.
 
-        Arguments:
+        Args:
             journey_id: Id of the journey the agent follows.
             stage_id: Id of the stage the agent initially targets.
             position: Position to spawn the agent at, as ``(x, y)`` in metres.
@@ -320,12 +313,14 @@ class Simulation:
             region_id=region_id,
         )
 
-    def get_location(self, x: float, y: float, *, region_id: int) -> Location:
+    def get_location(
+        self, x: float, y: float, *, region_id: int
+    ) -> py_jps.Location:
         """Get the location at ``(x, y)`` in region ``region_id``.
 
         The location stays valid as long as this simulation exists.
 
-        Arguments:
+        Args:
             x: x coordinate in metres.
             y: y coordinate in metres.
             region_id: Region the place lies in, see :func:`add_agent`.
@@ -336,7 +331,7 @@ class Simulation:
         Raises:
             SimulationError: if ``region_id`` does not exist or ``(x, y)`` is not in it.
         """
-        return Location(self._obj.get_location(x, y, region_id))
+        return self._obj.get_location(x, y, region_id)
 
     def mark_agent_for_removal(self, agent_id: int):
         """Marks an agent for removal.
@@ -345,7 +340,7 @@ class Simulation:
         simulation in the start of the next :func:`iterate` call. The removal will take place before
         any interaction between agents will be computed.
 
-        Arguments:
+        Args:
             agent_id: Id of the agent marked for removal
         """
 
@@ -365,7 +360,7 @@ class Simulation:
     def iterate(self, count: int = 1) -> None:
         """Advance the simulation by the given number of iterations.
 
-        Arguments:
+        Args:
             count: Number of iterations to advance
         """
         if self._writer and self.iteration_count() == 0:
@@ -382,7 +377,7 @@ class Simulation:
     ) -> None:
         """Switch agent to the given journey at the given stage.
 
-        Arguments:
+        Args:
             agent_id: Id of the agent to switch
             journey_id: Id of the new journey to follow
             stage_id: Id of the stage in the new journey the agent continues with
@@ -440,7 +435,7 @@ class Simulation:
     def agent(self, agent_id) -> Agent:
         """Access specific agent in the simulation.
 
-        Arguments:
+        Args:
             agent_id: Id of the agent to access
 
         Returns:
@@ -459,7 +454,7 @@ class Simulation:
     ) -> list[Agent]:
         """Handles to all agents within the given distance to the given position.
 
-        Arguments:
+        Args:
              pos:  point around which to search for agents
              distance: search radius
 
@@ -516,25 +511,21 @@ class Simulation:
             )
         ]
 
-    def get_stage(self, stage_id: int):
-        """Specific stage in the simulation.
+    def get_stage(
+        self, stage_id: int
+    ) -> py_jps.WaypointStage | py_jps.ExitStage | py_jps.DirectSteeringStage:
+        """Get the stage with the given id.
 
-        Arguments:
+        Args:
             stage_id: Id of the stage to retrieve.
 
         Returns:
-            The stage object.
+            The stage object. It keeps the simulation alive.
+
+        Raises:
+            SimulationError: If no stage with this id exists.
         """
-        stage = self._obj.get_stage_proxy(stage_id)
-        match stage:
-            case py_jps.WaypointProxy():
-                return WaypointStage(stage)
-            case py_jps.ExitProxy():
-                return ExitStage(stage)
-            case _:
-                raise Exception(
-                    f"Internal error, unexpected type: {type(stage)}"
-                )
+        return self._obj.get_stage(stage_id)
 
     def set_tracing(self, status: bool) -> None:
         self._obj.set_tracing(status)

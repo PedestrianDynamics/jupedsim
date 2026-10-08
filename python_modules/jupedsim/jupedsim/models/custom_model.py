@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from jupedsim.agent_view import AgentStep, AgentView
+    from jupedsim.native import AgentStep, AgentView
 
 
 class CustomOperationalModel(ABC):
@@ -41,9 +41,11 @@ class CustomOperationalModel(ABC):
 
     .. warning::
 
-        The ``step`` object passed to the callbacks (and the neighbor objects
-        returned from neighborhood queries) are transient views that are only
-        valid for the duration of the callback. Never store them. Calling
+        The ``step`` and ``view`` objects passed to the callbacks (and every
+        view derived from them) are transient views that are only valid for the
+        duration of the callback; once it has returned, every access raises
+        :class:`~jupedsim.SimulationError`. The neighbor objects returned from
+        neighborhood queries are transient as well; never store them. Calling
         mutating methods on the simulation (``add_agent``,
         ``mark_agent_for_removal``, journey or stage mutation) from within a
         callback raises :class:`~jupedsim.SimulationError`.
@@ -82,29 +84,3 @@ class CustomOperationalModel(ABC):
             view: What the agent perceives of its surroundings.
         """
         pass
-
-    def _compute_next_state(
-        self,
-        state,
-        step,
-    ) -> tuple[Any, tuple[float, float]]:
-        from jupedsim.agent_view import AgentStep
-
-        wrapper = AgentStep(step)
-        try:
-            return self.compute_next_state(state, wrapper)
-        finally:
-            wrapper._obj = None
-
-    def _check_model_constraint(
-        self,
-        state,
-        view,
-    ) -> None:
-        from jupedsim.agent_view import AgentView
-
-        wrapper = AgentView(view)
-        try:
-            self.check_model_constraint(state, wrapper)
-        finally:
-            wrapper._obj = None

@@ -73,7 +73,7 @@ def _wait_until_serving(port: int, timeout: float = 20.0) -> bool:
 class SimulationViewer:
     """Native Play/Pause viewer around a live JuPedSim ``Simulation``.
 
-    Arguments:
+    Args:
         sim: A prepared ``jupedsim.Simulation`` (geometry, journeys, agents already set up).
         on_step: Optional callback run on *every* ``sim.iterate()`` step, receiving ``sim``.
             Use it to add/retarget agents or record state. It is registered up front and stays

@@ -22,6 +22,7 @@ sys.path.insert(
 )
 
 import jupedsim
+from sphinx.errors import ConfigError
 
 project = "JuPedSim"
 author = "The JuPedSim Development Team"
@@ -61,9 +62,26 @@ intersphinx_mapping = {
 }
 
 # -- Automatic generation of API doc -----------------------------------------
-autoapi_dirs = [
-    "../../python_modules/jupedsim/jupedsim",
-]
+# Analyse the imported (built or installed) package, not python_modules/: the
+# native types exist for autoapi only as the pybind11-stubgen stubs
+# (py_jupedsim/*.pyi) that the build generates into the package.
+autoapi_dirs = [os.path.dirname(jupedsim.__file__)]
+# A build stage keeps symlinks to deleted sources until CMake re-runs; autoapi
+# would crash on them with a bare FileNotFoundError.
+_DANGLING_LINKS = sorted(
+    path
+    for root, _, files in os.walk(autoapi_dirs[0])
+    for path in (os.path.join(root, name) for name in files)
+    if os.path.islink(path) and not os.path.exists(path)
+)
+if _DANGLING_LINKS:
+    raise ConfigError(
+        "Dangling symlinks in the analysed jupedsim package (stale build "
+        "stage?): "
+        + ", ".join(_DANGLING_LINKS)
+        + ". Re-run the build (ninja re-runs CMake, which removes them) or "
+        "delete them: find <build-dir>/stage -xtype l -delete"
+    )
 autoapi_root = "api"
 autoapi_options = [
     "members",
@@ -74,7 +92,6 @@ autoapi_options = [
 ]
 autoapi_ignore = [
     "**/tests/**",
-    "**/native/**",
     "**/internal/**",
 ]
 autoapi_add_toctree_entry = False
@@ -94,8 +111,16 @@ suppress_warnings = [
 ]
 
 
+# jupedsim.native and jupedsim.py_jupedsim must be analysed so that autoapi can
+# resolve the re-exports in jupedsim, but their pages would duplicate every
+# native type under an internal path (and make cross-references ambiguous).
+_INTERNAL_PACKAGES = ("jupedsim.native", "jupedsim.py_jupedsim")
+
+
 def skip_rules(app, what, name, obj, skip, options):
     if what == "module":
+        skip = True
+    if what == "package" and name in _INTERNAL_PACKAGES:
         skip = True
     if what == "method":
         if name.endswith("as_native"):
@@ -107,22 +132,31 @@ def skip_rules(app, what, name, obj, skip, options):
     return skip
 
 
-# jupedsim.internal.{aabb,grid,tracing} and jupedsim.native are excluded via
-# autoapi_ignore, so autoapi cannot resolve imports from them and drops the
-# imported names. Only these known imports are silenced; any other unresolved
-# import still fails a -W build. Known gap: the public re-exports
-# jupedsim.WalkableSurface (from jupedsim.native) and the tracing API
-# (Timer, enable_tracing, ... from jupedsim.internal.tracing) are therefore
-# missing from the API reference.
+# jupedsim.internal.{aabb,grid,tracing} are excluded via autoapi_ignore, so
+# autoapi cannot resolve imports from them and drops the imported names. Only
+# these known imports are silenced; any other unresolved import (including
+# jupedsim.native, which must resolve through the stubs) fails a -W build.
+# Known gap: the Python tracing helpers (Timer, trace_event from
+# jupedsim.internal.tracing) are missing from the API reference.
 _KNOWN_UNRESOLVED_IMPORT = re.compile(
     r"Cannot resolve import of unknown module "
-    r"jupedsim\.(internal\.(aabb|grid|tracing)|native) in "
+    r"jupedsim\.internal\.(aabb|grid|tracing) in "
+)
+# pybind11-stubgen lists the bound submodule in the stub's __all__. autoapi
+# does not count submodules as members when it expands the star import in
+# jupedsim.native and warns about this entry; the submodule is internal.
+_KNOWN_INVALID_ALL_ENTRY = re.compile(
+    r"Invalid __all__ entry floorfield in jupedsim\.py_jupedsim$"
 )
 
 
 class _KnownUnresolvedImportFilter(logging.Filter):
     def filter(self, record):
-        return not _KNOWN_UNRESOLVED_IMPORT.match(record.getMessage())
+        message = record.getMessage()
+        return not (
+            _KNOWN_UNRESOLVED_IMPORT.match(message)
+            or _KNOWN_INVALID_ALL_ENTRY.match(message)
+        )
 
 
 # The docs build warns and continues without network. CI builds with -W

@@ -127,6 +127,26 @@ def test_a_location_reads_only_a_place():
         location.x = 0.0
 
 
+def test_locations_are_the_native_type():
+    sim, ground, upper = u_stair()
+    journey_id, exit_id = journey_to_upper_exit(sim, upper)
+    agent = sim.agent(
+        sim.add_agent(
+            journey_id=journey_id,
+            stage_id=exit_id,
+            position=STACKED_XY,
+            state=jps.CollisionFreeSpeedModelState(),
+            region_id=ground,
+        )
+    )
+    location = sim.get_location(*STACKED_XY, region_id=upper)
+    assert type(location) is jps.Location
+    assert type(agent.location) is jps.Location
+    assert jps.Location.__module__ == "jupedsim.py_jupedsim"
+    assert "A point on the walkable surface" in jps.Location.__doc__
+    assert "Height of the surface" in jps.Location.z.__doc__
+
+
 def test_an_agent_reports_the_floor_it_stands_on():
     sim, ground, upper = u_stair()
     journey_id, exit_id = journey_to_upper_exit(sim, upper)

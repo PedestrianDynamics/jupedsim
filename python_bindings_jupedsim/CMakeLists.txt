@@ -4,6 +4,8 @@ add_library(py_jupedsim MODULE
     anticipation_velocity_model.cpp
     bindings_jupedsim.cpp
     build_info.cpp
+    callback_views.cpp
+    callback_views.hpp
     collision_free_speed_model.cpp
     collision_free_speed_model_v2.cpp
     collision_free_speed_model_v3.cpp
@@ -22,6 +24,7 @@ add_library(py_jupedsim MODULE
     temporary/boundary_index.cpp
     trace.cpp
     transition.cpp
+    transition.hpp
     type_casters.hpp
     walkable_surface.cpp
     warp_driver_model.cpp
@@ -73,6 +76,15 @@ set(PKG_SRC ${CMAKE_SOURCE_DIR}/python_modules/jupedsim/jupedsim)
 # developer mode); such copies are refreshed on the next configure only.
 file(GLOB_RECURSE PKG_FILES CONFIGURE_DEPENDS RELATIVE ${PKG_SRC} ${PKG_SRC}/*)
 list(FILTER PKG_FILES EXCLUDE REGEX "(^|/)__pycache__/")
+# Drop links whose source file was deleted; the glob above re-runs this
+# configure step when files are removed. Stale links would otherwise stay
+# importable-looking and break tools that walk the stage (the docs build).
+file(GLOB_RECURSE STAGE_FILES ${STAGE}/jupedsim/*)
+foreach(f IN LISTS STAGE_FILES)
+    if(IS_SYMLINK ${f} AND NOT EXISTS ${f})
+        file(REMOVE ${f})
+    endif()
+endforeach()
 foreach(f IN LISTS PKG_FILES)
     get_filename_component(d ${STAGE}/jupedsim/${f} DIRECTORY)
     file(MAKE_DIRECTORY ${d})
