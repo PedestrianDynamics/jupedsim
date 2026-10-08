@@ -413,6 +413,20 @@ impl MultiRegionFloorfield {
         steepest_descent(g, query, cell).ok_or(unreachable)
     }
 
+    /// Travel time from (x, y) in `region` to `dest`: zero inside it, infinite
+    /// where it cannot be reached. Taken at the same cell as `direction`, with
+    /// the same errors except `Unreachable`. Solves the destination on first
+    /// use.
+    pub fn travel_time(&mut self, region: usize, x: f64, y: f64, dest: usize) -> Result<f64> {
+        let g = self.covered(region, x, y)?;
+        let cell = nearest_walkable(&self.spec, g, [x, y], None)
+            .ok_or(MultiRegionError::NotRoutable { region, x, y })?;
+        let sol = self.solution(dest)?;
+        Ok(sol.query[region]
+            .as_ref()
+            .map_or(f64::INFINITY, |query| query[cell as usize]))
+    }
+
     // ── Internals ───────────────────────────────────────────────────────────
 
     fn region(&self, region: usize) -> Result<&RegionGrid> {
