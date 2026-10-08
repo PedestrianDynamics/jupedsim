@@ -501,13 +501,11 @@ def build_app(obj_path: str | None):
         plotter.remove_actor("boundary_segments", render=False)
         if not segments:
             return
-        # The index hands out 2D (x, y) segments; draw them at the query
-        # point's height, slightly lifted so they never z-fight with the
-        # floor. Exact on flat floors, approximate on ramps / stairs.
+        # The index hands out 2D ((x1, y1), (x2, y2)) segments; draw them at
+        # the query point's height, slightly lifted so they never z-fight with
+        # the floor. Exact on flat floors, approximate on ramps / stairs.
         lift = z + 0.05
-        pts = np.array(
-            [(*p, lift) for seg in segments for p in (seg.p1, seg.p2)]
-        )
+        pts = np.array([(*p, lift) for seg in segments for p in seg])
         pairs = np.arange(len(pts)).reshape(-1, 2)
         cells = np.hstack(
             [np.full((len(pairs), 1), 2, dtype=np.int64), pairs]
