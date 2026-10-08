@@ -4,6 +4,7 @@
 #include "OperationalModels/OperationalModelState.hpp"
 #include "OperationalModels/OperationalModelType.hpp"
 #include "Point.hpp"
+#include "RoutingTarget.hpp"
 #include "UniqueID.hpp"
 #include "Visitor.hpp"
 
@@ -28,7 +29,7 @@ struct GenericAgent {
     // This is evaluated by the "operational level"
     /// Unit vector along the route to the final target. Zero if the agent has reached it.
     Point routeOrientation{};
-    Location finalTarget;
+    RoutingTarget finalTarget;
 
     OperationalModelState state{};
 
@@ -96,8 +97,8 @@ struct fmt::formatter<GenericAgent> {
                     agent.journeyId,
                     agent.stageId,
                     agent.routeOrientation,
-                    agent.finalTarget.xy(),
-                    agent.location.xy(),
+                    agent.finalTarget,
+                    agent.location,
                     m);
             },
             agent.state);

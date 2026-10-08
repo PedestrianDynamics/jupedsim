@@ -125,32 +125,53 @@ def test_can_add_waypoint(square_room_5x5_with_obstacle, waypoint_position):
 def test_can_not_add_waypoint_outside_geometry(square_room_5x5):
     simulation = square_room_5x5
 
-    with pytest.raises(jps.SimulationError, match="is not in region 0"):
+    with pytest.raises(
+        jps.SimulationError, match="Area does not intersect region 0"
+    ):
         simulation.add_waypoint_stage((10, 10), 1, region_id=0)
 
 
 def test_can_not_add_exit_completely_outside_geometry(square_room_5x5):
     simulation = square_room_5x5
 
-    with pytest.raises(jps.SimulationError, match="is not in region 0"):
+    with pytest.raises(
+        jps.SimulationError, match="Area does not intersect region 0"
+    ):
         simulation.add_exit_stage(
             [(-10, -10), (-8, -10), (-8, -8), (-10, -8)], region_id=0
         )
 
 
-def test_can_add_exit_partly_outside_geometry_centroid_inside(square_room_5x5):
-    simulation = square_room_5x5
-    simulation.add_exit_stage(
-        [(-3, -3), (-3, -1), (-1, -1), (-1, -3)], region_id=0
+@pytest.mark.parametrize(
+    "polygon",
+    [
+        [(-3, -3), (-3, -1), (-1, -1), (-1, -3)],
+        [(-4, -4), (-4, -2), (-2, -2), (-2, -4)],
+    ],
+)
+def test_can_add_exit_partly_outside_geometry(square_room_5x5, polygon):
+    square_room_5x5.add_exit_stage(polygon, region_id=0)
+
+
+def test_an_agent_standing_at_the_edge_of_an_exit_leaves():
+    # The exit's edge lies off the routing grid.
+    simulation = jps.Simulation(
+        model=jps.CollisionFreeSpeedModel(),
+        geometry=[(0, 0), (10, 0), (10, 10), (0, 10)],
     )
-
-
-def test_can_not_add_exit_partly_outside_geometry_centroid_outside(
-    square_room_5x5,
-):
-    simulation = square_room_5x5
-
-    with pytest.raises(jps.SimulationError, match="is not in region 0"):
-        simulation.add_exit_stage(
-            [(-4, -4), (-4, -2), (-2, -2), (-2, -4)], region_id=0
-        )
+    exit_id = simulation.add_exit_stage(
+        [(8.05, 4), (9.5, 4), (9.5, 6), (8.05, 6)], region_id=0
+    )
+    journey_id = simulation.add_journey(jps.JourneyDescription([exit_id]))
+    simulation.add_agent(
+        journey_id=journey_id,
+        stage_id=exit_id,
+        position=(8.02, 5),
+        state=jps.CollisionFreeSpeedModelState(),
+        region_id=0,
+    )
+    expected_iterations_to_finish = 10
+    simulation.iterate(expected_iterations_to_finish)
+    assert simulation.agent_count() == 0, (
+        f"Expected agent to exit simulation within {expected_iterations_to_finish} iterations."
+    )

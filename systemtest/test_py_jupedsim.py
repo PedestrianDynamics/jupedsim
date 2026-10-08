@@ -350,7 +350,7 @@ def test_direct_steering_target_must_be_inside_geometry():
     agent = simulation.agent(agent_id)
 
     agent.final_target = (60, 60)
-    assert agent.final_target == (60, 60)
+    assert (agent.final_target.x, agent.final_target.y) == (60, 60)
 
     with pytest.raises(
         jps.SimulationError,

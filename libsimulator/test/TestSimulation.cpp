@@ -14,10 +14,9 @@
 #include <cstddef>
 #include <memory>
 #include <utility>
+#include <variant>
 #include <vector>
 
-/// What only a whole simulation can be asked: whether a multi-storey world runs, and whether the
-/// places written into it land on the storey they were meant on.
 namespace
 {
 using State = CollisionFreeSpeedModel::State;
@@ -92,15 +91,18 @@ TEST(MultiStoreySimulation, AStageIsPutInTheRegionItNames)
     const auto [up_journey, up_stage] = journey_to(sim, stacked_point, stair.upper);
     const auto [down_journey, down_stage] = journey_to(sim, stacked_point, stair.ground);
 
+    // Upstairs, the waypoint is only reached over the stair to the east.
     const auto id = sim.AddAgent(up_journey, up_stage, Point{2, 2}, State{}, stair.ground);
     sim.Iterate();
-    // The waypoint of the journey the agent is on, so its target says which storey the stage
-    // was put on.
-    EXPECT_EQ(sim.Agent(id).finalTarget.region(), stair.upper);
+    EXPECT_GT(sim.Agent(id).routeOrientation.x, 0.5);
 
+    // Downstairs, it is in plain sight. Floor field directions follow a gradient on a grid, so
+    // straight ahead holds only up to the grid.
     sim.SwitchAgentJourney(id, down_journey, down_stage);
     sim.Iterate();
-    EXPECT_EQ(sim.Agent(id).finalTarget.region(), stair.ground);
+    const Point straight = (stacked_point - sim.Agent(id).location.xy()).Normalized();
+    EXPECT_NEAR(sim.Agent(id).routeOrientation.x, straight.x, 1e-2);
+    EXPECT_NEAR(sim.Agent(id).routeOrientation.y, straight.y, 1e-2);
 }
 
 TEST(MultiStoreySimulation, ATargetWrittenFromOutsideLandsOnTheAgentsOwnStorey)
@@ -113,17 +115,24 @@ TEST(MultiStoreySimulation, ATargetWrittenFromOutsideLandsOnTheAgentsOwnStorey)
     // Only (x, y) is given, and two storeys carry it. It has to mean the one the agent is on --
     // anything else routes it through the wrong floor.
     sim.SetAgentTarget(upstairs, Point{2, 6});
-    EXPECT_EQ(sim.Agent(upstairs).finalTarget.region(), stair.upper);
+    EXPECT_EQ(std::get<Location>(sim.Agent(upstairs).finalTarget).region(), stair.upper);
 
     const auto downstairs = sim.AddAgent(journey, stage, stacked_point, State{}, stair.ground);
     sim.SetAgentTarget(downstairs, Point{2, 6});
-    EXPECT_EQ(sim.Agent(downstairs).finalTarget.region(), stair.ground);
+    EXPECT_EQ(std::get<Location>(sim.Agent(downstairs).finalTarget).region(), stair.ground);
 }
 
 TEST(Simulation, AWaypointNeedsAPositiveDistance)
 {
     auto sim = on_a_flat_room();
     EXPECT_THROW(sim->AddStage(WaypointDescription{{5, 5}, 0.0, 0}), SimulationError);
+}
+
+TEST(Simulation, AnExitMayBeConcave)
+{
+    auto sim = on_a_flat_room();
+    const Polygon l_shape{std::vector<Point>{{2, 2}, {6, 2}, {6, 4}, {4, 4}, {4, 6}, {2, 6}}};
+    EXPECT_NO_THROW(sim->AddStage(ExitDescription{l_shape, 0}));
 }
 
 TEST(MeshBuiltSimulation, IsRejected)
@@ -189,8 +198,7 @@ TEST(MultiStoreySimulation, WalkingUpTheUStairToTheExitAbove)
     const auto walked = climb(sim, id, [&sim] { return sim.AgentCount() == 0; });
 
     EXPECT_EQ(sim.AgentCount(), 0u) << "never made it to the exit";
-    // Standing in the exit's outline is not standing in the exit: from the ground floor the way to
-    // its centre leads to the storey above, not to the centre.
+    // Standing under the exit is not standing in it.
     EXPECT_GT(walked.heights.size(), 1u) << "left through the floor above, on the first step";
     expect_climbed_without_stalling(walked);
 }

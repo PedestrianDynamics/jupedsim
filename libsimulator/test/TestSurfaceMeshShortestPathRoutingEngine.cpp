@@ -113,11 +113,11 @@ TEST(SurfaceMeshShortestPathCorridor, TheOrientationNeverVanishesOnTheWay)
 
     constexpr double stride = 0.05;
     int steps = 0;
-    while(walker->distance_to(*exit) > stride) {
+    while((exit->xy() - walker->xy()).Norm() > stride) {
         const Point onwards = engine.GetOrientation(*walker, *exit);
         ASSERT_FALSE(onwards.isZeroLength()) << "stuck at x=" << walker->xy().x;
         ASSERT_LT(++steps, 2000) << "no progress at x=" << walker->xy().x;
         walker->move_on_surface(onwards * stride);
     }
-    EXPECT_LE(walker->distance_to(*exit), stride);
+    EXPECT_LE((exit->xy() - walker->xy()).Norm(), stride);
 }

@@ -4,7 +4,10 @@
 #include "Geometry/Location.hpp"
 #include "Point.hpp"
 
+#include <fmt/format.h>
+
 #include <cstddef>
+#include <string>
 
 class FloorfieldRoutingEngine;
 
@@ -17,6 +20,15 @@ class Destination
 public:
     Destination(FloorfieldRoutingEngine& engine, std::size_t id) : _engine(&engine), _id(id) {}
 
+    /// Whether @p where lies in the destination, to the engine's resolution.
+    bool contains(const Location& where) const;
+
     /// Unit vector from @p from along the route to the destination. Zero once inside it.
     Point orientation(const Location& from) const;
+
+private:
+    friend std::string format_as(const Destination& d)
+    {
+        return fmt::format("destination {}", d._id);
+    }
 };

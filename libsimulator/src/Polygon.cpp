@@ -9,7 +9,9 @@
 #include <fmt/format.h>
 
 #include <algorithm>
+#include <cmath>
 #include <iterator>
+#include <numbers>
 #include <string>
 #include <tuple>
 #include <vector>
@@ -40,6 +42,24 @@ Polygon::Polygon(const std::vector<Point>& points)
 
 Polygon::Polygon(PolygonType polygon) : _polygon(std::move(polygon))
 {
+}
+
+Polygon Polygon::FromCircle(Point center, double radius)
+{
+    // An edge of the inscribed n-gon is 2 r sin(pi / n) long.
+    constexpr double targetCircleEdgeLength = 0.4;
+    constexpr int minCircleCorners = 4;
+    const double max_sin = targetCircleEdgeLength / (2.0 * radius);
+    const int corners = max_sin >= std::sin(std::numbers::pi / minCircleCorners) ?
+                            minCircleCorners :
+                            static_cast<int>(std::ceil(std::numbers::pi / std::asin(max_sin)));
+    std::vector<Point> points{};
+    points.reserve(corners);
+    for(int i = 0; i < corners; ++i) {
+        const double angle = 2.0 * std::numbers::pi * i / corners;
+        points.push_back(center + Point{std::cos(angle), std::sin(angle)} * radius);
+    }
+    return Polygon{points};
 }
 
 bool Polygon::IsConvex() const

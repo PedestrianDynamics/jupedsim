@@ -42,16 +42,16 @@ SurfaceMeshShortestPathRoutingEngine::on_surface(const Point3D& p, const char* w
 SurfaceMeshShortestPathRoutingEngine::ShortestPath&
 SurfaceMeshShortestPathRoutingEngine::tree_for(const Point3D& target)
 {
-    auto it = _cache.find(target);
-    if(it == _cache.end()) {
+    if(_lastTree == nullptr || _lastTarget != target) {
         const auto below = on_surface(target, "target");
-        auto shortest_path = std::make_unique<ShortestPath>(_geometry.mesh());
-        const auto to_loc = shortest_path->locate(below.point, _geometry.aabb_tree());
-        shortest_path->add_source_point(to_loc);
-        shortest_path->build_sequence_tree();
-        it = _cache.emplace(target, std::move(shortest_path)).first;
+        auto tree = std::make_unique<ShortestPath>(_geometry.mesh());
+        const auto to_loc = tree->locate(below.point, _geometry.aabb_tree());
+        tree->add_source_point(to_loc);
+        tree->build_sequence_tree();
+        _lastTree = std::move(tree);
+        _lastTarget = target;
     }
-    return *it->second;
+    return *_lastTree;
 }
 
 SurfaceMeshShortestPathRoutingEngine::Way
