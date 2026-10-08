@@ -8,7 +8,6 @@
 
 #include <CGAL/Surface_mesh_shortest_path.h>
 
-#include <map>
 #include <memory>
 #include <vector>
 
@@ -62,7 +61,8 @@ private:
     /// Where @p p sits on the surface. Throws naming @p what if it sits nowhere.
     Geometry::FaceLocation on_surface(const Point3D& p, const char* what) const;
 
-    /// The sequence tree for @p target: built on first use, then kept.
+    /// The sequence tree for @p target. The last one built is cached. Therefore asking
+    /// for the same target again in a row does not rebuild it.
     ShortestPath& tree_for(const Point3D& target);
 
     Way trace_way(const Point3D& source, const Point3D& target);
@@ -77,5 +77,8 @@ private:
     const Geometry& _geometry;
     double _wallClearance;
 
-    std::map<Point3D, std::unique_ptr<ShortestPath>> _cache{};
+    /// The tree last built by `tree_for`, and its target. Makes `GetShortestPath` and
+    /// `GetOrientation` non-reentrant.
+    Point3D _lastTarget{};
+    std::unique_ptr<ShortestPath> _lastTree{};
 };

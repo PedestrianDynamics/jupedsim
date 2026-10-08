@@ -6,6 +6,8 @@
 
 #include <gtest/gtest.h>
 
+#include <cmath>
+
 TEST(Polygon, PointIsInside)
 {
     const std::vector<Point> points{{0, 0}, {1, 1}, {0, 2}, {-1, 1}};
@@ -52,4 +54,19 @@ TEST(Polygon, PointIsOutsideRightOfMiddleLineSegmentOfPolygon)
     const Point pt{0.5, 1.6};
     Polygon poly(points);
     ASSERT_FALSE(poly.IsInside(pt));
+}
+
+TEST(Polygon, FromCircleKeepsHasShortEdges)
+{
+    constexpr double targetLength = 0.4;
+    for(const double radius : {0.05, 0.2, 1.0, 10.0}) {
+        const Poly circle = Polygon::FromCircle({3, -2}, radius);
+        EXPECT_GE(circle.size(), 4u) << "radius " << radius;
+        for(auto edge = circle.edges_begin(); edge != circle.edges_end(); ++edge) {
+            EXPECT_LE(std::sqrt(edge->squared_length()), targetLength) << "radius " << radius;
+        }
+    }
+    // Not finer than needed: the edges of a large circle come close to the limit.
+    const Poly large = Polygon::FromCircle({3, -2}, 10.0);
+    EXPECT_GT(std::sqrt(large.edges_begin()->squared_length()), targetLength - 0.05);
 }

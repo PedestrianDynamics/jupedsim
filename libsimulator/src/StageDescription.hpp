@@ -14,13 +14,13 @@ struct DirectSteeringDescription {
 struct WaypointDescription {
     Point position;
     double distance;
-    /// Region the position lies in, see `Geometry::get_location`.
+    /// Region the waypoint lies in.
     std::size_t region_id;
 };
 
 struct ExitDescription {
     Polygon polygon;
-    /// Region the polygon's centroid lies in, see `Geometry::get_location`.
+    /// Region the exit lies in.
     std::size_t region_id;
 };
 

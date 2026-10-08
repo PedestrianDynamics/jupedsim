@@ -31,6 +31,7 @@ public:
     /// travel time.
     Destination RegisterDestination(const std::vector<AreaPiece>& pieces);
 
+    bool Contains(const Location& where, std::size_t id);
     Point GetOrientation(const Location& from, std::size_t id);
 
 private:

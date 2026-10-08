@@ -194,11 +194,32 @@ Journey::ID Simulation::AddJourney(const std::map<BaseStage::ID, TransitionDescr
     return id;
 }
 
+// Each stage checks its description and cuts its area before it registers the destination, so
+// that a stage which cannot be added leaves nothing behind in the routing engine.
 BaseStage::ID Simulation::AddStage(const StageDescription& stageDescription)
 {
     ThrowIfIterating("AddStage");
     JPS_SCOPED_TIMER_AND_TRACE(_timer, "Add Stage", Detailed);
-    return _stageManager.AddStage(stageDescription, _removedAgentsInLastIteration, *_geometry);
+    auto stage = std::visit(
+        overloaded{
+            [this](const WaypointDescription& d) -> std::unique_ptr<BaseStage> {
+                if(d.distance <= 0.0) {
+                    throw SimulationError("Waypoint distance must be positive, got {}", d.distance);
+                }
+                const auto pieces = _geometry->split_into_region_pieces(
+                    Polygon::FromCircle(d.position, d.distance), d.region_id);
+                return std::make_unique<Waypoint>(_routingEngine->RegisterDestination(pieces));
+            },
+            [this](const ExitDescription& d) -> std::unique_ptr<BaseStage> {
+                const auto pieces = _geometry->split_into_region_pieces(d.polygon, d.region_id);
+                return std::make_unique<Exit>(
+                    _routingEngine->RegisterDestination(pieces), _removedAgentsInLastIteration);
+            },
+            [](const DirectSteeringDescription&) -> std::unique_ptr<BaseStage> {
+                return std::make_unique<DirectSteering>();
+            }},
+        stageDescription);
+    return _stageManager.AddStage(std::move(stage));
 }
 
 GenericAgent::ID Simulation::AddAgent(

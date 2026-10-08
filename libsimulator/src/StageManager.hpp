@@ -2,16 +2,12 @@
 #pragma once
 
 #include "GenericAgent.hpp"
-#include "Geometry/Geometry.hpp"
 #include "SimulationError.hpp"
 #include "Stage.hpp"
-#include "StageDescription.hpp"
-#include "Visitor.hpp"
 
 #include <memory>
 #include <unordered_map>
 #include <utility>
-#include <variant>
 #include <vector>
 
 class StageManager
@@ -27,33 +23,8 @@ public:
     StageManager(StageManager&& other) = delete;
     StageManager& operator=(StageManager&& other) = delete;
 
-    BaseStage::ID AddStage(
-        const StageDescription& stageDescription,
-        std::vector<GenericAgent::ID>& removedAgentsInLastIteration,
-        const Geometry& geometry)
+    BaseStage::ID AddStage(std::unique_ptr<BaseStage> stage)
     {
-        std::unique_ptr<BaseStage> stage = std::visit(
-            overloaded{
-                [&geometry](const WaypointDescription& d) -> std::unique_ptr<BaseStage> {
-                    if(d.distance <= 0.0) {
-                        throw SimulationError(
-                            "Waypoint distance must be positive, got {}", d.distance);
-                    }
-                    return std::make_unique<Waypoint>(
-                        geometry.get_location(d.position.x, d.position.y, d.region_id), d.distance);
-                },
-                [&removedAgentsInLastIteration,
-                 &geometry](const ExitDescription& d) -> std::unique_ptr<BaseStage> {
-                    const auto centroid = d.polygon.Centroid();
-                    return std::make_unique<Exit>(
-                        d.polygon,
-                        geometry.get_location(centroid.x, centroid.y, d.region_id),
-                        removedAgentsInLastIteration);
-                },
-                [](const DirectSteeringDescription&) -> std::unique_ptr<BaseStage> {
-                    return std::make_unique<DirectSteering>();
-                }},
-            stageDescription);
         if(stages.find(stage->Id()) != stages.end()) {
             throw SimulationError("Internal error, stage id already in use.");
         }

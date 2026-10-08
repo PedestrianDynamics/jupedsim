@@ -184,11 +184,35 @@ def test_a_direct_steering_target_can_be_given_as_a_location():
     )
     target = sim.get_location(6.0, 7.6, region_id=upper)
     agent.final_target = target
-    assert agent.final_target == pytest.approx((target.x, target.y))
+    final_target = agent.final_target
+    assert final_target is not None
+    assert (final_target.x, final_target.y, final_target.z) == (
+        target.x,
+        target.y,
+        target.z,
+    )
     sim.iterate(100)
     # it walks along its own floor towards the target, and stays up there
     assert agent.position[0] > STACKED_XY[0]
     assert agent.location.region_id == upper
+
+
+def test_an_agent_heading_for_an_exit_has_no_final_target_location():
+    sim = polygon_simulation()
+    exit_id = sim.add_exit_stage([(8, 4), (9, 4), (9, 6), (8, 6)], region_id=0)
+    journey_id = sim.add_journey(jps.JourneyDescription([exit_id]))
+    agent = sim.agent(
+        sim.add_agent(
+            journey_id=journey_id,
+            stage_id=exit_id,
+            position=(2.0, 5.0),
+            state=jps.CollisionFreeSpeedModelState(),
+            region_id=0,
+        )
+    )
+    sim.iterate()
+    assert agent.final_target is None
+    assert agent.route_orientation == pytest.approx((1.0, 0.0))
 
 
 def test_an_agent_reports_the_orientation_of_its_route():

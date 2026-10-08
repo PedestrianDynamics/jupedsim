@@ -144,7 +144,7 @@ class Agent:
         return Location(self.__resolve().location)
 
     @property
-    def final_target(self) -> tuple[float, float]:
+    def final_target(self) -> Location | None:
         """Current final target of the agent.
 
         Can be used to directly steer an agent towards the given coordinate.
@@ -167,9 +167,11 @@ class Agent:
         :meth:`~jupedsim.simulation.Simulation.get_location`.
 
         Returns:
-            Current final target of the agent, as ``(x, y)``.
+            Current final target of the agent, or ``None`` while it heads
+            for an area such as an exit.
         """
-        return self.__resolve().final_target
+        target = self.__resolve().final_target
+        return Location(target) if target is not None else None
 
     @final_target.setter
     def final_target(

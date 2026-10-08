@@ -211,7 +211,7 @@ and write resolves the agent freshly through the simulation:
 
 ```python
 agent = sim.agent(agent_id)
-agent.target = (10.0, 5.0)
+agent.final_target = (10.0, 5.0)
 agent.state.desired_speed = 0.8   # takes effect in the next iterate()
 
 for _ in range(1000):
@@ -222,6 +222,11 @@ print(agent.position)             # still valid, freshly resolved
 
 `agent.state` returns a per-model state handle with the same semantics: it
 resolves per access and raises once the agent is gone.
+
+`agent.target` is now `agent.final_target`. Reading it returns a
+{class}`~jupedsim.Location` instead of an `(x, y)` tuple, and `None` while the
+agent heads for an area such as an exit or a waypoint. Setting it accepts a `Location` or an `(x, y)` tuple. Setting a target
+outside the walkable area now raises immediately, not at the next `iterate()`.
 
 ## Mutation during iterate() is now an error
 

@@ -3,6 +3,7 @@
 
 #include "GenericAgent.hpp"
 #include "Point.hpp"
+#include "RoutingTarget.hpp"
 #include "SimulationError.hpp"
 #include "Stage.hpp"
 #include "UniqueID.hpp"
@@ -181,7 +182,7 @@ public:
 
     ID Id() const { return id; }
 
-    std::tuple<Location, BaseStage::ID> Target(const GenericAgent& agent) const
+    std::tuple<RoutingTarget, BaseStage::ID> Target(const GenericAgent& agent) const
     {
         auto& node = stages.at(agent.stageId);
         auto stage = node.stage;

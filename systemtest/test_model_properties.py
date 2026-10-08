@@ -461,19 +461,18 @@ def test_social_force_model_body_force_and_friction_are_model_level():
 def _velocity_along_wall(friction, y):
     """return x-velocity after 20 ms of an agent (radius 0.3 m) at height y in a
     corridor whose wall runs along y = 0. It starts at its desired speed of
-    1 m/s along +x, so without other forces its speed stays constant."""
+    1 m/s along +x, so without other forces its speed stays constant.
+    Use DirectSteering as FF-engine would push it away from the wall."""
     sim = jps.Simulation(
         model=jps.SocialForceModel(body_force=120000.0, friction=friction),
         geometry=[(0, 0), (60, 0), (60, 4), (0, 4)],
         dt=0.001,
     )
-    exit_id = sim.add_exit_stage(
-        [(58, 0), (60, 0), (60, 4), (58, 4)], region_id=0
-    )
-    journey_id = sim.add_journey(jps.JourneyDescription([exit_id]))
+    stage_id = sim.add_direct_steering_stage()
+    journey_id = sim.add_journey(jps.JourneyDescription([stage_id]))
     agent_id = sim.add_agent(
         journey_id=journey_id,
-        stage_id=exit_id,
+        stage_id=stage_id,
         position=(1, y),
         state=jps.SocialForceModelState(
             velocity=(1.0, 0.0),
@@ -483,6 +482,7 @@ def _velocity_along_wall(friction, y):
         ),
         region_id=0,
     )
+    sim.agent(agent_id).final_target = (59, y)
     for _ in range(20):
         sim.iterate()
     return sim.agent(agent_id).state.velocity[0]

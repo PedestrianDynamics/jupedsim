@@ -322,7 +322,7 @@ std::vector<AreaPiece> Geometry::split_into_region_pieces(const Poly& p, size_t 
     const auto seed_poly = to_exact((*g)[region_id]);
     const auto exact_area = to_exact(p);
     if(!CGAL::do_intersect(seed_poly, exact_area)) {
-        throw SimulationError("Seed region {} does not intersect the area to be split", region_id);
+        throw SimulationError("Area does not intersect region {}", region_id);
     }
     std::vector<bool> seen(boost::num_vertices(*g), false);
 

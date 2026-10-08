@@ -11,6 +11,7 @@
 #include "floorfield_cxx/lib.h"
 #include "rust/cxx.h"
 
+#include <CGAL/squared_distance_3.h>
 #include <boost/range/iterator_range.hpp>
 #include <gtest/gtest.h>
 
@@ -116,7 +117,9 @@ double length_3d(const std::vector<Location>& path)
 {
     double length = 0.0;
     for(std::size_t i = 1; i < path.size(); ++i) {
-        length += path[i - 1].distance_to(path[i]);
+        length += std::sqrt(
+            CGAL::to_double(
+                CGAL::squared_distance(path[i - 1].position_3d(), path[i].position_3d())));
     }
     return length;
 }

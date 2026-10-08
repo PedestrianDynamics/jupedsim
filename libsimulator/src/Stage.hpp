@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
+#include "Destination.hpp"
 #include "GenericAgent.hpp"
 #include "GeometricFunctions.hpp"
 #include "Geometry/Location.hpp"
 #include "LineSegment.hpp"
 #include "Point.hpp"
-#include "Polygon.hpp"
 #include "UniqueID.hpp"
 #include "Util.hpp"
 
@@ -73,7 +73,7 @@ protected:
 public:
     virtual ~BaseStage() = default;
     virtual bool IsCompleted(const GenericAgent& agent) = 0;
-    virtual Location Target(const GenericAgent& agent) = 0;
+    virtual RoutingTarget Target(const GenericAgent& agent) = 0;
     virtual StageProxy Proxy(Simulation* simulation_) = 0;
     ID Id() const { return id; }
     size_t CountTargeting() const { return targeting; }
@@ -99,32 +99,28 @@ struct fmt::formatter<BaseStage> {
 
 class Waypoint : public BaseStage
 {
-    Location position;
-    double distance;
+    Destination destination;
 
 public:
-    Waypoint(Location position_, double distance_);
+    explicit Waypoint(Destination destination_);
     ~Waypoint() override = default;
     bool IsCompleted(const GenericAgent& agent) override;
-    Location Target(const GenericAgent& agent) override;
+    RoutingTarget Target(const GenericAgent& agent) override;
     StageProxy Proxy(Simulation* simulation_) override;
-    Point Position() const { return position.xy(); };
 };
 
 /// Notifies simulation of all agents that need to be removed at the beginning of the next iteration
 class Exit : public BaseStage
 {
-    Polygon area;
-    Location centroid;
+    Destination destination;
     std::vector<GenericAgent::ID>& toRemove;
 
 public:
-    Exit(Polygon area, Location centroid_, std::vector<GenericAgent::ID>& toRemove_);
+    Exit(Destination destination_, std::vector<GenericAgent::ID>& toRemove_);
     ~Exit() override = default;
     bool IsCompleted(const GenericAgent& agent) override;
-    Location Target(const GenericAgent& agent) override;
+    RoutingTarget Target(const GenericAgent& agent) override;
     StageProxy Proxy(Simulation* simulation_) override;
-    Polygon Position() const { return area; };
 };
 
 class DirectSteering : public BaseStage
@@ -133,7 +129,7 @@ public:
     DirectSteering() = default;
     ~DirectSteering() override = default;
     bool IsCompleted(const GenericAgent&) override { return false; };
-    Location Target(const GenericAgent& agent) override;
+    RoutingTarget Target(const GenericAgent& agent) override;
     StageProxy Proxy(Simulation* simulation) override
     {
         return DirectSteeringProxy(simulation, this);

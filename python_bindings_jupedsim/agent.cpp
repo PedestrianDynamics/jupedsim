@@ -8,7 +8,9 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h> // IWYU pragma: keep
 
+#include <optional>
 #include <tuple>
+#include <variant>
 
 namespace py = pybind11;
 
@@ -36,7 +38,15 @@ void init_agent(py::module_& m)
                 [](const GenericAgent& agent) { return agent.location; }, py::keep_alive<0, 1>()))
         .def_property_readonly(
             "final_target",
-            [](const GenericAgent& agent) { return intoTuple(agent.finalTarget.xy()); })
+            // Same lifetime tie as for "location".
+            py::cpp_function(
+                [](const GenericAgent& agent) -> std::optional<Location> {
+                    if(const auto* place = std::get_if<Location>(&agent.finalTarget)) {
+                        return *place;
+                    }
+                    return std::nullopt;
+                },
+                py::keep_alive<0, 1>()))
         .def_property_readonly(
             "route_orientation",
             [](const GenericAgent& agent) { return intoTuple(agent.routeOrientation); })

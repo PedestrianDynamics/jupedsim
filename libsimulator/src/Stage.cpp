@@ -3,7 +3,6 @@
 
 #include "GenericAgent.hpp"
 #include "Point.hpp"
-#include "Polygon.hpp"
 #include "Simulation.hpp"
 #include "SimulationError.hpp"
 #include "Util.hpp"
@@ -26,18 +25,18 @@ size_t BaseProxy::CountTargeting() const
 ////////////////////////////////////////////////////////////////////////////////
 /// Waypoint
 ////////////////////////////////////////////////////////////////////////////////
-Waypoint::Waypoint(Location position_, double distance_) : position(position_), distance(distance_)
+Waypoint::Waypoint(Destination destination_) : destination(destination_)
 {
 }
 
 bool Waypoint::IsCompleted(const GenericAgent& agent)
 {
-    return agent.location.distance_to(position) <= distance;
+    return destination.contains(agent.location);
 }
 
-Location Waypoint::Target(const GenericAgent&)
+RoutingTarget Waypoint::Target(const GenericAgent&)
 {
-    return position;
+    return destination;
 }
 
 StageProxy Waypoint::Proxy(Simulation* simulation)
@@ -48,27 +47,23 @@ StageProxy Waypoint::Proxy(Simulation* simulation)
 ////////////////////////////////////////////////////////////////////////////////
 /// Exit
 ////////////////////////////////////////////////////////////////////////////////
-Exit::Exit(Polygon area_, Location centroid_, std::vector<GenericAgent::ID>& toRemove_)
-    : area(std::move(area_)), centroid(centroid_), toRemove(toRemove_)
+Exit::Exit(Destination destination_, std::vector<GenericAgent::ID>& toRemove_)
+    : destination(destination_), toRemove(toRemove_)
 {
-    if(!area.IsConvex()) {
-        throw SimulationError("Exit areas need to be bounded by convex polygons.");
-    }
 }
 
 bool Exit::IsCompleted(const GenericAgent& agent)
 {
-    const bool hasReachedExit =
-        area.IsInside(agent.location.xy()) && agent.location.can_walk_straight_to(centroid);
+    const bool hasReachedExit = destination.contains(agent.location);
     if(hasReachedExit) {
         toRemove.push_back(agent.id);
     }
     return hasReachedExit;
 }
 
-Location Exit::Target(const GenericAgent&)
+RoutingTarget Exit::Target(const GenericAgent&)
 {
-    return centroid;
+    return destination;
 }
 
 StageProxy Exit::Proxy(Simulation* simulation)
@@ -79,7 +74,7 @@ StageProxy Exit::Proxy(Simulation* simulation)
 ////////////////////////////////////////////////////////////////////////////////
 /// DirectSteering
 ////////////////////////////////////////////////////////////////////////////////
-Location DirectSteering::Target(const GenericAgent& agent)
+RoutingTarget DirectSteering::Target(const GenericAgent& agent)
 {
     return agent.finalTarget;
 }

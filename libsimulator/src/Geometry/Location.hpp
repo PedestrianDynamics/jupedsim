@@ -4,6 +4,8 @@
 #include "CfgCgal.hpp"
 #include "Point.hpp"
 
+#include <fmt/core.h>
+
 #include <cstddef>
 #include <optional>
 
@@ -33,8 +35,6 @@ public:
     /// the walkable area. Does not modify `*this`.
     std::optional<Location> try_move_on_surface(Point xy_direction) const;
 
-    double distance_to(const Location& other) const;
-
     /// Whether walking straight from here arrives where @p other stands.
     bool can_walk_straight_to(const Location& other) const;
 
@@ -57,4 +57,16 @@ private:
     std::size_t _regionId;
     SurfaceMesh::Face_index _face; // cache; always valid (move throws before invalidating)
     double _z; // cache
+};
+
+template <>
+struct fmt::formatter<Location> {
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+
+    template <typename FormatContext>
+    auto format(const Location& l, FormatContext& ctx) const
+    {
+        return fmt::format_to(
+            ctx.out(), "({}, {}, {}, region={})", l.xy().x, l.xy().y, l.z(), l.region());
+    }
 };

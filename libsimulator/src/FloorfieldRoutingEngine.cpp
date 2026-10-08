@@ -91,6 +91,12 @@ Destination FloorfieldRoutingEngine::RegisterDestination(const std::vector<AreaP
     return Destination{*this, id};
 }
 
+bool FloorfieldRoutingEngine::Contains(const Location& where, std::size_t id)
+{
+    const auto xy = where.xy();
+    return checked([&] { return _field->travel_time(where.region(), {xy.x, xy.y}, id); }) == 0.0;
+}
+
 Point FloorfieldRoutingEngine::GetOrientation(const Location& from, std::size_t id)
 {
     const auto xy = from.xy();
