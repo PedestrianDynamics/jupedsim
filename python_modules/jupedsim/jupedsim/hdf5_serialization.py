@@ -231,7 +231,7 @@ class Hdf5TrajectoryWriter(TrajectoryWriter):
             return
         frame = iteration // self._every_nth_frame
 
-        for agent in simulation.agents():
+        for agent in simulation._obj.agents():
             self._buffer.append(
                 (
                     frame,
