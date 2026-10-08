@@ -5,7 +5,6 @@ import jupedsim.native as py_jps
 BoundaryIndex = py_jps.BoundaryIndex
 Geometry = py_jps.Geometry
 Location = py_jps.Location
-RoutingEngine = py_jps.RoutingEngine
 SurfaceMeshShortestPathRoutingEngine = (
     py_jps.SurfaceMeshShortestPathRoutingEngine
 )

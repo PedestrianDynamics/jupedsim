@@ -16,11 +16,14 @@
 SurfaceMeshShortestPathRoutingEngine::SurfaceMeshShortestPathRoutingEngine(
     const Geometry& geometry,
     double wallClearance)
-    : RoutingEngine(wallClearance), _geometry(geometry)
+    : _geometry(geometry), _wallClearance(wallClearance)
 {
+    if(wallClearance < 0.0) {
+        throw SimulationError("Wall clearance cannot be negative, got {}.", wallClearance);
+    }
 }
 
-bool SurfaceMeshShortestPathRoutingEngine::IsValidLocation(const RoutingTarget& loc) const
+bool SurfaceMeshShortestPathRoutingEngine::IsValidLocation(const Point3D& loc) const
 {
     return _geometry.face_below(loc).face != SurfaceMesh::null_face();
 }
@@ -37,7 +40,7 @@ SurfaceMeshShortestPathRoutingEngine::on_surface(const Point3D& p, const char* w
 }
 
 SurfaceMeshShortestPathRoutingEngine::ShortestPath&
-SurfaceMeshShortestPathRoutingEngine::tree_for(const RoutingTarget& target)
+SurfaceMeshShortestPathRoutingEngine::tree_for(const Point3D& target)
 {
     auto it = _cache.find(target);
     if(it == _cache.end()) {
@@ -52,7 +55,7 @@ SurfaceMeshShortestPathRoutingEngine::tree_for(const RoutingTarget& target)
 }
 
 SurfaceMeshShortestPathRoutingEngine::Way
-SurfaceMeshShortestPathRoutingEngine::trace_way(const Point3D& source, const RoutingTarget& target)
+SurfaceMeshShortestPathRoutingEngine::trace_way(const Point3D& source, const Point3D& target)
 {
     const auto from_below = on_surface(source, "source");
     auto& tree = tree_for(target);
@@ -141,9 +144,8 @@ Point3D SurfaceMeshShortestPathRoutingEngine::held_off_the_wall(
     return located ? located->position_3d() : Point3D{moved.x, moved.y, corner.z()};
 }
 
-std::vector<Point3D> SurfaceMeshShortestPathRoutingEngine::GetShortestPath(
-    const Point3D& source,
-    const RoutingTarget& target)
+std::vector<Point3D>
+SurfaceMeshShortestPathRoutingEngine::GetShortestPath(const Point3D& source, const Point3D& target)
 {
     const auto way = trace_way(source, target);
 
@@ -159,7 +161,7 @@ std::vector<Point3D> SurfaceMeshShortestPathRoutingEngine::GetShortestPath(
 
 Point SurfaceMeshShortestPathRoutingEngine::next_waypoint(
     const Point3D& source,
-    const RoutingTarget& target)
+    const Point3D& target)
 {
     const Point here{source.x(), source.y()};
     // CGAL sets a point wherever the way crosses a triangle edge.

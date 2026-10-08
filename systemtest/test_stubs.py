@@ -35,7 +35,6 @@ CLASSES = [
     "Polygon2D",
     "Profiler",
     "RoundRobinTransitionDescription",
-    "RoutingEngine",
     "Simulation",
     "SocialForceModel",
     "SocialForceModelState",
@@ -68,7 +67,6 @@ CLASSES_WITHOUT_CONSTRUCTOR = [
     "OperationalModel",
     "Polygon2D",
     "RoundRobinTransitionDescription",
-    "RoutingEngine",
     "WallView",
     "WaypointProxy",
 ]

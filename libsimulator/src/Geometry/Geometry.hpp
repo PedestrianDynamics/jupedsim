@@ -2,6 +2,7 @@
 #pragma once
 
 #include "CfgCgal.hpp"
+#include "Geometry/AreaPiece.hpp"
 #include "Geometry/BoundaryIndex.hpp"
 #include "Geometry/Location.hpp"
 #include "Geometry/RegionSplit.hpp"
@@ -22,13 +23,6 @@ inline constexpr double NearZTolerance = 0.1;
 /// Height difference above which two people cannot touch each other. This is used
 /// as a quick pre-filter.
 inline constexpr double InteractionHeight = 2.0;
-
-/// A piece of a polygon that lies in one region. The polygon is clipped to the
-/// region's footprint, and only the outer boundary is taken (holes are ignored).
-struct AreaPiece {
-    Poly polygon;
-    std::size_t region;
-};
 
 /// The 3D geometry
 class Geometry

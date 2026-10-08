@@ -7,6 +7,7 @@
 #include "MeshFixtures.hpp"
 #include "Point.hpp"
 
+#include <array>
 #include <memory>
 #include <vector>
 
@@ -150,10 +151,32 @@ inline std::unique_ptr<Geometry> stair_turning_on_a_landing()
     return std::make_unique<Geometry>(fixtures::stair_turning_on_a_landing());
 }
 
-/// A long flat corridor with door recesses set into its sides.
+/// A corridor 45 m long and 2 m wide with door recesses down one side:
+///
+///          ┌┐    ┌┐    ┌┐    ┌┐    ┌┐    ┌┐    ┌┐
+///     ┌────┘└────┘└────┘└────┘└────┘└────┘└────┘└───┐
+///     │                                             │
+///     └─────────────────────────────────────────────┘
+///
+/// The long wall below has no corner along the way, so that triangulation creates slivers.
 inline std::unique_ptr<Geometry> corridor_with_door_recesses()
 {
-    return std::make_unique<Geometry>(fixtures::corridor_with_door_recesses());
+    constexpr double length = 45.0;
+    constexpr double width = 2.0;
+    constexpr double depth = 0.3;
+    // Walked back along the far wall, so the ring stays counter-clockwise.
+    constexpr std::array<std::array<double, 2>, 7> doors{
+        {{42, 41}, {36, 35}, {30, 29}, {24, 23}, {18, 17}, {12, 11}, {6, 5}}};
+
+    std::vector<Point> ring{{0, 0}, {length, 0}, {length, width}};
+    for(const auto& [near, far] : doors) {
+        ring.push_back({near, width});
+        ring.push_back({near, width + depth});
+        ring.push_back({far, width + depth});
+        ring.push_back({far, width});
+    }
+    ring.push_back({0, width});
+    return from_polygons({ring});
 }
 
 } // namespace test_geometries

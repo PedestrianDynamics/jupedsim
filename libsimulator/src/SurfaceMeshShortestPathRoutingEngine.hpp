@@ -1,32 +1,52 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
+#include "CfgCgal.hpp"
 #include "Geometry/Geometry.hpp"
-#include "RoutingEngine.hpp"
+#include "Geometry/Location.hpp"
+#include "Point.hpp"
 
 #include <CGAL/Surface_mesh_shortest_path.h>
 
 #include <map>
-#include <tuple>
+#include <memory>
 #include <vector>
 
-class SurfaceMeshShortestPathRoutingEngine : public RoutingEngine
+/// Point-to-point shortest paths along the surface.
+class SurfaceMeshShortestPathRoutingEngine
 {
 public:
     /// Borrows @p geometry (non-owning); the caller keeps it alive for the
     /// engine's lifetime. Ownership lives with the world (later: Simulation),
     /// matching the 2D pipeline where engines never own the geometry.
+    /// @param wallClearance how far a route is held off the wall corners it turns on.
     explicit SurfaceMeshShortestPathRoutingEngine(
         const Geometry& geometry,
         double wallClearance = 0.2);
-    ~SurfaceMeshShortestPathRoutingEngine() override = default;
+    ~SurfaceMeshShortestPathRoutingEngine() = default;
 
-    bool IsValidLocation(const RoutingTarget& loc) const override;
+    SurfaceMeshShortestPathRoutingEngine(const SurfaceMeshShortestPathRoutingEngine&) = delete;
+    SurfaceMeshShortestPathRoutingEngine&
+    operator=(const SurfaceMeshShortestPathRoutingEngine&) = delete;
+    SurfaceMeshShortestPathRoutingEngine(SurfaceMeshShortestPathRoutingEngine&&) = delete;
+    SurfaceMeshShortestPathRoutingEngine&
+    operator=(SurfaceMeshShortestPathRoutingEngine&&) = delete;
 
-    std::vector<Point3D>
-    GetShortestPath(const Point3D& source, const RoutingTarget& target) override;
+    /// True iff @p loc projects onto the walkable surface.
+    bool IsValidLocation(const Point3D& loc) const;
 
-    Point GetOrientation(const Location& from, const Location& to) override;
+    /// Compute the shortest path from @p source to @p target, held off wall corners by the
+    /// engine's wall clearance.
+    /// @param source where to route from
+    /// @param target where to route to
+    /// @return the path, including source as first and target as last element
+    std::vector<Point3D> GetShortestPath(const Point3D& source, const Point3D& target);
+
+    /// Unit vector from @p from along the route to @p to, projected to x/y. Zero once @p from
+    /// has reached @p to.
+    Point GetOrientation(const Location& from, const Location& to);
+
+    double WallClearance() const { return _wallClearance; }
 
 private:
     using Traits = CGAL::Surface_mesh_shortest_path_traits<K, SurfaceMesh>;
@@ -43,18 +63,19 @@ private:
     Geometry::FaceLocation on_surface(const Point3D& p, const char* what) const;
 
     /// The sequence tree for @p target: built on first use, then kept.
-    ShortestPath& tree_for(const RoutingTarget& target);
+    ShortestPath& tree_for(const Point3D& target);
 
-    Way trace_way(const Point3D& source, const RoutingTarget& target);
+    Way trace_way(const Point3D& source, const Point3D& target);
 
     /// @p corner moved into the open by the wall clearance, put back onto the surface.
     Point3D held_off_the_wall(const Point3D& corner, Point into_the_open) const;
 
     /// Next point of the path from @p source to @p target
     /// Returns @p source itself when @p target is already reached.
-    Point next_waypoint(const Point3D& source, const RoutingTarget& target);
+    Point next_waypoint(const Point3D& source, const Point3D& target);
 
     const Geometry& _geometry;
+    double _wallClearance;
 
-    std::map<RoutingTarget, std::unique_ptr<ShortestPath>> _cache{};
+    std::map<Point3D, std::unique_ptr<ShortestPath>> _cache{};
 };
