@@ -39,10 +39,10 @@ model as keyword-only constructor arguments with sensible defaults:
 ``displacement_x``, ``displacement_y``, ``detour_time`` and ``detour_side``.
 """
 
-import jupedsim.native as py_jps
-
-WarpDriverModel = py_jps.WarpDriverModel
-WarpDriverModelState = py_jps.WarpDriverModelState
+from jupedsim.native import (
+    WarpDriverModel,
+    WarpDriverModelState,
+)
 
 __all__ = [
     "WarpDriverModel",

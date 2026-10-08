@@ -2,7 +2,7 @@
 from dataclasses import dataclass, replace
 
 import numpy as np
-from jupedsim.agent_view import WallView
+from jupedsim import WallView
 from jupedsim.models.custom_model import CustomOperationalModel
 
 

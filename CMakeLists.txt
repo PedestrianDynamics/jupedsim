@@ -272,13 +272,13 @@ if(BUILD_SITE AND UNIX)
     add_custom_target(site
         COMMENT "Building website (site + docs, notebooks executed)"
         COMMAND ${PROJECT_BINARY_DIR}/build-site
-        DEPENDS py_jupedsim
+        DEPENDS py_jupedsim py_jupedsim_stubs
         USES_TERMINAL
     )
     add_custom_target(site-fast
         COMMENT "Building website (site + docs, notebooks not executed)"
         COMMAND ${PROJECT_BINARY_DIR}/build-site --no-notebooks
-        DEPENDS py_jupedsim
+        DEPENDS py_jupedsim py_jupedsim_stubs
         USES_TERMINAL
     )
 endif()

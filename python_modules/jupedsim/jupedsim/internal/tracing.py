@@ -137,36 +137,6 @@ class Timer:
         return timer_region()
 
 
-def is_tracing_enabled() -> bool:
-    """Check if the profiler is enabled."""
-    return py_jps.Profiler().is_enabled
-
-
-def enable_tracing() -> None:
-    """Enable the profiler."""
-    py_jps.Profiler().enable()
-
-
-def disable_tracing() -> None:
-    """Disable the profiler."""
-    py_jps.Profiler().disable()
-
-
-def start_trace_event(name: str) -> None:
-    """Starts a named trace event."""
-    py_jps.Profiler().start_trace_event(name)
-
-
-def end_trace_event() -> None:
-    """Ends the last started trace event."""
-    py_jps.Profiler().end_trace_event()
-
-
-def dump_traces(filename: str) -> None:
-    """Dump traces to file."""
-    py_jps.Profiler().dump_and_reset(filename)
-
-
 def trace_event(func=None, *, name=None):
     """Use as either a decorator or a context-manager factory.
 
@@ -188,11 +158,11 @@ def trace_event(func=None, *, name=None):
                 event_name = f"{fn.__name__}()"
             else:
                 event_name = f"{name}()"
-            start_trace_event(event_name)
+            py_jps.start_trace_event(event_name)
             try:
                 return fn(*args, **kwargs)
             finally:
-                end_trace_event()
+                py_jps.end_trace_event()
 
         return wrapper
 
@@ -203,10 +173,10 @@ def trace_event(func=None, *, name=None):
 
     @contextmanager
     def trace_region(name):
-        start_trace_event(name)
+        py_jps.start_trace_event(name)
         try:
             yield
         finally:
-            end_trace_event()
+            py_jps.end_trace_event()
 
     return trace_region(func)

@@ -36,14 +36,14 @@ std::vector<Point> ring_of(const Poly& ring)
 void init_geometry(py::module_& m)
 {
     py::class_<PolyWithHoles> polygon2d(m, "Polygon2D");
-    polygon2d.doc() = R"(
+    polygon2d.doc() = cleanDoc(R"(
         A polygon with holes in the (x, y) plane, e.g. the walkable area of one region.
-    )";
+    )");
     polygon2d
         .def(
             "boundary",
             [](const PolyWithHoles& p) { return intoTuples(ring_of(p.outer_boundary())); },
-            "Outer boundary as a list of (x, y) points.")
+            cleanDoc("Outer boundary as a list of (x, y) points.").c_str())
         .def(
             "holes",
             [](const PolyWithHoles& p) {
@@ -53,11 +53,12 @@ void init_geometry(py::module_& m)
                 }
                 return res;
             },
-            "Holes, each as a list of (x, y) points.")
+            cleanDoc("Holes, each as a list of (x, y) points.").c_str())
         .def(
             "as_wkt",
             &as_wkt,
-            "The polygon as WKT; every coordinate reads back to the exact same value.");
+            cleanDoc("The polygon as WKT; every coordinate reads back to the exact same value.")
+                .c_str());
 
     // smart_holder: a Simulation shares ownership of its geometry with Python.
     py::class_<Geometry, py::smart_holder>(m, "Geometry")
@@ -97,7 +98,7 @@ void init_geometry(py::module_& m)
             &Geometry::polygon,
             py::kw_only(),
             py::arg("region_id"),
-            "Polygon2D for the specified region ID");
+            cleanDoc("Polygon2D for the specified region ID").c_str());
 
     py::class_<GeometryBuilder>(m, "GeometryBuilder")
         .def(py::init<>())

@@ -34,9 +34,9 @@ of the model as keyword-only constructor arguments with sensible defaults:
 ``radius`` and ``heading_angle``.
 """
 
-import jupedsim.native as py_jps
-
-CollisionFreeSpeedModelV3 = py_jps.CollisionFreeSpeedModelV3
-CollisionFreeSpeedModelV3State = py_jps.CollisionFreeSpeedModelV3State
+from jupedsim.native import (
+    CollisionFreeSpeedModelV3,
+    CollisionFreeSpeedModelV3State,
+)
 
 __all__ = ["CollisionFreeSpeedModelV3", "CollisionFreeSpeedModelV3State"]

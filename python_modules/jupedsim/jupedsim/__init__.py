@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
 from jupedsim.agent import Agent
-from jupedsim.agent_view import AgentStep, AgentView, NeighborView, WallView
 from jupedsim.distributions import (
     AgentNumberError,
     IncorrectParameterError,
@@ -15,25 +14,8 @@ from jupedsim.distributions import (
     distribute_until_filled,
 )
 from jupedsim.hdf5_serialization import Hdf5TrajectoryWriter
-from jupedsim.internal.tracing import (
-    Timer,
-    disable_tracing,
-    dump_traces,
-    enable_tracing,
-    end_trace_event,
-    start_trace_event,
-    trace_event,
-)
-from jupedsim.journey import JourneyDescription, Transition
-from jupedsim.library import (
-    BuildInfo,
-    get_build_info,
-    set_debug_callback,
-    set_error_callback,
-    set_info_callback,
-    set_warning_callback,
-)
-from jupedsim.location import Location
+from jupedsim.internal.tracing import Timer, trace_event
+from jupedsim.journey import JourneyDescription
 from jupedsim.models.anticipation_velocity_model import (
     AnticipationVelocityModel,
     AnticipationVelocityModelState,
@@ -63,16 +45,37 @@ from jupedsim.models.warp_driver import (
     WarpDriverModel,
     WarpDriverModelState,
 )
-from jupedsim.native import Geometry, SimulationError, WalkableSurface
+from jupedsim.native import (
+    AgentStep,
+    AgentView,
+    BuildInfo,
+    DirectSteeringStage,
+    ExitStage,
+    Geometry,
+    Location,
+    NeighborView,
+    SimulationError,
+    Transition,
+    WalkableSurface,
+    WallView,
+    WaypointStage,
+    disable_tracing,
+    dump_traces,
+    enable_tracing,
+    end_trace_event,
+    get_build_info,
+    is_tracing_enabled,
+    set_debug_callback,
+    set_error_callback,
+    set_info_callback,
+    set_warning_callback,
+    start_trace_event,
+)
 from jupedsim.recording import Recording, RecordingAgent, RecordingFrame
 from jupedsim.routing import RoutingEngine
 from jupedsim.serialization import TrajectoryWriter
 from jupedsim.simulation import Simulation
 from jupedsim.sqlite_serialization import SqliteTrajectoryWriter
-from jupedsim.stages import (
-    ExitStage,
-    WaypointStage,
-)
 
 __version__ = get_build_info().library_version
 """
@@ -107,6 +110,7 @@ __all__ = [
     "CollisionFreeSpeedModelV3",
     "CollisionFreeSpeedModelV3State",
     "CustomOperationalModel",
+    "DirectSteeringStage",
     "ExitStage",
     "GeneralizedCentrifugalForceModel",
     "GeneralizedCentrifugalForceModelState",
@@ -149,6 +153,7 @@ __all__ = [
     "enable_tracing",
     "end_trace_event",
     "get_build_info",
+    "is_tracing_enabled",
     "set_debug_callback",
     "set_error_callback",
     "set_info_callback",

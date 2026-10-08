@@ -41,10 +41,10 @@ of the model as keyword-only constructor arguments with sensible defaults:
 ``desired_speed`` and ``radius``.
 """
 
-import jupedsim.native as py_jps
-
-AnticipationVelocityModel = py_jps.AnticipationVelocityModel
-AnticipationVelocityModelState = py_jps.AnticipationVelocityModelState
+from jupedsim.native import (
+    AnticipationVelocityModel,
+    AnticipationVelocityModelState,
+)
 
 __all__ = [
     "AnticipationVelocityModel",

@@ -31,7 +31,7 @@ class RoutingEngine:
     ) -> list[tuple[float, float]]:
         """Computes shortest path between specified points.
 
-        Arguments:
+        Args:
             geometry: Data to create the geometry out of. Data may be supplied as:
 
                 * list of 2d points describing the outer boundary, holes may be added with use of `excluded_areas` kw-argument
@@ -49,7 +49,7 @@ class RoutingEngine:
             frm: point from which to find the shortest path
             to: point to which to find the shortest path
 
-        Keyword Arguments:
+        Keyword Args:
             excluded_areas: describes exclusions
                 from the walkable area. Only use this argument if `geometry` was
                 provided as list[tuple[float, float]].

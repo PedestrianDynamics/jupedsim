@@ -2,7 +2,9 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 set -euo pipefail
 export JPSCORE_SOURCE_PATH="@PROJECT_SOURCE_DIR@"
-export PYTHONPATH="@PROJECT_SOURCE_DIR@/python_modules/jupedsim:@CMAKE_LIBRARY_OUTPUT_DIRECTORY@"
+# The stage holds the package with the compiled module and its stubs; the docs
+# document the native types through those stubs.
+export PYTHONPATH="@PROJECT_BINARY_DIR@/stage"
 
 echo "Source path ${JPSCORE_SOURCE_PATH}"
 echo "PYTHONPATH=${PYTHONPATH}"

@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 import jupedsim as jps
+import jupedsim.py_jupedsim as native
 import pytest
 import shapely
 
@@ -357,3 +358,29 @@ def test_direct_steering_target_must_be_inside_geometry():
         match=r"Point \(-50, -50\) is outside of accessible area",
     ):
         agent.final_target = (-50, -50)
+
+
+@pytest.mark.parametrize("level", ["debug", "info", "warning", "error"])
+def test_log_callback_setters_are_the_native_functions(level):
+    setter = getattr(jps, f"set_{level}_callback")
+    assert setter is getattr(native, f"set_{level}_callback")
+    assert f"Set receiver for {level} messages" in setter.__doc__
+    setter(fn=lambda msg: None)  # the keyword name stays "fn"
+
+
+def test_build_info_is_native():
+    info = jps.get_build_info()
+    assert type(info) is jps.BuildInfo
+    assert jps.get_build_info is native.get_build_info
+    assert not hasattr(native, "buildinfo")
+    assert info.library_version == jps.__version__
+    assert repr(info) == (
+        f"JuPedSim {info.library_version}:\n"
+        "--------------------------------\n"
+        f"Commit: {info.git_commit_hash} from {info.git_branch}"
+        f" on {info.git_commit_date}\n"
+        f"Compiler: {info.compiler} ({info.compiler_version})"
+    )
+    assert repr(jps.BuildInfo()) == repr(info)
+    assert "SHA1 commit hash" in jps.BuildInfo.git_commit_hash.__doc__
+    assert "printable" in jps.get_build_info.__doc__

@@ -39,9 +39,9 @@ model as keyword-only constructor arguments with sensible defaults:
 ``force_distance`` (B) and ``radius`` (r).
 """
 
-import jupedsim.native as py_jps
-
-SocialForceModel = py_jps.SocialForceModel
-SocialForceModelState = py_jps.SocialForceModelState
+from jupedsim.native import (
+    SocialForceModel,
+    SocialForceModelState,
+)
 
 __all__ = ["SocialForceModel", "SocialForceModelState"]

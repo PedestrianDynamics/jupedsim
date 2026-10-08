@@ -70,8 +70,7 @@ import hdf5plugin
 import numpy as np
 import numpy.typing as npt
 
-from jupedsim.library import get_build_info
-from jupedsim.native import Geometry
+from jupedsim.native import Geometry, get_build_info
 from jupedsim.serialization import TrajectoryWriter
 from jupedsim.simulation import Simulation
 
@@ -87,7 +86,7 @@ class Hdf5TrajectoryWriter(TrajectoryWriter):
     Call :meth:`close` when the simulation is done to write the remaining rows
     and the frame index, or use the writer in a ``with`` block.
 
-    Arguments:
+    Args:
         output_file: File to write to; an existing file is overwritten.
         every_nth_frame: Record every n-th iteration, 1 records all of them.
     """

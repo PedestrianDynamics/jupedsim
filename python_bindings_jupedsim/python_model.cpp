@@ -6,6 +6,7 @@
 #include "OperationalModel.hpp"
 #include "OperationalModels/CustomModel/CustomModel.hpp"
 #include "SimulationError.hpp"
+#include "callback_views.hpp"
 #include "conversion.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep
 
@@ -13,6 +14,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <tuple>
@@ -82,8 +84,8 @@ PythonModel::PythonModel(py::object model) : _model(std::move(model))
     if(!_model || _model.is_none()) {
         throw std::invalid_argument("_PythonModel requires a CustomOperationalModel instance");
     }
-    if(!py::hasattr(_model, "_compute_next_state") ||
-       !py::hasattr(_model, "_check_model_constraint")) {
+    if(!py::hasattr(_model, "compute_next_state") ||
+       !py::hasattr(_model, "check_model_constraint")) {
         throw std::invalid_argument("_PythonModel requires a CustomOperationalModel instance");
     }
 }
@@ -114,9 +116,12 @@ Point PythonModel::ComputeNextState(
     py::gil_scoped_acquire gil;
 
     py::object pythonState = std::get<CustomModel::State>(current).Get<GilSafePyObject>().Get();
-    py::object pythonStep = py::cast(&step, py::return_value_policy::reference);
+    // The views handed to Python expire with the callback, also when it raises.
+    auto scope = std::make_shared<CallbackScope>();
+    const CloseScopeOnExit closeScope{*scope};
+    py::object pythonStep = py::cast(PyAgentStep{step, scope});
 
-    py::object pythonUpdate = _model.attr("_compute_next_state")(pythonState, pythonStep);
+    py::object pythonUpdate = _model.attr("compute_next_state")(pythonState, pythonStep);
 
     if(!py::isinstance<py::tuple>(pythonUpdate)) {
         throw SimulationError(
@@ -160,18 +165,18 @@ void PythonModel::CheckModelConstraint(const GenericAgent& agent, const AgentVie
     py::gil_scoped_acquire gil;
 
     py::object pythonState = std::get<CustomModel::State>(agent.state).Get<GilSafePyObject>().Get();
-    py::object pythonView = py::cast(&view, py::return_value_policy::reference);
+    auto scope = std::make_shared<CallbackScope>();
+    const CloseScopeOnExit closeScope{*scope};
+    py::object pythonView = py::cast(PyAgentView{view, scope});
 
-    _model.attr("_check_model_constraint")(pythonState, pythonView);
+    _model.attr("check_model_constraint")(pythonState, pythonView);
 }
 
-/// The Python surface wraps the native view in jupedsim.agent_view.AgentStep. A model that
-/// delegates hands on the step it was given, so accept either the wrapper or the native object.
+/// A model that delegates hands on the step it was given (or one derived from it).
 static const AgentStep& asAgentStep(const py::object& step)
 {
-    const py::object native = py::hasattr(step, "_obj") ? step.attr("_obj") : step;
     try {
-        return *native.cast<const AgentStep*>();
+        return step.cast<const PyAgentStep&>().Step();
     } catch(const py::cast_error&) {
         throw SimulationError(
             "compute_next_state() expects the step it was called with, got {}", Describe(step));
@@ -209,9 +214,10 @@ void init_python_model(py::module_& m)
                     throw SimulationError(
                         agentStep.HasNeighborMapping() ?
                             "{} encountered a neighbor it cannot read. The mapping passed to "
-                            "with_neighbor_states() has to return '{}' states." :
+                            "with_neighbor_state_mapping() has to return '{}' states." :
                             "{} encountered a neighbor it cannot read. Map neighbors to '{}' "
-                            "states with AgentStep.with_neighbor_states() before delegating.",
+                            "states with AgentStep.with_neighbor_state_mapping() before "
+                            "delegating.",
                         ToString(self.Type()),
                         ToString(self.Type()));
                 }
@@ -222,8 +228,28 @@ void init_python_model(py::module_& m)
             },
             py::arg("state"),
             py::arg("step"),
-            "Run this model for one step on 'state', as perceived through 'step'. Returns "
-            "(next_state, movement). The agent's stored state is not touched.");
+            cleanDoc(R"(
+                Run this model for one step.
+
+                Lets a custom model delegate to a built-in one. The agent's stored
+                state is not touched.
+
+                Args:
+                    state: Model state of this model's type to advance.
+                    step: The :class:`~jupedsim.AgentStep` the custom model was
+                        called with, optionally mapped with
+                        :meth:`~jupedsim.AgentStep.with_neighbor_state_mapping`.
+
+                Returns:
+                    A pair ``(next_state, movement)``; ``movement`` is the offset
+                    ``(dx, dy)`` the agent wants to move by.
+
+                Raises:
+                    SimulationError: If ``state`` is not of this model's type,
+                        ``step`` is not an :class:`~jupedsim.AgentStep`, or a
+                        neighbor carries a state this model cannot read.
+            )")
+                .c_str());
 
     py::class_<PythonModel, OperationalModel, py::smart_holder>(m, "_PythonModel")
         .def(py::init<py::object>(), py::arg("model"));
