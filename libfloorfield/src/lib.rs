@@ -132,6 +132,16 @@ mod ffi {
             p: Point2d,
             dest: usize,
         ) -> Result<Point2d>;
+        /// Travel time from `p` in `region` to `dest`: zero inside it,
+        /// infinite where it cannot be reached. Solves the destination on
+        /// first use.
+        #[cxx_name = "travel_time"]
+        fn travel_time_ffi(
+            self: &mut MultiRegionFloorfield,
+            region: usize,
+            p: Point2d,
+            dest: usize,
+        ) -> Result<f64>;
         /// Travel time to `dest` for every cell of `region`'s grid, infinite
         /// where it cannot be reached. Solves the destination on first use.
         fn region_travel_times(
@@ -188,6 +198,15 @@ impl MultiRegionFloorfield {
     ) -> Result<Point2d, MultiRegionError> {
         let (x, y) = self.direction(region, p.x, p.y, dest)?;
         Ok(Point2d { x, y })
+    }
+
+    fn travel_time_ffi(
+        &mut self,
+        region: usize,
+        p: Point2d,
+        dest: usize,
+    ) -> Result<f64, MultiRegionError> {
+        self.travel_time(region, p.x, p.y, dest)
     }
 
     fn region_travel_times(
