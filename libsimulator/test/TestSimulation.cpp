@@ -16,8 +16,8 @@
 #include <utility>
 #include <vector>
 
-/// What only a whole simulation can be asked: whether a world made of a surface mesh runs, and
-/// whether the places written into it land on the storey they were meant on.
+/// What only a whole simulation can be asked: whether a multi-storey world runs, and whether the
+/// places written into it land on the storey they were meant on.
 namespace
 {
 using State = CollisionFreeSpeedModel::State;
@@ -120,54 +120,52 @@ TEST(MultiStoreySimulation, ATargetWrittenFromOutsideLandsOnTheAgentsOwnStorey)
     EXPECT_EQ(sim.Agent(downstairs).finalTarget.region(), stair.ground);
 }
 
-TEST(MeshBuiltSimulation, HasNoPolygonToHandOut)
+TEST(MeshBuiltSimulation, IsRejected)
 {
-    EXPECT_THROW(on_the_switchback_stair()->Geo().polygon(0), SimulationError);
-    EXPECT_NO_THROW(on_a_flat_room()->Geo().polygon(0));
+    EXPECT_THROW(on_the_switchback_stair(), SimulationError);
+    EXPECT_NO_THROW(on_a_flat_room());
 }
 
-TEST(MeshBuiltSimulation, WalkingUpAStairToTheExitAtTheTop)
+namespace
 {
-    auto sim =
-        std::make_unique<Simulation>(model(), test_geometries::straight_stair_to_a_landing(), 0.01);
-
-    // A mesh brings no region ids along, so look them up.
-    const auto ground = sim->Geo().get_location_near_z(2, 4, 0.0)->region();
-    const auto landing = sim->Geo().get_location_near_z(18, 4, 3.0)->region();
-
-    // Start on the ground floor, exit on the landing three metres up: the whole way there leads
-    // over the flight, so arriving at all means the climb worked.
-    const Polygon outline{{{17, 2}, {19, 2}, {19, 6}, {17, 6}}};
-    const auto exit = sim->AddStage(ExitDescription{outline}, landing);
-    const auto journey = sim->AddJourney({{exit, NonTransitionDescription{}}});
-    const auto id = sim->AddAgent(journey, exit, Point{2, 4}, State{}, ground);
-
+struct Climb {
     std::vector<double> heights{};
     std::vector<Point> positions{};
-    for(int step = 0; step < 4000 && sim->AgentCount() > 0; ++step) {
-        heights.push_back(sim->Agent(id).location.z());
-        positions.push_back(sim->Agent(id).location.xy());
-        sim->Iterate();
+};
+
+/// Heights and positions of agent @p id, one per step, until @p done or 6000 steps have passed.
+template <typename Done>
+Climb climb(Simulation& sim, GenericAgent::ID id, Done done)
+{
+    Climb climb{};
+    for(int step = 0; step < 6000 && !done(); ++step) {
+        const auto& agent = sim.Agent(id);
+        climb.heights.push_back(agent.location.z());
+        climb.positions.push_back(agent.location.xy());
+        sim.Iterate();
     }
+    return climb;
+}
 
-    EXPECT_EQ(sim->AgentCount(), 0u) << "never made it to the exit";
-    ASSERT_FALSE(heights.empty());
-
-    // Up, and never back down.
-    EXPECT_EQ(heights.front(), 0.0);
-    for(std::size_t i = 1; i < heights.size(); ++i) {
-        EXPECT_GE(heights[i], heights[i - 1] - 1e-9)
-            << "dropped from " << heights[i - 1] << " to " << heights[i] << " at step " << i;
+/// From the ground floor up to the upper one at z = 3, never back down, and without stalling: a
+/// phantom wall over or under the agent would show as one that stops making headway.
+void expect_climbed_without_stalling(const Climb& climb)
+{
+    ASSERT_FALSE(climb.heights.empty());
+    EXPECT_EQ(climb.heights.front(), 0.0);
+    for(std::size_t i = 1; i < climb.heights.size(); ++i) {
+        EXPECT_GE(climb.heights[i], climb.heights[i - 1] - 1e-9)
+            << "dropped from " << climb.heights[i - 1] << " to " << climb.heights[i] << " at step "
+            << i;
     }
-    EXPECT_GE(heights.back(), 3.0 - 1e-9);
-
-    // No standing still: a phantom wall under or over the flight would show as an agent that
-    // stops making headway without ever arriving.
-    for(std::size_t i = 100; i < positions.size(); i += 100) {
-        EXPECT_GT((positions[i] - positions[i - 100]).Norm(), 0.05)
-            << "stalled around " << positions[i].x << ", " << positions[i].y;
+    EXPECT_GE(climb.heights.back(), 3.0 - 1e-9);
+    for(std::size_t i = 100; i < climb.positions.size(); i += 100) {
+        const auto& p = climb.positions[i];
+        EXPECT_GT((p - climb.positions[i - 100]).Norm(), 0.05)
+            << "stalled around " << p.x << ", " << p.y;
     }
 }
+} // namespace
 
 TEST(MultiStoreySimulation, WalkingUpTheUStairToTheExitAbove)
 {
@@ -182,34 +180,33 @@ TEST(MultiStoreySimulation, WalkingUpTheUStairToTheExitAbove)
     const auto journey = sim.AddJourney({{exit, NonTransitionDescription{}}});
     const auto id = sim.AddAgent(journey, exit, Point{2, 6}, State{}, stair.ground);
 
-    std::vector<double> heights{};
-    std::vector<Point> positions{};
-    for(int step = 0; step < 6000 && sim.AgentCount() > 0; ++step) {
-        const auto& agent = sim.Agent(id);
-        heights.push_back(agent.location.z());
-        positions.push_back(agent.location.xy());
-        sim.Iterate();
-    }
+    const auto walked = climb(sim, id, [&sim] { return sim.AgentCount() == 0; });
 
     EXPECT_EQ(sim.AgentCount(), 0u) << "never made it to the exit";
-    ASSERT_FALSE(heights.empty());
-
     // Standing in the exit's outline is not standing in the exit: from the ground floor the way to
     // its centre leads to the storey above, not to the centre.
-    EXPECT_EQ(heights.front(), 0.0);
-    EXPECT_GT(heights.size(), 1u) << "left through the floor above, on the first step";
+    EXPECT_GT(walked.heights.size(), 1u) << "left through the floor above, on the first step";
+    expect_climbed_without_stalling(walked);
+}
 
-    // Up, and never back down.
-    for(std::size_t i = 1; i < heights.size(); ++i) {
-        EXPECT_GE(heights[i], heights[i - 1] - 1e-9)
-            << "dropped from " << heights[i - 1] << " to " << heights[i] << " at step " << i;
-    }
-    EXPECT_GE(heights.back(), 3.0 - 1e-9);
+TEST(MultiStoreySimulation, SteeredUpTheUStairToTheFloorAbove)
+{
+    auto stair = test_geometries::u_stair();
+    Simulation sim{model(), std::move(stair.geometry), 0.01};
 
-    // No standing still: a phantom wall over or under him would show as an agent that stops
-    // making headway without ever arriving.
-    for(std::size_t i = 100; i < positions.size(); i += 100) {
-        EXPECT_GT((positions[i] - positions[i - 100]).Norm(), 0.05)
-            << "stalled around " << positions[i].x << ", " << positions[i].y;
-    }
+    // The same way as to the exit above, steered towards a single place.
+    const auto steering = sim.AddStage(DirectSteeringDescription{});
+    const auto journey = sim.AddJourney({{steering, NonTransitionDescription{}}});
+    const auto id = sim.AddAgent(journey, steering, Point{2, 6}, State{}, stair.ground);
+    const auto target = sim.GetLocation(2, 6, stair.upper);
+    sim.SetAgentTarget(id, target);
+
+    const auto arrived = [&] {
+        const auto& at = sim.Agent(id).location;
+        return at.region() == stair.upper && (at.xy() - target.xy()).Norm() < 0.2;
+    };
+    const auto walked = climb(sim, id, arrived);
+
+    EXPECT_TRUE(arrived()) << "never made it to the target";
+    expect_climbed_without_stalling(walked);
 }

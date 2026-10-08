@@ -12,7 +12,6 @@
 #include "SimulationError.hpp"
 #include "Stage.hpp"
 #include "StageDescription.hpp"
-#include "SurfaceMeshShortestPathRoutingEngine.hpp"
 #include "Tracing.hpp"
 #include "Visitor.hpp"
 
@@ -62,7 +61,7 @@ Simulation::Simulation(
     : _clock(dT)
     , _operationalDecisionSystem(std::move(operationalModel))
     , _geometry(std::move(geometry))
-    , _routingEngine(std::make_unique<SurfaceMeshShortestPathRoutingEngine>(*_geometry))
+    , _routingEngine(std::make_unique<RoutingEngine>(*_geometry))
 {
 }
 

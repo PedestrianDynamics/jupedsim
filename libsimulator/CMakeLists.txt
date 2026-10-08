@@ -13,8 +13,13 @@ target_sources(simulator PRIVATE
     src/CfgCgal.hpp
     src/Ellipse.cpp
     src/Ellipse.hpp
+    src/FloorfieldRoutingEngine.cpp
+    src/FloorfieldRoutingEngine.hpp
     src/GenericAgent.hpp
     src/GeometricFunctions.hpp
+    src/Destination.cpp
+    src/Destination.hpp
+    src/Geometry/AreaPiece.hpp
     src/Geometry/BoundaryIndex.cpp
     src/Geometry/BoundaryIndex.hpp
     src/Geometry/Geometry.cpp
@@ -50,6 +55,7 @@ target_sources(simulator PRIVATE
     src/Point.hpp
     src/Polygon.cpp
     src/Polygon.hpp
+    src/RoutingEngine.cpp
     src/RoutingEngine.hpp
     src/Simulation.cpp
     src/Simulation.hpp
@@ -85,6 +91,7 @@ target_link_libraries(simulator PUBLIC
     build_info
     glm::glm
     perfetto
+    floorfield_cxx
 )
 target_link_options(simulator PUBLIC
     $<$<AND:$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>,$<BOOL:${BUILD_WITH_SANITIZERS}>>:-fsanitize=address,undefined>
@@ -123,6 +130,7 @@ if (BUILD_TESTS)
         test/TestSimulation.cpp
         test/TestSimulationClock.cpp
         test/TestStage.cpp
+        test/TestSurfaceMeshShortestPathRoutingEngine.cpp
         test/TestUniqueID.cpp
         test/TestValidation.cpp
         test/TestWalkableSurface.cpp
@@ -133,8 +141,6 @@ if (BUILD_TESTS)
         GTest::gtest_main
         GTest::gtest
         simulator
-        # Floor fields are only exercised by the tests so far; the simulator does not use them.
-        floorfield_cxx
     )
 
     target_link_libraries(libsimulator-tests PRIVATE project_options)

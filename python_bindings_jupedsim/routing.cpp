@@ -31,14 +31,7 @@ void init_routing(py::module_& m)
             return fmt::format("Location({}, {}, {})", l.xy().x, l.xy().y, l.z());
         });
 
-    py::class_<RoutingEngine>(m, "RoutingEngine")
-        .def("is_valid_location", &RoutingEngine::IsValidLocation)
-        .def("get_shortest_path", &RoutingEngine::GetShortestPath)
-        .def("get_orientation", &RoutingEngine::GetOrientation)
-        .def("wall_clearance", &RoutingEngine::WallClearance);
-
-    py::class_<SurfaceMeshShortestPathRoutingEngine, RoutingEngine>(
-        m, "SurfaceMeshShortestPathRoutingEngine")
+    py::class_<SurfaceMeshShortestPathRoutingEngine>(m, "SurfaceMeshShortestPathRoutingEngine")
         // The engine borrows the geometry; keep_alive ties the Python-side
         // Geometry's lifetime to the engine so the borrow can't dangle.
         .def(
@@ -46,5 +39,9 @@ void init_routing(py::module_& m)
                 return std::make_unique<SurfaceMeshShortestPathRoutingEngine>(geometry);
             }),
             py::arg("geometry"),
-            py::keep_alive<1, 2>());
+            py::keep_alive<1, 2>())
+        .def("is_valid_location", &SurfaceMeshShortestPathRoutingEngine::IsValidLocation)
+        .def("get_shortest_path", &SurfaceMeshShortestPathRoutingEngine::GetShortestPath)
+        .def("get_orientation", &SurfaceMeshShortestPathRoutingEngine::GetOrientation)
+        .def("wall_clearance", &SurfaceMeshShortestPathRoutingEngine::WallClearance);
 }
