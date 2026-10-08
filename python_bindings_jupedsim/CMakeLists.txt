@@ -96,8 +96,11 @@ set(STUB_FILES
 # The module is found via the working directory (python -m puts it first on
 # sys.path), not PYTHONPATH: pip's isolated build exposes the build requirements
 # through PYTHONPATH, so overriding it would hide pybind11-stubgen and shapely.
+# The stub folder is cleared first: stubgen only writes the current modules, so
+# stubs of removed submodules would linger and fail the stubtest system test.
 add_custom_command(
     OUTPUT ${STUB_FILES}
+    COMMAND ${CMAKE_COMMAND} -E rm -rf ${STUB_DIR}
     COMMAND ${Python_EXECUTABLE} -m pybind11_stubgen jupedsim.py_jupedsim
             -o ${STAGE} --exit-code
     WORKING_DIRECTORY ${STAGE}
