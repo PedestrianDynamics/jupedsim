@@ -1,11 +1,7 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
-from pathlib import Path
 
 import jupedsim as jps
 import pytest
-
-OBJ = Path(__file__).parents[3] / "examples/geometry/multi_level_u_stair.obj"
-OFFICE = Path(__file__).parents[3] / "examples/geometry/office_5floors.obj"
 
 # The two stacked floors of the U-stair, and an (x, y) that both carry.
 GROUND_Z = 0.0
@@ -51,28 +47,6 @@ def u_stair(**simulation_args):
         "dt": 0.01,
     } | simulation_args
     return jps.Simulation(geometry=surface, **args), ground, upper
-
-
-def mesh_simulation(geometry: str | Path = OBJ):
-    return jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=geometry, dt=0.01
-    )
-
-
-def test_simulation_can_be_built_from_an_obj_path():
-    sim = mesh_simulation()
-    assert sim.agent_count() == 0
-
-
-def test_a_string_naming_an_obj_file_is_a_mesh_not_a_wkt():
-    sim = mesh_simulation(str(OBJ))
-    assert sim.agent_count() == 0
-
-
-def test_a_mesh_built_simulation_has_no_polygon_to_hand_out():
-    sim = mesh_simulation()
-    with pytest.raises(jps.SimulationError, match="built from mesh"):
-        sim.get_geometry().polygon(region_id=0)
 
 
 def polygon_simulation():
@@ -317,52 +291,3 @@ def test_the_exit_an_agent_walks_towards_is_the_one_on_its_own_floor():
         if sim.agent_count() == 0:
             break
     assert sim.agent_count() == 0
-
-
-def ground_floor_region(sim, x, y):
-    """Region of the lowest location over (x, y): a mesh declares no regions to name."""
-    geometry = sim.get_geometry()
-    located = []
-    for region_id in range(geometry.region_count()):
-        try:
-            located.append(geometry.get_location(x, y, region_id=region_id))
-        except jps.SimulationError:
-            pass
-    return min(located, key=lambda location: location.z).region_id
-
-
-def test_an_agent_gets_down_a_long_corridor():
-    # A corridor 45 m long, finely divided: the geodesic crosses a hundred edges, and the
-    # path comes back with its own source point a fraction of a nanometre off. Given that as
-    # its next waypoint, an agent walks a nanometre and stalls -- and because the direction of
-    # so short a step is rounding noise, it wanders back the way it came.
-    sim = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=OFFICE, dt=0.01
-    )
-    exit_id = sim.add_exit_stage(
-        [(43.5, 7.4), (45.5, 7.4), (45.5, 8.6), (43.5, 8.6)],
-        region_id=ground_floor_region(sim, 44.5, 8.0),
-    )
-    journey_id = sim.add_journey(jps.JourneyDescription([exit_id]))
-    agent = sim.agent(
-        sim.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=(2.0, 3.5),
-            state=jps.CollisionFreeSpeedModelState(),
-            region_id=ground_floor_region(sim, 2.0, 3.5),
-        )
-    )
-    reached = [agent.position[0]]
-    for _ in range(6000):
-        sim.iterate()
-        if sim.agent_count() == 0:
-            break
-        reached.append(agent.position[0])
-
-    assert sim.agent_count() == 0
-    # and it walked the corridor rather than wandering it: never far back the way it came
-    assert (
-        min(later - earlier for earlier, later in zip(reached, reached[1:]))
-        > -0.05
-    )

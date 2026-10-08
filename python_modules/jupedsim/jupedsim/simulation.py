@@ -1,7 +1,5 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
-import os
-from pathlib import Path
 from typing import Any, Iterator
 
 import shapely
@@ -57,24 +55,16 @@ _STATE_TYPES = (
     WarpDriverModelState,
 )
 
-_MESH_SUFFIXES = (".obj",)
-
 
 def _as_geometry(geometry: Any) -> py_jps.Geometry:
     """Convert to native geometry.
 
-    A ``Path`` and ``str`` ending with ".obj" read a mesh file; a geometry is used untouched;
-    fallback to build from 2D.
+    A geometry is used untouched; fallback to build from 2D.
     """
     if isinstance(geometry, py_jps.Geometry):
         return geometry
     if isinstance(geometry, py_jps.WalkableSurface):
         return geometry.create_geometry()
-    if isinstance(geometry, os.PathLike) or (
-        isinstance(geometry, str)
-        and Path(geometry).suffix.lower() in _MESH_SUFFIXES
-    ):
-        return py_jps.Geometry.from_obj(os.fspath(geometry))
     return build_geometry(geometry)
 
 
@@ -102,7 +92,6 @@ class Simulation:
         ),
         geometry: (
             str
-            | os.PathLike
             | py_jps.WalkableSurface
             | shapely.GeometryCollection
             | shapely.Polygon
@@ -150,13 +139,11 @@ class Simulation:
                   for the shapely types are supported: GEOMETRYCOLLETION, MULTIPOLYGON, POLYGON,
                   MULTIPOINT. The same restrictions as mentioned for the shapely types apply.
 
-                * :class:`~pathlib.Path` (or a str ending in ``.obj``) naming an OBJ file holding a
-                  walkable surface. The world is then a surface: agents walk on it and are routed
-                  over it, floors may be stacked, and there is no polygon underneath --
-                  :func:`get_geometry` has no answer for such a simulation.
+                * :class:`~jupedsim.WalkableSurface` made of regions, which may be stacked into
+                  floors and joined by stairs or ramps.
 
-                A walkable area given as a polygon (all forms but the OBJ file) is a single region
-                with id ``0``.
+                A walkable area given as a polygon (all forms but the WalkableSurface) is a single
+                region with id ``0``.
 
             dt: Iteration step size in seconds. It is recommended to leave this at its default
                 value.
