@@ -38,7 +38,7 @@ Types and template parameters are `PascalCase`; everything you call or read is
 | macro | `UPPER_CASE` | `JPS_TRACE_EVENT` |
 | namespace | `snake_case` | `jps` |
 | names a standard protocol requires | as the standard spells them | `value_type`, `begin()` |
-| file | after its main type: `PascalCase.hpp/.cpp`; bindings `snake_case.cpp` after the Python module; tests `TestX.cpp` | `Simulation.hpp`, `agent_view.cpp` |
+| file and directory | `snake_case`, after the main type or the Python module; tests `test_x.cpp` | `simulation.hpp`, `operational_models/social_force_model/`, `test_aabb.cpp` |
 
 Constants are variables: there is no `k` prefix and no `UPPER_CASE` for them, those are
 reserved for macros. Operators, constructors, destructors and `main` have no name to style.
@@ -55,7 +55,7 @@ reserved for macros. Operators, constructors, destructors and `main` have no nam
   (`value_type`, `iterator_category`, CGAL's `Rebind_TDS`, pybind11's `cast_op_type`,
   googletest's `PrintTo`). They are listed explicitly in `.clang-tidy`; add a new one there
   with a comment saying which protocol needs it.
-- File names are not tool-checked.
+- File and directory names are not tool-checked.
 
 ## In code
 

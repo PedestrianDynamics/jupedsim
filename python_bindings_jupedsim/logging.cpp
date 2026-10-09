@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "logging.hpp"
 
-#include "Logger.hpp"
 #include "conversion.hpp"
+#include "logger.hpp"
 
 #include <pybind11/functional.h> // IWYU pragma: keep
 #include <pybind11/pybind11.h>

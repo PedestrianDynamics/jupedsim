@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "Simulation.hpp"
+#include "simulation.hpp"
 
-#include "GenericAgent.hpp"
-#include "Geometry/Geometry.hpp"
-#include "Geometry/Location.hpp"
-#include "Journey.hpp"
-#include "OperationalModel.hpp"
-#include "Polygon.hpp"
-#include "Stage.hpp"
-#include "StageDescription.hpp"
 #include "conversion.hpp"
+#include "generic_agent.hpp"
+#include "geometry/geometry.hpp"
+#include "geometry/location.hpp"
+#include "journey.hpp"
+#include "operational_model.hpp"
+#include "polygon.hpp"
+#include "stage.hpp"
+#include "stage_description.hpp"
 #include "transition.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep
 

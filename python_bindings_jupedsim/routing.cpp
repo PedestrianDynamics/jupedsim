@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "Geometry/Geometry.hpp"
-#include "Geometry/Location.hpp"
-#include "Geometry/Validation.hpp"
-#include "SimulationError.hpp"
-#include "SurfaceMeshShortestPathRoutingEngine.hpp"
 #include "conversion.hpp"
+#include "geometry/geometry.hpp"
+#include "geometry/location.hpp"
+#include "geometry/validation.hpp"
+#include "simulation_error.hpp"
+#include "surface_mesh_shortest_path_routing_engine.hpp"
 #include "type_casters.hpp"
 
 #include <CGAL/Polygon_mesh_processing/IO/polygon_mesh_io.h>

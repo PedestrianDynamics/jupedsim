@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "Stage.hpp"
+#include "stage.hpp"
 
 #include "conversion.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep

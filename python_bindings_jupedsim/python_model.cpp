@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "python_model.hpp"
 
-#include "AgentView.hpp"
-#include "GenericAgent.hpp"
-#include "OperationalModel.hpp"
-#include "OperationalModels/CustomModel/CustomModel.hpp"
-#include "SimulationError.hpp"
+#include "agent_view.hpp"
 #include "callback_views.hpp"
 #include "conversion.hpp"
+#include "generic_agent.hpp"
+#include "operational_model.hpp"
+#include "operational_models/custom_model/custom_model.hpp"
+#include "simulation_error.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep
 
 #include <fmt/format.h>

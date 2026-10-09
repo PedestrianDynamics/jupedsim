@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "callback_views.hpp"
 
-#include "OperationalModels/CustomModel/CustomModel.hpp"
-#include "SimulationError.hpp"
+#include "operational_models/custom_model/custom_model.hpp"
 #include "python_model.hpp"
+#include "simulation_error.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep
 
 #include <pybind11/stl.h>

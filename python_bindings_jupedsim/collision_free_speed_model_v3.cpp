@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "CollisionFreeSpeedModelV3.hpp"
-#include "OperationalModel.hpp"
+#include "collision_free_speed_model_v3.hpp"
+
+#include "operational_model.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep
 
 #include <pybind11/cast.h>
