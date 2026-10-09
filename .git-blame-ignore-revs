@@ -1,0 +1,4 @@
+# SPDX-License-Identifier: LGPL-3.0-or-later
+# Commits that touched every file without changing behaviour.
+# Use with: git config blame.ignoreRevsFile .git-blame-ignore-revs
+aa1286cb794e2787daea8781679adc10e0d594d9  # Adopt snake_case naming for C++ and enforce it with clang-tidy
