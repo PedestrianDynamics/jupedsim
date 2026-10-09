@@ -61,9 +61,9 @@ ff::RegionGraph to_floorfield(const Geometry::RegionGraph2D& g)
 }
 
 /// A floor field over the region graph of @p geo, which must be built by WalkableSurface.
-rust::Box<ff::MultiRegionFloorfield> field_over(const Geometry& geo, double cellSize)
+rust::Box<ff::MultiRegionFloorfield> field_over(const Geometry& geo, double cell_size)
 {
-    return ff::new_multi_region_floorfield(to_floorfield(*geo.region_graph_2d()), cellSize, 0.5);
+    return ff::new_multi_region_floorfield(to_floorfield(*geo.region_graph_2d()), cell_size, 0.5);
 }
 
 /// Ground (region 0, z = 0) and upper floor (region 1, z = 3), joined by stairs rising 3 m over
@@ -72,11 +72,11 @@ std::unique_ptr<Geometry> two_floors()
 {
     WalkableSurface surface{};
     const auto ground =
-        surface.AddRegion(WalkableSurface::Polygon{rectangle_points({0, 0}, {5, 5}), {}}, 0.0);
+        surface.add_region(WalkableSurface::Polygon{rectangle_points({0, 0}, {5, 5}), {}}, 0.0);
     const auto upper =
-        surface.AddRegion(WalkableSurface::Polygon{rectangle_points({10, 0}, {15, 5}), {}}, 3.0);
-    surface.ConnectRegions(ground, {{5, 0}, {5, 5}}, upper, {{10, 0}, {10, 5}});
-    return surface.CreateGeometry();
+        surface.add_region(WalkableSurface::Polygon{rectangle_points({10, 0}, {15, 5}), {}}, 3.0);
+    surface.connect_regions(ground, {{5, 0}, {5, 5}}, upper, {{10, 0}, {10, 5}});
+    return surface.create_geometry();
 }
 
 /// Travel time at @p xy in @p region.
@@ -87,12 +87,12 @@ double time_at(ff::MultiRegionFloorfield& field, std::size_t region, std::size_t
     const auto row = static_cast<std::size_t>(std::floor((xy.y - grid.origin_y) / grid.cell_size));
     return field.region_travel_times(region, dest)[row * grid.width + col];
 }
-/// Follow the field's directions from @p from the way an agent does, in steps of @p stepLength:
+/// Follow the field's directions from @p from the way an agent does, in steps of @p step_length:
 /// every step moves a Location over the surface mesh, which tracks the region across seams and
 /// keeps stacked floors apart. Stops on arrival (a zero direction, or the destination's cell with
 /// travel time 0), when a step would leave the walkable surface, or after a step budget.
 std::vector<Location>
-trace(ff::MultiRegionFloorfield& field, Location from, std::size_t dest, double stepLength = 0.1)
+trace(ff::MultiRegionFloorfield& field, Location from, std::size_t dest, double step_length = 0.1)
 {
     std::vector<Location> path{from};
     for(int i = 0; i < 2000; ++i) {
@@ -103,7 +103,7 @@ trace(ff::MultiRegionFloorfield& field, Location from, std::size_t dest, double 
         if(dir.x == 0.0 && dir.y == 0.0) {
             break;
         }
-        const auto moved = from.try_move_on_surface(Point{dir.x, dir.y} * stepLength);
+        const auto moved = from.try_move_on_surface(Point{dir.x, dir.y} * step_length);
         if(!moved) {
             break;
         }
@@ -182,11 +182,11 @@ TEST(Floorfield, RoomBehindADoorwayNarrowerThanACellThrows)
 {
     WalkableSurface surface{};
     const auto a =
-        surface.AddRegion({{{0, 0}, {10, 0}, {10, 5}, {10, 5.04}, {10, 10}, {0, 10}}, {}}, 0.0);
+        surface.add_region({{{0, 0}, {10, 0}, {10, 5}, {10, 5.04}, {10, 10}, {0, 10}}, {}}, 0.0);
     const auto b =
-        surface.AddRegion({{{11, 0}, {21, 0}, {21, 10}, {11, 10}, {11, 5.04}, {11, 5}}, {}}, 0.0);
-    surface.ConnectRegions(a, {{10, 5}, {10, 5.04}}, b, {{11, 5}, {11, 5.04}});
-    const auto geo = surface.CreateGeometry();
+        surface.add_region({{{11, 0}, {21, 0}, {21, 10}, {11, 10}, {11, 5.04}, {11, 5}}, {}}, 0.0);
+    surface.connect_regions(a, {{10, 5}, {10, 5.04}}, b, {{11, 5}, {11, 5.04}});
+    const auto geo = surface.create_geometry();
     auto field = field_over(*geo, 0.1);
     const auto dest = field->add_point_destination(a, {2, 2});
 
@@ -214,13 +214,13 @@ TEST(Floorfield, ExitSpanningSeveralRegions)
     const auto pieces = geo->split_into_region_pieces(exit, 0);
     ASSERT_EQ(pieces.size(), 3u);
 
-    std::vector<ff::AreaPiece> ffPieces{};
+    std::vector<ff::AreaPiece> ff_pieces{};
     for(const auto& piece : pieces) {
-        ffPieces.push_back({piece.region, to_ring(piece.polygon)});
+        ff_pieces.push_back({piece.region, to_ring(piece.polygon)});
     }
 
     auto field = field_over(*geo, 0.1);
-    const auto dest = field->add_area_destination({ffPieces.data(), ffPieces.size()});
+    const auto dest = field->add_area_destination({ff_pieces.data(), ff_pieces.size()});
 
     EXPECT_EQ(time_at(*field, 0, dest, {9.8, 5}), 0.0) << "piece in room 0";
     EXPECT_EQ(time_at(*field, 2, dest, {10.5, 5}), 0.0) << "piece in the doorway";
@@ -248,13 +248,13 @@ TEST(Floorfield, ExitSpanningSeveralRegions)
 TEST(Floorfield, SeamOnAHoleEdge)
 {
     WalkableSurface surface{};
-    const auto ground = surface.AddRegion(
+    const auto ground = surface.add_region(
         {{{0, 0}, {20, 0}, {20, 10}, {0, 10}},
          {{{2, 2}, {18, 2}, {18, 8}, {2, 8}, {2, 7}, {2, 3}}}},
         0.0);
-    const auto platform = surface.AddRegion({{{12, 3}, {17, 3}, {17, 7}, {12, 7}}, {}}, 1.0);
-    surface.ConnectRegions(ground, {{2, 3}, {2, 7}}, platform, {{12, 3}, {12, 7}});
-    const auto geo = surface.CreateGeometry();
+    const auto platform = surface.add_region({{{12, 3}, {17, 3}, {17, 7}, {12, 7}}, {}}, 1.0);
+    surface.connect_regions(ground, {{2, 3}, {2, 7}}, platform, {{12, 3}, {12, 7}});
+    const auto geo = surface.create_geometry();
 
     auto field = field_over(*geo, 0.1);
     const auto dest = field->add_point_destination(platform, {15, 5});
@@ -291,9 +291,9 @@ TEST(Floorfield, ComparedWithTheExactGeodesic)
     struct Case {
         const char* name;
         std::unique_ptr<Geometry> geo;
-        std::size_t fromRegion;
+        std::size_t from_region;
         Point3D from;
-        std::size_t toRegion;
+        std::size_t to_region;
         Point3D to;
     };
     std::vector<Case> cases{};
@@ -302,14 +302,14 @@ TEST(Floorfield, ComparedWithTheExactGeodesic)
 
     for(auto& c : cases) {
         SurfaceMeshShortestPathRoutingEngine geodesic{*c.geo};
-        const auto geodesic_path = geodesic.GetShortestPath(c.from, c.to);
+        const auto geodesic_path = geodesic.get_shortest_path(c.from, c.to);
         double g = 0.0;
         for(std::size_t i = 1; i < geodesic_path.size(); ++i) {
             g += std::sqrt(CGAL::squared_distance(geodesic_path[i - 1], geodesic_path[i]));
         }
         auto field = field_over(*c.geo, 0.1);
-        const auto dest = field->add_point_destination(c.toRegion, {c.to.x(), c.to.y()});
-        const auto from = c.geo->get_location(c.from.x(), c.from.y(), c.fromRegion);
+        const auto dest = field->add_point_destination(c.to_region, {c.to.x(), c.to.y()});
+        const auto from = c.geo->get_location(c.from.x(), c.from.y(), c.from_region);
         const double walked = length_3d(trace(*field, from, dest));
 
         EXPECT_LT(std::abs(walked / g - 1), 0.03) << c.name << ": walked " << walked << " vs " << g;

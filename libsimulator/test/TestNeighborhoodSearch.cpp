@@ -24,11 +24,13 @@ struct ValueWithPos {
 
 namespace
 {
-std::set<int>
-ItemIdsInRange(const NeighborhoodSearch<ValueWithPos<int>>& neighborhood, Point pos, double radius)
+std::set<int> item_ids_in_range(
+    const NeighborhoodSearch<ValueWithPos<int>>& neighborhood,
+    Point pos,
+    double radius)
 {
     std::set<int> ids{};
-    neighborhood.ForEachInRange(
+    neighborhood.for_each_in_range(
         pos, radius, [&ids](const ValueWithPos<int>& item) { ids.insert(item.val); });
     return ids;
 }
@@ -37,34 +39,34 @@ ItemIdsInRange(const NeighborhoodSearch<ValueWithPos<int>>& neighborhood, Point 
 TEST(NeighborhoodSearch, ReturnsEmptyOnEmpty)
 {
     NeighborhoodSearch<ValueWithPos<int>> neighborhood{3};
-    ASSERT_TRUE(ItemIdsInRange(neighborhood, {0, 0}, 10).empty());
+    ASSERT_TRUE(item_ids_in_range(neighborhood, {0, 0}, 10).empty());
 }
 
 TEST(NeighborhoodSearch, ReturnsOneValueInRange)
 {
     NeighborhoodSearch<ValueWithPos<int>> neighborhood{3};
     const AgentContainer<ValueWithPos<int>> agents{{{0, 0}, 1}};
-    neighborhood.Update(agents);
+    neighborhood.update(agents);
 
-    ASSERT_EQ(ItemIdsInRange(neighborhood, {0, 0}, 10), (std::set<int>{1}));
+    ASSERT_EQ(item_ids_in_range(neighborhood, {0, 0}, 10), (std::set<int>{1}));
 }
 
 TEST(NeighborhoodSearch, ReturnsMultipleValuesInRange)
 {
     NeighborhoodSearch<ValueWithPos<int>> neighborhood{3};
     const AgentContainer<ValueWithPos<int>> agents{{{0, 0}, 1}, {{0, 0}, 0}};
-    neighborhood.Update(agents);
+    neighborhood.update(agents);
 
-    ASSERT_EQ(ItemIdsInRange(neighborhood, {0, 0}, 10), (std::set<int>{1, 0}));
+    ASSERT_EQ(item_ids_in_range(neighborhood, {0, 0}, 10), (std::set<int>{1, 0}));
 }
 
 TEST(NeighborhoodSearch, ReturnsValuesFromDifferentInternalGridCells)
 {
     NeighborhoodSearch<ValueWithPos<int>> neighborhood{3};
     const AgentContainer<ValueWithPos<int>> agents{{{0, 0}, 1}, {{-3, 0}, 0}, {{4, 4}, 6}};
-    neighborhood.Update(agents);
+    neighborhood.update(agents);
 
-    ASSERT_EQ(ItemIdsInRange(neighborhood, {0, 0}, 10), (std::set<int>{1, 0, 6}));
+    ASSERT_EQ(item_ids_in_range(neighborhood, {0, 0}, 10), (std::set<int>{1, 0, 6}));
 }
 
 TEST(NeighborhoodSearch, RejectesValuesInGridCellsTooFarAway)
@@ -72,25 +74,25 @@ TEST(NeighborhoodSearch, RejectesValuesInGridCellsTooFarAway)
     NeighborhoodSearch<ValueWithPos<int>> neighborhood{3};
     const AgentContainer<ValueWithPos<int>> agents{
         {{0, 0}, 1}, {{-3, 0}, 0}, {{4, 4}, 6}, {{10, 10}, 7}};
-    neighborhood.Update(agents);
+    neighborhood.update(agents);
 
-    ASSERT_EQ(ItemIdsInRange(neighborhood, {0, 0}, 10), (std::set<int>{1, 0, 6}));
+    ASSERT_EQ(item_ids_in_range(neighborhood, {0, 0}, 10), (std::set<int>{1, 0, 6}));
 }
 
 TEST(NeighborhoodSearch, RejectsValuesFromSelectedGridThatareTooFarAway)
 {
     NeighborhoodSearch<ValueWithPos<int>> neighborhood{3};
     const AgentContainer<ValueWithPos<int>> agents{{{0, 0}, 1}, {{0.5, 0.5}, 2}, {{0.4, 0.4}, 3}};
-    neighborhood.Update(agents);
+    neighborhood.update(agents);
 
-    ASSERT_EQ(ItemIdsInRange(neighborhood, {0, 0}, 0.41 * sqrt(2.0)), (std::set<int>{1, 3}));
+    ASSERT_EQ(item_ids_in_range(neighborhood, {0, 0}, 0.41 * sqrt(2.0)), (std::set<int>{1, 3}));
 }
 
 TEST(NeighborhoodSearch, ReturnsValueExactlyDistanceAwayFromQueryPoint)
 {
     NeighborhoodSearch<ValueWithPos<int>> neighborhood{3};
     const AgentContainer<ValueWithPos<int>> agents{{{1, 0}, 1}};
-    neighborhood.Update(agents);
+    neighborhood.update(agents);
 
-    ASSERT_EQ(ItemIdsInRange(neighborhood, {0, 0}, 1), (std::set<int>{1}));
+    ASSERT_EQ(item_ids_in_range(neighborhood, {0, 0}, 1), (std::set<int>{1}));
 }

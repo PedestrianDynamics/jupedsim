@@ -38,17 +38,17 @@ struct AABB {
         ymax = std::max(b.y, std::max(a.y, ymax));
     }
 
-    bool Inside(Point p) const { return p.x >= xmin && p.x <= xmax && p.y >= ymin && p.y <= ymax; }
+    bool inside(Point p) const { return p.x >= xmin && p.x <= xmax && p.y >= ymin && p.y <= ymax; }
 
-    bool Overlap(const AABB& other) const
+    bool overlap(const AABB& other) const
     {
         return !(xmax < other.xmin || xmin > other.xmax || ymax < other.ymin || ymin > other.ymax);
     };
 
-    bool Intersects(const LineSegment& lineSegment) const;
+    bool intersects(const LineSegment& line_segment) const;
 
-    Point TopLeft() const { return Point{xmin, ymax}; };
-    Point TopRight() const { return Point{xmax, ymax}; };
-    Point BottomLeft() const { return Point{xmin, ymin}; };
-    Point BottomRight() const { return Point{xmax, ymin}; };
+    Point top_left() const { return Point{xmin, ymax}; };
+    Point top_right() const { return Point{xmax, ymax}; };
+    Point bottom_left() const { return Point{xmin, ymin}; };
+    Point bottom_right() const { return Point{xmax, ymin}; };
 };

@@ -230,10 +230,10 @@ These are fixed in the implementation and are not exposed as parameters.
 
 | Symbol | Code constant | Value | Unit | Role |
 |---|---|---:|---|---|
-| $w_b$ | `SpacingBlendWeight` | `0.15` | - | Weight of goal-direction spacing in the blend |
-| $\tau_\theta$ | `TauTheta` | `0.3` | s | Heading relaxation timescale |
-| $\varepsilon_s$ | `SideEps` | `0.05` | m | Side-sign smoothing constant |
-| $v_{\min}$ | `MinReverseSpeed` | `-0.01` | m/s | Reverse-speed floor for deadlock release |
+| $w_b$ | `spacing_blend_weight` | `0.15` | - | Weight of goal-direction spacing in the blend |
+| $\tau_\theta$ | `tau_theta` | `0.3` | s | Heading relaxation timescale |
+| $\varepsilon_s$ | `side_eps` | `0.05` | m | Side-sign smoothing constant |
+| $v_{\min}$ | `min_reverse_speed` | `-0.01` | m/s | Reverse-speed floor for deadlock release |
 
 ## Practical interpretation
 

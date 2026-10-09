@@ -21,7 +21,7 @@ public:
     /// @param wallClearance how far a route is held off the wall corners it turns on.
     explicit SurfaceMeshShortestPathRoutingEngine(
         const Geometry& geometry,
-        double wallClearance = 0.2);
+        double wall_clearance = 0.2);
     ~SurfaceMeshShortestPathRoutingEngine() = default;
 
     SurfaceMeshShortestPathRoutingEngine(const SurfaceMeshShortestPathRoutingEngine&) = delete;
@@ -32,20 +32,20 @@ public:
     operator=(SurfaceMeshShortestPathRoutingEngine&&) = delete;
 
     /// True iff @p loc projects onto the walkable surface.
-    bool IsValidLocation(const Point3D& loc) const;
+    bool is_valid_location(const Point3D& loc) const;
 
     /// Compute the shortest path from @p source to @p target, held off wall corners by the
     /// engine's wall clearance.
     /// @param source where to route from
     /// @param target where to route to
     /// @return the path, including source as first and target as last element
-    std::vector<Point3D> GetShortestPath(const Point3D& source, const Point3D& target);
+    std::vector<Point3D> get_shortest_path(const Point3D& source, const Point3D& target);
 
     /// Unit vector from @p from along the route to @p to, projected to x/y. Zero once @p from
     /// has reached @p to.
-    Point GetOrientation(const Location& from, const Location& to);
+    Point get_orientation(const Location& from, const Location& to);
 
-    double WallClearance() const { return _wallClearance; }
+    double wall_clearance() const { return _wall_clearance; }
 
 private:
     using Traits = CGAL::Surface_mesh_shortest_path_traits<K, SurfaceMesh>;
@@ -54,7 +54,7 @@ private:
     struct Step {
         Point3D point;
         /// Unit vector off a wall corner, zero where there is no corner.
-        Point intoTheOpen;
+        Point into_the_open;
     };
     using Way = std::vector<Step>;
 
@@ -75,10 +75,10 @@ private:
     Point next_waypoint(const Point3D& source, const Point3D& target);
 
     const Geometry& _geometry;
-    double _wallClearance;
+    double _wall_clearance;
 
     /// The tree last built by `tree_for`, and its target. Makes `GetShortestPath` and
     /// `GetOrientation` non-reentrant.
-    Point3D _lastTarget{};
-    std::unique_ptr<ShortestPath> _lastTree{};
+    Point3D _last_target{};
+    std::unique_ptr<ShortestPath> _last_tree{};
 };

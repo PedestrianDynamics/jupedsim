@@ -7,7 +7,8 @@
 #include <optional>
 
 template <typename Container>
-std::optional<size_t> IndexInContainer(const Container& c, const typename Container::value_type& v)
+std::optional<size_t>
+index_in_container(const Container& c, const typename Container::value_type& v)
 {
     size_t idx = 0;
     for(const auto& e : c) {
@@ -20,7 +21,7 @@ std::optional<size_t> IndexInContainer(const Container& c, const typename Contai
 }
 
 template <typename Container>
-bool Contains(const Container& c, const typename Container::value_type& v)
+bool contains(const Container& c, const typename Container::value_type& v)
 {
     return std::find(std::begin(c), std::end(c), v) != std::end(c);
 }

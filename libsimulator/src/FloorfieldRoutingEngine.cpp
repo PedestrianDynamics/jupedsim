@@ -15,9 +15,9 @@ namespace ff = jupedsim::floorfield;
 
 namespace
 {
-constexpr double cellSize = 0.2;
+constexpr double cell_size = 0.2;
 /// Walls slow agents down within this distance, which keeps routes off them.
-constexpr double wallInfluenceRadius = 0.5;
+constexpr double wall_influence_radius = 0.5;
 
 template <typename Call>
 auto checked(Call&& call)
@@ -72,12 +72,12 @@ ff::RegionGraph to_floorfield(const Geometry& geometry)
 FloorfieldRoutingEngine::FloorfieldRoutingEngine(const Geometry& geometry)
     : _field(checked([&geometry] {
         return ff::new_multi_region_floorfield(
-            to_floorfield(geometry), cellSize, wallInfluenceRadius);
+            to_floorfield(geometry), cell_size, wall_influence_radius);
     }))
 {
 }
 
-Destination FloorfieldRoutingEngine::RegisterDestination(const std::vector<AreaPiece>& pieces)
+Destination FloorfieldRoutingEngine::register_destination(const std::vector<AreaPiece>& pieces)
 {
     std::vector<ff::AreaPiece> ff_pieces{};
     ff_pieces.reserve(pieces.size());
@@ -91,13 +91,13 @@ Destination FloorfieldRoutingEngine::RegisterDestination(const std::vector<AreaP
     return Destination{*this, id};
 }
 
-bool FloorfieldRoutingEngine::Contains(const Location& where, std::size_t id)
+bool FloorfieldRoutingEngine::contains(const Location& where, std::size_t id)
 {
     const auto xy = where.xy();
     return checked([&] { return _field->travel_time(where.region(), {xy.x, xy.y}, id); }) == 0.0;
 }
 
-Point FloorfieldRoutingEngine::GetOrientation(const Location& from, std::size_t id)
+Point FloorfieldRoutingEngine::get_orientation(const Location& from, std::size_t id)
 {
     const auto xy = from.xy();
     const auto direction =

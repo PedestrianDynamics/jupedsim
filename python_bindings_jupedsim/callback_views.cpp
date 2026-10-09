@@ -11,11 +11,11 @@
 #include <utility>
 #include <variant>
 
-py::object stateToPython(const OperationalModelState& state)
+py::object state_to_python(const OperationalModelState& state)
 {
     const auto& variant = static_cast<const OperationalModelState&>(state);
     if(const auto* custom = std::get_if<CustomModel::State>(&variant)) {
-        return custom->Get<GilSafePyObject>().Get();
+        return custom->get<GilSafePyObject>().get();
     }
     return py::cast(variant);
 }
@@ -25,9 +25,9 @@ PythonNeighborStateMapper::PythonNeighborStateMapper(py::object repack) : _repac
 }
 
 const OperationalModelState&
-PythonNeighborStateMapper::MapToCurrentState(const OperationalModelState& state) const
+PythonNeighborStateMapper::map_to_current_state(const OperationalModelState& state) const
 {
-    py::object repacked = _repack(stateToPython(state));
+    py::object repacked = _repack(state_to_python(state));
     try {
         _states.emplace_back(repacked.cast<OperationalModelState>());
     } catch(const py::cast_error&) {
@@ -39,7 +39,7 @@ PythonNeighborStateMapper::MapToCurrentState(const OperationalModelState& state)
     return _states.back();
 }
 
-void CallbackScope::Check(const char* what) const
+void CallbackScope::check(const char* what) const
 {
     if(!_open) {
         throw SimulationError(
@@ -55,9 +55,9 @@ PyAgentView::PyAgentView(
 {
 }
 
-const AgentView& PyAgentView::View() const
+const AgentView& PyAgentView::view() const
 {
-    _scope->Check("AgentView");
+    _scope->check("AgentView");
     return _view;
 }
 
@@ -70,9 +70,9 @@ PyAgentStep::PyAgentStep(
 {
 }
 
-const AgentStep& PyAgentStep::Step() const
+const AgentStep& PyAgentStep::step() const
 {
-    Scope()->Check("AgentStep");
+    scope()->check("AgentStep");
     return _step;
 }
 
@@ -84,8 +84,8 @@ PyNeighborView::PyNeighborView(
 {
 }
 
-const NeighborView& PyNeighborView::Neighbor() const
+const NeighborView& PyNeighborView::neighbor() const
 {
-    _scope->Check("NeighborView");
+    _scope->check("NeighborView");
     return _neighbor;
 }

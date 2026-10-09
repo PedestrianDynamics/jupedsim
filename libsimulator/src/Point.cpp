@@ -3,25 +3,25 @@
 
 #include <Logger.hpp>
 
-bool Point::isZeroLength() const
+bool Point::is_zero_length() const
 {
     constexpr double epsilon = 1e-6;
     return (std::abs(x) < epsilon && std::abs(y) < epsilon);
 }
 
-double Point::Norm() const
+double Point::norm() const
 {
-    return sqrt(NormSquare());
+    return sqrt(norm_square());
 }
 
-Point Point::Normalized() const
+Point Point::normalized() const
 {
-    return std::get<1>(NormAndNormalized());
+    return std::get<1>(norm_and_normalized());
 }
 
-std::tuple<double, Point> Point::NormAndNormalized() const
+std::tuple<double, Point> Point::norm_and_normalized() const
 {
-    const double norm = Norm();
+    const double norm = this->norm();
     if(norm > std::numeric_limits<double>::epsilon())
         return std::make_tuple(norm, (Point(x, y) / norm));
     else
@@ -41,14 +41,14 @@ std::tuple<double, Point> Point::NormAndNormalized() const
  * @param sphi    Sine of rotation angle phi
  * @return        Point transformed into the ellipse-local frame (S_2)
  */
-Point Point::TransformToEllipseCoordinates(const Point& center, double cphi, double sphi) const
+Point Point::transform_to_ellipse_coordinates(const Point& center, double cphi, double sphi) const
 {
     Point p = Point(x, y);
-    return (p - center).Rotate(cphi, -sphi);
+    return (p - center).rotate(cphi, -sphi);
 }
 /**
  * Transforms coordinates from ellipse-local system (S_2) back to Cartesian system (S_1).
- * This is the inverse operation of TransformToEllipseCoordinates().
+ * This is the inverse operation of transform_to_ellipse_coordinates().
  *
  * The transformation follows these steps:
  * 1. Take point P(x,y) in ellipse system S_2
@@ -60,11 +60,11 @@ Point Point::TransformToEllipseCoordinates(const Point& center, double cphi, dou
  * @param sphi   sin(phi)
  * @return       Point in Cartesian coordinates (S_1)
  */
-Point Point::TransformToCartesianCoordinates(const Point& center, double cphi, double sphi) const
+Point Point::transform_to_cartesian_coordinates(const Point& center, double cphi, double sphi) const
 {
 
     Point p = Point(x, y);
-    return (p.Rotate(cphi, sphi) + center);
+    return (p.rotate(cphi, sphi) + center);
 }
 
 /**
@@ -73,20 +73,20 @@ Point Point::TransformToCartesianCoordinates(const Point& center, double cphi, d
  * @param stetha Sine of rotation angle
  * @return Rotated point
  */
-Point Point::Rotate(double ctheta, double stheta) const
+Point Point::rotate(double ctheta, double stheta) const
 {
     return Point(x * ctheta - y * stheta, x * stheta + y * ctheta);
 }
 
-Point Point::Rotate90Deg() const
+Point Point::rotate90_deg() const
 {
     return {-y, x};
 }
 
-bool Point::IsUnitLength() const
+bool Point::is_unit_length() const
 {
     constexpr double tolerance = 1e-9;
-    return std::abs(1 - NormSquare()) <= tolerance;
+    return std::abs(1 - norm_square()) <= tolerance;
 }
 
 const Point Point::operator+(const Point& p) const
@@ -162,12 +162,12 @@ bool Point::operator>=(const Point& rhs) const
     return !(*this < rhs);
 }
 
-double Distance(const Point& point1, const Point& point2)
+double distance(const Point& point1, const Point& point2)
 {
-    return (point1 - point2).Norm();
+    return (point1 - point2).norm();
 }
 
-double DistanceSquared(const Point& a, const Point& b)
+double distance_squared(const Point& a, const Point& b)
 {
-    return (a - b).NormSquare();
+    return (a - b).norm_square();
 }

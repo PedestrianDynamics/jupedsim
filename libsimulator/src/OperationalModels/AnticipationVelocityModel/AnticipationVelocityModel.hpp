@@ -22,44 +22,44 @@ public:
 
 private:
     /// Add a small outward component to maintain minimum distance from walls.
-    double _pushoutStrength{0.3};
-    double _cutOffRadius{3};
+    double _pushout_strength{0.3};
+    double _cut_off_radius{3};
     // Shared sequential RNG: draws must stay on the model to keep simulations deterministic.
-    mutable std::mt19937 gen;
+    mutable std::mt19937 _gen;
 
 public:
-    AnticipationVelocityModel(double pushoutStrength, uint64_t rng_seed);
+    AnticipationVelocityModel(double pushout_strength, uint64_t rng_seed);
     ~AnticipationVelocityModel() override = default;
-    OperationalModelType Type() const override;
-    Point ComputeNextState(
+    OperationalModelType type() const override;
+    Point compute_next_state(
         const OperationalModelState& current,
         OperationalModelState& next,
         const AgentStep& step) const override;
-    void CheckModelConstraint(const GenericAgent& agent, const AgentView& view) const override;
+    void check_model_constraint(const GenericAgent& agent, const AgentView& view) const override;
 
 private:
-    double OptimalSpeed(const State& currentState, double spacing, double time_gap) const;
-    Point CalculateInfluenceDirection(
-        const Point& desiredDirection,
-        const Point& predictedDirection) const;
-    double GetSpacing(
-        const State& currentState,
+    double optimal_speed(const State& current_state, double spacing, double time_gap) const;
+    Point calculate_influence_direction(
+        const Point& desired_direction,
+        const Point& predicted_direction) const;
+    double get_spacing(
+        const State& current_state,
         const NeighborView& neighbor,
         const Point& direction) const;
-    Point NeighborRepulsion(
-        const State& currentState,
-        Point desiredDirection,
+    Point neighbor_repulsion(
+        const State& current_state,
+        Point desired_direction,
         const NeighborView& neighbor) const;
 
-    Point HandleWallAvoidance(
+    Point handle_wall_avoidance(
         const Point& direction,
-        const State& currentState,
+        const State& current_state,
         const AgentStep& step,
-        double pushoutStrength) const;
+        double pushout_strength) const;
 
-    Point UpdateDirection(
-        const State& currentState,
-        Point desiredDirection,
-        const Point& calculatedDirection,
+    Point update_direction(
+        const State& current_state,
+        Point desired_direction,
+        const Point& calculated_direction,
         double dt) const;
 };

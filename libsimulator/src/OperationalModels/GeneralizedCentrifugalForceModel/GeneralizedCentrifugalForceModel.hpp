@@ -16,34 +16,34 @@ public:
     using State = GeneralizedCentrifugalForceModelState;
 
 private:
-    double _cutOffRadius{4.0}; // TODO (MC) check this free parameter
-    double strengthNeighborRepulsion{0.3};
-    double strengthGeometryRepulsion{0.2};
-    double maxNeighborInteractionDistance{2};
-    double maxGeometryInteractionDistance{2};
-    double maxNeighborInterpolationDistance{0.1};
-    double maxGeometryInterpolationDistance{0.1};
-    double maxNeighborRepulsionForce{9};
-    double maxGeometryRepulsionForce{3};
+    double _cut_off_radius{4.0}; // TODO (MC) check this free parameter
+    double _strength_neighbor_repulsion{0.3};
+    double _strength_geometry_repulsion{0.2};
+    double _max_neighbor_interaction_distance{2};
+    double _max_geometry_interaction_distance{2};
+    double _max_neighbor_interpolation_distance{0.1};
+    double _max_geometry_interpolation_distance{0.1};
+    double _max_neighbor_repulsion_force{9};
+    double _max_geometry_repulsion_force{3};
 
 public:
     GeneralizedCentrifugalForceModel(
-        double strengthNeighborRepulsion,
-        double strengthGeometryRepulsion,
-        double maxNeighborInteractionDistance,
-        double maxGeometryInteractionDistance,
-        double maxNeighborInterpolationDistance,
-        double maxGeometryInterpolationDistance,
-        double maxNeighborRepulsionForce,
-        double maxGeometryRepulsionForce);
+        double strength_neighbor_repulsion,
+        double strength_geometry_repulsion,
+        double max_neighbor_interaction_distance,
+        double max_geometry_interaction_distance,
+        double max_neighbor_interpolation_distance,
+        double max_geometry_interpolation_distance,
+        double max_neighbor_repulsion_force,
+        double max_geometry_repulsion_force);
     ~GeneralizedCentrifugalForceModel() override = default;
 
-    OperationalModelType Type() const override;
-    Point ComputeNextState(
+    OperationalModelType type() const override;
+    Point compute_next_state(
         const OperationalModelState& current,
         OperationalModelState& next,
         const AgentStep& step) const override;
-    void CheckModelConstraint(const GenericAgent& agent, const AgentView& view) const override;
+    void check_model_constraint(const GenericAgent& agent, const AgentView& view) const override;
 
 private:
     /**
@@ -54,12 +54,12 @@ private:
      *
      * @return Point
      */
-    Point ForceDriv(
-        const State& currentState,
-        Point orientationToTarget,
+    Point force_driv(
+        const State& current_state,
+        Point orientation_to_target,
         double mass,
         double tau,
-        double deltaT,
+        double delta_t,
         Point& e0update) const;
     /**
      * Repulsive force between two pedestrians according to
@@ -70,20 +70,21 @@ private:
      *
      * @return Point
      */
-    Point ForceRepPed(const State& currentState, const NeighborView& neighbor) const;
+    Point force_rep_ped(const State& current_state, const NeighborView& neighbor) const;
     /**
      * Sum of the repulsive forces of all walls surrounding the pedestrian.
-     * @see ForceRepWall
+     * @see force_rep_wall
      */
-    Point ForceRepWall(const State& currentState, const WallView& wall) const;
-    Point ForceRepStatPoint(const State& currentState, const Point& p, double l, double vn) const;
-    Point ForceInterpolation(
+    Point force_rep_wall(const State& current_state, const WallView& wall) const;
+    Point
+    force_rep_stat_point(const State& current_state, const Point& p, double l, double vn) const;
+    Point force_interpolation(
         double v0,
-        double K_ij,
+        double k_ij,
         const Point& e,
         double v,
         double d,
         double r,
         double l) const;
-    double AgentToAgentSpacing(const State& currentState, const NeighborView& neighbor) const;
+    double agent_to_agent_spacing(const State& current_state, const NeighborView& neighbor) const;
 };

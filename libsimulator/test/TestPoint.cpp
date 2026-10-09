@@ -7,10 +7,10 @@
 
 TEST(Point, IsUnitLength)
 {
-    EXPECT_TRUE(Point(1, 0).IsUnitLength());
-    EXPECT_TRUE(Point(-1, 0).IsUnitLength());
-    EXPECT_TRUE(Point(0, -1).IsUnitLength());
-    EXPECT_TRUE(Point(0, 1).IsUnitLength());
-    EXPECT_TRUE(Point(1, 1).Normalized().IsUnitLength());
-    EXPECT_FALSE(Point(-1, -1).IsUnitLength());
+    EXPECT_TRUE(Point(1, 0).is_unit_length());
+    EXPECT_TRUE(Point(-1, 0).is_unit_length());
+    EXPECT_TRUE(Point(0, -1).is_unit_length());
+    EXPECT_TRUE(Point(0, 1).is_unit_length());
+    EXPECT_TRUE(Point(1, 1).normalized().is_unit_length());
+    EXPECT_FALSE(Point(-1, -1).is_unit_length());
 }

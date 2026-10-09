@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "benchmarkWallQuery.hpp"
+#include "benchmarkLineSegment.hpp"
+#include "buildGeometries.hpp"
 
 #include <benchmark/benchmark.h>
 

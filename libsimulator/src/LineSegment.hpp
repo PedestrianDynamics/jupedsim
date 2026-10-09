@@ -21,33 +21,33 @@ public:
     bool operator!=(const LineSegment& other) const;
     bool operator<(const LineSegment& other) const;
 
-    Point NormalVec() const;
+    Point normal_vec() const;
 
     /**
      *TODO: FIXME
      */
-    double NormalComp(const Point& v) const; // Normale Komponente von v auf l
+    double normal_comp(const Point& v) const; // Normale Komponente von v auf l
 
     /**
      * Note that that result must not lie on the segment
      * @return the orthogonal projection of p on the line defined by the segment points.
      */
-    Point LotPoint(const Point& p) const;
+    Point lot_point(const Point& p) const;
 
     /**
      * @return the point on the segment with the minimum distance to p
      */
-    Point ShortestPoint(const Point& p) const;
+    Point shortest_point(const Point& p) const;
 
     /**
      * @return the distance from the line to the point p
      */
-    double DistTo(const Point& p) const;
+    double dist_to(const Point& p) const;
 
     /**
      * @return the lenght square of  the segment
      */
-    double LengthSquare() const;
+    double length_square() const;
 };
 
 template <>

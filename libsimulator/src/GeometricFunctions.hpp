@@ -52,7 +52,7 @@ inline bool intersects(PointType a1, PointType a2, PointType b1, PointType b2)
     }
     const auto xy_projection = [](const auto p1, const auto p2, const auto c) {
         const AABB aabb(p1, p2);
-        return aabb.Inside(c);
+        return aabb.inside(c);
     };
     if(o1 == Orientation::Colinear && xy_projection(a1, a2, b1)) {
         return true;
@@ -69,17 +69,17 @@ inline bool intersects(PointType a1, PointType a2, PointType b1, PointType b2)
     return false;
 }
 
-inline bool intersectsWithCGAL(const LineSegment l1, const LineSegment l2)
+inline bool intersects_with_cgal(const LineSegment l1, const LineSegment l2)
 {
     using K = CGAL::Exact_predicates_inexact_constructions_kernel;
-    using Point_2 = K::Point_2;
-    using Segment_2 = K::Segment_2;
-    const Segment_2 this_segment(Point_2(l1.p1.x, l1.p1.y), Point_2(l1.p2.x, l1.p2.y));
-    const Segment_2 other_segment(Point_2(l2.p1.x, l2.p1.y), Point_2(l2.p2.x, l2.p2.y));
+    using Point2 = K::Point_2;
+    using Segment2 = K::Segment_2;
+    const Segment2 this_segment(Point2(l1.p1.x, l1.p1.y), Point2(l1.p2.x, l1.p2.y));
+    const Segment2 other_segment(Point2(l2.p1.x, l2.p1.y), Point2(l2.p2.x, l2.p2.y));
     return CGAL::do_intersect(this_segment, other_segment);
 }
 
 inline bool intersects(const LineSegment& l1, const LineSegment& l2)
 {
-    return intersectsWithCGAL(l1, l2);
+    return intersects_with_cgal(l1, l2);
 }

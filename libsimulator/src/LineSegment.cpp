@@ -10,7 +10,7 @@
 #include <cmath>
 #include <utility>
 
-LineSegment::LineSegment(Point _p1, Point _p2) : p1(std::move(_p1)), p2(std::move(_p2))
+LineSegment::LineSegment(Point p1, Point p2) : p1(std::move(p1)), p2(std::move(p2))
 {
 }
 
@@ -33,38 +33,38 @@ bool LineSegment::operator<(const LineSegment& other) const
     return false;
 }
 
-Point LineSegment::NormalVec() const
+Point LineSegment::normal_vec() const
 {
     const Point r = (p2 - p1);
-    return Point(-r.y, r.x).Normalized();
+    return Point(-r.y, r.x).normalized();
 }
 
-double LineSegment::NormalComp(const Point& v) const
+double LineSegment::normal_comp(const Point& v) const
 {
     // Normierte Vectoren
-    Point l = (p2 - p1).Normalized();
-    const Point& n = NormalVec();
+    Point l = (p2 - p1).normalized();
+    const Point& n = normal_vec();
 
     double alpha;
 
-    if(fabs(l.x) < J_EPS) {
+    if(fabs(l.x) < j_eps) {
         alpha = v.x / n.x;
-    } else if(fabs(l.y) < J_EPS) {
+    } else if(fabs(l.y) < j_eps) {
         alpha = v.y / n.y;
     } else {
-        alpha = l.CrossProduct(v) / n.CrossProduct(l);
+        alpha = l.cross_product(v) / n.cross_product(l);
     }
 
     return fabs(alpha);
 }
 
-Point LineSegment::ShortestPoint(const Point& p) const
+Point LineSegment::shortest_point(const Point& p) const
 {
     if(p1 == p2)
         return p1;
 
     const Point& t = p1 - p2;
-    double lambda = (p - p2).ScalarProduct(t) / t.ScalarProduct(t);
+    double lambda = (p - p2).scalar_product(t) / t.scalar_product(t);
     if(lambda < 0)
         return p2;
     else if(lambda > 1)
@@ -73,7 +73,7 @@ Point LineSegment::ShortestPoint(const Point& p) const
         return p2 + t * lambda;
 }
 
-double LineSegment::DistTo(const Point& p) const
+double LineSegment::dist_to(const Point& p) const
 {
     using Kernel = CGAL::Simple_cartesian<double>;
     using PointCGAL = Kernel::Point_2;
@@ -85,7 +85,7 @@ double LineSegment::DistTo(const Point& p) const
     return sqrt(CGAL::squared_distance(point, segment));
 }
 
-double LineSegment::LengthSquare() const
+double LineSegment::length_square() const
 {
-    return (p1 - p2).NormSquare();
+    return (p1 - p2).norm_square();
 }

@@ -16,7 +16,7 @@
 #include <string_view>
 #include <vector>
 
-namespace PMP = CGAL::Polygon_mesh_processing;
+namespace pmp = CGAL::Polygon_mesh_processing;
 
 namespace
 {
@@ -29,7 +29,7 @@ struct Options {
     unsigned int iterations = 3;
 };
 
-void PrintUsage()
+void print_usage()
 {
     std::cerr << "Usage: remesh [--side-length=<max>] [--iterations=<n>] <input.obj>\n"
               << "  --side-length=<max>  maximum triangle side length, > 0 (default: 0.3)\n"
@@ -37,7 +37,7 @@ void PrintUsage()
 }
 
 template <typename T>
-std::optional<T> ParseValue(std::string_view text)
+std::optional<T> parse_value(std::string_view text)
 {
     T value{};
     const auto [ptr, ec] = std::from_chars(text.begin(), text.end(), value);
@@ -47,21 +47,21 @@ std::optional<T> ParseValue(std::string_view text)
     return value;
 }
 
-std::optional<Options> ParseArgs(int argc, char** argv)
+std::optional<Options> parse_args(int argc, char** argv)
 {
     Options opts{};
     bool have_input = false;
     for(int i = 1; i < argc; ++i) {
         const std::string_view arg{argv[i]};
         if(constexpr std::string_view prefix = "--side-length="; arg.starts_with(prefix)) {
-            const auto value = ParseValue<double>(arg.substr(prefix.size()));
+            const auto value = parse_value<double>(arg.substr(prefix.size()));
             if(!value || *value <= 0.0) {
                 std::cerr << "Invalid --side-length value: '" << arg << "'\n";
                 return std::nullopt;
             }
             opts.max_edge_length = *value;
         } else if(constexpr std::string_view prefix = "--iterations="; arg.starts_with(prefix)) {
-            const auto value = ParseValue<unsigned int>(arg.substr(prefix.size()));
+            const auto value = parse_value<unsigned int>(arg.substr(prefix.size()));
             if(!value || *value < 1) {
                 std::cerr << "Invalid --iterations value: '" << arg << "'\n";
                 return std::nullopt;
@@ -86,14 +86,14 @@ std::optional<Options> ParseArgs(int argc, char** argv)
 
 /// Refine #mesh so that no edge is longer than #max_edge_length, keeping borders and
 /// creases (stair noses, floor/ramp transitions) in place.
-void RemeshWithMaxEdgeLength(SurfaceMesh& mesh, double max_edge_length, unsigned int iterations)
+void remesh_with_max_edge_length(SurfaceMesh& mesh, double max_edge_length, unsigned int iterations)
 {
     // isotropic_remeshing only splits edges longer than 4/3 x target, so aim below the cap.
     const double target_edge_length = max_edge_length * 3. / 4.;
 
     auto ecm =
         mesh.add_property_map<EdgeDescriptor<SurfaceMesh>, bool>("e:constrained", false).first;
-    PMP::detect_sharp_edges(mesh, sharp_edge_angle_deg, ecm);
+    pmp::detect_sharp_edges(mesh, sharp_edge_angle_deg, ecm);
 
     std::vector<EdgeDescriptor<SurfaceMesh>> constrained{};
     for(auto e : CGAL::edges(mesh)) {
@@ -103,10 +103,10 @@ void RemeshWithMaxEdgeLength(SurfaceMesh& mesh, double max_edge_length, unsigned
     }
     // protect_constraints keeps these edges out of the remesher's reach, so cap their length
     // here; this also satisfies the remesher's < 4/3 x target precondition on them.
-    PMP::split_long_edges(
+    pmp::split_long_edges(
         constrained, target_edge_length, mesh, CGAL::parameters::edge_is_constrained_map(ecm));
 
-    PMP::isotropic_remeshing(
+    pmp::isotropic_remeshing(
         CGAL::faces(mesh),
         target_edge_length,
         mesh,
@@ -121,17 +121,17 @@ void RemeshWithMaxEdgeLength(SurfaceMesh& mesh, double max_edge_length, unsigned
     for(auto e : CGAL::edges(mesh)) {
         all_edges.emplace_back(e);
     }
-    PMP::split_long_edges(
+    pmp::split_long_edges(
         all_edges, max_edge_length, mesh, CGAL::parameters::edge_is_constrained_map(ecm));
 
     mesh.remove_property_map(ecm);
 }
 
-double MaxEdgeLength(const SurfaceMesh& mesh)
+double max_edge_length(const SurfaceMesh& mesh)
 {
     double max_length = 0.0;
     for(auto e : CGAL::edges(mesh)) {
-        max_length = std::max(max_length, CGAL::to_double(PMP::edge_length(e, mesh)));
+        max_length = std::max(max_length, CGAL::to_double(pmp::edge_length(e, mesh)));
     }
     return max_length;
 }
@@ -139,27 +139,27 @@ double MaxEdgeLength(const SurfaceMesh& mesh)
 
 int main(int argc, char** argv)
 {
-    const auto opts = ParseArgs(argc, argv);
+    const auto opts = parse_args(argc, argv);
     if(!opts) {
-        PrintUsage();
+        print_usage();
         return EXIT_FAILURE;
     }
 
     SurfaceMesh mesh{};
-    if(!PMP::IO::read_polygon_mesh(opts->input.string(), mesh) || mesh.is_empty()) {
+    if(!pmp::IO::read_polygon_mesh(opts->input.string(), mesh) || mesh.is_empty()) {
         std::cerr << "Could not read a mesh from OBJ file '" << opts->input.string() << "'\n";
         return EXIT_FAILURE;
     }
 
     try {
-        NormaliseAndValidateMesh(mesh);
+        normalise_and_validate_mesh(mesh);
     } catch(const std::exception& e) {
         std::cerr << "Mesh validation failed: " << e.what() << '\n';
         return EXIT_FAILURE;
     }
 
     const auto faces_before = mesh.number_of_faces();
-    RemeshWithMaxEdgeLength(mesh, opts->max_edge_length, opts->iterations);
+    remesh_with_max_edge_length(mesh, opts->max_edge_length, opts->iterations);
     mesh.collect_garbage();
 
     const auto output =
@@ -171,7 +171,7 @@ int main(int argc, char** argv)
     }
 
     std::cout << "Wrote " << output.string() << ": " << faces_before << " -> "
-              << mesh.number_of_faces() << " faces, max edge length " << MaxEdgeLength(mesh)
+              << mesh.number_of_faces() << " faces, max edge length " << max_edge_length(mesh)
               << '\n';
     return EXIT_SUCCESS;
 }

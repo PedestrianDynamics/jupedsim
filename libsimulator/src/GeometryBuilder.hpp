@@ -9,7 +9,7 @@
 
 class GeometryBuilder
 {
-    std::vector<Polygon> _accessibleAreas{};
+    std::vector<Polygon> _accessible_areas{};
     std::vector<Polygon> _exclusions{};
 
 public:
@@ -20,8 +20,8 @@ public:
     GeometryBuilder(GeometryBuilder&& other) = delete;
     GeometryBuilder& operator=(GeometryBuilder&& other) = delete;
 
-    GeometryBuilder& AddAccessibleArea(const std::vector<Point>& lineLoop);
-    GeometryBuilder& ExcludeFromAccessibleArea(const std::vector<Point>& lineLoop);
+    GeometryBuilder& add_accessible_area(const std::vector<Point>& line_loop);
+    GeometryBuilder& exclude_from_accessible_area(const std::vector<Point>& line_loop);
     /// The walkable area as a single polygon with holes, ready to be lifted.
-    PolyWithHoles Build();
+    PolyWithHoles build();
 };

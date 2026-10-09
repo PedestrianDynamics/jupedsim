@@ -29,11 +29,11 @@ void init_generalized_centrifugal_force_model(py::module_& m)
         .def(
             py::init([](Point orientation,
                         double speed,
-                        Point desiredDirection,
-                        int orientationDelay,
+                        Point desired_direction,
+                        int orientation_delay,
                         double mass,
                         double tau,
-                        double desiredSpeed,
+                        double desired_speed,
                         double av,
                         double amin,
                         double bmin,
@@ -41,38 +41,38 @@ void init_generalized_centrifugal_force_model(py::module_& m)
                 return GeneralizedCentrifugalForceModel::State{
                     .orientation = orientation,
                     .speed = speed,
-                    .e0 = desiredDirection,
-                    .orientationDelay = orientationDelay,
+                    .e0 = desired_direction,
+                    .orientation_delay = orientation_delay,
                     .mass = mass,
                     .tau = tau,
-                    .v0 = desiredSpeed,
-                    .Av = av,
-                    .AMin = amin,
-                    .BMin = bmin,
-                    .BMax = bmax};
+                    .v0 = desired_speed,
+                    .av = av,
+                    .a_min = amin,
+                    .b_min = bmin,
+                    .b_max = bmax};
             }),
             py::kw_only(),
             py::arg("orientation") = d.orientation,
             py::arg("speed") = d.speed,
             py::arg("desired_direction") = d.e0,
-            py::arg("orientation_delay") = d.orientationDelay,
+            py::arg("orientation_delay") = d.orientation_delay,
             py::arg("mass") = d.mass,
             py::arg("tau") = d.tau,
             py::arg("desired_speed") = d.v0,
-            py::arg("a_v") = d.Av,
-            py::arg("a_min") = d.AMin,
-            py::arg("b_min") = d.BMin,
-            py::arg("b_max") = d.BMax)
+            py::arg("a_v") = d.av,
+            py::arg("a_min") = d.a_min,
+            py::arg("b_min") = d.b_min,
+            py::arg("b_max") = d.b_max)
         .def_readwrite("orientation", &GeneralizedCentrifugalForceModel::State::orientation)
         .def_readwrite("speed", &GeneralizedCentrifugalForceModel::State::speed)
         .def_readwrite("desired_direction", &GeneralizedCentrifugalForceModel::State::e0)
         .def_readwrite(
-            "orientation_delay", &GeneralizedCentrifugalForceModel::State::orientationDelay)
+            "orientation_delay", &GeneralizedCentrifugalForceModel::State::orientation_delay)
         .def_readwrite("mass", &GeneralizedCentrifugalForceModel::State::mass)
         .def_readwrite("tau", &GeneralizedCentrifugalForceModel::State::tau)
         .def_readwrite("desired_speed", &GeneralizedCentrifugalForceModel::State::v0)
-        .def_readwrite("a_v", &GeneralizedCentrifugalForceModel::State::Av)
-        .def_readwrite("a_min", &GeneralizedCentrifugalForceModel::State::AMin)
-        .def_readwrite("b_min", &GeneralizedCentrifugalForceModel::State::BMin)
-        .def_readwrite("b_max", &GeneralizedCentrifugalForceModel::State::BMax);
+        .def_readwrite("a_v", &GeneralizedCentrifugalForceModel::State::av)
+        .def_readwrite("a_min", &GeneralizedCentrifugalForceModel::State::a_min)
+        .def_readwrite("b_min", &GeneralizedCentrifugalForceModel::State::b_min)
+        .def_readwrite("b_max", &GeneralizedCentrifugalForceModel::State::b_max);
 }

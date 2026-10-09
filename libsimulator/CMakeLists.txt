@@ -154,7 +154,6 @@ if (BUILD_BENCHMARKS)
     add_executable(libsimulator-benchmarks
         benchmark/BenchmarkMain.cpp
         benchmark/benchmarkLineSegment.hpp
-        benchmark/benchmarkWallQuery.hpp
         benchmark/buildGeometries.hpp
     )
 

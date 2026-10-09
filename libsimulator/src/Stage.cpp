@@ -17,29 +17,29 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// Base Proxy
 ////////////////////////////////////////////////////////////////////////////////
-size_t BaseProxy::CountTargeting() const
+size_t BaseProxy::count_targeting() const
 {
-    return stage->CountTargeting();
+    return _stage->count_targeting();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Waypoint
 ////////////////////////////////////////////////////////////////////////////////
-Waypoint::Waypoint(Destination destination_) : destination(destination_)
+Waypoint::Waypoint(Destination destination) : _destination(destination)
 {
 }
 
-bool Waypoint::IsCompleted(const GenericAgent& agent)
+bool Waypoint::is_completed(const GenericAgent& agent)
 {
-    return destination.contains(agent.location);
+    return _destination.contains(agent.location);
 }
 
-RoutingTarget Waypoint::Target(const GenericAgent&)
+RoutingTarget Waypoint::target(const GenericAgent&)
 {
-    return destination;
+    return _destination;
 }
 
-StageProxy Waypoint::Proxy(Simulation* simulation)
+StageProxy Waypoint::proxy(Simulation* simulation)
 {
     return WaypointProxy(simulation, this);
 }
@@ -47,26 +47,26 @@ StageProxy Waypoint::Proxy(Simulation* simulation)
 ////////////////////////////////////////////////////////////////////////////////
 /// Exit
 ////////////////////////////////////////////////////////////////////////////////
-Exit::Exit(Destination destination_, std::vector<GenericAgent::ID>& toRemove_)
-    : destination(destination_), toRemove(toRemove_)
+Exit::Exit(Destination destination, std::vector<GenericAgent::ID>& to_remove)
+    : _destination(destination), _to_remove(to_remove)
 {
 }
 
-bool Exit::IsCompleted(const GenericAgent& agent)
+bool Exit::is_completed(const GenericAgent& agent)
 {
-    const bool hasReachedExit = destination.contains(agent.location);
-    if(hasReachedExit) {
-        toRemove.push_back(agent.id);
+    const bool has_reached_exit = _destination.contains(agent.location);
+    if(has_reached_exit) {
+        _to_remove.push_back(agent.id);
     }
-    return hasReachedExit;
+    return has_reached_exit;
 }
 
-RoutingTarget Exit::Target(const GenericAgent&)
+RoutingTarget Exit::target(const GenericAgent&)
 {
-    return destination;
+    return _destination;
 }
 
-StageProxy Exit::Proxy(Simulation* simulation)
+StageProxy Exit::proxy(Simulation* simulation)
 {
     return ExitProxy(simulation, this);
 }
@@ -74,7 +74,7 @@ StageProxy Exit::Proxy(Simulation* simulation)
 ////////////////////////////////////////////////////////////////////////////////
 /// DirectSteering
 ////////////////////////////////////////////////////////////////////////////////
-RoutingTarget DirectSteering::Target(const GenericAgent& agent)
+RoutingTarget DirectSteering::target(const GenericAgent& agent)
 {
-    return agent.finalTarget;
+    return agent.final_target;
 }

@@ -17,4 +17,5 @@ description: "Longer pieces on modelling, validation and working with JuPedSim."
 :hidden:
 
 writing-guide
+coding-style
 ```

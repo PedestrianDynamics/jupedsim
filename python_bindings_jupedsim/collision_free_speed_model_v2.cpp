@@ -18,44 +18,44 @@ void init_collision_free_speed_model_v2(py::module_& m)
     py::class_<CollisionFreeSpeedModelV2::State>(m, "CollisionFreeSpeedModelV2State")
         .def(
             py::init([](Point orientation,
-                        double strengthNeighborRepulsion,
-                        double rangeNeighborRepulsion,
-                        double strengthGeometryRepulsion,
-                        double rangeGeometryRepulsion,
-                        double timeGap,
-                        double desiredSpeed,
+                        double strength_neighbor_repulsion,
+                        double range_neighbor_repulsion,
+                        double strength_geometry_repulsion,
+                        double range_geometry_repulsion,
+                        double time_gap,
+                        double desired_speed,
                         double radius) {
                 return CollisionFreeSpeedModelV2::State{
                     .orientation = orientation,
-                    .strengthNeighborRepulsion = strengthNeighborRepulsion,
-                    .rangeNeighborRepulsion = rangeNeighborRepulsion,
-                    .strengthGeometryRepulsion = strengthGeometryRepulsion,
-                    .rangeGeometryRepulsion = rangeGeometryRepulsion,
-                    .timeGap = timeGap,
-                    .v0 = desiredSpeed,
+                    .strength_neighbor_repulsion = strength_neighbor_repulsion,
+                    .range_neighbor_repulsion = range_neighbor_repulsion,
+                    .strength_geometry_repulsion = strength_geometry_repulsion,
+                    .range_geometry_repulsion = range_geometry_repulsion,
+                    .time_gap = time_gap,
+                    .v0 = desired_speed,
                     .radius = radius};
             }),
             py::kw_only(),
             py::arg("orientation") = d.orientation,
-            py::arg("strength_neighbor_repulsion") = d.strengthNeighborRepulsion,
-            py::arg("range_neighbor_repulsion") = d.rangeNeighborRepulsion,
-            py::arg("strength_geometry_repulsion") = d.strengthGeometryRepulsion,
-            py::arg("range_geometry_repulsion") = d.rangeGeometryRepulsion,
-            py::arg("time_gap") = d.timeGap,
+            py::arg("strength_neighbor_repulsion") = d.strength_neighbor_repulsion,
+            py::arg("range_neighbor_repulsion") = d.range_neighbor_repulsion,
+            py::arg("strength_geometry_repulsion") = d.strength_geometry_repulsion,
+            py::arg("range_geometry_repulsion") = d.range_geometry_repulsion,
+            py::arg("time_gap") = d.time_gap,
             py::arg("desired_speed") = d.v0,
             py::arg("radius") = d.radius)
         .def_readwrite("orientation", &CollisionFreeSpeedModelV2::State::orientation)
         .def_readwrite(
             "strength_neighbor_repulsion",
-            &CollisionFreeSpeedModelV2::State::strengthNeighborRepulsion)
+            &CollisionFreeSpeedModelV2::State::strength_neighbor_repulsion)
         .def_readwrite(
-            "range_neighbor_repulsion", &CollisionFreeSpeedModelV2::State::rangeNeighborRepulsion)
+            "range_neighbor_repulsion", &CollisionFreeSpeedModelV2::State::range_neighbor_repulsion)
         .def_readwrite(
             "strength_geometry_repulsion",
-            &CollisionFreeSpeedModelV2::State::strengthGeometryRepulsion)
+            &CollisionFreeSpeedModelV2::State::strength_geometry_repulsion)
         .def_readwrite(
-            "range_geometry_repulsion", &CollisionFreeSpeedModelV2::State::rangeGeometryRepulsion)
-        .def_readwrite("time_gap", &CollisionFreeSpeedModelV2::State::timeGap)
+            "range_geometry_repulsion", &CollisionFreeSpeedModelV2::State::range_geometry_repulsion)
+        .def_readwrite("time_gap", &CollisionFreeSpeedModelV2::State::time_gap)
         .def_readwrite("desired_speed", &CollisionFreeSpeedModelV2::State::v0)
         .def_readwrite("radius", &CollisionFreeSpeedModelV2::State::radius);
 }

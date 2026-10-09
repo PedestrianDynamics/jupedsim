@@ -17,139 +17,140 @@
 #include <limits>
 #include <vector>
 
-AnticipationVelocityModel::AnticipationVelocityModel(double pushoutStrength, uint64_t rng_seed)
-    : _pushoutStrength(pushoutStrength), gen(rng_seed)
+AnticipationVelocityModel::AnticipationVelocityModel(double pushout_strength, uint64_t rng_seed)
+    : _pushout_strength(pushout_strength), _gen(rng_seed)
 {
 }
 
-OperationalModelType AnticipationVelocityModel::Type() const
+OperationalModelType AnticipationVelocityModel::type() const
 {
-    return OperationalModelType::ANTICIPATION_VELOCITY_MODEL;
+    return OperationalModelType::AnticipationVelocityModel;
 }
 
-Point AnticipationVelocityModel::ComputeNextState(
+Point AnticipationVelocityModel::compute_next_state(
     const OperationalModelState& current,
     OperationalModelState& next,
     const AgentStep& step) const
 {
-    const auto& currentState = std::get<State>(current);
+    const auto& current_state = std::get<State>(current);
     // Exclude occluded and self agents
-    auto neighborhood = step.OtherAgentsInRange(
-        _cutOffRadius, [&step](const NeighborView& n) { return step.NoGeometryBetween(n); });
+    auto neighborhood = step.other_agents_in_range(
+        _cut_off_radius, [&step](const NeighborView& n) { return step.no_geometry_between(n); });
 
-    const auto desiredDirection = step.route_orientation();
-    Point neighborRepulsion{};
+    const auto desired_direction = step.route_orientation();
+    Point neighbor_repulsion{};
     for(const auto& neighbor : neighborhood) {
-        neighborRepulsion += NeighborRepulsion(currentState, desiredDirection, neighbor);
+        neighbor_repulsion += this->neighbor_repulsion(current_state, desired_direction, neighbor);
     }
 
-    auto direction = (desiredDirection + neighborRepulsion).Normalized();
+    auto direction = (desired_direction + neighbor_repulsion).normalized();
     if(direction == Point{}) {
-        direction = currentState.orientation;
+        direction = current_state.orientation;
     }
 
     // update direction towards the newly calculated direction
-    direction = UpdateDirection(currentState, desiredDirection, direction, step.dt());
+    direction = update_direction(current_state, desired_direction, direction, step.dt());
     auto spacing = std::numeric_limits<double>::max();
     for(const auto& neighbor : neighborhood) {
-        spacing = std::min(spacing, GetSpacing(currentState, neighbor, direction));
+        spacing = std::min(spacing, get_spacing(current_state, neighbor, direction));
     }
 
-    const auto optimal_speed = OptimalSpeed(currentState, spacing, currentState.timeGap);
+    const auto optimal_speed = this->optimal_speed(current_state, spacing, current_state.time_gap);
     // Wall sliding behavior
-    direction = HandleWallAvoidance(direction, currentState, step, _pushoutStrength);
+    direction = handle_wall_avoidance(direction, current_state, step, _pushout_strength);
 
     const auto velocity = direction * optimal_speed;
-    auto& nextModel = std::get<State>(next);
-    nextModel.orientation = direction;
-    nextModel.velocity = velocity;
+    auto& next_model = std::get<State>(next);
+    next_model.orientation = direction;
+    next_model.velocity = velocity;
     return velocity * step.dt();
 }
 
-Point AnticipationVelocityModel::UpdateDirection(
-    const State& currentState,
-    Point desiredDirection,
-    const Point& calculatedDirection,
+Point AnticipationVelocityModel::update_direction(
+    const State& current_state,
+    Point desired_direction,
+    const Point& calculated_direction,
     double dt) const
 {
-    const Point actualDirection = currentState.orientation;
-    Point updatedDirection;
+    const Point actual_direction = current_state.orientation;
+    Point updated_direction;
 
-    if(desiredDirection.ScalarProduct(calculatedDirection) *
-           desiredDirection.ScalarProduct(actualDirection) <
+    if(desired_direction.scalar_product(calculated_direction) *
+           desired_direction.scalar_product(actual_direction) <
        0) {
-        updatedDirection = calculatedDirection;
+        updated_direction = calculated_direction;
     } else {
         // Compute the rate of change of direction (Eq. 7)
-        const Point directionDerivative =
-            (calculatedDirection.Normalized() - actualDirection) / currentState.reactionTime;
-        updatedDirection = actualDirection + directionDerivative * dt;
+        const Point direction_derivative =
+            (calculated_direction.normalized() - actual_direction) / current_state.reaction_time;
+        updated_direction = actual_direction + direction_derivative * dt;
     }
 
-    return updatedDirection.Normalized();
+    return updated_direction.normalized();
 }
 
-void AnticipationVelocityModel::CheckModelConstraint(
+void AnticipationVelocityModel::check_model_constraint(
     const GenericAgent& agent,
     const AgentView& view) const
 {
-    const auto& currentState = std::get<State>(agent.state);
-    const auto r = currentState.radius;
-    constexpr double rMin = 0.;
-    constexpr double rMax = 2.;
-    validateConstraint(r, rMin, rMax, "radius", true);
+    const auto& current_state = std::get<State>(agent.state);
+    const auto r = current_state.radius;
+    constexpr double r_min = 0.;
+    constexpr double r_max = 2.;
+    validate_constraint(r, r_min, r_max, "radius", true);
 
-    const auto strengthNeighborRepulsion = currentState.strengthNeighborRepulsion;
-    constexpr double snMin = 0.;
-    constexpr double snMax = 20.;
-    validateConstraint(strengthNeighborRepulsion, snMin, snMax, "strengthNeighborRepulsion", false);
+    const auto strength_neighbor_repulsion = current_state.strength_neighbor_repulsion;
+    constexpr double sn_min = 0.;
+    constexpr double sn_max = 20.;
+    validate_constraint(
+        strength_neighbor_repulsion, sn_min, sn_max, "strengthNeighborRepulsion", false);
 
-    const auto rangeNeighborRepulsion = currentState.rangeNeighborRepulsion;
-    constexpr double rnMin = 0.;
-    constexpr double rnMax = 5.;
-    validateConstraint(rangeNeighborRepulsion, rnMin, rnMax, "rangeNeighborRepulsion", true);
+    const auto range_neighbor_repulsion = current_state.range_neighbor_repulsion;
+    constexpr double rn_min = 0.;
+    constexpr double rn_max = 5.;
+    validate_constraint(range_neighbor_repulsion, rn_min, rn_max, "rangeNeighborRepulsion", true);
 
-    const auto buff = currentState.wallBufferDistance;
-    constexpr double buffMin = 0.;
-    constexpr double buffMax = 1.;
-    validateConstraint(buff, buffMin, buffMax, "wallBufferDistance", false);
+    const auto buff = current_state.wall_buffer_distance;
+    constexpr double buff_min = 0.;
+    constexpr double buff_max = 1.;
+    validate_constraint(buff, buff_min, buff_max, "wallBufferDistance", false);
 
-    const auto v0 = currentState.v0;
-    constexpr double v0Min = 0.;
-    constexpr double v0Max = 10.;
-    validateConstraint(v0, v0Min, v0Max, "v0");
+    const auto v0 = current_state.v0;
+    constexpr double v0_min = 0.;
+    constexpr double v0_max = 10.;
+    validate_constraint(v0, v0_min, v0_max, "v0");
 
-    const auto timeGap = currentState.timeGap;
-    constexpr double timeGapMin = 0.;
-    constexpr double timeGapMax = 10.;
-    validateConstraint(timeGap, timeGapMin, timeGapMax, "timeGap", true);
+    const auto time_gap = current_state.time_gap;
+    constexpr double time_gap_min = 0.;
+    constexpr double time_gap_max = 10.;
+    validate_constraint(time_gap, time_gap_min, time_gap_max, "timeGap", true);
 
-    const auto anticipationTime = currentState.anticipationTime;
-    constexpr double anticipationTimeMin = 0.0;
-    constexpr double anticipationTimeMax = 5.0;
-    validateConstraint(
-        anticipationTime, anticipationTimeMin, anticipationTimeMax, "anticipationTime");
+    const auto anticipation_time = current_state.anticipation_time;
+    constexpr double anticipation_time_min = 0.0;
+    constexpr double anticipation_time_max = 5.0;
+    validate_constraint(
+        anticipation_time, anticipation_time_min, anticipation_time_max, "anticipationTime");
 
-    const auto reactionTime = currentState.reactionTime;
-    constexpr double reactionTimeMin = 0.0;
-    constexpr double reactionTimeMax = 1.0;
-    validateConstraint(reactionTime, reactionTimeMin, reactionTimeMax, "reactionTime", true);
+    const auto reaction_time = current_state.reaction_time;
+    constexpr double reaction_time_min = 0.0;
+    constexpr double reaction_time_max = 1.0;
+    validate_constraint(reaction_time, reaction_time_min, reaction_time_max, "reactionTime", true);
 
-    const auto neighbors = view.OtherAgentsInRange(2.0);
+    const auto neighbors = view.other_agents_in_range(2.0);
     for(const auto& neighbor : neighbors) {
         const auto& neighbor_model = std::get<State>(*neighbor.state);
-        const auto contanctdDist = r + neighbor_model.radius;
-        const auto distance = neighbor.RelativePosition.Norm();
-        if(contanctdDist >= distance) {
+        const auto contanctd_dist = r + neighbor_model.radius;
+        const auto distance = neighbor.relative_position.norm();
+        if(contanctd_dist >= distance) {
             throw SimulationError(
                 "Model constraint violation: Agent {} too close to agent {}: distance {}",
                 agent.location.xy(),
-                agent.location.xy() + neighbor.RelativePosition,
+                agent.location.xy() + neighbor.relative_position,
                 distance);
         }
     }
 
-    if(!view.WallsInRange(r).empty()) {
+    if(!view.walls_in_range(r).empty()) {
         throw SimulationError(
             "Model constraint violation: Agent at {} too close to geometry boundaries, distance "
             "< {}",
@@ -158,8 +159,8 @@ void AnticipationVelocityModel::CheckModelConstraint(
     }
 }
 
-double AnticipationVelocityModel::OptimalSpeed(
-    const State& currentState,
+double AnticipationVelocityModel::optimal_speed(
+    const State& current_state,
     double spacing,
     double time_gap) const
 {
@@ -169,115 +170,118 @@ double AnticipationVelocityModel::OptimalSpeed(
 
     if(std::abs(speed) < creep_speed) {
         // Random shuffle: forward, backward, or stop
-        const auto r = gen() % 3;
+        const auto r = _gen() % 3;
         speed = (r == 0) ? creep_speed : (r == 1) ? -creep_speed : 0.0;
     }
 
-    return std::min(std::max(speed, -creep_speed), currentState.v0);
+    return std::min(std::max(speed, -creep_speed), current_state.v0);
 }
-double AnticipationVelocityModel::GetSpacing(
-    const State& currentState,
+double AnticipationVelocityModel::get_spacing(
+    const State& current_state,
     const NeighborView& neighbor,
     const Point& direction) const
 {
-    const auto& neighborState = std::get<State>(*neighbor.state);
-    const auto distp12 = neighbor.RelativePosition;
-    const auto inFront = direction.ScalarProduct(distp12) >= 0;
-    if(!inFront) {
+    const auto& neighbor_state = std::get<State>(*neighbor.state);
+    const auto distp12 = neighbor.relative_position;
+    const auto in_front = direction.scalar_product(distp12) >= 0;
+    if(!in_front) {
         return std::numeric_limits<double>::max();
     }
 
-    const auto left = direction.Rotate90Deg();
+    const auto left = direction.rotate90_deg();
     const auto buffer = 0.02;
-    const auto l = currentState.radius + neighborState.radius + buffer;
-    const bool inCorridor = std::abs(left.ScalarProduct(distp12)) <= l;
-    if(!inCorridor) {
+    const auto l = current_state.radius + neighbor_state.radius + buffer;
+    const bool in_corridor = std::abs(left.scalar_product(distp12)) <= l;
+    if(!in_corridor) {
         return std::numeric_limits<double>::max();
     }
-    return distp12.Norm() - l;
+    return distp12.norm() - l;
 }
 
-Point AnticipationVelocityModel::CalculateInfluenceDirection(
-    const Point& desiredDirection,
-    const Point& predictedDirection) const
+Point AnticipationVelocityModel::calculate_influence_direction(
+    const Point& desired_direction,
+    const Point& predicted_direction) const
 {
     // Eq. (5)
-    const Point orthogonalDirection = Point(-desiredDirection.y, desiredDirection.x).Normalized();
-    const double alignment = orthogonalDirection.ScalarProduct(predictedDirection);
-    Point influenceDirection = orthogonalDirection;
-    if(fabs(alignment) < J_EPS) {
+    const Point orthogonal_direction =
+        Point(-desired_direction.y, desired_direction.x).normalized();
+    const double alignment = orthogonal_direction.scalar_product(predicted_direction);
+    Point influence_direction = orthogonal_direction;
+    if(fabs(alignment) < j_eps) {
         // Choose a random direction (left or right)
-        if(gen() % 2 == 0) {
-            influenceDirection = -orthogonalDirection;
+        if(_gen() % 2 == 0) {
+            influence_direction = -orthogonal_direction;
         }
     } else if(alignment > 0) {
-        influenceDirection = -orthogonalDirection;
+        influence_direction = -orthogonal_direction;
     }
-    return influenceDirection;
+    return influence_direction;
 }
 
-Point AnticipationVelocityModel::NeighborRepulsion(
-    const State& currentState,
-    Point desiredDirection,
+Point AnticipationVelocityModel::neighbor_repulsion(
+    const State& current_state,
+    Point desired_direction,
     const NeighborView& neighbor) const
 {
-    const auto& neighborState = std::get<State>(*neighbor.state);
+    const auto& neighbor_state = std::get<State>(*neighbor.state);
 
-    const auto distp12 = neighbor.RelativePosition;
-    const auto [distance, ep12] = distp12.NormAndNormalized();
-    const double adjustedDist = distance - (currentState.radius + neighborState.radius);
+    const auto distp12 = neighbor.relative_position;
+    const auto [distance, ep12] = distp12.norm_and_normalized();
+    const double adjusted_dist = distance - (current_state.radius + neighbor_state.radius);
 
     // Pedestrian movement and desired directions
-    const auto& e1 = currentState.orientation;
-    const auto& d1 = desiredDirection;
-    const auto& e2 = neighborState.orientation;
+    const auto& e1 = current_state.orientation;
+    const auto& d1 = desired_direction;
+    const auto& e2 = neighbor_state.orientation;
 
     // Check perception range (Eq. 1)
-    const auto inPerceptionRange = d1.ScalarProduct(ep12) >= 0 || e1.ScalarProduct(ep12) >= 0;
-    if(!inPerceptionRange)
+    const auto in_perception_range = d1.scalar_product(ep12) >= 0 || e1.scalar_product(ep12) >= 0;
+    if(!in_perception_range)
         return Point(0, 0);
 
-    const double S_Gap = (currentState.velocity - neighborState.velocity).ScalarProduct(ep12) *
-                         currentState.anticipationTime;
-    double R_dist = adjustedDist - S_Gap;
-    R_dist = std::max(R_dist, 0.0); // Clamp to zero if negative
+    const double s_gap = (current_state.velocity - neighbor_state.velocity).scalar_product(ep12) *
+                         current_state.anticipation_time;
+    double r_dist = adjusted_dist - s_gap;
+    r_dist = std::max(r_dist, 0.0); // Clamp to zero if negative
 
     // Interaction strength (Eq. 3 & 4)
-    constexpr double alignmentBase = 1.0;
-    constexpr double alignmentWeight = 0.5;
-    const double alignmentFactor = alignmentBase + alignmentWeight * (1.0 - d1.ScalarProduct(e2));
-    const double interactionStrength = currentState.strengthNeighborRepulsion * alignmentFactor *
-                                       std::exp(-R_dist / currentState.rangeNeighborRepulsion);
+    constexpr double alignment_base = 1.0;
+    constexpr double alignment_weight = 0.5;
+    const double alignment_factor =
+        alignment_base + alignment_weight * (1.0 - d1.scalar_product(e2));
+    const double interaction_strength = current_state.strength_neighbor_repulsion *
+                                        alignment_factor *
+                                        std::exp(-r_dist / current_state.range_neighbor_repulsion);
     const auto newep12 =
-        distp12 + neighborState.velocity * neighborState.anticipationTime; // e_ij(t+ta)
+        distp12 + neighbor_state.velocity * neighbor_state.anticipation_time; // e_ij(t+ta)
 
     // Compute adjusted influence direction
-    const auto influenceDirection = CalculateInfluenceDirection(d1, newep12);
-    return influenceDirection * interactionStrength;
+    const auto influence_direction = calculate_influence_direction(d1, newep12);
+    return influence_direction * interaction_strength;
 }
 
-Point AnticipationVelocityModel::HandleWallAvoidance(
+Point AnticipationVelocityModel::handle_wall_avoidance(
     const Point& direction,
-    const State& currentState,
+    const State& current_state,
     const AgentStep& step,
-    double pushoutStrength) const
+    double pushout_strength) const
 {
-    const double criticalWallDistance = currentState.wallBufferDistance + currentState.radius;
+    const double critical_wall_distance = current_state.wall_buffer_distance + current_state.radius;
 
-    Point modifiedDirection = direction;
-    for(const auto& wall : step.WallsInRange(criticalWallDistance)) {
-        const auto dotProduct = modifiedDirection.ScalarProduct(wall.normal);
+    Point modified_direction = direction;
+    for(const auto& wall : step.walls_in_range(critical_wall_distance)) {
+        const auto dot_product = modified_direction.scalar_product(wall.normal);
 
-        if(dotProduct < 0) {
+        if(dot_product < 0) {
             // Direction points into wall - need to project it out
             // Remove the component pointing into the wall
-            const auto projectedDirection = modifiedDirection - wall.normal * dotProduct;
-            modifiedDirection = projectedDirection + wall.normal * pushoutStrength;
+            const auto projected_direction = modified_direction - wall.normal * dot_product;
+            modified_direction = projected_direction + wall.normal * pushout_strength;
         }
     }
 
     // Renormalize to maintain speed
-    const auto finalDirection = modifiedDirection.Normalized();
+    const auto final_direction = modified_direction.normalized();
 
-    return finalDirection;
+    return final_direction;
 }

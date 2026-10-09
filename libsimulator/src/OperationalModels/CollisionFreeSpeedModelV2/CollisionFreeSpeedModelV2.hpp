@@ -17,24 +17,24 @@ public:
     using State = CollisionFreeSpeedModelV2State;
 
 private:
-    double _cutOffRadius{3};
+    double _cut_off_radius{3};
 
 public:
     CollisionFreeSpeedModelV2() = default;
     ~CollisionFreeSpeedModelV2() override = default;
-    OperationalModelType Type() const override;
-    Point ComputeNextState(
+    OperationalModelType type() const override;
+    Point compute_next_state(
         const OperationalModelState& current,
         OperationalModelState& next,
         const AgentStep& step) const override;
-    void CheckModelConstraint(const GenericAgent& agent, const AgentView& view) const override;
+    void check_model_constraint(const GenericAgent& agent, const AgentView& view) const override;
 
 private:
-    double OptimalSpeed(const State& currentState, double spacing, double time_gap) const;
-    double GetSpacing(
-        const State& currentState,
+    double optimal_speed(const State& current_state, double spacing, double time_gap) const;
+    double get_spacing(
+        const State& current_state,
         const NeighborView& neighbor,
         const Point& direction) const;
-    Point NeighborRepulsion(const State& currentState, const NeighborView& neighbor) const;
-    Point BoundaryRepulsion(const State& currentState, const WallView& boundary) const;
+    Point neighbor_repulsion(const State& current_state, const NeighborView& neighbor) const;
+    Point boundary_repulsion(const State& current_state, const WallView& boundary) const;
 };

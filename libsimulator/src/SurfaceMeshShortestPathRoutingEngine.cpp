@@ -15,15 +15,15 @@
 ////////////////////////////////////////////////////////////////////////////////
 SurfaceMeshShortestPathRoutingEngine::SurfaceMeshShortestPathRoutingEngine(
     const Geometry& geometry,
-    double wallClearance)
-    : _geometry(geometry), _wallClearance(wallClearance)
+    double wall_clearance)
+    : _geometry(geometry), _wall_clearance(wall_clearance)
 {
-    if(wallClearance < 0.0) {
-        throw SimulationError("Wall clearance cannot be negative, got {}.", wallClearance);
+    if(wall_clearance < 0.0) {
+        throw SimulationError("Wall clearance cannot be negative, got {}.", wall_clearance);
     }
 }
 
-bool SurfaceMeshShortestPathRoutingEngine::IsValidLocation(const Point3D& loc) const
+bool SurfaceMeshShortestPathRoutingEngine::is_valid_location(const Point3D& loc) const
 {
     return _geometry.face_below(loc).face != SurfaceMesh::null_face();
 }
@@ -42,16 +42,16 @@ SurfaceMeshShortestPathRoutingEngine::on_surface(const Point3D& p, const char* w
 SurfaceMeshShortestPathRoutingEngine::ShortestPath&
 SurfaceMeshShortestPathRoutingEngine::tree_for(const Point3D& target)
 {
-    if(_lastTree == nullptr || _lastTarget != target) {
+    if(_last_tree == nullptr || _last_target != target) {
         const auto below = on_surface(target, "target");
         auto tree = std::make_unique<ShortestPath>(_geometry.mesh());
         const auto to_loc = tree->locate(below.point, _geometry.aabb_tree());
         tree->add_source_point(to_loc);
         tree->build_sequence_tree();
-        _lastTree = std::move(tree);
-        _lastTarget = target;
+        _last_tree = std::move(tree);
+        _last_target = target;
     }
-    return *_lastTree;
+    return *_last_tree;
 }
 
 SurfaceMeshShortestPathRoutingEngine::Way
@@ -94,17 +94,17 @@ SurfaceMeshShortestPathRoutingEngine::trace_way(const Point3D& source, const Poi
                 return {0.0, 0.0};
             }
             const Point here = xy(v);
-            const Point along = (xy(mesh.source(*border)) - here).Normalized();
-            const Point onwards = (xy(mesh.target(mesh.next(*border))) - here).Normalized();
+            const Point along = (xy(mesh.source(*border)) - here).normalized();
+            const Point onwards = (xy(mesh.target(mesh.next(*border))) - here).normalized();
             // A straight wall running through has no corner to step around.
-            return (along + onwards).Normalized() * -1.0;
+            return (along + onwards).normalized() * -1.0;
         }
 
         /// The crossing of @p e, held off whichever of its ends is a wall. CGAL weights the
         /// edge's target: the point is `t * target + (1 - t) * source`.
         K::FT held_off_the_walls(SurfaceMesh::Halfedge_index e, K::FT t) const
         {
-            const double length = (xy(mesh.target(e)) - xy(mesh.source(e))).Norm();
+            const double length = (xy(mesh.target(e)) - xy(mesh.source(e))).norm();
             const double margin = std::min(clearance / length, 0.5);
             const double low = on_wall(mesh.source(e)) ? margin : 0.0;
             const double high = on_wall(mesh.target(e)) ? 1.0 - margin : 1.0;
@@ -126,7 +126,7 @@ SurfaceMeshShortestPathRoutingEngine::trace_way(const Point3D& source, const Poi
     };
 
     Way way{};
-    Collector collector{tree, _geometry.mesh(), WallClearance(), way};
+    Collector collector{tree, _geometry.mesh(), wall_clearance(), way};
     tree.shortest_path_sequence_to_source_points(from_loc.first, from_loc.second, collector);
     return way;
 }
@@ -135,17 +135,18 @@ Point3D SurfaceMeshShortestPathRoutingEngine::held_off_the_wall(
     const Point3D& corner,
     Point into_the_open) const
 {
-    const Point moved = Point{corner.x(), corner.y()} + into_the_open * WallClearance();
+    const Point moved = Point{corner.x(), corner.y()} + into_the_open * wall_clearance();
     // Back onto the surface: beside a corner the floor may climb, and the route has to stay on
     // the storey the corner belongs to. Half a metre is far more than the clearance can climb
     // and far less than one storey.
-    constexpr double sameStorey = 0.5;
-    const auto located = _geometry.get_location_near_z(moved.x, moved.y, corner.z(), sameStorey);
+    constexpr double same_storey = 0.5;
+    const auto located = _geometry.get_location_near_z(moved.x, moved.y, corner.z(), same_storey);
     return located ? located->position_3d() : Point3D{moved.x, moved.y, corner.z()};
 }
 
-std::vector<Point3D>
-SurfaceMeshShortestPathRoutingEngine::GetShortestPath(const Point3D& source, const Point3D& target)
+std::vector<Point3D> SurfaceMeshShortestPathRoutingEngine::get_shortest_path(
+    const Point3D& source,
+    const Point3D& target)
 {
     const auto way = trace_way(source, target);
 
@@ -153,8 +154,9 @@ SurfaceMeshShortestPathRoutingEngine::GetShortestPath(const Point3D& source, con
     path.reserve(way.size());
     for(const auto& step : way) {
         path.push_back(
-            step.intoTheOpen.isZeroLength() ? step.point :
-                                              held_off_the_wall(step.point, step.intoTheOpen));
+            step.into_the_open.is_zero_length() ?
+                step.point :
+                held_off_the_wall(step.point, step.into_the_open));
     }
     return path;
 }
@@ -165,9 +167,9 @@ Point SurfaceMeshShortestPathRoutingEngine::next_waypoint(
 {
     const Point here{source.x(), source.y()};
     // CGAL sets a point wherever the way crosses a triangle edge.
-    for(const auto& p : GetShortestPath(source, target)) {
+    for(const auto& p : get_shortest_path(source, target)) {
         const Point xy{p.x(), p.y()};
-        if(!(xy - here).isZeroLength()) {
+        if(!(xy - here).is_zero_length()) {
             // Return first point "far enough" from source
             return xy;
         }
@@ -175,8 +177,10 @@ Point SurfaceMeshShortestPathRoutingEngine::next_waypoint(
     return here;
 }
 
-Point SurfaceMeshShortestPathRoutingEngine::GetOrientation(const Location& from, const Location& to)
+Point SurfaceMeshShortestPathRoutingEngine::get_orientation(
+    const Location& from,
+    const Location& to)
 {
     // Zero when the way heads for where it already is: nowhere left to go.
-    return (next_waypoint(from.position_3d(), to.position_3d()) - from.xy()).Normalized();
+    return (next_waypoint(from.position_3d(), to.position_3d()) - from.xy()).normalized();
 }

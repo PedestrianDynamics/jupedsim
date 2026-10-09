@@ -7,10 +7,10 @@
 
 #include <vector>
 
-inline PolyWithHoles buildGrosserStern()
+inline PolyWithHoles build_grosser_stern()
 {
     GeometryBuilder builder;
-    builder.AddAccessibleArea(
+    builder.add_accessible_area(
         std::vector<Point>{
             Point(-1773.300627609831, -35.03876590574541),
             Point(-1798.192678410298, -86.3503974642084),
@@ -216,7 +216,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1691.308121098691, 44.47651286194993),
             Point(-1675.85214697949, 21.22314061832157)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1789.582263523407, -107.4118112402807),
             Point(-1790.147147571263, -106.3344515744634),
@@ -231,7 +231,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1790.203830255021, -106.3402765953113),
             Point(-1789.629119126158, -107.4363786928851)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1815.088475666402, -120.7852977647285),
             Point(-1815.653359714258, -119.7079380979799),
@@ -246,7 +246,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1815.710042398016, -119.7137631188277),
             Point(-1815.135331269152, -120.8098652173329)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{Point(-1820.377068870938, -122.3274852574642),
                            Point(-1820.435796594366, -122.2154784115069),
                            Point(-1820.385584790594, -122.0526290972555),
@@ -416,7 +416,7 @@ inline PolyWithHoles buildGrosserStern()
                            Point(-1818.553798415252, -125.7474417969886),
                            Point(-1820.42392441121, -122.3520528292283)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1813.494315304109, -119.9494432679217),
             Point(-1814.000515834927, -118.9841136258866),
@@ -433,7 +433,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1814.047327168866, -119.0086580189542),
             Point(-1813.54117090686, -119.9740107205261)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1792.77054004131, -109.0834970551382),
             Point(-1793.335424089167, -108.0061373893209),
@@ -448,7 +448,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1793.392106772925, -108.0119624101687),
             Point(-1792.817395644061, -109.1080645077426)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1791.176379679105, -108.2476425583313),
             Point(-1791.682580210127, -107.2823129172276),
@@ -465,7 +465,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1791.729391543862, -107.3068573093639),
             Point(-1791.223235281856, -108.2722100109357)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1808.71192263042, -117.4419261331509),
             Point(-1809.276806678276, -116.3645664673336),
@@ -480,7 +480,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1809.333489362034, -116.3703914881815),
             Point(-1808.758778233171, -117.4664935857553)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1807.117762268215, -116.6060716372754),
             Point(-1807.623962799237, -115.6407419952403),
@@ -497,7 +497,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1807.670774132972, -115.6652863883079),
             Point(-1807.164617870966, -116.6306390898798)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1818.276752184218, -122.4569835814486),
             Point(-1818.841636232161, -121.3796239147),
@@ -512,7 +512,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1818.898318915919, -121.3854489355479),
             Point(-1818.323607786969, -122.481551034053)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1816.682591822013, -121.6211290837105),
             Point(-1817.188792353034, -120.6557994407441),
@@ -529,7 +529,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1817.23560368677, -120.680343834743),
             Point(-1816.729447424764, -121.6456965363149)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1803.929485750312, -114.9343858214866),
             Point(-1804.43568628113, -113.9690561794515),
@@ -546,7 +546,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1804.482497615068, -113.9936005725191),
             Point(-1803.976341353062, -114.958953274091)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1799.147093077001, -112.4268686857845),
             Point(-1799.711977124857, -111.3495090199672),
@@ -561,7 +561,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1799.768659808615, -111.355334040815),
             Point(-1799.193948679752, -112.4514361383889)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1797.552932714825, -111.5910141889776),
             Point(-1798.059133245847, -110.6256845478739),
@@ -578,7 +578,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1798.105944579582, -110.6502289400102),
             Point(-1797.599788317576, -111.615581641582)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1802.335369594701, -114.0985545025046),
             Point(-1802.900253642266, -113.0211948366873),
@@ -593,7 +593,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1802.956936326024, -113.0270198575352),
             Point(-1802.382225197451, -114.123121955109)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1800.741209232204, -113.2627000056978),
             Point(-1801.24740976375, -112.2973703636627),
@@ -610,7 +610,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1801.294221096961, -112.3219147567303),
             Point(-1800.788064834955, -113.2872674583022)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1811.900199148324, -119.1136119489397),
             Point(-1812.46508319618, -118.0362522831224),
@@ -625,7 +625,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1812.521765879938, -118.0420773039703),
             Point(-1811.947054751074, -119.1381794015441)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1810.306038786002, -118.2777574530642),
             Point(-1810.81223931714, -117.3124278100978),
@@ -642,7 +642,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1810.859050650759, -117.3369722040967),
             Point(-1810.352894388753, -118.3023249056686)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1795.958816559214, -110.755182870927),
             Point(-1796.52370060707, -109.6778232051097),
@@ -657,7 +657,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1796.580383290828, -109.6836482259576),
             Point(-1796.005672161965, -110.7797503235314)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1794.364656196921, -109.9193283741201),
             Point(-1794.870856728031, -108.9539987320851),
@@ -674,7 +674,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1794.917668061678, -108.9785431251527),
             Point(-1794.411511799672, -109.9438958267245)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1805.523646112517, -115.7702403173621),
             Point(-1806.08853016046, -114.6928806524761),
@@ -689,7 +689,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1806.145212844218, -114.698705673324),
             Point(-1805.570501715267, -115.7948077699665)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1790.129035004394, -107.5596703732428),
             Point(-1790.521004189749, -106.812097853808),
@@ -700,7 +700,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1790.198142693771, -107.7189229287345),
             Point(-1790.135871354391, -107.6862726572498)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1788.534874642189, -106.7238158764359),
             Point(-1788.926843827544, -105.9762433570011),
@@ -711,7 +711,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1788.603982331566, -106.8830684319276),
             Point(-1788.541710992186, -106.8504181604429)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1814.041086785096, -120.0973024008837),
             Point(-1814.433055970452, -119.3497298814489),
@@ -722,7 +722,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1814.110194474473, -120.2565549563754),
             Point(-1814.047923135094, -120.2239046848907)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1793.317311522298, -109.2313561881003),
             Point(-1793.709280707653, -108.4837836686655),
@@ -733,7 +733,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1793.386419211675, -109.390608743592),
             Point(-1793.324147872295, -109.3579584721072)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1791.723151160093, -108.3955016912934),
             Point(-1792.115120345448, -107.6479291718586),
@@ -744,7 +744,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1791.79225884947, -108.5547542467851),
             Point(-1791.72998751009, -108.5221039753004)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1807.664533749202, -116.7539307702374),
             Point(-1808.056502934558, -116.0063582508026),
@@ -755,7 +755,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1807.733641438579, -116.9131833257291),
             Point(-1807.6713700992, -116.8805330542444)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1818.823523665205, -122.6048427144107),
             Point(-1819.21549285056, -121.8572701949759),
@@ -766,7 +766,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1818.892631354582, -122.7640952699024),
             Point(-1818.830360015202, -122.7314449984177)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1817.236199652997, -121.8955905006795),
             Point(-1817.229363303, -121.7689882166725),
@@ -777,7 +777,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1817.406492239464, -121.861860925505),
             Point(-1817.298470992377, -121.9282407721642)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1815.635247147389, -120.9331568976906),
             Point(-1816.027216332744, -120.1855843782558),
@@ -788,7 +788,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1815.704354836766, -121.0924094531823),
             Point(-1815.642083497386, -121.0597591816976)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1804.476257231299, -115.0822449544486),
             Point(-1804.868226416654, -114.3346724350138),
@@ -799,7 +799,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1804.545364920676, -115.2414975099403),
             Point(-1804.483093581296, -115.2088472384556)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1802.882141075688, -114.2464136354667),
             Point(-1803.274110261043, -113.4988411160319),
@@ -810,7 +810,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1802.951248765065, -114.4056661909584),
             Point(-1802.888977425685, -114.3730159194737)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1799.693864557988, -112.5747278187466),
             Point(-1800.085833743343, -111.8271552993118),
@@ -821,7 +821,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1799.762972247365, -112.7339803742383),
             Point(-1799.700700907985, -112.7013301027535)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1798.661965967489, -110.9575712278609),
             Point(-1798.668802317631, -111.0841735113374),
@@ -832,7 +832,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1798.491673381167, -110.9913008025049),
             Point(-1798.599694628608, -110.9249209554244)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1796.505588040201, -110.9030420038891),
             Point(-1796.897557225556, -110.1554694844543),
@@ -843,7 +843,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1796.574695729578, -111.0622945593808),
             Point(-1796.512424390198, -111.029644287896)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1801.850242484868, -112.629257044581),
             Point(-1801.857078835011, -112.7558593280575),
@@ -854,7 +854,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1801.679949898547, -112.662986619225),
             Point(-1801.787971145988, -112.5966067721445)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1812.446970629311, -119.2614710819018),
             Point(-1812.838939814666, -118.513898562467),
@@ -865,7 +865,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1812.516078318688, -119.4207236373935),
             Point(-1812.453806979308, -119.3880733659088)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1811.415072038666, -117.6443144919474),
             Point(-1811.421908388809, -117.7709167754239),
@@ -876,7 +876,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1811.244779452345, -117.6780440665914),
             Point(-1811.352800699785, -117.6116642195109)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1809.820955883084, -116.8084831720342),
             Point(-1809.827792233227, -116.9350854555107),
@@ -887,7 +887,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1809.650663296763, -116.8422127466782),
             Point(-1809.758684544203, -116.7758328995976)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1795.473689449585, -109.2858854130034),
             Point(-1795.480525799728, -109.4124876964799),
@@ -898,7 +898,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1795.303396863264, -109.3196149876474),
             Point(-1795.411418110705, -109.2532351405669)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1806.63267936518, -115.1367973562454),
             Point(-1806.639515715323, -115.2633996397219),
@@ -909,7 +909,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1806.462386778859, -115.1705269308894),
             Point(-1806.5704080263, -115.1041470838088)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1811.016782317396, -177.2471065046182),
             Point(-1810.920103576924, -177.4396817414035),
@@ -924,7 +924,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1810.577097638153, -176.0890006870627),
             Point(-1810.627315434773, -176.0723519592073)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1803.656711054768, -179.664899514502),
             Point(-1803.808749837658, -179.7418756984012),
@@ -939,7 +939,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1803.223685976907, -178.5268811482962),
             Point(-1803.273903773527, -178.5102324204408)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1805.84471658866, -178.8062704091424),
             Point(-1805.891221829193, -178.9463862171313),
@@ -956,7 +956,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1805.451489771359, -177.7882961081937),
             Point(-1805.50170756798, -177.7716473803383)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1787.097389489585, -185.1771151516503),
             Point(-1787.000710749113, -185.3696903884356),
@@ -971,7 +971,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1786.657704810458, -184.0190093350261),
             Point(-1786.707922607079, -184.0023606071707)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1800.765613962603, -180.6456816373309),
             Point(-1800.668935222131, -180.8382568741163),
@@ -986,7 +986,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1800.325929283156, -179.4875758225694),
             Point(-1800.376147079777, -179.470927094714)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1802.427660470463, -179.9391287870237),
             Point(-1802.474165711084, -180.079244595944),
@@ -1003,7 +1003,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1802.034433653163, -178.921154486075),
             Point(-1802.084651449783, -178.9045057582196)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1792.176492115758, -183.3377039234618),
             Point(-1792.222997356408, -183.477819729588),
@@ -1020,7 +1020,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1791.783265298457, -182.3197296225131),
             Point(-1791.833483095078, -182.3030808946576)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1793.931501726094, -182.9113983958876),
             Point(-1793.834822985622, -183.1039736326729),
@@ -1035,7 +1035,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1793.491817046968, -181.7532925792634),
             Point(-1793.542034843588, -181.736643851408)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1788.759435997445, -184.4705623013431),
             Point(-1788.805941238095, -184.610678109332),
@@ -1052,7 +1052,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1788.366209180145, -183.4525880003944),
             Point(-1788.416426976765, -183.435939272539)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1790.514445607898, -184.0442567728376),
             Point(-1790.417766867425, -184.236832009623),
@@ -1067,7 +1067,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1790.074760928655, -182.8861509571448),
             Point(-1790.124978725275, -182.8695022292894)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1785.342379879249, -185.6034206782931),
             Point(-1785.388885119899, -185.7435364872134),
@@ -1084,7 +1084,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1784.949153061948, -184.5854463773444),
             Point(-1784.999370858569, -184.568797649489)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1783.680333371592, -186.3099735295316),
             Point(-1783.58365463112, -186.502548766317),
@@ -1099,7 +1099,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1783.240648692146, -185.1518677138388),
             Point(-1783.290866488766, -185.1352189859834)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1797.348557844087, -181.7785400161436),
             Point(-1797.251879103614, -181.9711152529289),
@@ -1114,7 +1114,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1796.90887316496, -180.6204342004508),
             Point(-1796.959090961581, -180.6037854725953)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1799.010604352267, -181.0719871649051),
             Point(-1799.057109592597, -181.212102972894),
@@ -1131,7 +1131,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1798.617377534966, -180.0540128639564),
             Point(-1798.667595331587, -180.037364136101)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1807.599726199083, -178.3799648824996),
             Point(-1807.503047458611, -178.5725401192849),
@@ -1146,7 +1146,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1807.160041519666, -177.2218590658754),
             Point(-1807.210259316286, -177.20521033802)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1814.433838435883, -176.1142481248742),
             Point(-1814.337159695411, -176.3068233616596),
@@ -1161,7 +1161,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1813.994153756669, -174.9561423082501),
             Point(-1814.04437155329, -174.9394935803946)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1795.593548233751, -182.2048455427864),
             Point(-1795.640053474604, -182.3449613507753),
@@ -1178,7 +1178,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1795.20032141645, -181.1868712418377),
             Point(-1795.25053921307, -181.1702225139823)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1812.67882882546, -176.5405536524484),
             Point(-1812.725334065906, -176.6806694613686),
@@ -1195,7 +1195,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1812.285602008159, -175.5225793514997),
             Point(-1812.33581980478, -175.5059306236442)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1809.261772707147, -177.6734120303297),
             Point(-1809.30827794739, -177.81352783925),
@@ -1212,7 +1212,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1808.868545889846, -176.655437729381),
             Point(-1808.918763686467, -176.6387890015256)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1809.526056426749, -176.4522023103827),
             Point(-1809.62189130984, -176.5352116414705),
@@ -1223,7 +1223,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1809.432052221562, -176.5981490765984),
             Point(-1809.459316714355, -176.4743285555616)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1802.691944190065, -178.7179190670767),
             Point(-1802.787779073156, -178.8009283981645),
@@ -1234,7 +1234,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1802.597939984878, -178.8638658332924),
             Point(-1802.625204477671, -178.7400453122557)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1804.400495938372, -178.1514820247584),
             Point(-1804.496330821463, -178.2344913558462),
@@ -1245,7 +1245,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1804.306491733185, -178.2974287909741),
             Point(-1804.333756225978, -178.1736082699374)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1799.274888071869, -179.8507774449581),
             Point(-1799.37072295496, -179.9337867760459),
@@ -1256,7 +1256,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1799.180883866682, -179.9967242111738),
             Point(-1799.208148359475, -179.872903690137)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1800.983439820059, -179.2843404035711),
             Point(-1801.07927470315, -179.3673497346589),
@@ -1267,7 +1267,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1800.889435614872, -179.4302871697868),
             Point(-1800.916700107665, -179.30646664875)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1790.732271465557, -182.6829155381465),
             Point(-1790.828106348648, -182.7659248692343),
@@ -1278,7 +1278,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1790.63826726037, -182.8288623043622),
             Point(-1790.665531753163, -182.7050417833254)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1792.44077583536, -182.1164942035147),
             Point(-1792.536610718451, -182.1995035346025),
@@ -1289,7 +1289,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1792.346771630173, -182.2624409697304),
             Point(-1792.374036122966, -182.1386204486937)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1787.315215347361, -183.8157739160278),
             Point(-1787.411050230452, -183.8987832471156),
@@ -1300,7 +1300,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1787.221211142174, -183.9617206822435),
             Point(-1787.248475634967, -183.8379001612068)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1789.023719717047, -183.2493525813961),
             Point(-1789.119554600138, -183.3323619124839),
@@ -1311,7 +1311,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1788.92971551186, -183.3952993476118),
             Point(-1788.956980004653, -183.271478826575)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1783.898159229048, -184.9486322948405),
             Point(-1783.993994112139, -185.0316416259283),
@@ -1322,7 +1322,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1783.804155023861, -185.0945790610562),
             Point(-1783.831419516654, -184.9707585400194)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1785.606663598851, -184.3822109583461),
             Point(-1785.702498481942, -184.4652202894339),
@@ -1333,7 +1333,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1785.512659393664, -184.5281577245618),
             Point(-1785.539923886457, -184.404337203525)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1807.817552056568, -177.0186236468771),
             Point(-1807.913386939659, -177.1016329779649),
@@ -1344,7 +1344,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1807.723547851381, -177.1645704130928),
             Point(-1807.750812344174, -177.040749892056)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1782.189607480567, -185.5150693362274),
             Point(-1782.285442363658, -185.5980786673153),
@@ -1355,7 +1355,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1782.09560327538, -185.6610161024431),
             Point(-1782.122867768173, -185.5371955814064)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1795.857831953352, -180.9836358228394),
             Point(-1795.953666836444, -181.0666451539272),
@@ -1366,7 +1366,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1795.763827748165, -181.1295825890551),
             Point(-1795.791092240958, -181.0057620680184)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1797.566383701863, -180.4171987814524),
             Point(-1797.662218584954, -180.5002081125403),
@@ -1377,7 +1377,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1797.472379496676, -180.5631455476681),
             Point(-1797.499643989468, -180.4393250266314)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1806.109000308262, -177.5850606891954),
             Point(-1806.204835191353, -177.6680700202832),
@@ -1388,7 +1388,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1806.014996103075, -177.7310074554111),
             Point(-1806.042260595867, -177.6071869343743)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1814.651664293572, -174.7529068892517),
             Point(-1814.747499176663, -174.8359162203396),
@@ -1399,7 +1399,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1814.557660088385, -174.8988536554674),
             Point(-1814.584924581178, -174.7750331344307)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1811.234608175055, -175.8857652680644),
             Point(-1811.330443058147, -175.9687745991522),
@@ -1410,7 +1410,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1811.140603969868, -176.0317120342801),
             Point(-1811.167868462661, -175.9078915132434)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1812.943112545062, -175.3193439325013),
             Point(-1813.038947428153, -175.4023532635892),
@@ -1421,7 +1421,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1812.849108339875, -175.465290698717),
             Point(-1812.876372832668, -175.3414701776803)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1794.14932758387, -181.5500571602651),
             Point(-1794.245162466961, -181.6330664913529),
@@ -1432,7 +1432,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1794.055323378683, -181.6960039264808),
             Point(-1794.082587871476, -181.5721834054441)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1861.938103161549, -424.8259567422792),
             Point(-1860.38810316156, -424.5759567422792),
@@ -1443,7 +1443,7 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1876.588103161572, -269.8259567422792),
             Point(-1882.488103161566, -270.6259567430243)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(-1878.488103161566, -256.675956742838),
             Point(-1878.788103161554, -256.175956742838),
@@ -1456,14 +1456,14 @@ inline PolyWithHoles buildGrosserStern()
             Point(-1878.188103161551, -257.7759567424554),
             Point(-1878.288103161554, -257.2259567426518)});
 
-    return builder.Build();
+    return builder.build();
 }
 
-inline PolyWithHoles buildLargeStreetNetwork()
+inline PolyWithHoles build_large_street_network()
 {
 
     GeometryBuilder builder;
-    builder.AddAccessibleArea(
+    builder.add_accessible_area(
         std::vector<Point>{
             Point(485.82891183420395, 155.94713193480587),
             Point(485.8146331352698, 155.95224093497743),
@@ -3558,7 +3558,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(485.9212815131149, 155.91408153521553),
             Point(485.8427176769173, 155.94085644016667)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(873.5315196967933, 1897.8479048715478),
             Point(884.2432121754819, 1893.745935678204),
@@ -3569,7 +3569,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(932.1852575499965, 2052.7662823665573),
             Point(873.0913627444396, 1898.5555701691794)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(886.7276381934784, 1892.7765199041448),
             Point(886.725555720642, 1892.7720011996319),
@@ -4028,7 +4028,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(886.7337870153036, 1892.7921706970492),
             Point(886.7331481099411, 1892.7924155270337)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{Point(887.1194803109526, 1730.3660787077547),
                            Point(887.1177958238901, 1730.3655234919531),
                            Point(887.1338806714645, 1730.320569354509),
@@ -4067,7 +4067,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
                            Point(891.1884333153545, 1742.5466379921486),
                            Point(883.0084117858644, 1742.838781618202)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{Point(885.5839657193409, 1721.3796305466556),
                            Point(885.5735811904415, 1721.3811709460049),
                            Point(885.5631016595881, 1721.3817960089752),
@@ -4138,7 +4138,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
                            Point(885.7487287395313, 1721.3707240807014),
                            Point(885.6715199000284, 1721.3753292855743)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(882.8138371134254, 1534.911776568696),
             Point(882.7776336253254, 1534.9113096518429),
@@ -4152,7 +4152,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(882.8187538139989, 1534.9102440959307),
             Point(882.8187739693205, 1534.911534036518)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(874.5307813921785, 1519.1101101497795),
             Point(873.7655464606303, 1518.7800655400324),
@@ -4163,7 +4163,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(886.2107222726231, 1515.7966050322834),
             Point(885.6765130290386, 1516.440151928088)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{Point(838.1717802428584, 1307.182173118723),
                            Point(838.7960209067255, 1306.3487865683271),
                            Point(838.7969118519276, 1306.3475852677866),
@@ -4208,7 +4208,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
                            Point(896.3864224039498, 1517.565215657147),
                            Point(888.1353716394578, 1515.246051332525)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(833.70909479274, 1293.2498558082796),
             Point(778.511388233267, 1168.6897151821754),
@@ -4257,7 +4257,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(944.8023172771767, 1338.8291905416593),
             Point(842.2706297423033, 1298.0350908305943)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(887.7138795325112, 1179.257316567635),
             Point(887.6719212643483, 1179.1686032631742),
@@ -4322,7 +4322,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(887.7234369688401, 1179.2812585538268),
             Point(887.7225658960107, 1179.2815933272898)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(884.7984233393347, 1159.1864251810368),
             Point(879.311858710939, 1160.8539105092748),
@@ -4617,7 +4617,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(884.799430645491, 1159.1861193285356),
             Point(884.7984382969788, 1159.186474396511)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(834.7942135623731, 949.3357864376269),
             Point(834.6487865683273, 949.2039790932745),
@@ -4649,7 +4649,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(995.5815068517687, 932.9219732909287),
             Point(835.8672477856585, 950.4813993592348)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(937.6753668647301, 778.7722409349774),
             Point(937.4905693545089, 778.7061193285356),
@@ -4748,7 +4748,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(1113.463051964971, 674.0017675886821),
             Point(939.0503760060305, 779.3259311768935)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{Point(934.2347155148956, 657.5612478946576),
                            Point(926.0801806440323, 655.9484294391935),
                            Point(926.001698584283, 655.9367877253566),
@@ -4827,7 +4827,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
                            Point(956.0388962021475, 560.6971795898988),
                            Point(956.5727727566423, 561.3312227411956)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(833.6539149751926, 355.1835879318288),
             Point(833.9540476430601, 354.4111344602725),
@@ -4838,7 +4838,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(949.6102945574268, 538.6425251911552),
             Point(948.780850460951, 538.5744455653764)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(840.5694655720713, 350.39790590414145),
             Point(837.7720458787481, 342.0418777807421),
@@ -4881,7 +4881,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(957.4260342806591, 534.2296305466556),
             Point(955.9008352331338, 534.1044443154982)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{Point(839.9542445250391, 334.4816079114491),
                            Point(839.3677590650226, 333.1846331352698),
                            Point(839.3367229231853, 333.11901272669115),
@@ -4959,7 +4959,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
                            Point(1021.9357864376269, 372.1457864376269),
                            Point(1019.921097096853, 374.2908603117331)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{Point(713.6682629679646, 543.3768613965794),
                            Point(715.0508540801337, 544.7891218459196),
                            Point(715.0586508257302, 544.7963406278723),
@@ -5001,7 +5001,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
                            Point(711.5522102177251, 554.8870810451617),
                            Point(710.3972571656232, 544.7383968066911)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(717.9885548285854, 541.9172248503882),
             Point(717.6266774847346, 541.1659612325083),
@@ -5012,7 +5012,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(729.0098380565536, 547.0278940378917),
             Point(728.1845184533452, 547.1675189489024)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{Point(715.0136648290837, 539.2087324096584),
                            Point(714.934937914043, 539.1704694971005),
                            Point(714.9249721521113, 539.166783897571),
@@ -5066,7 +5066,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
                            Point(716.0883762550009, 539.784866280357),
                            Point(715.092793473652, 539.2461574713033)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{Point(650.7198721989838, 381.6080106296119),
                            Point(650.6997153227455, 381.6130596642678),
                            Point(650.6073165676349, 381.6461204674887),
@@ -5112,7 +5112,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
                            Point(812.8880205977293, 336.0701595282992),
                            Point(650.7196548321623, 381.6072365346427)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(662.3842551281476, 249.40072426038967),
             Point(651.8512075428597, 239.1885266885788),
@@ -5123,7 +5123,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(811.6981119196475, 96.32618108024607),
             Point(663.2095754815019, 249.50540166744383)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(436.11610410045876, 682.1311183507432),
             Point(435.9922590668869, 681.3070430959845),
@@ -5134,7 +5134,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(447.3789120072734, 692.5420221337408),
             Point(446.5620167730431, 692.4302930050999)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(537.9721151600775, 367.23049038234154),
             Point(635.4054771088378, 255.46372632408372),
@@ -5145,7 +5145,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(551.6122925428529, 379.7850017763888),
             Point(538.1468087544433, 368.05039565532144)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{Point(512.923826458064, 161.841165474606),
                            Point(514.2309924521529, 159.07480642961747),
                            Point(515.6445521127954, 157.2240633687763),
@@ -5194,7 +5194,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
                            Point(536.5658349250816, 365.80005764924067),
                            Point(534.5351023032264, 365.16235807591414)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(420.50229155977064, 501.5795240005322),
             Point(545.4068003233375, 564.1161263861682),
@@ -5203,7 +5203,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(432.59488408809113, 679.0490287955274),
             Point(418.3350780241657, 502.97617272347765)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(425.63863034954414, 491.1776681606109),
             Point(550.6052104321008, 553.7503193349531),
@@ -5214,7 +5214,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(421.1865423564499, 498.9404377758786),
             Point(424.8898477452454, 491.55105167451444)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(524.1419067602426, 411.33015452464934),
             Point(553.6619665968518, 550.6604738945509),
@@ -5223,7 +5223,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(426.27386278579326, 486.67508618016836),
             Point(521.4484553556235, 409.9907084207307)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(416.95597822358985, 475.17565108747596),
             Point(512.2800155911362, 398.38078144132146),
@@ -5234,7 +5234,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(424.18283674736574, 484.9410039414471),
             Point(416.9847042549875, 476.01280971677875)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(510.9584429202627, 162.2728336282606),
             Point(532.5628212437596, 365.52913360864966),
@@ -5245,7 +5245,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(492.4718553439478, 163.7385643675181),
             Point(510.24394767447575, 161.84870855657147)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(406.08012906244994, 483.89944574597627),
             Point(406.08782876548713, 483.8957232287594),
@@ -5261,7 +5261,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(405.9917943998226, 483.94215223749785),
             Point(406.072793473652, 483.9038425286967)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{Point(314.0187865683273, 290.06602090672544),
                            Point(314.1642135623731, 289.9342135623731),
                            Point(314.29602090672546, 289.7887865683273),
@@ -5290,14 +5290,14 @@ inline PolyWithHoles buildLargeStreetNetwork()
                            Point(313.692793473652, 290.2838425286967),
                            Point(313.8611404660392, 290.1829392246051)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(491.15280315512723, 159.42639238094628),
             Point(509.7427595603685, 157.87945196271957),
             Point(491.9263887297267, 159.77401627839285),
             Point(491.7450796106799, 159.6925419274288)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{Point(540.4170765966462, 393.66883585614977),
                            Point(540.417069267544, 393.66884808362323),
                            Point(540.4170607753949, 393.66885953396076),
@@ -5338,7 +5338,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
                            Point(535.3292934755759, 370.90080331638154),
                            Point(548.159519284334, 382.08180866872704)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(550.6193747939485, 563.7647395633813),
             Point(554.3627888911456, 556.2953225973465),
@@ -5349,7 +5349,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(561.3327693543981, 575.9318778592366),
             Point(550.9369337823521, 565.6820768518548)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(526.6487233792598, 410.29862568382686),
             Point(531.6049906768498, 409.25353417698676),
@@ -5360,14 +5360,14 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(555.6650724124917, 550.4655876171341),
             Point(526.1013506330358, 410.9291903302231)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(631.8518090928405, 27.67663464738247),
             Point(646.3430464049376, 235.91264422510952),
             Point(639.9581117364792, 236.36218019818713),
             Point(625.4670327310438, 28.118540409893463)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{Point(639.1088482831501, 250.8871067794552),
                            Point(639.1429392246051, 250.8411404660392),
                            Point(639.163999147821, 250.80600410687626),
@@ -5397,7 +5397,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
                            Point(639.0689868515897, 250.9436356268048),
                            Point(639.0766677403731, 250.93443020837745)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(658.8077590650227, 1203.92463313527),
             Point(658.8075407893879, 1203.9241716302154),
@@ -5557,7 +5557,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(658.8448989058892, 1204.028412966807),
             Point(658.8406482910257, 1204.0165523641804)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(549.7516737307213, 1018.640762970632),
             Point(550.5667691041275, 1013.6394010677913),
@@ -5568,7 +5568,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(684.4298541338404, 1041.2032391870898),
             Point(550.1424845979966, 1019.3829066492184)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(428.58943064549106, 1246.1461193285356),
             Point(428.55799354945265, 1246.1573677013596),
@@ -5635,7 +5635,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(432.1304866327091, 1245.1115988342142),
             Point(432.1304866327086, 1245.1115988342144)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(415.8536011097227, 1039.9606020310596),
             Point(416.136001323662, 1038.8629081134711),
@@ -5646,7 +5646,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(421.37300304008824, 1057.3310206024205),
             Point(420.7083482703792, 1056.8287913180864)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(546.9183049400943, 1024.1232933577928),
             Point(647.2056773335427, 1192.2339809899452),
@@ -5657,7 +5657,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(538.989152751319, 1028.274555126671),
             Point(546.0853886471871, 1024.0374822373906)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(546.4064666251573, 1014.299191350578),
             Point(545.7672435617798, 1018.2214144190697),
@@ -5666,7 +5666,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(529.4355519638397, 1024.7146685580763),
             Point(525.4119596111929, 1010.7343900446423)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(549.4134801218977, 1196.361278520536),
             Point(635.8949699978066, 1202.1543915826398),
@@ -5677,7 +5677,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(548.530391951492, 1202.0480179149558),
             Point(548.870923057042, 1196.995486627958)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(655.1900407390872, 1205.6862008584874),
             Point(655.2460814619724, 1205.8458640501037),
@@ -5686,7 +5686,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(641.6878814311069, 1200.7651834860453),
             Point(648.0367503554547, 1196.9789489275254)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(653.9757864376269, 1970.255786437627),
             Point(653.9683589635013, 1970.2639813924739),
@@ -5869,14 +5869,14 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(656.4153429849039, 1968.1314430291163),
             Point(654.1212134316727, 1970.1239790932746)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(588.9148688231434, 1719.0687503134234),
             Point(590.1312866668756, 1728.584944329015),
             Point(404.6352329263796, 1752.311183760939),
             Point(403.41861160557403, 1742.7851215823862)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(593.9208066417002, 1718.8027634224634),
             Point(596.8311924607149, 1706.8266930407708),
@@ -5884,7 +5884,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(596.5861294375098, 1729.7575687610413),
             Point(595.0327690802035, 1727.4797162212758)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(647.5161807904236, 825.212507615203),
             Point(648.2807561214711, 825.5362965210683),
@@ -5895,7 +5895,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(638.9711896116881, 827.8619146399296),
             Point(639.4929502632582, 827.2183152469944)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(649.5938806714644, 822.5294306454911),
             Point(649.5277590650226, 822.3446331352699),
@@ -6090,7 +6090,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(650.0991218737752, 824.5678028671799),
             Point(649.6415705608064, 822.7198193559677)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(644.4785349013903, 1666.6172857283634),
             Point(644.2643869249587, 1665.814784598572),
@@ -6101,7 +6101,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(656.850718827409, 1675.6805092837112),
             Point(656.0184013706215, 1675.6640277499134)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(652.917206526348, 1683.3161574713033),
             Point(652.8866880022157, 1683.334449570718),
@@ -6118,7 +6118,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(653.0294153008207, 1683.2606239922738),
             Point(652.9738047286688, 1683.2893885152268)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(751.9293064676541, 789.174338570944),
             Point(922.9306744758887, 783.9647620106931),
@@ -6129,7 +6129,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(751.7987686387936, 801.3132347435665),
             Point(751.4493879865711, 789.8553410463209)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(726.22, 558.47),
             Point(726.3123240819765, 558.4654644086946),
@@ -6239,7 +6239,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(749.2655080635917, 783.5382715434766),
             Point(724.828707902447, 558.5367820206826)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(747.4465649225145, 789.8237299977957),
             Point(747.7387737642184, 799.4066814987999),
@@ -6248,7 +6248,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(735.9422165206787, 789.2778160539738),
             Point(746.4525480105607, 788.1375442413922)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(710.6635799876561, 559.0069605834998),
             Point(722.0659697520425, 557.7699088637787),
@@ -6259,14 +6259,14 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(734.5303317403735, 784.9064390091032),
             Point(710.0582235115917, 559.5698948504302)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(726.7287494333843, 923.3092791512511),
             Point(731.9007372300405, 911.5987917320664),
             Point(822.9412505666156, 951.8107208487489),
             Point(817.7692627699595, 963.5212082679336)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(698.6331825272799, 1032.7786202674265),
             Point(701.069489423895, 1036.3508739379233),
@@ -6275,7 +6275,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(689.8076938553106, 1036.2023676430547),
             Point(691.2571881390124, 1034.624599528937)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(837.0434444277971, 1300.1938091844204),
             Point(835.8416966842079, 1303.210855207355),
@@ -6290,7 +6290,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(823.5575562388603, 1302.491102321349),
             Point(832.8397084026911, 1298.3736348230343)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(765.3904195526969, 1173.967857825724),
             Point(775.8699051223024, 1169.3192655089504),
@@ -6301,7 +6301,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(820.1113774356229, 1299.0970070627616),
             Point(764.9864959354353, 1174.6912777344075)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(774.9046331352698, 1165.3722409349775),
             Point(774.8800061692169, 1165.3838886224576),
@@ -6315,7 +6315,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(775.0375444679663, 1165.3226334038989),
             Point(774.9714264791476, 1165.3483418943924)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(766.3906715486346, 1691.259590321973),
             Point(767.0710255552644, 1690.7860694872552),
@@ -6326,7 +6326,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(762.0665669516706, 1705.9863714080911),
             Point(761.7980860928259, 1705.1931829224304)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(717.0188313509683, 1605.6736317238156),
             Point(744.4963046117989, 1688.8166758147772),
@@ -6335,7 +6335,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(658.4740831816486, 1676.8514442484466),
             Point(714.5986578799127, 1605.2568240704672)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(734.0777996288025, 1599.9297340127794),
             Point(761.6036986073292, 1683.2193076460799),
@@ -6346,7 +6346,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(719.3600909617774, 1604.2699522301339),
             Point(733.288641444294, 1599.6668367974655)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(748.3677432318996, 1692.3401161263985),
             Point(761.4064051512714, 1688.0225078673832),
@@ -6356,7 +6356,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(746.745282362933, 1695.3373547996011),
             Point(746.9219646542725, 1694.0644392006325)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{Point(819.1503694533444, 343.3939657193408),
                            Point(819.1379152399327, 343.310006232379),
                            Point(819.1265764831634, 343.2258888413292),
@@ -6400,7 +6400,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
                            Point(819.1527960144119, 343.4204003391989),
                            Point(819.1510213099356, 343.4072345650779)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(746.1662616142655, 1839.7402278213585),
             Point(751.3591842229314, 1839.3414539008977),
@@ -6411,7 +6411,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(658.4800341699051, 1971.913446152777),
             Point(658.2005710353155, 1969.0629221799638)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(755.0280420825696, 1828.3322316690812),
             Point(863.7039468547713, 1861.34242622271),
@@ -6422,7 +6422,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(751.9565895785737, 1836.7458043451118),
             Point(754.3618804678912, 1828.8230003046717)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(855.8310831701588, 1893.0511678390164),
             Point(856.6422800738368, 1892.8754315032784),
@@ -6433,7 +6433,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(771.1880957486973, 2079.6382834757533),
             Point(770.7873532332998, 2078.901472110111)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(868.9745005436981, 1894.1229912365377),
             Point(859.3301073300278, 1889.706787127529),
@@ -6445,7 +6445,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(881.1911844524516, 1890.6314274860158),
             Point(871.8490949428567, 1894.2089166125998)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(1235.4654256366373, 1835.1545862958667),
             Point(1235.6621322247902, 1835.9707757517926),
@@ -6456,7 +6456,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(1220.7994215648441, 1823.8180165319548),
             Point(1221.6308619730905, 1823.8506220381605)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(1235.7398883680037, 1820.1973889265232),
             Point(1235.7397858223842, 1820.1967127663452),
@@ -6466,7 +6466,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(1237.1411402572694, 1831.3583239671436),
             Point(1225.4006881898542, 1821.7654192852947)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(1222.4031482206253, 1817.6733452515539),
             Point(1211.0737950599043, 1743.1838350972664),
@@ -6477,7 +6477,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(1234.4805383641144, 1816.3426411425396),
             Point(1223.1352617604123, 1818.0632518122954)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(1227.6428675312125, 1739.7241273455525),
             Point(1314.5213849916543, 1786.367395499107),
@@ -6487,7 +6487,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(1236.9742744790738, 1814.9906321448466),
             Point(1225.7313545925097, 1741.0792067233315)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(1235.2998362309152, 1724.1576736576606),
             Point(1236.0480029270268, 1723.807800816697),
@@ -6498,7 +6498,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(1228.4816618247282, 1737.9044459784006),
             Point(1228.356696730698, 1737.0900735193593)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{Point(1217.112402216655, 1702.7354050511324),
                            Point(1217.1894204202863, 1701.902769911181),
                            Point(1384.241676071672, 1600.2148951560853),
@@ -6532,7 +6532,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
                            Point(1236.627372179117, 1721.8488619107377),
                            Point(1221.570156932318, 1710.0607735217611)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{Point(1106.640532593178, 1534.3784904057027),
                            Point(1107.1377590650225, 1533.0353668647301),
                            Point(1107.2038806714643, 1532.850569354509),
@@ -6609,7 +6609,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
                            Point(1216.0670923062376, 1700.2445520721553),
                            Point(1212.7108147856177, 1699.4762475794832)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(1083.1660342806592, 1519.3996305466558),
             Point(1083.0751467864145, 1519.3951655303802),
@@ -6687,7 +6687,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(1256.958486294541, 1458.6510890883503),
             Point(1103.0160338847438, 1520.6779439029788)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(1110.6198732718208, 1334.373637277014),
             Point(1110.5455702330196, 1334.3185303876976),
@@ -6920,7 +6920,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(1258.7320962187487, 1454.5386934344865),
             Point(1110.620037286773, 1334.3734351171502)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(1135.7196451736577, 1179.9472543290553),
             Point(1136.6059047045107, 1174.2895167179533),
@@ -6993,7 +6993,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(1287.2502491633295, 1204.3047764500989),
             Point(1136.1165850806008, 1180.688899542089)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(1027.4349173358214, 1092.10446646397),
             Point(1132.5159535120172, 1174.5523581017899),
@@ -7003,7 +7003,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(1021.5323484202721, 1098.8231238210053),
             Point(1026.632614481128, 1092.3185615305558)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(1024.0229489880699, 1089.1820169800496),
             Point(1023.9883664290818, 1089.2165857074126),
@@ -7020,7 +7020,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(1024.092313211186, 1089.1126804998182),
             Point(1024.055786437627, 1089.1457864376268)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{Point(965.4987865683273, 1342.1339790932745),
                            Point(965.3411404660392, 1342.017060775395),
                            Point(965.3400887400958, 1342.016430395124),
@@ -7055,7 +7055,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
                            Point(966.7006486820794, 1343.3178949770613),
                            Point(965.6442135623731, 1342.265786437627)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(1024.1398877602262, 1822.0803964288953),
             Point(1041.876857776974, 1824.0790591928371),
@@ -7064,7 +7064,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(1018.1997853131455, 1829.2689154288912),
             Point(1021.6241258891256, 1824.4229172130638)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(1038.9484425388418, 1682.447474068787),
             Point(1039.4577590650224, 1681.1853668647302),
@@ -7084,7 +7084,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(1024.3353886177024, 1818.0771111294143),
             Point(1023.7296134742234, 1817.5058727462288)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(901.5491918845913, 1736.8801429795712),
             Point(903.0442135623731, 1735.3942135623731),
@@ -7154,7 +7154,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(1021.7289823273424, 1817.3991459382412),
             Point(1018.9865550920078, 1819.853694071524)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(1034.480180644032, 1669.5284294391936),
             Point(1034.2860342806591, 1669.4996305466557),
@@ -7289,7 +7289,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(1034.85536686473, 1669.6422409349775),
             Point(1034.6705693545089, 1669.5761193285357)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(1049.2766693687943, 1214.0644607391612),
             Point(1049.2450471859993, 1214.0808181583095),
@@ -7306,7 +7306,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(1049.3589563508197, 1214.0216816271695),
             Point(1049.307206526348, 1214.0461574713033)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(1047.7080407411427, 1822.5780018420048),
             Point(1196.5303026201625, 1719.1264402230818),
@@ -7317,7 +7317,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(1054.2223746519242, 1832.8223347938674),
             Point(1047.6741786358407, 1823.4076234219062)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{Point(1207.6646941207593, 1727.290150290061),
                            Point(1207.6538425286967, 1727.267206526348),
                            Point(1207.6164157924586, 1727.2047637893409),
@@ -7358,7 +7358,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
                            Point(1207.706633007265, 1727.3788226154506),
                            Point(1207.6771860290569, 1727.3122438540759)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(1091.2859717162614, 2178.3733572312517),
             Point(1090.1787357082767, 2176.095614586254),
@@ -7401,7 +7401,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(1177.0099476749492, 2137.2119970448),
             Point(1092.0292473792517, 2178.752399914075)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(1130.1479706135244, 1967.180160970545),
             Point(1134.9981412890609, 1965.7060894907252),
@@ -7413,7 +7413,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(1174.3818069875647, 2114.9522998355956),
             Point(1129.6616593025385, 1967.8457664820087)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(1237.4905743591305, 1836.8940760399348),
             Point(1250.8042135623732, 1823.754213562373),
@@ -7568,7 +7568,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(1137.5937893310854, 1965.0838240698038),
             Point(1137.750964402877, 1958.907768307651)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(945.7645070058945, 2052.38024177415),
             Point(945.7796823650176, 2052.3733710687557),
@@ -7583,7 +7583,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(945.7452365797388, 2052.3877356973094),
             Point(945.7449116990311, 2052.3868873188676)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(1123.4250907329936, 1955.1495047726357),
             Point(1122.880959176958, 1952.3534552708386),
@@ -7592,7 +7592,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(1129.032180681448, 1963.3386165770614),
             Point(1127.492568442204, 1962.7033919468838)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(1146.6710659352877, 677.8716091931703),
             Point(1146.5883671842123, 674.290753271608),
@@ -7603,14 +7603,14 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(1230.0058968284354, 763.5174832797051),
             Point(1225.633459331761, 764.1179534194804)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(1188.4456669738745, 240.38590551136932),
             Point(1188.644588957864, 253.1861027419957),
             Point(963.5443232023005, 256.78413869396707),
             Point(963.3454208569223, 243.9938530933407)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(957.3565190581178, 538.5035510059708),
             Point(961.2917378068499, 540.409672587388),
@@ -7623,7 +7623,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(956.5927286261173, 538.9841144569281),
             Point(956.5953624499987, 538.9826319299046)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(1224.1763357271377, 765.4881731177684),
             Point(1224.025170583432, 766.3072592015293),
@@ -7634,14 +7634,14 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(1144.4498047616937, 679.3953298074033),
             Point(1145.2800024389874, 679.3139827687278)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(1038.6436183655426, 2424.8904210259766),
             Point(1223.5995097274567, 2279.924188692776),
             Point(1229.5163816344575, 2287.4795789740233),
             Point(1044.5604902725433, 2432.4458113072237)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(1316.7241517087418, 1945.0850847016525),
             Point(1467.2514926964825, 2035.5430166889885),
@@ -7654,7 +7654,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(1310.03815468721, 1955.2286061290554),
             Point(1315.9511091939144, 1945.400559017154)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(1352.7306809953259, 1790.48020925909),
             Point(1480.1941181202976, 1719.6250644202087),
@@ -7667,7 +7667,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(1316.4252510265496, 1940.557965699324),
             Point(1347.9031832786366, 1795.1480426544103)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(1347.4127031248568, 1780.1612016538984),
             Point(1474.2981924728872, 1709.6273299139398),
@@ -7678,7 +7678,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(1351.3239445720797, 1788.2159581587384),
             Point(1347.3003951501241, 1780.9873543792512)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(1188.1848621217314, 2132.742865139711),
             Point(1183.7273682341724, 2134.0164348218705),
@@ -7689,13 +7689,13 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(1184.075421831917, 2117.923048038887),
             Point(1188.143644960961, 2120.625019873186)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(1225.4797437088052, 2279.08131954122),
             Point(1228.8860888316012, 2278.106495571119),
             Point(1229.5512197908513, 2284.280281307525)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(1308.115136831977, 1943.181191766118),
             Point(1312.1010675776777, 1944.0407774700632),
@@ -7703,7 +7703,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(1302.0152027472438, 1950.5836332013066),
             Point(1299.4247065350723, 1948.8631160172376)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(1279.9621205136002, 1455.8085961006689),
             Point(1280.7878840309445, 1455.7115887930465),
@@ -7714,7 +7714,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(1266.8314203636871, 1468.8978231136582),
             Point(1266.974901113709, 1468.0789582290245)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(1281.367004163555, 1450.901667038417),
             Point(1281.354670904169, 1450.843000500432),
@@ -7853,7 +7853,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(1282.0870455139889, 1454.1744658881094),
             Point(1281.3815705608065, 1450.9598193559677)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(1472.4529888869226, 1109.6179842929619),
             Point(1473.0203302098316, 1110.221455039084),
@@ -7864,7 +7864,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(1457.2514034559313, 1107.520382008708),
             Point(1458.0005807436892, 1107.1344062290327)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(1476.2366667863619, 1092.8831256174633),
             Point(1559.3162242395895, 1080.2438067186079),
@@ -7875,7 +7875,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(1477.087296934997, 1101.7904775638433),
             Point(1475.8467889340993, 1093.6151852523712)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{Point(1298.5860209067255, 1193.2087865683272),
                            Point(1299.344615780708, 1192.3226876435588),
                            Point(1450.590225338898, 1100.7743109733651),
@@ -7955,7 +7955,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
                            Point(1298.3087865683272, 1193.4860209067256),
                            Point(1298.454213562373, 1193.3542135623732)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(1262.5528623199232, 1456.9632407747993),
             Point(1263.9088563836417, 1455.290173472301),
@@ -7966,7 +7966,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(1262.1469570382949, 1459.3298749592082),
             Point(1262.4894788803128, 1457.3327984565956)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(1457.9975458102638, 1103.075369741348),
             Point(1457.9366448275387, 1103.0686212719822),
@@ -7981,7 +7981,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(1458.0187255226729, 1103.0788924381734),
             Point(1458.018566477056, 1103.079817954549)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(1591.852021456085, 1882.4558913724334),
             Point(1591.4920956137228, 1883.1988787673577),
@@ -7992,7 +7992,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(1501.9671141268693, 1710.3929201787803),
             Point(1502.7912248128523, 1710.5323405690704)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(1533.882425610111, 1553.876179726416),
             Point(1534.6683786812123, 1553.5987768731939),
@@ -8003,7 +8003,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(1490.7237431851415, 1691.6968421238587),
             Point(1490.2438040916336, 1691.0190392049453)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(1530.3183568510274, 1551.977743108706),
             Point(1531.9304117768575, 1553.414846337159),
@@ -8012,7 +8012,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(1415.8021442631111, 1606.4199895495624),
             Point(1420.2847141186887, 1601.3846557811582)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(1483.9786807529915, 1693.6121464648982),
             Point(1483.776509711768, 1694.4131810719393),
@@ -8023,7 +8023,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(1413.1950020585705, 1607.4407842329972),
             Point(1414.0283326869044, 1607.4081046005135)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(1486.7770540028441, 1713.7558428448165),
             Point(1482.2026545060442, 1714.5862274668468),
@@ -8034,7 +8034,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(1494.138906933987, 1696.9803941435364),
             Point(1499.015277573462, 1707.4171148026103)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(1402.3170913923682, 1611.1115424053764),
             Point(1392.81194006024, 1605.6422407860816),
@@ -8045,7 +8045,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(1415.0593830884734, 1600.0321897867805),
             Point(1411.1094394936667, 1603.9821333815871)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(1577.1053314602468, 1896.152464335623),
             Point(1577.9433300747962, 1896.1566334829593),
@@ -8056,7 +8056,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(1472.808722165255, 2035.0278412976888),
             Point(1472.5788589529695, 2034.2252431531406)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(1591.1861133603038, 1900.7515254536602),
             Point(1589.8430147040156, 1900.1558415307877),
@@ -8066,7 +8066,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(1596.8986942985857, 1896.7514259171728),
             Point(1595.6403385360152, 1898.6590397061757)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(1781.6560342806592, 1905.2303694533443),
             Point(1781.8501806440322, 1905.2015705608064),
@@ -8113,7 +8113,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(1779.43, 1905.18),
             Point(1781.46, 1905.24)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(1779.1701119449228, 1896.7635133006315),
             Point(1779.649129885484, 1897.4432379124778),
@@ -8125,7 +8125,7 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(1601.0582105467981, 1891.717464272819),
             Point(1601.5786944141948, 1891.0655524828305)});
 
-    builder.ExcludeFromAccessibleArea(
+    builder.exclude_from_accessible_area(
         std::vector<Point>{
             Point(1570.4198571620414, 1072.133782504792),
             Point(1572.259179254694, 1080.2164373344756),
@@ -8135,5 +8135,5 @@ inline PolyWithHoles buildLargeStreetNetwork()
             Point(1570.4188843163147, 1072.1219188531325),
             Point(1570.4217482129725, 1072.133352169484)});
 
-    return builder.Build();
+    return builder.build();
 }

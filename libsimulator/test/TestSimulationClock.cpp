@@ -7,7 +7,7 @@
 TEST(SimulationClock, Construction)
 {
     SimulationClock sc{0.5};
-    ASSERT_EQ(sc.dT(), 0.5);
-    ASSERT_EQ(sc.Iteration(), 0);
-    ASSERT_EQ(sc.ElapsedTime(), 0.0);
+    ASSERT_EQ(sc.dt(), 0.5);
+    ASSERT_EQ(sc.iteration(), 0);
+    ASSERT_EQ(sc.elapsed_time(), 0.0);
 }

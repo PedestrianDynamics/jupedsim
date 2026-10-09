@@ -62,17 +62,17 @@ GilSafePyObject::~GilSafePyObject()
     _obj = py::object();
 }
 
-const py::object& GilSafePyObject::Get() const
+const py::object& GilSafePyObject::get() const
 {
     return _obj;
 }
 
-py::object& GilSafePyObject::Get()
+py::object& GilSafePyObject::get()
 {
     return _obj;
 }
 
-void GilSafePyObject::Set(py::object obj)
+void GilSafePyObject::set(py::object obj)
 {
     py::gil_scoped_acquire gil;
     _obj = std::move(obj);
@@ -93,7 +93,7 @@ PythonModel::PythonModel(py::object model) : _model(std::move(model))
 /// Best-effort "<repr> (of type <T>)" for an object that failed a conversion. The
 /// diagnostics run Python code on the offending object; they must not be able to
 /// replace the error they describe.
-static std::string Describe(const py::object& obj)
+static std::string describe(const py::object& obj)
 {
     std::string type = "<unknown>";
     std::string repr = "<unprintable>";
@@ -108,39 +108,39 @@ static std::string Describe(const py::object& obj)
     return fmt::format("{} (of type {})", repr, type);
 }
 
-Point PythonModel::ComputeNextState(
+Point PythonModel::compute_next_state(
     const OperationalModelState& current,
     OperationalModelState& next,
     const AgentStep& step) const
 {
     py::gil_scoped_acquire gil;
 
-    py::object pythonState = std::get<CustomModel::State>(current).Get<GilSafePyObject>().Get();
+    py::object python_state = std::get<CustomModel::State>(current).get<GilSafePyObject>().get();
     // The views handed to Python expire with the callback, also when it raises.
     auto scope = std::make_shared<CallbackScope>();
-    const CloseScopeOnExit closeScope{*scope};
-    py::object pythonStep = py::cast(PyAgentStep{step, scope});
+    const CloseScopeOnExit close_scope{*scope};
+    py::object python_step = py::cast(PyAgentStep{step, scope});
 
-    py::object pythonUpdate = _model.attr("compute_next_state")(pythonState, pythonStep);
+    py::object python_update = _model.attr("compute_next_state")(python_state, python_step);
 
-    if(!py::isinstance<py::tuple>(pythonUpdate)) {
+    if(!py::isinstance<py::tuple>(python_update)) {
         throw SimulationError(
             "compute_next_state() must return a (state, movement) pair, got {}",
-            Describe(pythonUpdate));
+            describe(python_update));
     }
-    auto update = py::reinterpret_borrow<py::tuple>(pythonUpdate);
+    auto update = py::reinterpret_borrow<py::tuple>(python_update);
     if(update.size() != 2) {
         throw SimulationError(
             "compute_next_state() must return a (state, movement) pair, got {} values",
             update.size());
     }
-    py::object nextState = update[0];
-    py::object movementValue = update[1];
+    py::object next_state = update[0];
+    py::object movement_value = update[1];
 
     // "next" shares the Python state object with "current" (GilSafePyObject copies are
     // refcounted, not cloned), so this also rejects returning the current state instance.
-    auto& customModelData = std::get<CustomModel::State>(next).Get<GilSafePyObject>();
-    if(nextState.is(customModelData.Get())) {
+    auto& custom_model_data = std::get<CustomModel::State>(next).get<GilSafePyObject>();
+    if(next_state.is(custom_model_data.get())) {
         throw SimulationError(
             "Current and updated model state are the same instance. "
             "compute_next_state() must return a new state object, "
@@ -149,37 +149,38 @@ Point PythonModel::ComputeNextState(
 
     Point movement{};
     try {
-        movement = intoPoint(py::cast<std::tuple<double, double>>(movementValue));
+        movement = into_point(py::cast<std::tuple<double, double>>(movement_value));
     } catch(const py::cast_error&) {
         throw SimulationError(
             "Movement returned by compute_next_state() is of wrong type: "
             "expected tuple[float, float], got {}",
-            Describe(movementValue));
+            describe(movement_value));
     }
-    customModelData.Set(nextState);
+    custom_model_data.set(next_state);
     return movement;
 }
 
-void PythonModel::CheckModelConstraint(const GenericAgent& agent, const AgentView& view) const
+void PythonModel::check_model_constraint(const GenericAgent& agent, const AgentView& view) const
 {
     py::gil_scoped_acquire gil;
 
-    py::object pythonState = std::get<CustomModel::State>(agent.state).Get<GilSafePyObject>().Get();
+    py::object python_state =
+        std::get<CustomModel::State>(agent.state).get<GilSafePyObject>().get();
     auto scope = std::make_shared<CallbackScope>();
-    const CloseScopeOnExit closeScope{*scope};
-    py::object pythonView = py::cast(PyAgentView{view, scope});
+    const CloseScopeOnExit close_scope{*scope};
+    py::object python_view = py::cast(PyAgentView{view, scope});
 
-    _model.attr("check_model_constraint")(pythonState, pythonView);
+    _model.attr("check_model_constraint")(python_state, python_view);
 }
 
 /// A model that delegates hands on the step it was given (or one derived from it).
-static const AgentStep& asAgentStep(const py::object& step)
+static const AgentStep& as_agent_step(const py::object& step)
 {
     try {
-        return step.cast<const PyAgentStep&>().Step();
+        return step.cast<const PyAgentStep&>().step();
     } catch(const py::cast_error&) {
         throw SimulationError(
-            "compute_next_state() expects the step it was called with, got {}", Describe(step));
+            "compute_next_state() expects the step it was called with, got {}", describe(step));
     }
 }
 
@@ -190,36 +191,36 @@ void init_python_model(py::module_& m)
             return CustomModel::State{GilSafePyObject{std::move(model)}};
         }))
         .def_property_readonly(
-            "model", [](CustomModel::State& data) { return data.Get<GilSafePyObject>().Get(); });
+            "model", [](CustomModel::State& data) { return data.get<GilSafePyObject>().get(); });
 
     py::class_<OperationalModel, py::smart_holder>(m, "OperationalModel")
         .def(
             "compute_next_state",
             [](const OperationalModel& self, OperationalModelState state, py::object step) {
-                const AgentStep& agentStep = asAgentStep(step);
+                const AgentStep& agent_step = as_agent_step(step);
                 const OperationalModelState current{std::move(state)};
-                if(ModelTypeOf(current) != self.Type()) {
+                if(model_type_of(current) != self.type()) {
                     throw SimulationError(
                         "{} cannot compute a state of type '{}'",
-                        ToString(self.Type()),
-                        ToString(ModelTypeOf(current)));
+                        to_string(self.type()),
+                        to_string(model_type_of(current)));
                 }
                 OperationalModelState next{current};
 
                 Point movement{};
                 try {
-                    movement = self.ComputeNextState(current, next, agentStep);
+                    movement = self.compute_next_state(current, next, agent_step);
                 } catch(const std::bad_variant_access&) {
                     // The state handed in is of the right type, so it was a neighbor's.
                     throw SimulationError(
-                        agentStep.HasNeighborMapping() ?
+                        agent_step.has_neighbor_mapping() ?
                             "{} encountered a neighbor it cannot read. The mapping passed to "
                             "with_neighbor_state_mapping() has to return '{}' states." :
                             "{} encountered a neighbor it cannot read. Map neighbors to '{}' "
                             "states with AgentStep.with_neighbor_state_mapping() before "
                             "delegating.",
-                        ToString(self.Type()),
-                        ToString(self.Type()));
+                        to_string(self.type()),
+                        to_string(self.type()));
                 }
 
                 return std::make_tuple(
@@ -228,7 +229,7 @@ void init_python_model(py::module_& m)
             },
             py::arg("state"),
             py::arg("step"),
-            cleanDoc(R"(
+            clean_doc(R"(
                 Run this model for one step.
 
                 Lets a custom model delegate to a built-in one. The agent's stored

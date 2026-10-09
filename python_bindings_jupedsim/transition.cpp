@@ -18,7 +18,7 @@ namespace py = pybind11;
 void init_transition(py::module_& m)
 {
     py::class_<PyTransition> transition(m, "Transition");
-    transition.doc() = cleanDoc(R"(
+    transition.doc() = clean_doc(R"(
         Describes the Transition at a stage.
 
         This type describes how a agent will proceed after completing its stage.
@@ -43,9 +43,9 @@ void init_transition(py::module_& m)
     transition
         .def_static(
             "create_fixed_transition",
-            [](uint64_t stageId) { return PyTransition{FixedTransitionDescription(stageId)}; },
+            [](uint64_t stage_id) { return PyTransition{FixedTransitionDescription(stage_id)}; },
             py::arg("stage_id"),
-            cleanDoc(R"(
+            clean_doc(R"(
             Create a fixed transition.
 
             On completion of this transitions stage all agents will proceed to the
@@ -63,16 +63,16 @@ void init_transition(py::module_& m)
                 .c_str())
         .def_static(
             "create_round_robin_transition",
-            [](const std::vector<std::tuple<uint64_t, uint64_t>>& stageWeights) {
+            [](const std::vector<std::tuple<uint64_t, uint64_t>>& stage_weights) {
                 auto weights = std::vector<std::tuple<BaseStage::ID, uint64_t>>{};
-                weights.reserve(stageWeights.size());
-                for(const auto& [stage_id, weight] : stageWeights) {
+                weights.reserve(stage_weights.size());
+                for(const auto& [stage_id, weight] : stage_weights) {
                     weights.emplace_back(stage_id, weight);
                 }
                 return PyTransition{RoundRobinTransitionDescription(weights)};
             },
             py::arg("stage_weights"),
-            cleanDoc(R"(
+            clean_doc(R"(
             Create a round-robin transition.
 
             Round-robin transitions: On completion of this transitions stage agents
@@ -96,10 +96,10 @@ void init_transition(py::module_& m)
             "create_least_targeted_transition",
             [](const std::vector<uint64_t>& stages) {
                 return PyTransition{
-                    LeastTargetedTransitionDescription(intoVecT<BaseStage::ID>(stages))};
+                    LeastTargetedTransitionDescription(into_vec_t<BaseStage::ID>(stages))};
             },
             py::arg("stage_ids"),
-            cleanDoc(R"(
+            clean_doc(R"(
             Create a least targeted transition.
 
             On completion of this stage agents will proceed towards the currently
@@ -120,7 +120,7 @@ void init_transition(py::module_& m)
         .def_static(
             "create_none_transition",
             [] { return PyTransition{NonTransitionDescription{}}; },
-            cleanDoc(R"(
+            clean_doc(R"(
             Create a transition that leads nowhere.
 
             The next stage of a stage with this transition is the stage itself:

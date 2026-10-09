@@ -8,8 +8,7 @@
 #include <variant>
 #include <vector>
 
-struct DirectSteeringDescription {
-};
+struct DirectSteeringDescription {};
 
 struct WaypointDescription {
     Point position;

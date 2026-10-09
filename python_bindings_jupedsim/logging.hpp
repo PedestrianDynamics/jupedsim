@@ -6,7 +6,7 @@
 class LogCallbackOwner
 {
 public:
-    using LogCallback = Logging::Logger::LogCallback;
+    using LogCallback = logging::Logger::LogCallback;
 
     LogCallback debug{};
     LogCallback info{};
@@ -14,5 +14,5 @@ public:
     LogCallback error{};
 
 public:
-    static LogCallbackOwner& Instance();
+    static LogCallbackOwner& instance();
 };

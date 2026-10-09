@@ -5,7 +5,7 @@
 
 #include <complex>
 
-bool almostEqual(double a, double b, double eps);
+bool almost_equal(double a, double b, double eps);
 
 double sign(double x);
 
@@ -16,6 +16,6 @@ std::complex<double> c_cbrt(std::complex<double> x);
 
 Point mollify_e0(
     const Point& orientation_to_target,
-    double deltaT,
-    int orientationDelay,
+    double delta_t,
+    int orientation_delay,
     const Point& e0);

@@ -14,14 +14,14 @@ PERFETTO_TRACK_EVENT_STATIC_STORAGE();
 
 namespace
 {
-std::string makeTempTracePath()
+std::string make_temp_trace_path()
 {
     auto ts = std::chrono::steady_clock::now().time_since_epoch().count();
     std::string name = fmt::format("jupedsim_trace{}.pftrace", ts);
     return (std::filesystem::temp_directory_path() / name).string();
 }
 
-perfetto::TraceConfig buildDefaultTraceConfig(const std::string& output_path)
+perfetto::TraceConfig build_default_trace_config(const std::string& output_path)
 {
     perfetto::TraceConfig cfg;
 
@@ -43,9 +43,9 @@ perfetto::TraceConfig buildDefaultTraceConfig(const std::string& output_path)
 }
 } // namespace
 
-void Profiler::createSession()
+void Profiler::create_session()
 {
-    if(tracing_session) {
+    if(_tracing_session) {
         return;
     }
 
@@ -57,73 +57,73 @@ void Profiler::createSession()
 
     perfetto::TrackEvent::Register();
 
-    temp_trace_path = makeTempTracePath();
+    _temp_trace_path = make_temp_trace_path();
 
-    tracing_session = perfetto::Tracing::NewTrace();
-    tracing_session->Setup(buildDefaultTraceConfig(temp_trace_path));
-    tracing_session->StartBlocking();
+    _tracing_session = perfetto::Tracing::NewTrace();
+    _tracing_session->Setup(build_default_trace_config(_temp_trace_path));
+    _tracing_session->StartBlocking();
 }
 
-void Profiler::writeAndResetSession(const std::string& filename)
+void Profiler::write_and_reset_session(const std::string& filename)
 {
-    if(!tracing_session) {
+    if(!_tracing_session) {
         return;
     }
 
     perfetto::TrackEvent::Flush();
-    tracing_session->StopBlocking();
-    tracing_session.reset();
+    _tracing_session->StopBlocking();
+    _tracing_session.reset();
 
-    if(!temp_trace_path.empty()) {
+    if(!_temp_trace_path.empty()) {
         std::error_code ec;
         if(filename.empty()) {
-            std::filesystem::remove(temp_trace_path, ec);
+            std::filesystem::remove(_temp_trace_path, ec);
         } else {
-            std::filesystem::rename(temp_trace_path, filename, ec);
+            std::filesystem::rename(_temp_trace_path, filename, ec);
             if(ec) {
                 // rename fails across devices — copy then delete
                 std::filesystem::copy_file(
-                    temp_trace_path,
+                    _temp_trace_path,
                     filename,
                     std::filesystem::copy_options::overwrite_existing,
                     ec);
-                std::filesystem::remove(temp_trace_path);
+                std::filesystem::remove(_temp_trace_path);
                 if(ec) {
                     LOG_ERROR("Failed to save Perfetto trace to: {}", filename);
                 }
             }
         }
-        temp_trace_path.clear();
+        _temp_trace_path.clear();
     }
 }
 
 void Profiler::enable()
 {
     auto& instance = Profiler::instance();
-    if(instance.enabled) {
+    if(instance._enabled) {
         return;
     }
 
-    instance.createSession();
-    instance.enabled = true;
+    instance.create_session();
+    instance._enabled = true;
 }
 
 void Profiler::disable()
 {
     auto& instance = Profiler::instance();
-    if(!instance.enabled && !instance.tracing_session) {
+    if(!instance._enabled && !instance._tracing_session) {
         return;
     }
 
-    instance.writeAndResetSession("");
-    instance.enabled = false;
+    instance.write_and_reset_session("");
+    instance._enabled = false;
 }
 
-void Profiler::dumpAndReset(const std::string& filename)
+void Profiler::dump_and_reset(const std::string& filename)
 {
     auto& instance = Profiler::instance();
-    instance.writeAndResetSession(filename);
-    instance.enabled = false;
+    instance.write_and_reset_session(filename);
+    instance._enabled = false;
 }
 
 Profiler Profiler::profiler{};

@@ -31,9 +31,9 @@ public:
     GilSafePyObject& operator=(GilSafePyObject&&) noexcept;
     ~GilSafePyObject();
 
-    const py::object& Get() const;
-    py::object& Get();
-    void Set(py::object obj);
+    const py::object& get() const;
+    py::object& get();
+    void set(py::object obj);
 
 private:
     py::object _obj;
@@ -44,12 +44,12 @@ class PythonModel final : public CustomModel
 public:
     explicit PythonModel(py::object model);
 
-    Point ComputeNextState(
+    Point compute_next_state(
         const OperationalModelState& current,
         OperationalModelState& next,
         const AgentStep& step) const override;
 
-    void CheckModelConstraint(const GenericAgent& agent, const AgentView& view) const override;
+    void check_model_constraint(const GenericAgent& agent, const AgentView& view) const override;
 
 private:
     py::object _model;

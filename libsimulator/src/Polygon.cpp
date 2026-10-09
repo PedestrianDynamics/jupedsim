@@ -44,14 +44,14 @@ Polygon::Polygon(PolygonType polygon) : _polygon(std::move(polygon))
 {
 }
 
-Polygon Polygon::FromCircle(Point center, double radius)
+Polygon Polygon::from_circle(Point center, double radius)
 {
     // An edge of the inscribed n-gon is 2 r sin(pi / n) long.
-    constexpr double targetCircleEdgeLength = 0.4;
-    constexpr int minCircleCorners = 4;
-    const double max_sin = targetCircleEdgeLength / (2.0 * radius);
-    const int corners = max_sin >= std::sin(std::numbers::pi / minCircleCorners) ?
-                            minCircleCorners :
+    constexpr double target_circle_edge_length = 0.4;
+    constexpr int min_circle_corners = 4;
+    const double max_sin = target_circle_edge_length / (2.0 * radius);
+    const int corners = max_sin >= std::sin(std::numbers::pi / min_circle_corners) ?
+                            min_circle_corners :
                             static_cast<int>(std::ceil(std::numbers::pi / std::asin(max_sin)));
     std::vector<Point> points{};
     points.reserve(corners);
@@ -62,18 +62,18 @@ Polygon Polygon::FromCircle(Point center, double radius)
     return Polygon{points};
 }
 
-bool Polygon::IsConvex() const
+bool Polygon::is_convex() const
 {
     return _polygon.is_convex();
 }
 
-bool Polygon::IsInside(Point p) const
+bool Polygon::is_inside(Point p) const
 {
     const auto side = _polygon.bounded_side(PolygonType::Point_2{p.x, p.y});
     return side != CGAL::Bounded_side::ON_UNBOUNDED_SIDE;
 }
 
-Point Polygon::Centroid() const
+Point Polygon::centroid() const
 {
     Point sum{};
     std::for_each(_polygon.begin(), _polygon.end(), [&sum](const auto& p) {
@@ -82,13 +82,13 @@ Point Polygon::Centroid() const
     return sum / static_cast<double>(_polygon.size());
 }
 
-std::tuple<Point, double> Polygon::ContainingCircle() const
+std::tuple<Point, double> Polygon::containing_circle() const
 {
-    const auto center = Centroid();
+    const auto center = centroid();
     auto distance = 0.0;
     std::for_each(std::begin(_polygon), std::end(_polygon), [&distance, center](const auto& p) {
         const Point pt(CGAL::to_double(p.x()), CGAL::to_double(p.y()));
-        distance = std::max(distance, (center - pt).Norm());
+        distance = std::max(distance, (center - pt).norm());
     });
     return {center, distance};
 }

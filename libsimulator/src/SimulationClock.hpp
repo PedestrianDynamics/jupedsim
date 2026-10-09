@@ -6,16 +6,16 @@
 class SimulationClock
 {
     uint64_t _iteration{0};
-    double _dT;
+    double _dt;
 
 public:
-    explicit SimulationClock(double dT);
+    explicit SimulationClock(double dt);
 
-    void Advance();
+    void advance();
 
-    double ElapsedTime() const;
+    double elapsed_time() const;
 
-    uint64_t Iteration() const;
+    uint64_t iteration() const;
 
-    double dT() const;
+    double dt() const;
 };

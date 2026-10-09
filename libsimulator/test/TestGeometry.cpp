@@ -26,10 +26,10 @@ bool sees_part_of(const std::vector<LineSegment>& answer, const LineSegment& wal
     const Point along = wall.p2 - wall.p1;
     const auto on_wall = [&](Point p) {
         const Point offset = p - wall.p1;
-        if(std::abs(along.CrossProduct(offset)) > 1e-9) {
+        if(std::abs(along.cross_product(offset)) > 1e-9) {
             return false;
         }
-        const double t = offset.ScalarProduct(along) / along.ScalarProduct(along);
+        const double t = offset.scalar_product(along) / along.scalar_product(along);
         return t >= -1e-9 && t <= 1.0 + 1e-9;
     };
     return std::any_of(answer.begin(), answer.end(), [&](const LineSegment& piece) {
@@ -101,22 +101,24 @@ namespace
 /// Ground floor and upper floor side by side, joined by stairs: seams at x = 5 and x = 10.
 struct FloorsJoinedByStairs {
     WalkableSurface surface{};
-    size_t ground = surface.AddRegion({test_geometries::rectangle_points({0, 0}, {5, 5}), {}}, 0.0);
+    size_t ground =
+        surface.add_region({test_geometries::rectangle_points({0, 0}, {5, 5}), {}}, 0.0);
     size_t upper =
-        surface.AddRegion({test_geometries::rectangle_points({10, 0}, {15, 5}), {}}, 3.0);
-    size_t stairs = surface.ConnectRegions(ground, {{5, 0}, {5, 5}}, upper, {{10, 0}, {10, 5}});
-    std::unique_ptr<Geometry> geo = surface.CreateGeometry();
+        surface.add_region({test_geometries::rectangle_points({10, 0}, {15, 5}), {}}, 3.0);
+    size_t stairs = surface.connect_regions(ground, {{5, 0}, {5, 5}}, upper, {{10, 0}, {10, 5}});
+    std::unique_ptr<Geometry> geo = surface.create_geometry();
 };
 
 /// As above, but the upper floor wraps around the stairs and covers the ground floor.
 struct UpperFloorOverGroundFloor {
     WalkableSurface surface{};
-    size_t ground = surface.AddRegion({test_geometries::rectangle_points({0, 0}, {5, 5}), {}}, 0.0);
-    size_t upper = surface.AddRegion(
+    size_t ground =
+        surface.add_region({test_geometries::rectangle_points({0, 0}, {5, 5}), {}}, 0.0);
+    size_t upper = surface.add_region(
         {{{10, 0}, {15, 0}, {15, 10}, {0, 10}, {0, 0}, {5, 0}, {5, 5}, {10, 5}}, {}},
         3.0);
-    size_t stairs = surface.ConnectRegions(ground, {{5, 0}, {5, 5}}, upper, {{10, 0}, {10, 5}});
-    std::unique_ptr<Geometry> geo = surface.CreateGeometry();
+    size_t stairs = surface.connect_regions(ground, {{5, 0}, {5, 5}}, upper, {{10, 0}, {10, 5}});
+    std::unique_ptr<Geometry> geo = surface.create_geometry();
 };
 } // namespace
 
@@ -214,7 +216,7 @@ TEST(GeometryModelQueries, EverythingAnsweredIsWithinTheRadius)
     const auto walls = geo->line_segments_in_range(*who, 5.0);
     ASSERT_FALSE(walls.empty());
     for(const auto& wall : walls) {
-        EXPECT_LE(wall.DistTo(who->xy()), 5.0 + 1e-9);
+        EXPECT_LE(wall.dist_to(who->xy()), 5.0 + 1e-9);
     }
     // The hole's near side and the room's west wall are both 2 m away and in plain sight.
     EXPECT_TRUE(sees_part_of(walls, LineSegment{{4, 4}, {4, 6}}));

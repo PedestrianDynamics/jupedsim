@@ -22,46 +22,46 @@ public:
     explicit Polygon(const std::vector<Point>& points);
     explicit Polygon(PolygonType polygon);
     /// Approximate polygon with corners on the circle
-    static Polygon FromCircle(Point center, double radius);
+    static Polygon from_circle(Point center, double radius);
     ~Polygon() = default;
     Polygon(const Polygon& other) = default;
     Polygon& operator=(const Polygon& other) = default;
     Polygon(Polygon&& other) = default;
     Polygon& operator=(Polygon&& other) = default;
-    bool IsConvex() const;
-    bool IsInside(Point p) const;
-    Point Centroid() const;
-    std::tuple<Point, double> ContainingCircle() const;
+    bool is_convex() const;
+    bool is_inside(Point p) const;
+    Point centroid() const;
+    std::tuple<Point, double> containing_circle() const;
 
     operator PolygonType() const { return _polygon; }
 };
 
 template <std::ranges::input_range R1, std::ranges::input_range R2>
     requires std::same_as<std::ranges::range_value_t<R1>, std::ranges::range_value_t<R2>>
-PolyWithHoles CombinePolygons(R1&& polygons, R2&& exclusions)
+PolyWithHoles combine_polygons(R1&& polygons, R2&& exclusions)
 {
 
-    PolyWithHolesList accessibleList{};
-    CGAL::join(std::begin(polygons), std::end(polygons), std::back_inserter(accessibleList));
+    PolyWithHolesList accessible_list{};
+    CGAL::join(std::begin(polygons), std::end(polygons), std::back_inserter(accessible_list));
 
-    if(accessibleList.size() != 1) {
+    if(accessible_list.size() != 1) {
         throw SimulationError("Combined polygons do not form a single polygon.");
     }
 
-    auto combinedArea = *accessibleList.begin();
+    auto combined_area = *accessible_list.begin();
 
-    PolyWithHolesList exclusionsList{};
-    CGAL::join(std::begin(exclusions), std::end(exclusions), std::back_inserter(exclusionsList));
+    PolyWithHolesList exclusions_list{};
+    CGAL::join(std::begin(exclusions), std::end(exclusions), std::back_inserter(exclusions_list));
 
-    for(const auto& ex : exclusionsList) {
+    for(const auto& ex : exclusions_list) {
         PolyWithHolesList res{};
-        CGAL::difference(combinedArea, ex, std::back_inserter(res));
+        CGAL::difference(combined_area, ex, std::back_inserter(res));
         if(res.size() != 1) {
             throw SimulationError("Exclusions splits combined polygon.");
         }
-        combinedArea = *res.begin();
+        combined_area = *res.begin();
     }
-    return combinedArea;
+    return combined_area;
 }
 
 /// Throws if @p polygon is empty.

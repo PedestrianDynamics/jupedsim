@@ -51,4 +51,8 @@ Standard: c++20
 TabWidth: 4
 UseTab: Never
 
+# Format gmock declarations as what they expand to, so a parameter list such as
+# (Simulation* sim) is not mistaken for a multiplication (Simulation * sim).
+Macros:
+  - "MOCK_METHOD(ret, name, args, specs)=ret name args specs"
 ...

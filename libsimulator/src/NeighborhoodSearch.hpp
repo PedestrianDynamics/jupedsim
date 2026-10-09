@@ -64,28 +64,28 @@ class NeighborhoodSearch
 {
     using Grid = std::unordered_map<Grid2DIndex, std::vector<const Value*>>;
 
-    double _cellSize;
+    double _cell_size;
     Grid _grid{};
 
 private:
-    Grid2DIndex getIndex(const Point& pos) const
+    Grid2DIndex get_index(const Point& pos) const
     {
-        const int32_t idx = static_cast<int32_t>(pos.x / _cellSize);
-        const int32_t idy = static_cast<int32_t>(pos.y / _cellSize);
+        const int32_t idx = static_cast<int32_t>(pos.x / _cell_size);
+        const int32_t idy = static_cast<int32_t>(pos.y / _cell_size);
         return Grid2DIndex{idx, idy};
     }
 
 public:
-    explicit NeighborhoodSearch(double cellSize) : _cellSize(cellSize) {};
+    explicit NeighborhoodSearch(double cell_size) : _cell_size(cell_size) {};
 
-    void AddAgent(const Value& item)
+    void add_agent(const Value& item)
     {
-        auto index = getIndex(item.location.xy());
+        auto index = get_index(item.location.xy());
         auto& vec = _grid[index];
         vec.push_back(&item);
     }
 
-    void RemoveAgent(const Value& item)
+    void remove_agent(const Value& item)
     {
         for(auto& [_, agents] : _grid) {
             const auto iter =
@@ -100,11 +100,11 @@ public:
         throw SimulationError("Unknown agent id {}", item.id);
     }
 
-    void Update(const AgentContainer<Value>& items)
+    void update(const AgentContainer<Value>& items)
     {
         _grid.clear();
         for(const auto& item : items) {
-            auto index = getIndex(item.location.xy());
+            auto index = get_index(item.location.xy());
             auto& vec = _grid[index];
             vec.push_back(&item);
         }
@@ -112,23 +112,23 @@ public:
 
     /// Calls 'fn' for every item within 'radius' of 'pos'.
     template <std::invocable<const Value&> Fn>
-    void ForEachInRange(Point pos, double radius, Fn&& fn) const
+    void for_each_in_range(Point pos, double radius, Fn&& fn) const
     {
-        const auto posIdx = getIndex(pos);
-        const auto offset = static_cast<int32_t>(std::ceil(radius / _cellSize));
-        const int32_t xMin = posIdx.idx - offset;
-        const int32_t xMax = posIdx.idx + offset;
-        const int32_t yMin = posIdx.idy - offset;
-        const int32_t yMax = posIdx.idy + offset;
+        const auto pos_idx = get_index(pos);
+        const auto offset = static_cast<int32_t>(std::ceil(radius / _cell_size));
+        const int32_t x_min = pos_idx.idx - offset;
+        const int32_t x_max = pos_idx.idx + offset;
+        const int32_t y_min = pos_idx.idy - offset;
+        const int32_t y_max = pos_idx.idy + offset;
 
-        const auto radiusSquared = radius * radius;
+        const auto radius_squared = radius * radius;
 
-        for(int32_t x = xMin; x <= xMax; ++x) {
-            for(int32_t y = yMin; y <= yMax; ++y) {
+        for(int32_t x = x_min; x <= x_max; ++x) {
+            for(int32_t y = y_min; y <= y_max; ++y) {
                 auto it = _grid.find({x, y});
                 if(it != _grid.cend()) {
                     for(const auto& item : it->second) {
-                        if(DistanceSquared(item->location.xy(), pos) <= radiusSquared) {
+                        if(distance_squared(item->location.xy(), pos) <= radius_squared) {
                             fn(*item);
                         }
                     }

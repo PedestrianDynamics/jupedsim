@@ -19,7 +19,7 @@
 #include <utility>
 #include <vector>
 
-bool IsWalkableNormal(const Vector3D& n)
+bool is_walkable_normal(const Vector3D& n)
 {
     constexpr double max_incline_deg = 50.0;
     constexpr double max_incline_rad = max_incline_deg * std::numbers::pi / 180.0;
@@ -42,7 +42,7 @@ first_self_intersection(const SurfaceMesh& mesh)
 }
 } // namespace
 
-bool IsFaceInMeshPlanar(
+bool is_face_in_mesh_planar(
     const SurfaceMesh& mesh,
     FaceDescriptor<SurfaceMesh> face,
     std::vector<VertexDescriptor<SurfaceMesh>>& buffer)
@@ -69,39 +69,39 @@ bool IsFaceInMeshPlanar(
     });
 }
 
-bool AllFacesInMeshPlanar(const SurfaceMesh& mesh)
+bool all_faces_in_mesh_planar(const SurfaceMesh& mesh)
 {
     std::vector<VertexDescriptor<SurfaceMesh>> buffer{};
     buffer.reserve(3);
     return std::all_of(
         std::begin(CGAL::faces(mesh)), std::end(CGAL::faces(mesh)), [&buffer, &mesh](auto face) {
-            return IsFaceInMeshPlanar(mesh, face, buffer);
+            return is_face_in_mesh_planar(mesh, face, buffer);
         });
 }
 
-void NormaliseAndValidateMesh(SurfaceMesh& mesh, const RegionMap* regions)
+void normalise_and_validate_mesh(SurfaceMesh& mesh, const RegionMap* regions)
 {
-    namespace PMP = CGAL::Polygon_mesh_processing;
+    namespace pmp = CGAL::Polygon_mesh_processing;
     if(!CGAL::is_triangle_mesh(mesh)) {
-        PMP::triangulate_faces(mesh);
+        pmp::triangulate_faces(mesh);
     }
 
     if(mesh.number_of_faces() == 0) {
         throw SimulationError("No Geometry defined.");
     }
 
-    if(!AllFacesInMeshPlanar(mesh)) {
+    if(!all_faces_in_mesh_planar(mesh)) {
         throw SimulationError("Not all faces are planar.");
     }
 
-    const auto n = PMP::compute_face_normal(*std::begin(CGAL::faces(mesh)), mesh);
-    if(!IsWalkableNormal(n)) {
-        PMP::reverse_face_orientations(mesh);
+    const auto n = pmp::compute_face_normal(*std::begin(CGAL::faces(mesh)), mesh);
+    if(!is_walkable_normal(n)) {
+        pmp::reverse_face_orientations(mesh);
     }
 
     for(auto&& face : CGAL::faces(mesh)) {
-        const auto n = PMP::compute_face_normal(face, mesh);
-        if(!IsWalkableNormal(n)) {
+        const auto n = pmp::compute_face_normal(face, mesh);
+        if(!is_walkable_normal(n)) {
             throw SimulationError("Face {} inclination exceeds 50deg.", face.idx());
         }
     }
@@ -119,7 +119,7 @@ void NormaliseAndValidateMesh(SurfaceMesh& mesh, const RegionMap* regions)
     std::vector<size_t> component(mesh.number_of_faces(), 0);
     const auto component_of =
         boost::make_iterator_property_map(std::begin(component), get(CGAL::face_index, mesh));
-    const auto count = PMP::connected_components(mesh, component_of);
+    const auto count = pmp::connected_components(mesh, component_of);
     if(count > 1) {
         if(regions == nullptr) {
             throw SimulationError("Expected exactly 1 connected component, got: {}", count);

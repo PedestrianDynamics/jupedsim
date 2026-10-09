@@ -23,13 +23,13 @@ void init_agent(py::module_& m)
     // not the Python-visible Agent; the public Agent is a handle that resolves
     // this wrapper freshly on every attribute access.
     py::class_<GenericAgent>(m, "Agent")
-        .def_property_readonly("id", [](const GenericAgent& agent) { return agent.id.getID(); })
+        .def_property_readonly("id", [](const GenericAgent& agent) { return agent.id.get_id(); })
         .def_property_readonly(
-            "journey_id", [](const GenericAgent& agent) { return agent.journeyId.getID(); })
+            "journey_id", [](const GenericAgent& agent) { return agent.journey_id.get_id(); })
         .def_property_readonly(
-            "stage_id", [](const GenericAgent& agent) { return agent.stageId.getID(); })
+            "stage_id", [](const GenericAgent& agent) { return agent.stage_id.get_id(); })
         .def_property_readonly(
-            "position", [](const GenericAgent& agent) { return intoTuple(agent.location.xy()); })
+            "position", [](const GenericAgent& agent) { return into_tuple(agent.location.xy()); })
         .def_property_readonly(
             "location",
             // The token points into geometry the simulation owns; this agent wrapper in turn
@@ -41,7 +41,7 @@ void init_agent(py::module_& m)
             // Same lifetime tie as for "location".
             py::cpp_function(
                 [](const GenericAgent& agent) -> std::optional<Location> {
-                    if(const auto* place = std::get_if<Location>(&agent.finalTarget)) {
+                    if(const auto* place = std::get_if<Location>(&agent.final_target)) {
                         return *place;
                     }
                     return std::nullopt;
@@ -49,7 +49,7 @@ void init_agent(py::module_& m)
                 py::keep_alive<0, 1>()))
         .def_property_readonly(
             "route_orientation",
-            [](const GenericAgent& agent) { return intoTuple(agent.routeOrientation); })
+            [](const GenericAgent& agent) { return into_tuple(agent.route_orientation); })
         .def_property_readonly(
             "state",
             [](GenericAgent& agent) -> OperationalModelState& { return agent.state; },

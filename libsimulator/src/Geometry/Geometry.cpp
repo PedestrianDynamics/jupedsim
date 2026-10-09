@@ -32,40 +32,40 @@ Geometry::Geometry(SurfaceMesh mesh) : _mesh(std::move(mesh))
     // Compact vertex/face indices so vertices()/triangles()/region_id_per_face() are
     // contiguous.
     _mesh.collect_garbage();
-    _regionSplit = split_into_regions(_mesh);
+    _region_split = split_into_regions(_mesh);
     build();
 }
 
 Geometry::Geometry(
     SurfaceMesh&& mesh,
-    RegionSplit&& regionSplit,
-    std::unique_ptr<RegionGraph2D> regionGraph2d)
+    RegionSplit&& region_split,
+    std::unique_ptr<RegionGraph2D> region_graph_2d)
     : _mesh(std::move(mesh))
-    , _regionGraph2D(std::move(regionGraph2d))
-    , _regionSplit(std::move(regionSplit))
+    , _region_graph_2d(std::move(region_graph_2d))
+    , _region_split(std::move(region_split))
 {
-    // safety only: hand-crafted mesh/region-split/regionGraph2d combo should not run into this
+    // safety only: hand-crafted mesh/region-split/region_graph_2d combo should not run into this
     assert(!_mesh.has_garbage());
     build();
 }
 
 void Geometry::build()
 {
-    _aabbTree = std::make_unique<AABBTree>(_mesh.faces().begin(), _mesh.faces().end(), _mesh);
-    _region = _regionSplit.region;
-    _boundaryIndex = MakePortalBoundaryIndex(_mesh, _regionSplit);
-    _regionGraph = CreateRegionGraph(_mesh, _regionSplit);
+    _aabb_tree = std::make_unique<AABBTree>(_mesh.faces().begin(), _mesh.faces().end(), _mesh);
+    _region = _region_split.region;
+    _boundary_index = make_portal_boundary_index(_mesh, _region_split);
+    _region_graph = create_region_graph(_mesh, _region_split);
 }
 
 PolyWithHoles Geometry::polygon(size_t region_id) const
 {
-    if(!_regionGraph2D) {
+    if(!_region_graph_2d) {
         throw SimulationError("Geometry is built from mesh and has no 2D polygons");
     }
     if(region_id >= region_count()) {
         throw SimulationError("Unknown region ID {}", region_id);
     }
-    return (*_regionGraph2D)[region_id];
+    return (*_region_graph_2d)[region_id];
 }
 
 Geometry::FaceLocation Geometry::face_below(const Point3D& p) const
@@ -74,8 +74,8 @@ Geometry::FaceLocation Geometry::face_below(const Point3D& p) const
     // i.e. the face directly below the query point. The ray starts a hair
     // above p: a query point sitting exactly on the surface may round minimally
     // below its face's plane, and the strictly-downward ray would miss it.
-    constexpr double onSurfaceTolerance = 1e-9;
-    const Ray3D ray(Point3D{p.x(), p.y(), p.z() + onSurfaceTolerance}, Direction3D(0, 0, -1));
+    constexpr double on_surface_tolerance = 1e-9;
+    const Ray3D ray(Point3D{p.x(), p.y(), p.z() + on_surface_tolerance}, Direction3D(0, 0, -1));
     const auto hit = aabb_tree().first_intersection(ray);
     if(!hit) {
         return {SurfaceMesh::null_face(), K::Point_3{}};
@@ -94,7 +94,7 @@ bool Geometry::is_valid_location(const Point3D& p) const
 std::vector<LineSegment>
 Geometry::line_segments_in_range(const Location& who, double distance) const
 {
-    return _boundaryIndex->Query(who, distance);
+    return _boundary_index->query(who, distance);
 }
 
 bool Geometry::no_geometry_between(const Location& who, Point direction) const
@@ -111,7 +111,7 @@ bool Geometry::no_geometry_between(const Location& who, const Location& other) c
 std::optional<std::size_t> Geometry::region_reached(const Location& who, Point direction) const
 {
     const LineSegment chord{who.xy(), who.xy() + direction};
-    const auto& graph = *_regionGraph;
+    const auto& graph = *_region_graph;
     const auto crosses_seam = [&] {
         for(const auto e : boost::make_iterator_range(boost::out_edges(who.region(), graph))) {
             if(intersects(chord, graph[e])) {
@@ -122,8 +122,8 @@ std::optional<std::size_t> Geometry::region_reached(const Location& who, Point d
     };
     if(!crosses_seam()) {
         // Direct line stays within this region: the region's own walls settle it.
-        return graph[who.region()]->IntersectsAny(chord) ? std::nullopt :
-                                                           std::optional{who.region()};
+        return graph[who.region()]->intersects_any(chord) ? std::nullopt :
+                                                            std::optional{who.region()};
     }
     // Crosses regions: Doing the expensive "move on surface".
     const auto arrival = who.try_move_on_surface(direction);
@@ -191,11 +191,11 @@ Geometry::get_location_near_z(double x, double y, double z, double tol) const
 Geometry::FaceLocation Geometry::locate_near_z(const Point2D& xy, double z, double tolerance) const
 {
     FaceLocation best{SurfaceMesh::null_face(), Point3D{}};
-    auto bestDeviation = tolerance;
+    auto best_deviation = tolerance;
     for(const auto& face_location : faces_at(xy)) {
         const auto deviation = std::abs(face_location.point.z() - z);
-        if(deviation < bestDeviation) {
-            bestDeviation = deviation;
+        if(deviation < best_deviation) {
+            best_deviation = deviation;
             best = face_location;
         }
     }
@@ -314,7 +314,7 @@ Poly to_inexact(const ExactPoly& ring)
 std::vector<AreaPiece> Geometry::split_into_region_pieces(const Poly& p, size_t region_id) const
 {
 
-    const auto* g = _regionGraph2D.get();
+    const auto* g = _region_graph_2d.get();
     if(!g) {
         throw SimulationError("Geometry is built from mesh and has no 2D polygons");
     }

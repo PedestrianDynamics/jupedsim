@@ -18,7 +18,7 @@
 
 namespace
 {
-constexpr auto UNASSIGNED = std::numeric_limits<std::size_t>::max();
+constexpr auto unassigned = std::numeric_limits<std::size_t>::max();
 
 // Tolerances of the planar floodfill. Membership is always tested against the SEED face's
 // plane (never a drifting average), so they bound a patch's total slab thickness and keep
@@ -31,7 +31,7 @@ constexpr auto UNASSIGNED = std::numeric_limits<std::size_t>::max();
 constexpr double plane_distance_tolerance = 1e-4; // metres
 constexpr double plane_normal_min_cos = 0.99996192306417; // cos(0.5 deg), fixed literal
 
-namespace PMP = CGAL::Polygon_mesh_processing;
+namespace pmp = CGAL::Polygon_mesh_processing;
 
 struct SeedPlane {
     Vector3D unit_normal;
@@ -131,12 +131,12 @@ void resplit_exactly_coplanar(
     std::vector<std::uint8_t>& in_set)
 {
     for(const auto f : faces_to_split) {
-        patch_of[f] = UNASSIGNED;
+        patch_of[f] = unassigned;
         in_set[f] = 1;
     }
     std::vector<SurfaceMesh::Face_index> patch_faces{};
     for(const auto seed : faces_to_split) {
-        if(patch_of[seed] != UNASSIGNED) {
+        if(patch_of[seed] != unassigned) {
             continue;
         }
         const auto id = patches.size();
@@ -159,7 +159,7 @@ void resplit_exactly_coplanar(
                     continue;
                 }
                 const auto nbr = mesh.face(opp);
-                if(!in_set[nbr] || patch_of[nbr] != UNASSIGNED) {
+                if(!in_set[nbr] || patch_of[nbr] != unassigned) {
                     continue;
                 }
                 bool coplanar = true;
@@ -186,16 +186,16 @@ void resplit_exactly_coplanar(
 /// re-split exactly.
 std::vector<std::size_t> grow_planar_patches(const SurfaceMesh& mesh, std::vector<Patch>& patches)
 {
-    std::vector<std::size_t> patch_of(mesh.number_of_faces(), UNASSIGNED);
+    std::vector<std::size_t> patch_of(mesh.number_of_faces(), unassigned);
     std::vector<Vector3D> normal_of(mesh.number_of_faces());
     for(const auto f : faces(mesh)) {
-        normal_of[f] = PMP::compute_face_normal(f, mesh);
+        normal_of[f] = pmp::compute_face_normal(f, mesh);
     }
 
     std::vector<std::uint8_t> in_set(mesh.number_of_faces(), 0);
     std::vector<SurfaceMesh::Face_index> patch_faces{};
     for(const auto seed : faces(mesh)) {
-        if(patch_of[seed] != UNASSIGNED) {
+        if(patch_of[seed] != unassigned) {
             continue;
         }
         const auto id = patches.size();
@@ -216,7 +216,7 @@ std::vector<std::size_t> grow_planar_patches(const SurfaceMesh& mesh, std::vecto
                     continue;
                 }
                 const auto nbr = mesh.face(opp);
-                if(patch_of[nbr] != UNASSIGNED ||
+                if(patch_of[nbr] != unassigned ||
                    !fits_seed_plane(mesh, nbr, normal_of[nbr], plane)) {
                     continue;
                 }
@@ -398,7 +398,7 @@ RegionSplit split_into_regions(const SurfaceMesh& mesh)
     merge_to_fixpoint(mesh, patch_of, patches, parent);
 
     // Compact region ids in first-seen-face order.
-    std::vector<std::size_t> region(mesh.number_of_faces(), UNASSIGNED);
+    std::vector<std::size_t> region(mesh.number_of_faces(), unassigned);
     std::map<std::size_t, std::size_t> compact{};
     std::size_t next_id = 0;
     for(const auto f : faces(mesh)) {

@@ -27,13 +27,13 @@ public:
 
     /// Registers @p pieces as one destination. Routing heads for whichever piece is nearest in
     /// travel time.
-    Destination RegisterDestination(const std::vector<AreaPiece>& pieces);
+    Destination register_destination(const std::vector<AreaPiece>& pieces);
 
     /// Unit vector from @p from along the route to @p to, projected to x/y. Zero once @p from
     /// has reached @p to.
-    Point GetOrientation(const Location& from, const RoutingTarget& to);
+    Point get_orientation(const Location& from, const RoutingTarget& to);
 
 private:
     FloorfieldRoutingEngine _floorfield;
-    SurfaceMeshShortestPathRoutingEngine _shortestPath;
+    SurfaceMeshShortestPathRoutingEngine _shortest_path;
 };

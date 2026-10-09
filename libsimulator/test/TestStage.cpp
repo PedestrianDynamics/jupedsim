@@ -12,21 +12,21 @@
 
 namespace
 {
-Destination DestinationOf(
+Destination destination_of(
     FloorfieldRoutingEngine& engine,
     const Geometry& geometry,
     const Polygon& polygon,
     std::size_t region)
 {
-    return engine.RegisterDestination(geometry.split_into_region_pieces(polygon, region));
+    return engine.register_destination(geometry.split_into_region_pieces(polygon, region));
 }
 
-GenericAgent AgentAt(Location location, BaseStage::ID stageId)
+GenericAgent agent_at(Location location, BaseStage::ID stage_id)
 {
     return GenericAgent(
-        GenericAgent::ID::Invalid,
-        Journey::ID::Invalid,
-        stageId,
+        GenericAgent::ID::invalid,
+        Journey::ID::invalid,
+        stage_id,
         location,
         CollisionFreeSpeedModelState{});
 }
@@ -38,17 +38,20 @@ public:
     std::unique_ptr<Geometry> geometry = test_geometries::rectangle({-10, -10}, {10, 10});
     FloorfieldRoutingEngine engine{*geometry};
 
-    Location At(Point p) const { return geometry->get_location(p.x, p.y, 0); }
+    Location at(Point p) const { return geometry->get_location(p.x, p.y, 0); }
 
-    GenericAgent AgentAt(Point p, BaseStage::ID stageId) const { return ::AgentAt(At(p), stageId); }
+    GenericAgent agent_at(Point p, BaseStage::ID stage_id) const
+    {
+        return ::agent_at(at(p), stage_id);
+    }
 };
 
 TEST_F(StagesTests, WaypointIsReachedWithinItsDistance)
 {
-    Waypoint waypoint(DestinationOf(engine, *geometry, Polygon::FromCircle({0, 0}, 1.0), 0));
+    Waypoint waypoint(destination_of(engine, *geometry, Polygon::from_circle({0, 0}, 1.0), 0));
 
-    EXPECT_TRUE(waypoint.IsCompleted(AgentAt({0.9, 0}, waypoint.Id())));
-    EXPECT_FALSE(waypoint.IsCompleted(AgentAt({1.1, 0}, waypoint.Id())));
+    EXPECT_TRUE(waypoint.is_completed(agent_at({0.9, 0}, waypoint.id())));
+    EXPECT_FALSE(waypoint.is_completed(agent_at({1.1, 0}, waypoint.id())));
 }
 
 /// Two floors over the same footprint: (x, y) alone no longer says where a stage is.
@@ -60,44 +63,44 @@ public:
     const std::size_t upper = geometry->get_location_near_z(3, 3, 3.0)->region();
     FloorfieldRoutingEngine engine{*geometry};
 
-    Location At(Point p, std::size_t region) const
+    Location at(Point p, std::size_t region) const
     {
         return geometry->get_location(p.x, p.y, region);
     }
 
-    GenericAgent AgentAt(Point p, std::size_t region, BaseStage::ID stageId) const
+    GenericAgent agent_at(Point p, std::size_t region, BaseStage::ID stage_id) const
     {
-        return ::AgentAt(At(p, region), stageId);
+        return ::agent_at(at(p, region), stage_id);
     }
 
-    Destination CircleAround(Point p, double radius, std::size_t region)
+    Destination circle_around(Point p, double radius, std::size_t region)
     {
-        return DestinationOf(engine, *geometry, Polygon::FromCircle(p, radius), region);
+        return destination_of(engine, *geometry, Polygon::from_circle(p, radius), region);
     }
 };
 
 TEST_F(StagesOnTwoStoreys, WaypointIsReachedOnlyFromItsOwnFloor)
 {
     // A radius larger than the height between the floors.
-    Waypoint waypoint(CircleAround({3, 3}, 3.1, upper));
+    Waypoint waypoint(circle_around({3, 3}, 3.1, upper));
 
-    EXPECT_FALSE(waypoint.IsCompleted(AgentAt({3, 3}, ground, waypoint.Id())));
-    EXPECT_TRUE(waypoint.IsCompleted(AgentAt({3, 3}, upper, waypoint.Id())));
+    EXPECT_FALSE(waypoint.is_completed(agent_at({3, 3}, ground, waypoint.id())));
+    EXPECT_TRUE(waypoint.is_completed(agent_at({3, 3}, upper, waypoint.id())));
 }
 
 TEST_F(StagesOnTwoStoreys, PassingOverOrUnderAnExitDoesNotTakeIt)
 {
     std::vector<GenericAgent::ID> removed{};
     const Polygon area{test_geometries::rectangle_points({2, 2}, {4, 4})};
-    Exit lower(DestinationOf(engine, *geometry, area, ground), removed);
-    Exit upper_exit(DestinationOf(engine, *geometry, area, upper), removed);
+    Exit lower(destination_of(engine, *geometry, area, ground), removed);
+    Exit upper_exit(destination_of(engine, *geometry, area, upper), removed);
 
-    EXPECT_FALSE(lower.IsCompleted(AgentAt({3, 3}, upper, lower.Id())));
-    EXPECT_FALSE(upper_exit.IsCompleted(AgentAt({3, 3}, ground, upper_exit.Id())));
+    EXPECT_FALSE(lower.is_completed(agent_at({3, 3}, upper, lower.id())));
+    EXPECT_FALSE(upper_exit.is_completed(agent_at({3, 3}, ground, upper_exit.id())));
     EXPECT_TRUE(removed.empty());
 
-    EXPECT_TRUE(lower.IsCompleted(AgentAt({3, 3}, ground, lower.Id())));
-    EXPECT_TRUE(upper_exit.IsCompleted(AgentAt({3, 3}, upper, upper_exit.Id())));
+    EXPECT_TRUE(lower.is_completed(agent_at({3, 3}, ground, lower.id())));
+    EXPECT_TRUE(upper_exit.is_completed(agent_at({3, 3}, upper, upper_exit.id())));
     EXPECT_EQ(removed.size(), 2u);
 }
 
@@ -105,10 +108,10 @@ TEST_F(StagesOnTwoStoreys, DirectSteeringHandsBackWhereTheAgentWasSteered)
 {
     DirectSteering steering{};
 
-    auto agent = AgentAt({1, 1}, ground, steering.Id());
-    agent.finalTarget = At({3, 3}, upper);
+    auto agent = agent_at({1, 1}, ground, steering.id());
+    agent.final_target = at({3, 3}, upper);
 
-    const auto target = std::get<Location>(steering.Target(agent));
+    const auto target = std::get<Location>(steering.target(agent));
     EXPECT_EQ(target.xy(), Point(3, 3));
     EXPECT_EQ(target.region(), upper);
 }
@@ -118,8 +121,8 @@ TEST_F(StagesOnTwoStoreys, WaypointIsReachedFromTheRampLeadingToIt)
     // On the upper floor, 1 m past the top of the ramp at x = 14: its radius reaches back onto
     // the ramp, but not down to the ground floor underneath.
     const auto ramp = geometry->get_location_near_z(10, 5, 1.5)->region();
-    Waypoint waypoint(CircleAround({15, 5}, 1.5, upper));
+    Waypoint waypoint(circle_around({15, 5}, 1.5, upper));
 
-    EXPECT_TRUE(waypoint.IsCompleted(AgentAt({13.7, 5}, ramp, waypoint.Id())));
-    EXPECT_FALSE(waypoint.IsCompleted(AgentAt({15, 5}, ground, waypoint.Id())));
+    EXPECT_TRUE(waypoint.is_completed(agent_at({13.7, 5}, ramp, waypoint.id())));
+    EXPECT_FALSE(waypoint.is_completed(agent_at({15, 5}, ground, waypoint.id())));
 }

@@ -61,7 +61,7 @@ using AABBTree = CGAL::AABB_tree<AABBTraits>;
 template <class Gt, class Fb = CGAL::Constrained_triangulation_face_base_2<Gt>>
 class MyFace : public Fb
 {
-    bool in{false};
+    bool _in{false};
     typedef Fb Base;
     typedef typename Fb::Triangulation_data_structure TDS;
 
@@ -72,8 +72,8 @@ public:
         typedef typename Fb::template Rebind_TDS<TDS2>::Other Fb2;
         typedef MyFace<Gt, Fb2> Other;
     };
-    void set_in_domain(bool v) { in = v; }
-    bool get_in_domain() const { return in; }
+    void set_in_domain(bool v) { _in = v; }
+    bool get_in_domain() const { return _in; }
 };
 using TDS = CGAL::Triangulation_data_structure_2<Vb, MyFace<K>>;
 using Itag = CGAL::Exact_predicates_tag;

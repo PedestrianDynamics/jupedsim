@@ -8,15 +8,15 @@
 ///
 /// Derive from this class when a model is not part of the built-in model set. The derived model
 /// still implements the pure virtual interface inherited from OperationalModel:
-/// ComputeNextState() and CheckModelConstraint(). This class only fixes the model
-/// type to OperationalModelType::CUSTOM_MODEL so custom models do not need to repeat that
+/// compute_next_state() and check_model_constraint(). This class only fixes the model
+/// type to OperationalModelType::CustomModel so custom models do not need to repeat that
 /// boilerplate.
 ///
 /// Per-agent custom state should be stored in GenericAgent::model as CustomModel::State. In
-/// ComputeNextState(), "next" arrives as an exact copy of "current"; the model overwrites only the
-/// fields it changes and returns how far it wants to move. CustomModel::State stores its payload
-/// in std::any, so model implementations must agree on the concrete stored type and retrieve it
-/// with the exact typed accessors.
+/// compute_next_state(), "next" arrives as an exact copy of "current"; the model overwrites only
+/// the fields it changes and returns how far it wants to move. CustomModel::State stores its
+/// payload in std::any, so model implementations must agree on the concrete stored type and
+/// retrieve it with the exact typed accessors.
 ///
 /// Payload types must be copy-constructible because GenericAgent values are copied during
 /// simulation queries, e.g. by NeighborhoodSearch.
@@ -25,12 +25,12 @@
 /// class MyModel : public CustomModel
 /// {
 /// public:
-///     Point ComputeNextState(
+///     Point compute_next_state(
 ///         const OperationalModelState& current,
 ///         OperationalModelState& next,
 ///         const AgentStep& step) const override;
 ///
-///     void CheckModelConstraint(
+///     void check_model_constraint(
 ///         const GenericAgent& agent,
 ///         const AgentView& view) const override;
 /// };
@@ -46,5 +46,5 @@ public:
     CustomModel() = default;
     ~CustomModel() override = default;
 
-    OperationalModelType Type() const override { return OperationalModelType::CUSTOM_MODEL; }
+    OperationalModelType type() const override { return OperationalModelType::CustomModel; }
 };

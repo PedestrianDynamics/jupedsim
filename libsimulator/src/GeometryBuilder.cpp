@@ -9,22 +9,22 @@
 
 #include <vector>
 
-GeometryBuilder& GeometryBuilder::AddAccessibleArea(const std::vector<Point>& lineLoop)
+GeometryBuilder& GeometryBuilder::add_accessible_area(const std::vector<Point>& line_loop)
 {
-    _accessibleAreas.emplace_back(lineLoop);
+    _accessible_areas.emplace_back(line_loop);
     return *this;
 }
 
-GeometryBuilder& GeometryBuilder::ExcludeFromAccessibleArea(const std::vector<Point>& lineLoop)
+GeometryBuilder& GeometryBuilder::exclude_from_accessible_area(const std::vector<Point>& line_loop)
 {
-    _exclusions.emplace_back(lineLoop);
+    _exclusions.emplace_back(line_loop);
     return *this;
 }
 
-PolyWithHoles GeometryBuilder::Build()
+PolyWithHoles GeometryBuilder::build()
 {
-    const std::vector<Poly> accessibleAreas{
-        std::begin(_accessibleAreas), std::end(_accessibleAreas)};
+    const std::vector<Poly> accessible_areas{
+        std::begin(_accessible_areas), std::end(_accessible_areas)};
     const std::vector<Poly> exclusions{std::begin(_exclusions), std::end(_exclusions)};
-    return CombinePolygons(accessibleAreas, exclusions);
+    return combine_polygons(accessible_areas, exclusions);
 }

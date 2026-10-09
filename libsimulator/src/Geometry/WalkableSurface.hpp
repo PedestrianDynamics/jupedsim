@@ -21,17 +21,17 @@ public:
         std::vector<Ring> holes;
     };
 
-    size_t AddRegion(Polygon polygon, double height);
-    size_t AddRegion(const PolyWithHoles& polygon, double height);
-    size_t ConnectRegions(size_t fromRegion, LineSegment from, size_t toRegion, LineSegment to);
+    size_t add_region(Polygon polygon, double height);
+    size_t add_region(const PolyWithHoles& polygon, double height);
+    size_t connect_regions(size_t from_region, LineSegment from, size_t to_region, LineSegment to);
 
     using RegionGraph2D = Geometry::RegionGraph2D;
-    std::unique_ptr<RegionGraph2D> CreateRegionGraph2D() const;
+    std::unique_ptr<RegionGraph2D> create_region_graph_2d() const;
 
-    std::unique_ptr<Geometry> CreateGeometry();
+    std::unique_ptr<Geometry> create_geometry();
 
 private:
-    std::vector<Point3D> _globalVertices;
+    std::vector<Point3D> _global_vertices;
 
     struct Region {
         // Store boundary (index 0) + holes as vector of indices into globalVertices
@@ -39,7 +39,7 @@ private:
         /// Empty for connectors, which are inclined instead of flat.
         std::optional<double> height;
         /// Polygons projected to x/y.
-        PolyWithHoles polyWithHoles;
+        PolyWithHoles poly_with_holes;
 
         /// Connectors may not be connected again.
         bool is_connectable() const { return height.has_value(); }
@@ -50,17 +50,17 @@ private:
 
     using RegionGraph =
         boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS, Region, Seam>;
-    RegionGraph _regionGraph{};
+    RegionGraph _region_graph{};
 
     size_t insert_region(
         std::vector<std::vector<size_t>> polygons,
         const std::vector<Point3D>& vertices,
         double height);
 
-    std::array<size_t, 2> FindEdge(size_t regionId, const LineSegment& edge) const;
+    std::array<size_t, 2> find_edge(size_t region_id, const LineSegment& edge) const;
 
     /// Check whether floors at specified height overlap. Throws in case of error.
-    void ValidateFloorOverlap(const PolyWithHoles& polyWithHoles, double height) const;
+    void validate_floor_overlap(const PolyWithHoles& poly_with_holes, double height) const;
 };
 
 template <>

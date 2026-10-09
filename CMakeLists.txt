@@ -62,6 +62,23 @@ if(WITH_FORMAT AND WIN32)
     message(FATAL_ERROR "Format target not supported on Windows")
 endif()
 
+set(WITH_TIDY OFF CACHE BOOL "Create clang-tidy targets (check-tidy, tidy-fix)")
+print_var(WITH_TIDY)
+if(WITH_TIDY AND WIN32)
+    message(FATAL_ERROR "clang-tidy targets not supported on Windows")
+endif()
+# clang-tidy only sees translation units in the compile database: tests, tools and
+# benchmarks must be configured, or check-tidy skips them and tidy-fix leaves them behind.
+# Normal variables shadow the cache, so turning WITH_TIDY off restores the cached choice.
+if(WITH_TIDY)
+    foreach(tidy-option BUILD_TESTS BUILD_TOOLS BUILD_BENCHMARKS)
+        if(NOT ${tidy-option})
+            message(STATUS "WITH_TIDY=ON enables ${tidy-option} so its sources are checked")
+            set(${tidy-option} ON)
+        endif()
+    endforeach()
+endif()
+
 ################################################################################
 # Compilation flags
 ################################################################################
@@ -287,7 +304,7 @@ endif()
 # Code formatting
 ################################################################################
 if(UNIX AND WITH_FORMAT)
-    set(clang-format-version 21)
+    set(clang-format-version 23)
     if(DEFINED ENV{CLANG_FORMAT})
         set(CLANG_FORMAT "$ENV{CLANG_FORMAT}")
         if(NOT EXISTS "${CLANG_FORMAT}")
@@ -346,6 +363,115 @@ if(UNIX AND WITH_FORMAT)
             message(FATAL_ERROR "Could not create formatting target, clang-format ${version_string} does not yield a version number")
         endif()
     endif()
+endif()
+
+################################################################################
+# clang-tidy (naming convention and the checks listed in .clang-tidy)
+################################################################################
+# Generated headers live in the build dir (BuildInfo.hpp, corrosion cxxbridge); a config
+# with no checks there keeps them silent whatever filter a caller uses.
+file(WRITE ${PROJECT_BINARY_DIR}/.clang-tidy "---\n# Generated code is never checked.\nChecks: '-*'\n")
+if(UNIX AND WITH_TIDY)
+    set(clang-tidy-version 23)
+    if(DEFINED ENV{CLANG_TIDY})
+        set(CLANG_TIDY "$ENV{CLANG_TIDY}")
+        if(NOT EXISTS "${CLANG_TIDY}")
+            message(FATAL_ERROR "CLANG_TIDY environment variable points to non-existent path: ${CLANG_TIDY}")
+        endif()
+        message(STATUS "Using clang-tidy from CLANG_TIDY env: ${CLANG_TIDY}")
+    else()
+        find_program(CLANG_TIDY
+            NAMES
+                clang-tidy-${clang-tidy-version}
+                clang-tidy
+            REQUIRED
+        )
+    endif()
+    execute_process(
+        COMMAND ${CLANG_TIDY} --version
+        OUTPUT_VARIABLE version_string
+        ERROR_QUIET
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    if(NOT version_string MATCHES "LLVM version ([.0-9]+)")
+        message(FATAL_ERROR "Could not create clang-tidy targets, clang-tidy ${version_string} does not yield a version number")
+    endif()
+    set(version ${CMAKE_MATCH_1})
+    if(NOT version MATCHES "^${clang-tidy-version}\\.")
+        message(FATAL_ERROR "Could not create clang-tidy targets, clang-tidy version ${version} found, but ${clang-tidy-version} required")
+    endif()
+    get_filename_component(clang-tidy-bindir "${CLANG_TIDY}" DIRECTORY)
+    find_program(RUN_CLANG_TIDY
+        NAMES run-clang-tidy-${clang-tidy-version} run-clang-tidy
+        HINTS ${clang-tidy-bindir}
+        REQUIRED
+    )
+    find_program(CLANG_APPLY_REPLACEMENTS
+        NAMES clang-apply-replacements-${clang-tidy-version} clang-apply-replacements
+        HINTS ${clang-tidy-bindir}
+        REQUIRED
+    )
+    message(STATUS "Found clang-tidy ${version}, add check-tidy and tidy-fix targets")
+    # Only our own translation units and headers. third-party/ and generated code are
+    # excluded by the source regex and the header filter (plus the .clang-tidy files in
+    # third-party/ and the build dir).
+    set(tidy-dirs "(libsimulator|libcommon|python_bindings_jupedsim|tools)")
+    set(tidy-filter "^${PROJECT_SOURCE_DIR}/${tidy-dirs}/")
+    set(tidy-common
+        ${RUN_CLANG_TIDY}
+        -clang-tidy-binary ${CLANG_TIDY}
+        -clang-apply-replacements-binary ${CLANG_APPLY_REPLACEMENTS}
+        -p ${PROJECT_BINARY_DIR}
+        -quiet
+        -header-filter ${tidy-filter}
+    )
+    # A non-Apple clang-tidy (e.g. Homebrew LLVM) does not find the macOS SDK when the
+    # compile database names the system compiler, which finds it implicitly. An SDK newer
+    # than the clang-tidy can need an older one (LLVM 21 could not parse NAN/INFINITY from
+    # the macOS 27 SDK's math.h in -std=c++20); CLANG_TIDY_SYSROOT then selects an older SDK.
+    if(APPLE)
+        set(CLANG_TIDY_SYSROOT "" CACHE PATH
+            "macOS SDK clang-tidy parses against (default: CMAKE_OSX_SYSROOT, else xcrun's SDK)")
+        set(tidy-sysroot "${CLANG_TIDY_SYSROOT}")
+        if(NOT tidy-sysroot AND IS_DIRECTORY "${CMAKE_OSX_SYSROOT}")
+            set(tidy-sysroot "${CMAKE_OSX_SYSROOT}")
+        endif()
+        if(NOT tidy-sysroot)
+            # CMAKE_OSX_SYSROOT may hold an SDK name (e.g. macosx) instead of a path.
+            set(tidy-xcrun-sdk)
+            if(CMAKE_OSX_SYSROOT)
+                set(tidy-xcrun-sdk --sdk ${CMAKE_OSX_SYSROOT})
+            endif()
+            execute_process(
+                COMMAND xcrun ${tidy-xcrun-sdk} --show-sdk-path
+                OUTPUT_VARIABLE tidy-sysroot
+                ERROR_QUIET
+                OUTPUT_STRIP_TRAILING_WHITESPACE
+            )
+        endif()
+        if(tidy-sysroot)
+            list(APPEND tidy-common -extra-arg=-isysroot${tidy-sysroot})
+        endif()
+        message(STATUS "clang-tidy sysroot: ${tidy-sysroot} (override with CLANG_TIDY_SYSROOT)")
+    endif()
+    # No check list on this command line or any other: .clang-tidy decides what is checked.
+    add_custom_target(check-tidy
+        COMMENT "Checking naming and the checks listed in .clang-tidy"
+        COMMAND ${tidy-common} "-warnings-as-errors=*" ${tidy-filter}
+        DEPENDS floorfield_cxx
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+        USES_TERMINAL
+        VERBATIM
+    )
+    # Fixes apply to warnings only, so this target must not turn them into errors.
+    add_custom_target(tidy-fix
+        COMMENT "Applying clang-tidy fixes (run reformat afterwards)"
+        COMMAND ${tidy-common} -fix ${tidy-filter}
+        DEPENDS floorfield_cxx
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+        USES_TERMINAL
+        VERBATIM
+    )
 endif()
 
 ################################################################################

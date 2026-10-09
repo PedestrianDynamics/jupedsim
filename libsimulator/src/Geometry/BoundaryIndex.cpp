@@ -27,14 +27,14 @@
 //==================================================================================================
 // NaiveBoundaryIndex
 //==================================================================================================
-NaiveBoundaryIndex::NaiveBoundaryIndex(std::vector<SegmentGrid> regions_)
-    : regions(std::move(regions_))
+NaiveBoundaryIndex::NaiveBoundaryIndex(std::vector<SegmentGrid> regions)
+    : _regions(std::move(regions))
 {
 }
 
-std::vector<LineSegment> NaiveBoundaryIndex::Query(const Location& loc, double maximum_distance)
+std::vector<LineSegment> NaiveBoundaryIndex::query(const Location& loc, double maximum_distance)
 {
-    auto range = regions[loc.region()].LineSegmentsInDistanceTo(maximum_distance, loc.xy());
+    auto range = _regions[loc.region()].line_segments_in_distance_to(maximum_distance, loc.xy());
     return {std::begin(range), std::end(range)};
 }
 
@@ -45,11 +45,11 @@ namespace
 {
 /// Shorter than this a clipped piece is an artefact of the clip, not something an agent can
 /// see, let alone be pushed away from.
-constexpr double kMinPartLength = 1e-9;
+constexpr double min_part_length = 1e-9;
 
 /// How close to an end of a wall, as a fraction of its length, a cut has to land to count as
 /// being that end. On anything of a building's size this is well under a micrometre.
-constexpr double kSnapEps = 1e-9;
+constexpr double snap_eps = 1e-9;
 
 /// A seam as a sight ray needs it: where it stands and where crossing it leads.
 struct SeamCandidate {
@@ -76,20 +76,20 @@ struct Candidates {
 /// seen is settled by what the straight line from @p p to it crosses -- a line that never
 /// leaves the disc. Geometry with no point in the disc can therefore neither be reported nor
 /// hide anything that is.
-Candidates CollectCandidates(const RegionGraph& g, Point p, double radius)
+Candidates collect_candidates(const RegionGraph& g, Point p, double radius)
 {
     Candidates candidates{};
     candidates.wall_ids_of.resize(boost::num_vertices(g));
     candidates.seams_of.resize(boost::num_vertices(g));
 
     for(const auto region : boost::make_iterator_range(boost::vertices(g))) {
-        for(const auto& wall : g[region]->LineSegmentsInDistanceTo(radius, p)) {
+        for(const auto& wall : g[region]->line_segments_in_distance_to(radius, p)) {
             candidates.wall_ids_of[region].push_back(candidates.walls.size());
             candidates.walls.push_back(wall);
         }
         for(const auto edge : boost::make_iterator_range(boost::out_edges(region, g))) {
             const auto& seam = g[edge];
-            if(seam.DistTo(p) <= radius) {
+            if(seam.dist_to(p) <= radius) {
                 candidates.seams_of[region].push_back(SeamCandidate{seam, boost::target(edge, g)});
             }
         }
@@ -101,27 +101,27 @@ Candidates CollectCandidates(const RegionGraph& g, Point p, double radius)
 ///
 /// A cut that close was made by geometry running through the segment's own endpoint, and
 /// re-deriving that endpoint from an angle, or from a disc, must not be allowed to move it.
-double SnapToEnd(double s)
+double snap_to_end(double s)
 {
-    if(s < kSnapEps) {
+    if(s < snap_eps) {
         return 0.0;
     }
-    return s > 1.0 - kSnapEps ? 1.0 : s;
+    return s > 1.0 - snap_eps ? 1.0 : s;
 }
 
 /// Where @p x sits along @p ls, as the parameter of its projection onto it.
-double ParameterAlong(const LineSegment& ls, Point x)
+double parameter_along(const LineSegment& ls, Point x)
 {
     const Point along{ls.p2.x - ls.p1.x, ls.p2.y - ls.p1.y};
-    return Point{x.x - ls.p1.x, x.y - ls.p1.y}.ScalarProduct(along) / along.ScalarProduct(along);
+    return Point{x.x - ls.p1.x, x.y - ls.p1.y}.scalar_product(along) / along.scalar_product(along);
 }
 
 /// The part of @p ls between the two parameters, or nothing when that is empty or too short
 /// to mean anything.
-std::optional<LineSegment> SubSegment(const LineSegment& ls, double from, double to)
+std::optional<LineSegment> sub_segment(const LineSegment& ls, double from, double to)
 {
     const Point along{ls.p2.x - ls.p1.x, ls.p2.y - ls.p1.y};
-    if(to <= from || (to - from) * along.Norm() < kMinPartLength) {
+    if(to <= from || (to - from) * along.norm() < min_part_length) {
         return std::nullopt;
     }
     // An untouched end stays the endpoint it was, rather than an arithmetic re-derivation of
@@ -139,16 +139,16 @@ std::optional<LineSegment> SubSegment(const LineSegment& ls, double from, double
 }
 
 /// The part of @p ls inside the closed disc, or nothing if it does not reach into it.
-std::optional<LineSegment> ClipToDisc(const LineSegment& ls, Point center, double radius)
+std::optional<LineSegment> clip_to_disc(const LineSegment& ls, Point center, double radius)
 {
     const Point along{ls.p2.x - ls.p1.x, ls.p2.y - ls.p1.y};
     const Point to_start{ls.p1.x - center.x, ls.p1.y - center.y};
-    const double a = along.ScalarProduct(along);
+    const double a = along.scalar_product(along);
     if(a <= 0.0) {
         return std::nullopt;
     }
-    const double b = 2.0 * to_start.ScalarProduct(along);
-    const double c = to_start.ScalarProduct(to_start) - radius * radius;
+    const double b = 2.0 * to_start.scalar_product(along);
+    const double c = to_start.scalar_product(to_start) - radius * radius;
     const double discriminant = b * b - 4.0 * a * c;
     if(discriminant < 0.0) {
         // The supporting line misses the circle, so no point of the segment is inside it
@@ -156,12 +156,12 @@ std::optional<LineSegment> ClipToDisc(const LineSegment& ls, Point center, doubl
         return std::nullopt;
     }
     const double root = std::sqrt(discriminant);
-    return SubSegment(
+    return sub_segment(
         ls, std::max(0.0, (-b - root) / (2.0 * a)), std::min(1.0, (-b + root) / (2.0 * a)));
 }
 
 /// Turns what the portal recursion found -- per wall, the stretches of it that were seen, as
-/// parameters along that wall -- into the answer Query() promises: the visible pieces
+/// parameters along that wall -- into the answer query() promises: the visible pieces
 /// themselves. @p parts_of_wall is sorted in place.
 ///
 /// One stretch of wall can arrive in several pieces that touch: split where the recursion's
@@ -169,7 +169,7 @@ std::optional<LineSegment> ClipToDisc(const LineSegment& ls, Point center, doubl
 /// it. Touching intervals are fused before clipping, so each piece that leaves here is
 /// maximal. A cut within rounding distance of an end of the wall is that end: re-deriving an
 /// endpoint from the recursion's arithmetic must not move it.
-std::vector<LineSegment> AssembleAnswer(
+std::vector<LineSegment> assemble_answer(
     const Candidates& candidates,
     Point p,
     double maximum_distance,
@@ -191,20 +191,20 @@ std::vector<LineSegment> AssembleAnswer(
         // grazes a wall the cut is decided by the last bits of a discriminant, and feeding it
         // re-derived piece endpoints turns the same tangency into an answer a few nanometres
         // long.
-        const auto within_disc = ClipToDisc(wall, p, maximum_distance);
+        const auto within_disc = clip_to_disc(wall, p, maximum_distance);
         if(!within_disc) {
             continue;
         }
-        const double disc_from = ParameterAlong(wall, within_disc->p1);
-        const double disc_to = ParameterAlong(wall, within_disc->p2);
+        const double disc_from = parameter_along(wall, within_disc->p1);
+        const double disc_to = parameter_along(wall, within_disc->p2);
         std::size_t i = 0;
         while(i < intervals.size()) {
             auto [from, to] = intervals[i];
-            for(++i; i < intervals.size() && intervals[i].first <= to + kSnapEps; ++i) {
+            for(++i; i < intervals.size() && intervals[i].first <= to + snap_eps; ++i) {
                 to = std::max(to, intervals[i].second);
             }
-            const auto part = SubSegment(
-                wall, SnapToEnd(std::max(from, disc_from)), SnapToEnd(std::min(to, disc_to)));
+            const auto part = sub_segment(
+                wall, snap_to_end(std::max(from, disc_from)), snap_to_end(std::min(to, disc_to)));
             if(!part) {
                 continue;
             }
@@ -243,20 +243,20 @@ using VisArrangement = CGAL::Arrangement_2<CGAL::Arr_segment_traits_2<VisKernel>
 /// the query face's boundary circulators instead, which leaves the same question to how the
 /// arrangement happens to file those segments -- as inner boundaries of the face -- so the
 /// engine whose correctness is visible in its own code wins. The regularized flavour drops
-/// zero-width needles, which the Query() contract allows to be omitted anyway. Both
+/// zero-width needles, which the query() contract allows to be omitted anyway. Both
 /// engines want the query point in a BOUNDED face; the box below provides one.
 using VisEngine = CGAL::Triangular_expansion_visibility_2<VisArrangement, CGAL::Tag_true>;
 
 /// A recursion this deep means a sight line threading this many doorways inside one query
 /// disc; no building does that, but a cycle in the window bookkeeping would.
-constexpr int kMaxWindowDepth = 128;
+constexpr int max_window_depth = 128;
 
-VisPoint ToExact(Point p)
+VisPoint to_exact(Point p)
 {
     return {p.x, p.y};
 }
 
-Point FromExact(const VisPoint& p)
+Point from_exact(const VisPoint& p)
 {
     return {CGAL::to_double(p.x()), CGAL::to_double(p.y())};
 }
@@ -294,7 +294,7 @@ struct JobSegment {
 /// deciding just-inside against just-outside in doubles would tear pieces at exactly the
 /// places the recursion has to agree with itself about.
 std::optional<VisSegment>
-ClipToWindowWedge(const VisPoint& q, const VisSegment& window, VisSegment piece)
+clip_to_window_wedge(const VisPoint& q, const VisSegment& window, VisSegment piece)
 {
     for(int i = 0; i < 2; ++i) {
         const VisPoint through = i == 0 ? window.source() : window.target();
@@ -328,7 +328,7 @@ ClipToWindowWedge(const VisPoint& q, const VisSegment& window, VisSegment piece)
 /// Runs the visibility query of one (region, window) job: visible wall pieces go into
 /// @p parts_of_wall as parameter intervals along their wall, visible seam pieces become new
 /// jobs in @p pending.
-void ProcessWindowJob(
+void process_window_job(
     const Candidates& candidates,
     Point p,
     const VisPoint& q,
@@ -345,8 +345,8 @@ void ProcessWindowJob(
     // query point off the arrangement's edges.
     std::vector<JobSegment> segments{};
     const auto keep = [&](const LineSegment& ls) -> std::optional<VisSegment> {
-        const VisPoint a = ToExact(ls.p1);
-        const VisPoint b = ToExact(ls.p2);
+        const VisPoint a = to_exact(ls.p1);
+        const VisPoint b = to_exact(ls.p2);
         if(CGAL::orientation(a, b, q) == CGAL::COLLINEAR) {
             return std::nullopt;
         }
@@ -386,7 +386,7 @@ void ProcessWindowJob(
     CGAL::Oriented_side agent_side{CGAL::ON_ORIENTED_BOUNDARY};
     if(job.window) {
         window_line =
-            VisKernel::Line_2{ToExact(job.seam_of_parent.p1), ToExact(job.seam_of_parent.p2)};
+            VisKernel::Line_2{to_exact(job.seam_of_parent.p1), to_exact(job.seam_of_parent.p2)};
         // Strictly off the line: a seam collinear with the agent never gets a window.
         agent_side = window_line->oriented_side(q);
     }
@@ -424,7 +424,7 @@ void ProcessWindowJob(
     for(const auto& js : segments) {
         // Seams are stored once per direction, so the seam the window lies on appears here as
         // its own exact reverse, leading back to the region the look came from. The match is
-        // bit-exact on purpose -- CreateRegionGraph builds both directions from the same mesh
+        // bit-exact on purpose -- create_region_graph builds both directions from the same mesh
         // points -- and the assert below keeps that coupling visible: a window whose seam is
         // not found again would stay silently bricked up.
         const bool entering = job.window && js.is_seam && js.seam->neighbor == job.parent &&
@@ -504,7 +504,7 @@ void ProcessWindowJob(
         // says the surface continues there, and crediting the wall instead would silently
         // delete everything behind it.
         // Two coincident seams of one region leading to DIFFERENT neighbours would have no
-        // defensible winner at all; CreateRegionGraph does not produce that for a manifold
+        // defensible winner at all; create_region_graph does not produce that for a manifold
         // mesh, and the assert keeps the assumption visible.
         const JobSegment* on = nullptr;
         [[maybe_unused]] int seams_matched = 0;
@@ -537,7 +537,7 @@ void ProcessWindowJob(
         // its face reaches nothing its own sight lines do not reach.
         VisSegment piece{source, target};
         if(job.window) {
-            const auto through = ClipToWindowWedge(q, *job.window, piece);
+            const auto through = clip_to_window_wedge(q, *job.window, piece);
             if(!through) {
                 continue;
             }
@@ -545,8 +545,8 @@ void ProcessWindowJob(
         }
         if(!on->is_seam) {
             const auto& wall = candidates.walls[on->wall_id];
-            const VisPoint a = ToExact(wall.p1);
-            const VisPoint b = ToExact(wall.p2);
+            const VisPoint a = to_exact(wall.p1);
+            const VisPoint b = to_exact(wall.p2);
             const auto length2 = (b - a) * (b - a);
             const double from = CGAL::to_double(((piece.source() - a) * (b - a)) / length2);
             const double to = CGAL::to_double(((piece.target() - a) * (b - a)) / length2);
@@ -558,15 +558,15 @@ void ProcessWindowJob(
         // every sight line onward passes through it first -- so a window already out of reach
         // opens on nothing the disc clip would keep, and this prune is what ends the
         // recursion.
-        const LineSegment window{FromExact(piece.source()), FromExact(piece.target())};
-        if(window.DistTo(p) > maximum_distance) {
+        const LineSegment window{from_exact(piece.source()), from_exact(piece.target())};
+        if(window.dist_to(p) > maximum_distance) {
             continue;
         }
-        if(Distance(window.p1, window.p2) < kMinPartLength) {
+        if(distance(window.p1, window.p2) < min_part_length) {
             continue; // a zero-width slit; measure zero may be omitted
         }
-        assert(job.depth < kMaxWindowDepth && "portal window recursion runaway");
-        if(job.depth >= kMaxWindowDepth) {
+        assert(job.depth < max_window_depth && "portal window recursion runaway");
+        if(job.depth >= max_window_depth) {
             continue; // the cap has to hold with the assert compiled out, too
         }
         pending.push_back(
@@ -575,15 +575,15 @@ void ProcessWindowJob(
 }
 } // namespace
 
-PortalBoundaryIndex::PortalBoundaryIndex(std::unique_ptr<RegionGraph> graph) : g(std::move(graph))
+PortalBoundaryIndex::PortalBoundaryIndex(std::unique_ptr<RegionGraph> graph) : _g(std::move(graph))
 {
 }
 
-std::vector<LineSegment> PortalBoundaryIndex::Query(const Location& loc, double maximum_distance)
+std::vector<LineSegment> PortalBoundaryIndex::query(const Location& loc, double maximum_distance)
 {
     const Point p = loc.xy();
-    const VisPoint q = ToExact(p);
-    const auto candidates = CollectCandidates(*g, p, maximum_distance);
+    const VisPoint q = to_exact(p);
+    const auto candidates = collect_candidates(*_g, p, maximum_distance);
 
     std::vector<std::vector<std::pair<double, double>>> parts_of_wall(candidates.walls.size());
     std::vector<WindowJob> pending{};
@@ -591,29 +591,29 @@ std::vector<LineSegment> PortalBoundaryIndex::Query(const Location& loc, double 
     while(!pending.empty()) {
         const WindowJob job = std::move(pending.back());
         pending.pop_back();
-        ProcessWindowJob(candidates, p, q, maximum_distance, job, parts_of_wall, pending);
+        process_window_job(candidates, p, q, maximum_distance, job, parts_of_wall, pending);
     }
 
     // One stretch of wall can arrive here in several pieces that touch -- split where the box
     // happened to cross the wall, or seen through two windows whose views meet on it -- so the
     // assembly fuses them before clipping.
-    return AssembleAnswer(candidates, p, maximum_distance, parts_of_wall);
+    return assemble_answer(candidates, p, maximum_distance, parts_of_wall);
 }
 
 //==================================================================================================
 // Factories
 //==================================================================================================
 std::unique_ptr<BoundaryIndex>
-MakeNaiveBoundaryIndex(const SurfaceMesh& mesh, const RegionSplit& region_split)
+make_naive_boundary_index(const SurfaceMesh& mesh, const RegionSplit& region_split)
 {
-    auto boundaries = CreatePerRegionSegmentGrids(mesh, region_split);
+    auto boundaries = create_per_region_segment_grids(mesh, region_split);
     return std::make_unique<NaiveBoundaryIndex>(std::move(boundaries));
 }
 
 std::unique_ptr<BoundaryIndex>
-MakePortalBoundaryIndex(const SurfaceMesh& mesh, const RegionSplit& region_split)
+make_portal_boundary_index(const SurfaceMesh& mesh, const RegionSplit& region_split)
 {
-    auto g = CreateRegionGraph(mesh, region_split);
+    auto g = create_region_graph(mesh, region_split);
     return std::make_unique<PortalBoundaryIndex>(std::move(g));
 }
 
@@ -621,7 +621,7 @@ MakePortalBoundaryIndex(const SurfaceMesh& mesh, const RegionSplit& region_split
 // Supporting code
 //==================================================================================================
 std::tuple<SurfaceMesh::Face_index, SurfaceMesh::Halfedge_index>
-IncidentFaceAndHalfedge(const SurfaceMesh& mesh, SurfaceMesh::Edge_index e)
+incident_face_and_halfedge(const SurfaceMesh& mesh, SurfaceMesh::Edge_index e)
 {
     auto h = mesh.halfedge(e, 0);
     if(mesh.is_border(h)) {
@@ -634,14 +634,14 @@ IncidentFaceAndHalfedge(const SurfaceMesh& mesh, SurfaceMesh::Edge_index e)
 }
 
 std::vector<SegmentGrid>
-CreatePerRegionSegmentGrids(const SurfaceMesh& mesh, const RegionSplit& region_split)
+create_per_region_segment_grids(const SurfaceMesh& mesh, const RegionSplit& region_split)
 {
     std::vector<std::vector<LineSegment>> elements{};
     elements.resize(region_split.count);
 
     for(const auto edge : mesh.edges()) {
         if(mesh.is_border(edge)) {
-            const auto [f, he] = IncidentFaceAndHalfedge(mesh, edge);
+            const auto [f, he] = incident_face_and_halfedge(mesh, edge);
             const auto region_id = region_split.region[f];
             const auto v0 = mesh.point(mesh.source(he));
             const auto v1 = mesh.point(mesh.target(he));
@@ -660,7 +660,7 @@ CreatePerRegionSegmentGrids(const SurfaceMesh& mesh, const RegionSplit& region_s
 }
 
 std::unique_ptr<RegionGraph>
-CreateRegionGraph(const SurfaceMesh& mesh, const RegionSplit& region_split)
+create_region_graph(const SurfaceMesh& mesh, const RegionSplit& region_split)
 {
     std::vector<std::vector<LineSegment>> elements{};
     elements.resize(region_split.count);
@@ -669,7 +669,7 @@ CreateRegionGraph(const SurfaceMesh& mesh, const RegionSplit& region_split)
 
     for(const auto edge : mesh.edges()) {
         if(mesh.is_border(edge)) {
-            const auto [f, he] = IncidentFaceAndHalfedge(mesh, edge);
+            const auto [f, he] = incident_face_and_halfedge(mesh, edge);
             const auto region_id = region_split.region[f];
             const auto v0 = mesh.point(mesh.source(he));
             const auto v1 = mesh.point(mesh.target(he));
