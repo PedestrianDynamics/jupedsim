@@ -64,7 +64,7 @@ intersphinx_mapping = {
 # -- Automatic generation of API doc -----------------------------------------
 # Analyse the imported (built or installed) package, not python_modules/: the
 # native types exist for autoapi only as the pybind11-stubgen stubs
-# (py_jupedsim/*.pyi) that the build generates into the package.
+# (py_jupedsim.pyi) that the build generates into the package.
 autoapi_dirs = [os.path.dirname(jupedsim.__file__)]
 # A build stage keeps symlinks to deleted sources until CMake re-runs; autoapi
 # would crash on them with a bare FileNotFoundError.
