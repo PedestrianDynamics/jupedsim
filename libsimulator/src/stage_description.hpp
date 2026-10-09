@@ -1,0 +1,27 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later
+#pragma once
+
+#include "point.hpp"
+#include "polygon.hpp"
+
+#include <cstddef>
+#include <variant>
+#include <vector>
+
+struct DirectSteeringDescription {};
+
+struct WaypointDescription {
+    Point position;
+    double distance;
+    /// Region the waypoint lies in.
+    std::size_t region_id;
+};
+
+struct ExitDescription {
+    Polygon polygon;
+    /// Region the exit lies in.
+    std::size_t region_id;
+};
+
+using StageDescription =
+    std::variant<DirectSteeringDescription, WaypointDescription, ExitDescription>;

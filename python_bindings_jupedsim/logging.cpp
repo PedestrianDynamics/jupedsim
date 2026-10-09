@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "logging.hpp"
 
-#include "Logger.hpp"
 #include "conversion.hpp"
+#include "logger.hpp"
 
 #include <pybind11/functional.h> // IWYU pragma: keep
 #include <pybind11/pybind11.h>
@@ -12,7 +12,7 @@
 namespace py = pybind11;
 
 // TODO(kkratz): I think this can now be replaced by lifetime annotations, i.e. py::keep_alive...
-LogCallbackOwner& LogCallbackOwner::Instance()
+LogCallbackOwner& LogCallbackOwner::instance()
 {
     static LogCallbackOwner instance;
     return instance;
@@ -22,7 +22,7 @@ void init_logging(py::module_& m)
 {
     auto atexit = py::module_::import("atexit");
     atexit.attr("register")(py::cpp_function([]() {
-        auto& owner = LogCallbackOwner::Instance();
+        auto& owner = LogCallbackOwner::instance();
         owner.debug = {};
         owner.info = {};
         owner.warning = {};
@@ -31,12 +31,12 @@ void init_logging(py::module_& m)
     m.def(
         "set_debug_callback",
         [](LogCallbackOwner::LogCallback callback) {
-            LogCallbackOwner::Instance().debug = callback;
-            Logging::Logger::Instance().SetDebugCallback(
-                [](const std::string& msg) { LogCallbackOwner::Instance().debug(msg); });
+            LogCallbackOwner::instance().debug = callback;
+            logging::Logger::instance().set_debug_callback(
+                [](const std::string& msg) { LogCallbackOwner::instance().debug(msg); });
         },
         py::arg("fn"),
-        cleanDoc(R"(
+        clean_doc(R"(
         Set receiver for debug messages.
 
         Args:
@@ -46,12 +46,12 @@ void init_logging(py::module_& m)
     m.def(
         "set_info_callback",
         [](LogCallbackOwner::LogCallback callback) {
-            LogCallbackOwner::Instance().info = callback;
-            Logging::Logger::Instance().SetInfoCallback(
-                [](const std::string& msg) { LogCallbackOwner::Instance().info(msg); });
+            LogCallbackOwner::instance().info = callback;
+            logging::Logger::instance().set_info_callback(
+                [](const std::string& msg) { LogCallbackOwner::instance().info(msg); });
         },
         py::arg("fn"),
-        cleanDoc(R"(
+        clean_doc(R"(
         Set receiver for info messages.
 
         Args:
@@ -61,12 +61,12 @@ void init_logging(py::module_& m)
     m.def(
         "set_warning_callback",
         [](LogCallbackOwner::LogCallback callback) {
-            LogCallbackOwner::Instance().warning = callback;
-            Logging::Logger::Instance().SetWarningCallback(
-                [](const std::string& msg) { LogCallbackOwner::Instance().warning(msg); });
+            LogCallbackOwner::instance().warning = callback;
+            logging::Logger::instance().set_warning_callback(
+                [](const std::string& msg) { LogCallbackOwner::instance().warning(msg); });
         },
         py::arg("fn"),
-        cleanDoc(R"(
+        clean_doc(R"(
         Set receiver for warning messages.
 
         Args:
@@ -76,12 +76,12 @@ void init_logging(py::module_& m)
     m.def(
         "set_error_callback",
         [](LogCallbackOwner::LogCallback callback) {
-            LogCallbackOwner::Instance().error = callback;
-            Logging::Logger::Instance().SetErrorCallback(
-                [](const std::string& msg) { LogCallbackOwner::Instance().error(msg); });
+            LogCallbackOwner::instance().error = callback;
+            logging::Logger::instance().set_error_callback(
+                [](const std::string& msg) { LogCallbackOwner::instance().error(msg); });
         },
         py::arg("fn"),
-        cleanDoc(R"(
+        clean_doc(R"(
         Set receiver for error messages.
 
         Args:

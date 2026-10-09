@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "OperationalModel.hpp"
-#include "WarpDriverModel.hpp"
+#include "warp_driver_model.hpp"
+
+#include "operational_model.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep
 
 #include <pybind11/cast.h>
@@ -30,37 +31,37 @@ void init_warp_driver_model(py::module_& m)
         .def(
             py::init([](Point orientation,
                         double radius,
-                        double desiredSpeed,
-                        double stuckTime,
-                        double displacementX,
-                        double displacementY,
-                        double detourTime,
-                        int detourSide) {
+                        double desired_speed,
+                        double stuck_time,
+                        double displacement_x,
+                        double displacement_y,
+                        double detour_time,
+                        int detour_side) {
                 return WarpDriverModel::State{
                     .orientation = orientation,
                     .radius = radius,
-                    .v0 = desiredSpeed,
-                    .stuckTime = stuckTime,
-                    .displacementX = displacementX,
-                    .displacementY = displacementY,
-                    .detourTime = detourTime,
-                    .detourSide = detourSide};
+                    .v0 = desired_speed,
+                    .stuck_time = stuck_time,
+                    .displacement_x = displacement_x,
+                    .displacement_y = displacement_y,
+                    .detour_time = detour_time,
+                    .detour_side = detour_side};
             }),
             py::kw_only(),
             py::arg("orientation") = d.orientation,
             py::arg("radius") = d.radius,
             py::arg("desired_speed") = d.v0,
-            py::arg("stuck_time") = d.stuckTime,
-            py::arg("displacement_x") = d.displacementX,
-            py::arg("displacement_y") = d.displacementY,
-            py::arg("detour_time") = d.detourTime,
-            py::arg("detour_side") = d.detourSide)
+            py::arg("stuck_time") = d.stuck_time,
+            py::arg("displacement_x") = d.displacement_x,
+            py::arg("displacement_y") = d.displacement_y,
+            py::arg("detour_time") = d.detour_time,
+            py::arg("detour_side") = d.detour_side)
         .def_readwrite("orientation", &WarpDriverModel::State::orientation)
         .def_readwrite("radius", &WarpDriverModel::State::radius)
         .def_readwrite("desired_speed", &WarpDriverModel::State::v0)
-        .def_readwrite("stuck_time", &WarpDriverModel::State::stuckTime)
-        .def_readwrite("displacement_x", &WarpDriverModel::State::displacementX)
-        .def_readwrite("displacement_y", &WarpDriverModel::State::displacementY)
-        .def_readwrite("detour_time", &WarpDriverModel::State::detourTime)
-        .def_readwrite("detour_side", &WarpDriverModel::State::detourSide);
+        .def_readwrite("stuck_time", &WarpDriverModel::State::stuck_time)
+        .def_readwrite("displacement_x", &WarpDriverModel::State::displacement_x)
+        .def_readwrite("displacement_y", &WarpDriverModel::State::displacement_y)
+        .def_readwrite("detour_time", &WarpDriverModel::State::detour_time)
+        .def_readwrite("detour_side", &WarpDriverModel::State::detour_side);
 }

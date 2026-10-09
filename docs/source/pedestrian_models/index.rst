@@ -94,7 +94,7 @@ The following rules govern the behavior:
 
 1. **Critical Wall Distance**:
     - A critical wall distance is defined as the sum of the agent's radius and
-      a configurable buffer distance (`wallBufferDistance`).
+      a configurable buffer distance (`wall_buffer_distance`).
     - If an agent comes within this critical distance to a wall,
       their direction is adjusted to ensure a minimum distance is maintained.
 

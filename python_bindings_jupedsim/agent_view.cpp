@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "AgentView.hpp"
+#include "agent_view.hpp"
+
 #include "callback_views.hpp"
 #include "conversion.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep
@@ -17,8 +18,8 @@ namespace py = pybind11;
 
 void init_agent_view(py::module_& m)
 {
-    py::class_<PyNeighborView> neighborView(m, "NeighborView");
-    neighborView.doc() = cleanDoc(R"(
+    py::class_<PyNeighborView> neighbor_view(m, "NeighborView");
+    neighbor_view.doc() = clean_doc(R"(
         A neighboring agent as seen from the agent that asked for it.
 
         Obtained from :meth:`~jupedsim.AgentView.other_agents_in_range`. Only valid for the
@@ -26,15 +27,15 @@ void init_agent_view(py::module_& m)
         :attr:`state` after the callback has returned raises
         :class:`~jupedsim.SimulationError`.
     )");
-    neighborView
+    neighbor_view
         .def_property_readonly(
             "relative_position",
-            &PyNeighborView::RelativePosition,
-            cleanDoc("Vector from the querying agent to this neighbor.").c_str())
+            &PyNeighborView::relative_position,
+            clean_doc("Vector from the querying agent to this neighbor.").c_str())
         .def_property_readonly(
             "state",
-            [](const PyNeighborView& self) { return stateToPython(*self.Neighbor().state); },
-            cleanDoc(R"(
+            [](const PyNeighborView& self) { return state_to_python(*self.neighbor().state); },
+            clean_doc(R"(
             Model state of this neighbor.
 
             Treat it as read-only: state may only be changed by returning a new
@@ -43,31 +44,31 @@ void init_agent_view(py::module_& m)
                 .c_str())
         .def("__repr__", [](const PyNeighborView& self) {
             return py::str("NeighborView(relative_position={!r})")
-                .format(py::cast(self.RelativePosition()));
+                .format(py::cast(self.relative_position()));
         });
 
-    py::class_<WallView> wallView(m, "WallView");
-    wallView.doc() = cleanDoc(R"(
+    py::class_<WallView> wall_view(m, "WallView");
+    wall_view.doc() = clean_doc(R"(
         A wall segment as seen from the agent that asked for it.
 
         Obtained from :meth:`~jupedsim.AgentView.walls_in_range`. The view is always
         relative to the agent - as if the agent sits at the origin.
     )");
-    wallView
+    wall_view
         .def_readonly(
             "segment",
             &WallView::segment,
-            cleanDoc("The part of the segment within the queried distance, relative to the agent.")
+            clean_doc("The part of the segment within the queried distance, relative to the agent.")
                 .c_str())
         .def_readonly(
             "closest_point",
             &WallView::closest_point,
-            cleanDoc("The point on the segment closest to the agent.").c_str())
-        .def_readonly("distance", &WallView::distance, cleanDoc("Distance to that point.").c_str())
+            clean_doc("The point on the segment closest to the agent.").c_str())
+        .def_readonly("distance", &WallView::distance, clean_doc("Distance to that point.").c_str())
         .def_readonly(
             "normal",
             &WallView::normal,
-            cleanDoc(R"(
+            clean_doc(R"(
             Unit vector pointing from the wall towards the agent.
 
             This is the direction a repulsion acts in. It is ``(0.0, 0.0)`` for an
@@ -79,8 +80,8 @@ void init_agent_view(py::module_& m)
                 .format(self.distance, py::cast(self.normal));
         });
 
-    py::class_<PyAgentView> agentView(m, "AgentView");
-    agentView.doc() = cleanDoc(R"(
+    py::class_<PyAgentView> agent_view(m, "AgentView");
+    agent_view.doc() = clean_doc(R"(
         What an agent perceives of its surroundings, relative to where it stands.
 
         Passed to
@@ -101,7 +102,7 @@ void init_agent_view(py::module_& m)
                         lambda n: step.no_geometry_between(n),
                     )
     )");
-    agentView
+    agent_view
         .def(
             "other_agents_in_range",
             [](const PyAgentView& self,
@@ -109,9 +110,9 @@ void init_agent_view(py::module_& m)
                const std::optional<py::typing::Callable<py::object(const PyNeighborView&)>>&
                    predicate) {
                 py::list result{};
-                for(const NeighborView& neighbor : self.View().OtherAgentsInRange(radius)) {
+                for(const NeighborView& neighbor : self.view().other_agents_in_range(radius)) {
                     py::object candidate =
-                        py::cast(PyNeighborView{neighbor, self.Scope(), self.Mapper()});
+                        py::cast(PyNeighborView{neighbor, self.scope(), self.mapper()});
                     if(!predicate || py::bool_((*predicate)(candidate))) {
                         result.append(candidate);
                     }
@@ -120,7 +121,7 @@ void init_agent_view(py::module_& m)
             },
             py::arg("radius"),
             py::arg("predicate") = py::none(),
-            cleanDoc(R"(
+            clean_doc(R"(
             Return agents within *radius*, excluding the agent itself.
 
             Args:
@@ -139,12 +140,12 @@ void init_agent_view(py::module_& m)
             "no_geometry_between",
             [](const PyAgentView& self, const std::variant<Point, PyNeighborView>& target) {
                 if(const auto* neighbor = std::get_if<PyNeighborView>(&target)) {
-                    return self.View().NoGeometryBetween(neighbor->Neighbor());
+                    return self.view().no_geometry_between(neighbor->neighbor());
                 }
-                return self.View().NoGeometryBetween(std::get<Point>(target));
+                return self.view().no_geometry_between(std::get<Point>(target));
             },
             py::arg("target"),
-            cleanDoc(R"(
+            clean_doc(R"(
             Return ``True`` when nothing blocks the straight line to *target*.
 
             Given a :class:`~jupedsim.NeighborView`, this answers whether that
@@ -163,10 +164,10 @@ void init_agent_view(py::module_& m)
         .def(
             "walls_in_range",
             [](const PyAgentView& self, double distance) {
-                return intoVec(self.View().WallsInRange(distance));
+                return into_vec(self.view().walls_in_range(distance));
             },
             py::arg("distance"),
-            cleanDoc(R"(
+            clean_doc(R"(
             Return the walls within *distance* of the agent.
 
             Args:
@@ -179,12 +180,12 @@ void init_agent_view(py::module_& m)
         .def(
             "with_neighbor_state_mapping",
             [](const PyAgentView& self, py::typing::Callable<py::object(py::object)> repack) {
-                const AgentView& view = self.View();
+                const AgentView& view = self.view();
                 auto mapper = std::make_shared<PythonNeighborStateMapper>(std::move(repack));
-                return PyAgentView{view.WithNeighborStateMapping(*mapper), self.Scope(), mapper};
+                return PyAgentView{view.with_neighbor_state_mapping(*mapper), self.scope(), mapper};
             },
             py::arg("repack"),
-            cleanDoc(R"(
+            clean_doc(R"(
             Return this view with every neighbor seen through *repack*.
 
             Use this to delegate a view to a built-in model whose
@@ -206,8 +207,8 @@ void init_agent_view(py::module_& m)
             )")
                 .c_str());
 
-    py::class_<PyAgentStep, PyAgentView> agentStep(m, "AgentStep");
-    agentStep.doc() = cleanDoc(R"(
+    py::class_<PyAgentStep, PyAgentView> agent_step(m, "AgentStep");
+    agent_step.doc() = clean_doc(R"(
         An :class:`~jupedsim.AgentView` plus what only holds for one step.
 
         Passed to
@@ -215,16 +216,16 @@ void init_agent_view(py::module_& m)
         Accessing a step after its callback has returned raises
         :class:`~jupedsim.SimulationError`.
     )");
-    agentStep
+    agent_step
         .def(
             "with_neighbor_state_mapping",
             [](const PyAgentStep& self, py::typing::Callable<py::object(py::object)> repack) {
-                const AgentStep& step = self.Step();
+                const AgentStep& step = self.step();
                 auto mapper = std::make_shared<PythonNeighborStateMapper>(std::move(repack));
-                return PyAgentStep{step.WithNeighborStateMapping(*mapper), self.Scope(), mapper};
+                return PyAgentStep{step.with_neighbor_state_mapping(*mapper), self.scope(), mapper};
             },
             py::arg("repack"),
-            cleanDoc(R"(
+            clean_doc(R"(
             Return this step with every neighbor seen through *repack*.
 
             Use this to delegate a step to a built-in model whose
@@ -248,12 +249,12 @@ void init_agent_view(py::module_& m)
                 .c_str())
         .def_property_readonly(
             "dt",
-            [](const PyAgentStep& self) { return self.Step().dt(); },
-            cleanDoc("Duration of this simulation step in seconds.").c_str())
+            [](const PyAgentStep& self) { return self.step().dt(); },
+            clean_doc("Duration of this simulation step in seconds.").c_str())
         .def_property_readonly(
             "route_orientation",
-            [](const PyAgentStep& self) { return self.Step().route_orientation(); },
-            cleanDoc(R"(
+            [](const PyAgentStep& self) { return self.step().route_orientation(); },
+            clean_doc(R"(
             Unit vector along the route to the agent's final target.
 
             Zero when the agent has already reached it.

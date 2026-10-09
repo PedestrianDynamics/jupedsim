@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "Geometry/Geometry.hpp"
-#include "Geometry/Location.hpp"
-#include "Geometry/Validation.hpp"
-#include "SimulationError.hpp"
-#include "SurfaceMeshShortestPathRoutingEngine.hpp"
 #include "conversion.hpp"
+#include "geometry/geometry.hpp"
+#include "geometry/location.hpp"
+#include "geometry/validation.hpp"
+#include "simulation_error.hpp"
+#include "surface_mesh_shortest_path_routing_engine.hpp"
 #include "type_casters.hpp"
 
 #include <CGAL/Polygon_mesh_processing/IO/polygon_mesh_io.h>
@@ -20,7 +20,7 @@ namespace py = pybind11;
 void init_routing(py::module_& m)
 {
     py::class_<Location> location(m, "Location");
-    location.doc() = cleanDoc(R"(
+    location.doc() = clean_doc(R"(
         A point on the walkable surface, together with the region it lies in.
 
         Locations cannot be created directly, get them from the simulation:
@@ -39,15 +39,15 @@ void init_routing(py::module_& m)
         .def_property_readonly(
             "x",
             [](const Location& l) { return l.xy().x; },
-            cleanDoc("x coordinate in metres.").c_str())
+            clean_doc("x coordinate in metres.").c_str())
         .def_property_readonly(
             "y",
             [](const Location& l) { return l.xy().y; },
-            cleanDoc("y coordinate in metres.").c_str())
+            clean_doc("y coordinate in metres.").c_str())
         .def_property_readonly(
-            "z", &Location::z, cleanDoc("Height of the surface here, in metres.").c_str())
+            "z", &Location::z, clean_doc("Height of the surface here, in metres.").c_str())
         .def_property_readonly(
-            "region_id", &Location::region, cleanDoc("Region this location lies in.").c_str())
+            "region_id", &Location::region, clean_doc("Region this location lies in.").c_str())
         .def("__repr__", [](const Location& l) {
             // Python float formatting (3.0, not fmt's 3), as the former Python wrapper printed.
             return py::str("Location({!r}, {!r}, {!r})").format(l.xy().x, l.xy().y, l.z());
@@ -62,8 +62,8 @@ void init_routing(py::module_& m)
             }),
             py::arg("geometry"),
             py::keep_alive<1, 2>())
-        .def("is_valid_location", &SurfaceMeshShortestPathRoutingEngine::IsValidLocation)
-        .def("get_shortest_path", &SurfaceMeshShortestPathRoutingEngine::GetShortestPath)
-        .def("get_orientation", &SurfaceMeshShortestPathRoutingEngine::GetOrientation)
-        .def("wall_clearance", &SurfaceMeshShortestPathRoutingEngine::WallClearance);
+        .def("is_valid_location", &SurfaceMeshShortestPathRoutingEngine::is_valid_location)
+        .def("get_shortest_path", &SurfaceMeshShortestPathRoutingEngine::get_shortest_path)
+        .def("get_orientation", &SurfaceMeshShortestPathRoutingEngine::get_orientation)
+        .def("wall_clearance", &SurfaceMeshShortestPathRoutingEngine::wall_clearance);
 }

@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "Geometry/Geometry.hpp"
+#include "geometry/geometry.hpp"
 
-#include "Geometry/Validation.hpp"
-#include "GeometryBuilder.hpp"
-#include "Point.hpp"
-#include "Polygon.hpp"
-#include "SimulationError.hpp"
 #include "conversion.hpp"
+#include "geometry/validation.hpp"
+#include "geometry_builder.hpp"
+#include "point.hpp"
+#include "polygon.hpp"
+#include "simulation_error.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep
 
 #include <CGAL/Polygon_mesh_processing/IO/polygon_mesh_io.h>
@@ -36,28 +36,28 @@ std::vector<Point> ring_of(const Poly& ring)
 void init_geometry(py::module_& m)
 {
     py::class_<PolyWithHoles> polygon2d(m, "Polygon2D");
-    polygon2d.doc() = cleanDoc(R"(
+    polygon2d.doc() = clean_doc(R"(
         A polygon with holes in the (x, y) plane, e.g. the walkable area of one region.
     )");
     polygon2d
         .def(
             "boundary",
-            [](const PolyWithHoles& p) { return intoTuples(ring_of(p.outer_boundary())); },
-            cleanDoc("Outer boundary as a list of (x, y) points.").c_str())
+            [](const PolyWithHoles& p) { return into_tuples(ring_of(p.outer_boundary())); },
+            clean_doc("Outer boundary as a list of (x, y) points.").c_str())
         .def(
             "holes",
             [](const PolyWithHoles& p) {
                 std::vector<std::vector<std::tuple<double, double>>> res{};
                 for(const auto& hole : p.holes()) {
-                    res.emplace_back(intoTuples(ring_of(hole)));
+                    res.emplace_back(into_tuples(ring_of(hole)));
                 }
                 return res;
             },
-            cleanDoc("Holes, each as a list of (x, y) points.").c_str())
+            clean_doc("Holes, each as a list of (x, y) points.").c_str())
         .def(
             "as_wkt",
             &as_wkt,
-            cleanDoc("The polygon as WKT; every coordinate reads back to the exact same value.")
+            clean_doc("The polygon as WKT; every coordinate reads back to the exact same value.")
                 .c_str());
 
     // smart_holder: a Simulation shares ownership of its geometry with Python.
@@ -68,14 +68,14 @@ void init_geometry(py::module_& m)
             [](const std::string& obj_path) {
                 // Use the PMP reader, not CGAL::IO::read_polygon_mesh as the PMP
                 // reader repairs some common issues like triangle orientation.
-                namespace PMP = CGAL::Polygon_mesh_processing;
+                namespace pmp = CGAL::Polygon_mesh_processing;
                 SurfaceMesh mesh{};
-                if(!PMP::IO::read_polygon_mesh(obj_path, mesh) || mesh.is_empty()) {
+                if(!pmp::IO::read_polygon_mesh(obj_path, mesh) || mesh.is_empty()) {
                     throw SimulationError("Could not read a mesh from OBJ file '{}'", obj_path);
                 }
                 // The one door a mesh from outside comes through, so the one place to insist it
                 // is a surface people can walk on -- and to turn it right side up if it is not.
-                NormaliseAndValidateMesh(mesh);
+                normalise_and_validate_mesh(mesh);
                 return std::make_unique<Geometry>(std::move(mesh));
             },
             py::arg("obj_path"))
@@ -98,19 +98,19 @@ void init_geometry(py::module_& m)
             &Geometry::polygon,
             py::kw_only(),
             py::arg("region_id"),
-            cleanDoc("Polygon2D for the specified region ID").c_str());
+            clean_doc("Polygon2D for the specified region ID").c_str());
 
     py::class_<GeometryBuilder>(m, "GeometryBuilder")
         .def(py::init<>())
         .def(
             "add_accessible_area",
             [](GeometryBuilder& builder, const std::vector<std::tuple<double, double>>& points) {
-                builder.AddAccessibleArea(intoPoints(points));
+                builder.add_accessible_area(into_points(points));
             })
         .def(
             "exclude_from_accessible_area",
             [](GeometryBuilder& builder, const std::vector<std::tuple<double, double>>& points) {
-                builder.ExcludeFromAccessibleArea(intoPoints(points));
+                builder.exclude_from_accessible_area(into_points(points));
             })
-        .def("build", &GeometryBuilder::Build);
+        .def("build", &GeometryBuilder::build);
 }

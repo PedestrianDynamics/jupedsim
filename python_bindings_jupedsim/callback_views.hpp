@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "AgentView.hpp"
+#include "agent_view.hpp"
 
 #include <pybind11/pybind11.h>
 
@@ -12,7 +12,7 @@ namespace py = pybind11;
 
 /// A model state as user code sees it. Custom states are unwrapped so that the
 /// _CustomModelState transport type never reaches user code.
-py::object stateToPython(const OperationalModelState& state);
+py::object state_to_python(const OperationalModelState& state);
 
 /// Maps neighbor states through a Python callable, e.g. to hand a built-in model neighbors of
 /// the state type it expects.
@@ -22,7 +22,7 @@ public:
     explicit PythonNeighborStateMapper(py::object repack);
 
     const OperationalModelState&
-    MapToCurrentState(const OperationalModelState& state) const override;
+    map_to_current_state(const OperationalModelState& state) const override;
 
 private:
     py::object _repack;
@@ -36,10 +36,10 @@ private:
 class CallbackScope
 {
 public:
-    void Close() { _open = false; }
+    void close() { _open = false; }
     /// Throws SimulationError("<what> is only valid during the callback it was passed to; do
     /// not store it.") when closed.
-    void Check(const char* what) const;
+    void check(const char* what) const;
 
 private:
     bool _open{true};
@@ -50,7 +50,7 @@ class CloseScopeOnExit
 {
 public:
     explicit CloseScopeOnExit(CallbackScope& scope) : _scope(scope) {}
-    ~CloseScopeOnExit() { _scope.Close(); }
+    ~CloseScopeOnExit() { _scope.close(); }
     CloseScopeOnExit(const CloseScopeOnExit&) = delete;
     CloseScopeOnExit& operator=(const CloseScopeOnExit&) = delete;
 
@@ -67,9 +67,9 @@ public:
         std::shared_ptr<const CallbackScope> scope,
         std::shared_ptr<const NeighborStateMapper> mapper = {});
     /// The libsimulator view; checks the scope first.
-    const AgentView& View() const;
-    const std::shared_ptr<const CallbackScope>& Scope() const { return _scope; }
-    const std::shared_ptr<const NeighborStateMapper>& Mapper() const { return _mapper; }
+    const AgentView& view() const;
+    const std::shared_ptr<const CallbackScope>& scope() const { return _scope; }
+    const std::shared_ptr<const NeighborStateMapper>& mapper() const { return _mapper; }
 
 private:
     AgentView _view;
@@ -87,7 +87,7 @@ public:
         std::shared_ptr<const CallbackScope> scope,
         std::shared_ptr<const NeighborStateMapper> mapper = {});
     /// The libsimulator step; checks the scope first.
-    const AgentStep& Step() const;
+    const AgentStep& step() const;
 
 private:
     AgentStep _step;
@@ -103,9 +103,9 @@ public:
         std::shared_ptr<const CallbackScope> scope,
         std::shared_ptr<const NeighborStateMapper> mapper);
     /// The libsimulator neighbor; checks the scope first.
-    const NeighborView& Neighbor() const;
+    const NeighborView& neighbor() const;
     /// A value copy, valid after the callback too.
-    Point RelativePosition() const { return _neighbor.RelativePosition; }
+    Point relative_position() const { return _neighbor.relative_position; }
 
 private:
     NeighborView _neighbor;

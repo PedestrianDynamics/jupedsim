@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "Geometry/WalkableSurface.hpp"
-#include "Point.hpp"
-#include "UniqueID.hpp"
+#include "geometry/walkable_surface.hpp"
+#include "point.hpp"
+#include "unique_id.hpp"
 
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <pybind11/pybind11.h>
@@ -115,7 +115,7 @@ struct type_caster<CGAL::Exact_predicates_inexact_constructions_kernel::Point_3>
 // Deliberately NOT using PYBIND11_TYPE_CASTER: the macro declares a default-initialized
 // `value` member, and UniqueID's default constructor draws a fresh id from the global
 // counter. Every caster instantiation would then silently consume an id. The members the
-// macro would generate are spelled out below with `value` initialised to ID::Invalid.
+// macro would generate are spelled out below with `value` initialised to ID::invalid.
 template <typename Tag, typename Integer>
 struct type_caster<jps::UniqueID<Tag, Integer>> {
     using ID = jps::UniqueID<Tag, Integer>;
@@ -127,17 +127,17 @@ struct type_caster<jps::UniqueID<Tag, Integer>> {
 
     static handle cast(const ID& src, return_value_policy policy, handle parent)
     {
-        return make_caster<Integer>::cast(src.getID(), policy, parent);
+        return make_caster<Integer>::cast(src.get_id(), policy, parent);
     }
 
     // Required by pybind11's caster protocol even though load() never succeeds.
     template <typename T>
     using cast_op_type = pybind11::detail::cast_op_type<T>;
-    operator ID&() { return value; }
-    operator ID*() { return &value; }
+    operator ID&() { return _value; }
+    operator ID*() { return &_value; }
 
 protected:
-    ID value{ID::Invalid};
+    ID _value{ID::invalid};
 };
 
 namespace
