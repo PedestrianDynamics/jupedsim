@@ -91,8 +91,10 @@ foreach(f IN LISTS PKG_FILES)
     file(CREATE_LINK ${PKG_SRC}/${f} ${STAGE}/jupedsim/${f} COPY_ON_ERROR SYMBOLIC)
 endforeach()
 
-# Stubs are generated directly into the stage. Build directories created
-# before that linked this folder to a separate stubs tree; drop the link.
+# Stubs are generated directly into the stage. The module has no submodules, so
+# pybind11-stubgen writes a single py_jupedsim.pyi; with submodules it would
+# write a py_jupedsim/ package instead. Build directories created before that
+# linked this folder to a separate stubs tree; drop the link.
 set(STUB_DIR ${STAGE}/jupedsim/py_jupedsim)
 if(IS_SYMLINK ${STUB_DIR})
     file(REMOVE ${STUB_DIR})
@@ -100,16 +102,12 @@ endif()
 
 # Stub generation imports the built module, so the build has to be able to run
 # it: wheels are built natively for each architecture, not cross-compiled.
-# NOTE: there is one file per module we export from the bindings
-set(STUB_FILES
-    ${STUB_DIR}/__init__.pyi
-    ${STUB_DIR}/buildinfo.pyi
-)
+set(STUB_FILES ${STAGE}/jupedsim/py_jupedsim.pyi)
 # The module is found via the working directory (python -m puts it first on
 # sys.path), not PYTHONPATH: pip's isolated build exposes the build requirements
 # through PYTHONPATH, so overriding it would hide pybind11-stubgen and shapely.
-# The stub folder is cleared first: stubgen only writes the current modules, so
-# stubs of removed submodules would linger and fail the stubtest system test.
+# A stub package left by an older layout is removed first: it would shadow
+# py_jupedsim.pyi for type checkers and the stubtest system test.
 add_custom_command(
     OUTPUT ${STUB_FILES}
     COMMAND ${CMAKE_COMMAND} -E rm -rf ${STUB_DIR}
@@ -123,4 +121,4 @@ add_custom_target(py_jupedsim_stubs ALL DEPENDS ${STUB_FILES})
 # Wheel contents. scikit-build-core installs only the "python" component; the
 # pure Python package is added via wheel.packages in pyproject.toml.
 install(TARGETS py_jupedsim LIBRARY DESTINATION jupedsim COMPONENT python)
-install(FILES ${STUB_FILES} DESTINATION jupedsim/py_jupedsim COMPONENT python)
+install(FILES ${STUB_FILES} DESTINATION jupedsim COMPONENT python)
