@@ -17,19 +17,19 @@ public:
     using State = SocialForceModelState;
 
 private:
-    double _cutOffRadius{2.5};
-    double bodyForce{120000}; // k
-    double friction{240000}; // kappa
+    double _cut_off_radius{2.5};
+    double _body_force{120000}; // k
+    double _friction{240000}; // kappa
 
 public:
-    SocialForceModel(double bodyForce, double friction);
+    SocialForceModel(double body_force, double friction);
     ~SocialForceModel() override = default;
-    OperationalModelType Type() const override;
-    Point ComputeNextState(
+    OperationalModelType type() const override;
+    Point compute_next_state(
         const OperationalModelState& current,
         OperationalModelState& next,
         const AgentStep& step) const override;
-    void CheckModelConstraint(const GenericAgent& agent, const AgentView& view) const override;
+    void check_model_constraint(const GenericAgent& agent, const AgentView& view) const override;
 
 private:
     /**
@@ -38,21 +38,21 @@ private:
      *
      * @return vector with driving force of pedestrian
      */
-    static Point DrivingForce(const State& currentState, Point e0);
+    static Point driving_force(const State& current_state, Point e0);
     /**
      *  Repulsive force acting on pedestrian <ped1> from pedestrian <ped2>
      * @param ped1 reference to Pedestrian 1 on whom the force acts on
      * @param ped2 reference to Pedestrian 2, from whom the force originates
      * @return vector with the repulsive force
      */
-    Point AgentForce(const State& currentState, const NeighborView& neighbor) const;
+    Point agent_force(const State& current_state, const NeighborView& neighbor) const;
     /**
      *  Repulsive force acting on pedestrian <agent> from line segment <segment>
      * @param agent reference to the Pedestrian on whom the force acts on
      * @param segment reference to line segment, from which the force originates
      * @return vector with the repulsive force
      */
-    Point ObstacleForce(const State& currentState, const WallView& wall) const;
+    Point obstacle_force(const State& current_state, const WallView& wall) const;
     /**
      * calculates the pushing and friction forces along <separation>
      * @param separation vector pointing from where the force originates to where it acts
@@ -60,16 +60,16 @@ private:
      * @param B force distance
      * @param r radius
      * @param velocity velocity difference
-     * @param bodyForce body force parameter (k) of the agent the force acts on
+     * @param body_force body force parameter (k) of the agent the force acts on
      * @param friction friction parameter (kappa) of the agent the force acts on
      */
-    static Point ForceFromSeparation(
+    static Point force_from_separation(
         const Point separation,
-        const double A,
-        const double B,
+        const double a,
+        const double b,
         const double radius,
         const Point velocity,
-        const double bodyForce,
+        const double body_force,
         const double friction);
 
     /**
@@ -80,5 +80,5 @@ private:
      * @param distance distance between the two points
      * @return length of pushing force between the two points
      */
-    static double PushingForceLength(double A, double B, double r, double distance);
+    static double pushing_force_length(double a, double b, double r, double distance);
 };

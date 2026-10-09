@@ -108,13 +108,13 @@ std::optional<Geometry::FaceLocation> straight_walk(
     // non-advancing iteration when starting on a vertex (fanning back to the
     // start face); exceeding that means a predicate/topology inconsistency.
     // This is just a safeguard and should never happen.
-    const auto maxSteps = mesh.number_of_faces() + 2;
+    const auto max_steps = mesh.number_of_faces() + 2;
     // Store last vertex if face is entered by vertex. This vertex has to be
     // excluded from the next "hits vertex" test to avoid a potential infinite loop.
     // Note: We never need to reset this as the vertex is bound to the current triangle
     //       so that we never skip a "vertex of interest".
-    SurfaceMesh::Vertex_index lastCrossedVertex = SurfaceMesh::null_vertex();
-    for(std::size_t step = 0; step < maxSteps; ++step) {
+    SurfaceMesh::Vertex_index last_crossed_vertex = SurfaceMesh::null_vertex();
+    for(std::size_t step = 0; step < max_steps; ++step) {
         if(covers(f)) {
             // Done: target is inside the triangle
             return Geometry::FaceLocation{f, point_on_face(mesh, f, to)};
@@ -124,9 +124,9 @@ std::optional<Geometry::FaceLocation> straight_walk(
         // (1) Hits Vertex: the ray passes exactly through current triangle's vertex.
         //     `>0` means that the vertex is "in front" of us, not behind.
         //     With `>= 0` it also catches a start exactly on a vertex.
-        bool hitsVertex = false;
+        bool hits_vertex = false;
         for(const auto v : CGAL::vertices_around_face(mesh.halfedge(f), mesh)) {
-            if(v == lastCrossedVertex) {
+            if(v == last_crossed_vertex) {
                 continue;
             }
             const auto vp = xy_of(mesh, v);
@@ -136,13 +136,13 @@ std::optional<Geometry::FaceLocation> straight_walk(
                     // Left the walkable area crossing this vertex.
                     return std::nullopt;
                 }
-                lastCrossedVertex = v;
+                last_crossed_vertex = v;
                 f = g;
-                hitsVertex = true;
+                hits_vertex = true;
                 break;
             }
         }
-        if(hitsVertex) {
+        if(hits_vertex) {
             continue;
         }
 

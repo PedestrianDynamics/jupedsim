@@ -28,38 +28,38 @@ public:
     OperationalDecisionSystem(OperationalDecisionSystem&& other) = delete;
     OperationalDecisionSystem& operator=(OperationalDecisionSystem&& other) = delete;
 
-    OperationalModelType ModelType() const { return _model->Type(); }
+    OperationalModelType model_type() const { return _model->type(); }
 
     void
-    Run(double dT,
+    run(double dt,
         double /*t_in_sec*/,
-        const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
+        const NeighborhoodSearch<GenericAgent>& neighborhood_search,
         const Geometry& geometry,
         AgentContainer<GenericAgent>& agents)
     {
-        const EnvironmentQuery envQuery{geometry, neighborhoodSearch};
+        const EnvironmentQuery env_query{geometry, neighborhood_search};
         _next.clear();
         std::copy(std::begin(agents), std::end(agents), std::back_inserter(_next));
         for(size_t index = 0; index < agents.size(); ++index) {
             const auto& current = agents[index];
             auto& next = _next[index];
-            const AgentStep step{envQuery, current, dT};
-            const Point movement = _model->ComputeNextState(current.state, next.state, step);
+            const AgentStep step{env_query, current, dt};
+            const Point movement = _model->compute_next_state(current.state, next.state, step);
             next.location.move_on_surface(movement);
         }
         // Swap in the computed generation. This is safe because no caller retains
         // pointers/references across an iteration (Python-side agent handles resolve per
-        // access) and Simulation::Iterate rebuilds the neighborhood grid right after this
+        // access) and Simulation::iterate rebuilds the neighborhood grid right after this
         // step.
         agents.swap(_next);
     }
 
-    void ValidateAgent(
+    void validate_agent(
         const GenericAgent& agent,
-        const NeighborhoodSearch<GenericAgent>& neighborhoodSearch,
+        const NeighborhoodSearch<GenericAgent>& neighborhood_search,
         const Geometry& geometry) const
     {
-        const EnvironmentQuery envQuery{geometry, neighborhoodSearch};
-        _model->CheckModelConstraint(agent, AgentView{envQuery, agent});
+        const EnvironmentQuery env_query{geometry, neighborhood_search};
+        _model->check_model_constraint(agent, AgentView{env_query, agent});
     }
 };

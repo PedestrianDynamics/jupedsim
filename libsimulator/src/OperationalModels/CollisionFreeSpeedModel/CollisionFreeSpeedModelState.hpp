@@ -6,7 +6,7 @@
 
 struct CollisionFreeSpeedModelState {
     Point orientation{0.0, 0.0};
-    double timeGap{1};
+    double time_gap{1};
     double v0{1.2};
     double radius{0.2};
 };
@@ -22,7 +22,7 @@ struct fmt::formatter<CollisionFreeSpeedModelState> {
             ctx.out(),
             "CollisionFreeSpeedModel[orientation={}, timeGap={}, v0={}, radius={}])",
             m.orientation,
-            m.timeGap,
+            m.time_gap,
             m.v0,
             m.radius);
     }

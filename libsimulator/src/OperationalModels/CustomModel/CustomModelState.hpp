@@ -9,13 +9,14 @@
 
 class CustomModelState
 {
-    std::any value{};
-    FormatFn format{};
+    std::any _value{};
+    FormatFn _format{};
 
 public:
     template <typename T>
         requires(!std::is_same_v<std::decay_t<T>, CustomModelState>)
-    explicit CustomModelState(T&& value) : value(std::forward<T>(value)), format(makeFormatFn<T>())
+    explicit CustomModelState(T&& value)
+        : _value(std::forward<T>(value)), _format(make_format_fn<T>())
     {
         using Stored = std::decay_t<T>;
         static_assert(
@@ -24,22 +25,22 @@ public:
     }
 
     template <typename T>
-    T& Get()
+    T& get()
     {
-        return std::any_cast<T&>(value);
+        return std::any_cast<T&>(_value);
     }
 
     template <typename T>
-    const T& Get() const
+    const T& get() const
     {
-        return std::any_cast<const T&>(value);
+        return std::any_cast<const T&>(_value);
     }
 
     template <typename T>
-    void Set(T&& newValue)
+    void set(T&& new_value)
     {
         using Stored = std::decay_t<T>;
-        std::any_cast<Stored&>(value) = std::forward<T>(newValue);
+        std::any_cast<Stored&>(_value) = std::forward<T>(new_value);
     }
 
     friend struct fmt::formatter<CustomModelState>;
@@ -51,6 +52,6 @@ struct fmt::formatter<CustomModelState> {
 
     auto format(const CustomModelState& value, fmt::format_context& ctx) const
     {
-        return value.format(value.value, ctx);
+        return value._format(value._value, ctx);
     }
 };

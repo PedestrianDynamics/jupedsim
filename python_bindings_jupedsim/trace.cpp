@@ -11,7 +11,7 @@ void init_trace(py::module_& m)
     m.def(
         "enable_tracing",
         &Profiler::enable,
-        cleanDoc(R"(
+        clean_doc(R"(
         Enable the profiler.
 
         Starts a tracing session that records events from the C++ core and
@@ -22,7 +22,7 @@ void init_trace(py::module_& m)
     m.def(
         "disable_tracing",
         &Profiler::disable,
-        cleanDoc(R"(
+        clean_doc(R"(
         Disable the profiler.
 
         The recorded trace is discarded; use :func:`dump_traces` to keep it.
@@ -30,8 +30,8 @@ void init_trace(py::module_& m)
             .c_str());
     m.def(
         "is_tracing_enabled",
-        [] { return Profiler::instance().isEnabled(); },
-        cleanDoc(R"(
+        [] { return Profiler::instance().is_enabled(); },
+        clean_doc(R"(
         Check if the profiler is enabled.
 
         Returns:
@@ -43,7 +43,7 @@ void init_trace(py::module_& m)
         "start_trace_event",
         [](const char* name) { TRACE_EVENT_BEGIN("Python", perfetto::DynamicString{name}); },
         py::arg("name"),
-        cleanDoc(R"(
+        clean_doc(R"(
         Starts a named trace event.
 
         Close it with :func:`end_trace_event`; events nest.
@@ -55,12 +55,12 @@ void init_trace(py::module_& m)
     m.def(
         "end_trace_event",
         [] { TRACE_EVENT_END("Python"); },
-        cleanDoc("Ends the last started trace event on the calling thread.").c_str());
+        clean_doc("Ends the last started trace event on the calling thread.").c_str());
     m.def(
         "dump_traces",
-        &Profiler::dumpAndReset,
+        &Profiler::dump_and_reset,
         py::arg("filename"),
-        cleanDoc(R"(
+        clean_doc(R"(
         Dump traces to file.
 
         Stops the tracing session, saves the trace to ``filename`` and resets

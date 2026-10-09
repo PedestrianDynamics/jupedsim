@@ -24,50 +24,50 @@ void init_anticipation_velocity_model(py::module_& m)
     py::class_<AnticipationVelocityModel::State>(m, "AnticipationVelocityModelState")
         .def(
             py::init([](Point orientation,
-                        double strengthNeighborRepulsion,
-                        double rangeNeighborRepulsion,
-                        double wallBufferDistance,
-                        double anticipationTime,
-                        double reactionTime,
+                        double strength_neighbor_repulsion,
+                        double range_neighbor_repulsion,
+                        double wall_buffer_distance,
+                        double anticipation_time,
+                        double reaction_time,
                         Point velocity,
-                        double timeGap,
-                        double desiredSpeed,
+                        double time_gap,
+                        double desired_speed,
                         double radius) {
                 return AnticipationVelocityModel::State{
                     .orientation = orientation,
-                    .strengthNeighborRepulsion = strengthNeighborRepulsion,
-                    .rangeNeighborRepulsion = rangeNeighborRepulsion,
-                    .wallBufferDistance = wallBufferDistance,
-                    .anticipationTime = anticipationTime,
-                    .reactionTime = reactionTime,
+                    .strength_neighbor_repulsion = strength_neighbor_repulsion,
+                    .range_neighbor_repulsion = range_neighbor_repulsion,
+                    .wall_buffer_distance = wall_buffer_distance,
+                    .anticipation_time = anticipation_time,
+                    .reaction_time = reaction_time,
                     .velocity = velocity,
-                    .timeGap = timeGap,
-                    .v0 = desiredSpeed,
+                    .time_gap = time_gap,
+                    .v0 = desired_speed,
                     .radius = radius};
             }),
             py::kw_only(),
             py::arg("orientation") = d.orientation,
-            py::arg("strength_neighbor_repulsion") = d.strengthNeighborRepulsion,
-            py::arg("range_neighbor_repulsion") = d.rangeNeighborRepulsion,
-            py::arg("wall_buffer_distance") = d.wallBufferDistance,
-            py::arg("anticipation_time") = d.anticipationTime,
-            py::arg("reaction_time") = d.reactionTime,
+            py::arg("strength_neighbor_repulsion") = d.strength_neighbor_repulsion,
+            py::arg("range_neighbor_repulsion") = d.range_neighbor_repulsion,
+            py::arg("wall_buffer_distance") = d.wall_buffer_distance,
+            py::arg("anticipation_time") = d.anticipation_time,
+            py::arg("reaction_time") = d.reaction_time,
             py::arg("velocity") = d.velocity,
-            py::arg("time_gap") = d.timeGap,
+            py::arg("time_gap") = d.time_gap,
             py::arg("desired_speed") = d.v0,
             py::arg("radius") = d.radius)
         .def_readwrite("orientation", &AnticipationVelocityModel::State::orientation)
         .def_readwrite(
             "strength_neighbor_repulsion",
-            &AnticipationVelocityModel::State::strengthNeighborRepulsion)
+            &AnticipationVelocityModel::State::strength_neighbor_repulsion)
         .def_readwrite(
-            "range_neighbor_repulsion", &AnticipationVelocityModel::State::rangeNeighborRepulsion)
+            "range_neighbor_repulsion", &AnticipationVelocityModel::State::range_neighbor_repulsion)
         .def_readwrite(
-            "wall_buffer_distance", &AnticipationVelocityModel::State::wallBufferDistance)
-        .def_readwrite("anticipation_time", &AnticipationVelocityModel::State::anticipationTime)
-        .def_readwrite("reaction_time", &AnticipationVelocityModel::State::reactionTime)
+            "wall_buffer_distance", &AnticipationVelocityModel::State::wall_buffer_distance)
+        .def_readwrite("anticipation_time", &AnticipationVelocityModel::State::anticipation_time)
+        .def_readwrite("reaction_time", &AnticipationVelocityModel::State::reaction_time)
         .def_readwrite("velocity", &AnticipationVelocityModel::State::velocity)
-        .def_readwrite("time_gap", &AnticipationVelocityModel::State::timeGap)
+        .def_readwrite("time_gap", &AnticipationVelocityModel::State::time_gap)
         .def_readwrite("desired_speed", &AnticipationVelocityModel::State::v0)
         .def_readwrite("radius", &AnticipationVelocityModel::State::radius);
 }

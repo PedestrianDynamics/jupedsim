@@ -6,20 +6,20 @@
 #include <variant>
 
 RoutingEngine::RoutingEngine(const Geometry& geometry)
-    : _floorfield(geometry), _shortestPath(geometry)
+    : _floorfield(geometry), _shortest_path(geometry)
 {
 }
 
-Destination RoutingEngine::RegisterDestination(const std::vector<AreaPiece>& pieces)
+Destination RoutingEngine::register_destination(const std::vector<AreaPiece>& pieces)
 {
-    return _floorfield.RegisterDestination(pieces);
+    return _floorfield.register_destination(pieces);
 }
 
-Point RoutingEngine::GetOrientation(const Location& from, const RoutingTarget& to)
+Point RoutingEngine::get_orientation(const Location& from, const RoutingTarget& to)
 {
     return std::visit(
-        overloaded{
-            [&](const Location& place) { return _shortestPath.GetOrientation(from, place); },
+        Overloaded{
+            [&](const Location& place) { return _shortest_path.get_orientation(from, place); },
             [&](const Destination& d) { return d.orientation(from); }},
         to);
 }

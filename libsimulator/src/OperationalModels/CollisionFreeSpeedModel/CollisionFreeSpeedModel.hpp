@@ -17,32 +17,32 @@ public:
     using State = CollisionFreeSpeedModelState;
 
 private:
-    double _cutOffRadius{3};
-    double strengthNeighborRepulsion{8.0};
-    double rangeNeighborRepulsion{0.1};
-    double strengthGeometryRepulsion{5.0};
-    double rangeGeometryRepulsion{0.02};
+    double _cut_off_radius{3};
+    double _strength_neighbor_repulsion{8.0};
+    double _range_neighbor_repulsion{0.1};
+    double _strength_geometry_repulsion{5.0};
+    double _range_geometry_repulsion{0.02};
 
 public:
     CollisionFreeSpeedModel(
-        double strengthNeighborRepulsion,
-        double rangeNeighborRepulsion,
-        double strengthGeometryRepulsion,
-        double rangeGeometryRepulsion);
+        double strength_neighbor_repulsion,
+        double range_neighbor_repulsion,
+        double strength_geometry_repulsion,
+        double range_geometry_repulsion);
     ~CollisionFreeSpeedModel() override = default;
-    OperationalModelType Type() const override;
-    Point ComputeNextState(
+    OperationalModelType type() const override;
+    Point compute_next_state(
         const OperationalModelState& current,
         OperationalModelState& next,
         const AgentStep& step) const override;
-    void CheckModelConstraint(const GenericAgent& agent, const AgentView& view) const override;
+    void check_model_constraint(const GenericAgent& agent, const AgentView& view) const override;
 
 private:
-    double OptimalSpeed(const State& currentState, double spacing, double time_gap) const;
-    double GetSpacing(
-        const State& currentState,
+    double optimal_speed(const State& current_state, double spacing, double time_gap) const;
+    double get_spacing(
+        const State& current_state,
         const NeighborView& neighbor,
         const Point& direction) const;
-    Point NeighborRepulsion(const State& currentState, const NeighborView& neighbor) const;
-    Point BoundaryRepulsion(const State& currentState, const WallView& boundary) const;
+    Point neighbor_repulsion(const State& current_state, const NeighborView& neighbor) const;
+    Point boundary_repulsion(const State& current_state, const WallView& boundary) const;
 };

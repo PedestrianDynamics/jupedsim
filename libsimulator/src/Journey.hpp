@@ -24,60 +24,60 @@ class NonTransitionDescription
 
 class FixedTransitionDescription
 {
-    BaseStage::ID next{};
+    BaseStage::ID _next{};
 
 public:
-    FixedTransitionDescription(BaseStage::ID next_) : next(next_)
+    FixedTransitionDescription(BaseStage::ID next) : _next(next)
     {
-        if(next_ == BaseStage::ID::Invalid.getID()) {
+        if(next == BaseStage::ID::invalid.get_id()) {
             throw SimulationError("Can not create fixed transition from invalid stage id.");
         }
     };
 
-    BaseStage::ID NextId() const { return next; }
+    BaseStage::ID next_id() const { return _next; }
 };
 
 class RoundRobinTransitionDescription
 {
-    std::vector<std::tuple<BaseStage::ID, uint64_t>> weightedStages{};
+    std::vector<std::tuple<BaseStage::ID, uint64_t>> _weighted_stages{};
 
 public:
     RoundRobinTransitionDescription(
-        const std::vector<std::tuple<BaseStage::ID, uint64_t>>& weightedStages_)
-        : weightedStages(weightedStages_)
+        const std::vector<std::tuple<BaseStage::ID, uint64_t>>& weighted_stages)
+        : _weighted_stages(weighted_stages)
     {
-        for(const auto& [stageId, _] : weightedStages) {
-            if(stageId == BaseStage::ID::Invalid.getID()) {
+        for(const auto& [stage_id, _] : _weighted_stages) {
+            if(stage_id == BaseStage::ID::invalid.get_id()) {
                 throw SimulationError(
                     "Can not create round robin transition from invalid stage id.");
             }
         }
     };
 
-    const std::vector<std::tuple<BaseStage::ID, uint64_t>>& WeightedStages() const
+    const std::vector<std::tuple<BaseStage::ID, uint64_t>>& weighted_stages() const
     {
-        return weightedStages;
+        return _weighted_stages;
     }
 };
 
 class LeastTargetedTransitionDescription
 {
 private:
-    std::vector<BaseStage::ID> targetCandidates;
+    std::vector<BaseStage::ID> _target_candidates;
 
 public:
-    LeastTargetedTransitionDescription(std::vector<BaseStage::ID> targetCandidates_)
-        : targetCandidates(std::move(targetCandidates_))
+    LeastTargetedTransitionDescription(std::vector<BaseStage::ID> target_candidates)
+        : _target_candidates(std::move(target_candidates))
     {
-        for(const auto& stageId : targetCandidates) {
-            if(stageId == BaseStage::ID::Invalid.getID()) {
+        for(const auto& stage_id : _target_candidates) {
+            if(stage_id == BaseStage::ID::invalid.get_id()) {
                 throw SimulationError(
                     "Can not create least targeted transition from invalid stage id.");
             }
         }
     }
 
-    const std::vector<BaseStage::ID>& TargetCandidates() const { return targetCandidates; }
+    const std::vector<BaseStage::ID>& target_candidates() const { return _target_candidates; }
 };
 
 using TransitionDescription = std::variant<
@@ -90,52 +90,52 @@ class Transition
 {
 public:
     virtual ~Transition() = default;
-    virtual BaseStage* NextStage() = 0;
+    virtual BaseStage* next_stage() = 0;
 };
 
 class FixedTransition : public Transition
 {
 private:
-    BaseStage* next;
+    BaseStage* _next;
 
 public:
-    FixedTransition(BaseStage* next_) : next(next_) {};
+    FixedTransition(BaseStage* next) : _next(next) {};
 
-    BaseStage* NextStage() override { return next; }
+    BaseStage* next_stage() override { return _next; }
 };
 
 class RoundRobinTransition : public Transition
 {
 private:
-    std::vector<std::tuple<BaseStage*, uint64_t>> weightedStages{};
-    uint64_t nextCalled{};
-    uint64_t sumWeights{};
+    std::vector<std::tuple<BaseStage*, uint64_t>> _weighted_stages{};
+    uint64_t _next_called{};
+    uint64_t _sum_weights{};
 
 public:
-    RoundRobinTransition(std::vector<std::tuple<BaseStage*, uint64_t>> weightedStages_)
-        : weightedStages(std::move(weightedStages_))
+    RoundRobinTransition(std::vector<std::tuple<BaseStage*, uint64_t>> weighted_stages)
+        : _weighted_stages(std::move(weighted_stages))
     {
-        for(auto const& [_, weight] : weightedStages) {
+        for(auto const& [_, weight] : _weighted_stages) {
             if(weight == 0) {
                 throw SimulationError("RoundRobinTransition no weight may be zero.");
             }
-            sumWeights += weight;
+            _sum_weights += weight;
         }
     }
 
-    BaseStage* NextStage() override
+    BaseStage* next_stage() override
     {
-        uint64_t sumWeightsSoFar = 0;
+        uint64_t sum_weights_so_far = 0;
         BaseStage* candidate{};
-        for(const auto& [stage, weight] : weightedStages) {
-            if(sumWeightsSoFar <= nextCalled) {
+        for(const auto& [stage, weight] : _weighted_stages) {
+            if(sum_weights_so_far <= _next_called) {
                 candidate = stage;
             } else {
                 break;
             }
-            sumWeightsSoFar += weight;
+            sum_weights_so_far += weight;
         }
-        nextCalled = (nextCalled + 1) % sumWeights;
+        _next_called = (_next_called + 1) % _sum_weights;
         return candidate;
     }
 };
@@ -143,21 +143,23 @@ public:
 class LeastTargetedTransition : public Transition
 {
 private:
-    std::vector<BaseStage*> targetCandidates;
+    std::vector<BaseStage*> _target_candidates;
 
 public:
-    LeastTargetedTransition(std::vector<BaseStage*> targetCandidates_)
-        : targetCandidates(std::move(targetCandidates_))
+    LeastTargetedTransition(std::vector<BaseStage*> target_candidates)
+        : _target_candidates(std::move(target_candidates))
     {
     }
 
-    BaseStage* NextStage() override
+    BaseStage* next_stage() override
     {
-        auto leastTargeted = std::min_element(
-            std::begin(targetCandidates),
-            std::end(targetCandidates),
-            [](auto const& a, auto const& b) { return a->CountTargeting() < b->CountTargeting(); });
-        return *leastTargeted;
+        auto least_targeted = std::min_element(
+            std::begin(_target_candidates),
+            std::end(_target_candidates),
+            [](auto const& a, auto const& b) {
+                return a->count_targeting() < b->count_targeting();
+            });
+        return *least_targeted;
     }
 };
 
@@ -172,36 +174,36 @@ public:
     using ID = jps::UniqueID<Journey>;
 
 private:
-    ID id{};
-    std::map<BaseStage::ID, JourneyNode> stages{};
+    ID _id{};
+    std::map<BaseStage::ID, JourneyNode> _stages{};
 
 public:
     ~Journey() = default;
 
-    Journey(std::map<BaseStage::ID, JourneyNode> stages_) : stages(std::move(stages_)) {}
+    Journey(std::map<BaseStage::ID, JourneyNode> stages) : _stages(std::move(stages)) {}
 
-    ID Id() const { return id; }
+    ID id() const { return _id; }
 
-    std::tuple<RoutingTarget, BaseStage::ID> Target(const GenericAgent& agent) const
+    std::tuple<RoutingTarget, BaseStage::ID> target(const GenericAgent& agent) const
     {
-        auto& node = stages.at(agent.stageId);
+        auto& node = _stages.at(agent.stage_id);
         auto stage = node.stage;
         const auto& transition = node.transition;
 
-        if(stage->IsCompleted(agent)) {
-            stage = transition->NextStage();
+        if(stage->is_completed(agent)) {
+            stage = transition->next_stage();
         }
 
-        return std::make_tuple(stage->Target(agent), stage->Id());
+        return std::make_tuple(stage->target(agent), stage->id());
     }
 
-    size_t CountStages() const { return stages.size(); }
+    size_t count_stages() const { return _stages.size(); }
 
-    bool ContainsStage(BaseStage::ID stageId) const
+    bool contains_stage(BaseStage::ID stage_id) const
     {
-        const auto find_iter = stages.find(stageId);
-        return find_iter != std::end(stages);
+        const auto find_iter = _stages.find(stage_id);
+        return find_iter != std::end(_stages);
     }
 
-    const std::map<BaseStage::ID, JourneyNode>& Stages() const { return stages; };
+    const std::map<BaseStage::ID, JourneyNode>& stages() const { return _stages; };
 };

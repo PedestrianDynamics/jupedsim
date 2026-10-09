@@ -44,7 +44,7 @@ public:
 };
 } // namespace
 
-void Simulation::ThrowIfIterating(const char* operation) const
+void Simulation::throw_if_iterating(const char* operation) const
 {
     if(_iterating) {
         throw SimulationError(
@@ -55,22 +55,22 @@ void Simulation::ThrowIfIterating(const char* operation) const
 }
 
 Simulation::Simulation(
-    std::unique_ptr<OperationalModel>&& operationalModel,
+    std::unique_ptr<OperationalModel>&& operational_model,
     std::unique_ptr<Geometry>&& geometry,
-    double dT)
-    : _clock(dT)
-    , _operationalDecisionSystem(std::move(operationalModel))
+    double dt)
+    : _clock(dt)
+    , _operational_decision_system(std::move(operational_model))
     , _geometry(std::move(geometry))
-    , _routingEngine(std::make_unique<RoutingEngine>(*_geometry))
+    , _routing_engine(std::make_unique<RoutingEngine>(*_geometry))
 {
 }
 
-const SimulationClock& Simulation::Clock() const
+const SimulationClock& Simulation::clock() const
 {
     return _clock;
 }
 
-void Simulation::SetTracing(bool status)
+void Simulation::set_tracing(bool status)
 {
     if(status) {
         Profiler::instance().enable();
@@ -79,55 +79,55 @@ void Simulation::SetTracing(bool status)
     }
 };
 
-void Simulation::Iterate()
+void Simulation::iterate()
 {
-    ThrowIfIterating("Iterate");
-    IterationScope iterationScope(_iterating);
+    throw_if_iterating("Iterate");
+    IterationScope iteration_scope(_iterating);
     JPS_SCOPED_TIMER_AND_TRACE(_timer, "Total Iteration", General);
 
     {
         JPS_SCOPED_TIMER_AND_TRACE(_timer, "Agent Removal System", Detailed);
-        _agentRemovalSystem.Run(_agents, _removedAgentsInLastIteration, _stageManager);
+        _agent_removal_system.run(_agents, _removed_agents_in_last_iteration, _stage_manager);
     }
 
     {
         JPS_SCOPED_TIMER_AND_TRACE(_timer, "Neighborhood Search", Detailed);
-        _neighborhoodSearch.Update(_agents);
+        _neighborhood_search.update(_agents);
     }
 
     {
         JPS_SCOPED_TIMER_AND_TRACE(_timer, "Strategical Decision System", General);
-        _stategicalDecisionSystem.Run(_journeys, _agents, _stageManager);
+        _stategical_decision_system.run(_journeys, _agents, _stage_manager);
     }
 
     {
         JPS_SCOPED_TIMER_AND_TRACE(_timer, "Tactical Decision System", General);
-        _tacticalDecisionSystem.Run(*_routingEngine, _agents);
+        _tactical_decision_system.run(*_routing_engine, _agents);
     }
 
     {
         JPS_SCOPED_TIMER_AND_TRACE(_timer, "Operational Decision System", General);
-        _operationalDecisionSystem.Run(
-            _clock.dT(), _clock.ElapsedTime(), _neighborhoodSearch, *_geometry, _agents);
+        _operational_decision_system.run(
+            _clock.dt(), _clock.elapsed_time(), _neighborhood_search, *_geometry, _agents);
         // Agents moved during the operational step; rebuild the grid so cell membership
-        // reflects the new positions for queries before the next iteration (AgentsInRange,
-        // AddAgent validation).
-        _neighborhoodSearch.Update(_agents);
+        // reflects the new positions for queries before the next iteration (agents_in_range,
+        // add_agent validation).
+        _neighborhood_search.update(_agents);
     }
-    _clock.Advance();
+    _clock.advance();
 }
 
-Journey::ID Simulation::AddJourney(const std::map<BaseStage::ID, TransitionDescription>& stages)
+Journey::ID Simulation::add_journey(const std::map<BaseStage::ID, TransitionDescription>& stages)
 {
-    ThrowIfIterating("AddJourney");
+    throw_if_iterating("AddJourney");
     JPS_SCOPED_TIMER_AND_TRACE(_timer, "Add Journey", Detailed);
     std::map<BaseStage::ID, JourneyNode> nodes;
-    bool containsDirectSteering =
+    bool contains_direct_steering =
         std::find_if(std::begin(stages), std::end(stages), [this](auto const& pair) {
-            return std::holds_alternative<DirectSteeringProxy>(Stage(pair.first));
+            return std::holds_alternative<DirectSteeringProxy>(stage(pair.first));
         }) != std::end(stages);
 
-    if(containsDirectSteering && stages.size() > 1) {
+    if(contains_direct_steering && stages.size() > 1) {
         throw SimulationError(
             "Journeys containing a DirectSteeringStage, may only contain this stage.");
     }
@@ -138,13 +138,13 @@ Journey::ID Simulation::AddJourney(const std::map<BaseStage::ID, TransitionDescr
         std::inserter(nodes, std::end(nodes)),
         [this](auto const& pair) -> std::pair<BaseStage::ID, JourneyNode> {
             const auto& [id, desc] = pair;
-            auto stage = _stageManager.Stage(id);
+            auto stage = _stage_manager.stage(id);
             return {
                 id,
                 JourneyNode{
                     stage,
                     std::visit(
-                        overloaded{
+                        Overloaded{
                             [stage](
                                 const NonTransitionDescription&) -> std::unique_ptr<Transition> {
                                 return std::make_unique<FixedTransition>(stage);
@@ -152,35 +152,35 @@ Journey::ID Simulation::AddJourney(const std::map<BaseStage::ID, TransitionDescr
                             [this](const FixedTransitionDescription& d)
                                 -> std::unique_ptr<Transition> {
                                 return std::make_unique<FixedTransition>(
-                                    _stageManager.Stage(d.NextId()));
+                                    _stage_manager.stage(d.next_id()));
                             },
                             [this](const RoundRobinTransitionDescription& d)
                                 -> std::unique_ptr<Transition> {
-                                std::vector<std::tuple<BaseStage*, uint64_t>> weightedStages{};
-                                weightedStages.reserve(d.WeightedStages().size());
+                                std::vector<std::tuple<BaseStage*, uint64_t>> weighted_stages{};
+                                weighted_stages.reserve(d.weighted_stages().size());
 
                                 std::transform(
-                                    std::begin(d.WeightedStages()),
-                                    std::end(d.WeightedStages()),
-                                    std::back_inserter(weightedStages),
+                                    std::begin(d.weighted_stages()),
+                                    std::end(d.weighted_stages()),
+                                    std::back_inserter(weighted_stages),
                                     [this](auto const& pair) -> std::tuple<BaseStage*, uint64_t> {
                                         const auto& [id, weight] = pair;
-                                        return {_stageManager.Stage(id), weight};
+                                        return {_stage_manager.stage(id), weight};
                                     });
 
-                                return std::make_unique<RoundRobinTransition>(weightedStages);
+                                return std::make_unique<RoundRobinTransition>(weighted_stages);
                             },
                             [this](const LeastTargetedTransitionDescription& d)
                                 -> std::unique_ptr<Transition> {
                                 std::vector<BaseStage*> candidates{};
-                                candidates.reserve(d.TargetCandidates().size());
+                                candidates.reserve(d.target_candidates().size());
 
                                 std::transform(
-                                    std::begin(d.TargetCandidates()),
-                                    std::end(d.TargetCandidates()),
+                                    std::begin(d.target_candidates()),
+                                    std::end(d.target_candidates()),
                                     std::back_inserter(candidates),
                                     [this](auto const& id) -> BaseStage* {
-                                        return _stageManager.Stage(id);
+                                        return _stage_manager.stage(id);
                                     });
 
                                 return std::make_unique<LeastTargetedTransition>(candidates);
@@ -189,104 +189,105 @@ Journey::ID Simulation::AddJourney(const std::map<BaseStage::ID, TransitionDescr
         });
 
     auto journey = std::make_unique<Journey>(std::move(nodes));
-    const auto id = journey->Id();
+    const auto id = journey->id();
     _journeys.emplace(id, std::move(journey));
     return id;
 }
 
 // Each stage checks its description and cuts its area before it registers the destination, so
 // that a stage which cannot be added leaves nothing behind in the routing engine.
-BaseStage::ID Simulation::AddStage(const StageDescription& stageDescription)
+BaseStage::ID Simulation::add_stage(const StageDescription& stage_description)
 {
-    ThrowIfIterating("AddStage");
+    throw_if_iterating("AddStage");
     JPS_SCOPED_TIMER_AND_TRACE(_timer, "Add Stage", Detailed);
     auto stage = std::visit(
-        overloaded{
+        Overloaded{
             [this](const WaypointDescription& d) -> std::unique_ptr<BaseStage> {
                 if(d.distance <= 0.0) {
                     throw SimulationError("Waypoint distance must be positive, got {}", d.distance);
                 }
                 const auto pieces = _geometry->split_into_region_pieces(
-                    Polygon::FromCircle(d.position, d.distance), d.region_id);
-                return std::make_unique<Waypoint>(_routingEngine->RegisterDestination(pieces));
+                    Polygon::from_circle(d.position, d.distance), d.region_id);
+                return std::make_unique<Waypoint>(_routing_engine->register_destination(pieces));
             },
             [this](const ExitDescription& d) -> std::unique_ptr<BaseStage> {
                 const auto pieces = _geometry->split_into_region_pieces(d.polygon, d.region_id);
                 return std::make_unique<Exit>(
-                    _routingEngine->RegisterDestination(pieces), _removedAgentsInLastIteration);
+                    _routing_engine->register_destination(pieces),
+                    _removed_agents_in_last_iteration);
             },
             [](const DirectSteeringDescription&) -> std::unique_ptr<BaseStage> {
                 return std::make_unique<DirectSteering>();
             }},
-        stageDescription);
-    return _stageManager.AddStage(std::move(stage));
+        stage_description);
+    return _stage_manager.add_stage(std::move(stage));
 }
 
-GenericAgent::ID Simulation::AddAgent(
-    Journey::ID journeyId,
-    BaseStage::ID stageId,
+GenericAgent::ID Simulation::add_agent(
+    Journey::ID journey_id,
+    BaseStage::ID stage_id,
     Point position,
     OperationalModelState model,
     std::size_t region_id)
 {
-    ThrowIfIterating("AddAgent");
+    throw_if_iterating("AddAgent");
     JPS_SCOPED_TIMER_AND_TRACE(_timer, "Add Agent", Detailed);
     const auto location = _geometry->get_location(position.x, position.y, region_id);
-    if(_journeys.count(journeyId) == 0) {
-        throw SimulationError("Unknown journey id: {}", journeyId);
+    if(_journeys.count(journey_id) == 0) {
+        throw SimulationError("Unknown journey id: {}", journey_id);
     }
 
-    if(!_journeys.at(journeyId)->ContainsStage(stageId)) {
-        throw SimulationError("Unknown stage id: {}", stageId);
+    if(!_journeys.at(journey_id)->contains_stage(stage_id)) {
+        throw SimulationError("Unknown stage id: {}", stage_id);
     }
 
-    if(const auto agentModelType = ModelTypeOf(model);
-       agentModelType != _operationalDecisionSystem.ModelType()) {
+    if(const auto agent_model_type = model_type_of(model);
+       agent_model_type != _operational_decision_system.model_type()) {
         throw SimulationError(
             "Agent model data of type '{}' does not match the simulation's operational model "
             "'{}'",
-            ToString(agentModelType),
-            ToString(_operationalDecisionSystem.ModelType()));
+            to_string(agent_model_type),
+            to_string(_operational_decision_system.model_type()));
     }
 
-    GenericAgent agent{GenericAgent::ID::Invalid, journeyId, stageId, location, std::move(model)};
+    GenericAgent agent{GenericAgent::ID::invalid, journey_id, stage_id, location, std::move(model)};
 
-    _operationalDecisionSystem.ValidateAgent(agent, _neighborhoodSearch, *_geometry);
+    _operational_decision_system.validate_agent(agent, _neighborhood_search, *_geometry);
 
-    _stageManager.HandleNewAgent(agent.stageId);
+    _stage_manager.handle_new_agent(agent.stage_id);
     _agents.emplace_back(std::move(agent));
-    _neighborhoodSearch.AddAgent(_agents.back());
+    _neighborhood_search.add_agent(_agents.back());
 
     auto v = IteratorPair(std::prev(std::end(_agents)), std::end(_agents));
-    _stategicalDecisionSystem.Run(_journeys, v, _stageManager);
-    _tacticalDecisionSystem.Run(*_routingEngine, v);
-    return _agents.back().id.getID();
+    _stategical_decision_system.run(_journeys, v, _stage_manager);
+    _tactical_decision_system.run(*_routing_engine, v);
+    return _agents.back().id.get_id();
 }
 
-Location Simulation::GetLocation(double x, double y, std::size_t region_id) const
+Location Simulation::get_location(double x, double y, std::size_t region_id) const
 {
     return _geometry->get_location(x, y, region_id);
 }
 
-void Simulation::SetAgentTarget(GenericAgent::ID id, Point target)
+void Simulation::set_agent_target(GenericAgent::ID id, Point target)
 {
-    auto& agent = Agent(id);
+    auto& agent = this->agent(id);
     const auto located = _geometry->get_location_near_z(
         target.x, target.y, agent.location.z(), std::numeric_limits<double>::max());
     if(!located) {
         throw SimulationError("Point {} is outside of accessible area", target);
     }
-    agent.finalTarget = *located;
+    agent.final_target = *located;
 }
 
-void Simulation::SetAgentTarget(GenericAgent::ID id, const Location& target)
+void Simulation::set_agent_target(GenericAgent::ID id, const Location& target)
 {
-    Agent(id).finalTarget = target;
+    agent(id).final_target = target;
 }
 
-void Simulation::MarkAgentForRemoval(GenericAgent::ID id)
+void Simulation::mark_agent_for_removal(GenericAgent::ID id)
 {
-    ThrowIfIterating("MarkAgentForRemoval");
+    throw_if_iterating("MarkAgentForRemoval");
     JPS_TRACE_FUNC;
     const auto iter = std::find_if(
         std::begin(_agents), std::end(_agents), [id](auto& agent) { return agent.id == id; });
@@ -294,10 +295,10 @@ void Simulation::MarkAgentForRemoval(GenericAgent::ID id)
         throw SimulationError("Unknown agent id {}", id);
     }
 
-    _removedAgentsInLastIteration.push_back(id);
+    _removed_agents_in_last_iteration.push_back(id);
 }
 
-const GenericAgent& Simulation::Agent(GenericAgent::ID id) const
+const GenericAgent& Simulation::agent(GenericAgent::ID id) const
 {
     JPS_TRACE_FUNC;
     const auto iter =
@@ -308,7 +309,7 @@ const GenericAgent& Simulation::Agent(GenericAgent::ID id) const
     return *iter;
 }
 
-GenericAgent& Simulation::Agent(GenericAgent::ID id)
+GenericAgent& Simulation::agent(GenericAgent::ID id)
 {
     JPS_TRACE_FUNC;
     const auto iter =
@@ -319,115 +320,115 @@ GenericAgent& Simulation::Agent(GenericAgent::ID id)
     return *iter;
 }
 
-const std::vector<GenericAgent::ID>& Simulation::RemovedAgents() const
+const std::vector<GenericAgent::ID>& Simulation::removed_agents() const
 {
-    return _removedAgentsInLastIteration;
+    return _removed_agents_in_last_iteration;
 }
 
-double Simulation::ElapsedTime() const
+double Simulation::elapsed_time() const
 {
-    return _clock.ElapsedTime();
+    return _clock.elapsed_time();
 }
 
-double Simulation::DT() const
+double Simulation::dt() const
 {
-    return _clock.dT();
+    return _clock.dt();
 }
 
-uint64_t Simulation::Iteration() const
+uint64_t Simulation::iteration() const
 {
-    return _clock.Iteration();
+    return _clock.iteration();
 }
 
-size_t Simulation::AgentCount() const
+size_t Simulation::agent_count() const
 {
     return _agents.size();
 }
 
-AgentContainer<GenericAgent>& Simulation::Agents()
+AgentContainer<GenericAgent>& Simulation::agents()
 {
     return _agents;
 };
 
-void Simulation::SwitchAgentJourney(
+void Simulation::switch_agent_journey(
     GenericAgent::ID agent_id,
     Journey::ID journey_id,
     BaseStage::ID stage_id)
 {
-    ThrowIfIterating("SwitchAgentJourney");
+    throw_if_iterating("SwitchAgentJourney");
     JPS_TRACE_FUNC;
     const auto find_iter = _journeys.find(journey_id);
     if(find_iter == std::end(_journeys)) {
         throw SimulationError("Unknown Journey id {}", journey_id);
     }
     auto& journey = find_iter->second;
-    if(!journey->ContainsStage(stage_id)) {
+    if(!journey->contains_stage(stage_id)) {
         throw SimulationError("Stage {} not part of Journey {}", stage_id, journey_id);
     }
-    auto& agent = Agent(agent_id);
-    agent.journeyId = journey_id;
-    _stageManager.MigrateAgent(agent.stageId, stage_id);
-    agent.stageId = stage_id;
+    auto& agent = this->agent(agent_id);
+    agent.journey_id = journey_id;
+    _stage_manager.migrate_agent(agent.stage_id, stage_id);
+    agent.stage_id = stage_id;
 }
 
-std::vector<GenericAgent::ID> Simulation::AgentsInRange(Point p, double distance)
+std::vector<GenericAgent::ID> Simulation::agents_in_range(Point p, double distance)
 {
     JPS_SCOPED_TIMER_AND_TRACE(_timer, "Agents in Range", Debug);
-    std::vector<GenericAgent::ID> neighborIds{};
-    _neighborhoodSearch.ForEachInRange(p, distance, [&neighborIds](const GenericAgent& agent) {
-        neighborIds.push_back(agent.id);
+    std::vector<GenericAgent::ID> neighbor_ids{};
+    _neighborhood_search.for_each_in_range(p, distance, [&neighbor_ids](const GenericAgent& agent) {
+        neighbor_ids.push_back(agent.id);
     });
-    return neighborIds;
+    return neighbor_ids;
 }
 
-std::vector<GenericAgent::ID> Simulation::AgentsInPolygon(const std::vector<Point>& polygon)
+std::vector<GenericAgent::ID> Simulation::agents_in_polygon(const std::vector<Point>& polygon)
 {
     JPS_SCOPED_TIMER_AND_TRACE(_timer, "Agents in Polygon", Debug);
     const Polygon poly{polygon};
-    if(!poly.IsConvex()) {
+    if(!poly.is_convex()) {
         throw SimulationError("Polygon needs to be simple and convex");
     }
-    const auto [p, dist] = poly.ContainingCircle();
+    const auto [p, dist] = poly.containing_circle();
 
     std::vector<GenericAgent::ID> result{};
-    _neighborhoodSearch.ForEachInRange(p, dist, [&result, &poly](const GenericAgent& agent) {
-        if(poly.IsInside(agent.location.xy())) {
+    _neighborhood_search.for_each_in_range(p, dist, [&result, &poly](const GenericAgent& agent) {
+        if(poly.is_inside(agent.location.xy())) {
             result.push_back(agent.id);
         }
     });
     return result;
 }
 
-OperationalModelType Simulation::ModelType() const
+OperationalModelType Simulation::model_type() const
 {
-    return _operationalDecisionSystem.ModelType();
+    return _operational_decision_system.model_type();
 }
 
-StageProxy Simulation::Stage(BaseStage::ID stageId)
+StageProxy Simulation::stage(BaseStage::ID stage_id)
 {
-    return _stageManager.Stage(stageId)->Proxy(this);
+    return _stage_manager.stage(stage_id)->proxy(this);
 }
-const Geometry& Simulation::Geo() const
+const Geometry& Simulation::geo() const
 {
     return *_geometry;
 }
 
-void Simulation::PushTimer(const std::string_view name, size_t probe_log_level)
+void Simulation::push_timer(const std::string_view name, size_t probe_log_level)
 {
-    _timer.pushTimerProbe(name, probe_log_level);
+    _timer.push_timer_probe(name, probe_log_level);
 }
 
-void Simulation::PopTimer(const std::string_view name)
+void Simulation::pop_timer(const std::string_view name)
 {
-    _timer.popTimerProbe(name);
+    _timer.pop_timer_probe(name);
 }
 
-TimerEntry::duration_type Simulation::GetTimerDuration(const std::string_view name) const
+TimerEntry::DurationType Simulation::get_timer_duration(const std::string_view name) const
 {
-    return _timer.getDuration(name);
+    return _timer.get_duration(name);
 }
 
-std::map<std::string, TimerEntry::duration_type> Simulation::GetTimerDurations() const
+std::map<std::string, TimerEntry::DurationType> Simulation::get_timer_durations() const
 {
-    return _timer.getDurations();
+    return _timer.get_durations();
 }

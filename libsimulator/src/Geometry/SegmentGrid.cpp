@@ -13,49 +13,49 @@
 #include <utility>
 #include <vector>
 
-Cell makeCell(Point p)
+Cell make_cell(Point p)
 {
-    return {floor(p.x / CELL_EXTEND) * CELL_EXTEND, floor(p.y / CELL_EXTEND) * CELL_EXTEND};
+    return {floor(p.x / cell_extend) * cell_extend, floor(p.y / cell_extend) * cell_extend};
 }
 
-bool IsN4Adjacent(const Cell& a, const Cell& b)
+bool is_n4_adjacent(const Cell& a, const Cell& b)
 {
-    const auto dx = static_cast<int>(abs(a.x - b.x) / CELL_EXTEND);
-    const auto dy = static_cast<int>(abs(a.y - b.y) / CELL_EXTEND);
+    const auto dx = static_cast<int>(abs(a.x - b.x) / cell_extend);
+    const auto dy = static_cast<int>(abs(a.y - b.y) / cell_extend);
     return dx + dy == 1;
 }
 
-std::set<Cell> cellsFromLineSegment(LineSegment ls)
+std::set<Cell> cells_from_line_segment(LineSegment ls)
 {
-    const auto firstCell = makeCell(ls.p1);
-    const auto lastCell = makeCell(ls.p2);
-    if(firstCell == lastCell) {
-        return {firstCell};
+    const auto first_cell = make_cell(ls.p1);
+    const auto last_cell = make_cell(ls.p2);
+    if(first_cell == last_cell) {
+        return {first_cell};
     }
 
-    if(IsN4Adjacent(firstCell, lastCell)) {
-        return {firstCell, lastCell};
+    if(is_n4_adjacent(first_cell, last_cell)) {
+        return {first_cell, last_cell};
     }
 
-    std::set<Cell> cells{firstCell, lastCell};
+    std::set<Cell> cells{first_cell, last_cell};
 
-    const auto toMultiple = [](double x) { return ceil(x / CELL_EXTEND) * CELL_EXTEND; };
+    const auto to_multiple = [](double x) { return ceil(x / cell_extend) * cell_extend; };
     const AABB bounds(ls.p1, ls.p2);
     const auto vec_p1p2 = ls.p2 - ls.p1;
     std::vector<Point> intersections{};
-    for(double x_intersect = toMultiple(bounds.xmin); x_intersect <= bounds.xmax;
-        x_intersect += CELL_EXTEND) {
+    for(double x_intersect = to_multiple(bounds.xmin); x_intersect <= bounds.xmax;
+        x_intersect += cell_extend) {
         const double fact = (x_intersect - ls.p1.x) / vec_p1p2.x;
         intersections.emplace_back(x_intersect, ls.p1.y + fact * vec_p1p2.y);
     }
-    for(double y_intersect = toMultiple(bounds.ymin); y_intersect <= bounds.ymax;
-        y_intersect += CELL_EXTEND) {
+    for(double y_intersect = to_multiple(bounds.ymin); y_intersect <= bounds.ymax;
+        y_intersect += cell_extend) {
         const double fact = (y_intersect - ls.p1.y) / vec_p1p2.y;
         intersections.emplace_back(ls.p1.x + fact * vec_p1p2.x, y_intersect);
     }
     std::sort(std::begin(intersections), std::end(intersections));
     for(size_t index = 1; index < intersections.size(); ++index) {
-        cells.insert(makeCell((intersections[index - 1] + intersections[index]) / 2));
+        cells.insert(make_cell((intersections[index - 1] + intersections[index]) / 2));
     }
     return cells;
 }

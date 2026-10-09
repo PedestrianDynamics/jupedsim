@@ -15,14 +15,14 @@
 
 /// A neighbouring agent as seen from the agent that asked for it.
 struct NeighborView {
-    Point RelativePosition;
+    Point relative_position;
     const OperationalModelState* state;
 
 private:
     /// Internal Location of the agent. Only AgentView has access to it.
     friend class AgentView;
     NeighborView(Point relative, const OperationalModelState* model, const Location* where)
-        : RelativePosition(relative), state(model), _location(where)
+        : relative_position(relative), state(model), _location(where)
     {
     }
     const Location* _location;
@@ -57,7 +57,7 @@ class NeighborStateMapper
 public:
     virtual ~NeighborStateMapper() = default;
     virtual const OperationalModelState&
-    MapToCurrentState(const OperationalModelState& agent) const = 0;
+    map_to_current_state(const OperationalModelState& agent) const = 0;
 };
 
 /// What an agent perceives of its surroundings, expressed relative to where it
@@ -68,8 +68,8 @@ public:
     AgentView(
         const EnvironmentQuery& world,
         const GenericAgent& agent,
-        const NeighborStateMapper* neighborStateMapper = nullptr)
-        : _world(world), _agent(agent), _neighborStateMapper(neighborStateMapper)
+        const NeighborStateMapper* neighbor_state_mapper = nullptr)
+        : _world(world), _agent(agent), _neighbor_state_mapper(neighbor_state_mapper)
     {
     }
 
@@ -79,23 +79,24 @@ public:
 
     /// All agents within 'radius', excluding this agent.
     template <std::predicate<const NeighborView&> Pred = AcceptAllNeighbors>
-    std::vector<NeighborView> OtherAgentsInRange(double radius, Pred filter = {}) const
+    std::vector<NeighborView> other_agents_in_range(double radius, Pred filter = {}) const
     {
         std::vector<NeighborView> neighbors{};
         // The grid searches by (x, y). Only filters out the asking agent itself plus applies
         // a quick z-filter - whether agents are "too far" away in z.
         const double z = location().z();
-        _world.ForEachAgentInRange(location().xy(), radius, [&](const GenericAgent& candidate) {
+        _world.for_each_agent_in_range(location().xy(), radius, [&](const GenericAgent& candidate) {
             if(candidate.id == _agent.id) {
                 return;
             }
-            if(std::abs(candidate.location.z() - z) > InteractionHeight) {
+            if(std::abs(candidate.location.z() - z) > interaction_height) {
                 return;
             }
             const NeighborView neighbor{
                 candidate.location.xy() - location().xy(),
-                _neighborStateMapper ? &_neighborStateMapper->MapToCurrentState(candidate.state) :
-                                       &candidate.state,
+                _neighbor_state_mapper ?
+                    &_neighbor_state_mapper->map_to_current_state(candidate.state) :
+                    &candidate.state,
                 &candidate.location};
             if(filter(neighbor)) {
                 neighbors.push_back(neighbor);
@@ -105,51 +106,51 @@ public:
     }
 
     /// Whether neighbors are seen through a substituted state rather than their own.
-    bool HasNeighborMapping() const { return _neighborStateMapper != nullptr; }
+    bool has_neighbor_mapping() const { return _neighbor_state_mapper != nullptr; }
 
-    /// Whether the straight line to a point at 'RelativePosition' is free of geometry.
-    bool NoGeometryBetween(Point RelativePosition) const
+    /// Whether the straight line to a point at 'relative_position' is free of geometry.
+    bool no_geometry_between(Point relative_position) const
     {
-        return _world.NoGeometryBetween(location(), RelativePosition);
+        return _world.no_geometry_between(location(), relative_position);
     }
 
     /// Whether 'neighbor' can be seen from here. In practice whetehr the direct path to
     /// the neighbor can be walked on the surface.
-    bool NoGeometryBetween(const NeighborView& neighbor) const
+    bool no_geometry_between(const NeighborView& neighbor) const
     {
-        return _world.NoGeometryBetween(location(), *neighbor._location);
+        return _world.no_geometry_between(location(), *neighbor._location);
     }
 
 private:
     /// The segments as seen from the agent. The query hands over what it found; the view
     /// owns it from here and turns it into WallViews one at a time, as they are asked for.
-    /// Must stay above WallsInRange() in code: an 'auto' return type is deduced from the
+    /// Must stay above walls_in_range() in code: an 'auto' return type is deduced from the
     /// body, so unlike other members this one cannot be called before it is defined.
-    auto AsSeenFromAgent(std::vector<LineSegment> segments) const
+    auto as_seen_from_agent(std::vector<LineSegment> segments) const
     {
         return std::move(segments) |
                std::views::transform([origin = location().xy()](const LineSegment& s) {
                    const LineSegment segment{s.p1 - origin, s.p2 - origin};
-                   const Point closest_point = segment.ShortestPoint(Point{});
+                   const Point closest_point = segment.shortest_point(Point{});
                    return WallView{
                        .segment = segment,
                        .closest_point = closest_point,
-                       .distance = closest_point.Norm(),
-                       .normal = (Point{} - closest_point).Normalized()};
+                       .distance = closest_point.norm(),
+                       .normal = (Point{} - closest_point).normalized()};
                });
     }
 
 public:
     /// Wall segments within 'distance' of the agent, relative to it. Returns lazy range.
-    auto WallsInRange(double distance) const
+    auto walls_in_range(double distance) const
     {
-        return AsSeenFromAgent(_world.LineSegmentsInRange(location(), distance));
+        return as_seen_from_agent(_world.line_segments_in_range(location(), distance));
     }
 
     /// The same view, but with neighbors seen through 'states'. 'states' has to outlive the
     /// returned view. AgentStep shadows this function. AgentStep has an
     /// additional member (dt) that needs to be passed to the returned AgentStep.
-    AgentView WithNeighborStateMapping(const NeighborStateMapper& states) const
+    AgentView with_neighbor_state_mapping(const NeighborStateMapper& states) const
     {
         return AgentView{_world, _agent, &states};
     }
@@ -161,10 +162,10 @@ protected:
     const EnvironmentQuery& _world;
     const GenericAgent& _agent;
     /// Null in the common case, where neighbors are seen with their own state.
-    const NeighborStateMapper* _neighborStateMapper;
+    const NeighborStateMapper* _neighbor_state_mapper;
 };
 
-/// An AgentView plus what only holds for one step (dT + next target).
+/// An AgentView plus what only holds for one step (dt + next target).
 class AgentStep : public AgentView
 {
 public:
@@ -172,14 +173,14 @@ public:
         const EnvironmentQuery& world,
         const GenericAgent& agent,
         double dt,
-        const NeighborStateMapper* neighborStateMapper = nullptr)
-        : AgentView(world, agent, neighborStateMapper), _dt(dt)
+        const NeighborStateMapper* neighbor_state_mapper = nullptr)
+        : AgentView(world, agent, neighbor_state_mapper), _dt(dt)
     {
     }
 
     /// The same step, but with neighbors seen through 'states'. 'states' has to outlive the
     /// returned step.
-    AgentStep WithNeighborStateMapping(const NeighborStateMapper& states) const
+    AgentStep with_neighbor_state_mapping(const NeighborStateMapper& states) const
     {
         return AgentStep{_world, _agent, _dt, &states};
     }
@@ -188,7 +189,7 @@ public:
 
     /// Unit vector along the route to the final target. Zero when the agent has already
     /// reached it.
-    Point route_orientation() const { return _agent.routeOrientation; }
+    Point route_orientation() const { return _agent.route_orientation; }
 
 private:
     double _dt;

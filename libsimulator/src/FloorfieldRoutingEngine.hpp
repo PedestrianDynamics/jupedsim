@@ -29,10 +29,10 @@ public:
 
     /// Registers @p pieces as one destination. Routing heads for whichever piece is nearest in
     /// travel time.
-    Destination RegisterDestination(const std::vector<AreaPiece>& pieces);
+    Destination register_destination(const std::vector<AreaPiece>& pieces);
 
-    bool Contains(const Location& where, std::size_t id);
-    Point GetOrientation(const Location& from, std::size_t id);
+    bool contains(const Location& where, std::size_t id);
+    Point get_orientation(const Location& from, std::size_t id);
 
 private:
     rust::Box<jupedsim::floorfield::MultiRegionFloorfield> _field;

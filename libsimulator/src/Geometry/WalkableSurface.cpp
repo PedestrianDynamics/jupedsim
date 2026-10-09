@@ -27,14 +27,14 @@ std::optional<std::vector<std::array<size_t, 3>>> triangulate_rings(
     const std::vector<Point3D>& vertices)
 {
     CDT cdt{};
-    std::unordered_map<CDT::Vertex_handle, size_t> cdtVertices{};
+    std::unordered_map<CDT::Vertex_handle, size_t> cdt_vertices{};
     for(const auto& ring : rings) {
         std::vector<CDT::Vertex_handle> handles{};
         handles.reserve(ring.size());
-        for(const size_t vertexID : ring) {
-            const Point3D& vertex = vertices[vertexID];
+        for(const size_t vertex_id : ring) {
+            const Point3D& vertex = vertices[vertex_id];
             const auto handle = cdt.insert(Point2D(vertex[0], vertex[1]));
-            cdtVertices.emplace(handle, vertexID);
+            cdt_vertices.emplace(handle, vertex_id);
             handles.emplace_back(handle);
         }
         for(size_t index = 1; index < handles.size(); ++index) {
@@ -53,8 +53,8 @@ std::optional<std::vector<std::array<size_t, 3>>> triangulate_rings(
         //       order of points for connectors.
         std::array<size_t, 3> triangle{};
         for(int corner = 0; corner < 3; ++corner) {
-            const auto iter = cdtVertices.find(face->vertex(corner));
-            if(iter == cdtVertices.end()) {
+            const auto iter = cdt_vertices.find(face->vertex(corner));
+            if(iter == cdt_vertices.end()) {
                 // A vertex not in the map got added by triangulation ("Steiner point")
                 return std::nullopt;
             }
@@ -73,8 +73,8 @@ PolyWithHoles as_2d_poly_with_holes(
     const auto oriented_poly =
         [&vertices](const std::vector<size_t>& ring, CGAL::Orientation wanted) {
             Poly poly{};
-            for(const size_t vertexID : ring) {
-                const Point3D& v = vertices[vertexID];
+            for(const size_t vertex_id : ring) {
+                const Point3D& v = vertices[vertex_id];
                 poly.push_back(Point2D(v[0], v[1]));
             }
             if(poly.orientation() != wanted) {
@@ -121,7 +121,7 @@ Geometry::SeamEdge find_seam_edge(const PolyWithHoles& poly, const Point2D& a, c
 //==================================================================================================
 // WalkableSurface
 //==================================================================================================
-size_t WalkableSurface::AddRegion(Polygon polygon, double height)
+size_t WalkableSurface::add_region(Polygon polygon, double height)
 {
     // Build up locally first. If an error is thrown, the internal structures are still fine.
     std::vector<Point3D> vertices{};
@@ -129,7 +129,7 @@ size_t WalkableSurface::AddRegion(Polygon polygon, double height)
 
     auto convert_ring = [&vertices, &polygons, height](const Ring& ring) {
         // Deal with first and last point being the same.
-        const size_t count = ring.size() > 1 && (ring.back() - ring.front()).isZeroLength() ?
+        const size_t count = ring.size() > 1 && (ring.back() - ring.front()).is_zero_length() ?
                                  ring.size() - 1 :
                                  ring.size();
         if(count < 3) {
@@ -152,7 +152,7 @@ size_t WalkableSurface::AddRegion(Polygon polygon, double height)
     return insert_region(std::move(polygons), vertices, height);
 }
 
-size_t WalkableSurface::AddRegion(const PolyWithHoles& polygon, double height)
+size_t WalkableSurface::add_region(const PolyWithHoles& polygon, double height)
 {
     std::vector<Point3D> vertices{};
     std::vector<std::vector<size_t>> polygons{};
@@ -183,39 +183,39 @@ size_t WalkableSurface::insert_region(
     // Before orienting the rings: CGAL's orientation() requires simple polygons.
     for(const auto& ring : polygons) {
         Poly poly{};
-        for(const size_t vertexID : ring) {
-            poly.push_back(Point2D(vertices[vertexID][0], vertices[vertexID][1]));
+        for(const size_t vertex_id : ring) {
+            poly.push_back(Point2D(vertices[vertex_id][0], vertices[vertex_id][1]));
         }
         if(!poly.is_simple()) {
             throw SimulationError("boundary/hole is not simple");
         }
     }
-    const PolyWithHoles polyWithHoles = as_2d_poly_with_holes(polygons, vertices);
-    ValidateFloorOverlap(polyWithHoles, height);
+    const PolyWithHoles poly_with_holes = as_2d_poly_with_holes(polygons, vertices);
+    validate_floor_overlap(poly_with_holes, height);
 
     // Fix vertex indices and insert them into the global map.
-    const size_t base = _globalVertices.size();
+    const size_t base = _global_vertices.size();
     for(auto& ring : polygons) {
         for(auto& index : ring) {
             index += base;
         }
     }
-    _globalVertices.insert(std::end(_globalVertices), std::begin(vertices), std::end(vertices));
+    _global_vertices.insert(std::end(_global_vertices), std::begin(vertices), std::end(vertices));
 
     const Region region{
-        .polygons = std::move(polygons), .height = height, .polyWithHoles = polyWithHoles};
-    return boost::add_vertex(region, _regionGraph);
+        .polygons = std::move(polygons), .height = height, .poly_with_holes = poly_with_holes};
+    return boost::add_vertex(region, _region_graph);
 }
 
-std::array<size_t, 2> WalkableSurface::FindEdge(size_t regionId, const LineSegment& edge) const
+std::array<size_t, 2> WalkableSurface::find_edge(size_t region_id, const LineSegment& edge) const
 {
     // no need to compare z as regions by design cannot overlap in xy within a single region
-    auto match_in_2d = [this](size_t vertexID, const Point& p) {
-        const Point3D& globalVertex = _globalVertices[vertexID];
-        return (Point(globalVertex[0], globalVertex[1]) - p).isZeroLength();
+    auto match_in_2d = [this](size_t vertex_id, const Point& p) {
+        const Point3D& global_vertex = _global_vertices[vertex_id];
+        return (Point(global_vertex[0], global_vertex[1]) - p).is_zero_length();
     };
 
-    const Region& region = _regionGraph[regionId];
+    const Region& region = _region_graph[region_id];
     for(const auto& polygon : region.polygons) {
         for(size_t index = 0; index < polygon.size(); ++index) {
             const size_t current = polygon[index];
@@ -228,27 +228,27 @@ std::array<size_t, 2> WalkableSurface::FindEdge(size_t regionId, const LineSegme
             }
         }
     }
-    throw SimulationError("{} is not an edge of region {}.", edge, regionId);
+    throw SimulationError("{} is not an edge of region {}.", edge, region_id);
 }
 
-size_t WalkableSurface::ConnectRegions(
-    size_t fromRegion,
+size_t WalkableSurface::connect_regions(
+    size_t from_region,
     LineSegment from,
-    size_t toRegion,
+    size_t to_region,
     LineSegment to)
 {
     auto check_region = [this](size_t region_id, std::string_view name) {
-        if(region_id >= boost::num_vertices(_regionGraph)) {
+        if(region_id >= boost::num_vertices(_region_graph)) {
             throw SimulationError("Unknown region id used for {}: {}", name, region_id);
         }
-        const Region& region = _regionGraph[region_id];
+        const Region& region = _region_graph[region_id];
         if(!region.is_connectable()) {
             throw SimulationError("{} {} is not connectable", name, region_id);
         }
     };
-    check_region(fromRegion, "fromRegion");
-    check_region(toRegion, "toRegion");
-    if(fromRegion == toRegion) {
+    check_region(from_region, "fromRegion");
+    check_region(to_region, "toRegion");
+    if(from_region == to_region) {
         throw SimulationError("fromRegion and toRegion may not be the same region.");
     }
 
@@ -259,13 +259,13 @@ size_t WalkableSurface::ConnectRegions(
         std::swap(from.p1, from.p2);
     }
 
-    const auto fromEdge = FindEdge(fromRegion, from);
-    const auto toEdge = FindEdge(toRegion, to);
-    std::vector<size_t> connector_polygon{fromEdge[0], fromEdge[1], toEdge[0], toEdge[1]};
-    const Point3D& p1 = _globalVertices[connector_polygon[0]];
-    const Point3D& p2 = _globalVertices[connector_polygon[1]];
-    const Point3D& p3 = _globalVertices[connector_polygon[2]];
-    const Point3D& p4 = _globalVertices[connector_polygon[3]];
+    const auto from_edge = find_edge(from_region, from);
+    const auto to_edge = find_edge(to_region, to);
+    std::vector<size_t> connector_polygon{from_edge[0], from_edge[1], to_edge[0], to_edge[1]};
+    const Point3D& p1 = _global_vertices[connector_polygon[0]];
+    const Point3D& p2 = _global_vertices[connector_polygon[1]];
+    const Point3D& p3 = _global_vertices[connector_polygon[2]];
+    const Point3D& p4 = _global_vertices[connector_polygon[3]];
     const std::array<Point2D, 4> corners_2d{
         Point2D(p1.x(), p1.y()),
         Point2D(p2.x(), p2.y()),
@@ -283,41 +283,41 @@ size_t WalkableSurface::ConnectRegions(
         CGAL::collinear(p1, p2, p3) ? K::Plane_3(p1, p2, p4) : K::Plane_3(p1, p2, p3);
     auto normal = plane.orthogonal_vector() / std::sqrt(plane.orthogonal_vector().squared_length());
     if(normal.z() < 0) {
-        // IsWalkableNormal expects a certain orientation.
+        // is_walkable_normal expects a certain orientation.
         normal = -normal;
     }
-    if(!IsWalkableNormal(normal)) {
+    if(!is_walkable_normal(normal)) {
         throw SimulationError("Connector is too steep.");
     }
 
     Region connector{
         .polygons = {connector_polygon},
         .height = std::nullopt,
-        .polyWithHoles = as_2d_poly_with_holes({connector_polygon}, _globalVertices)};
-    const auto connectorRegion = boost::add_vertex(connector, _regionGraph);
-    boost::add_edge(fromRegion, connectorRegion, fromEdge, _regionGraph);
-    boost::add_edge(connectorRegion, toRegion, toEdge, _regionGraph);
-    return connectorRegion;
+        .poly_with_holes = as_2d_poly_with_holes({connector_polygon}, _global_vertices)};
+    const auto connector_region = boost::add_vertex(connector, _region_graph);
+    boost::add_edge(from_region, connector_region, from_edge, _region_graph);
+    boost::add_edge(connector_region, to_region, to_edge, _region_graph);
+    return connector_region;
 }
 
-std::unique_ptr<WalkableSurface::RegionGraph2D> WalkableSurface::CreateRegionGraph2D() const
+std::unique_ptr<WalkableSurface::RegionGraph2D> WalkableSurface::create_region_graph_2d() const
 {
-    const auto as_point_2d = [this](size_t vertexID) {
-        const Point3D& v = _globalVertices[vertexID];
+    const auto as_point_2d = [this](size_t vertex_id) {
+        const Point3D& v = _global_vertices[vertex_id];
         return Point2D(v[0], v[1]);
     };
 
     auto graph = std::make_unique<RegionGraph2D>();
     // Add vertices.
-    for(const auto regionID : boost::make_iterator_range(boost::vertices(_regionGraph))) {
-        boost::add_vertex(_regionGraph[regionID].polyWithHoles, *graph);
+    for(const auto region_id : boost::make_iterator_range(boost::vertices(_region_graph))) {
+        boost::add_vertex(_region_graph[region_id].poly_with_holes, *graph);
     }
 
     // Add seams.
-    for(const auto& edge : boost::make_iterator_range(boost::edges(_regionGraph))) {
-        const auto from = boost::source(edge, _regionGraph);
-        const auto to = boost::target(edge, _regionGraph);
-        const Seam& seam = _regionGraph[edge];
+    for(const auto& edge : boost::make_iterator_range(boost::edges(_region_graph))) {
+        const auto from = boost::source(edge, _region_graph);
+        const auto to = boost::target(edge, _region_graph);
+        const Seam& seam = _region_graph[edge];
         const Point2D a = as_point_2d(seam[0]);
         const Point2D b = as_point_2d(seam[1]);
         boost::add_edge(from, to, find_seam_edge((*graph)[from], a, b), *graph);
@@ -327,45 +327,47 @@ std::unique_ptr<WalkableSurface::RegionGraph2D> WalkableSurface::CreateRegionGra
     return graph;
 }
 
-void WalkableSurface::ValidateFloorOverlap(const PolyWithHoles& polyWithHoles, double height) const
+void WalkableSurface::validate_floor_overlap(const PolyWithHoles& poly_with_holes, double height)
+    const
 {
-    for(const auto regionID : boost::make_iterator_range(boost::vertices(_regionGraph))) {
-        const Region& region = _regionGraph[regionID];
+    for(const auto region_id : boost::make_iterator_range(boost::vertices(_region_graph))) {
+        const Region& region = _region_graph[region_id];
         if(region.height != height) {
             continue;
         }
         // Check overlap or even if regions touch each other.
-        const auto side = CGAL::oriented_side(region.polyWithHoles, polyWithHoles);
+        const auto side = CGAL::oriented_side(region.poly_with_holes, poly_with_holes);
         if(side != CGAL::ON_NEGATIVE_SIDE) {
             throw SimulationError(
                 side == CGAL::ON_POSITIVE_SIDE ? "New region overlaps with region {}." :
                                                  "New region touches region {}.",
-                regionID);
+                region_id);
         }
     }
 }
 
-std::unique_ptr<Geometry> WalkableSurface::CreateGeometry()
+std::unique_ptr<Geometry> WalkableSurface::create_geometry()
 {
     SurfaceMesh mesh{};
-    RegionSplit region_split{{}, boost::num_vertices(_regionGraph)};
+    RegionSplit region_split{{}, boost::num_vertices(_region_graph)};
 
-    // Map _globalVertices to CGAL mesh vertices.
-    std::vector<SurfaceMesh::Vertex_index> meshVertices(
-        _globalVertices.size(), SurfaceMesh::null_vertex());
-    auto mesh_vertex = [this, &mesh, &meshVertices](size_t vertexID) {
-        auto& meshVertex = meshVertices[vertexID];
-        if(meshVertex == SurfaceMesh::null_vertex()) {
-            meshVertex = mesh.add_vertex(_globalVertices[vertexID]);
+    // Map _global_vertices to CGAL mesh vertices.
+    std::vector<SurfaceMesh::Vertex_index> mesh_vertices(
+        _global_vertices.size(), SurfaceMesh::null_vertex());
+    auto mesh_vertex = [this, &mesh, &mesh_vertices](size_t vertex_id) {
+        auto& mesh_vertex = mesh_vertices[vertex_id];
+        if(mesh_vertex == SurfaceMesh::null_vertex()) {
+            mesh_vertex = mesh.add_vertex(_global_vertices[vertex_id]);
         }
-        return meshVertex;
+        return mesh_vertex;
     };
 
-    for(const auto regionID : boost::make_iterator_range(boost::vertices(_regionGraph))) {
-        const auto triangles = triangulate_rings(_regionGraph[regionID].polygons, _globalVertices);
+    for(const auto region_id : boost::make_iterator_range(boost::vertices(_region_graph))) {
+        const auto triangles =
+            triangulate_rings(_region_graph[region_id].polygons, _global_vertices);
         if(!triangles) {
-            // Already checked within AddRegion and ConnectRegions - but kept for safety.
-            throw SimulationError("Region {} has self-intersecting boundaries.", regionID);
+            // Already checked within add_region and connect_regions - but kept for safety.
+            throw SimulationError("Region {} has self-intersecting boundaries.", region_id);
         }
 
         for(const auto& triangle : *triangles) {
@@ -374,7 +376,7 @@ std::unique_ptr<Geometry> WalkableSurface::CreateGeometry()
             if(added == SurfaceMesh::null_face()) {
                 throw SimulationError(
                     "Region {} does not fit to a walkable surface, check its connectors.",
-                    regionID);
+                    region_id);
             }
             if(region_split.region.size() != added.idx()) {
                 throw SimulationError(
@@ -382,12 +384,12 @@ std::unique_ptr<Geometry> WalkableSurface::CreateGeometry()
                     added.idx(),
                     region_split.region.size());
             }
-            region_split.region.push_back(regionID);
+            region_split.region.push_back(region_id);
         }
     }
 
-    NormaliseAndValidateMesh(mesh, &region_split.region);
+    normalise_and_validate_mesh(mesh, &region_split.region);
 
     return std::make_unique<Geometry>(
-        std::move(mesh), std::move(region_split), CreateRegionGraph2D());
+        std::move(mesh), std::move(region_split), create_region_graph_2d());
 }

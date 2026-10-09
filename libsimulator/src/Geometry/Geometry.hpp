@@ -18,11 +18,11 @@
 class WalkableSurface;
 
 /// Default tolerance of get_location_near_z: how far the surface may lie from the given z.
-inline constexpr double NearZTolerance = 0.1;
+inline constexpr double near_z_tolerance = 0.1;
 
 /// Height difference above which two people cannot touch each other. This is used
 /// as a quick pre-filter.
-inline constexpr double InteractionHeight = 2.0;
+inline constexpr double interaction_height = 2.0;
 
 /// The 3D geometry
 class Geometry
@@ -53,8 +53,8 @@ public:
     /// Special constructor for WalkableSurface: Ensures consistency of parameters.
     explicit Geometry(
         SurfaceMesh&& mesh,
-        RegionSplit&& regionSplit,
-        std::unique_ptr<RegionGraph2D> regionGraph2d);
+        RegionSplit&& region_split,
+        std::unique_ptr<RegionGraph2D> region_graph_2d);
 
     ~Geometry() = default;
 
@@ -66,14 +66,14 @@ public:
     Geometry& operator=(Geometry&&) = delete;
 
     const SurfaceMesh& mesh() const { return _mesh; }
-    const AABBTree& aabb_tree() const { return *_aabbTree; }
+    const AABBTree& aabb_tree() const { return *_aabb_tree; }
 
     /// Returns the 2D polygon of the specified region. Throws in case of error.
     PolyWithHoles polygon(size_t region_id) const;
 
     /// The exact 2D footprint of every region and the seams between them, as authored.
     /// `nullptr` unless the geometry was built by `WalkableSurface`.
-    const RegionGraph2D* region_graph_2d() const { return _regionGraph2D.get(); }
+    const RegionGraph2D* region_graph_2d() const { return _region_graph_2d.get(); }
 
     /// Face and on-surface point hit by the -z ray through @p p, or
     /// `null_face()` if the ray misses the walkable surface.
@@ -96,7 +96,7 @@ public:
     /// The place at (@p x, @p y) on the surface closest to height @p z, if one comes within
     /// @p tol.
     std::optional<Location>
-    get_location_near_z(double x, double y, double z, double tol = NearZTolerance) const;
+    get_location_near_z(double x, double y, double z, double tol = near_z_tolerance) const;
 
     /// True iff @p p projects (along -z) onto the walkable surface.
     bool is_valid_location(const Point3D& p) const;
@@ -117,7 +117,7 @@ public:
 
     // -- region related API ---------------------------------------------------
 
-    std::size_t region_count() const { return _regionSplit.count; }
+    std::size_t region_count() const { return _region_split.count; }
 
     /// Region id (0-based) of a single face, as assigned by the region overlay.
     std::size_t region_of(SurfaceMesh::Face_index face) const { return _region[face]; }
@@ -125,7 +125,7 @@ public:
     /// One 0-based region id per triangle, in mesh face order.
     std::vector<std::size_t> region_id_per_face() const;
 
-    const RegionSplit& region_split() const { return _regionSplit; }
+    const RegionSplit& region_split() const { return _region_split; }
 
     // -- Stage System API -------------------------------------------------------
 
@@ -157,10 +157,10 @@ private:
     std::optional<std::size_t> region_reached(const Location& who, Point direction) const;
 
     SurfaceMesh _mesh{};
-    std::unique_ptr<AABBTree> _aabbTree{};
-    std::unique_ptr<BoundaryIndex> _boundaryIndex{};
-    std::unique_ptr<RegionGraph> _regionGraph{};
-    std::unique_ptr<RegionGraph2D> _regionGraph2D{};
+    std::unique_ptr<AABBTree> _aabb_tree{};
+    std::unique_ptr<BoundaryIndex> _boundary_index{};
+    std::unique_ptr<RegionGraph> _region_graph{};
+    std::unique_ptr<RegionGraph2D> _region_graph_2d{};
     RegionMap _region{};
-    RegionSplit _regionSplit{};
+    RegionSplit _region_split{};
 };

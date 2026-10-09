@@ -20,31 +20,31 @@ struct GenericAgent {
     using ID = jps::UniqueID<GenericAgent>;
     ID id{};
 
-    jps::UniqueID<Journey> journeyId{jps::UniqueID<Journey>::Invalid};
-    jps::UniqueID<BaseStage> stageId{jps::UniqueID<BaseStage>::Invalid};
+    jps::UniqueID<Journey> journey_id{jps::UniqueID<Journey>::invalid};
+    jps::UniqueID<BaseStage> stage_id{jps::UniqueID<BaseStage>::invalid};
 
     /// Where the agent stands. Only the geometry can say that, so only it can build one.
     Location location;
 
     // This is evaluated by the "operational level"
     /// Unit vector along the route to the final target. Zero if the agent has reached it.
-    Point routeOrientation{};
-    RoutingTarget finalTarget;
+    Point route_orientation{};
+    RoutingTarget final_target;
 
     OperationalModelState state{};
 
     GenericAgent(
-        ID id_,
-        jps::UniqueID<Journey> journeyId_,
-        jps::UniqueID<BaseStage> stageId_,
-        Location location_,
-        OperationalModelState state_)
-        : id(id_ != ID::Invalid ? id_ : ID{})
-        , journeyId(journeyId_)
-        , stageId(stageId_)
-        , location(location_)
-        , finalTarget(location_)
-        , state(std::move(state_))
+        ID id,
+        jps::UniqueID<Journey> journey_id,
+        jps::UniqueID<BaseStage> stage_id,
+        Location location,
+        OperationalModelState state)
+        : id(id != ID::invalid ? id : ID{})
+        , journey_id(journey_id)
+        , stage_id(stage_id)
+        , location(location)
+        , final_target(location)
+        , state(std::move(state))
     {
     }
 };
@@ -52,28 +52,28 @@ struct GenericAgent {
 /// Maps agent model data to the operational model type it belongs to. Kept
 /// exhaustive on purpose: adding a model type will not compile until the
 /// mapping is extended.
-inline OperationalModelType ModelTypeOf(const OperationalModelState& model)
+inline OperationalModelType model_type_of(const OperationalModelState& model)
 {
     return std::visit(
-        overloaded{
+        Overloaded{
             [](const GeneralizedCentrifugalForceModelState&) {
-                return OperationalModelType::GENERALIZED_CENTRIFUGAL_FORCE;
+                return OperationalModelType::GeneralizedCentrifugalForce;
             },
             [](const CollisionFreeSpeedModelState&) {
-                return OperationalModelType::COLLISION_FREE_SPEED;
+                return OperationalModelType::CollisionFreeSpeed;
             },
             [](const CollisionFreeSpeedModelV2State&) {
-                return OperationalModelType::COLLISION_FREE_SPEED_V2;
+                return OperationalModelType::CollisionFreeSpeedV2;
             },
             [](const CollisionFreeSpeedModelV3State&) {
-                return OperationalModelType::COLLISION_FREE_SPEED_V3;
+                return OperationalModelType::CollisionFreeSpeedV3;
             },
             [](const AnticipationVelocityModelState&) {
-                return OperationalModelType::ANTICIPATION_VELOCITY_MODEL;
+                return OperationalModelType::AnticipationVelocityModel;
             },
-            [](const SocialForceModelState&) { return OperationalModelType::SOCIAL_FORCE; },
-            [](const WarpDriverModelState&) { return OperationalModelType::WARP_DRIVER; },
-            [](const CustomModelState&) { return OperationalModelType::CUSTOM_MODEL; }},
+            [](const SocialForceModelState&) { return OperationalModelType::SocialForce; },
+            [](const WarpDriverModelState&) { return OperationalModelType::WarpDriver; },
+            [](const CustomModelState&) { return OperationalModelType::CustomModel; }},
         model);
 }
 
@@ -94,10 +94,10 @@ struct fmt::formatter<GenericAgent> {
                     "Agent[id={}, journey={}, stage={}, route_orientation={}, target={}, pos={}, "
                     "state={})",
                     agent.id,
-                    agent.journeyId,
-                    agent.stageId,
-                    agent.routeOrientation,
-                    agent.finalTarget,
+                    agent.journey_id,
+                    agent.stage_id,
+                    agent.route_orientation,
+                    agent.final_target,
                     agent.location,
                     m);
             },

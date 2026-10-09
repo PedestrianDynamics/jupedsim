@@ -7,11 +7,11 @@
 struct SocialForceModelState {
     Point velocity{};
     double mass{80.0};
-    double desiredSpeed{0.8};
-    double reactionTime{0.5};
-    double agentScale{2000.0};
-    double obstacleScale{2000.0};
-    double forceDistance{0.08};
+    double desired_speed{0.8};
+    double reaction_time{0.5};
+    double agent_scale{2000.0};
+    double obstacle_scale{2000.0};
+    double force_distance{0.08};
     double radius{0.3};
 };
 
@@ -27,11 +27,11 @@ struct fmt::formatter<SocialForceModelState> {
             "SFM[velocity={}, m={}, v0={}, tau={}, A_ped={}, A_obst={}, B={}, r={}])",
             m.velocity,
             m.mass,
-            m.desiredSpeed,
-            m.reactionTime,
-            m.agentScale,
-            m.obstacleScale,
-            m.forceDistance,
+            m.desired_speed,
+            m.reaction_time,
+            m.agent_scale,
+            m.obstacle_scale,
+            m.force_distance,
             m.radius);
     }
 };

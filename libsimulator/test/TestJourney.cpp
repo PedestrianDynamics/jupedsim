@@ -12,7 +12,7 @@ TEST(FixedTransition, NextIsCorrect)
     FixedTransition sut(reinterpret_cast<BaseStage*>(&stage));
 
     for(auto i = 0; i < 20; ++i) {
-        ASSERT_EQ(reinterpret_cast<BaseStage*>(&stage), sut.NextStage());
+        ASSERT_EQ(reinterpret_cast<BaseStage*>(&stage), sut.next_stage());
     }
 }
 
@@ -22,16 +22,16 @@ TEST(RoundRobinTransition, SimpleNextIsCorrect)
     int stage2;
     int stage3;
 
-    std::vector<std::tuple<BaseStage*, uint64_t>> weightedStages = {
+    std::vector<std::tuple<BaseStage*, uint64_t>> weighted_stages = {
         {reinterpret_cast<BaseStage*>(&stage1), 1},
         {reinterpret_cast<BaseStage*>(&stage2), 1},
         {reinterpret_cast<BaseStage*>(&stage3), 1}};
 
-    RoundRobinTransition sut(weightedStages);
+    RoundRobinTransition sut(weighted_stages);
 
     for(auto i = 0; i < 5; ++i) {
-        for(auto const& [stage, _] : weightedStages) {
-            ASSERT_EQ(stage, sut.NextStage());
+        for(auto const& [stage, _] : weighted_stages) {
+            ASSERT_EQ(stage, sut.next_stage());
         }
     }
 }
@@ -42,32 +42,32 @@ TEST(RoundRobinTransition, WeightedRoundRobin)
     int stage2;
     int stage3;
 
-    std::vector<std::tuple<BaseStage*, uint64_t>> weightedStages = {
+    std::vector<std::tuple<BaseStage*, uint64_t>> weighted_stages = {
         {reinterpret_cast<BaseStage*>(&stage1), 1},
         {reinterpret_cast<BaseStage*>(&stage2), 2},
         {reinterpret_cast<BaseStage*>(&stage3), 3}};
 
-    RoundRobinTransition sut(weightedStages);
+    RoundRobinTransition sut(weighted_stages);
 
     for(auto i = 0; i < 5; ++i) {
-        ASSERT_EQ(std::get<0>(weightedStages[0]), sut.NextStage());
+        ASSERT_EQ(std::get<0>(weighted_stages[0]), sut.next_stage());
 
-        ASSERT_EQ(std::get<0>(weightedStages[1]), sut.NextStage());
-        ASSERT_EQ(std::get<0>(weightedStages[1]), sut.NextStage());
+        ASSERT_EQ(std::get<0>(weighted_stages[1]), sut.next_stage());
+        ASSERT_EQ(std::get<0>(weighted_stages[1]), sut.next_stage());
 
-        ASSERT_EQ(std::get<0>(weightedStages[2]), sut.NextStage());
-        ASSERT_EQ(std::get<0>(weightedStages[2]), sut.NextStage());
-        ASSERT_EQ(std::get<0>(weightedStages[2]), sut.NextStage());
+        ASSERT_EQ(std::get<0>(weighted_stages[2]), sut.next_stage());
+        ASSERT_EQ(std::get<0>(weighted_stages[2]), sut.next_stage());
+        ASSERT_EQ(std::get<0>(weighted_stages[2]), sut.next_stage());
     }
 }
 
 TEST(RoundRobinTransition, ZeroWeightGivesException)
 {
     int stage1;
-    std::vector<std::tuple<BaseStage*, uint64_t>> weightedStages = {
+    std::vector<std::tuple<BaseStage*, uint64_t>> weighted_stages = {
         {reinterpret_cast<BaseStage*>(&stage1), 0}};
 
-    ASSERT_THROW(RoundRobinTransition sut(weightedStages), SimulationError);
+    ASSERT_THROW(RoundRobinTransition sut(weighted_stages), SimulationError);
 }
 
 TEST(LeastTargetedTransition, NextIsCorrect)
@@ -75,17 +75,17 @@ TEST(LeastTargetedTransition, NextIsCorrect)
     class MockStage : public BaseStage
     {
     public:
-        MockStage(size_t targeting_)
+        MockStage(size_t targeting)
         {
-            targeting = targeting_;
-            ON_CALL(*this, CountTargeting).WillByDefault([this]() { return targeting; });
-            ON_CALL(*this, IsCompleted).WillByDefault([]() { return true; });
+            _targeting = targeting;
+            ON_CALL(*this, count_targeting).WillByDefault([this]() { return _targeting; });
+            ON_CALL(*this, is_completed).WillByDefault([]() { return true; });
         }
-        MOCK_METHOD(size_t, CountTargeting, (), (const));
-        MOCK_METHOD(bool, IsCompleted, (const GenericAgent& agent), (override));
-        MOCK_METHOD(RoutingTarget, Target, (const GenericAgent& agent), (override));
-        MOCK_METHOD(StageProxy, Proxy, (Simulation * simulation_), (override));
-        void SetTargeting(size_t targeting_) { targeting = targeting_; }
+        MOCK_METHOD(size_t, count_targeting, (), (const));
+        MOCK_METHOD(bool, is_completed, (const GenericAgent& agent), (override));
+        MOCK_METHOD(RoutingTarget, target, (const GenericAgent& agent), (override));
+        MOCK_METHOD(StageProxy, proxy, (Simulation* sim), (override));
+        void set_targeting(size_t targeting) { _targeting = targeting; }
     };
 
     MockStage mockstage1(3);
@@ -95,20 +95,20 @@ TEST(LeastTargetedTransition, NextIsCorrect)
     std::vector<BaseStage*> stages = {&mockstage1, &mockstage2, &mockstage3};
     LeastTargetedTransition sut(stages);
 
-    ASSERT_EQ(&mockstage3, sut.NextStage());
+    ASSERT_EQ(&mockstage3, sut.next_stage());
 
-    mockstage1.SetTargeting(1);
-    mockstage2.SetTargeting(1);
-    mockstage3.SetTargeting(1);
-    ASSERT_EQ(&mockstage1, sut.NextStage());
+    mockstage1.set_targeting(1);
+    mockstage2.set_targeting(1);
+    mockstage3.set_targeting(1);
+    ASSERT_EQ(&mockstage1, sut.next_stage());
 
-    mockstage1.SetTargeting(5);
-    mockstage2.SetTargeting(1);
-    mockstage3.SetTargeting(5);
-    ASSERT_EQ(&mockstage2, sut.NextStage());
+    mockstage1.set_targeting(5);
+    mockstage2.set_targeting(1);
+    mockstage3.set_targeting(5);
+    ASSERT_EQ(&mockstage2, sut.next_stage());
 
-    mockstage1.SetTargeting(5);
-    mockstage2.SetTargeting(5);
-    mockstage3.SetTargeting(2);
-    ASSERT_EQ(&mockstage3, sut.NextStage());
+    mockstage1.set_targeting(5);
+    mockstage2.set_targeting(5);
+    mockstage3.set_targeting(2);
+    ASSERT_EQ(&mockstage3, sut.next_stage());
 }

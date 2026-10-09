@@ -28,14 +28,14 @@ inline std::unique_ptr<Geometry> from_polygons(
 {
     GeometryBuilder builder{};
     for(const auto& loop : boundaries) {
-        builder.AddAccessibleArea(loop);
+        builder.add_accessible_area(loop);
     }
     for(const auto& loop : holes) {
-        builder.ExcludeFromAccessibleArea(loop);
+        builder.exclude_from_accessible_area(loop);
     }
     WalkableSurface surface{};
-    surface.AddRegion(builder.Build(), 0.0);
-    return surface.CreateGeometry();
+    surface.add_region(builder.build(), 0.0);
+    return surface.create_geometry();
 }
 
 /// Flat rectangle at z = 0.
@@ -48,11 +48,11 @@ inline std::unique_ptr<Geometry> two_rooms()
 {
     WalkableSurface surface{};
     const auto a =
-        surface.AddRegion(WalkableSurface::Polygon{rectangle_points({0, 0}, {10, 10}), {}}, 0.0);
+        surface.add_region(WalkableSurface::Polygon{rectangle_points({0, 0}, {10, 10}), {}}, 0.0);
     const auto b =
-        surface.AddRegion(WalkableSurface::Polygon{rectangle_points({11, 0}, {21, 10}), {}}, 0.0);
-    surface.ConnectRegions(a, {{10, 0}, {10, 10}}, b, {{11, 0}, {11, 10}});
-    return surface.CreateGeometry();
+        surface.add_region(WalkableSurface::Polygon{rectangle_points({11, 0}, {21, 10}), {}}, 0.0);
+    surface.connect_regions(a, {{10, 0}, {10, 10}}, b, {{11, 0}, {11, 10}});
+    return surface.create_geometry();
 }
 
 /// Two floors over the same 20 x 10 footprint, the ground floor at z = 0 and the upper one at
@@ -65,10 +65,10 @@ inline std::unique_ptr<Geometry> stacked_floors_with_ramp()
     const auto footprint = rectangle_points({0, 0}, {20, 10});
     const auto opening = rectangle_points({6, 4}, {14, 6});
     WalkableSurface surface{};
-    const auto ground = surface.AddRegion(WalkableSurface::Polygon{footprint, {opening}}, 0.0);
-    const auto upper = surface.AddRegion(WalkableSurface::Polygon{footprint, {opening}}, 3.0);
-    surface.ConnectRegions(ground, {{6, 4}, {6, 6}}, upper, {{14, 4}, {14, 6}});
-    return surface.CreateGeometry();
+    const auto ground = surface.add_region(WalkableSurface::Polygon{footprint, {opening}}, 0.0);
+    const auto upper = surface.add_region(WalkableSurface::Polygon{footprint, {opening}}, 3.0);
+    surface.connect_regions(ground, {{6, 4}, {6, 6}}, upper, {{14, 4}, {14, 6}});
+    return surface.create_geometry();
 }
 
 /// Flat rectangle with rectangular hole, z = 0.
@@ -97,13 +97,13 @@ inline UStair u_stair()
     // (8, 9) and (13, 9) split the stairwell sides so each flight has an edge of its own.
     const WalkableSurface::Ring stairwell{{8, 6}, {14, 6}, {14, 12}, {8, 12}, {8, 9}};
     WalkableSurface surface{};
-    const auto ground = surface.AddRegion({rectangle_points({0, 0}, {20, 20}), {stairwell}}, 0.0);
-    const auto upper = surface.AddRegion({rectangle_points({0, 0}, {20, 20}), {stairwell}}, 3.0);
+    const auto ground = surface.add_region({rectangle_points({0, 0}, {20, 20}), {stairwell}}, 0.0);
+    const auto upper = surface.add_region({rectangle_points({0, 0}, {20, 20}), {stairwell}}, 3.0);
     const auto landing =
-        surface.AddRegion({{{13, 6}, {14, 6}, {14, 12}, {13, 12}, {13, 9}}, {}}, 1.5);
-    surface.ConnectRegions(ground, {{8, 6}, {8, 9}}, landing, {{13, 6}, {13, 9}});
-    surface.ConnectRegions(landing, {{13, 9}, {13, 12}}, upper, {{8, 9}, {8, 12}});
-    return {surface.CreateGeometry(), ground, upper, landing};
+        surface.add_region({{{13, 6}, {14, 6}, {14, 12}, {13, 12}, {13, 9}}, {}}, 1.5);
+    surface.connect_regions(ground, {{8, 6}, {8, 9}}, landing, {{13, 6}, {13, 9}});
+    surface.connect_regions(landing, {{13, 9}, {13, 12}}, upper, {{8, 9}, {8, 12}});
+    return {surface.create_geometry(), ground, upper, landing};
 }
 
 /// A ramp climbing along y, from z = 0 to "height".

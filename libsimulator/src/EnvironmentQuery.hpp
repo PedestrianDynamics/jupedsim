@@ -30,17 +30,17 @@ public:
     /// Calls 'fn' for every agent within 'radius' of 'from'.
     /// Note: No z filtering is applied.
     template <std::invocable<const GenericAgent&> Fn>
-    void ForEachAgentInRange(const Point& from, double radius, Fn fn) const
+    void for_each_agent_in_range(const Point& from, double radius, Fn fn) const
     {
-        _nsearch.ForEachInRange(from, radius, fn);
+        _nsearch.for_each_in_range(from, radius, fn);
     }
 
     template <std::predicate<const GenericAgent&> Pred = AcceptAll>
     std::vector<GenericAgent>
-    AgentsInRange(const Point& from, double radius, Pred filter = {}) const
+    agents_in_range(const Point& from, double radius, Pred filter = {}) const
     {
         std::vector<GenericAgent> neighbors{};
-        ForEachAgentInRange(from, radius, [&](const GenericAgent& candidate) {
+        for_each_agent_in_range(from, radius, [&](const GenericAgent& candidate) {
             if(filter(candidate)) {
                 neighbors.push_back(candidate);
             }
@@ -48,17 +48,17 @@ public:
         return neighbors;
     }
 
-    bool NoGeometryBetween(const Location& who, Point direction) const
+    bool no_geometry_between(const Location& who, Point direction) const
     {
         return _geometry.no_geometry_between(who, direction);
     }
 
-    bool NoGeometryBetween(const Location& who, const Location& other) const
+    bool no_geometry_between(const Location& who, const Location& other) const
     {
         return _geometry.no_geometry_between(who, other);
     }
 
-    std::vector<LineSegment> LineSegmentsInRange(const Location& who, double distance) const
+    std::vector<LineSegment> line_segments_in_range(const Location& who, double distance) const
     {
         return _geometry.line_segments_in_range(who, distance);
     }

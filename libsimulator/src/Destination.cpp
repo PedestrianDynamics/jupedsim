@@ -5,10 +5,10 @@
 
 bool Destination::contains(const Location& where) const
 {
-    return _engine->Contains(where, _id);
+    return _engine->contains(where, _id);
 }
 
 Point Destination::orientation(const Location& from) const
 {
-    return _engine->GetOrientation(from, _id);
+    return _engine->get_orientation(from, _id);
 }

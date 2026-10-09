@@ -18,15 +18,15 @@ public:
     StrategicalDecisionSystem& operator=(StrategicalDecisionSystem&& other) = delete;
 
     void
-    Run(const std::unordered_map<Journey::ID, std::unique_ptr<Journey>>& journeys,
+    run(const std::unordered_map<Journey::ID, std::unique_ptr<Journey>>& journeys,
         auto&& agents,
-        StageManager& stageManager) const
+        StageManager& stage_manager) const
     {
         for(auto& agent : agents) {
-            const auto [target, id] = journeys.at(agent.journeyId)->Target(agent);
-            agent.finalTarget = target;
-            stageManager.MigrateAgent(agent.stageId, id);
-            agent.stageId = id;
+            const auto [target, id] = journeys.at(agent.journey_id)->target(agent);
+            agent.final_target = target;
+            stage_manager.migrate_agent(agent.stage_id, id);
+            agent.stage_id = id;
         }
     }
 };

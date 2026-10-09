@@ -9,7 +9,7 @@
 
 // ok that is not perfect. For a profound discussion see
 // http://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
-bool almostEqual(double a, double b, double eps)
+bool almost_equal(double a, double b, double eps)
 {
     return fabs(a - b) < eps; // std::numeric_limits<double>::epsilon();
 }
@@ -54,7 +54,7 @@ double hermite_interp(double t, double x1, double x2, double y1, double y2, doub
 std::complex<double> c_cbrt(std::complex<double> x)
 {
     double a, b, r, phi, rn;
-    std::complex<double> I(0, 1);
+    std::complex<double> i(0, 1);
     double s;
     a = real(x);
     b = imag(x);
@@ -65,19 +65,19 @@ std::complex<double> c_cbrt(std::complex<double> x)
     phi /= 3.0;
     rn = cbrt(r);
     s = sin(phi);
-    return rn * cos(phi) + I * rn * s;
+    return rn * cos(phi) + i * rn * s;
 }
 
 Point mollify_e0(
     const Point& orientation_to_target,
-    double deltaT,
-    int orientationDelay,
+    double delta_t,
+    int orientation_delay,
     const Point& e0)
 {
-    constexpr double _tau = 0.5;
+    constexpr double tau = 0.5;
     const Point new_e0 = orientation_to_target;
-    const double t = orientationDelay * deltaT;
+    const double t = orientation_delay * delta_t;
 
     // Handover new target
-    return e0 + (new_e0 - e0) * (1 - exp(-t / _tau));
+    return e0 + (new_e0 - e0) * (1 - exp(-t / tau));
 }

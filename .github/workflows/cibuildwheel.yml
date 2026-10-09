@@ -33,14 +33,36 @@ jobs:
           python-version: "3.13"
       - name: Install dependencies
         run: pip install ruff
-      - name: Install clang-format-21
+      - name: Install clang-format-23
         run: |
-          sudo add-apt-repository 'deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-21 main'
+          sudo add-apt-repository 'deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-23 main'
           wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
           sudo apt update
-          sudo apt install clang-format-21
+          sudo apt install clang-format-23
       - name: Run checks
         run: ./scripts/ci/check_format.sh
+  tidy:
+    name: Check clang-tidy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          submodules: true
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - name: Install dependencies
+        run: pip install pytest
+      - name: Install clang-tidy-23
+        run: |
+          sudo add-apt-repository 'deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-23 main'
+          wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
+          sudo apt update
+          sudo apt install clang-tidy-23
+      - name: Run clang-tidy
+        run: ./scripts/ci/check_tidy.sh
   tests:
     name: Run tests [${{ matrix.toolchain.cxx }}]
     runs-on: ubuntu-latest

@@ -17,9 +17,9 @@ TEST(UniqueId, CanBeConstructedFromUnderlyingType)
     const jps::UniqueID<void> b{667};
     const jps::UniqueID<void> second_sentinel{};
     ASSERT_NE(a, b);
-    ASSERT_EQ(a.getID(), 666);
-    ASSERT_EQ(b.getID(), 667);
-    ASSERT_EQ(first_sentinel.getID() + 1, second_sentinel.getID());
+    ASSERT_EQ(a.get_id(), 666);
+    ASSERT_EQ(b.get_id(), 667);
+    ASSERT_EQ(first_sentinel.get_id() + 1, second_sentinel.get_id());
 }
 
 TEST(UniqueId, DefaultConstructedIDsAreNotIdentical)
@@ -83,8 +83,7 @@ TEST(UniqueId, CanBeMovedAndCopied)
 TEST(UniqueId, CanBeFormatted)
 {
     // create this type to ensure the internal counter of id creation for UniqueId<Foo> starts at 0;
-    struct Foo {
-    };
+    struct Foo {};
     jps::UniqueID<Foo> id;
     ASSERT_EQ("1", fmt::format("{}", id));
 }
@@ -97,18 +96,16 @@ TEST(UniqueId, CanBeHashed)
 
 TEST(UniqueId, InvalidValueIsNotFirstID)
 {
-    struct InvalidValueIsNotFirstID_Type {
-    };
-    using UID = UniqueID<InvalidValueIsNotFirstID_Type>;
+    struct InvalidValueIsNotFirstIdType {};
+    using UID = UniqueID<InvalidValueIsNotFirstIdType>;
     auto first = UID{};
-    ASSERT_NE(UID::Invalid, first);
+    ASSERT_NE(UID::invalid, first);
 }
 
 TEST(UniqueId, InvalidValueComparesToItself)
 {
-    struct InvalidValueComparesToItself_Type {
-    };
-    using UID = UniqueID<InvalidValueComparesToItself_Type>;
+    struct InvalidValueComparesToItselfType {};
+    using UID = UniqueID<InvalidValueComparesToItselfType>;
     auto first = UID{};
-    ASSERT_EQ(UID::Invalid, UID::Invalid);
+    ASSERT_EQ(UID::invalid, UID::invalid);
 }

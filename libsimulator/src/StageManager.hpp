@@ -13,7 +13,7 @@
 class StageManager
 {
 private:
-    std::unordered_map<BaseStage::ID, std::unique_ptr<BaseStage>> stages;
+    std::unordered_map<BaseStage::ID, std::unique_ptr<BaseStage>> _stages;
 
 public:
     StageManager() {}
@@ -23,48 +23,48 @@ public:
     StageManager(StageManager&& other) = delete;
     StageManager& operator=(StageManager&& other) = delete;
 
-    BaseStage::ID AddStage(std::unique_ptr<BaseStage> stage)
+    BaseStage::ID add_stage(std::unique_ptr<BaseStage> stage)
     {
-        if(stages.find(stage->Id()) != stages.end()) {
+        if(_stages.find(stage->id()) != _stages.end()) {
             throw SimulationError("Internal error, stage id already in use.");
         }
-        const auto id = stage->Id();
-        stages.emplace(id, std::move(stage));
+        const auto id = stage->id();
+        _stages.emplace(id, std::move(stage));
 
         return id;
     }
 
-    void MigrateAgent(BaseStage::ID prevTarget, BaseStage::ID newTarget)
+    void migrate_agent(BaseStage::ID prev_target, BaseStage::ID new_target)
     {
-        stages.at(newTarget)->IncreaseTargeting();
-        stages.at(prevTarget)->DecreaseTargeting();
+        _stages.at(new_target)->increase_targeting();
+        _stages.at(prev_target)->decrease_targeting();
     }
 
-    void HandleNewAgent(BaseStage::ID stageId) { stages.at(stageId)->IncreaseTargeting(); }
-    void HandleRemoveAgent(BaseStage::ID stageId) { stages.at(stageId)->DecreaseTargeting(); }
+    void handle_new_agent(BaseStage::ID stage_id) { _stages.at(stage_id)->increase_targeting(); }
+    void handle_remove_agent(BaseStage::ID stage_id) { _stages.at(stage_id)->decrease_targeting(); }
 
-    BaseStage* Stage(BaseStage::ID stageId) const
+    BaseStage* stage(BaseStage::ID stage_id) const
     {
-        const auto iter = stages.find(stageId);
-        if(iter == std::end(stages)) {
-            throw SimulationError("Unknown stage id ({}) provided in journey.", stageId.getID());
+        const auto iter = _stages.find(stage_id);
+        if(iter == std::end(_stages)) {
+            throw SimulationError("Unknown stage id ({}) provided in journey.", stage_id.get_id());
         }
         return iter->second.get();
     }
 
-    BaseStage* Stage(BaseStage::ID stageId)
+    BaseStage* stage(BaseStage::ID stage_id)
     {
-        auto iter = stages.find(stageId);
-        if(iter == std::end(stages)) {
-            throw SimulationError("Unknown stage id ({}) provided in journey.", stageId.getID());
+        auto iter = _stages.find(stage_id);
+        if(iter == std::end(_stages)) {
+            throw SimulationError("Unknown stage id ({}) provided in journey.", stage_id.get_id());
         }
         return iter->second.get();
     }
 
-    std::unordered_map<BaseStage::ID, std::unique_ptr<BaseStage>>& Stages() { return stages; }
+    std::unordered_map<BaseStage::ID, std::unique_ptr<BaseStage>>& stages() { return _stages; }
 
-    const std::unordered_map<BaseStage::ID, std::unique_ptr<BaseStage>>& Stages() const
+    const std::unordered_map<BaseStage::ID, std::unique_ptr<BaseStage>>& stages() const
     {
-        return stages;
+        return _stages;
     }
 };

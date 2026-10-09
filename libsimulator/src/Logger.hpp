@@ -6,7 +6,7 @@
 #include <functional>
 #include <string>
 
-namespace Logging
+namespace logging
 {
 
 class Logger
@@ -15,26 +15,26 @@ public:
     using LogCallback = std::function<void(const std::string& msg)>;
 
 private:
-    LogCallback debug_msg_cb{};
-    LogCallback info_msg_cb{};
-    LogCallback warning_msg_cb{};
-    LogCallback error_msg_cb{};
+    LogCallback _debug_msg_cb{};
+    LogCallback _info_msg_cb{};
+    LogCallback _warning_msg_cb{};
+    LogCallback _error_msg_cb{};
 
 public:
-    static Logger& Instance();
-    void SetDebugCallback(LogCallback&& cb);
-    void ClearDebugCallback();
-    void LogDebugMessage(const std::string& msg);
-    void SetInfoCallback(LogCallback&& cb);
-    void ClearInfoCallback();
-    void LogInfoMessage(const std::string& msg);
-    void SetWarningCallback(LogCallback&& cb);
-    void ClearWarningCallback();
-    void LogWarningMessage(const std::string& msg);
-    void SetErrorCallback(LogCallback&& cb);
-    void ClearErrorCallback();
-    void LogErrorMessage(const std::string& msg);
-    void ClearAllCallbacks();
+    static Logger& instance();
+    void set_debug_callback(LogCallback&& cb);
+    void clear_debug_callback();
+    void log_debug_message(const std::string& msg);
+    void set_info_callback(LogCallback&& cb);
+    void clear_info_callback();
+    void log_info_message(const std::string& msg);
+    void set_warning_callback(LogCallback&& cb);
+    void clear_warning_callback();
+    void log_warning_message(const std::string& msg);
+    void set_error_callback(LogCallback&& cb);
+    void clear_error_callback();
+    void log_error_message(const std::string& msg);
+    void clear_all_callbacks();
 
 private:
     Logger() = default;
@@ -47,7 +47,7 @@ private:
 
 enum class Level { Debug, Info, Warning, Error, Off };
 
-} // namespace Logging
+} // namespace logging
 
 // Convenience macros to add log messages with compile time check to validate
 // used format string.I have not been able to get the FMT_STRING macro to work
@@ -59,28 +59,28 @@ enum class Level { Debug, Info, Warning, Error, Off };
 
 #ifdef _MSC_VER
 // NOLINTNEXTLINE
-#define __LOG(Level, FormatString, ...)                                                            \
-    Logging::Logger::Instance().Log##Level##Message(                                               \
+#define LOG_AT_LEVEL(level, FormatString, ...)                                                     \
+    logging::Logger::instance().log_##level##_message(                                             \
         fmt::format(FMT_STRING(FormatString), __VA_ARGS__))
 // NOLINTNEXTLINE
-#define LOG_DEBUG(FormatString, ...) __LOG(Debug, FormatString, __VA_ARGS__)
+#define LOG_DEBUG(FormatString, ...) LOG_AT_LEVEL(debug, FormatString, __VA_ARGS__)
 // NOLINTNEXTLINE
-#define LOG_INFO(FormatString, ...) __LOG(Info, FormatString, __VA_ARGS__)
+#define LOG_INFO(FormatString, ...) LOG_AT_LEVEL(info, FormatString, __VA_ARGS__)
 // NOLINTNEXTLINE
-#define LOG_WARNING(FormatString, ...) __LOG(Warning, FormatString, __VA_ARGS__)
+#define LOG_WARNING(FormatString, ...) LOG_AT_LEVEL(warning, FormatString, __VA_ARGS__)
 // NOLINTNEXTLINE
-#define LOG_ERROR(FormatString, ...) __LOG(Error, FormatString, __VA_ARGS__)
+#define LOG_ERROR(FormatString, ...) LOG_AT_LEVEL(error, FormatString, __VA_ARGS__)
 #else
 // NOLINTNEXTLINE
-#define __LOG(Level, FormatString, ...)                                                            \
-    Logging::Logger::Instance().Log##Level##Message(                                               \
+#define LOG_AT_LEVEL(level, FormatString, ...)                                                     \
+    logging::Logger::instance().log_##level##_message(                                             \
         fmt::format(FMT_STRING(FormatString), ##__VA_ARGS__))
 // NOLINTNEXTLINE
-#define LOG_DEBUG(FormatString, ...) __LOG(Debug, FormatString, ##__VA_ARGS__)
+#define LOG_DEBUG(FormatString, ...) LOG_AT_LEVEL(debug, FormatString, ##__VA_ARGS__)
 // NOLINTNEXTLINE
-#define LOG_INFO(FormatString, ...) __LOG(Info, FormatString, ##__VA_ARGS__)
+#define LOG_INFO(FormatString, ...) LOG_AT_LEVEL(info, FormatString, ##__VA_ARGS__)
 // NOLINTNEXTLINE
-#define LOG_WARNING(FormatString, ...) __LOG(Warning, FormatString, ##__VA_ARGS__)
+#define LOG_WARNING(FormatString, ...) LOG_AT_LEVEL(warning, FormatString, ##__VA_ARGS__)
 // NOLINTNEXTLINE
-#define LOG_ERROR(FormatString, ...) __LOG(Error, FormatString, ##__VA_ARGS__)
+#define LOG_ERROR(FormatString, ...) LOG_AT_LEVEL(error, FormatString, ##__VA_ARGS__)
 #endif

@@ -8,14 +8,14 @@ struct GeneralizedCentrifugalForceModelState {
     Point orientation{1.0, 0.0};
     double speed{};
     Point e0{};
-    int orientationDelay{};
+    int orientation_delay{};
     double mass{1.0};
     double tau{0.5};
     double v0{1.2};
-    double Av{1.0};
-    double AMin{0.2};
-    double BMin{0.2};
-    double BMax{0.4};
+    double av{1.0};
+    double a_min{0.2};
+    double b_min{0.2};
+    double b_max{0.4};
 };
 
 template <>

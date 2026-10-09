@@ -11,10 +11,10 @@
 #include <type_traits>
 #include <vector>
 
-std::tuple<double, double> intoTuple(const Point& p);
+std::tuple<double, double> into_tuple(const Point& p);
 
 // Works for container of Point type, but also e.g. for container of glm::vec<2>
-std::vector<std::tuple<double, double>> intoTuples(const auto& in)
+std::vector<std::tuple<double, double>> into_tuples(const auto& in)
 {
     std::vector<std::tuple<double, double>> tuples{};
     tuples.reserve(in.size());
@@ -24,9 +24,9 @@ std::vector<std::tuple<double, double>> intoTuples(const auto& in)
     return tuples;
 }
 
-Point intoPoint(const std::tuple<double, double>& p);
+Point into_point(const std::tuple<double, double>& p);
 
-std::vector<Point> intoPoints(const std::vector<std::tuple<double, double>>& in);
+std::vector<Point> into_points(const std::vector<std::tuple<double, double>>& in);
 
 /// Normalizes the whitespace of a docstring written as an indented raw string literal.
 ///
@@ -51,10 +51,10 @@ std::vector<Point> intoPoints(const std::vector<std::tuple<double, double>>& in)
 ///
 /// @param raw Docstring as written in the source; not copied.
 /// @return The cleaned docstring, lines joined with `\n`; empty if @p raw is blank.
-std::string cleanDoc(std::string_view raw);
+std::string clean_doc(std::string_view raw);
 
 template <typename Range>
-auto intoVec(Range&& range)
+auto into_vec(Range&& range)
 {
     using Value = std::remove_cvref_t<decltype(*std::begin(range))>;
 
@@ -69,7 +69,7 @@ auto intoVec(Range&& range)
 }
 
 template <typename T, typename U>
-std::vector<T> intoVecT(const std::vector<U>& vec)
+std::vector<T> into_vec_t(const std::vector<U>& vec)
 {
     auto result = std::vector<T>();
     result.reserve(vec.size());

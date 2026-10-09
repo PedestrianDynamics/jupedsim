@@ -19,7 +19,7 @@ struct fmt::formatter<RoutingTarget> {
     auto format(const RoutingTarget& target, FormatContext& ctx) const
     {
         return std::visit(
-            overloaded{
+            Overloaded{
                 [&ctx](const Destination& d) { return fmt::format_to(ctx.out(), "{}", d); },
                 [&ctx](const Location& l) { return fmt::format_to(ctx.out(), "{}", l); }},
             target);

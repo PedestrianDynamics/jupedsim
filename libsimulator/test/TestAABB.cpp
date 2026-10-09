@@ -51,71 +51,71 @@ TEST(AABB, CanConstructFromPoints)
 TEST(AABB, InsidePointIsInside)
 {
     const AABB aabb({0, 0}, {1, 1});
-    ASSERT_TRUE(aabb.Inside({0.5, 0.5}));
+    ASSERT_TRUE(aabb.inside({0.5, 0.5}));
 }
 
 TEST(AABB, PointOnBoundaryIsInside)
 {
     const AABB aabb({0, 0}, {1, 1});
-    ASSERT_TRUE(aabb.Inside({0.0, 0.5}));
-    ASSERT_TRUE(aabb.Inside({0.5, 0.0}));
-    ASSERT_TRUE(aabb.Inside({1.0, 0.5}));
-    ASSERT_TRUE(aabb.Inside({0.5, 1.0}));
+    ASSERT_TRUE(aabb.inside({0.0, 0.5}));
+    ASSERT_TRUE(aabb.inside({0.5, 0.0}));
+    ASSERT_TRUE(aabb.inside({1.0, 0.5}));
+    ASSERT_TRUE(aabb.inside({0.5, 1.0}));
 }
 
 TEST(AABB, CornersAreInside)
 {
     const AABB aabb({0, 0}, {1, 1});
-    ASSERT_TRUE(aabb.Inside({0, 0}));
-    ASSERT_TRUE(aabb.Inside({1, 0}));
-    ASSERT_TRUE(aabb.Inside({0, 1}));
-    ASSERT_TRUE(aabb.Inside({1, 1}));
+    ASSERT_TRUE(aabb.inside({0, 0}));
+    ASSERT_TRUE(aabb.inside({1, 0}));
+    ASSERT_TRUE(aabb.inside({0, 1}));
+    ASSERT_TRUE(aabb.inside({1, 1}));
 }
 
 TEST(AABB, NonOverlappingDoNotOverlap)
 {
     const AABB a({0, 0}, {1, 1});
     const AABB b({2, 0}, {3, 1});
-    ASSERT_FALSE(a.Overlap(b));
-    ASSERT_FALSE(b.Overlap(a));
+    ASSERT_FALSE(a.overlap(b));
+    ASSERT_FALSE(b.overlap(a));
 }
 
 TEST(AABB, OverlappingDoOverlap)
 {
     const AABB a({0, 0}, {1, 1});
     const AABB b({0.5, 0}, {1.5, 1});
-    ASSERT_TRUE(a.Overlap(b));
-    ASSERT_TRUE(b.Overlap(a));
+    ASSERT_TRUE(a.overlap(b));
+    ASSERT_TRUE(b.overlap(a));
 }
 
 TEST(AABB, OverlappingOnCornerDoOverlap)
 {
     const AABB a({0, 0}, {1, 1});
     const AABB b({1, 1}, {2, 2});
-    ASSERT_TRUE(a.Overlap(b));
-    ASSERT_TRUE(b.Overlap(a));
+    ASSERT_TRUE(a.overlap(b));
+    ASSERT_TRUE(b.overlap(a));
 }
 
 TEST(AABB, OverlappingSidesDoOverlap)
 {
     const AABB a({0, 0}, {1, 1});
     const AABB b({1, 0}, {2, 2});
-    ASSERT_TRUE(a.Overlap(b));
-    ASSERT_TRUE(b.Overlap(a));
+    ASSERT_TRUE(a.overlap(b));
+    ASSERT_TRUE(b.overlap(a));
 }
 
 TEST(AABB, IntersectsDiagonal)
 {
     const AABB a({3., 2.}, {6., 4.});
     const LineSegment l({3., 2.}, {6., 4.});
-    ASSERT_TRUE(a.Intersects(l));
+    ASSERT_TRUE(a.intersects(l));
 }
 
 TEST(AABB, IntersectsDiagonalInverted)
 {
     const AABB a({3., 2.}, {6., 4.});
     const LineSegment l({6., 4.}, {3., 2.});
-    ASSERT_TRUE(a.Intersects(l));
+    ASSERT_TRUE(a.intersects(l));
 }
 
 TEST(AABB, IntersectsParallelToAxis)
@@ -127,13 +127,13 @@ TEST(AABB, IntersectsParallelToAxis)
         },
         {1., 1.});
     const LineSegment l1({-1., -1.}, {-1., 1.});
-    ASSERT_TRUE(a.Intersects(l1));
+    ASSERT_TRUE(a.intersects(l1));
     const LineSegment l2({-1., 1.}, {1., 1.});
-    ASSERT_TRUE(a.Intersects(l2));
+    ASSERT_TRUE(a.intersects(l2));
     const LineSegment l3({1., 1.}, {1., -1.});
-    ASSERT_TRUE(a.Intersects(l3));
+    ASSERT_TRUE(a.intersects(l3));
     const LineSegment l4({1., -1.}, {-1., -1.});
-    ASSERT_TRUE(a.Intersects(l4));
+    ASSERT_TRUE(a.intersects(l4));
 }
 
 TEST(AABB, IntersectsTouchesCorner)
@@ -145,16 +145,16 @@ TEST(AABB, IntersectsTouchesCorner)
         },
         {1., 1.});
     const LineSegment l1({-1., -1.}, {-2., -2.});
-    ASSERT_TRUE(a.Intersects(l1));
+    ASSERT_TRUE(a.intersects(l1));
     const LineSegment l2({-1., 1.}, {-2., 2.});
-    ASSERT_TRUE(a.Intersects(l2));
+    ASSERT_TRUE(a.intersects(l2));
     const LineSegment l3({1., 1.}, {2., 2.});
-    ASSERT_TRUE(a.Intersects(l3));
+    ASSERT_TRUE(a.intersects(l3));
     const LineSegment l4({1., -1.}, {2., -2.});
-    ASSERT_TRUE(a.Intersects(l4));
+    ASSERT_TRUE(a.intersects(l4));
 
     const LineSegment l5({-2., 0}, {0., -2.});
-    ASSERT_TRUE(a.Intersects(l5));
+    ASSERT_TRUE(a.intersects(l5));
 }
 
 TEST(AABB, IntersectsTouchesEdge)
@@ -166,13 +166,13 @@ TEST(AABB, IntersectsTouchesEdge)
         },
         {1., 1.});
     const LineSegment l1({-1., 0.}, {-2., 0.});
-    ASSERT_TRUE(a.Intersects(l1));
+    ASSERT_TRUE(a.intersects(l1));
     const LineSegment l2({0., 1.}, {0., 2.});
-    ASSERT_TRUE(a.Intersects(l2));
+    ASSERT_TRUE(a.intersects(l2));
     const LineSegment l3({1., 0.}, {2., 0.});
-    ASSERT_TRUE(a.Intersects(l3));
+    ASSERT_TRUE(a.intersects(l3));
     const LineSegment l4({0., -1.}, {0., -2.});
-    ASSERT_TRUE(a.Intersects(l4));
+    ASSERT_TRUE(a.intersects(l4));
 }
 
 TEST(AABB, IntersectsPartlyInside)
@@ -184,7 +184,7 @@ TEST(AABB, IntersectsPartlyInside)
         },
         {1., 1.});
     const LineSegment l({0., 0.}, {-2., 3.});
-    ASSERT_TRUE(a.Intersects(l));
+    ASSERT_TRUE(a.intersects(l));
 }
 
 TEST(AABB, IntersectsCompletlyInside)
@@ -196,7 +196,7 @@ TEST(AABB, IntersectsCompletlyInside)
         },
         {1., 1.});
     const LineSegment l({-0.5, -0.5}, {0.5, 0.5});
-    ASSERT_TRUE(a.Intersects(l));
+    ASSERT_TRUE(a.intersects(l));
 }
 
 TEST(AABB, DoesNotIntersect)
@@ -208,15 +208,15 @@ TEST(AABB, DoesNotIntersect)
         },
         {1., 1.});
 
-    const LineSegment l1({a.TopLeft() + Point{0., 1.}, a.TopRight() + Point{0., 1.}});
-    ASSERT_FALSE(a.Intersects(l1));
+    const LineSegment l1({a.top_left() + Point{0., 1.}, a.top_right() + Point{0., 1.}});
+    ASSERT_FALSE(a.intersects(l1));
 
-    const LineSegment l2({a.TopRight() + Point{1., 0.}, a.BottomRight() + Point{1., 0.}});
-    ASSERT_FALSE(a.Intersects(l2));
+    const LineSegment l2({a.top_right() + Point{1., 0.}, a.bottom_right() + Point{1., 0.}});
+    ASSERT_FALSE(a.intersects(l2));
 
-    const LineSegment l3({a.BottomRight() - Point{0., 1.}, a.BottomLeft() - Point{0., 1.}});
-    ASSERT_FALSE(a.Intersects(l3));
+    const LineSegment l3({a.bottom_right() - Point{0., 1.}, a.bottom_left() - Point{0., 1.}});
+    ASSERT_FALSE(a.intersects(l3));
 
-    const LineSegment l4({a.BottomLeft() - Point{1., 0.}, a.TopLeft() - Point{1., 0.}});
-    ASSERT_FALSE(a.Intersects(l4));
+    const LineSegment l4({a.bottom_left() - Point{1., 0.}, a.top_left() - Point{1., 0.}});
+    ASSERT_FALSE(a.intersects(l4));
 }

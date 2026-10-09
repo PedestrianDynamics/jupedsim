@@ -16,42 +16,42 @@ public:
 public:
     Point(double x = 0, double y = 0) : x(x), y(y) {};
 
-    bool isZeroLength() const;
+    bool is_zero_length() const;
 
     /// Norm
-    double Norm() const;
+    double norm() const;
 
     /// Norm square
-    inline double NormSquare() const { return ScalarProduct(*this); }
+    inline double norm_square() const { return scalar_product(*this); }
 
     /// normalized vector
-    Point Normalized() const;
+    Point normalized() const;
 
     /// Return norm and direction in one call
     /// @return Norm and Normalized
-    std::tuple<double, Point> NormAndNormalized() const;
+    std::tuple<double, Point> norm_and_normalized() const;
 
     /// dot product
-    inline double ScalarProduct(const Point& v) const { return x * v.x + y * v.y; }
+    inline double scalar_product(const Point& v) const { return x * v.x + y * v.y; }
 
-    inline double CrossProduct(const Point& p) const { return Determinant(p); }
+    inline double cross_product(const Point& p) const { return determinant(p); }
 
     /// determinant of the square matrix formed by the vectors [ this, v]
-    inline double Determinant(const Point& v) const { return x * v.y - y * v.x; }
+    inline double determinant(const Point& v) const { return x * v.y - y * v.x; }
 
-    Point TransformToEllipseCoordinates(const Point& center, double cphi, double sphi) const;
+    Point transform_to_ellipse_coordinates(const Point& center, double cphi, double sphi) const;
     /// translation and rotation in cartesian system
-    Point TransformToCartesianCoordinates(const Point& center, double cphi, double sphi) const;
+    Point transform_to_cartesian_coordinates(const Point& center, double cphi, double sphi) const;
     /// rotate the vector by theta
-    Point Rotate(double ctheta, double stheta) const;
+    Point rotate(double ctheta, double stheta) const;
 
     /// Create a new vector rotated by +90 degree (ccw rotation)
     /// @return rotated vector
-    Point Rotate90Deg() const;
+    Point rotate90_deg() const;
 
     /// Tests that the vector is length 1
     /// @return length == 1
-    bool IsUnitLength() const;
+    bool is_unit_length() const;
 
     // operators
     /// addition
@@ -79,13 +79,13 @@ public:
 /// @param [in] Point a
 /// @param [in] Point b
 /// @return distance between 'a' and 'b'
-double Distance(const Point& a, const Point& b);
+double distance(const Point& a, const Point& b);
 
 /// Squared euclidean distance between 'a' and 'b'
 /// @param [in] Point a
 /// @param [in] Point b
 /// @return distance between 'a' and 'b'
-double DistanceSquared(const Point& a, const Point& b);
+double distance_squared(const Point& a, const Point& b);
 
 /// multiplication
 const Point operator*(const Point& p, const double f);

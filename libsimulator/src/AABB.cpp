@@ -4,32 +4,32 @@
 #include "LineSegment.hpp"
 #include "Point.hpp"
 
-static bool intersectsLine(const AABB& boundingBox, const LineSegment& lineSegment)
+static bool intersects_line(const AABB& bounding_box, const LineSegment& line_segment)
 {
-    const Point base = lineSegment.p1;
-    const Point dir = lineSegment.p2 - lineSegment.p1;
+    const Point base = line_segment.p1;
+    const Point dir = line_segment.p2 - line_segment.p1;
     const Point n = Point{dir.y, -dir.x};
 
-    const Point c1 = boundingBox.BottomLeft() - base;
-    const Point c2 = boundingBox.TopRight() - base;
-    const Point c3 = boundingBox.BottomRight() - base;
-    const Point c4 = boundingBox.TopLeft() - base;
+    const Point c1 = bounding_box.bottom_left() - base;
+    const Point c2 = bounding_box.top_right() - base;
+    const Point c3 = bounding_box.bottom_right() - base;
+    const Point c4 = bounding_box.top_left() - base;
 
-    const double dp1 = n.ScalarProduct(c1);
-    const double dp2 = n.ScalarProduct(c2);
-    const double dp3 = n.ScalarProduct(c3);
-    const double dp4 = n.ScalarProduct(c4);
+    const double dp1 = n.scalar_product(c1);
+    const double dp2 = n.scalar_product(c2);
+    const double dp3 = n.scalar_product(c3);
+    const double dp4 = n.scalar_product(c4);
 
     return (dp1 * dp2 <= 0.) || (dp2 * dp3 <= 0.) || (dp3 * dp4 <= 0.);
 }
 
-bool AABB::Intersects(const LineSegment& lineSegment) const
+bool AABB::intersects(const LineSegment& line_segment) const
 {
-    if(!intersectsLine(*this, lineSegment)) {
+    if(!intersects_line(*this, line_segment)) {
         return false;
     }
 
-    const AABB bbLineSegment({lineSegment.p1, lineSegment.p2});
+    const AABB bb_line_segment({line_segment.p1, line_segment.p2});
 
-    return this->Overlap(bbLineSegment);
+    return this->overlap(bb_line_segment);
 }

@@ -19,7 +19,7 @@ public:
     /// Horizontal position.
     Point xy() const { return _xy; }
 
-    std::size_t region() const { return _regionId; }
+    std::size_t region() const { return _region_id; }
 
     /// Cache of z coordinate.
     double z() const { return _z; }
@@ -45,16 +45,16 @@ private:
     Location(
         const Geometry* geometry,
         Point xy,
-        std::size_t regionId,
+        std::size_t region_id,
         SurfaceMesh::Face_index face,
         double z)
-        : _geometry(geometry), _xy(xy), _regionId(regionId), _face(face), _z(z)
+        : _geometry(geometry), _xy(xy), _region_id(region_id), _face(face), _z(z)
     {
     }
 
     const Geometry* _geometry;
     Point _xy;
-    std::size_t _regionId;
+    std::size_t _region_id;
     SurfaceMesh::Face_index _face; // cache; always valid (move throws before invalidating)
     double _z; // cache
 };

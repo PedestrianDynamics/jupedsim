@@ -22,11 +22,11 @@ concept ToStringResult = std::same_as<std::remove_cvref_t<T>, std::string> ||
 
 template <typename T>
 concept HasToString = requires(const T& value) {
-    { value.ToString() } -> ToStringResult;
+    { value.to_string() } -> ToStringResult;
 };
 
 template <typename T>
-auto makeFormatFn()
+auto make_format_fn()
 {
     using Stored = std::decay_t<T>;
     if constexpr(fmt::formattable<Stored, char>) {
@@ -36,7 +36,7 @@ auto makeFormatFn()
     } else if constexpr(HasToString<Stored>) {
         return [](const std::any& any, fmt::format_context& ctx) {
             const auto& value = std::any_cast<const Stored&>(any);
-            return fmt::format_to(ctx.out(), "{}", value.ToString());
+            return fmt::format_to(ctx.out(), "{}", value.to_string());
         };
     } else {
         return [](const std::any& any, fmt::format_context& ctx) {

@@ -13,11 +13,11 @@ public:
     TacticalDecisionSystem(TacticalDecisionSystem&& other) = delete;
     TacticalDecisionSystem& operator=(TacticalDecisionSystem&& other) = delete;
 
-    void Run(RoutingEngine& routingEngine, auto&& agents) const
+    void run(RoutingEngine& routing_engine, auto&& agents) const
     {
         for(auto& agent : agents) {
-            agent.routeOrientation =
-                routingEngine.GetOrientation(agent.location, agent.finalTarget);
+            agent.route_orientation =
+                routing_engine.get_orientation(agent.location, agent.final_target);
         }
     }
 };

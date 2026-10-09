@@ -47,7 +47,7 @@ public:
               std::find_if(
                   current,
                   end,
-                  [this](const LineSegment& ls) { return ls.DistTo(_p) <= _distance; }))
+                  [this](const LineSegment& ls) { return ls.dist_to(_p) <= _distance; }))
         , _end(end)
     {
     }
@@ -63,7 +63,7 @@ public:
     {
         do {
             ++_current;
-        } while(_current != _end && _current->DistTo(_p) > _distance);
+        } while(_current != _end && _current->dist_to(_p) > _distance);
         return *this;
     }
 
@@ -80,16 +80,16 @@ public:
 
 /// Encodes a cell in the geometry grid.
 /// Cells are defined on the intervalls [min.x, min.x + extend), [min.y, min.y + extend)
-const int CELL_EXTEND = 4;
+const int cell_extend = 4;
 using Cell = Point;
 
 /// Checks if two Cells are N4 neighbors: Is it one of the 4 non-diagonal surrounding cells?
-bool IsN4Adjacent(const Cell& a, const Cell& b);
+bool is_n4_adjacent(const Cell& a, const Cell& b);
 
 /// Creates a cell from a position.
-/// Cells are always alligned to multiples of CELL_EXTEND. Cells are defined in worldcoordinates NOT
+/// Cells are always alligned to multiples of cell_extend. Cells are defined in worldcoordinates NOT
 /// indices.
-Cell makeCell(Point p);
+Cell make_cell(Point p);
 
 template <>
 struct std::hash<Cell> {
@@ -101,14 +101,14 @@ struct std::hash<Cell> {
 };
 
 /// Creates all cells that are trouched by the linesegment
-std::set<Cell> cellsFromLineSegment(LineSegment ls);
+std::set<Cell> cells_from_line_segment(LineSegment ls);
 
 /// Cell membership and the search radius are computed from the inflated bounds of a segment.
 inline AABB search_bounds(const LineSegment& ls, double radius)
 {
     const AABB bounds({ls.p1, ls.p2});
     const Point extend(radius, radius);
-    return AABB(bounds.BottomLeft() - extend, bounds.TopRight() + extend);
+    return AABB(bounds.bottom_left() - extend, bounds.top_right() + extend);
 }
 
 /// Spatial grid over a set of line segments (like walls or seams).
@@ -117,7 +117,7 @@ class SegmentGrid
 private:
     std::vector<LineSegment> _segments;
     std::unordered_map<Cell, std::set<LineSegment>> _grid{};
-    std::unordered_map<Cell, std::vector<LineSegment>> _approximateGrid{};
+    std::unordered_map<Cell, std::vector<LineSegment>> _approximate_grid{};
 
 public:
     using LineSegmentRange = IteratorPair<DistanceQueryIterator>;
@@ -126,12 +126,12 @@ public:
     explicit SegmentGrid(std::vector<LineSegment> segments) : _segments(std::move(segments))
     {
         for(const auto& segment : _segments) {
-            for(const auto& cell : cellsFromLineSegment(segment)) {
+            for(const auto& cell : cells_from_line_segment(segment)) {
                 _grid[cell].insert(segment);
             }
-            insertIntoApproximateGrid(segment);
+            insert_into_approximate_grid(segment);
         }
-        for(auto& [_, vec] : _approximateGrid) {
+        for(auto& [_, vec] : _approximate_grid) {
             vec.shrink_to_fit();
         }
     }
@@ -140,33 +140,33 @@ public:
     /// @param distance from reference point
     /// @param p reference point
     /// @return iterator_pair to all linesegments in range
-    LineSegmentRange LineSegmentsInDistanceTo(double distance, Point p) const
+    LineSegmentRange line_segments_in_distance_to(double distance, Point p) const
     {
         return LineSegmentRange{
             DistanceQueryIterator{distance, p, _segments.cbegin(), _segments.cend()},
             DistanceQueryIterator{distance, p, _segments.cend(), _segments.cend()}};
     }
 
-    LineSegmentRange LineSegmentsInApproxDistanceTo(Point p) const
+    LineSegmentRange line_segments_in_approx_distance_to(Point p) const
     {
         constexpr double inf = std::numeric_limits<double>::infinity();
         static const std::vector<LineSegment> empty{};
-        const auto it = _approximateGrid.find(makeCell(p));
-        const auto& vec = (it != _approximateGrid.end()) ? it->second : empty;
+        const auto it = _approximate_grid.find(make_cell(p));
+        const auto& vec = (it != _approximate_grid.end()) ? it->second : empty;
         return {
             DistanceQueryIterator(inf, p, vec.begin(), vec.end()),
             DistanceQueryIterator(inf, p, vec.end(), vec.end())};
     }
 
     /// Smallest radius for which the approximate query is meaningful (the grid cell size).
-    double MinApproxRadius() const { return CELL_EXTEND; }
+    double min_approx_radius() const { return cell_extend; }
 
     /// Performs a linesegment intersection versus every indexed segment.
     /// @param linesegment to test for intersection with the indexed segments
     /// @return if any indexed segment was intersected.
-    bool IntersectsAny(const LineSegment& linesegment) const
+    bool intersects_any(const LineSegment& linesegment) const
     {
-        for(const auto& cell : cellsFromLineSegment(linesegment)) {
+        for(const auto& cell : cells_from_line_segment(linesegment)) {
             const auto iter = _grid.find(cell);
             if(iter == std::end(_grid)) {
                 continue;
@@ -184,21 +184,21 @@ public:
     }
 
 private:
-    void insertIntoApproximateGrid(const LineSegment& segment)
+    void insert_into_approximate_grid(const LineSegment& segment)
     {
-        constexpr double searchRadius = 4.;
-        const AABB bounds = search_bounds(segment, searchRadius);
-        const auto bottomLeft = makeCell(bounds.BottomLeft());
-        const auto topRight = makeCell(bounds.TopRight());
+        constexpr double search_radius = 4.;
+        const AABB bounds = search_bounds(segment, search_radius);
+        const auto bottom_left = make_cell(bounds.bottom_left());
+        const auto top_right = make_cell(bounds.top_right());
 
-        for(double x = bottomLeft.x; x <= topRight.x; x += CELL_EXTEND) {
-            for(double y = bottomLeft.y; y <= topRight.y; y += CELL_EXTEND) {
-                const auto cell = makeCell({x, y});
-                const AABB cellWithSearchRadius(
-                    {cell.x - searchRadius, cell.y - searchRadius},
-                    {cell.x + searchRadius + CELL_EXTEND, cell.y + searchRadius + CELL_EXTEND});
-                if(cellWithSearchRadius.Intersects(segment)) {
-                    _approximateGrid[cell].push_back(segment);
+        for(double x = bottom_left.x; x <= top_right.x; x += cell_extend) {
+            for(double y = bottom_left.y; y <= top_right.y; y += cell_extend) {
+                const auto cell = make_cell({x, y});
+                const AABB cell_with_search_radius(
+                    {cell.x - search_radius, cell.y - search_radius},
+                    {cell.x + search_radius + cell_extend, cell.y + search_radius + cell_extend});
+                if(cell_with_search_radius.intersects(segment)) {
+                    _approximate_grid[cell].push_back(segment);
                 }
             }
         }

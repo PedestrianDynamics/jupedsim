@@ -15,35 +15,35 @@ class AgentView;
 struct GenericAgent;
 
 template <typename T>
-void validateConstraint(
+void validate_constraint(
     T value,
-    T valueMin,
-    T valueMax,
+    T value_min,
+    T value_max,
     const std::string& name,
-    bool excludeMin = false)
+    bool exclude_min = false)
 {
-    if(excludeMin) {
-        if(value <= valueMin || value > valueMax) {
+    if(exclude_min) {
+        if(value <= value_min || value > value_max) {
             throw SimulationError(
                 "Model constraint violation: {} {} not in allowed range, "
                 "{} needs to be in ({},{}]",
                 name,
                 value,
                 name,
-                valueMin,
-                valueMax);
+                value_min,
+                value_max);
         }
 
     } else {
-        if(value < valueMin || value > valueMax) {
+        if(value < value_min || value > value_max) {
             throw SimulationError(
                 "Model constraint violation: {} {} not in allowed range, "
                 "{} needs to be in [{},{}]",
                 name,
                 value,
                 name,
-                valueMin,
-                valueMax);
+                value_min,
+                value_max);
         }
     }
 }
@@ -54,16 +54,16 @@ public:
     OperationalModel() = default;
     virtual ~OperationalModel() = default;
 
-    virtual OperationalModelType Type() const = 0;
+    virtual OperationalModelType type() const = 0;
 
     /// Computes the agent's model state for the next iteration and returns how far it
     /// wants to move during this step. "next" arrives as an exact copy of "current";
     /// implementations overwrite only the fields they change. The returned movement is
     /// binding: the framework applies it as is.
-    virtual Point ComputeNextState(
+    virtual Point compute_next_state(
         const OperationalModelState& current,
         OperationalModelState& next,
         const AgentStep& step) const = 0;
 
-    virtual void CheckModelConstraint(const GenericAgent& agent, const AgentView& view) const = 0;
+    virtual void check_model_constraint(const GenericAgent& agent, const AgentView& view) const = 0;
 };

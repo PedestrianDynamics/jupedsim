@@ -37,8 +37,8 @@ public:
     static void enable();
     static void disable();
 
-    static void dumpAndReset(const std::string& filename);
-    inline bool isEnabled() const { return enabled; }
+    static void dump_and_reset(const std::string& filename);
+    inline bool is_enabled() const { return _enabled; }
 
 private:
     Profiler() = default;
@@ -47,9 +47,9 @@ private:
     Profiler(Profiler&&) = delete;
     Profiler& operator=(Profiler&&) = delete;
 
-    void createSession();
-    void writeAndResetSession(const std::string& filename);
-    bool enabled{false};
-    std::unique_ptr<perfetto::TracingSession> tracing_session{};
-    std::string temp_trace_path{};
+    void create_session();
+    void write_and_reset_session(const std::string& filename);
+    bool _enabled{false};
+    std::unique_ptr<perfetto::TracingSession> _tracing_session{};
+    std::string _temp_trace_path{};
 };

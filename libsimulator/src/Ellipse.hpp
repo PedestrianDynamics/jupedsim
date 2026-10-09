@@ -6,17 +6,17 @@
 class Ellipse
 {
 public:
-    double Av{0.53};
-    double Amin{0.18};
-    double Bmax{0.25};
-    double Bmin{0.20};
+    double av{0.53};
+    double amin{0.18};
+    double bmax{0.25};
+    double bmin{0.20};
 
 public:
-    double GetEA(double speed) const; // ellipse semi-axis in the direction of the velocity
+    double get_ea(double speed) const; // ellipse semi-axis in the direction of the velocity
     // ellipse semi-axis in the orthogonal direction of the velocity
-    double GetEB(double scale) const;
+    double get_eb(double scale) const;
     // Effective distance between two ellipses
-    double EffectiveDistanceToEllipse(
+    double effective_distance_to_ellipse(
         const Ellipse& other,
         Point center_first,
         Point center_second,
@@ -27,7 +27,7 @@ public:
         const Point& orientation_first,
         const Point& orientation_second) const;
     // Schnittpunkt der Ellipse mit der Gerade durch P und AP (=ActionPoint von E)
-    Point PointOnEllipse(
+    Point point_on_ellipse(
         const Point& p,
         double scale,
         const Point& center,

@@ -50,7 +50,7 @@ public:
     /// segments of one region meet only at their endpoints. split_into_regions() guarantees
     /// this; a region map produced by any other means must satisfy it too, or what is answered
     /// at coincident geometry is best effort.
-    virtual std::vector<LineSegment> Query(const Location& loc, double maximum_distance) = 0;
+    virtual std::vector<LineSegment> query(const Location& loc, double maximum_distance) = 0;
 };
 
 //==================================================================================================
@@ -63,11 +63,11 @@ public:
 class NaiveBoundaryIndex final : public BoundaryIndex
 {
 private:
-    std::vector<SegmentGrid> regions;
+    std::vector<SegmentGrid> _regions;
 
 public:
     explicit NaiveBoundaryIndex(std::vector<SegmentGrid> regions);
-    std::vector<LineSegment> Query(const Location& loc, double maximum_distance) override;
+    std::vector<LineSegment> query(const Location& loc, double maximum_distance) override;
 };
 
 //==================================================================================================
@@ -94,12 +94,12 @@ using RegionGraph = boost::adjacency_list<
 class PortalBoundaryIndex final : public BoundaryIndex
 {
 private:
-    std::unique_ptr<RegionGraph> g{};
+    std::unique_ptr<RegionGraph> _g{};
 
 public:
     explicit PortalBoundaryIndex(std::unique_ptr<RegionGraph> graph);
 
-    std::vector<LineSegment> Query(const Location& loc, double maximum_distance) override;
+    std::vector<LineSegment> query(const Location& loc, double maximum_distance) override;
 };
 
 //==================================================================================================
@@ -107,20 +107,20 @@ public:
 //==================================================================================================
 /// @precondition mesh has been split into region.
 std::unique_ptr<BoundaryIndex>
-MakeNaiveBoundaryIndex(const SurfaceMesh& mesh, const RegionSplit& region_split);
+make_naive_boundary_index(const SurfaceMesh& mesh, const RegionSplit& region_split);
 
 /// @precondition mesh has been split into region.
 std::unique_ptr<BoundaryIndex>
-MakePortalBoundaryIndex(const SurfaceMesh& mesh, const RegionSplit& region_split);
+make_portal_boundary_index(const SurfaceMesh& mesh, const RegionSplit& region_split);
 
 //==================================================================================================
 // Supporting code
 //==================================================================================================
 std::tuple<SurfaceMesh::Face_index, SurfaceMesh::Halfedge_index>
-IncidentFaceAndHalfedge(const SurfaceMesh& mesh, SurfaceMesh::Edge_index e);
+incident_face_and_halfedge(const SurfaceMesh& mesh, SurfaceMesh::Edge_index e);
 
 std::vector<SegmentGrid>
-CreatePerRegionSegmentGrids(const SurfaceMesh& mesh, const RegionSplit& region_split);
+create_per_region_segment_grids(const SurfaceMesh& mesh, const RegionSplit& region_split);
 
 std::unique_ptr<RegionGraph>
-CreateRegionGraph(const SurfaceMesh& mesh, const RegionSplit& region_split);
+create_region_graph(const SurfaceMesh& mesh, const RegionSplit& region_split);

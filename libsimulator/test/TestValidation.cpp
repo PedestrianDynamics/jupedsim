@@ -13,7 +13,7 @@ TEST(NormaliseAndValidateMesh, TriangulatesNonTriangleFaces)
     const auto v3 = mesh.add_vertex(Point3D{0, 10, 0});
     mesh.add_face(v0, v1, v2, v3);
 
-    NormaliseAndValidateMesh(mesh);
+    normalise_and_validate_mesh(mesh);
 
     EXPECT_TRUE(CGAL::is_triangle_mesh(mesh));
     EXPECT_EQ(mesh.number_of_faces(), 2u);

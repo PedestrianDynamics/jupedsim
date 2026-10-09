@@ -9,17 +9,17 @@
 #include <tuple>
 #include <vector>
 
-std::tuple<double, double> intoTuple(const Point& p)
+std::tuple<double, double> into_tuple(const Point& p)
 {
     return std::make_tuple(p.x, p.y);
 }
 
-Point intoPoint(const std::tuple<double, double>& p)
+Point into_point(const std::tuple<double, double>& p)
 {
     return Point{std::get<0>(p), std::get<1>(p)};
 }
 
-std::vector<Point> intoPoints(const std::vector<std::tuple<double, double>>& in)
+std::vector<Point> into_points(const std::vector<std::tuple<double, double>>& in)
 {
     std::vector<Point> points{};
     points.reserve(in.size());
@@ -29,7 +29,7 @@ std::vector<Point> intoPoints(const std::vector<std::tuple<double, double>>& in)
     return points;
 }
 
-std::string cleanDoc(std::string_view raw)
+std::string clean_doc(std::string_view raw)
 {
     // Tabs count as one column; docstrings in the bindings are indented with spaces.
     constexpr std::string_view whitespace = " \t\r";

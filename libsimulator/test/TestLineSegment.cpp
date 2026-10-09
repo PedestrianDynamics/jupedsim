@@ -8,46 +8,46 @@
 
 #include <random>
 
-const double PI = acos(-1);
+const double pi = acos(-1);
 
 TEST(LineSegment, ScalarProduct)
 {
     for(int i : {-5, -4, -3, -2, -1, 1, 2, 3, 4}) {
-        Point P1(PI / i, PI * i);
-        Point P2(i, std::sin(PI / i));
-        LineSegment L1(P1, P2);
-        Point normal = L1.NormalVec();
-        Point diff = P2 - P1;
-        ASSERT_NEAR(normal.ScalarProduct(diff), 0.0, 1.0e-12);
+        Point p1(pi / i, pi * i);
+        Point p2(i, std::sin(pi / i));
+        LineSegment l1(p1, p2);
+        Point normal = l1.normal_vec();
+        Point diff = p2 - p1;
+        ASSERT_NEAR(normal.scalar_product(diff), 0.0, 1.0e-12);
     }
 }
 
 TEST(LineSegment, ShortestPoint)
 {
-    Point PA(-2, 4);
-    Point PB(14, 9);
-    LineSegment L1(PA, PB);
-    const Point& DPAB = PA - PB;
+    Point pa(-2, 4);
+    Point pb(14, 9);
+    LineSegment l1(pa, pb);
+    const Point& dpab = pa - pb;
     for(float i = -20; i < 20; ++i) {
         i = (i == 0) ? 0.5 : i;
-        Point P1(i, std::sin(PI / i));
-        Point P2 = L1.ShortestPoint(P1);
-        double lambda = (P1 - PB).ScalarProduct(DPAB) / DPAB.ScalarProduct(DPAB);
+        Point p1(i, std::sin(pi / i));
+        Point p2 = l1.shortest_point(p1);
+        double lambda = (p1 - pb).scalar_product(dpab) / dpab.scalar_product(dpab);
         if(lambda > 1) {
-            ASSERT_EQ(P2, PA);
+            ASSERT_EQ(p2, pa);
         } else if(lambda < 0) {
-            ASSERT_EQ(P2, PB);
+            ASSERT_EQ(p2, pb);
         } else {
-            ASSERT_NEAR((P2 - P1).ScalarProduct(DPAB), 0.0, 1.0e-12);
+            ASSERT_NEAR((p2 - p1).scalar_product(dpab), 0.0, 1.0e-12);
         }
     }
 }
 
 TEST(LineSegment, DistTo)
 {
-    LineSegment L1(Point(-10, 2), Point(10, 2));
+    LineSegment l1(Point(-10, 2), Point(10, 2));
     for(int i = -10; i < 11; ++i) {
-        ASSERT_DOUBLE_EQ(L1.DistTo(Point(i, i)), abs(i - 2));
+        ASSERT_DOUBLE_EQ(l1.dist_to(Point(i, i)), abs(i - 2));
     }
 }
 

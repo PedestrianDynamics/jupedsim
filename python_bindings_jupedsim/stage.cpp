@@ -11,36 +11,36 @@ namespace py = pybind11;
 
 void init_stage(py::module_& m)
 {
-    constexpr const char* countTargetingDoc = R"(
+    constexpr const char* count_targeting_doc = R"(
         Count the agents currently targeting this stage.
 
         Returns:
             Number of agents whose current target is this stage.
     )";
 
-    py::class_<WaypointProxy> waypointStage(m, "WaypointStage");
-    waypointStage.doc() = cleanDoc(R"(
+    py::class_<WaypointProxy> waypoint_stage(m, "WaypointStage");
+    waypoint_stage.doc() = clean_doc(R"(
         Models a waypoint.
 
         A waypoint is considered to be reached if an agent is within the specified
         distance to the waypoint.
     )");
-    waypointStage.def(
-        "count_targeting", &WaypointProxy::CountTargeting, cleanDoc(countTargetingDoc).c_str());
+    waypoint_stage.def(
+        "count_targeting", &WaypointProxy::count_targeting, clean_doc(count_targeting_doc).c_str());
 
-    py::class_<ExitProxy> exitStage(m, "ExitStage");
-    exitStage.doc() = cleanDoc(R"(
+    py::class_<ExitProxy> exit_stage(m, "ExitStage");
+    exit_stage.doc() = clean_doc(R"(
         Models an exit.
 
         Agents entering the polygon defining the exit will be removed at the
         beginning of the next iteration, i.e. agents will be inside the specified
         polygon for one frame.
     )");
-    exitStage.def(
-        "count_targeting", &ExitProxy::CountTargeting, cleanDoc(countTargetingDoc).c_str());
+    exit_stage.def(
+        "count_targeting", &ExitProxy::count_targeting, clean_doc(count_targeting_doc).c_str());
 
-    py::class_<DirectSteeringProxy> steeringStage(m, "DirectSteeringStage");
-    steeringStage.doc() = cleanDoc(R"(
+    py::class_<DirectSteeringProxy> steering_stage(m, "DirectSteeringStage");
+    steering_stage.doc() = clean_doc(R"(
         Models a direct steering stage.
 
         This stage allows a direct control of the target the agent is walking to,
@@ -49,8 +49,8 @@ void init_stage(py::module_& m)
         A direct steering stage can only be used if it is the only stage in a
         journey.
     )");
-    steeringStage.def(
+    steering_stage.def(
         "count_targeting",
-        &DirectSteeringProxy::CountTargeting,
-        cleanDoc(countTargetingDoc).c_str());
+        &DirectSteeringProxy::count_targeting,
+        clean_doc(count_targeting_doc).c_str());
 }
