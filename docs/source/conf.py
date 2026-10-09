@@ -111,10 +111,11 @@ suppress_warnings = [
 ]
 
 
-# jupedsim.native and jupedsim.py_jupedsim must be analysed so that autoapi can
-# resolve the re-exports in jupedsim, but their pages would duplicate every
-# native type under an internal path (and make cross-references ambiguous).
-_INTERNAL_PACKAGES = ("jupedsim.native", "jupedsim.py_jupedsim")
+# jupedsim.native must be analysed so that autoapi can resolve the re-exports
+# in jupedsim, but its page would duplicate every native type under an
+# internal path (and make cross-references ambiguous). jupedsim.py_jupedsim is
+# a single stub module and falls under the module rule below.
+_INTERNAL_PACKAGES = ("jupedsim.native",)
 
 
 def skip_rules(app, what, name, obj, skip, options):
@@ -142,21 +143,11 @@ _KNOWN_UNRESOLVED_IMPORT = re.compile(
     r"Cannot resolve import of unknown module "
     r"jupedsim\.internal\.(aabb|grid|tracing) in "
 )
-# pybind11-stubgen lists the bound submodule in the stub's __all__. autoapi
-# does not count submodules as members when it expands the star import in
-# jupedsim.native and warns about this entry; the submodule is internal.
-_KNOWN_INVALID_ALL_ENTRY = re.compile(
-    r"Invalid __all__ entry floorfield in jupedsim\.py_jupedsim$"
-)
 
 
 class _KnownUnresolvedImportFilter(logging.Filter):
     def filter(self, record):
-        message = record.getMessage()
-        return not (
-            _KNOWN_UNRESOLVED_IMPORT.match(message)
-            or _KNOWN_INVALID_ALL_ENTRY.match(message)
-        )
+        return not _KNOWN_UNRESOLVED_IMPORT.match(record.getMessage())
 
 
 # The docs build warns and continues without network. CI builds with -W
