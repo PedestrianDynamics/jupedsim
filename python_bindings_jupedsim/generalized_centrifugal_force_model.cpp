@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "GeneralizedCentrifugalForceModel.hpp"
-#include "OperationalModel.hpp"
+#include "generalized_centrifugal_force_model.hpp"
+
+#include "operational_model.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep
 
 #include <pybind11/cast.h>

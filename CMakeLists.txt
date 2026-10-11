@@ -196,7 +196,7 @@ target_compile_definitions(git-info INTERFACE
     GIT_COMMIT_SUBJECT="${GIT_COMMIT_SUBJECT}"
     GIT_BRANCH="${GIT_BRANCH}"
 )
-configure_file(cmake_templates/BuildInfo.hpp.in ${PROJECT_BINARY_DIR}/generated/build_info/BuildInfo.hpp @ONLY)
+configure_file(cmake_templates/build_info.hpp.in ${PROJECT_BINARY_DIR}/generated/build_info/build_info.hpp @ONLY)
 add_library(build_info INTERFACE)
 target_include_directories(build_info INTERFACE
     ${PROJECT_BINARY_DIR}/generated/build_info
@@ -368,7 +368,7 @@ endif()
 ################################################################################
 # clang-tidy (naming convention and the checks listed in .clang-tidy)
 ################################################################################
-# Generated headers live in the build dir (BuildInfo.hpp, corrosion cxxbridge); a config
+# Generated headers live in the build dir (build_info.hpp, corrosion cxxbridge); a config
 # with no checks there keeps them silent whatever filter a caller uses.
 file(WRITE ${PROJECT_BINARY_DIR}/.clang-tidy "---\n# Generated code is never checked.\nChecks: '-*'\n")
 if(UNIX AND WITH_TIDY)

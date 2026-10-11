@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "Geometry/Geometry.hpp" // IWYU pragma: keep
-#include "Geometry/WalkableSurface.hpp"
+#include "geometry/walkable_surface.hpp"
+
+#include "geometry/geometry.hpp" // IWYU pragma: keep
 #include "type_casters.hpp"
 
 #include <pybind11/pybind11.h>

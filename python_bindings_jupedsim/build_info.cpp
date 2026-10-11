@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "BuildInfo.hpp"
+#include "build_info.hpp"
+
 #include "conversion.hpp"
 
 #include <fmt/format.h>
@@ -9,7 +10,7 @@ namespace py = pybind11;
 
 namespace
 {
-/// Python's jupedsim.BuildInfo: reads the constants from BuildInfo.hpp.
+/// Python's jupedsim.BuildInfo: reads the constants from build_info.hpp.
 struct PyBuildInfo {};
 } // namespace
 

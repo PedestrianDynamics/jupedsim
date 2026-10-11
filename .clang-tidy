@@ -30,7 +30,7 @@ Checks: >-
     modernize-use-bool-literals,
     modernize-use-override,
 # Only our own headers; never third-party/ or generated headers in the build dir
-# (BuildInfo.hpp, corrosion cxxbridge). The CMake targets pass the same filter anchored at
+# (build_info.hpp, corrosion cxxbridge). The CMake targets pass the same filter anchored at
 # the checkout root.
 HeaderFilterRegex: '^.*/(libsimulator|libcommon|python_bindings_jupedsim|tools)/'
 CheckOptions:

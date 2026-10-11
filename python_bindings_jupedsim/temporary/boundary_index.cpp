@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "Geometry/BoundaryIndex.hpp"
-#include "Geometry/Geometry.hpp"
+#include "geometry/boundary_index.hpp"
+
+#include "geometry/geometry.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep
 
 #include <pybind11/pybind11.h>
