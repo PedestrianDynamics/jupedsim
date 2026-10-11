@@ -1,0 +1,166 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later
+#pragma once
+
+#include "cfg_cgal.hpp"
+#include "geometry/area_piece.hpp"
+#include "geometry/boundary_index.hpp"
+#include "geometry/location.hpp"
+#include "geometry/region_split.hpp"
+#include "line_segment.hpp"
+#include "point.hpp"
+
+#include <array>
+#include <cstddef>
+#include <memory>
+#include <optional>
+#include <vector>
+
+class WalkableSurface;
+
+/// Default tolerance of get_location_near_z: how far the surface may lie from the given z.
+inline constexpr double near_z_tolerance = 0.1;
+
+/// Height difference above which two people cannot touch each other. This is used
+/// as a quick pre-filter.
+inline constexpr double interaction_height = 2.0;
+
+/// The 3D geometry
+class Geometry
+{
+public:
+    /// Result of projecting a query point onto the surface along -z.
+    struct FaceLocation {
+        SurfaceMesh::Face_index face;
+        K::Point_3 point;
+    };
+
+    /// Seam as edge:
+    /// - ring 0 is boundary, ring k is hole k-1.
+    /// - edge goes from vertex index to successor.
+    /// - source region is always left of seam.
+    struct SeamEdge {
+        size_t ring;
+        size_t index;
+    };
+
+    // Note: There is always at most 1 connection between 2 regions as regions are connected
+    //       via Connectors which add a region of their own.
+    using RegionGraph2D =
+        boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS, PolyWithHoles, SeamEdge>;
+
+    /// 3D mesh. Perform auto-split into regions.
+    explicit Geometry(SurfaceMesh mesh);
+    /// Special constructor for WalkableSurface: Ensures consistency of parameters.
+    explicit Geometry(
+        SurfaceMesh&& mesh,
+        RegionSplit&& region_split,
+        std::unique_ptr<RegionGraph2D> region_graph_2d);
+
+    ~Geometry() = default;
+
+    // Non-copyable and non-movable: Any instance should be held by unique_ptr
+    // to ensure exposed addresses do not move.
+    Geometry(const Geometry&) = delete;
+    Geometry& operator=(const Geometry&) = delete;
+    Geometry(Geometry&&) = delete;
+    Geometry& operator=(Geometry&&) = delete;
+
+    const SurfaceMesh& mesh() const { return _mesh; }
+    const AABBTree& aabb_tree() const { return *_aabb_tree; }
+
+    /// Returns the 2D polygon of the specified region. Throws in case of error.
+    PolyWithHoles polygon(size_t region_id) const;
+
+    /// The exact 2D footprint of every region and the seams between them, as authored.
+    /// `nullptr` unless the geometry was built by `WalkableSurface`.
+    const RegionGraph2D* region_graph_2d() const { return _region_graph_2d.get(); }
+
+    /// Face and on-surface point hit by the -z ray through @p p, or
+    /// `null_face()` if the ray misses the walkable surface.
+    FaceLocation face_below(const Point3D& p) const;
+
+    /// Locate @p xy within region @p region_id: the face of that region whose
+    /// (x,y)-projection contains @p xy, and the on-surface point (its z on that
+    /// face's plane). `null_face()` if @p xy is outside the region's footprint.
+    FaceLocation locate_in_region(std::size_t region_id, const Point2D& xy) const;
+
+    /// Locate @p xy on the mesh face whose surface z is nearest to @p z: among all
+    /// faces stacked over @p xy pick the one whose on-surface z deviates least
+    /// from the provided z. `null_face()` if no mesh face comes within @p tolerance.
+    FaceLocation locate_near_z(const Point2D& xy, double z, double tolerance) const;
+
+    /// The place at (@p x, @p y) in region @p region_id.
+    /// Throws if @p region_id does not exist or (@p x, @p y) is not in it.
+    Location get_location(double x, double y, std::size_t region_id) const;
+
+    /// The place at (@p x, @p y) on the surface closest to height @p z, if one comes within
+    /// @p tol.
+    std::optional<Location>
+    get_location_near_z(double x, double y, double z, double tol = near_z_tolerance) const;
+
+    /// True iff @p p projects (along -z) onto the walkable surface.
+    bool is_valid_location(const Point3D& p) const;
+
+    // -- `EnvironmentQuery` API -----------------------------------------------
+
+    /// The wall segments within @p distance of @p who that @p who can see, each clipped to
+    /// that distance. Sight lines crosses regions seams.
+    std::vector<LineSegment> line_segments_in_range(const Location& who, double distance) const;
+
+    /// True iff the straight horizontal step @p direction, taken from @p who, crosses no
+    /// wall and does not run off the surface.
+    bool no_geometry_between(const Location& who, Point direction) const;
+
+    /// True iff @p who can see @p other: the way there has to be clear, and it has to lead
+    /// to the mesh face @p other is standing on.
+    bool no_geometry_between(const Location& who, const Location& other) const;
+
+    // -- region related API ---------------------------------------------------
+
+    std::size_t region_count() const { return _region_split.count; }
+
+    /// Region id (0-based) of a single face, as assigned by the region overlay.
+    std::size_t region_of(SurfaceMesh::Face_index face) const { return _region[face]; }
+
+    /// One 0-based region id per triangle, in mesh face order.
+    std::vector<std::size_t> region_id_per_face() const;
+
+    const RegionSplit& region_split() const { return _region_split; }
+
+    // -- Stage System API -------------------------------------------------------
+
+    /// Cut @p p along the region footprints into pieces that each lie in one region. The
+    /// region @p region_id seeds the search; regions joined to it by seams inside @p p follow.
+    /// A geometry without a 2D region graph (built from a raw mesh) throws an exception.
+    /// If there is no intersection between @p p and the seed region, an exception is thrown.
+    std::vector<AreaPiece> split_into_region_pieces(const Poly& p, size_t region_id) const;
+    // -- Viewer API -----------------------------------------------------------
+
+    /// Vertex coordinates (x, y, z), indexable 0..n-1.
+    std::vector<std::array<double, 3>> vertices() const;
+
+    /// Triangles as vertex-index triples, matching region_id_per_face() order.
+    std::vector<std::array<std::size_t, 3>> triangles() const;
+
+private:
+    /// Create internal structures like building the AABB tree and the region overlay.
+    void build();
+
+    /// Every face the vertical line through @p xy crosses, with its on-surface point, ordered
+    /// by region id, then by face index.
+    std::vector<FaceLocation> faces_at(const Point2D& xy) const;
+
+    Location location_at(Point xy, const FaceLocation& where) const;
+
+    /// The region a straight horizontal step from @p who along @p direction ends up in, or
+    /// nothing when a wall stops it or it runs off the surface.
+    std::optional<std::size_t> region_reached(const Location& who, Point direction) const;
+
+    SurfaceMesh _mesh{};
+    std::unique_ptr<AABBTree> _aabb_tree{};
+    std::unique_ptr<BoundaryIndex> _boundary_index{};
+    std::unique_ptr<RegionGraph> _region_graph{};
+    std::unique_ptr<RegionGraph2D> _region_graph_2d{};
+    RegionMap _region{};
+    RegionSplit _region_split{};
+};

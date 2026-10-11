@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "AgentView.hpp"
+#include "agent_view.hpp"
+
 #include "callback_views.hpp"
 #include "conversion.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep

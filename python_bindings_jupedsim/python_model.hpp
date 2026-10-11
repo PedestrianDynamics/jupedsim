@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "AgentView.hpp"
-#include "OperationalModels/CustomModel/CustomModel.hpp"
+#include "agent_view.hpp"
+#include "operational_models/custom_model/custom_model.hpp"
 
 #include <pybind11/pybind11.h>
 

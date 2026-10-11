@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "Geometry/WalkableSurface.hpp"
-#include "Point.hpp"
-#include "UniqueID.hpp"
+#include "geometry/walkable_surface.hpp"
+#include "point.hpp"
+#include "unique_id.hpp"
 
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <pybind11/pybind11.h>

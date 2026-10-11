@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "conversion.hpp"
 
-#include "Point.hpp"
+#include "point.hpp"
 
 #include <algorithm>
 #include <string>

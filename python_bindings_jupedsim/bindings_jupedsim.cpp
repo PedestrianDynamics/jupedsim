@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "SimulationError.hpp"
 #include "conversion.hpp"
+#include "simulation_error.hpp"
 
 #include <pybind11/detail/common.h>
 #include <pybind11/pybind11.h>

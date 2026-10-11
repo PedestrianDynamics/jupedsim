@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "Geometry/Validation.hpp"
+#include "geometry/validation.hpp"
 
 #include <CGAL/IO/polygon_mesh_io.h>
 #include <CGAL/Polygon_mesh_processing/IO/polygon_mesh_io.h>

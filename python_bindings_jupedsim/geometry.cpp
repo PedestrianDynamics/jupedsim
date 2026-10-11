@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "Geometry/Geometry.hpp"
+#include "geometry/geometry.hpp"
 
-#include "Geometry/Validation.hpp"
-#include "GeometryBuilder.hpp"
-#include "Point.hpp"
-#include "Polygon.hpp"
-#include "SimulationError.hpp"
 #include "conversion.hpp"
+#include "geometry/validation.hpp"
+#include "geometry_builder.hpp"
+#include "point.hpp"
+#include "polygon.hpp"
+#include "simulation_error.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep
 
 #include <CGAL/Polygon_mesh_processing/IO/polygon_mesh_io.h>

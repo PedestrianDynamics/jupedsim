@@ -1,0 +1,137 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later
+#include "geometry/validation.hpp"
+
+#include "simulation_error.hpp"
+
+#include <CGAL/Polygon_mesh_processing/compute_normal.h>
+#include <CGAL/Polygon_mesh_processing/connected_components.h>
+#include <CGAL/Polygon_mesh_processing/orientation.h>
+#include <CGAL/Polygon_mesh_processing/self_intersections.h>
+#include <CGAL/Polygon_mesh_processing/triangulate_faces.h>
+#include <CGAL/boost/graph/helpers.h>
+#include <boost/property_map/property_map.hpp>
+
+#include <algorithm>
+#include <cmath>
+#include <iterator>
+#include <numbers>
+#include <optional>
+#include <utility>
+#include <vector>
+
+bool is_walkable_normal(const Vector3D& n)
+{
+    constexpr double max_incline_deg = 50.0;
+    constexpr double max_incline_rad = max_incline_deg * std::numbers::pi / 180.0;
+    // @TODO(kkratz): Replace with constexpr when moving to C++23
+    static const double min_z = std::cos(max_incline_rad);
+    return n.z() >= min_z;
+}
+
+namespace
+{
+std::optional<std::pair<SurfaceMesh::Face_index, SurfaceMesh::Face_index>>
+first_self_intersection(const SurfaceMesh& mesh)
+{
+    std::vector<std::pair<SurfaceMesh::Face_index, SurfaceMesh::Face_index>> intersecting{};
+    CGAL::Polygon_mesh_processing::self_intersections(mesh, std::back_inserter(intersecting));
+    if(intersecting.empty()) {
+        return std::nullopt;
+    }
+    return intersecting.front();
+}
+} // namespace
+
+bool is_face_in_mesh_planar(
+    const SurfaceMesh& mesh,
+    FaceDescriptor<SurfaceMesh> face,
+    std::vector<VertexDescriptor<SurfaceMesh>>& buffer)
+{
+    buffer.clear();
+    for(auto half_edge : CGAL::halfedges_around_face(CGAL::halfedge(face, mesh), mesh)) {
+        buffer.emplace_back(CGAL::source(half_edge, mesh));
+    }
+
+    if(buffer.size() < 3) {
+        return false;
+    }
+
+    const auto& p0 = mesh.point(buffer[0]);
+    const auto& p1 = mesh.point(buffer[1]);
+    const auto& p2 = mesh.point(buffer[2]);
+
+    if(CGAL::collinear(p0, p1, p2)) {
+        return false;
+    }
+
+    return std::all_of(std::begin(buffer), std::end(buffer), [&p0, &p1, &p2, &mesh](auto v) {
+        return CGAL::coplanar(p0, p1, p2, mesh.point(v));
+    });
+}
+
+bool all_faces_in_mesh_planar(const SurfaceMesh& mesh)
+{
+    std::vector<VertexDescriptor<SurfaceMesh>> buffer{};
+    buffer.reserve(3);
+    return std::all_of(
+        std::begin(CGAL::faces(mesh)), std::end(CGAL::faces(mesh)), [&buffer, &mesh](auto face) {
+            return is_face_in_mesh_planar(mesh, face, buffer);
+        });
+}
+
+void normalise_and_validate_mesh(SurfaceMesh& mesh, const RegionMap* regions)
+{
+    namespace pmp = CGAL::Polygon_mesh_processing;
+    if(!CGAL::is_triangle_mesh(mesh)) {
+        pmp::triangulate_faces(mesh);
+    }
+
+    if(mesh.number_of_faces() == 0) {
+        throw SimulationError("No Geometry defined.");
+    }
+
+    if(!all_faces_in_mesh_planar(mesh)) {
+        throw SimulationError("Not all faces are planar.");
+    }
+
+    const auto n = pmp::compute_face_normal(*std::begin(CGAL::faces(mesh)), mesh);
+    if(!is_walkable_normal(n)) {
+        pmp::reverse_face_orientations(mesh);
+    }
+
+    for(auto&& face : CGAL::faces(mesh)) {
+        const auto n = pmp::compute_face_normal(face, mesh);
+        if(!is_walkable_normal(n)) {
+            throw SimulationError("Face {} inclination exceeds 50deg.", face.idx());
+        }
+    }
+
+    if(const auto intersection = first_self_intersection(mesh)) {
+        if(regions == nullptr) {
+            throw SimulationError("Mesh faces pass through each other.");
+        }
+        throw SimulationError(
+            "Region {} and region {} pass through each other.",
+            (*regions)[intersection->first],
+            (*regions)[intersection->second]);
+    }
+
+    std::vector<size_t> component(mesh.number_of_faces(), 0);
+    const auto component_of =
+        boost::make_iterator_property_map(std::begin(component), get(CGAL::face_index, mesh));
+    const auto count = pmp::connected_components(mesh, component_of);
+    if(count > 1) {
+        if(regions == nullptr) {
+            throw SimulationError("Expected exactly 1 connected component, got: {}", count);
+        }
+        const auto first = *mesh.faces().begin();
+        for(const auto face : mesh.faces()) {
+            if(component[face] != component[first]) {
+                throw SimulationError(
+                    "Region {} is not connected to region {}.",
+                    (*regions)[face],
+                    (*regions)[first]);
+            }
+        }
+    }
+}

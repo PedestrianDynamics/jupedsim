@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "transition.hpp"
 
-#include "Journey.hpp"
-#include "Stage.hpp"
 #include "conversion.hpp"
+#include "journey.hpp"
+#include "stage.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep
 
 #include <pybind11/pybind11.h>

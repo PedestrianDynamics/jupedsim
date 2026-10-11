@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "AnticipationVelocityModel.hpp"
-#include "OperationalModel.hpp"
+#include "anticipation_velocity_model.hpp"
+
+#include "operational_model.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep
 
 #include <pybind11/cast.h>
