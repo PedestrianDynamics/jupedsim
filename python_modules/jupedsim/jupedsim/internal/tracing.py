@@ -3,7 +3,7 @@
 import functools
 from contextlib import contextmanager
 
-import jupedsim.native as py_jps
+from jupedsim.pyjupedsim import _Simulation, end_trace_event, start_trace_event
 
 
 class Timer:
@@ -12,7 +12,7 @@ class Timer:
     internally to measure the time spent in different stages of the simulation.
     """
 
-    def __init__(self, sim_object: py_jps.Simulation, timer_log_level: int = 0):
+    def __init__(self, sim_object: _Simulation, timer_log_level: int = 0):
         self._obj = sim_object
         self._obj.set_timer_log_level(timer_log_level)
         self.push_timer("Total Simulation Time")
@@ -158,11 +158,11 @@ def trace_event(func=None, *, name=None):
                 event_name = f"{fn.__name__}()"
             else:
                 event_name = f"{name}()"
-            py_jps.start_trace_event(event_name)
+            start_trace_event(event_name)
             try:
                 return fn(*args, **kwargs)
             finally:
-                py_jps.end_trace_event()
+                end_trace_event()
 
         return wrapper
 
@@ -173,10 +173,10 @@ def trace_event(func=None, *, name=None):
 
     @contextmanager
     def trace_region(name):
-        py_jps.start_trace_event(name)
+        start_trace_event(name)
         try:
             yield
         finally:
-            py_jps.end_trace_event()
+            end_trace_event()
 
     return trace_region(func)

@@ -1,9 +1,7 @@
 import time
 
 import jupedsim as jps
-import jupedsim.py_jupedsim as native
 import pytest
-from jupedsim.models.collision_free_speed import CollisionFreeSpeedModel
 
 TRACING_FUNCTIONS = [
     "enable_tracing",
@@ -17,8 +15,8 @@ TRACING_FUNCTIONS = [
 
 @pytest.mark.parametrize("name", TRACING_FUNCTIONS)
 def test_tracing_functions_are_native(name):
-    assert getattr(jps, name) is getattr(native, name)
-    assert getattr(jps, name).__doc__
+    assert getattr(jps.pyjupedsim, name) is getattr(jps, name)
+    assert getattr(jps.pyjupedsim, name).__doc__
     assert name in jps.__all__
 
 
@@ -32,15 +30,15 @@ def test_is_tracing_enabled_follows_enable_and_disable():
 
 
 def test_profiler_class_is_gone():
-    assert not hasattr(native, "Profiler")
+    assert not hasattr(jps, "Profiler")
 
 
 def test_trace_event_balanced_when_body_raises(monkeypatch, tmp_path):
     import jupedsim.internal.tracing as tracing
 
     calls = []
-    start = tracing.py_jps.start_trace_event
-    end = tracing.py_jps.end_trace_event
+    start = tracing.start_trace_event
+    end = tracing.end_trace_event
 
     def record_start(name):
         calls.append("start")
@@ -50,8 +48,8 @@ def test_trace_event_balanced_when_body_raises(monkeypatch, tmp_path):
         calls.append("end")
         end()
 
-    monkeypatch.setattr(tracing.py_jps, "start_trace_event", record_start)
-    monkeypatch.setattr(tracing.py_jps, "end_trace_event", record_end)
+    monkeypatch.setattr(tracing, "start_trace_event", record_start)
+    monkeypatch.setattr(tracing, "end_trace_event", record_end)
 
     @tracing.trace_event
     def fails():
@@ -75,7 +73,7 @@ def test_trace_event_balanced_when_body_raises(monkeypatch, tmp_path):
 
 def test_timer_integration_small_simulation(tmp_path):
     """
-    Integration test: exercise the real C++ Timer API exposed via jupedsim.native.
+    Integration test: exercise the real C++ Timer API exposed via jupedsim.pyjupedsim.
     """
     # Build a Simulation with a real model to access the C++-backed Simulation object
     try:
@@ -88,7 +86,9 @@ def test_timer_integration_small_simulation(tmp_path):
     surface.add_region(
         boundary=[(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)]
     )
-    sim = Simulation(model=CollisionFreeSpeedModel(), geometry=surface, dt=0.01)
+    sim = Simulation(
+        model=jps.CollisionFreeSpeedModel(), geometry=surface, dt=0.01
+    )
 
     # underlying C++ simulation object exposed as _obj
     timer = sim.timer

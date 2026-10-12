@@ -51,7 +51,7 @@ std::vector<Point> boundary_without_holes(Area area)
 
 void init_simulation(py::module_& m)
 {
-    py::class_<Simulation>(m, "Simulation")
+    py::class_<Simulation>(m, "_Simulation")
         .def(
             // The model is moved out of the Python object into Simulation. After this constructor
             // returns, the Python model object passed here is disowned/invalid and must not be

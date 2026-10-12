@@ -1,12 +1,13 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 import math
 
+import jupedsim as jps
 import pytest
 import shapely
-from jupedsim import distributions
+from jupedsim import distributions as jps_dist
 
 
-class GridMock(distributions.Grid):
+class GridMock(jps_dist.Grid):
     def __init__(self):
         pass
 
@@ -22,7 +23,7 @@ def test_cell_coord_determination():
 def test_grid_creation():
     box = [(0, 0), (3, 3)]
     distance_to_agents = 0.3
-    grid = distributions.Grid(box, distance_to_agents)
+    grid = jps_dist.Grid(box, distance_to_agents)
     acceptance_rate = 0.01
     assert grid.box == box
     assert abs(grid.c_s_l - 0.21213203435596423) < acceptance_rate
@@ -51,23 +52,17 @@ def test_point_in_circle():
     min_radius, max_radius = 5, 10
     test_point = (2, 2)
     assert (
-        distributions.__is_inside_circle(
-            test_point, mid, min_radius, max_radius
-        )
+        jps_dist.__is_inside_circle(test_point, mid, min_radius, max_radius)
         is False
     )
     test_point = (10, 10)
     assert (
-        distributions.__is_inside_circle(
-            test_point, mid, min_radius, max_radius
-        )
+        jps_dist.__is_inside_circle(test_point, mid, min_radius, max_radius)
         is False
     )
     test_point = (7, 7)
     assert (
-        distributions.__is_inside_circle(
-            test_point, mid, min_radius, max_radius
-        )
+        jps_dist.__is_inside_circle(test_point, mid, min_radius, max_radius)
         is True
     )
 
@@ -91,7 +86,7 @@ def test_bounding_box_determination():
     ]
     s_polygon = shapely.Polygon(polygon)
     expected_box = [(0, 0), (12, 10.5)]
-    assert distributions.__get_bounding_box(s_polygon) == expected_box
+    assert jps_dist.__get_bounding_box(s_polygon) == expected_box
 
 
 def test_minimal_distance_to_polygon():
@@ -108,7 +103,7 @@ def test_minimal_distance_to_polygon():
         ]
     )
     acceptance_rate = 0.01
-    actual_result = distributions.__min_distance_to_polygon(pt, polygon)
+    actual_result = jps_dist.__min_distance_to_polygon(pt, polygon)
     difference = actual_result - expected_result
     assert abs(difference) < acceptance_rate
 
@@ -119,14 +114,14 @@ def test_seed_works_correct_for_determination_by_number():
     distance_to_agents, distance_to_polygon = 0.3, 0.3
     number_of_agents = 100
     set_seed = 1337
-    samples1 = distributions.distribute_by_number(
+    samples1 = jps.distribute_by_number(
         polygon=polygon,
         number_of_agents=number_of_agents,
         distance_to_agents=distance_to_agents,
         distance_to_polygon=distance_to_polygon,
         seed=set_seed,
     )
-    samples2 = distributions.distribute_by_number(
+    samples2 = jps.distribute_by_number(
         polygon=polygon,
         number_of_agents=number_of_agents,
         distance_to_agents=distance_to_agents,
@@ -146,7 +141,7 @@ def test_seed_works_correct_for_determination_in_circles_by_number():
     center_point = (5, 5)
     circle_segment_radii = [(0, 5)]
 
-    samples1 = distributions.distribute_in_circles_by_number(
+    samples1 = jps.distribute_in_circles_by_number(
         polygon=polygon,
         distance_to_agents=distance_to_agents,
         distance_to_polygon=distance_to_polygon,
@@ -156,7 +151,7 @@ def test_seed_works_correct_for_determination_in_circles_by_number():
         seed=set_seed,
         max_iterations=10_000,
     )
-    samples2 = distributions.distribute_in_circles_by_number(
+    samples2 = jps.distribute_in_circles_by_number(
         polygon=polygon,
         distance_to_agents=distance_to_agents,
         distance_to_polygon=distance_to_polygon,
@@ -191,7 +186,7 @@ def test_determination_by_number_creates_correct_points():
     distance_to_agents, distance_to_polygon = 0.3, 0.3
     number_of_agents = 450
     set_seed = 1337
-    samples = distributions.distribute_by_number(
+    samples = jps.distribute_by_number(
         polygon=polygon,
         number_of_agents=number_of_agents,
         distance_to_agents=distance_to_agents,
@@ -227,7 +222,7 @@ def test_determination_by_density_creates_correct_amount():
     density = 2.5
     # 2.5 persons per m²
     set_seed = 1337
-    samples = distributions.distribute_by_density(
+    samples = jps.distribute_by_density(
         polygon=polygon,
         density=density,
         distance_to_agents=distance_to_agents,
@@ -264,7 +259,7 @@ def test_distribution_in_circle_by_number_creates_correct_points():
     center_point = (7.5, 7.5)
     circle_segment_radii = [(0, 5), (6, 7.5)]
 
-    samples = distributions.distribute_in_circles_by_number(
+    samples = jps.distribute_in_circles_by_number(
         polygon=polygon,
         distance_to_agents=distance_to_agents,
         distance_to_polygon=distance_to_polygon,
@@ -280,7 +275,7 @@ def test_distribution_in_circle_by_number_creates_correct_points():
 
     # all created points inside their corresponding circle segment
     while i < number_of_agents[0]:
-        assert distributions.__is_inside_circle(
+        assert jps_dist.__is_inside_circle(
             samples[i],
             center_point,
             circle_segment_radii[0][0],
@@ -288,7 +283,7 @@ def test_distribution_in_circle_by_number_creates_correct_points():
         )
         i = i + 1
     while i < number_of_agents[0] + number_of_agents[1]:
-        assert distributions.__is_inside_circle(
+        assert jps_dist.__is_inside_circle(
             samples[i],
             center_point,
             circle_segment_radii[1][0],
@@ -325,7 +320,7 @@ def test_distribution_in_circle_by_density_creates_correct_amount():
     center_point = (5, 5)
     circle_segment_radii = [(0, 5)]
 
-    samples = distributions.distribute_in_circles_by_density(
+    samples = jps.distribute_in_circles_by_density(
         polygon=polygon,
         distance_to_agents=distance_to_agents,
         distance_to_polygon=distance_to_polygon,
@@ -345,13 +340,13 @@ def test_seed_works_correct_for_distribution_till_full():
     polygon = shapely.Polygon(polygon)
     distance_to_agents, distance_to_polygon = 0.75, 0.75
     set_seed = 1337
-    samples1 = distributions.distribute_until_filled(
+    samples1 = jps.distribute_until_filled(
         polygon=polygon,
         distance_to_agents=distance_to_agents,
         distance_to_polygon=distance_to_polygon,
         seed=set_seed,
     )
-    samples2 = distributions.distribute_until_filled(
+    samples2 = jps.distribute_until_filled(
         polygon=polygon,
         distance_to_agents=distance_to_agents,
         distance_to_polygon=distance_to_polygon,
@@ -384,7 +379,7 @@ def test_distribution_by_percentage_creates_correct_points():
     distance_to_agents = 2.0
     distance_to_polygon = 1.0
     set_seed = 1337
-    samples = distributions.distribute_by_percentage(
+    samples = jps.distribute_by_percentage(
         polygon=polygon,
         percent=percent,
         distance_to_agents=distance_to_agents,
@@ -419,7 +414,7 @@ def test_seed_works_correct_for_distribution_by_percentage():
     distance_to_agents, distance_to_polygon = 0.75, 0.75
     set_seed = 1337
     percent = 73
-    samples1 = distributions.distribute_by_percentage(
+    samples1 = jps.distribute_by_percentage(
         polygon=polygon,
         percent=percent,
         distance_to_agents=distance_to_agents,
@@ -427,7 +422,7 @@ def test_seed_works_correct_for_distribution_by_percentage():
         seed=set_seed,
         max_iterations=750,
     )
-    samples2 = distributions.distribute_by_percentage(
+    samples2 = jps.distribute_by_percentage(
         polygon=polygon,
         percent=percent,
         distance_to_agents=distance_to_agents,
@@ -457,7 +452,7 @@ def test_box_of_intersection():
     center_point = (4, 7)
     outer_radius = 3.5
     expected_box = [(0.5, 4), (7.35329, 10)]
-    actual_box = distributions.__box_of_intersection(
+    actual_box = jps_dist.__box_of_intersection(
         s_polygon, center_point, outer_radius
     )
     exception_rate = 0.01
@@ -473,8 +468,8 @@ def test_catch_wrong_inputs_for_wrong_polygon_type():
     center_point = (0, 0)
     circle_segment_radii, numbers_of_agents = [(1, 3)], [5]
     # polygon is no Shapely Polygon
-    with pytest.raises(distributions.IncorrectParameterError):
-        distributions.__catch_wrong_inputs(
+    with pytest.raises(jps.IncorrectParameterError):
+        jps_dist.__catch_wrong_inputs(
             polygon=polygon,
             center_point=center_point,
             circle_segment_radii=circle_segment_radii,
@@ -487,8 +482,8 @@ def test_catch_wrong_inputs_negativ_value():
     center_point = (0, 0)
     circle_segment_radii = [(-1, 3), (3, 5)]
     numbers_of_agents = [5, 5]
-    with pytest.raises(distributions.NegativeValueError):
-        distributions.__catch_wrong_inputs(
+    with pytest.raises(jps.NegativeValueError):
+        jps_dist.__catch_wrong_inputs(
             polygon=s_polygon,
             center_point=center_point,
             circle_segment_radii=circle_segment_radii,
@@ -511,8 +506,8 @@ def test_catch_wrong_inputs_incorrect_parameter(
     polygon, center_point, circle_segment_radii, numbers_of_agents
 ):
     s_polygon = shapely.Polygon(polygon)
-    with pytest.raises(distributions.IncorrectParameterError):
-        distributions.__catch_wrong_inputs(
+    with pytest.raises(jps.IncorrectParameterError):
+        jps_dist.__catch_wrong_inputs(
             polygon=s_polygon,
             center_point=center_point,
             circle_segment_radii=circle_segment_radii,
@@ -540,8 +535,8 @@ def test_catch_wrong_inputs_overlapping_circles(
     polygon, center_point, circle_segment_radii, numbers_of_agents
 ):
     s_polygon = shapely.Polygon(polygon)
-    with pytest.raises(distributions.OverlappingCirclesError):
-        distributions.__catch_wrong_inputs(
+    with pytest.raises(jps.OverlappingCirclesError):
+        jps_dist.__catch_wrong_inputs(
             polygon=s_polygon,
             center_point=center_point,
             circle_segment_radii=circle_segment_radii,
@@ -604,7 +599,7 @@ def test_distribution_till_full_creates_correct_points(
 ):
     polygon = shapely.Polygon(polygon, holes)
     set_seed = 1337
-    samples = distributions.distribute_until_filled(
+    samples = jps.distribute_until_filled(
         polygon=polygon,
         distance_to_agents=distance_to_agents,
         distance_to_polygon=distance_to_polygon,
@@ -642,7 +637,7 @@ def test_distribute_until_filled_square_within_theoretical_bounds(
     side, distance_to_agents, distance_to_polygon, seed
 ):
     polygon = shapely.Polygon([(0, 0), (side, 0), (side, side), (0, side)])
-    samples = distributions.distribute_until_filled(
+    samples = jps.distribute_until_filled(
         polygon=polygon,
         distance_to_agents=distance_to_agents,
         distance_to_polygon=distance_to_polygon,

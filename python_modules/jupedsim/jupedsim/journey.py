@@ -2,7 +2,7 @@
 
 from typing import Optional
 
-from jupedsim.native import Transition
+from jupedsim.pyjupedsim import Transition
 
 
 class JourneyDescription:

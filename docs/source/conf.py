@@ -64,7 +64,7 @@ intersphinx_mapping = {
 # -- Automatic generation of API doc -----------------------------------------
 # Analyse the imported (built or installed) package, not python_modules/: the
 # native types exist for autoapi only as the pybind11-stubgen stubs
-# (py_jupedsim.pyi) that the build generates into the package.
+# (pyjupedsim.pyi) that the build generates into the package.
 autoapi_dirs = [os.path.dirname(jupedsim.__file__)]
 # A build stage keeps symlinks to deleted sources until CMake re-runs; autoapi
 # would crash on them with a bare FileNotFoundError.
@@ -111,17 +111,12 @@ suppress_warnings = [
 ]
 
 
-# jupedsim.native must be analysed so that autoapi can resolve the re-exports
-# in jupedsim, but its page would duplicate every native type under an
-# internal path (and make cross-references ambiguous). jupedsim.py_jupedsim is
-# a single stub module and falls under the module rule below.
-_INTERNAL_PACKAGES = ("jupedsim.native",)
-
-
+# jupedsim.pyjupedsim must be analysed so that autoapi can resolve the
+# re-exports in jupedsim, but its own page would duplicate every native type
+# under an internal path (and make cross-references ambiguous). It is a single
+# stub module and therefore dropped by the module rule below.
 def skip_rules(app, what, name, obj, skip, options):
     if what == "module":
-        skip = True
-    if what == "package" and name in _INTERNAL_PACKAGES:
         skip = True
     if what == "method":
         if name.endswith("as_native"):
@@ -136,7 +131,7 @@ def skip_rules(app, what, name, obj, skip, options):
 # jupedsim.internal.{aabb,grid,tracing} are excluded via autoapi_ignore, so
 # autoapi cannot resolve imports from them and drops the imported names. Only
 # these known imports are silenced; any other unresolved import (including
-# jupedsim.native, which must resolve through the stubs) fails a -W build.
+# jupedsim.pyjupedsim, which must resolve through the stubs) fails a -W build.
 # Known gap: the Python tracing helpers (Timer, trace_event from
 # jupedsim.internal.tracing) are missing from the API reference.
 _KNOWN_UNRESOLVED_IMPORT = re.compile(

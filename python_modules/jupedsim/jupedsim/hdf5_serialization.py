@@ -70,7 +70,7 @@ import hdf5plugin
 import numpy as np
 import numpy.typing as npt
 
-from jupedsim.native import Geometry, get_build_info
+from jupedsim.pyjupedsim import Geometry, get_build_info
 from jupedsim.serialization import TrajectoryWriter
 from jupedsim.simulation import Simulation
 

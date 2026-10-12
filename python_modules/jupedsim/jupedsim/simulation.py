@@ -4,38 +4,35 @@ from typing import Any, Iterator
 
 import shapely
 
-import jupedsim.native as py_jps
 from jupedsim.agent import Agent
+from jupedsim.custom_model import CustomOperationalModel
 from jupedsim.internal.tracing import Timer
 from jupedsim.journey import JourneyDescription
-from jupedsim.models.anticipation_velocity_model import (
+from jupedsim.pyjupedsim import (
     AnticipationVelocityModel,
     AnticipationVelocityModelState,
-)
-from jupedsim.models.collision_free_speed import (
     CollisionFreeSpeedModel,
     CollisionFreeSpeedModelState,
-)
-from jupedsim.models.collision_free_speed_v2 import (
     CollisionFreeSpeedModelV2,
     CollisionFreeSpeedModelV2State,
-)
-from jupedsim.models.collision_free_speed_v3 import (
     CollisionFreeSpeedModelV3,
     CollisionFreeSpeedModelV3State,
-)
-from jupedsim.models.custom_model import CustomOperationalModel
-from jupedsim.models.generalized_centrifugal_force import (
+    DirectSteeringStage,
+    ExitStage,
     GeneralizedCentrifugalForceModel,
     GeneralizedCentrifugalForceModelState,
-)
-from jupedsim.models.social_force import (
+    Geometry,
+    Location,
+    OperationalModel,
     SocialForceModel,
     SocialForceModelState,
-)
-from jupedsim.models.warp_driver import (
+    WalkableSurface,
     WarpDriverModel,
     WarpDriverModelState,
+    WaypointStage,
+    _CustomModelState,
+    _PythonModel,
+    _Simulation,
 )
 from jupedsim.serialization import TrajectoryWriter
 
@@ -72,7 +69,7 @@ class Simulation:
             | WarpDriverModel
             | CustomOperationalModel
         ),
-        geometry: py_jps.WalkableSurface | py_jps.Geometry,
+        geometry: WalkableSurface | Geometry,
         dt: float = 0.01,
         trajectory_writer: TrajectoryWriter | None = None,
         timer_log_level: int = 1,
@@ -102,10 +99,10 @@ class Simulation:
                 provides a writer that outputs trajectory data in a sqlite database. If you want
                 other formats such as CSV you need to provide your own custom implementation.
         """
-        if isinstance(model, py_jps.OperationalModel):
-            py_jps_model = model
+        if isinstance(model, OperationalModel):
+            the_model = model
         elif isinstance(model, CustomOperationalModel):
-            py_jps_model = py_jps._PythonModel(model)
+            the_model = _PythonModel(model)
         else:
             raise TypeError(
                 "model must be a built-in operational model instance or a "
@@ -113,11 +110,9 @@ class Simulation:
                 f"{type(model).__name__}"
             )
         self._writer = trajectory_writer
-        if isinstance(geometry, py_jps.WalkableSurface):
+        if isinstance(geometry, WalkableSurface):
             geometry = geometry.create_geometry()
-        self._obj = py_jps.Simulation(
-            model=py_jps_model, geometry=geometry, dt=dt
-        )
+        self._obj = _Simulation(model=the_model, geometry=geometry, dt=dt)
         self._timer = Timer(self._obj, timer_log_level=timer_log_level)
 
     def add_waypoint_stage(
@@ -239,13 +234,11 @@ class Simulation:
             journey_id=journey_id,
             stage_id=stage_id,
             position=position,
-            state=py_jps._CustomModelState(state),
+            state=_CustomModelState(state),
             region_id=region_id,
         )
 
-    def get_location(
-        self, x: float, y: float, *, region_id: int
-    ) -> py_jps.Location:
+    def get_location(self, x: float, y: float, *, region_id: int) -> Location:
         """Get the location at ``(x, y)`` in region ``region_id``.
 
         The location stays valid as long as this simulation exists.
@@ -420,7 +413,7 @@ class Simulation:
 
     def get_stage(
         self, stage_id: int
-    ) -> py_jps.WaypointStage | py_jps.ExitStage | py_jps.DirectSteeringStage:
+    ) -> WaypointStage | ExitStage | DirectSteeringStage:
         """Get the stage with the given id.
 
         Args:
@@ -437,7 +430,7 @@ class Simulation:
     def set_tracing(self, status: bool) -> None:
         self._obj.set_tracing(status)
 
-    def get_geometry(self) -> py_jps.Geometry:
+    def get_geometry(self) -> Geometry:
         """Current geometry of the simulation.
 
         Returns:

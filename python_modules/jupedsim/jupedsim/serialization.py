@@ -14,7 +14,7 @@ import typing
 if typing.TYPE_CHECKING:
     from jupedsim.simulation import Simulation
 
-import jupedsim.native as py_jps
+from jupedsim.pyjupedsim import SimulationError
 
 
 class TrajectoryWriter(metaclass=abc.ABCMeta):
@@ -105,7 +105,7 @@ def walkable_area_as_wkt(simulation: Simulation) -> str:
         )
     try:
         return geometry.polygon(region_id=0).as_wkt()
-    except py_jps.SimulationError as e:
+    except SimulationError as e:
         raise TrajectoryWriter.Exception(
             "Cannot write trajectories for a simulation with a geometry "
             "built from a surface "

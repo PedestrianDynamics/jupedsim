@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
 from jupedsim.agent import Agent
+from jupedsim.custom_model import CustomOperationalModel
 from jupedsim.distributions import (
     AgentNumberError,
     IncorrectParameterError,
@@ -16,48 +17,34 @@ from jupedsim.distributions import (
 from jupedsim.hdf5_serialization import Hdf5TrajectoryWriter
 from jupedsim.internal.tracing import Timer, trace_event
 from jupedsim.journey import JourneyDescription
-from jupedsim.models.anticipation_velocity_model import (
-    AnticipationVelocityModel,
-    AnticipationVelocityModelState,
-)
-from jupedsim.models.collision_free_speed import (
-    CollisionFreeSpeedModel,
-    CollisionFreeSpeedModelState,
-)
-from jupedsim.models.collision_free_speed_v2 import (
-    CollisionFreeSpeedModelV2,
-    CollisionFreeSpeedModelV2State,
-)
-from jupedsim.models.collision_free_speed_v3 import (
-    CollisionFreeSpeedModelV3,
-    CollisionFreeSpeedModelV3State,
-)
-from jupedsim.models.custom_model import CustomOperationalModel
-from jupedsim.models.generalized_centrifugal_force import (
-    GeneralizedCentrifugalForceModel,
-    GeneralizedCentrifugalForceModelState,
-)
-from jupedsim.models.social_force import (
-    SocialForceModel,
-    SocialForceModelState,
-)
-from jupedsim.models.warp_driver import (
-    WarpDriverModel,
-    WarpDriverModelState,
-)
-from jupedsim.native import (
+from jupedsim.pyjupedsim import (
     AgentStep,
     AgentView,
+    AnticipationVelocityModel,
+    AnticipationVelocityModelState,
     BuildInfo,
+    CollisionFreeSpeedModel,
+    CollisionFreeSpeedModelState,
+    CollisionFreeSpeedModelV2,
+    CollisionFreeSpeedModelV2State,
+    CollisionFreeSpeedModelV3,
+    CollisionFreeSpeedModelV3State,
     DirectSteeringStage,
     ExitStage,
+    GeneralizedCentrifugalForceModel,
+    GeneralizedCentrifugalForceModelState,
     Geometry,
     Location,
     NeighborView,
     SimulationError,
+    SocialForceModel,
+    SocialForceModelState,
+    SurfaceMeshShortestPathRoutingEngine,
     Transition,
     WalkableSurface,
     WallView,
+    WarpDriverModel,
+    WarpDriverModelState,
     WaypointStage,
     disable_tracing,
     dump_traces,
@@ -131,6 +118,7 @@ __all__ = [
     "SocialForceModel",
     "SocialForceModelState",
     "SqliteTrajectoryWriter",
+    "SurfaceMeshShortestPathRoutingEngine",
     "Timer",
     "TrajectoryWriter",
     "Transition",

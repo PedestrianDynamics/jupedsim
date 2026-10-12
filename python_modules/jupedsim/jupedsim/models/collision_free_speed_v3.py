@@ -34,7 +34,7 @@ of the model as keyword-only constructor arguments with sensible defaults:
 ``radius`` and ``heading_angle``.
 """
 
-from jupedsim.native import (
+from jupedsim.pyjupedsim import (
     CollisionFreeSpeedModelV3,
     CollisionFreeSpeedModelV3State,
 )

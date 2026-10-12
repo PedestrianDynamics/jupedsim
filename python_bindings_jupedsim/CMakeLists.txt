@@ -1,4 +1,4 @@
-add_library(py_jupedsim MODULE
+add_library(pyjupedsim MODULE
     agent.cpp
     agent_view.cpp
     anticipation_velocity_model.cpp
@@ -30,11 +30,11 @@ add_library(py_jupedsim MODULE
     warp_driver_model.cpp
 )
 
-target_include_directories(py_jupedsim PRIVATE
+target_include_directories(pyjupedsim PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-target_link_libraries(py_jupedsim
+target_link_libraries(pyjupedsim
     PRIVATE
         pybind11::module
         pybind11::windows_extras
@@ -45,11 +45,11 @@ target_link_libraries(py_jupedsim
         project_options
 )
 
-pybind11_extension(py_jupedsim)
+pybind11_extension(pyjupedsim)
 
 if(NOT MSVC AND NOT ${CMAKE_BUILD_TYPE} MATCHES Debug|RelWithDebInfo)
     # Strip unnecessary sections of the binary on Linux/macOS
-    pybind11_strip(py_jupedsim)
+    pybind11_strip(pyjupedsim)
 endif()
 
 # staging location of jupedsim python package.
@@ -59,7 +59,7 @@ set(STAGE ${CMAKE_BINARY_DIR}/stage)
 
 # $<1:...> stops multi-config generators (Visual Studio) from appending a
 # per-configuration folder, so the module always lands in the stage.
-set_target_properties(py_jupedsim
+set_target_properties(pyjupedsim
     PROPERTIES
         CXX_VISIBILITY_PRESET "hidden"
         CUDA_VISIBILITY_PRESET "hidden"
@@ -70,8 +70,8 @@ set(PKG_SRC ${CMAKE_SOURCE_DIR}/python_modules/jupedsim/jupedsim)
 
 # Mirror jupedsim python package to build tree
 # Note: package folders are created in place and individual files are symlinked
-# because we build the py_jupedsim.so into this tree. If we would link the whole folder
-# py_jupedsim.so would end up in the source tree.
+# because we build the pyjupedsim.so into this tree. If we would link the whole folder
+# pyjupedsim.so would end up in the source tree.
 # Files are copied instead where symlinks cannot be created (Windows without
 # developer mode); such copies are refreshed on the next configure only.
 file(GLOB_RECURSE PKG_FILES CONFIGURE_DEPENDS RELATIVE ${PKG_SRC} ${PKG_SRC}/*)
@@ -92,33 +92,33 @@ foreach(f IN LISTS PKG_FILES)
 endforeach()
 
 # Stubs are generated directly into the stage. The module has no submodules, so
-# pybind11-stubgen writes a single py_jupedsim.pyi; with submodules it would
-# write a py_jupedsim/ package instead. Build directories created before that
+# pybind11-stubgen writes a single pyjupedsim.pyi; with submodules it would
+# write a pyjupedsim/ package instead. Build directories created before that
 # linked this folder to a separate stubs tree; drop the link.
-set(STUB_DIR ${STAGE}/jupedsim/py_jupedsim)
+set(STUB_DIR ${STAGE}/jupedsim/pyjupedsim)
 if(IS_SYMLINK ${STUB_DIR})
     file(REMOVE ${STUB_DIR})
 endif()
 
 # Stub generation imports the built module, so the build has to be able to run
 # it: wheels are built natively for each architecture, not cross-compiled.
-set(STUB_FILES ${STAGE}/jupedsim/py_jupedsim.pyi)
+set(STUB_FILES ${STAGE}/jupedsim/pyjupedsim.pyi)
 # The module is found via the working directory (python -m puts it first on
 # sys.path), not PYTHONPATH: pip's isolated build exposes the build requirements
 # through PYTHONPATH, so overriding it would hide pybind11-stubgen and shapely.
 # A stub package left by an older layout is removed first: it would shadow
-# py_jupedsim.pyi for type checkers and the stubtest system test.
+# pyjupedsim.pyi for type checkers and the stubtest system test.
 add_custom_command(
     OUTPUT ${STUB_FILES}
     COMMAND ${CMAKE_COMMAND} -E rm -rf ${STUB_DIR}
-    COMMAND ${Python_EXECUTABLE} -m pybind11_stubgen jupedsim.py_jupedsim
+    COMMAND ${Python_EXECUTABLE} -m pybind11_stubgen jupedsim.pyjupedsim
             -o ${STAGE} --exit-code
     WORKING_DIRECTORY ${STAGE}
-    DEPENDS py_jupedsim
-    COMMENT "Generating stubs for jupedsim.py_jupedsim")
-add_custom_target(py_jupedsim_stubs ALL DEPENDS ${STUB_FILES})
+    DEPENDS pyjupedsim
+    COMMENT "Generating stubs for jupedsim.pyjupedsim")
+add_custom_target(pyjupedsim_stubs ALL DEPENDS ${STUB_FILES})
 
 # Wheel contents. scikit-build-core installs only the "python" component; the
 # pure Python package is added via wheel.packages in pyproject.toml.
-install(TARGETS py_jupedsim LIBRARY DESTINATION jupedsim COMPONENT python)
+install(TARGETS pyjupedsim LIBRARY DESTINATION jupedsim COMPONENT python)
 install(FILES ${STUB_FILES} DESTINATION jupedsim COMPONENT python)

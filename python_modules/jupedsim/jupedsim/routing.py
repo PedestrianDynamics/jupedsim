@@ -1,12 +1,12 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
-import jupedsim.native as py_jps
+from jupedsim.pyjupedsim import Geometry, SurfaceMeshShortestPathRoutingEngine
 
 
 class RoutingEngine:
     """RoutingEngine to compute the shortest paths with navigation meshes."""
 
-    def __init__(self, geometry: py_jps.Geometry) -> None:
+    def __init__(self, geometry: Geometry) -> None:
         """Creates a RoutingEngine.
 
         Args:
@@ -14,7 +14,7 @@ class RoutingEngine:
                 :meth:`~jupedsim.WalkableSurface.create_geometry`.
         """
         self._geometry = geometry
-        self._obj = py_jps.SurfaceMeshShortestPathRoutingEngine(self._geometry)
+        self._obj = SurfaceMeshShortestPathRoutingEngine(self._geometry)
 
     def compute_waypoints(
         self, frm: tuple[float, float], to: tuple[float, float]

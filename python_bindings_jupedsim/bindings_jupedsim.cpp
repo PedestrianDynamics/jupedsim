@@ -49,7 +49,7 @@ static void set_all(py::module_& m)
     m.attr("__all__") = names;
 }
 
-PYBIND11_MODULE(py_jupedsim, m)
+PYBIND11_MODULE(pyjupedsim, m)
 {
     py::register_exception<SimulationError>(m, "SimulationError").attr("__doc__") = clean_doc(R"(
         Raised for simulation errors, e.g. when accessing an agent handle whose
