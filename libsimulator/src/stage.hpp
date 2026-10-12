@@ -4,7 +4,6 @@
 #include "destination.hpp"
 #include "generic_agent.hpp"
 #include "geometric_functions.hpp"
-#include "geometry/location.hpp"
 #include "line_segment.hpp"
 #include "point.hpp"
 #include "unique_id.hpp"
@@ -17,45 +16,7 @@
 #include <cstddef>
 #include <iterator>
 #include <unordered_set>
-#include <variant>
 #include <vector>
-
-class BaseStage;
-class Geometry;
-class Simulation;
-
-class BaseProxy
-{
-protected:
-    Simulation* _simulation;
-    BaseStage* _stage;
-
-    BaseProxy(Simulation* simulation, BaseStage* stage) : _simulation(simulation), _stage(stage) {}
-    virtual ~BaseProxy() = default;
-
-public:
-    size_t count_targeting() const;
-};
-
-class WaypointProxy : public BaseProxy
-{
-public:
-    WaypointProxy(Simulation* simulation, BaseStage* stage) : BaseProxy(simulation, stage) {}
-};
-
-class ExitProxy : public BaseProxy
-{
-public:
-    ExitProxy(Simulation* simulation, BaseStage* stage) : BaseProxy(simulation, stage) {}
-};
-
-class DirectSteeringProxy : public BaseProxy
-{
-public:
-    DirectSteeringProxy(Simulation* simulation, BaseStage* stage) : BaseProxy(simulation, stage) {}
-};
-
-using StageProxy = std::variant<WaypointProxy, ExitProxy, DirectSteeringProxy>;
 
 class BaseStage
 {
@@ -70,7 +31,6 @@ public:
     virtual ~BaseStage() = default;
     virtual bool is_completed(const GenericAgent& agent) = 0;
     virtual RoutingTarget target(const GenericAgent& agent) = 0;
-    virtual StageProxy proxy(Simulation* simulation) = 0;
     ID id() const { return _id; }
     size_t count_targeting() const { return _targeting; }
     void increase_targeting() { _targeting = _targeting + 1; }
@@ -102,7 +62,6 @@ public:
     ~Waypoint() override = default;
     bool is_completed(const GenericAgent& agent) override;
     RoutingTarget target(const GenericAgent& agent) override;
-    StageProxy proxy(Simulation* simulation) override;
 };
 
 /// Notifies simulation of all agents that need to be removed at the beginning of the next iteration
@@ -116,7 +75,6 @@ public:
     ~Exit() override = default;
     bool is_completed(const GenericAgent& agent) override;
     RoutingTarget target(const GenericAgent& agent) override;
-    StageProxy proxy(Simulation* simulation) override;
 };
 
 class DirectSteering : public BaseStage
@@ -126,8 +84,4 @@ public:
     ~DirectSteering() override = default;
     bool is_completed(const GenericAgent&) override { return false; };
     RoutingTarget target(const GenericAgent& agent) override;
-    StageProxy proxy(Simulation* simulation) override
-    {
-        return DirectSteeringProxy(simulation, this);
-    };
 };
