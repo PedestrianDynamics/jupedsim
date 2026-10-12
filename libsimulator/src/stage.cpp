@@ -15,14 +15,6 @@
 #include <vector>
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Base Proxy
-////////////////////////////////////////////////////////////////////////////////
-size_t BaseProxy::count_targeting() const
-{
-    return _stage->count_targeting();
-}
-
-////////////////////////////////////////////////////////////////////////////////
 /// Waypoint
 ////////////////////////////////////////////////////////////////////////////////
 Waypoint::Waypoint(Destination destination) : _destination(destination)
@@ -37,11 +29,6 @@ bool Waypoint::is_completed(const GenericAgent& agent)
 RoutingTarget Waypoint::target(const GenericAgent&)
 {
     return _destination;
-}
-
-StageProxy Waypoint::proxy(Simulation* simulation)
-{
-    return WaypointProxy(simulation, this);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -64,11 +51,6 @@ bool Exit::is_completed(const GenericAgent& agent)
 RoutingTarget Exit::target(const GenericAgent&)
 {
     return _destination;
-}
-
-StageProxy Exit::proxy(Simulation* simulation)
-{
-    return ExitProxy(simulation, this);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

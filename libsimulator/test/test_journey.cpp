@@ -84,7 +84,6 @@ TEST(LeastTargetedTransition, NextIsCorrect)
         MOCK_METHOD(size_t, count_targeting, (), (const));
         MOCK_METHOD(bool, is_completed, (const GenericAgent& agent), (override));
         MOCK_METHOD(RoutingTarget, target, (const GenericAgent& agent), (override));
-        MOCK_METHOD(StageProxy, proxy, (Simulation* sim), (override));
         void set_targeting(size_t targeting) { _targeting = targeting; }
     };
 

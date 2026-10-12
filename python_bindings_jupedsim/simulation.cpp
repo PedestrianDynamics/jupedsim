@@ -193,14 +193,11 @@ void init_simulation(py::module_& m)
             })
         .def(
             "get_stage",
-            [](py::object self,
-               uint64_t id) -> py::typing::Union<WaypointProxy, ExitProxy, DirectSteeringProxy> {
-                // A stage object refers to its simulation. The keep-alive is set by hand:
-                // pybind11 3.1.0 runs py::keep_alive<0, 1>() also after a failed argument
-                // conversion and then crashes instead of raising TypeError.
-                auto stage = py::cast(self.cast<Simulation&>().stage(id));
-                py::detail::keep_alive_impl(stage, self);
-                return stage;
+            [](py::object self, uint64_t id) -> py::typing::Union<Waypoint, Exit, DirectSteering> {
+                return py::cast(
+                    self.cast<Simulation&>().stage(id),
+                    py::return_value_policy::reference_internal,
+                    self);
             },
             py::arg("stage_id"))
         .def("set_tracing", [](Simulation& sim, bool status) { sim.set_tracing(status); })

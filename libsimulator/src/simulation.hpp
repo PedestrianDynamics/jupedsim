@@ -95,7 +95,7 @@ public:
     GenericAgent& agent(GenericAgent::ID id);
     AgentContainer<GenericAgent>& agents();
     OperationalModelType model_type() const;
-    StageProxy stage(BaseStage::ID stage_id);
+    const BaseStage* stage(BaseStage::ID stage_id) const;
     /// The geometry this simulation runs on. Borrowed: it lives as long as the simulation.
     const Geometry& geo() const;
     void push_timer(const std::string_view name, size_t probe_log_level = 0);
