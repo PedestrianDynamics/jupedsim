@@ -1,0 +1,4 @@
+baseURL = 'https://example.org/'
+locale = 'en-us'
+title = 'JuPedSim'
+theme = 'hugo-book'

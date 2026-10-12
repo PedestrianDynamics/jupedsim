@@ -1,0 +1,32 @@
+name: Build Website
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build website
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          submodules: true
+
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: "0.167.0"
+
+      - name: Build website
+        run: hugo --source jupedsim.org
+
+      - name: Upload website artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: jupedsim.org
+          path: jupedsim.org/public/
+          if-no-files-found: error
