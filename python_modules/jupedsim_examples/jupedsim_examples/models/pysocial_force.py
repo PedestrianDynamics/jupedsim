@@ -2,8 +2,7 @@
 from dataclasses import dataclass, replace
 
 import numpy as np
-from jupedsim import WallView
-from jupedsim.models.custom_model import CustomOperationalModel
+from jupedsim import CustomOperationalModel, WallView
 
 
 @dataclass(kw_only=True, frozen=True)

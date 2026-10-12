@@ -215,7 +215,7 @@ def test_get_stage_returns_the_native_stage_types(square_room_5x5):
     assert type(waypoint) is jps.WaypointStage
     assert type(exit) is jps.ExitStage
     assert type(steering) is jps.DirectSteeringStage
-    assert jps.WaypointStage.__module__ == "jupedsim.py_jupedsim"
+    assert jps.WaypointStage.__module__ == "jupedsim.pyjupedsim"
     assert "Models a waypoint" in jps.WaypointStage.__doc__
     assert "Models an exit" in jps.ExitStage.__doc__
     assert "direct control of the target" in jps.DirectSteeringStage.__doc__

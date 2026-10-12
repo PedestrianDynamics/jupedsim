@@ -39,7 +39,7 @@ model as keyword-only constructor arguments with sensible defaults:
 ``displacement_x``, ``displacement_y``, ``detour_time`` and ``detour_side``.
 """
 
-from jupedsim.native import (
+from jupedsim.pyjupedsim import (
     WarpDriverModel,
     WarpDriverModelState,
 )

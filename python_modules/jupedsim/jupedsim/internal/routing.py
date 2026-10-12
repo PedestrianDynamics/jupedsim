@@ -1,12 +1,10 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
-import jupedsim.native as py_jps
+import jupedsim.pyjupedsim as jps
 
-BoundaryIndex = py_jps.BoundaryIndex
-Geometry = py_jps.Geometry
-Location = py_jps.Location
-SurfaceMeshShortestPathRoutingEngine = (
-    py_jps.SurfaceMeshShortestPathRoutingEngine
-)
-make_naive_boundary_index = py_jps.make_naive_boundary_index
-make_portal_boundary_index = py_jps.make_portal_boundary_index
+BoundaryIndex = jps.BoundaryIndex
+Geometry = jps.Geometry
+Location = jps.Location
+SurfaceMeshShortestPathRoutingEngine = jps.SurfaceMeshShortestPathRoutingEngine
+make_naive_boundary_index = jps.make_naive_boundary_index
+make_portal_boundary_index = jps.make_portal_boundary_index

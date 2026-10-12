@@ -32,7 +32,7 @@ of the model as keyword-only constructor arguments with sensible defaults:
 ``range_geometry_repulsion``, ``time_gap``, ``desired_speed`` and ``radius``.
 """
 
-from jupedsim.native import (
+from jupedsim.pyjupedsim import (
     CollisionFreeSpeedModelV2,
     CollisionFreeSpeedModelV2State,
 )

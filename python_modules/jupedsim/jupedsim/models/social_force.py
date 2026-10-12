@@ -39,7 +39,7 @@ model as keyword-only constructor arguments with sensible defaults:
 ``force_distance`` (B) and ``radius`` (r).
 """
 
-from jupedsim.native import (
+from jupedsim.pyjupedsim import (
     SocialForceModel,
     SocialForceModelState,
 )

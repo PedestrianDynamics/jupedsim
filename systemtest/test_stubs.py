@@ -3,7 +3,7 @@ import re
 
 from mypy import stubtest
 
-MODULE = "jupedsim.py_jupedsim"
+MODULE = "jupedsim.pyjupedsim"
 
 # Every bound class has metaclass pybind11_builtins.pybind11_type, which the
 # stubs do not declare.
@@ -30,7 +30,6 @@ CLASSES = [
     "NeighborView",
     "OperationalModel",
     "Polygon2D",
-    "Simulation",
     "SocialForceModel",
     "SocialForceModelState",
     "SurfaceMeshShortestPathRoutingEngine",
@@ -42,6 +41,7 @@ CLASSES = [
     "WaypointStage",
     "_CustomModelState",
     "_PythonModel",
+    "_Simulation",
 ]
 
 # Classes without a bound constructor inherit pybind11_object.__init__(*args,

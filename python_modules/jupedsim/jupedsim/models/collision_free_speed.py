@@ -39,7 +39,7 @@ the model as keyword-only constructor arguments with sensible defaults:
 ``radius``.
 """
 
-from jupedsim.native import (
+from jupedsim.pyjupedsim import (
     CollisionFreeSpeedModel,
     CollisionFreeSpeedModelState,
 )

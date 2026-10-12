@@ -229,7 +229,7 @@ if(BUILD_TESTS)
         COMMAND ${pytest-wrapper-out} -vv -s
                 --basetemp=${PROJECT_BINARY_DIR}/systemtest-out
                 --junit-xml=result-pythontests.xml
-        DEPENDS py_jupedsim py_jupedsim_stubs
+        DEPENDS pyjupedsim pyjupedsim_stubs
         USES_TERMINAL
     )
     set(unittests_dependency_list libsimulator-unittests libfloorfield-unittests)
@@ -289,13 +289,13 @@ if(BUILD_SITE AND UNIX)
     add_custom_target(site
         COMMENT "Building website (site + docs, notebooks executed)"
         COMMAND ${PROJECT_BINARY_DIR}/build-site
-        DEPENDS py_jupedsim py_jupedsim_stubs
+        DEPENDS pyjupedsim pyjupedsim_stubs
         USES_TERMINAL
     )
     add_custom_target(site-fast
         COMMENT "Building website (site + docs, notebooks not executed)"
         COMMAND ${PROJECT_BINARY_DIR}/build-site --no-notebooks
-        DEPENDS py_jupedsim py_jupedsim_stubs
+        DEPENDS pyjupedsim pyjupedsim_stubs
         USES_TERMINAL
     )
 endif()

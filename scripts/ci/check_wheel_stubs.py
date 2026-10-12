@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: LGPL-3.0-or-later
 """Check that the installed jupedsim ships the type stubs of the native
-extension jupedsim.py_jupedsim.
+extension jupedsim.pyjupedsim.
 
-Without submodules pybind11-stubgen writes a single py_jupedsim.pyi; with
-submodules it writes a py_jupedsim/ package with one stub per module.
+Without submodules pybind11-stubgen writes a single pyjupedsim.pyi; with
+submodules it writes a pyjupedsim/ package with one stub per module.
 
 Used as the cibuildwheel test command; exits non-zero and names the missing
 stubs if any is absent.
@@ -14,23 +14,23 @@ import importlib.resources
 import sys
 import types
 
-import jupedsim.py_jupedsim as native
+import jupedsim.pyjupedsim as jps
 
 
 def main():
     package = importlib.resources.files("jupedsim")
     submodules = sorted(
         name
-        for name, value in vars(native).items()
+        for name, value in vars(jps).items()
         if isinstance(value, types.ModuleType)
-        and value.__name__.startswith(f"{native.__name__}.")
+        and value.__name__.startswith(f"{jps.__name__}.")
     )
     if submodules:
-        expected = ["py_jupedsim/__init__.pyi"] + [
-            f"py_jupedsim/{name}.pyi" for name in submodules
+        expected = ["pyjupedsim/__init__.pyi"] + [
+            f"pyjupedsim/{name}.pyi" for name in submodules
         ]
     else:
-        expected = ["py_jupedsim.pyi"]
+        expected = ["pyjupedsim.pyi"]
     missing = [stub for stub in expected if not (package / stub).is_file()]
     if missing:
         print(f"missing stubs in {package}: {', '.join(missing)}")

@@ -20,7 +20,7 @@ def test_every_transition_kind_is_one_native_type():
         jps.Transition.create_none_transition(),
     ]
     assert all(type(t) is jps.Transition for t in transitions)
-    assert jps.Transition.__module__ == "jupedsim.py_jupedsim"
+    assert jps.Transition.__module__ == "jupedsim.pyjupedsim"
     assert "Describes the Transition at a stage" in jps.Transition.__doc__
     assert (
         "Create a fixed transition"

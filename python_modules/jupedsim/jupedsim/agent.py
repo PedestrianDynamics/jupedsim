@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-import jupedsim.native as py_jps
+from jupedsim.pyjupedsim import Location, _CustomModelState
 
 if TYPE_CHECKING:
     from jupedsim.simulation import Simulation
@@ -133,7 +133,7 @@ class Agent:
         return self.__resolve().position
 
     @property
-    def location(self) -> py_jps.Location:
+    def location(self) -> Location:
         """Current location of the agent.
 
         Same as :attr:`position`, plus the region and the height of the surface.
@@ -143,7 +143,7 @@ class Agent:
         return self.__resolve().location
 
     @property
-    def final_target(self) -> py_jps.Location | None:
+    def final_target(self) -> Location | None:
         """Current final target of the agent.
 
         Can be used to directly steer an agent towards the given coordinate.
@@ -173,7 +173,7 @@ class Agent:
 
     @final_target.setter
     def final_target(
-        self, final_target: py_jps.Location | tuple[float, float]
+        self, final_target: Location | tuple[float, float]
     ) -> None:
         self.__simulation._obj.set_agent_target(self.__id, final_target)
 
@@ -196,7 +196,7 @@ class Agent:
         returns the user supplied state object.
         """
         raw_state = self.__resolve().state
-        if isinstance(raw_state, py_jps._CustomModelState):
+        if isinstance(raw_state, _CustomModelState):
             return raw_state.model
         return _ModelStateHandle(self.__simulation, self.__id)
 

@@ -171,7 +171,7 @@ def test_neighbors_are_the_native_type():
 
     [(kind, text, visible)] = model.seen
     assert kind is jps.NeighborView
-    assert jps.NeighborView.__module__ == "jupedsim.py_jupedsim"
+    assert jps.NeighborView.__module__ == "jupedsim.pyjupedsim"
     assert text == "NeighborView(relative_position=(1.0, 0.0))"
     assert visible
     assert "A neighboring agent as seen from" in jps.NeighborView.__doc__
@@ -292,7 +292,7 @@ def test_walls_are_the_native_type():
 
     nearest = min(model.walls, key=lambda w: w.distance)
     assert type(nearest) is jps.WallView
-    assert jps.WallView.__module__ == "jupedsim.py_jupedsim"
+    assert jps.WallView.__module__ == "jupedsim.pyjupedsim"
     assert repr(nearest) == (
         f"WallView(distance={nearest.distance!r}, normal={nearest.normal!r})"
     )
@@ -348,7 +348,7 @@ def test_views_are_the_native_types():
     sim.iterate()
     assert (jps.AgentView, True, True) in model.types  # check_model_constraint
     assert (jps.AgentStep, True, True) in model.types  # compute_next_state
-    assert jps.AgentStep.__module__ == "jupedsim.py_jupedsim"
+    assert jps.AgentStep.__module__ == "jupedsim.pyjupedsim"
     assert issubclass(jps.AgentStep, jps.AgentView)
     assert "What an agent perceives" in jps.AgentView.__doc__
     assert "Duration of this simulation step" in jps.AgentStep.dt.__doc__
