@@ -135,6 +135,13 @@ TEST(Simulation, AnExitMayBeConcave)
     EXPECT_NO_THROW(sim->add_stage(ExitDescription{l_shape, 0}));
 }
 
+TEST(Simulation, AStageInAnUnknownRegionIsRejected)
+{
+    auto sim = on_a_flat_room();
+    const Polygon square{std::vector<Point>{{2, 2}, {4, 2}, {4, 4}, {2, 4}}};
+    EXPECT_THROW(sim->add_stage(ExitDescription{square, 99}), SimulationError);
+}
+
 TEST(MeshBuiltSimulation, IsRejected)
 {
     EXPECT_THROW(on_the_switchback_stair(), SimulationError);

@@ -180,6 +180,11 @@ size_t WalkableSurface::insert_region(
     const std::vector<Point3D>& vertices,
     double height)
 {
+    for(const auto& v : vertices) {
+        if(!std::isfinite(v[0]) || !std::isfinite(v[1]) || !std::isfinite(v[2])) {
+            throw SimulationError("Region coordinates and height must be finite");
+        }
+    }
     // Before orienting the rings: CGAL's orientation() requires simple polygons.
     for(const auto& ring : polygons) {
         Poly poly{};

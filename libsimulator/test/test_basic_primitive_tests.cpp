@@ -2,11 +2,13 @@
 #include "geometric_functions.hpp"
 #include "point.hpp"
 #include "polygon.hpp"
+#include "simulation_error.hpp"
 #include "test_common.hpp"
 
 #include <gtest/gtest.h>
 
 #include <cmath>
+#include <limits>
 
 TEST(Polygon, PointIsInside)
 {
@@ -63,6 +65,15 @@ TEST(Polygon, RepeatedClosingPointIsDropped)
     const Poly from_open = Polygon(open);
     const Poly from_closed = Polygon(closed);
     EXPECT_EQ(from_closed, from_open);
+}
+
+TEST(Polygon, NonFiniteCoordinatesAreRejected)
+{
+    for(const double bad :
+        {std::numeric_limits<double>::infinity(), std::numeric_limits<double>::quiet_NaN()}) {
+        const std::vector<Point> points{{0, 0}, {bad, 0}, {1, 1}, {0, 1}};
+        EXPECT_THROW(Polygon{points}, SimulationError) << bad;
+    }
 }
 
 TEST(Polygon, FromCircleKeepsHasShortEdges)
