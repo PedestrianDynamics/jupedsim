@@ -34,6 +34,15 @@ def test_exception_on_empty_polygon_in_exit_stage(square_room_5x5):
         sim.add_exit_stage([], region_id=0)
 
 
+def test_exception_on_exit_polygon_with_hole(square_room_5x5):
+    exit_with_hole = shapely.Polygon(
+        [(-2, -2), (2, -2), (2, 2), (-2, 2)],
+        [[(-1, -1), (1, -1), (1, 1), (-1, 1)]],
+    )
+    with pytest.raises(ValueError, match="Polygon must not have holes"):
+        square_room_5x5.add_exit_stage(exit_with_hole, region_id=0)
+
+
 def test_can_use_stage_proxy():
     messages = []
 

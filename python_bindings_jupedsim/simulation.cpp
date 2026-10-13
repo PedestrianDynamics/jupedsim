@@ -5,8 +5,10 @@
 #include "generic_agent.hpp"
 #include "geometry/geometry.hpp"
 #include "geometry/location.hpp"
+#include "geometry/walkable_surface.hpp"
 #include "journey.hpp"
 #include "operational_model.hpp"
+#include "point.hpp"
 #include "polygon.hpp"
 #include "stage.hpp"
 #include "stage_description.hpp"
@@ -25,9 +27,27 @@
 #include <memory>
 #include <stdexcept>
 #include <tuple>
+#include <utility>
+#include <variant>
 #include <vector>
 
 namespace py = pybind11;
+
+namespace
+{
+using Area = std::variant<WalkableSurface::Polygon, std::vector<Point>>;
+
+std::vector<Point> boundary_without_holes(Area area)
+{
+    if(auto* polygon = std::get_if<WalkableSurface::Polygon>(&area)) {
+        if(!polygon->holes.empty()) {
+            throw py::value_error("Polygon must not have holes");
+        }
+        return std::move(polygon->boundary);
+    }
+    return std::get<std::vector<Point>>(std::move(area));
+}
+} // namespace
 
 void init_simulation(py::module_& m)
 {
@@ -65,11 +85,9 @@ void init_simulation(py::module_& m)
             py::arg("region_id"))
         .def(
             "add_exit_stage",
-            [](Simulation& sim,
-               const std::vector<std::tuple<double, double>>& polygon,
-               std::size_t region_id) {
-                return sim.add_stage(ExitDescription{Polygon{into_points(polygon)}, region_id})
-                    .get_id();
+            [](Simulation& sim, Area polygon, std::size_t region_id) {
+                const Polygon area{boundary_without_holes(std::move(polygon))};
+                return sim.add_stage(ExitDescription{area, region_id}).get_id();
             },
             py::arg("polygon"),
             py::arg("region_id"))
@@ -182,8 +200,9 @@ void init_simulation(py::module_& m)
             })
         .def(
             "agents_in_polygon",
-            [](Simulation& sim, const std::vector<std::tuple<double, double>>& poly) {
-                auto agents_in_range = sim.agents_in_polygon(into_points(poly));
+            [](Simulation& sim, Area polygon) {
+                auto agents_in_range =
+                    sim.agents_in_polygon(boundary_without_holes(std::move(polygon)));
                 auto agents = std::vector<uint64_t>();
                 agents.reserve(agents_in_range.size());
                 for(auto agent : agents_in_range) {
