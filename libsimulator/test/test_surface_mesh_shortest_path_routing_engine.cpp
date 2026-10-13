@@ -29,7 +29,7 @@ class FlatSquare : public ::testing::Test
 public:
     void SetUp() override
     {
-        _geometry = test_geometries::rectangle({0, 0}, {10, 10});
+        _geometry = test_geometries::rectangle({0, 0}, {10, 10}).geometry;
         _engine = std::make_unique<SurfaceMeshShortestPathRoutingEngine>(*_geometry);
     }
 
@@ -54,15 +54,15 @@ TEST_F(FlatSquare, OrientationRobustWhenSourceOnEdge)
 TEST(SurfaceMeshShortestPathLShape, OrientationBendsTowardsReflexCorner)
 {
 
-    const auto geometry = test_geometries::from_polygons({l_shape});
-    SurfaceMeshShortestPathRoutingEngine engine{*geometry};
+    const auto room = test_geometries::from_polygons({l_shape});
+    SurfaceMeshShortestPathRoutingEngine engine{*room.geometry};
 
     // The route bends around the reflex corner (1,1), so the heading points there rather than at
     // the target -- at the turn the route makes, which is held off the corner itself. Heading for
     // the corner exactly is what leaves an agent stuck against it.
     const Point turn = Point{1, 1} + Point{-1, -1}.normalized() * engine.wall_clearance();
-    const auto from = located(*geometry, 2.5, 0.5);
-    const Point dir = engine.get_orientation(from, located(*geometry, 0.5, 2.5));
+    const auto from = located(*room.geometry, 2.5, 0.5);
+    const Point dir = engine.get_orientation(from, located(*room.geometry, 0.5, 2.5));
     const Point expected = (turn - Point{2.5, 0.5}).normalized();
     EXPECT_NEAR(dir.x, expected.x, 1e-6);
     EXPECT_NEAR(dir.y, expected.y, 1e-6);
@@ -75,25 +75,25 @@ TEST(SurfaceMeshShortestPathLShape, OrientationBendsTowardsReflexCorner)
 
 TEST(SurfaceMeshShortestPathWallClearance, NegativeIsNoDistance)
 {
-    const auto geometry = test_geometries::rectangle({0, 0}, {10, 10});
-    EXPECT_THROW(SurfaceMeshShortestPathRoutingEngine(*geometry, -0.1), SimulationError);
+    const auto room = test_geometries::rectangle({0, 0}, {10, 10});
+    EXPECT_THROW(SurfaceMeshShortestPathRoutingEngine(*room.geometry, -0.1), SimulationError);
 }
 
 TEST(SurfaceMeshShortestPathWallClearance, TheSurfaceEngineKeepsItToo)
 {
-    const auto geometry = test_geometries::from_polygons({l_shape});
+    const auto room = test_geometries::from_polygons({l_shape});
     const Point3D source{2.5, 0.5, 1};
     const Point3D target{0.5, 2.5, 1};
 
     // Zero routes through the corner, which is the bare geodesic.
-    SurfaceMeshShortestPathRoutingEngine bare{*geometry, 0.0};
+    SurfaceMeshShortestPathRoutingEngine bare{*room.geometry, 0.0};
     const auto through_the_corner = bare.get_shortest_path(source, target);
     ASSERT_EQ(through_the_corner.size(), 3u);
     EXPECT_NEAR(through_the_corner[1].x(), 1.0, 1e-9);
     EXPECT_NEAR(through_the_corner[1].y(), 1.0, 1e-9);
 
     // And whatever distance is asked for is the distance kept.
-    SurfaceMeshShortestPathRoutingEngine keeping_distance{*geometry, 0.3};
+    SurfaceMeshShortestPathRoutingEngine keeping_distance{*room.geometry, 0.3};
     const auto around_it = keeping_distance.get_shortest_path(source, target);
     ASSERT_EQ(around_it.size(), 3u);
     const Point turn{around_it[1].x(), around_it[1].y()};
@@ -102,14 +102,15 @@ TEST(SurfaceMeshShortestPathWallClearance, TheSurfaceEngineKeepsItToo)
 
 TEST(SurfaceMeshShortestPathCorridor, TheOrientationNeverVanishesOnTheWay)
 {
+    const auto room = test_geometries::corridor_with_door_recesses();
+
     // On triangles this long the path comes back with its own source point far enough off to
     // survive as a waypoint of its own -- and a step that short has no direction, so the agent
     // is sent to where it stands and stays there.
-    const auto geometry = test_geometries::corridor_with_door_recesses();
-    SurfaceMeshShortestPathRoutingEngine engine{*geometry};
+    SurfaceMeshShortestPathRoutingEngine engine{*room.geometry};
 
-    auto walker = geometry->get_location_near_z(2.0, 0.9, 0.0);
-    const auto exit = geometry->get_location_near_z(44.0, 1.0, 0.0);
+    auto walker = room.geometry->get_location_near_z(2.0, 0.9, 0.0);
+    const auto exit = room.geometry->get_location_near_z(44.0, 1.0, 0.0);
     ASSERT_TRUE(walker.has_value() && exit.has_value());
 
     constexpr double stride = 0.05;

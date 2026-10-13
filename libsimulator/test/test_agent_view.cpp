@@ -33,13 +33,14 @@ GenericAgent make_agent(const Geometry& geo, Point pos, double radius = 0.2, dou
 
 std::unique_ptr<Geometry> open_geometry()
 {
-    return test_geometries::rectangle({-100, -100}, {100, 100});
+    return test_geometries::rectangle({-100, -100}, {100, 100}).geometry;
 }
 
 // Geometry with a thin wall at x≈1 that blocks line-of-sight across it.
 std::unique_ptr<Geometry> walled_geometry()
 {
-    return test_geometries::rectangle_with_hole({-100, -100}, {100, 100}, {0.9, -50}, {1.1, 50});
+    return test_geometries::rectangle_with_hole({-100, -100}, {100, 100}, {0.9, -50}, {1.1, 50})
+        .geometry;
 }
 
 struct Environment {
@@ -261,7 +262,7 @@ TEST(AgentView, AgentsOnAnotherStoreyAreNotNeighbours)
     // Two floors sharing a footprint, one agent on each, standing at the same (x, y) three
     // metres apart in height. The neighbourhood grid searches by (x, y) and offers them to
     // each other; one is standing well above the other's head and cannot touch them.
-    const auto geo = test_geometries::stacked_floors({0, 0}, {10, 10}, 3.0);
+    const auto geo = test_geometries::stacked_floors({0, 0}, {10, 10}, 3.0).geometry;
 
     AgentContainer<GenericAgent> agents{};
     agents.push_back(make_agent(*geo, {5.0, 5.0}));
@@ -277,8 +278,8 @@ TEST(AgentView, AgentsOnAnotherStoreyAreNotNeighbours)
 
 TEST(AgentView, AgentsOnTheSameStoreyStillAre)
 {
-    // The same mesh, both agents on the lower floor: the filter must not swallow those.
-    const auto geo = test_geometries::stacked_floors({0, 0}, {10, 10}, 3.0);
+    // The same geometry, both agents on the lower floor: the filter must not swallow those.
+    const auto geo = test_geometries::stacked_floors({0, 0}, {10, 10}, 3.0).geometry;
 
     AgentContainer<GenericAgent> agents{};
     agents.push_back(make_agent(*geo, {5.0, 5.0}));
@@ -295,8 +296,8 @@ TEST(AgentView, ANeighbourCloseEnoughToTouchCanStillBeOnAnotherStorey)
 {
     // A mezzanine 1.5 m up, so the height band keeps both as candidates and what has to tell
     // them apart is which sheet each stands on. Nothing is between them in plan either: no
-    // wall on either floor, and no seam joining the two.
-    const auto geo = test_geometries::stacked_floors({0, 0}, {10, 10}, 1.5);
+    // wall on either floor, and no seam between them.
+    const auto geo = test_geometries::stacked_floors({0, 0}, {10, 10}, 1.5).geometry;
 
     AgentContainer<GenericAgent> agents{};
     agents.push_back(make_agent(*geo, {2.0, 5.0}));

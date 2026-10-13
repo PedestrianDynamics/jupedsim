@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "geometry/walkable_surface.hpp"
+#include "geometry_fixtures.hpp"
 #include "simulation_error.hpp"
 
 #include <boost/graph/adjacency_list.hpp>
@@ -14,17 +15,6 @@ Poly make_poly(const std::vector<Point2D>& points)
 {
     return Poly(std::begin(points), std::end(points));
 }
-
-/// Ground floor (counterclockwise input) and upper floor (clockwise input), connected by stairs.
-struct TwoFloors {
-    WalkableSurface surface{};
-    size_t ground = surface.add_region({{{0, 0}, {5, 0}, {5, 5}, {0, 5}}, {}}, 0.0);
-    size_t upper = surface.add_region({{{10, 0}, {10, 5}, {15, 5}, {15, 0}}, {}}, 3.0);
-    size_t stairs = surface.connect_regions(ground, {{5, 0}, {5, 5}}, upper, {{10, 0}, {10, 5}});
-    const Point2D on_ground{2.5, 2.5};
-    const Point2D on_stairs{7.5, 2.5};
-    const Point2D on_upper{12.5, 2.5};
-};
 
 /// Checks that the seam (between regions "from" and "to") connects "a" and "b" and that the point
 /// "inside" is left to the seam (has to be in region "from").
@@ -84,7 +74,7 @@ TEST(WalkableSurface, PolygonRingsHaveCorrectOrientation)
 
     const auto graph = surface.create_region_graph_2d();
     const PolyWithHoles& poly = (*graph)[region];
-    // boundaryshould be counterclockwise, hole clockwise.
+    // boundary should be counterclockwise, hole clockwise.
     EXPECT_EQ(poly.outer_boundary(), make_poly({{0, 0}, {10, 0}, {10, 10}, {0, 10}}));
     ASSERT_EQ(poly.number_of_holes(), 1);
     EXPECT_EQ(poly.holes()[0], make_poly({{2, 2}, {2, 4}, {4, 4}, {4, 2}}));
@@ -92,28 +82,32 @@ TEST(WalkableSurface, PolygonRingsHaveCorrectOrientation)
 
 TEST(WalkableSurface, CheckStairsPoly)
 {
-    TwoFloors floors{};
-
-    const auto graph = floors.surface.create_region_graph_2d();
+    const auto stair = test_geometries::straight_stair_to_a_landing();
+    const auto* graph = stair.geometry->region_graph_2d();
+    ASSERT_NE(graph, nullptr);
     ASSERT_EQ(boost::num_vertices(*graph), 3);
-    const PolyWithHoles& stairs = (*graph)[floors.stairs];
-    EXPECT_EQ(stairs.outer_boundary(), make_poly({{5, 0}, {10, 0}, {10, 5}, {5, 5}}));
-    EXPECT_EQ(stairs.number_of_holes(), 0);
+    const PolyWithHoles& flight = (*graph)[stair.connector];
+    EXPECT_EQ(flight.outer_boundary(), make_poly({{10, 0}, {15, 0}, {15, 8}, {10, 8}}));
+    EXPECT_EQ(flight.number_of_holes(), 0);
 }
 
 TEST(WalkableSurface, SeamsOfConnection)
 {
-    TwoFloors floors{};
+    const auto stair = test_geometries::straight_stair_to_a_landing();
+    const Point2D on_ground{5, 4};
+    const Point2D on_flight{12.5, 4};
+    const Point2D on_landing{17.5, 4};
 
-    const auto graph = floors.surface.create_region_graph_2d();
+    const auto* graph = stair.geometry->region_graph_2d();
+    ASSERT_NE(graph, nullptr);
     EXPECT_EQ(boost::num_edges(*graph), 4); // both directions at each seam
-    EXPECT_FALSE(boost::edge(floors.ground, floors.upper, *graph).second);
-    EXPECT_FALSE(boost::edge(floors.upper, floors.ground, *graph).second);
+    EXPECT_FALSE(boost::edge(stair.room_1, stair.room_2, *graph).second);
+    EXPECT_FALSE(boost::edge(stair.room_2, stair.room_1, *graph).second);
 
-    expect_seam(*graph, floors.ground, floors.stairs, {5, 0}, {5, 5}, floors.on_ground);
-    expect_seam(*graph, floors.stairs, floors.ground, {5, 5}, {5, 0}, floors.on_stairs);
-    expect_seam(*graph, floors.stairs, floors.upper, {10, 0}, {10, 5}, floors.on_stairs);
-    expect_seam(*graph, floors.upper, floors.stairs, {10, 5}, {10, 0}, floors.on_upper);
+    expect_seam(*graph, stair.room_1, stair.connector, {10, 0}, {10, 8}, on_ground);
+    expect_seam(*graph, stair.connector, stair.room_1, {10, 8}, {10, 0}, on_flight);
+    expect_seam(*graph, stair.connector, stair.room_2, {15, 0}, {15, 8}, on_flight);
+    expect_seam(*graph, stair.room_2, stair.connector, {15, 8}, {15, 0}, on_landing);
 }
 
 TEST(WalkableSurface, SeamOnHoleEdge)
