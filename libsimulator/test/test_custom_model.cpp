@@ -58,8 +58,8 @@ public:
 /// The flat square every agent in this file stands on.
 const Geometry& flat_square()
 {
-    static const auto geometry = test_geometries::rectangle({-10, -10}, {10, 10});
-    return *geometry;
+    static const auto room = test_geometries::rectangle({-10, -10}, {10, 10});
+    return *room.geometry;
 }
 
 GenericAgent make_agent(OperationalModelState model, Point position = {})

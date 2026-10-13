@@ -11,12 +11,12 @@
 
 static GenericAgent make_agent(OperationalModelState model)
 {
-    static const auto geometry = test_geometries::rectangle({-10, -10}, {10, 10});
+    static const auto room = test_geometries::rectangle({-10, -10}, {10, 10});
     return GenericAgent(
         GenericAgent::ID{},
         jps::UniqueID<Journey>::invalid,
         jps::UniqueID<BaseStage>::invalid,
-        *geometry->get_location_near_z(0.0, 0.0, 0.0),
+        *room.geometry->get_location_near_z(0.0, 0.0, 0.0),
         std::move(model));
 }
 

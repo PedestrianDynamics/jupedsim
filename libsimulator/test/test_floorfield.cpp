@@ -22,7 +22,6 @@
 #include <vector>
 
 namespace ff = jupedsim::floorfield;
-using test_geometries::rectangle_points;
 
 namespace
 {
@@ -64,19 +63,6 @@ ff::RegionGraph to_floorfield(const Geometry::RegionGraph2D& g)
 rust::Box<ff::MultiRegionFloorfield> field_over(const Geometry& geo, double cell_size)
 {
     return ff::new_multi_region_floorfield(to_floorfield(*geo.region_graph_2d()), cell_size, 0.5);
-}
-
-/// Ground (region 0, z = 0) and upper floor (region 1, z = 3), joined by stairs rising 3 m over
-/// 5 m (region 2).
-std::unique_ptr<Geometry> two_floors()
-{
-    WalkableSurface surface{};
-    const auto ground =
-        surface.add_region(WalkableSurface::Polygon{rectangle_points({0, 0}, {5, 5}), {}}, 0.0);
-    const auto upper =
-        surface.add_region(WalkableSurface::Polygon{rectangle_points({10, 0}, {15, 5}), {}}, 3.0);
-    surface.connect_regions(ground, {{5, 0}, {5, 5}}, upper, {{10, 0}, {10, 5}});
-    return surface.create_geometry();
 }
 
 /// Travel time at @p xy in @p region.
@@ -128,15 +114,16 @@ double length_3d(const std::vector<Location>& path)
 
 TEST(Floorfield, ClimbsTheStairsToTheUpperFloor)
 {
-    const auto geo = two_floors();
+    const auto floors = test_geometries::floors_joined_by_stairs();
+    const auto& geo = floors.geometry;
     auto field = field_over(*geo, 0.1);
-    const auto dest = field->add_point_destination(1, {14, 2.5});
-    const auto path = trace(*field, geo->get_location(1, 2.5, 0), dest);
+    const auto dest = field->add_point_destination(floors.room_2, {14, 2.5});
+    const auto path = trace(*field, geo->get_location(1, 2.5, floors.room_1), dest);
 
     ASSERT_GE(path.size(), 3u);
     EXPECT_DOUBLE_EQ(path.front().z(), 0.0);
     EXPECT_NEAR(path.back().xy().x, 14.0, 0.1) << "ends at the target";
-    EXPECT_EQ(path.back().region(), 1u);
+    EXPECT_EQ(path.back().region(), floors.room_2);
     EXPECT_NEAR(path.back().z(), 3.0, 1e-9);
     // Height never decreases on the way up.
     for(std::size_t i = 1; i < path.size(); ++i) {
@@ -150,13 +137,14 @@ TEST(Floorfield, ClimbsTheStairsToTheUpperFloor)
 /// grids, where the halo past each seam needs room of its own.
 TEST(Floorfield, DescendsTheStairsToTheGround)
 {
-    const auto geo = two_floors();
+    const auto floors = test_geometries::floors_joined_by_stairs();
+    const auto& geo = floors.geometry;
     auto field = field_over(*geo, 0.1);
-    const auto dest = field->add_point_destination(0, {1, 2.5});
-    const auto path = trace(*field, geo->get_location(14, 2.5, 1), dest);
+    const auto dest = field->add_point_destination(floors.room_1, {1, 2.5});
+    const auto path = trace(*field, geo->get_location(14, 2.5, floors.room_2), dest);
 
     EXPECT_NEAR(path.back().xy().x, 1.0, 0.1) << "ends at the target";
-    EXPECT_EQ(path.back().region(), 0u);
+    EXPECT_EQ(path.back().region(), floors.room_1);
     EXPECT_NEAR(path.back().z(), 0.0, 1e-9);
     for(std::size_t i = 1; i < path.size(); ++i) {
         EXPECT_LE(path[i].z(), path[i - 1].z() + 1e-9) << "step " << i;
@@ -166,11 +154,11 @@ TEST(Floorfield, DescendsTheStairsToTheGround)
 
 TEST(Floorfield, DirectionIsAUnitVectorTowardsTheTarget)
 {
-    const auto geo = two_floors();
-    auto field = field_over(*geo, 0.1);
-    const auto dest = field->add_point_destination(1, {14, 2.5});
+    const auto floors = test_geometries::floors_joined_by_stairs();
+    auto field = field_over(*floors.geometry, 0.1);
+    const auto dest = field->add_point_destination(floors.room_2, {14, 2.5});
 
-    const auto dir = field->region_direction(0, {1, 2.5}, dest);
+    const auto dir = field->region_direction(floors.room_1, {1, 2.5}, dest);
     EXPECT_NEAR(std::hypot(dir.x, dir.y), 1.0, 1e-12);
     EXPECT_GT(dir.x, 0.99);
 }
@@ -191,22 +179,24 @@ TEST(Floorfield, RoomBehindADoorwayNarrowerThanACellThrows)
 
 TEST(Floorfield, RoutableLocations)
 {
-    const auto geo = two_floors();
-    auto field = field_over(*geo, 0.1);
-    EXPECT_TRUE(field->region_is_routable(0, {2.5, 2.5}));
-    EXPECT_TRUE(field->region_is_routable(1, {12.5, 2.5}));
-    EXPECT_FALSE(field->region_is_routable(0, {12.5, 2.5})) << "on the upper floor, not the ground";
-    EXPECT_FALSE(field->region_is_routable(0, {20, 2.5})) << "off the surface";
+    const auto floors = test_geometries::floors_joined_by_stairs();
+    auto field = field_over(*floors.geometry, 0.1);
+    EXPECT_TRUE(field->region_is_routable(floors.room_1, {2.5, 2.5}));
+    EXPECT_TRUE(field->region_is_routable(floors.room_2, {12.5, 2.5}));
+    EXPECT_FALSE(field->region_is_routable(floors.room_1, {12.5, 2.5}))
+        << "on the upper floor, not the ground";
+    EXPECT_FALSE(field->region_is_routable(floors.room_1, {20, 2.5})) << "off the surface";
 }
 
 /// An exit across the doorway between two rooms, cut into one piece per region, is one
 /// destination: inside any piece the travel time is zero, and each room heads for its own side.
 TEST(Floorfield, ExitSpanningSeveralRegions)
 {
-    const auto geo = test_geometries::two_rooms(); // rooms 0 and 1, doorway (connector) 2
+    const auto rooms = test_geometries::two_rooms();
+    const auto& geo = rooms.geometry;
     const std::vector<Point2D> corners{{9.5, 4}, {11.5, 4}, {11.5, 6}, {9.5, 6}};
     const Poly exit(corners.begin(), corners.end());
-    const auto pieces = geo->split_into_region_pieces(exit, 0);
+    const auto pieces = geo->split_into_region_pieces(exit, rooms.room_1);
     ASSERT_EQ(pieces.size(), 3u);
 
     std::vector<ff::AreaPiece> ff_pieces{};
@@ -217,24 +207,24 @@ TEST(Floorfield, ExitSpanningSeveralRegions)
     auto field = field_over(*geo, 0.1);
     const auto dest = field->add_area_destination({ff_pieces.data(), ff_pieces.size()});
 
-    EXPECT_EQ(time_at(*field, 0, dest, {9.8, 5}), 0.0) << "piece in room 0";
-    EXPECT_EQ(time_at(*field, 2, dest, {10.5, 5}), 0.0) << "piece in the doorway";
-    EXPECT_EQ(time_at(*field, 1, dest, {11.2, 5}), 0.0) << "piece in room 1";
+    EXPECT_EQ(time_at(*field, rooms.room_1, dest, {9.8, 5}), 0.0) << "piece in room 1";
+    EXPECT_EQ(time_at(*field, rooms.connector, dest, {10.5, 5}), 0.0) << "piece in the doorway";
+    EXPECT_EQ(time_at(*field, rooms.room_2, dest, {11.2, 5}), 0.0) << "piece in room 2";
 
     // Inside the exit, in each of its three pieces: there, the zero vector.
     for(const auto& [region, p] : std::vector<std::pair<std::size_t, ff::Point2d>>{
-            {0, {9.8, 5}}, {2, {10.5, 5}}, {1, {11.2, 5}}}) {
+            {rooms.room_1, {9.8, 5}}, {rooms.connector, {10.5, 5}}, {rooms.room_2, {11.2, 5}}}) {
         const auto dir = field->region_direction(region, p, dest);
         EXPECT_EQ(dir.x, 0.0) << "region " << region;
         EXPECT_EQ(dir.y, 0.0) << "region " << region;
     }
-    // Just outside it in room 0 (the exit spans x 9.5..11.5): a unit vector towards it.
-    const auto outside = field->region_direction(0, {8.5, 5}, dest);
+    // Just outside it in room 1 (the exit spans x 9.5..11.5): a unit vector towards it.
+    const auto outside = field->region_direction(rooms.room_1, {8.5, 5}, dest);
     EXPECT_NEAR(std::hypot(outside.x, outside.y), 1.0, 1e-12);
     EXPECT_GT(outside.x, 0.9);
 
-    const auto path = trace(*field, geo->get_location(2, 5, 0), dest);
-    EXPECT_EQ(path.back().region(), 0u) << "room 0 heads for its own piece";
+    const auto path = trace(*field, geo->get_location(2, 5, rooms.room_1), dest);
+    EXPECT_EQ(path.back().region(), rooms.room_1) << "room 1 heads for its own piece";
     EXPECT_GT(path.back().xy().x, 9.4);
 }
 
@@ -263,20 +253,21 @@ TEST(Floorfield, SeamOnAHoleEdge)
 /// never straight through the floor above or below.
 TEST(Floorfield, StackedFloorsAreKeptApart)
 {
-    const auto geo = test_geometries::stacked_floors_with_ramp(); // ground 0, upper 1, ramp 2
+    const auto floors = test_geometries::stacked_floors_with_ramp();
+    const auto& geo = floors.geometry;
     auto field = field_over(*geo, 0.1);
-    const auto dest = field->add_point_destination(1, {2, 2});
+    const auto dest = field->add_point_destination(floors.room_2, {2, 2});
 
     // Right below the target: 4.5 m to the ramp, ~8.5 m up it, ~12.4 m back on the upper floor.
-    EXPECT_GT(time_at(*field, 0, dest, {2, 2}), 20.0);
+    EXPECT_GT(time_at(*field, floors.room_1, dest, {2, 2}), 20.0);
 
-    const auto path = trace(*field, geo->get_location(2, 2, 0), dest);
+    const auto path = trace(*field, geo->get_location(2, 2, floors.room_1), dest);
     bool on_ramp = false;
     for(const auto& p : path) {
-        on_ramp = on_ramp || p.region() == 2;
+        on_ramp = on_ramp || p.region() == floors.connector;
     }
     EXPECT_TRUE(on_ramp);
-    EXPECT_EQ(path.back().region(), 1u);
+    EXPECT_EQ(path.back().region(), floors.room_2);
     EXPECT_NEAR(path.back().xy().x, 2.0, 0.15);
 }
 
@@ -292,8 +283,17 @@ TEST(Floorfield, ComparedWithTheExactGeodesic)
         Point3D to;
     };
     std::vector<Case> cases{};
-    cases.push_back({"two floors + stairs", two_floors(), 0, {1, 2.5, 0}, 1, {14, 4, 3}});
-    cases.push_back({"doorway", test_geometries::two_rooms(), 0, {5, 1, 0}, 1, {20, 9, 0}});
+    auto floors = test_geometries::floors_joined_by_stairs();
+    cases.push_back(
+        {"two floors + stairs",
+         std::move(floors.geometry),
+         floors.room_1,
+         {1, 2.5, 0},
+         floors.room_2,
+         {14, 4, 3}});
+    auto rooms = test_geometries::two_rooms();
+    cases.push_back(
+        {"doorway", std::move(rooms.geometry), rooms.room_1, {5, 1, 0}, rooms.room_2, {20, 9, 0}});
 
     for(auto& c : cases) {
         SurfaceMeshShortestPathRoutingEngine geodesic{*c.geo};
@@ -313,15 +313,18 @@ TEST(Floorfield, ComparedWithTheExactGeodesic)
 
 TEST(Floorfield, ErrorsBecomeExceptions)
 {
-    const auto geo = two_floors();
+    const auto floors = test_geometries::floors_joined_by_stairs();
+    const auto& geo = floors.geometry;
+    const auto ground = floors.room_1;
     auto field = field_over(*geo, 0.1);
-    EXPECT_THROW(field->add_point_destination(0, {50, 50}), rust::Error) << "not walkable";
+    EXPECT_THROW(field->add_point_destination(ground, {50, 50}), rust::Error) << "not walkable";
     EXPECT_THROW(field->add_point_destination(7, {1, 1}), rust::Error) << "unknown region";
-    EXPECT_THROW(field->region_direction(0, {1, 1}, 42), rust::Error) << "unknown destination";
-    const auto dest = field->add_point_destination(0, {1, 2.5});
-    EXPECT_THROW(field->add_point_destination(0, {std::nan(""), 1}), rust::Error) << "NaN";
-    EXPECT_THROW(field->region_direction(0, {INFINITY, 1}, dest), rust::Error) << "infinity";
-    EXPECT_THROW(field->region_direction(0, {1e300, 1}, dest), rust::Error) << "far off the grid";
+    EXPECT_THROW(field->region_direction(ground, {1, 1}, 42), rust::Error) << "unknown destination";
+    const auto dest = field->add_point_destination(ground, {1, 2.5});
+    EXPECT_THROW(field->add_point_destination(ground, {std::nan(""), 1}), rust::Error) << "NaN";
+    EXPECT_THROW(field->region_direction(ground, {INFINITY, 1}, dest), rust::Error) << "infinity";
+    EXPECT_THROW(field->region_direction(ground, {1e300, 1}, dest), rust::Error)
+        << "far off the grid";
     EXPECT_THROW(field_over(*geo, 0.0), rust::Error) << "cell size";
     EXPECT_THROW(field_over(*geo, 1e-5), rust::Error) << "grid too large";
 

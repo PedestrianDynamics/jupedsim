@@ -96,19 +96,6 @@ inline SurfaceMesh stacked_floors(Point lower_left, Point upper_right, double fl
     return mesh;
 }
 
-/// A ramp climbing along y, from z = 0 to "height".
-inline SurfaceMesh ramp(Point lower_left, Point upper_right, double height)
-{
-    SurfaceMesh mesh{};
-    const auto a = mesh.add_vertex(Point3D{lower_left.x, lower_left.y, 0.0});
-    const auto b = mesh.add_vertex(Point3D{upper_right.x, lower_left.y, 0.0});
-    const auto c = mesh.add_vertex(Point3D{upper_right.x, upper_right.y, height});
-    const auto d = mesh.add_vertex(Point3D{lower_left.x, upper_right.y, height});
-    mesh.add_face(a, b, c);
-    mesh.add_face(a, c, d);
-    return mesh;
-}
-
 /// A flat 10x10 square at z = 0, split into two triangles: the coarsest walkable surface
 /// there is, with one border edge per side. `flat_rectangle` covers the same ground but
 /// carries a mid vertex, so tests that count border edges need this one.

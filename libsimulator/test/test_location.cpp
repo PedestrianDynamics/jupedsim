@@ -97,10 +97,10 @@ Location location_at(const Geometry& geo, double x, double y)
 
 TEST(Location, LocationOnFlatGround)
 {
-    const auto geo = test_geometries::rectangle({0, 0}, {10, 10});
-    ASSERT_EQ(geo->region_count(), 1);
+    const auto room = test_geometries::rectangle({0, 0}, {10, 10});
+    ASSERT_EQ(room.geometry->region_count(), 1);
 
-    const auto loc = geo->get_location_near_z(5, 5, 0.0);
+    const auto loc = room.geometry->get_location_near_z(5, 5, 0.0);
     ASSERT_TRUE(loc.has_value());
     EXPECT_DOUBLE_EQ(loc->xy().x, 5.0);
     EXPECT_DOUBLE_EQ(loc->xy().y, 5.0);
@@ -110,7 +110,8 @@ TEST(Location, LocationOnFlatGround)
 
 TEST(Location, XyIsTheExactAndZCorrectlyCalculated)
 {
-    const auto geo = test_geometries::ramp({5, 0}, {15, 10}, 4.0);
+    const auto ramp = test_geometries::ramp({5, 0}, {15, 10}, 4.0);
+    const auto& geo = ramp.geometry;
 
     // On the ramp z == 0.4*y; the location keeps the exact (x,y) and caches z.
     const auto loc = geo->get_location_near_z(10, 2, 0.0, 1.0);
@@ -122,7 +123,8 @@ TEST(Location, XyIsTheExactAndZCorrectlyCalculated)
 
 TEST(Location, Position3DCombinesXyAndCachedZ)
 {
-    const auto geo = test_geometries::ramp({5, 0}, {15, 10}, 4.0);
+    const auto ramp = test_geometries::ramp({5, 0}, {15, 10}, 4.0);
+    const auto& geo = ramp.geometry;
 
     const auto loc = geo->get_location_near_z(10, 9, 3.6, 0.1);
     ASSERT_TRUE(loc.has_value());
@@ -135,8 +137,8 @@ TEST(Location, Position3DCombinesXyAndCachedZ)
 
 TEST(Location, NearZDisambiguatesStackedSheets)
 {
-    const auto geo = test_geometries::stacked_floors({0, 0}, {10, 10}, 3.0);
-    ASSERT_EQ(geo->region_count(), 2);
+    const auto geo = test_geometries::stacked_floors({0, 0}, {10, 10}, 3.0).geometry;
+    ASSERT_EQ(geo->region_count(), 3); // both floors and the stair joining them
 
     const auto lower = geo->get_location_near_z(5, 5, 0.0);
     ASSERT_TRUE(lower.has_value());
@@ -152,7 +154,7 @@ TEST(Location, NearZDisambiguatesStackedSheets)
 
 TEST(Location, NearZPicksTheNearerSheetWithinTolerance)
 {
-    const auto geo = test_geometries::stacked_floors({0, 0}, {10, 10}, 3.0);
+    const auto geo = test_geometries::stacked_floors({0, 0}, {10, 10}, 3.0).geometry;
 
     // Hint closer to the upper sheet -- default tolerance still resolves it.
     const auto loc = geo->get_location_near_z(5, 5, 2.95);
@@ -162,7 +164,7 @@ TEST(Location, NearZPicksTheNearerSheetWithinTolerance)
 
 TEST(Location, NearZBeyondToleranceOfAnySheetMisses)
 {
-    const auto geo = test_geometries::stacked_floors({0, 0}, {10, 10}, 3.0);
+    const auto geo = test_geometries::stacked_floors({0, 0}, {10, 10}, 3.0).geometry;
 
     // Midway between the sheets (z=0 and z=3): 1.4 m from the nearer one,
     // beyond the 0.1 default tolerance -> no location.
@@ -175,24 +177,23 @@ TEST(Location, NearZBeyondToleranceOfAnySheetMisses)
 
 TEST(Location, PointOutsideFootprintMisses)
 {
-    const auto geo = test_geometries::rectangle({0, 0}, {10, 10});
-    EXPECT_FALSE(geo->get_location_near_z(20, 20, 0.0).has_value());
+    const auto room = test_geometries::rectangle({0, 0}, {10, 10});
+    EXPECT_FALSE(room.geometry->get_location_near_z(20, 20, 0.0).has_value());
 }
 
 TEST(Location, PointInsideHoleMisses)
 {
-    const auto geo = test_geometries::rectangle_with_hole({0, 0}, {10, 10}, {4, 4}, {6, 6});
-
-    EXPECT_TRUE(geo->get_location_near_z(1, 1, 0.0).has_value());
-    EXPECT_FALSE(geo->get_location_near_z(5, 5, 0.0).has_value()); // inside the hole
+    const auto room = test_geometries::rectangle_with_hole({0, 0}, {10, 10}, {4, 4}, {6, 6});
+    EXPECT_TRUE(room.geometry->get_location_near_z(1, 1, 0.0).has_value());
+    EXPECT_FALSE(room.geometry->get_location_near_z(5, 5, 0.0).has_value()); // inside the hole
 }
 
 // -- move_on_surface --
 
 TEST(LocationMove, AcrossInteriorDiagonalKeepsRegionAndInterpolatesHeight)
 {
-    const auto geo = test_geometries::ramp({5, 0}, {15, 10}, 4.0);
-    ASSERT_EQ(geo->region_count(), 1);
+    const auto ramp = test_geometries::ramp({5, 0}, {15, 10}, 4.0);
+    const auto& geo = ramp.geometry;
 
     // (10,2) and (10,8) sit in the two triangles of the ramp quad; the straight
     // move crosses the shared diagonal, stays in one region, z tracks 0.4*y.
@@ -200,7 +201,7 @@ TEST(LocationMove, AcrossInteriorDiagonalKeepsRegionAndInterpolatesHeight)
     loc.move_on_surface(Point{0, 6}); // -> (10,8)
     EXPECT_DOUBLE_EQ(loc.xy().x, 10.0);
     EXPECT_DOUBLE_EQ(loc.xy().y, 8.0);
-    EXPECT_EQ(loc.region(), 0u);
+    EXPECT_EQ(loc.region(), ramp.connector);
     EXPECT_NEAR(loc.z(), 3.2, 1e-9);
 }
 
@@ -241,7 +242,8 @@ TEST(LocationMove, StartingExactlyOnVertexResolvesToNeighbour)
 
 TEST(LocationMove, WithinOneTriangleReturnsTargetHeight)
 {
-    const auto geo = test_geometries::ramp({5, 0}, {15, 10}, 4.0);
+    const auto ramp = test_geometries::ramp({5, 0}, {15, 10}, 4.0);
+    const auto& geo = ramp.geometry;
 
     auto loc = location_at(*geo, 10, 2);
     loc.move_on_surface(Point{1, 1}); // -> (11,3), start/end in one triangle
@@ -252,9 +254,9 @@ TEST(LocationMove, WithinOneTriangleReturnsTargetHeight)
 
 TEST(LocationMove, LeavingWalkableAreaThrowsAndLeavesLocationUnchanged)
 {
-    const auto geo = test_geometries::rectangle({0, 0}, {10, 10});
+    const auto room = test_geometries::rectangle({0, 0}, {10, 10});
 
-    auto loc = location_at(*geo, 3, 2);
+    auto loc = location_at(*room.geometry, 3, 2);
     // The straight path crosses a border edge -> leaves the walkable area.
     // --> move throws.
     EXPECT_ANY_THROW(loc.move_on_surface(Point{17, 18})); // -> (20,20)
@@ -266,11 +268,11 @@ TEST(LocationMove, LeavingWalkableAreaThrowsAndLeavesLocationUnchanged)
 
 TEST(LocationMove, LeavingOverABoundaryCornerThrows)
 {
-    const auto geo = test_geometries::rectangle({0, 0}, {10, 10});
+    const auto room = test_geometries::rectangle({0, 0}, {10, 10});
 
     // The straight path passes exactly through the boundary corner (10,10) and
     // continues outward. It leaves the walkable area *at the vertex*.
-    auto loc = location_at(*geo, 4, 3);
+    auto loc = location_at(*room.geometry, 4, 3);
     EXPECT_ANY_THROW(loc.move_on_surface(Point{12, 14})); // through (10,10) -> (16,17)
     // Strong exception guarantee: the Location is unchanged.
     EXPECT_DOUBLE_EQ(loc.xy().x, 4.0);
@@ -332,7 +334,8 @@ TEST(LocationMove, LongStepCrossesManyFaces)
 
 TEST(LocationTryMove, SucceedsReturnsResultAndLeavesSourceUnchanged)
 {
-    const auto geo = test_geometries::ramp({5, 0}, {15, 10}, 4.0);
+    const auto ramp = test_geometries::ramp({5, 0}, {15, 10}, 4.0);
+    const auto& geo = ramp.geometry;
 
     const auto loc = location_at(*geo, 10, 2);
     const auto moved = loc.try_move_on_surface(Point{1, 1}); // -> (11,3), z=1.2
@@ -340,7 +343,7 @@ TEST(LocationTryMove, SucceedsReturnsResultAndLeavesSourceUnchanged)
     EXPECT_DOUBLE_EQ(moved->xy().x, 11.0);
     EXPECT_DOUBLE_EQ(moved->xy().y, 3.0);
     EXPECT_NEAR(moved->z(), 1.2, 1e-9);
-    EXPECT_EQ(moved->region(), 0u);
+    EXPECT_EQ(moved->region(), ramp.connector);
     // The source Location is const and must be untouched.
     EXPECT_DOUBLE_EQ(loc.xy().x, 10.0);
     EXPECT_DOUBLE_EQ(loc.xy().y, 2.0);
@@ -348,9 +351,9 @@ TEST(LocationTryMove, SucceedsReturnsResultAndLeavesSourceUnchanged)
 
 TEST(LocationTryMove, LeavingAcrossBorderEdgeReturnsNullopt)
 {
-    const auto geo = test_geometries::rectangle({0, 0}, {10, 10});
+    const auto room = test_geometries::rectangle({0, 0}, {10, 10});
 
-    const auto loc = location_at(*geo, 3, 2);
+    const auto loc = location_at(*room.geometry, 3, 2);
     // Straight path crosses a border edge -> no result (instead of throwing).
     EXPECT_FALSE(loc.try_move_on_surface(Point{17, 18}).has_value()); // -> (20,20)
     // Source unchanged.
@@ -360,10 +363,10 @@ TEST(LocationTryMove, LeavingAcrossBorderEdgeReturnsNullopt)
 
 TEST(LocationTryMove, LeavingOverBoundaryCornerReturnsNullopt)
 {
-    const auto geo = test_geometries::rectangle({0, 0}, {10, 10});
+    const auto room = test_geometries::rectangle({0, 0}, {10, 10});
 
     // Straight path passes exactly through the boundary corner (10,10) and
     // continues outward -> leaves the area at the vertex.
-    const auto loc = location_at(*geo, 4, 3);
+    const auto loc = location_at(*room.geometry, 4, 3);
     EXPECT_FALSE(loc.try_move_on_surface(Point{12, 14}).has_value()); // through (10,10)
 }

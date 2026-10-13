@@ -48,7 +48,7 @@ GenericAgent make_agent(const Geometry& geometry, Point start, Point velocity)
 /// A flat square [-10,10]^2 with its 3D twin over the same polygon.
 std::unique_ptr<Geometry> flat_square()
 {
-    return test_geometries::rectangle({-10, -10}, {10, 10});
+    return test_geometries::rectangle({-10, -10}, {10, 10}).geometry;
 }
 } // namespace
 
