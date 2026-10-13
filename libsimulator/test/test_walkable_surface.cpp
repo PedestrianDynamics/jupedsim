@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "geometry/walkable_surface.hpp"
+#include "simulation_error.hpp"
 
 #include <boost/graph/adjacency_list.hpp>
 #include <gtest/gtest.h>
 
+#include <limits>
 #include <vector>
 
 namespace
@@ -60,6 +62,18 @@ TEST(WalkableSurface, UnconnectedFloors)
     EXPECT_EQ(boost::num_edges(*graph), 0);
     EXPECT_EQ(first, 0);
     EXPECT_EQ(second, 1);
+}
+
+TEST(WalkableSurface, NonFiniteCoordinatesAreRejected)
+{
+    const WalkableSurface::Polygon square{{{0, 0}, {1, 0}, {1, 1}, {0, 1}}, {}};
+    for(const double bad :
+        {std::numeric_limits<double>::infinity(), std::numeric_limits<double>::quiet_NaN()}) {
+        const WalkableSurface::Polygon with_bad_corner{{{0, 0}, {bad, 0}, {1, 1}, {0, 1}}, {}};
+        WalkableSurface surface{};
+        EXPECT_THROW(surface.add_region(with_bad_corner, 0.0), SimulationError) << bad;
+        EXPECT_THROW(surface.add_region(square, bad), SimulationError) << bad;
+    }
 }
 
 TEST(WalkableSurface, PolygonRingsHaveCorrectOrientation)

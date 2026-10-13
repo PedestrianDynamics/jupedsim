@@ -18,6 +18,11 @@
 
 Polygon::Polygon(const std::vector<Point>& points)
 {
+    for(const auto& p : points) {
+        if(!std::isfinite(p.x) || !std::isfinite(p.y)) {
+            throw SimulationError("Polygon coordinates must be finite");
+        }
+    }
     const bool closed = points.size() > 1 && (points.back() - points.front()).is_zero_length();
     const size_t count = closed ? points.size() - 1 : points.size();
     if(count < 3) {

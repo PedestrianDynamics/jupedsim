@@ -314,12 +314,9 @@ Poly to_inexact(const ExactPoly& ring)
 std::vector<AreaPiece> Geometry::split_into_region_pieces(const Poly& p, size_t region_id) const
 {
 
-    const auto* g = _region_graph_2d.get();
-    if(!g) {
-        throw SimulationError("Geometry is built from mesh and has no 2D polygons");
-    }
     // convert the polygon to exact arithmetic for cutting, and intersection test
-    const auto seed_poly = to_exact((*g)[region_id]);
+    const auto seed_poly = to_exact(polygon(region_id));
+    const auto* g = _region_graph_2d.get();
     const auto exact_area = to_exact(p);
     if(!CGAL::do_intersect(seed_poly, exact_area)) {
         throw SimulationError("Area does not intersect region {}", region_id);
