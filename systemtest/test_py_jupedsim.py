@@ -15,12 +15,14 @@ def test_can_query_agents_in_range():
     jps.set_warning_callback(log_msg_handler)
     jps.set_error_callback(log_msg_handler)
 
+    surface = jps.WalkableSurface()
+    room = surface.add_region(boundary=[(0, 0), (100, 0), (100, 100), (0, 100)])
     simulation = jps.Simulation(
         model=jps.CollisionFreeSpeedModel(),
-        geometry=[(0, 0), (100, 0), (100, 100), (0, 100)],
+        geometry=surface,
     )
     exit = simulation.add_exit_stage(
-        [(99, 45), (99, 55), (100, 55), (100, 45)], region_id=0
+        [(99, 45), (99, 55), (100, 55), (100, 45)], region_id=room
     )
 
     journey = jps.JourneyDescription([exit])
@@ -47,7 +49,7 @@ def test_can_query_agents_in_range():
                 stage_id=exit,
                 position=new_pos,
                 state=jps.CollisionFreeSpeedModelState(),
-                region_id=0,
+                region_id=room,
             )
         )
 
@@ -87,12 +89,14 @@ def test_can_run_simulation():
 
     p1 = shapely.Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
     p2 = shapely.Polygon([(10, 4), (20, 4), (20, 6), (10, 6)])
+    surface = jps.WalkableSurface()
+    room = surface.add_region(polygon=p1.union(p2))
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=p1.union(p2)
+        model=jps.CollisionFreeSpeedModel(), geometry=surface
     )
     exit_stage_id = simulation.add_exit_stage(
         [(18, 4), (20, 4), (20, 6), (18, 6)],
-        region_id=0,
+        region_id=room,
     )
 
     journey = jps.JourneyDescription([exit_stage_id])
@@ -110,7 +114,7 @@ def test_can_run_simulation():
                 stage_id=exit_stage_id,
                 position=new_pos,
                 state=jps.CollisionFreeSpeedModelState(),
-                region_id=0,
+                region_id=room,
             )
         )
 
@@ -123,7 +127,7 @@ def test_can_run_simulation():
         stage_id=exit_stage_id,
         position=(6, 6),
         state=jps.CollisionFreeSpeedModelState(),
-        region_id=0,
+        region_id=room,
     )
 
     for actual, expected in zip(simulation.agents(), initial_agent_positions):
@@ -153,11 +157,13 @@ def test_get_single_agent_from_simulation():
 
     p1 = shapely.Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
     p2 = shapely.Polygon([(10, 4), (20, 4), (20, 6), (10, 6)])
+    surface = jps.WalkableSurface()
+    room = surface.add_region(polygon=p1.union(p2))
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=p1.union(p2)
+        model=jps.CollisionFreeSpeedModel(), geometry=surface
     )
     exit_id = simulation.add_exit_stage(
-        [(18, 4), (20, 4), (20, 6), (18, 6)], region_id=0
+        [(18, 4), (20, 4), (20, 6), (18, 6)], region_id=room
     )
 
     journey = jps.JourneyDescription([exit_id])
@@ -174,7 +180,7 @@ def test_get_single_agent_from_simulation():
                 stage_id=exit_id,
                 position=new_pos,
                 state=jps.CollisionFreeSpeedModelState(),
-                region_id=0,
+                region_id=room,
             )
         )
 
@@ -195,12 +201,14 @@ def test_get_agent_non_existing_agent_from_simulation():
 
     p1 = shapely.Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
     p2 = shapely.Polygon([(10, 4), (20, 4), (20, 6), (10, 6)])
+    surface = jps.WalkableSurface()
+    room = surface.add_region(polygon=p1.union(p2))
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=p1.union(p2)
+        model=jps.CollisionFreeSpeedModel(), geometry=surface
     )
 
     exit_id = simulation.add_exit_stage(
-        [(18, 4), (20, 4), (20, 6), (18, 6)], region_id=0
+        [(18, 4), (20, 4), (20, 6), (18, 6)], region_id=room
     )
     journey = jps.JourneyDescription([exit_id])
 
@@ -211,7 +219,7 @@ def test_get_agent_non_existing_agent_from_simulation():
         stage_id=exit_id,
         position=(7, 7),
         state=jps.CollisionFreeSpeedModelState(),
-        region_id=0,
+        region_id=room,
     )
 
     assert simulation.agent(agent_id).id == agent_id
@@ -235,12 +243,14 @@ def test_agent_can_be_removed_from_simulation():
 
     p1 = shapely.Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
     p2 = shapely.Polygon([(10, 4), (20, 4), (20, 6), (10, 6)])
+    surface = jps.WalkableSurface()
+    room = surface.add_region(polygon=p1.union(p2))
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=p1.union(p2)
+        model=jps.CollisionFreeSpeedModel(), geometry=surface
     )
     exit_stage_id = simulation.add_exit_stage(
         [(18, 4), (20, 4), (20, 6), (18, 6)],
-        region_id=0,
+        region_id=room,
     )
 
     journey = jps.JourneyDescription([exit_stage_id])
@@ -258,7 +268,7 @@ def test_agent_can_be_removed_from_simulation():
                 stage_id=exit_stage_id,
                 position=new_pos,
                 state=jps.CollisionFreeSpeedModelState(),
-                region_id=0,
+                region_id=room,
             )
         )
 
@@ -298,14 +308,16 @@ def test_agent_can_not_be_added_outside_geometry():
     jps.set_warning_callback(log_msg_handler)
     jps.set_error_callback(log_msg_handler)
 
+    surface = jps.WalkableSurface()
+    room = surface.add_region(boundary=[(0, 0), (100, 0), (100, 100), (0, 100)])
     simulation = jps.Simulation(
         model=jps.CollisionFreeSpeedModel(),
-        geometry=[(0, 0), (100, 0), (100, 100), (0, 100)],
+        geometry=surface,
     )
 
     exit_id = simulation.add_exit_stage(
         [(99, 45), (99, 55), (100, 55), (100, 45)],
-        region_id=0,
+        region_id=room,
     )
 
     journey = jps.JourneyDescription([exit_id])
@@ -318,7 +330,7 @@ def test_agent_can_not_be_added_outside_geometry():
         stage_id=exit_id,
         position=agent_position,
         state=jps.CollisionFreeSpeedModelState(),
-        region_id=0,
+        region_id=room,
     )
 
     with pytest.raises(
@@ -330,14 +342,16 @@ def test_agent_can_not_be_added_outside_geometry():
             stage_id=exit_id,
             position=(-50, -50),
             state=jps.CollisionFreeSpeedModelState(),
-            region_id=0,
+            region_id=room,
         )
 
 
 def test_direct_steering_target_must_be_inside_geometry():
+    surface = jps.WalkableSurface()
+    room = surface.add_region(boundary=[(0, 0), (100, 0), (100, 100), (0, 100)])
     simulation = jps.Simulation(
         model=jps.CollisionFreeSpeedModel(),
-        geometry=[(0, 0), (100, 0), (100, 100), (0, 100)],
+        geometry=surface,
     )
     stage_id = simulation.add_direct_steering_stage()
     journey_id = simulation.add_journey(jps.JourneyDescription([stage_id]))
@@ -346,7 +360,7 @@ def test_direct_steering_target_must_be_inside_geometry():
         stage_id=stage_id,
         position=(50, 50),
         state=jps.CollisionFreeSpeedModelState(),
-        region_id=0,
+        region_id=room,
     )
     agent = simulation.agent(agent_id)
 

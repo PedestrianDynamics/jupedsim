@@ -7,13 +7,13 @@ import h5py
 import jupedsim as jps
 import pytest
 import shapely
-from shapely import GeometryCollection
 
 
 @pytest.fixture
 def square_simulation(tmp_path: pathlib.Path):
-    area = GeometryCollection(
-        shapely.Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
+    surface = jps.WalkableSurface()
+    room = surface.add_region(
+        polygon=shapely.Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
     )
     out_filename = tmp_path / "traj.h5"
     writer = jps.Hdf5TrajectoryWriter(
@@ -22,13 +22,13 @@ def square_simulation(tmp_path: pathlib.Path):
     )
     sim = jps.Simulation(
         model=jps.CollisionFreeSpeedModelV2(),
-        geometry=area,
+        geometry=surface,
         trajectory_writer=writer,
         dt=0.01,
     )
     exit_id = sim.add_exit_stage(
         shapely.Polygon([(9, 0), (10, 0), (10, 10), (9, 10)]),
-        region_id=0,
+        region_id=room,
     )
     journey_id = sim.add_journey(jps.JourneyDescription([exit_id]))
     for x, y in [(2, 5), (3, 4), (3, 6)]:
@@ -37,7 +37,7 @@ def square_simulation(tmp_path: pathlib.Path):
             stage_id=exit_id,
             position=(x, y),
             state=jps.CollisionFreeSpeedModelV2State(),
-            region_id=0,
+            region_id=room,
         )
     for _ in range(50):
         sim.iterate()
@@ -96,12 +96,15 @@ def test_metadata_attributes(square_simulation):
 
 
 def test_close_is_idempotent(tmp_path):
-    area = GeometryCollection(shapely.Polygon([(0, 0), (5, 0), (5, 5), (0, 5)]))
+    surface = jps.WalkableSurface()
+    surface.add_region(
+        polygon=shapely.Polygon([(0, 0), (5, 0), (5, 5), (0, 5)])
+    )
     out = tmp_path / "empty.h5"
     writer = jps.Hdf5TrajectoryWriter(output_file=out, every_nth_frame=1)
     sim = jps.Simulation(
         model=jps.CollisionFreeSpeedModelV2(),
-        geometry=area,
+        geometry=surface,
         trajectory_writer=writer,
         dt=0.01,
     )
@@ -181,10 +184,13 @@ def test_regions_round_trip(tmp_path):
 
 
 def _square_simulation(writer):
-    area = GeometryCollection(shapely.Polygon([(0, 0), (5, 0), (5, 5), (0, 5)]))
+    surface = jps.WalkableSurface()
+    surface.add_region(
+        polygon=shapely.Polygon([(0, 0), (5, 0), (5, 5), (0, 5)])
+    )
     return jps.Simulation(
         model=jps.CollisionFreeSpeedModelV2(),
-        geometry=area,
+        geometry=surface,
         trajectory_writer=writer,
         dt=0.01,
     )

@@ -13,8 +13,9 @@ def _path_distance(points: list[tuple[float, float]]) -> float:
 
 
 def test_simple_path():
-    geometry = [(0, 0), (0, 10), (10, 10), (10, 0)]
-    navi = jps.RoutingEngine(geometry)
+    surface = jps.WalkableSurface()
+    surface.add_region(boundary=[(0, 0), (0, 10), (10, 10), (10, 0)])
+    navi = jps.RoutingEngine(surface.create_geometry())
 
     # Check is_routable for a point outside the geometry
     assert not navi.is_routable((-1, -1))

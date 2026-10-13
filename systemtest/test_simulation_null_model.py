@@ -5,9 +5,9 @@ import pytest
 
 def test_simulation_rejects_none_model():
     """Passing None as model should raise, not segfault."""
-    geo_builder = py_jps.GeometryBuilder()
-    geo_builder.add_accessible_area([(0, 0), (100, 0), (100, 100), (0, 100)])
-    geometry = geo_builder.build()
+    surface = py_jps.WalkableSurface()
+    surface.add_region(boundary=[(0, 0), (100, 0), (100, 100), (0, 100)])
+    geometry = surface.create_geometry()
 
     with pytest.raises(Exception):
         py_jps.Simulation(model=None, geometry=geometry, dt=0.01)
