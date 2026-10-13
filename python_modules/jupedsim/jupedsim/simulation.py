@@ -6,7 +6,7 @@ import shapely
 
 import jupedsim.native as py_jps
 from jupedsim.agent import Agent
-from jupedsim.geometry_utils import build_geometry, build_polygon
+from jupedsim.geometry_utils import build_geometry
 from jupedsim.internal.tracing import Timer
 from jupedsim.journey import JourneyDescription
 from jupedsim.models.anticipation_velocity_model import (
@@ -188,49 +188,24 @@ class Simulation:
 
     def add_exit_stage(
         self,
-        polygon: (
-            str
-            | shapely.GeometryCollection
-            | shapely.Polygon
-            | shapely.MultiPolygon
-            | shapely.MultiPoint
-            | list[tuple[float, float]]
-        ),
+        polygon: shapely.Polygon | list[tuple[float, float]],
         *,
         region_id: int,
     ) -> int:
         """Add an exit stage to the simulation.
 
         Args:
-            polygon:
-                Polygon without holes representing the exit stage. Polygon can be passed as:
-
-                * list of 2d points describing the outer boundary
-
-                * :class:`~shapely.GeometryCollection` consisting only out of
-                  :class:`Polygons <shapely.Polygon>`, :class:`MultiPolygons <shapely.MultiPolygon>`
-                  and :class:`MultiPoints <shapely.MultiPoint>`
-
-                * :class:`~shapely.MultiPolygon`
-
-                * :class:`~shapely.Polygon`
-
-                * :class:`~shapely.MultiPoint` forming a "simple" polygon when points are
-                  interpreted as linear ring without repetition of the start/end point.
-
-                * str with a valid Well Known Text. In this format the same WKT types as mentioned
-                  for the shapely types are supported: GEOMETRYCOLLETION, MULTIPOLYGON, POLYGON,
-                  MULTIPOINT. The same restrictions as mentioned for the shapely types apply.
-
+            polygon: Area of the exit, as a :class:`~shapely.Polygon` without
+                holes or as a list of 2D points describing its boundary.
             region_id: Region the exit lies in, see :func:`add_agent`.
 
         Returns:
             Id of the added exit stage.
 
+        Raises:
+            ValueError: If the polygon has holes.
         """
-        return self._obj.add_exit_stage(
-            build_polygon(polygon).boundary(), region_id
-        )
+        return self._obj.add_exit_stage(polygon, region_id)
 
     def add_direct_steering_stage(self) -> int:
         """Add an direct steering stage to the simulation.
@@ -468,47 +443,24 @@ class Simulation:
 
     def agents_in_polygon(
         self,
-        poly: (
-            str
-            | shapely.GeometryCollection
-            | shapely.Polygon
-            | shapely.MultiPolygon
-            | shapely.MultiPoint
-            | list[tuple[float, float]]
-        ),
+        poly: shapely.Polygon | list[tuple[float, float]],
     ) -> list[Agent]:
         """Handles to all agents inside the given polygon.
 
         Args:
-            poly:
-                Polygon without holes in which to check for pedestrians. Polygon can be passed as:
-
-                * list of 2d points describing the outer boundary
-
-                * :class:`~shapely.GeometryCollection` consisting only out of
-                  :class:`Polygons <shapely.Polygon>`, :class:`MultiPolygons <shapely.MultiPolygon>`
-                  and :class:`MultiPoints <shapely.MultiPoint>`
-
-                * :class:`~shapely.MultiPolygon`
-
-                * :class:`~shapely.Polygon`
-
-                * :class:`~shapely.MultiPoint` forming a "simple" polygon when points are
-                  interpreted as linear ring without repetition of the start/end point.
-
-                * str with a valid Well Known Text. In this format the same WKT types as mentioned
-                  for the shapely types are supported: GEOMETRYCOLLETION, MULTIPOLYGON, POLYGON,
-                  MULTIPOINT. The same restrictions as mentioned for the shapely types apply.
+            poly: Convex polygon in which to look for agents, as a
+                :class:`~shapely.Polygon` without holes or as a list of 2D
+                points describing its boundary.
 
         Returns:
             List of handles to all agents inside the given polygon.
 
+        Raises:
+            ValueError: If the polygon has holes.
         """
         return [
             Agent(self, agent_id)
-            for agent_id in self._obj.agents_in_polygon(
-                build_polygon(poly).boundary()
-            )
+            for agent_id in self._obj.agents_in_polygon(poly)
         ]
 
     def get_stage(
