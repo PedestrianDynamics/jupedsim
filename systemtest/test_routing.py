@@ -4,6 +4,7 @@ from pathlib import Path
 
 import jupedsim as jps
 import pytest
+import shapely
 
 ####################
 # Utility functions
@@ -18,11 +19,13 @@ def path_distance(points: list[tuple[float, float]]) -> float:
     )
 
 
-def load_wkt_file(filename: str):
+def load_geometry_from_wkt(filename: str) -> jps.Geometry:
     # Load file relative to repo root
     repo_root = Path(__file__).parents[1]
-    wkt_path = repo_root / filename
-    return wkt_path.read_text(encoding="utf-8")
+    wkt = shapely.from_wkt((repo_root / filename).read_text(encoding="utf-8"))
+    surface = jps.WalkableSurface()
+    surface.add_region(polygon=shapely.union_all(shapely.get_parts(wkt)))
+    return surface.create_geometry()
 
 
 ########################
@@ -43,8 +46,9 @@ def test_routing_engine_with_excluded_areas():
 
 
 def test_routing_engine_without_excluded_areas():
-    outer = [(0, 0), (100, 0), (100, 100), (0, 100)]
-    engine = jps.RoutingEngine(geometry=outer)
+    surface = jps.WalkableSurface()
+    surface.add_region(boundary=[(0, 0), (100, 0), (100, 100), (0, 100)])
+    engine = jps.RoutingEngine(geometry=surface.create_geometry())
     assert engine is not None
 
 
@@ -74,7 +78,7 @@ ROUTE_LENGTH_CONTINUITY = [
     ids=lambda params: params["test_name"],
 )
 def test_route_length_follows_the_target(test_entry):
-    geometry = load_wkt_file(test_entry["wkt_path"])
+    geometry = load_geometry_from_wkt(test_entry["wkt_path"])
     navi = jps.RoutingEngine(geometry)
 
     path1 = navi.compute_waypoints(

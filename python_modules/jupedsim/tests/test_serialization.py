@@ -6,14 +6,16 @@ from contextlib import closing
 
 import jupedsim as jps
 import shapely
-from shapely import GeometryCollection
 
 
 def _square_simulation(writer):
-    area = GeometryCollection(shapely.Polygon([(0, 0), (5, 0), (5, 5), (0, 5)]))
+    surface = jps.WalkableSurface()
+    surface.add_region(
+        polygon=shapely.Polygon([(0, 0), (5, 0), (5, 5), (0, 5)])
+    )
     return jps.Simulation(
         model=jps.CollisionFreeSpeedModelV2(),
-        geometry=area,
+        geometry=surface,
         trajectory_writer=writer,
         dt=0.01,
     )

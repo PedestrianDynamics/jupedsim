@@ -57,6 +57,15 @@ def polygon_simulation():
     )
 
 
+def square_simulation():
+    surface = jps.WalkableSurface()
+    room = surface.add_region(boundary=rect(0, 0, 10, 10))
+    simulation = jps.Simulation(
+        model=jps.CollisionFreeSpeedModel(), geometry=surface, dt=0.01
+    )
+    return simulation, room
+
+
 def test_polygon_input_still_builds_a_polygon_world():
     assert polygon_simulation().get_geometry().polygon(region_id=0).boundary()
 
@@ -218,8 +227,10 @@ def test_a_direct_steering_target_can_be_given_as_a_location():
 
 
 def test_an_agent_heading_for_an_exit_has_no_final_target_location():
-    sim = polygon_simulation()
-    exit_id = sim.add_exit_stage([(8, 4), (9, 4), (9, 6), (8, 6)], region_id=0)
+    sim, room = square_simulation()
+    exit_id = sim.add_exit_stage(
+        [(8, 4), (9, 4), (9, 6), (8, 6)], region_id=room
+    )
     journey_id = sim.add_journey(jps.JourneyDescription([exit_id]))
     agent = sim.agent(
         sim.add_agent(
@@ -227,7 +238,7 @@ def test_an_agent_heading_for_an_exit_has_no_final_target_location():
             stage_id=exit_id,
             position=(2.0, 5.0),
             state=jps.CollisionFreeSpeedModelState(),
-            region_id=0,
+            region_id=room,
         )
     )
     sim.iterate()
@@ -236,7 +247,7 @@ def test_an_agent_heading_for_an_exit_has_no_final_target_location():
 
 
 def test_an_agent_reports_the_orientation_of_its_route():
-    sim = polygon_simulation()
+    sim, room = square_simulation()
     steering = sim.add_direct_steering_stage()
     journey_id = sim.add_journey(jps.JourneyDescription([steering]))
     agent = sim.agent(
@@ -245,7 +256,7 @@ def test_an_agent_reports_the_orientation_of_its_route():
             stage_id=steering,
             position=(2.0, 5.0),
             state=jps.CollisionFreeSpeedModelState(),
-            region_id=0,
+            region_id=room,
         )
     )
     agent.final_target = (8.0, 5.0)

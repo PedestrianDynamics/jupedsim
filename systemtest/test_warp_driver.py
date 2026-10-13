@@ -9,8 +9,14 @@ import shapely
 @pytest.fixture
 def warp_driver_corridor():
     """20m x 4m corridor with WarpDriver model."""
-    area = shapely.Polygon([(0, 0), (20, 0), (20, 4), (0, 4)])
-    return jps.Simulation(model=jps.WarpDriverModel(), geometry=area, dt=0.01)
+    surface = jps.WalkableSurface()
+    room = surface.add_region(
+        polygon=shapely.Polygon([(0, 0), (20, 0), (20, 4), (0, 4)])
+    )
+    simulation = jps.Simulation(
+        model=jps.WarpDriverModel(), geometry=surface, dt=0.01
+    )
+    return simulation, room
 
 
 def test_default_model_construction():
@@ -33,9 +39,9 @@ def test_default_state_construction():
 
 def test_simulation_runs(warp_driver_corridor):
     """Test that a basic simulation runs without errors."""
-    sim = warp_driver_corridor
+    sim, room = warp_driver_corridor
     exit_area = shapely.Polygon([(19, 0), (20, 0), (20, 4), (19, 4)])
-    exit_id = sim.add_exit_stage(exit_area, region_id=0)
+    exit_id = sim.add_exit_stage(exit_area, region_id=room)
     journey_id = sim.add_journey(jps.JourneyDescription([exit_id]))
 
     aid = sim.add_agent(
@@ -43,7 +49,7 @@ def test_simulation_runs(warp_driver_corridor):
         stage_id=exit_id,
         position=(2, 2),
         state=jps.WarpDriverModelState(desired_speed=1.2, radius=0.15),
-        region_id=0,
+        region_id=room,
     )
 
     initial_x = sim.agent(aid).position[0]
@@ -57,8 +63,8 @@ def test_simulation_runs(warp_driver_corridor):
 
 def test_single_agent_straight_path(warp_driver_corridor):
     """Single agent with no neighbors follows straight path towards target."""
-    sim = warp_driver_corridor
-    wp = sim.add_waypoint_stage((10, 2), 0.5, region_id=0)
+    sim, room = warp_driver_corridor
+    wp = sim.add_waypoint_stage((10, 2), 0.5, region_id=room)
     journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
     aid = sim.add_agent(
@@ -66,7 +72,7 @@ def test_single_agent_straight_path(warp_driver_corridor):
         stage_id=wp,
         position=(2, 2),
         state=jps.WarpDriverModelState(desired_speed=1.0, radius=0.15),
-        region_id=0,
+        region_id=room,
     )
 
     for _ in range(100):
@@ -82,12 +88,12 @@ def test_single_agent_straight_path(warp_driver_corridor):
 
 def test_two_agents_head_on_avoid(warp_driver_corridor):
     """Two head-on agents should avoid each other and both reach their goals."""
-    sim = warp_driver_corridor
+    sim, room = warp_driver_corridor
     exit_left = shapely.Polygon([(0, 0), (1, 0), (1, 4), (0, 4)])
     exit_right = shapely.Polygon([(19, 0), (20, 0), (20, 4), (19, 4)])
 
-    exit_left_id = sim.add_exit_stage(exit_left, region_id=0)
-    exit_right_id = sim.add_exit_stage(exit_right, region_id=0)
+    exit_left_id = sim.add_exit_stage(exit_left, region_id=room)
+    exit_right_id = sim.add_exit_stage(exit_right, region_id=room)
 
     journey_right = sim.add_journey(jps.JourneyDescription([exit_right_id]))
     journey_left = sim.add_journey(jps.JourneyDescription([exit_left_id]))
@@ -99,7 +105,7 @@ def test_two_agents_head_on_avoid(warp_driver_corridor):
         state=jps.WarpDriverModelState(
             orientation=(1, 0), desired_speed=1.2, radius=0.15
         ),
-        region_id=0,
+        region_id=room,
     )
     sim.add_agent(
         journey_id=journey_left,
@@ -108,7 +114,7 @@ def test_two_agents_head_on_avoid(warp_driver_corridor):
         state=jps.WarpDriverModelState(
             orientation=(-1, 0), desired_speed=1.2, radius=0.15
         ),
-        region_id=0,
+        region_id=room,
     )
 
     max_steps = 3000
@@ -124,10 +130,13 @@ def test_two_agents_head_on_avoid(warp_driver_corridor):
 
 def test_agent_parameters():
     """Test per-agent parameter access and mutation."""
-    area = shapely.Polygon([(0, 0), (10, 0), (10, 4), (0, 4)])
-    sim = jps.Simulation(model=jps.WarpDriverModel(), geometry=area, dt=0.01)
+    surface = jps.WalkableSurface()
+    room = surface.add_region(
+        polygon=shapely.Polygon([(0, 0), (10, 0), (10, 4), (0, 4)])
+    )
+    sim = jps.Simulation(model=jps.WarpDriverModel(), geometry=surface, dt=0.01)
 
-    wp = sim.add_waypoint_stage((5, 2), 0.5, region_id=0)
+    wp = sim.add_waypoint_stage((5, 2), 0.5, region_id=room)
     journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
     aid = sim.add_agent(
@@ -135,7 +144,7 @@ def test_agent_parameters():
         stage_id=wp,
         position=(1, 2),
         state=jps.WarpDriverModelState(desired_speed=1.0, radius=0.2),
-        region_id=0,
+        region_id=room,
     )
 
     state = sim.agent(aid).state
@@ -151,10 +160,13 @@ def test_agent_parameters():
 
 def test_invalid_agent_state():
     """Invalid per-agent state raises errors when adding the agent."""
-    area = shapely.Polygon([(0, 0), (10, 0), (10, 4), (0, 4)])
-    sim = jps.Simulation(model=jps.WarpDriverModel(), geometry=area, dt=0.01)
+    surface = jps.WalkableSurface()
+    room = surface.add_region(
+        polygon=shapely.Polygon([(0, 0), (10, 0), (10, 4), (0, 4)])
+    )
+    sim = jps.Simulation(model=jps.WarpDriverModel(), geometry=surface, dt=0.01)
 
-    wp = sim.add_waypoint_stage((5, 2), 0.5, region_id=0)
+    wp = sim.add_waypoint_stage((5, 2), 0.5, region_id=room)
     journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
     with pytest.raises(jps.SimulationError, match="radius"):
@@ -163,7 +175,7 @@ def test_invalid_agent_state():
             stage_id=wp,
             position=(1, 2),
             state=jps.WarpDriverModelState(radius=-1.0),
-            region_id=0,
+            region_id=room,
         )
 
     with pytest.raises(jps.SimulationError, match="v0"):
@@ -172,5 +184,5 @@ def test_invalid_agent_state():
             stage_id=wp,
             position=(1, 2),
             state=jps.WarpDriverModelState(desired_speed=-1.0),
-            region_id=0,
+            region_id=room,
         )

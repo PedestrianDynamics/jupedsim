@@ -4,11 +4,12 @@ import pytest
 
 
 def _simulation():
-    return jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(),
-        geometry=[(0, 0), (10, 0), (10, 10), (0, 10)],
-        dt=0.01,
+    surface = jps.WalkableSurface()
+    room = surface.add_region(boundary=[(0, 0), (10, 0), (10, 10), (0, 10)])
+    simulation = jps.Simulation(
+        model=jps.CollisionFreeSpeedModel(), geometry=surface, dt=0.01
     )
+    return simulation, room
 
 
 def test_every_transition_kind_is_one_native_type():
@@ -28,13 +29,13 @@ def test_every_transition_kind_is_one_native_type():
 
 
 def test_a_journey_with_every_transition_kind_leads_to_the_exit():
-    sim = _simulation()
-    first = sim.add_waypoint_stage((2, 5), 0.5, region_id=0)
-    upper = sim.add_waypoint_stage((5, 7), 0.5, region_id=0)
-    lower = sim.add_waypoint_stage((5, 3), 0.5, region_id=0)
-    last = sim.add_waypoint_stage((8, 5), 0.5, region_id=0)
+    sim, room = _simulation()
+    first = sim.add_waypoint_stage((2, 5), 0.5, region_id=room)
+    upper = sim.add_waypoint_stage((5, 7), 0.5, region_id=room)
+    lower = sim.add_waypoint_stage((5, 3), 0.5, region_id=room)
+    last = sim.add_waypoint_stage((8, 5), 0.5, region_id=room)
     exit_id = sim.add_exit_stage(
-        [(9, 4), (10, 4), (10, 6), (9, 6)], region_id=0
+        [(9, 4), (10, 4), (10, 6), (9, 6)], region_id=room
     )
     journey = jps.JourneyDescription()
     journey.add([first, upper, lower])  # a list (was a TypeError)
@@ -58,7 +59,7 @@ def test_a_journey_with_every_transition_kind_leads_to_the_exit():
             stage_id=first,
             position=(1.0, y),
             state=jps.CollisionFreeSpeedModelState(),
-            region_id=0,
+            region_id=room,
         )
     while sim.agent_count() > 0 and sim.iteration_count() < 5000:
         sim.iterate()
@@ -87,8 +88,8 @@ def test_a_transition_to_the_invalid_stage_id_is_rejected(create):
 
 
 def test_a_journey_holding_something_else_than_a_transition_is_rejected():
-    sim = _simulation()
-    stage = sim.add_waypoint_stage((2, 5), 0.5, region_id=0)
+    sim, room = _simulation()
+    stage = sim.add_waypoint_stage((2, 5), 0.5, region_id=room)
     journey = jps.JourneyDescription([stage])
     journey.set_transition_for_stage(stage, None)
     with pytest.raises(TypeError):

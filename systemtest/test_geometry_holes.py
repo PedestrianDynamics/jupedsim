@@ -8,13 +8,14 @@ def test_geometry_holes_returns_coordinates():
     hole = [(40, 40), (60, 40), (60, 60), (40, 60)]
     poly = shapely.Polygon(outer, holes=[hole])
 
+    surface = jps.WalkableSurface()
+    room = surface.add_region(polygon=poly)
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(),
-        geometry=poly,
+        model=jps.CollisionFreeSpeedModel(), geometry=surface
     )
     geo = simulation.get_geometry()
 
-    holes = geo.polygon(region_id=0).holes()
+    holes = geo.polygon(region_id=room).holes()
     assert holes is not None
     assert len(holes) == 1
     assert len(holes[0]) >= 4
