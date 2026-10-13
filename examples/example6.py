@@ -10,19 +10,20 @@ import shapely
 
 
 def main():
-    geometry = shapely.GeometryCollection(shapely.box(0, -2.5, 50, 2.5))
+    surface = jps.WalkableSurface()
+    region = surface.add_region(polygon=shapely.box(0, -2.5, 50, 2.5))
     exit_polygon = shapely.box(48, -2.5, 50, 2.5)
 
     trajectory_file = "example_6.sqlite"
     simulation = jps.Simulation(
         model=jps.CollisionFreeSpeedModelV2(),
-        geometry=geometry,
+        geometry=surface,
         trajectory_writer=jps.SqliteTrajectoryWriter(
             output_file=pathlib.Path(trajectory_file)
         ),
     )
 
-    exit_id = simulation.add_exit_stage(exit_polygon, region_id=0)
+    exit_id = simulation.add_exit_stage(exit_polygon, region_id=region)
     journey = jps.JourneyDescription([exit_id])
     journey_id = simulation.add_journey(journey)
 
@@ -45,7 +46,7 @@ def main():
                 strength_geometry_repulsion=5,
                 range_geometry_repulsion=0.1,
             ),
-            region_id=0,
+            region_id=region,
         )
 
     slow_start_positions = jps.distribute_by_number(
@@ -68,7 +69,7 @@ def main():
                 range_geometry_repulsion=0.1,
                 desired_speed=0.3,
             ),
-            region_id=0,
+            region_id=region,
         )
 
     while simulation.agent_count() > 0:

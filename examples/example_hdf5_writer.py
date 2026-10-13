@@ -21,7 +21,7 @@ import hdf5plugin  # noqa: F401  registers the Zstd filter used by the writer
 import jupedsim as jps
 import matplotlib.pyplot as plt
 import shapely
-from shapely import GeometryCollection, Polygon
+from shapely import Polygon
 
 
 def main() -> None:
@@ -29,17 +29,18 @@ def main() -> None:
     room2 = Polygon([(15, 0), (25, 0), (25, 10), (15, 10)])
     corridor = Polygon([(10, 4.5), (28, 4.5), (28, 5.5), (10, 5.5)])
 
-    area = GeometryCollection(corridor.union(room1.union(room2)))
+    surface = jps.WalkableSurface()
+    region = surface.add_region(polygon=corridor.union(room1.union(room2)))
     out = pathlib.Path("example_traj.h5")
     with jps.Hdf5TrajectoryWriter(output_file=out, every_nth_frame=4) as writer:
         sim = jps.Simulation(
             model=jps.CollisionFreeSpeedModelV2(),
-            geometry=area,
+            geometry=surface,
             trajectory_writer=writer,
             dt=0.01,
         )
         exit_area = Polygon([(27, 4.5), (28, 4.5), (28, 5.5), (27, 5.5)])
-        exit_id = sim.add_exit_stage(exit_area, region_id=0)
+        exit_id = sim.add_exit_stage(exit_area, region_id=region)
         journey_id = sim.add_journey(jps.JourneyDescription([exit_id]))
         spawning_area = Polygon([(0, 0), (5, 0), (5, 10), (0, 10)])
         num_agents = 150
@@ -56,7 +57,7 @@ def main() -> None:
                 stage_id=exit_id,
                 position=position,
                 state=jps.CollisionFreeSpeedModelV2State(),
-                region_id=0,
+                region_id=region,
             )
 
         while sim.agent_count() > 0 and sim.iteration_count() < 2000:

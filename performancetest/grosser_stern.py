@@ -9,6 +9,7 @@ import sys
 import time
 
 import jupedsim as jps
+import shapely
 from performancetest.stats_writer import StatsWriter
 
 from performancetest.geometry import geometries
@@ -44354,7 +44355,7 @@ class RandomProfilePicker:
 
 
 @jps.trace_event
-def create_journeys(sim: jps.Simulation):
+def create_journeys(sim: jps.Simulation, region: int):
     gates = [
         (-1815.11, -175.23),
         (-1814.4, -175.43),
@@ -44375,8 +44376,10 @@ def create_journeys(sim: jps.Simulation):
         (-1655.71, -154.36),
         (-1660.21, -117.91),
     ]
-    gates_stages = [sim.add_waypoint_stage(g, 0.5, region_id=0) for g in gates]
-    exit_stage = sim.add_exit_stage(exit, region_id=0)
+    gates_stages = [
+        sim.add_waypoint_stage(g, 0.5, region_id=region) for g in gates
+    ]
+    exit_stage = sim.add_exit_stage(exit, region_id=region)
 
     journeys = []
     for gate_stage in gates_stages:
@@ -44435,14 +44438,19 @@ def main():
             ),
         )
     )
+    walkable_area = shapely.from_wkt(geometries["grosser_stern"])
+    surface = jps.WalkableSurface()
+    region = surface.add_region(
+        polygon=shapely.union_all(shapely.get_parts(walkable_area))
+    )
     simulation = jps.Simulation(
         model=jps.CollisionFreeSpeedModel(),
-        geometry=geometries["grosser_stern"],
+        geometry=surface,
         trajectory_writer=stats_writer,
         timer_log_level=3,
     )
     jps.enable_tracing()
-    journeys = create_journeys(simulation)
+    journeys = create_journeys(simulation, region)
 
     with jps.trace_event("initialisation"):
         for pos in positions:
@@ -44452,7 +44460,7 @@ def main():
                 stage_id=start_stage,
                 position=pos,
                 state=profile_picker.random_state(),
-                region_id=0,
+                region_id=region,
             )
 
     start_time = time.perf_counter_ns()
