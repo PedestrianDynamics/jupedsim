@@ -2,7 +2,7 @@
 Geometry
 ========
 
-When setting up a pedestrian dynamics simulation, one of the most fundamental parts, is to define where the agens can move.
+When setting up a pedestrian dynamics simulation, one of the most fundamental parts, is to define where the agents can move.
 *JuPedSim* works with a walkable area, which means that every point inside this region can be reached by the agents and every point outside is not included in the simulation code.
 The borders of the walkable area may not be crossed by any agent.
 
@@ -16,8 +16,9 @@ The borders of the walkable area may not be crossed by any agent.
 Walkable area
 =============
 
-The walkable area in *JuPedSim* is defined as one simple, e.g., non self intersecting polygon covering a non-zero area.
-This can be either directly defined via *Shapely* as a :class:`~shapely.Polygon` or as a :class:`~shapely.GeometryCollection` containing multiple Polygons.
+The walkable area is built with a :class:`~jupedsim.WalkableSurface` out of regions.
+Each region is one simple, i.e., non self intersecting polygon covering a non-zero area.
+It is added either as a *Shapely* :class:`~shapely.Polygon` or as a list of points describing its boundary.
 
 .. figure:: /_static/geometry/simple-polygon.svg
     :width: 80%
@@ -26,36 +27,58 @@ This can be either directly defined via *Shapely* as a :class:`~shapely.Polygon`
 
     A simple polygon, which can be used to model the walkable area of a simulation.
 
-Such polygons can be created like:
+Such a region can be added like:
 
 .. code:: python
 
-    from shapely import GeometryCollection, Polygon
+    import jupedsim as jps
+    import shapely
 
-    walkable_area = Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
+    surface = jps.WalkableSurface()
+    room = surface.add_region(polygon=shapely.Polygon([(0, 0), (10, 0), (10, 10), (0, 10)]))
 
+    # or, equivalently, from the points of the boundary
+    room = surface.add_region(boundary=[(0, 0), (10, 0), (10, 10), (0, 10)])
 
-When using the collection approach, *JuPedSim* will try to build the union of all polygon contained in the collection.
-This union **must** result in exactly one polygon, otherwise it is not possible to start a simulation.
+:meth:`~jupedsim.WalkableSurface.add_region` returns the id of the new region.
+Agents and stages are placed in a region by this id, see :doc:`routing`.
+
+A walkable area may consist of several regions, e.g. floors at different heights joined by stairs.
+Each of them is added with its own call to :meth:`~jupedsim.WalkableSurface.add_region`.
+
+Preparing polygons
+------------------
+
+*JuPedSim* takes each region as-is. If the walkable area is made of several overlapping polygons,
+build their union with *Shapely* first. The union **must** result in exactly one polygon.
 
 .. figure:: /_static/geometry/collection.svg
     :width: 80%
     :align: center
     :alt: Combining multiple polygons, to one polygon which represents the walkable area.
 
-    Combining two overlapping polygons to one, which then can be used to model teh walkable area of a simulation.
-
-Such polygons can be created with:
+    Combining two overlapping polygons to one, which then can be used to model the walkable area of a simulation.
 
 .. code:: python
 
-    from shapely import GeometryCollection, Polygon
+    import shapely
 
-    first_polygon = Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
-    second_polygon = Polygon([(15, 0), (25, 0), (25, 10), (15, 10)])
+    first_polygon = shapely.Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
+    second_polygon = shapely.Polygon([(8, 0), (18, 0), (18, 10), (8, 10)])
 
-    walkable_area = GeometryCollection(first_polygon.union(second_polygon))
+    walkable_area = shapely.union_all([first_polygon, second_polygon])
 
+The same applies to a walkable area read from a WKT file.
+Such files often hold a ``GEOMETRYCOLLECTION``, which has to be turned into a single polygon:
+
+.. code:: python
+
+    import pathlib
+
+    import shapely
+
+    wkt = shapely.from_wkt(pathlib.Path("walkable_area.wkt").read_text())
+    walkable_area = shapely.union_all(shapely.get_parts(wkt))
 
 Obstacles
 =========
@@ -75,31 +98,40 @@ For creating walkable areas with holes you can use:
 
 .. code:: python
 
-    from shapely import Polygon
+    import shapely
 
-    walkable_area = Polygon(
-        [
-            (0, 0), (20, 0), (20, 20), (0, 20)
-        ],
+    walkable_area = shapely.Polygon(
+        [(0, 0), (20, 0), (20, 20), (0, 20)],
         # now come the holes/obstacles
         [
             # first hole/obstacle
-            [(1, 1), (1, 2), (2, 2), (2, 1)]
+            [(1, 1), (1, 2), (2, 2), (2, 1)],
             # second hole/obstacle
-            [(10, 1), (10, 2), (11, 2), (11, 1)]
+            [(10, 1), (10, 2), (11, 2), (11, 1)],
+        ],
+    )
+    room = surface.add_region(polygon=walkable_area)
+
+    # or, equivalently, from points
+    room = surface.add_region(
+        boundary=[(0, 0), (20, 0), (20, 20), (0, 20)],
+        holes=[
+            [(1, 1), (1, 2), (2, 2), (2, 1)],
+            [(10, 1), (10, 2), (11, 2), (11, 1)],
         ],
     )
 
-Or you can "subtract" the hole from the walkable area, which will also work, when the touches the boundary of the geometry:
+Holes have to lie strictly inside the boundary.
+An obstacle that touches the boundary is instead "subtracted" from the walkable area:
 
 .. code:: python
 
-    from shapely import Polygon, difference
+    import shapely
 
-    walkable_area = Polygon([(0, 0), (20, 0), (20, 20), (0, 20)])
-    obstacle = Polygon([(1, 1), (1, 2), (2, 2), (2, 1)])
+    walkable_area = shapely.Polygon([(0, 0), (20, 0), (20, 20), (0, 20)])
+    obstacle = shapely.Polygon([(0, 1), (0, 2), (2, 2), (2, 1)])
 
-    walkable_area = walkable.difference(obstacle)
+    walkable_area = walkable_area.difference(obstacle)
 
 .. warning::
 
@@ -118,15 +150,18 @@ This can be done with:
 
 .. code:: python
 
+    import pathlib
+
     import jupedsim as jps
 
     # define walkable area
-    walkable_area = ...
+    surface = jps.WalkableSurface()
+    room = surface.add_region(polygon=...)
 
     simulation = jps.Simulation(
         model=jps.CollisionFreeSpeedModel(),
-        geometry=area,
+        geometry=surface,
         trajectory_writer=jps.SqliteTrajectoryWriter(
             output_file=pathlib.Path("traj.sqlite")
-        )
+        ),
     )

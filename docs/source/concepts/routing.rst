@@ -50,6 +50,9 @@ The various types of stages will be explained below.
     All stages added to the simulation need to be inside the walkable area.
     This needs to be uphold when the geometry is changed.
 
+Each stage lies in one region of the walkable area. Its ``region_id`` is the id
+:meth:`~jupedsim.WalkableSurface.add_region` returned for that region, see :doc:`geometry`.
+
 Waypoint
 ^^^^^^^^
 
@@ -69,7 +72,7 @@ A Waypoint at :math:`(0.6, -1.4)` with an accepted distance of 2m can be added t
 
 .. code:: python
 
-    waypoint_id = simulation.add_waypoint_stage([0.6, -1.4], 2, region_id=0)
+    waypoint_id = simulation.add_waypoint_stage([0.6, -1.4], 2, region_id=region_id)
 
 Exit
 ^^^^
@@ -95,11 +98,11 @@ An exit located in the polygon :math:`(-0.2, -1.9), (0.2, -1.9), (0.2, -1.7), (-
 .. code:: python
 
     # create exit from coordinates
-    exit_id = simulation.add_exit_stage([(-0.2, -1.9), (0.2, -1.9), (0.2, -1.7), (-0.2, -1.7)], region_id=0)
+    exit_id = simulation.add_exit_stage([(-0.2, -1.9), (0.2, -1.9), (0.2, -1.7), (-0.2, -1.7)], region_id=region_id)
 
     # create exit from shapely.Polygon
     exit_polygon = shapely.Polygon([(-0.2, -1.9), (0.2, -1.9), (0.2, -1.7), (-0.2, -1.7)])
-    exit_id = simulation.add_exit_stage(exit_polygon, region_id=0)
+    exit_id = simulation.add_exit_stage(exit_polygon, region_id=region_id)
 
 .. note::
 
