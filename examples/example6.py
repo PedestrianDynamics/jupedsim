@@ -35,10 +35,10 @@ def main():
 
     for position in motivated_start_positions:
         simulation.add_agent(
-            jps.CollisionFreeSpeedModelV2AgentParameters(
-                journey_id=journey_id,
-                stage_id=exit_id,
-                position=position,
+            journey_id=journey_id,
+            stage_id=exit_id,
+            position=position,
+            state=jps.CollisionFreeSpeedModelV2State(
                 radius=0.12,
                 strength_neighbor_repulsion=8,
                 range_neighbor_repulsion=0.1,
@@ -57,10 +57,10 @@ def main():
 
     for position in slow_start_positions:
         simulation.add_agent(
-            jps.CollisionFreeSpeedModelV2AgentParameters(
-                journey_id=journey_id,
-                stage_id=exit_id,
-                position=position,
+            journey_id=journey_id,
+            stage_id=exit_id,
+            position=position,
+            state=jps.CollisionFreeSpeedModelV2State(
                 radius=0.12,
                 strength_neighbor_repulsion=30,
                 range_neighbor_repulsion=0.1,

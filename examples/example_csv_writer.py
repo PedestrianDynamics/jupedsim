@@ -87,13 +87,14 @@ def main():
     journey = jps.JourneyDescription([exit_id])
     journey_id = simulation.add_journey(journey)
 
-    agent_parameters = jps.CollisionFreeSpeedModelAgentParameters(
-        journey_id=journey_id, stage_id=exit_id, radius=0.3
-    )
-
     for pos in [(1, 2), (3, 8), (5, 5)]:
-        agent_parameters.position = pos
-        simulation.add_agent(agent_parameters, region_id=0)
+        simulation.add_agent(
+            journey_id=journey_id,
+            stage_id=exit_id,
+            position=pos,
+            state=jps.CollisionFreeSpeedModelState(radius=0.3),
+            region_id=0,
+        )
 
     print(f"Running simulation with CsvTrajectoryWriter -> {output_file}")
 

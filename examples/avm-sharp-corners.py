@@ -1,7 +1,6 @@
 """Example simulation using the Anticipation Velocity Model (AVM) in Jupedsim with a geometry that has sharp corners."""
 
 import pathlib
-import random
 
 import jupedsim as jps
 from shapely.geometry import Polygon
@@ -56,11 +55,10 @@ print(f"Distributing {N} agents.")
 
 simulation = jps.Simulation(
     model=jps.AnticipationVelocityModel(
-        rng_seed=random.randint(0, 2**64 - 1),
+        rng_seed=1,
         pushout_strength=0.3,  # high values lead to more distance kept away from walls.
     ),
     dt=0.05,
-    rng_seed=1,
     geometry=walkable_area,
     trajectory_writer=jps.SqliteTrajectoryWriter(
         output_file=pathlib.Path(output_file), every_nth_frame=1
@@ -107,13 +105,10 @@ for i, pos in enumerate(pos_in_spawning_area):
     goal_id = goal_1 if i % 2 == 0 else goal_2
     journey_id = journey1id if i % 2 == 0 else journey2id
     simulation.add_agent(
-        parameters=jps.AnticipationVelocityModelAgentParameters(
-            journey_id=journey_id,
-            position=pos,
-            stage_id=goal_id,
-            radius=0.15,
-            desired_speed=1,
-        ),
+        journey_id=journey_id,
+        stage_id=goal_id,
+        position=pos,
+        state=jps.AnticipationVelocityModelState(radius=0.15, desired_speed=1),
         region_id=0,
     )
 

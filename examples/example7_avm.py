@@ -46,10 +46,10 @@ def main():
 
     for position in start_positions:
         simulation.add_agent(
-            jps.AnticipationVelocityModelAgentParameters(
-                journey_id=journey_id,
-                stage_id=exit_id,
-                position=position,
+            journey_id=journey_id,
+            stage_id=exit_id,
+            position=position,
+            state=jps.AnticipationVelocityModelState(
                 anticipation_time=0.5,
                 reaction_time=0.3,
                 wall_buffer_distance=0.05,
