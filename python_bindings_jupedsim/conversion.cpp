@@ -19,16 +19,6 @@ Point into_point(const std::tuple<double, double>& p)
     return Point{std::get<0>(p), std::get<1>(p)};
 }
 
-std::vector<Point> into_points(const std::vector<std::tuple<double, double>>& in)
-{
-    std::vector<Point> points{};
-    points.reserve(in.size());
-    for(const auto& [x, y] : in) {
-        points.emplace_back(x, y);
-    }
-    return points;
-}
-
 std::string clean_doc(std::string_view raw)
 {
     // Tabs count as one column; docstrings in the bindings are indented with spaces.

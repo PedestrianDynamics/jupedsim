@@ -15,7 +15,6 @@ def test_geometry_holes_returns_coordinates():
     )
     geo = simulation.get_geometry()
 
-    holes = geo.polygon(region_id=room).holes()
-    assert holes is not None
-    assert len(holes) == 1
-    assert len(holes[0]) >= 4
+    polygon = shapely.from_wkt(geo.polygon(region_id=room).as_wkt())
+    assert len(polygon.interiors) == 1
+    assert len(polygon.interiors[0].coords) >= 4
