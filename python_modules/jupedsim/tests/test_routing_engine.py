@@ -2,9 +2,9 @@
 import math
 from pathlib import Path
 
+import jupedsim as jps
 import pytest
 import shapely
-from jupedsim.geometry_utils import build_geometry
 from jupedsim.internal.routing import (
     Geometry,
     SurfaceMeshShortestPathRoutingEngine,
@@ -76,12 +76,15 @@ def test_orientation_is_unit_vector():
     assert math.hypot(*d) == pytest.approx(1.0)
 
 
-def test_build_geometry_lifts_shapely_polygon():
-    poly = shapely.Polygon(
-        [(0, 0), (10, 0), (10, 10), (0, 10)],
-        holes=[[(4, 4), (6, 4), (6, 6), (4, 6)]],
+def test_a_route_on_a_flat_region_keeps_clear_of_a_hole():
+    surface = jps.WalkableSurface()
+    surface.add_region(
+        polygon=shapely.Polygon(
+            [(0, 0), (10, 0), (10, 10), (0, 10)],
+            holes=[[(4, 4), (6, 4), (6, 6), (4, 6)]],
+        )
     )
-    geo = build_geometry(poly)
+    geo = surface.create_geometry()
 
     assert geo.region_count() == 1
     assert geo.is_valid_location((1, 1, 1))
@@ -90,7 +93,7 @@ def test_build_geometry_lifts_shapely_polygon():
     # flat lift: every vertex at z=0
     assert all(v[2] == 0.0 for v in geo.vertices())
 
-    # routing on the lifted geometry has to bend around the hole: (2,5) -> (8,5) turns on two of
+    # the route has to bend around the hole: (2,5) -> (8,5) turns on two of
     # its corners, and the route is held off each of them by the wall clearance -- so it is
     # longer than the geodesic through them, which measures 2 + 2*sqrt(5).
     engine = SurfaceMeshShortestPathRoutingEngine(geo)
@@ -111,12 +114,6 @@ def test_build_geometry_lifts_shapely_polygon():
     length = sum(math.dist(a, b) for a, b in zip(path, path[1:]))
     assert length > 2 + 2 * math.sqrt(5)
     assert all(p[2] == pytest.approx(0.0) for p in path)
-
-
-def test_build_geometry_accepts_wkt():
-    geo = build_geometry("POLYGON((0 0, 10 0, 10 10, 0 10, 0 0))")
-    assert geo.region_count() == 1
-    assert geo.is_valid_location((5, 5, 1))
 
 
 def test_fixed_target_several_sources(engine):

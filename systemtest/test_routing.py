@@ -33,25 +33,6 @@ def load_geometry_from_wkt(filename: str) -> jps.Geometry:
 ########################
 
 
-def test_routing_engine_with_excluded_areas():
-    """Verify excluded_areas kwarg is forwarded to build_geometry."""
-    outer = [(0, 0), (100, 0), (100, 100), (0, 100)]
-    hole = [(40, 40), (60, 40), (60, 60), (40, 60)]
-
-    engine = jps.RoutingEngine(
-        geometry=outer,
-        excluded_areas=[hole],
-    )
-    assert engine is not None
-
-
-def test_routing_engine_without_excluded_areas():
-    surface = jps.WalkableSurface()
-    surface.add_region(boundary=[(0, 0), (100, 0), (100, 100), (0, 100)])
-    engine = jps.RoutingEngine(geometry=surface.create_geometry())
-    assert engine is not None
-
-
 ROUTE_LENGTH_CONTINUITY = [
     {
         "test_name": "corner_with_shortcut",
