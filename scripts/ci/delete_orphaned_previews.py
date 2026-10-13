@@ -17,8 +17,7 @@ def find_orphaned_previews(root: Path, repo) -> list[Path]:
         return []
 
     if not root.is_dir():
-        sys.exit("error: {repo} exists but is not a directory!")
-
+        sys.exit(f"error: {root} exists but is not a directory!")
 
     orphaned = []
 
