@@ -28,17 +28,15 @@ DEFAULT_DT = 0.05
 MODELS = {
     # Each entry is a dict with keys:
     #   factory      -> () -> OperationalModel instance
-    #   agent_cls    -> the *AgentParameters dataclass for this model
-    #   agent_kwargs -> extra kwargs merged into agent params (per-agent state
-    #                   that used to live on the model constructor before the
-    #                   csm-v3 refactor — only CFSv2 and AVM use this)
+    #   state_cls    -> the *State class for this model
+    #   state_kwargs -> extra per-agent state (only CFSv2 and AVM use this)
     #   dt           -> simulation timestep [s] used when constructing
     #                   jps.Simulation for this model. Per-model so a more
     #                   sensitive integrator (e.g. WarpDriver) can run finer.
     "CFSV2": {
         "factory": lambda: jps.CollisionFreeSpeedModelV2(),
-        "agent_cls": jps.CollisionFreeSpeedModelV2AgentParameters,
-        "agent_kwargs": {
+        "state_cls": jps.CollisionFreeSpeedModelV2State,
+        "state_kwargs": {
             "strength_neighbor_repulsion": 8.0,  # repulsive force magnitude [N]
             "range_neighbor_repulsion": 0.1,  # exponential decay length [m]
             "strength_geometry_repulsion": 5.0,  # wall repulsive force magnitude [N]
@@ -48,8 +46,8 @@ MODELS = {
     },
     "AVM": {
         "factory": lambda: jps.AnticipationVelocityModel(),
-        "agent_cls": jps.AnticipationVelocityModelAgentParameters,
-        "agent_kwargs": {
+        "state_cls": jps.AnticipationVelocityModelState,
+        "state_kwargs": {
             "strength_neighbor_repulsion": 8.0,  # repulsive force magnitude [N]
             "range_neighbor_repulsion": 0.1,  # exponential decay length [m]
             "wall_buffer_distance": 0.02,  # min distance to walls [m]
@@ -63,8 +61,8 @@ MODELS = {
             body_force=2000,  # contact body force strength [N]
             friction=0.08,  # sliding friction coefficient
         ),
-        "agent_cls": jps.SocialForceModelAgentParameters,
-        "agent_kwargs": {},
+        "state_cls": jps.SocialForceModelState,
+        "state_kwargs": {},
         "dt": 0.001,  # SocialForce wants a small step for numerical stability
     },
     "WarpDriver": {
@@ -76,38 +74,22 @@ MODELS = {
             velocity_uncertainty_x=0.2,  # longitudinal speed uncertainty
             velocity_uncertainty_y=0.2,  # lateral speed uncertainty
         ),
-        "agent_cls": jps.WarpDriverModelAgentParameters,
-        "agent_kwargs": {},
+        "state_cls": jps.WarpDriverModelState,
+        "state_kwargs": {},
         "dt": 0.05,
     },
 }
 
-_HAS_ORIENTATION = {
-    jps.SocialForceModelAgentParameters,
-    jps.WarpDriverModelAgentParameters,
-}
+_HAS_ORIENTATION = {jps.WarpDriverModelState}
 
 
-def _make_agent(
-    agent_cls,
-    position,
-    journey_id,
-    stage_id,
-    orientation=None,
-    agent_kwargs=None,
-):
-    kwargs = dict(
-        position=position,
-        journey_id=journey_id,
-        stage_id=stage_id,
-        desired_speed=1.2,
-        radius=0.15,
-    )
-    if agent_cls in _HAS_ORIENTATION and orientation is not None:
+def _make_state(state_cls, orientation=None, state_kwargs=None):
+    kwargs = dict(desired_speed=1.2, radius=0.15)
+    if state_cls in _HAS_ORIENTATION and orientation is not None:
         kwargs["orientation"] = orientation
-    if agent_kwargs:
-        kwargs.update(agent_kwargs)
-    return agent_cls(**kwargs)
+    if state_kwargs:
+        kwargs.update(state_kwargs)
+    return state_cls(**kwargs)
 
 
 # ── Scenario: Bidirectional corridor ─────────────────────────────────────
@@ -129,7 +111,7 @@ def _setup_bidirectional(model, writer, dt, length=50.0, width=4.0):
     return sim, area, {"right": (jid_r, eid_r), "left": (jid_l, eid_l)}
 
 
-def _add_bidirectional(sim, agent_cls, routes, n=50, agent_kwargs=None):
+def _add_bidirectional(sim, state_cls, routes, n=50, state_kwargs=None):
     jid_r, eid_r = routes["right"]
     jid_l, eid_l = routes["left"]
     spawn_left = shapely.Polygon([(2, 0.3), (8, 0.3), (8, 3.7), (2, 3.7)])
@@ -144,13 +126,13 @@ def _add_bidirectional(sim, agent_cls, routes, n=50, agent_kwargs=None):
     )
     for pos in pos_r:
         aid = sim.add_agent(
-            _make_agent(
-                agent_cls,
-                pos,
-                jid_r,
-                eid_r,
+            journey_id=jid_r,
+            stage_id=eid_r,
+            position=pos,
+            state=_make_state(
+                state_cls,
                 orientation=(1, 0),
-                agent_kwargs=agent_kwargs,
+                state_kwargs=state_kwargs,
             ),
             region_id=0,
         )
@@ -164,13 +146,13 @@ def _add_bidirectional(sim, agent_cls, routes, n=50, agent_kwargs=None):
     )
     for pos in pos_l:
         aid = sim.add_agent(
-            _make_agent(
-                agent_cls,
-                pos,
-                jid_l,
-                eid_l,
+            journey_id=jid_l,
+            stage_id=eid_l,
+            position=pos,
+            state=_make_state(
+                state_cls,
                 orientation=(-1, 0),
-                agent_kwargs=agent_kwargs,
+                state_kwargs=state_kwargs,
             ),
             region_id=0,
         )
@@ -197,7 +179,7 @@ def _setup_bottleneck(model, writer, dt):
     return sim, geometry, {"exit": (jid, eid)}
 
 
-def _add_bottleneck(sim, agent_cls, routes, geometry, n=100, agent_kwargs=None):
+def _add_bottleneck(sim, state_cls, routes, geometry, n=100, state_kwargs=None):
     jid, eid = routes["exit"]
     spawn = geometry.intersection(shapely.box(-14, -4, -6, 4))
     positions = jps.distributions.distribute_by_number(
@@ -209,13 +191,13 @@ def _add_bottleneck(sim, agent_cls, routes, geometry, n=100, agent_kwargs=None):
     )
     for pos in positions:
         sim.add_agent(
-            _make_agent(
-                agent_cls,
-                pos,
-                jid,
-                eid,
+            journey_id=jid,
+            stage_id=eid,
+            position=pos,
+            state=_make_state(
+                state_cls,
                 orientation=(1, 0),
-                agent_kwargs=agent_kwargs,
+                state_kwargs=state_kwargs,
             ),
             region_id=0,
         )
@@ -252,7 +234,7 @@ def _setup_crossing(model, writer, dt):
     return sim, geometry, routes
 
 
-def _add_crossing(sim, agent_cls, routes, n=15, agent_kwargs=None):
+def _add_crossing(sim, state_cls, routes, n=15, state_kwargs=None):
     sources = {
         "S→N": (
             shapely.Polygon(
@@ -292,13 +274,13 @@ def _add_crossing(sim, agent_cls, routes, n=15, agent_kwargs=None):
         ids = []
         for pos in positions:
             aid = sim.add_agent(
-                _make_agent(
-                    agent_cls,
-                    pos,
-                    jid,
-                    eid,
+                journey_id=jid,
+                stage_id=eid,
+                position=pos,
+                state=_make_state(
+                    state_cls,
                     orientation=orient,
-                    agent_kwargs=agent_kwargs,
+                    state_kwargs=state_kwargs,
                 ),
                 region_id=0,
             )
@@ -342,8 +324,8 @@ def run_single(scenario_name, model_name):
     scen = SCENARIOS[scenario_name]
     entry = MODELS[model_name]
     model = entry["factory"]()
-    agent_cls = entry["agent_cls"]
-    agent_kwargs = entry["agent_kwargs"]
+    state_cls = entry["state_cls"]
+    state_kwargs = entry["state_kwargs"]
     dt = entry.get("dt", DEFAULT_DT)
 
     sqlite_file = f"{scenario_name}_{model_name.lower()}.sqlite"
@@ -353,10 +335,15 @@ def run_single(scenario_name, model_name):
 
     if scenario_name == "bottleneck":
         streams = _add_bottleneck(
-            sim, agent_cls, routes, geometry, n=200, agent_kwargs=agent_kwargs
+            sim,
+            state_cls,
+            routes,
+            geometry,
+            n=200,
+            state_kwargs=state_kwargs,
         )
     else:
-        streams = scen["add"](sim, agent_cls, routes, agent_kwargs=agent_kwargs)
+        streams = scen["add"](sim, state_cls, routes, state_kwargs=state_kwargs)
 
     initial = sim.agent_count()
     max_steps = scen["max_steps"]
