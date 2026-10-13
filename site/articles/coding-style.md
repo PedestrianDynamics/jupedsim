@@ -103,11 +103,13 @@ groups. Every file starts with `// SPDX-License-Identifier: LGPL-3.0-or-later`; 
   and `ninja check-tidy`. `ninja reformat` and `ninja tidy-fix` apply the fixes. On macOS
   a Homebrew clang-tidy older than the installed SDK may fail to parse it (LLVM 21 with the
   macOS 27 SDK did); point `-DCLANG_TIDY_SYSROOT=` at an older SDK then, e.g. `MacOSX26.sdk`.
-- CI: the jobs "Check Format" (`scripts/ci/check_format.sh`) and "Check clang-tidy"
+- CI: the jobs "Check Format" (`pre-commit run --all-files`) and "Check clang-tidy"
   (`scripts/ci/check_tidy.sh`) run on every push and pull request to `master` and the
-  release branches.
+  release branches. "Check Format" runs the same hooks as `pre-commit install` sets up
+  locally, so the clang-format and ruff versions pinned in `.pre-commit-config.yaml` decide
+  for both.
 - Python is covered by ruff (`ruff check`, `ruff format --check`), configured in
-  `pyproject.toml`.
+  `pyproject.toml`. ruff also formats the Python blocks in Markdown files.
 
 A failing "Check clang-tidy" job prints `invalid case style for <kind> '<name>'` with the
 file and line. Rename, or run `ninja tidy-fix` followed by `ninja reformat`. If the name is
