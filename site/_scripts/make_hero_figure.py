@@ -73,8 +73,10 @@ def simulate(seed):
     geometry = shapely.box(0.0, 0.0, ROOM_W, ROOM_H)
     for wall in walls():
         geometry = geometry.difference(wall)
-    sim = jps.Simulation(model=jps.CollisionFreeSpeedModel(), geometry=geometry)
-    exit_id = sim.add_exit_stage(EXIT)
+    surface = jps.WalkableSurface()
+    room = surface.add_region(polygon=geometry)
+    sim = jps.Simulation(model=jps.CollisionFreeSpeedModel(), geometry=surface)
+    exit_id = sim.add_exit_stage(EXIT, region_id=room)
     journey_id = sim.add_journey(jps.JourneyDescription([exit_id]))
     starts = jps.distribute_by_number(
         polygon=START,
@@ -89,6 +91,7 @@ def simulate(seed):
             stage_id=exit_id,
             position=pos,
             state=jps.CollisionFreeSpeedModelState(),
+            region_id=room,
         )
 
     tracks = {}
