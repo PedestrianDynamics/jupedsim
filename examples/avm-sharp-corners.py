@@ -49,6 +49,8 @@ default_geometry_coordinates = [
 
 polygons = [Polygon(coords) for coords in default_geometry_coordinates]
 walkable_area = unary_union(polygons)
+surface = jps.WalkableSurface()
+region = surface.add_region(polygon=walkable_area)
 
 
 print(f"Distributing {N} agents.")
@@ -59,7 +61,7 @@ simulation = jps.Simulation(
         pushout_strength=0.3,  # high values lead to more distance kept away from walls.
     ),
     dt=0.05,
-    geometry=walkable_area,
+    geometry=surface,
     trajectory_writer=jps.SqliteTrajectoryWriter(
         output_file=pathlib.Path(output_file), every_nth_frame=1
     ),
@@ -72,7 +74,7 @@ goal_1 = simulation.add_exit_stage(
         (113.022, 103.660),
         (114.308, 103.700),
     ],
-    region_id=0,
+    region_id=region,
 )
 goal_2 = simulation.add_exit_stage(
     [
@@ -81,7 +83,7 @@ goal_2 = simulation.add_exit_stage(
         (109.883, 65.822),
         (108.334, 67.112),
     ],
-    region_id=0,
+    region_id=region,
 )
 
 journey1 = jps.JourneyDescription([goal_1])
@@ -109,7 +111,7 @@ for i, pos in enumerate(pos_in_spawning_area):
         stage_id=goal_id,
         position=pos,
         state=jps.AnticipationVelocityModelState(radius=0.15, desired_speed=1),
-        region_id=0,
+        region_id=region,
     )
 
 while (

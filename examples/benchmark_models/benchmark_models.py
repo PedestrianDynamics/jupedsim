@@ -97,21 +97,23 @@ def _make_state(state_cls, orientation=None, state_kwargs=None):
 
 def _setup_bidirectional(model, writer, dt, length=50.0, width=4.0):
     area = shapely.Polygon([(0, 0), (length, 0), (length, width), (0, width)])
+    surface = jps.WalkableSurface()
+    region = surface.add_region(polygon=area)
     sim = jps.Simulation(
-        model=model, geometry=area, dt=dt, trajectory_writer=writer
+        model=model, geometry=surface, dt=dt, trajectory_writer=writer
     )
     exit_left = shapely.Polygon([(0, 0), (1, 0), (1, width), (0, width)])
     exit_right = shapely.Polygon(
         [(length - 1, 0), (length, 0), (length, width), (length - 1, width)]
     )
-    eid_l = sim.add_exit_stage(exit_left, region_id=0)
-    eid_r = sim.add_exit_stage(exit_right, region_id=0)
+    eid_l = sim.add_exit_stage(exit_left, region_id=region)
+    eid_r = sim.add_exit_stage(exit_right, region_id=region)
     jid_r = sim.add_journey(jps.JourneyDescription([eid_r]))
     jid_l = sim.add_journey(jps.JourneyDescription([eid_l]))
-    return sim, area, {"right": (jid_r, eid_r), "left": (jid_l, eid_l)}
+    return sim, area, region, {"right": (jid_r, eid_r), "left": (jid_l, eid_l)}
 
 
-def _add_bidirectional(sim, state_cls, routes, n=50, state_kwargs=None):
+def _add_bidirectional(sim, region, state_cls, routes, n=50, state_kwargs=None):
     jid_r, eid_r = routes["right"]
     jid_l, eid_l = routes["left"]
     spawn_left = shapely.Polygon([(2, 0.3), (8, 0.3), (8, 3.7), (2, 3.7)])
@@ -134,7 +136,7 @@ def _add_bidirectional(sim, state_cls, routes, n=50, state_kwargs=None):
                 orientation=(1, 0),
                 state_kwargs=state_kwargs,
             ),
-            region_id=0,
+            region_id=region,
         )
         streams["right"].append(aid)
     pos_l = jps.distributions.distribute_by_number(
@@ -154,7 +156,7 @@ def _add_bidirectional(sim, state_cls, routes, n=50, state_kwargs=None):
                 orientation=(-1, 0),
                 state_kwargs=state_kwargs,
             ),
-            region_id=0,
+            region_id=region,
         )
         streams["left"].append(aid)
     return streams
@@ -170,16 +172,20 @@ def _load_wkt(name):
 
 def _setup_bottleneck(model, writer, dt):
     geometry = _load_wkt("bottleneck.wkt")
+    surface = jps.WalkableSurface()
+    region = surface.add_region(polygon=geometry)
     sim = jps.Simulation(
-        model=model, geometry=geometry, dt=dt, trajectory_writer=writer
+        model=model, geometry=surface, dt=dt, trajectory_writer=writer
     )
     exit_area = geometry.intersection(shapely.box(13, -5, 15, 5))
-    eid = sim.add_exit_stage(exit_area, region_id=0)
+    eid = sim.add_exit_stage(exit_area, region_id=region)
     jid = sim.add_journey(jps.JourneyDescription([eid]))
-    return sim, geometry, {"exit": (jid, eid)}
+    return sim, geometry, region, {"exit": (jid, eid)}
 
 
-def _add_bottleneck(sim, state_cls, routes, geometry, n=100, state_kwargs=None):
+def _add_bottleneck(
+    sim, region, state_cls, routes, geometry, n=100, state_kwargs=None
+):
     jid, eid = routes["exit"]
     spawn = geometry.intersection(shapely.box(-14, -4, -6, 4))
     positions = jps.distributions.distribute_by_number(
@@ -199,7 +205,7 @@ def _add_bottleneck(sim, state_cls, routes, geometry, n=100, state_kwargs=None):
                 orientation=(1, 0),
                 state_kwargs=state_kwargs,
             ),
-            region_id=0,
+            region_id=region,
         )
     return None  # single stream, no color splitting
 
@@ -209,8 +215,10 @@ def _add_bottleneck(sim, state_cls, routes, geometry, n=100, state_kwargs=None):
 
 def _setup_crossing(model, writer, dt):
     geometry = _load_wkt("crossing.wkt")
+    surface = jps.WalkableSurface()
+    region = surface.add_region(polygon=geometry)
     sim = jps.Simulation(
-        model=model, geometry=geometry, dt=dt, trajectory_writer=writer
+        model=model, geometry=surface, dt=dt, trajectory_writer=writer
     )
     exits = {
         "north": shapely.Polygon(
@@ -228,13 +236,13 @@ def _setup_crossing(model, writer, dt):
     }
     routes = {}
     for name, poly in exits.items():
-        eid = sim.add_exit_stage(poly, region_id=0)
+        eid = sim.add_exit_stage(poly, region_id=region)
         jid = sim.add_journey(jps.JourneyDescription([eid]))
         routes[name] = (jid, eid)
-    return sim, geometry, routes
+    return sim, geometry, region, routes
 
 
-def _add_crossing(sim, state_cls, routes, n=15, state_kwargs=None):
+def _add_crossing(sim, region, state_cls, routes, n=15, state_kwargs=None):
     sources = {
         "S→N": (
             shapely.Polygon(
@@ -282,7 +290,7 @@ def _add_crossing(sim, state_cls, routes, n=15, state_kwargs=None):
                     orientation=orient,
                     state_kwargs=state_kwargs,
                 ),
-                region_id=0,
+                region_id=region,
             )
             ids.append(aid)
         streams[stream_name] = ids
@@ -294,8 +302,8 @@ def _add_crossing(sim, state_cls, routes, n=15, state_kwargs=None):
 SCENARIOS = {
     "bidirectional": {
         "setup": _setup_bidirectional,
-        "add": lambda sim, cls, routes, **kw: _add_bidirectional(
-            sim, cls, routes, n=50, **kw
+        "add": lambda sim, region, cls, routes, **kw: _add_bidirectional(
+            sim, region, cls, routes, n=50, **kw
         ),
         "max_steps": 100000,
         "title": "Bidirectional (50+50)",
@@ -308,8 +316,8 @@ SCENARIOS = {
     },
     "crossing": {
         "setup": _setup_crossing,
-        "add": lambda sim, cls, routes, **kw: _add_crossing(
-            sim, cls, routes, n=15, **kw
+        "add": lambda sim, region, cls, routes, **kw: _add_crossing(
+            sim, region, cls, routes, n=15, **kw
         ),
         "max_steps": 100000,
         "title": "Crossing (4x15)",
@@ -331,11 +339,12 @@ def run_single(scenario_name, model_name):
     sqlite_file = f"{scenario_name}_{model_name.lower()}.sqlite"
     writer = jps.SqliteTrajectoryWriter(output_file=sqlite_file)
 
-    sim, geometry, routes = scen["setup"](model, writer, dt)
+    sim, geometry, region, routes = scen["setup"](model, writer, dt)
 
     if scenario_name == "bottleneck":
         streams = _add_bottleneck(
             sim,
+            region,
             state_cls,
             routes,
             geometry,
@@ -343,7 +352,9 @@ def run_single(scenario_name, model_name):
             state_kwargs=state_kwargs,
         )
     else:
-        streams = scen["add"](sim, state_cls, routes, state_kwargs=state_kwargs)
+        streams = scen["add"](
+            sim, region, state_cls, routes, state_kwargs=state_kwargs
+        )
 
     initial = sim.agent_count()
     max_steps = scen["max_steps"]

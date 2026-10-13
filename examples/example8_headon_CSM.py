@@ -11,20 +11,23 @@ from shapely import Polygon
 def main():
     width = 2
     length = 10
-    geometry = Polygon([(0, 0), (length, 0), (length, width), (0, width)])
+    surface = jps.WalkableSurface()
+    region = surface.add_region(
+        polygon=Polygon([(0, 0), (length, 0), (length, width), (0, width)])
+    )
     exit_polygon = Polygon(
         [(length - 0.5, 0), (length, 0), (length, width), (length - 0.5, width)]
     )
     trajectory_file = "headon_CSM.sqlite"
     simulation = jps.Simulation(
         model=jps.CollisionFreeSpeedModel(),
-        geometry=geometry,
+        geometry=surface,
         trajectory_writer=jps.SqliteTrajectoryWriter(
             output_file=pathlib.Path(trajectory_file)
         ),
     )
 
-    exit_id = simulation.add_exit_stage(exit_polygon, region_id=0)
+    exit_id = simulation.add_exit_stage(exit_polygon, region_id=region)
     journey = jps.JourneyDescription([exit_id])
     journey_id = simulation.add_journey(journey)
 
@@ -39,7 +42,7 @@ def main():
             stage_id=exit_id,
             position=position,
             state=state,
-            region_id=0,
+            region_id=region,
         )
 
     while simulation.agent_count() > 0 and simulation.iteration_count() < 1000:

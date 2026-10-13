@@ -83,9 +83,11 @@ def main(
     sources = geo_collections.geoms[2]
     # waypoints = geo_collections.geoms[3]
     for run in range(0, number_of_runs):
+        surface = jps.WalkableSurface()
+        region = surface.add_region(polygon=geo.geoms[0])
         simulation = jps.Simulation(
             model=jps.AnticipationVelocityModel(),
-            geometry=geo,
+            geometry=surface,
             timer_log_level=3,
         )
 
@@ -102,11 +104,7 @@ def main(
 
         for exit in exits.geoms:
             exit_polygons.append(shapely.Polygon(list(exit.exterior.coords)))
-            exit_ids.append(
-                simulation.add_exit_stage(
-                    list(exit.exterior.coords), region_id=0
-                )
-            )
+            exit_ids.append(simulation.add_exit_stage(exit, region_id=region))
 
         journey = jps.JourneyDescription(exit_ids)
         journey_id = simulation.add_journey(journey)
@@ -139,7 +137,7 @@ def main(
         agent_parameters.radius = 0.15
         v_distribution = normal(1.34, 0.05, number_agents)
 
-        routing = jps.RoutingEngine(geo.geoms[0])
+        routing = jps.RoutingEngine(surface.create_geometry())
 
         for i in range(len(agent_positions)):
             agent_position = (
@@ -170,7 +168,7 @@ def main(
                 stage_id=exit_ids[min_exit_id],
                 position=agent_position,
                 state=agent_parameters,
-                region_id=0,
+                region_id=region,
             )
 
         start_time = time.perf_counter_ns()

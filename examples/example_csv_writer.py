@@ -15,7 +15,7 @@ import sys
 import jupedsim as jps
 from jupedsim.serialization import TrajectoryWriter
 from jupedsim.simulation import Simulation
-from shapely import GeometryCollection, Polygon
+from shapely import Polygon
 
 
 class CsvTrajectoryWriter(TrajectoryWriter):
@@ -68,13 +68,14 @@ class CsvTrajectoryWriter(TrajectoryWriter):
 def main():
     p1 = Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
     p2 = Polygon([(10, 4), (20, 4), (20, 6), (10, 6)])
-    area = GeometryCollection(p1.union(p2))
+    surface = jps.WalkableSurface()
+    region = surface.add_region(polygon=p1.union(p2))
 
     output_file = pathlib.Path("example_csv_out.csv")
 
     simulation = jps.Simulation(
         model=jps.CollisionFreeSpeedModel(),
-        geometry=area,
+        geometry=surface,
         trajectory_writer=CsvTrajectoryWriter(
             output_file=output_file,
             every_nth_frame=5,
@@ -82,7 +83,7 @@ def main():
     )
 
     exit_id = simulation.add_exit_stage(
-        [(18, 4), (20, 4), (20, 6), (18, 6)], region_id=0
+        [(18, 4), (20, 4), (20, 6), (18, 6)], region_id=region
     )
     journey = jps.JourneyDescription([exit_id])
     journey_id = simulation.add_journey(journey)
@@ -93,7 +94,7 @@ def main():
             stage_id=exit_id,
             position=pos,
             state=jps.CollisionFreeSpeedModelState(radius=0.3),
-            region_id=0,
+            region_id=region,
         )
 
     print(f"Running simulation with CsvTrajectoryWriter -> {output_file}")

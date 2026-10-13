@@ -22,18 +22,19 @@ def main():
             (10, 5 + width / 2),
         ]
     )
-    geometry = room1.union(room2).union(corridor)
+    surface = jps.WalkableSurface()
+    region = surface.add_region(polygon=room1.union(room2).union(corridor))
     exit_polygon = Polygon([(24, 4.5), (25, 4.5), (25, 5.5), (24, 5.5)])
     trajectory_file = "example_7.sqlite"
     simulation = jps.Simulation(
         model=jps.AnticipationVelocityModel(),
-        geometry=geometry,
+        geometry=surface,
         trajectory_writer=jps.SqliteTrajectoryWriter(
             output_file=pathlib.Path(trajectory_file)
         ),
     )
 
-    exit_id = simulation.add_exit_stage(exit_polygon, region_id=0)
+    exit_id = simulation.add_exit_stage(exit_polygon, region_id=region)
     journey = jps.JourneyDescription([exit_id])
     journey_id = simulation.add_journey(journey)
 
@@ -54,7 +55,7 @@ def main():
                 reaction_time=0.3,
                 wall_buffer_distance=0.05,
             ),
-            region_id=0,
+            region_id=region,
         )
 
     while simulation.agent_count() > 0 and simulation.iteration_count() < 3000:
