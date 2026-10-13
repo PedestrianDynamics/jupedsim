@@ -49,14 +49,6 @@ def u_stair(**simulation_args):
     return jps.Simulation(geometry=surface, **args), ground, upper
 
 
-def polygon_simulation():
-    return jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(),
-        geometry="POLYGON((0 0, 10 0, 10 10, 0 10, 0 0))",
-        dt=0.01,
-    )
-
-
 def square_simulation():
     surface = jps.WalkableSurface()
     room = surface.add_region(boundary=rect(0, 0, 10, 10))
@@ -64,17 +56,6 @@ def square_simulation():
         model=jps.CollisionFreeSpeedModel(), geometry=surface, dt=0.01
     )
     return simulation, room
-
-
-def test_polygon_input_still_builds_a_polygon_world():
-    assert polygon_simulation().get_geometry().polygon(region_id=0).boundary()
-
-
-def test_a_polygon_world_is_one_floor_at_height_zero():
-    sim = polygon_simulation()
-    assert sim.get_location(5.0, 5.0, region_id=0).z == 0.0
-    with pytest.raises(jps.SimulationError, match="not in region 0"):
-        sim.get_location(50.0, 50.0, region_id=0)
 
 
 def journey_to_upper_exit(sim, upper):

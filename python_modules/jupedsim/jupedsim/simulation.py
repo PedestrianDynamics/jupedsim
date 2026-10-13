@@ -6,7 +6,6 @@ import shapely
 
 import jupedsim.native as py_jps
 from jupedsim.agent import Agent
-from jupedsim.geometry_utils import build_geometry
 from jupedsim.internal.tracing import Timer
 from jupedsim.journey import JourneyDescription
 from jupedsim.models.anticipation_velocity_model import (
@@ -51,18 +50,6 @@ _STATE_TYPES = (
 )
 
 
-def _as_geometry(geometry: Any) -> py_jps.Geometry:
-    """Convert to native geometry.
-
-    A geometry is used untouched; fallback to build from 2D.
-    """
-    if isinstance(geometry, py_jps.Geometry):
-        return geometry
-    if isinstance(geometry, py_jps.WalkableSurface):
-        return geometry.create_geometry()
-    return build_geometry(geometry)
-
-
 class Simulation:
     """Defines a simulation of pedestrian movement over a continuous walkable area.
 
@@ -85,19 +72,10 @@ class Simulation:
             | WarpDriverModel
             | CustomOperationalModel
         ),
-        geometry: (
-            str
-            | py_jps.WalkableSurface
-            | shapely.GeometryCollection
-            | shapely.Polygon
-            | shapely.MultiPolygon
-            | shapely.MultiPoint
-            | list[tuple[float, float]]
-        ),
+        geometry: py_jps.WalkableSurface | py_jps.Geometry,
         dt: float = 0.01,
         trajectory_writer: TrajectoryWriter | None = None,
         timer_log_level: int = 1,
-        **kwargs: Any,
     ) -> None:
         """Creates a Simulation.
 
@@ -114,41 +92,15 @@ class Simulation:
                     Model instances are consumed by this constructor and must not be reused
                     afterwards.
             geometry:
-                Data to create the geometry out of. Data may be supplied as:
-
-                * list of 2d points describing the outer boundary, holes may be added with use of
-                  `excluded_areas` kw-argument
-
-                * :class:`~shapely.GeometryCollection` consisting only out of
-                  :class:`Polygons <shapely.Polygon>`, :class:`MultiPolygons <shapely.MultiPolygon>`
-                  and :class:`MultiPoints <shapely.MultiPoint>`
-
-                * :class:`~shapely.MultiPolygon`
-
-                * :class:`~shapely.Polygon`
-
-                * :class:`~shapely.MultiPoint` forming a "simple" polygon when points are
-                  interpreted as linear ring without repetition of the start/end point.
-
-                * str with a valid Well Known Text. In this format the same WKT types as mentioned
-                  for the shapely types are supported: GEOMETRYCOLLETION, MULTIPOLYGON, POLYGON,
-                  MULTIPOINT. The same restrictions as mentioned for the shapely types apply.
-
-                * :class:`~jupedsim.WalkableSurface` made of regions, which may be stacked into
-                  floors and joined by stairs or ramps.
-
-                A walkable area given as a polygon (all forms but the WalkableSurface) is a single
-                region with id ``0``.
+                The walkable area: a :class:`~jupedsim.WalkableSurface` made of regions, which
+                may be stacked into floors and joined by stairs or ramps, or a
+                :class:`~jupedsim.Geometry` created from one.
 
             dt: Iteration step size in seconds. It is recommended to leave this at its default
                 value.
             trajectory_writer: Any object implementing the TrajectoryWriter interface. JuPedSim
                 provides a writer that outputs trajectory data in a sqlite database. If you want
                 other formats such as CSV you need to provide your own custom implementation.
-
-        Keyword Args:
-            excluded_areas: describes exclusions from the walkable area. Only use this argument if
-                `geometry` was provided as list[tuple[float, float]].
         """
         if isinstance(model, py_jps.OperationalModel):
             py_jps_model = model
@@ -161,8 +113,11 @@ class Simulation:
                 f"{type(model).__name__}"
             )
         self._writer = trajectory_writer
-        geo = _as_geometry(geometry)
-        self._obj = py_jps.Simulation(model=py_jps_model, geometry=geo, dt=dt)
+        if isinstance(geometry, py_jps.WalkableSurface):
+            geometry = geometry.create_geometry()
+        self._obj = py_jps.Simulation(
+            model=py_jps_model, geometry=geometry, dt=dt
+        )
         self._timer = Timer(self._obj, timer_log_level=timer_log_level)
 
     def add_waypoint_stage(
