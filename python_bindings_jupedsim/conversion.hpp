@@ -13,20 +13,7 @@
 
 std::tuple<double, double> into_tuple(const Point& p);
 
-// Works for container of Point type, but also e.g. for container of glm::vec<2>
-std::vector<std::tuple<double, double>> into_tuples(const auto& in)
-{
-    std::vector<std::tuple<double, double>> tuples{};
-    tuples.reserve(in.size());
-    for(const auto& pt : in) {
-        tuples.emplace_back(pt.x, pt.y);
-    }
-    return tuples;
-}
-
 Point into_point(const std::tuple<double, double>& p);
-
-std::vector<Point> into_points(const std::vector<std::tuple<double, double>>& in);
 
 /// Normalizes the whitespace of a docstring written as an indented raw string literal.
 ///

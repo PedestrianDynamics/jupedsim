@@ -26,7 +26,6 @@ CLASSES = [
     "GeneralizedCentrifugalForceModel",
     "GeneralizedCentrifugalForceModelState",
     "Geometry",
-    "GeometryBuilder",
     "Location",
     "NeighborView",
     "OperationalModel",
