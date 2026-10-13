@@ -23,14 +23,14 @@ void init_walkable_surface(py::module_& m)
         .def(
             "add_region",
             [](WalkableSurface& ws,
-               std::vector<Point> exterior,
-               std::vector<std::vector<Point>> interior,
+               std::vector<Point> boundary,
+               std::vector<std::vector<Point>> holes,
                double height) {
-                return ws.add_region({std::move(exterior), std::move(interior)}, height);
+                return ws.add_region({std::move(boundary), std::move(holes)}, height);
             },
             py::kw_only(),
-            py::arg("exterior"),
-            py::arg("interior") = std::vector<Point>{},
+            py::arg("boundary"),
+            py::arg("holes") = std::vector<std::vector<Point>>{},
             py::arg("height") = 0.0)
         .def(
             "add_region",

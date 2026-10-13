@@ -22,13 +22,13 @@ def u_stair(**simulation_args):
     stairwell = [(8, 6), (14, 6), (14, 12), (8, 12), (8, 9)]
     surface = jps.WalkableSurface()
     ground = surface.add_region(
-        exterior=rect(0, 0, 20, 20), interior=[stairwell], height=GROUND_Z
+        boundary=rect(0, 0, 20, 20), holes=[stairwell], height=GROUND_Z
     )
     upper = surface.add_region(
-        exterior=rect(0, 0, 20, 20), interior=[stairwell], height=UPPER_Z
+        boundary=rect(0, 0, 20, 20), holes=[stairwell], height=UPPER_Z
     )
     landing = surface.add_region(
-        exterior=[(13, 6), (14, 6), (14, 12), (13, 12), (13, 9)], height=1.5
+        boundary=[(13, 6), (14, 6), (14, 12), (13, 12), (13, 9)], height=1.5
     )
     surface.connect_regions(
         from_region=ground,

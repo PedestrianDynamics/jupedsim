@@ -18,13 +18,14 @@
 
 Polygon::Polygon(const std::vector<Point>& points)
 {
-    if(points.size() < 3) {
+    const bool closed = points.size() > 1 && (points.back() - points.front()).is_zero_length();
+    const size_t count = closed ? points.size() - 1 : points.size();
+    if(count < 3) {
         throw SimulationError("Polygon must have at least 3 points");
     }
-    _polygon.resize(points.size());
-    std::transform(std::begin(points), std::end(points), _polygon.begin(), [](const auto& p) {
-        return PolygonType::Point_2{p.x, p.y};
-    });
+    for(size_t index = 0; index < count; ++index) {
+        _polygon.push_back({points[index].x, points[index].y});
+    }
 
     if(!_polygon.is_simple()) {
         throw SimulationError("Polygon is not simple");

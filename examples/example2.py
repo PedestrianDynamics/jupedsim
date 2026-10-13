@@ -15,7 +15,7 @@ def main():
 
     surface = jps.WalkableSurface()
     region = surface.add_region(
-        exterior=[(0, 0), (100, 0), (100, 100), (0, 100)]
+        boundary=[(0, 0), (100, 0), (100, 100), (0, 100)]
     )
 
     simulation = jps.Simulation(
