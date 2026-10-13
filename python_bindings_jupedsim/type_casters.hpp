@@ -175,10 +175,9 @@ struct type_caster<WalkableSurface::Polygon> {
         }
         value.boundary = cast_op<WalkableSurface::Ring&&>(std::move(caster));
 
-        auto seq = reinterpret_borrow<sequence>(*interiors);
         std::vector<WalkableSurface::Ring> holes{};
-        holes.reserve(seq.size());
-        for(auto ring : seq) {
+        holes.reserve(len(*interiors));
+        for(auto ring : *interiors) {
             auto hole_coords = optional_attr(ring, "coords");
             if(!hole_coords) {
                 return false;

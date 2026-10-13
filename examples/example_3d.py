@@ -18,17 +18,17 @@ STAIRWELL = [(8, 6), (14, 6), (14, 12), (8, 12), (8, 9)]
 
 surface = jps.WalkableSurface()
 ground = surface.add_region(
-    exterior=rect(0, 0, 20, 20),
-    interior=[STAIRWELL, rect(3, 3, 5, 5), rect(15, 15, 17, 17)],
+    boundary=rect(0, 0, 20, 20),
+    holes=[STAIRWELL, rect(3, 3, 5, 5), rect(15, 15, 17, 17)],
     height=GROUND_FLOOR,
 )
 upper = surface.add_region(
-    exterior=rect(0, 0, 20, 20),
-    interior=[STAIRWELL, rect(15, 3, 17, 5), rect(3, 15, 5, 17)],
+    boundary=rect(0, 0, 20, 20),
+    holes=[STAIRWELL, rect(15, 3, 17, 5), rect(3, 15, 5, 17)],
     height=UPPER_FLOOR,
 )
 landing = surface.add_region(
-    exterior=[(13, 6), (14, 6), (14, 12), (13, 12), (13, 9)],
+    boundary=[(13, 6), (14, 6), (14, 12), (13, 12), (13, 9)],
     height=LANDING,
 )
 surface.connect_regions(

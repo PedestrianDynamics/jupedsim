@@ -136,10 +136,10 @@ def test_regions_round_trip(tmp_path):
 
     surface = jps.WalkableSurface()
     ground_floor = surface.add_region(
-        exterior=rectangle((0, 0), (5, 5)), height=0.0
+        boundary=rectangle((0, 0), (5, 5)), height=0.0
     )
     upper_floor = surface.add_region(
-        exterior=rectangle((10, 0), (15, 5)), height=3.0
+        boundary=rectangle((10, 0), (15, 5)), height=3.0
     )
     stairs = surface.connect_regions(
         from_region=ground_floor,
