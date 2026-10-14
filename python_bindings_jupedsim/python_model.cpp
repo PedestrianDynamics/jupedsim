@@ -193,43 +193,53 @@ void init_python_model(py::module_& m)
         .def_property_readonly(
             "model", [](CustomModel::State& data) { return data.get<GilSafePyObject>().get(); });
 
-    py::class_<OperationalModel, py::smart_holder>(m, "OperationalModel")
-        .def(
-            "compute_next_state",
-            [](const OperationalModel& self, OperationalModelState state, py::object step) {
-                const AgentStep& agent_step = as_agent_step(step);
-                const OperationalModelState current{std::move(state)};
-                if(model_type_of(current) != self.type()) {
-                    throw SimulationError(
-                        "{} cannot compute a state of type '{}'",
-                        to_string(self.type()),
-                        to_string(model_type_of(current)));
-                }
-                OperationalModelState next{current};
+    py::class_<OperationalModel, py::smart_holder> operational_model(m, "OperationalModel");
+    operational_model.doc() = clean_doc(R"(
+        Base of all built-in operational models.
 
-                Point movement{};
-                try {
-                    movement = self.compute_next_state(current, next, agent_step);
-                } catch(const std::bad_variant_access&) {
-                    // The state handed in is of the right type, so it was a neighbor's.
-                    throw SimulationError(
-                        agent_step.has_neighbor_mapping() ?
-                            "{} encountered a neighbor it cannot read. The mapping passed to "
-                            "with_neighbor_state_mapping() has to return '{}' states." :
-                            "{} encountered a neighbor it cannot read. Map neighbors to '{}' "
-                            "states with AgentStep.with_neighbor_state_mapping() before "
-                            "delegating.",
-                        to_string(self.type()),
-                        to_string(self.type()));
-                }
+        Every operational model is passed to a :class:`~jupedsim.Simulation` as a
+        configured instance carrying its model-level parameters, e.g.
+        :class:`~jupedsim.SocialForceModel`,
+        :class:`~jupedsim.CollisionFreeSpeedModel` or
+        :class:`~jupedsim.WarpDriverModel`. Custom Python models are passed as
+        instances of a :class:`~jupedsim.CustomOperationalModel` subclass.
+    )");
+    operational_model.def(
+        "compute_next_state",
+        [](const OperationalModel& self, OperationalModelState state, py::object step) {
+            const AgentStep& agent_step = as_agent_step(step);
+            const OperationalModelState current{std::move(state)};
+            if(model_type_of(current) != self.type()) {
+                throw SimulationError(
+                    "{} cannot compute a state of type '{}'",
+                    to_string(self.type()),
+                    to_string(model_type_of(current)));
+            }
+            OperationalModelState next{current};
 
-                return std::make_tuple(
-                    static_cast<const OperationalModelState&>(next),
-                    std::make_tuple(movement.x, movement.y));
-            },
-            py::arg("state"),
-            py::arg("step"),
-            clean_doc(R"(
+            Point movement{};
+            try {
+                movement = self.compute_next_state(current, next, agent_step);
+            } catch(const std::bad_variant_access&) {
+                // The state handed in is of the right type, so it was a neighbor's.
+                throw SimulationError(
+                    agent_step.has_neighbor_mapping() ?
+                        "{} encountered a neighbor it cannot read. The mapping passed to "
+                        "with_neighbor_state_mapping() has to return '{}' states." :
+                        "{} encountered a neighbor it cannot read. Map neighbors to '{}' "
+                        "states with AgentStep.with_neighbor_state_mapping() before "
+                        "delegating.",
+                    to_string(self.type()),
+                    to_string(self.type()));
+            }
+
+            return std::make_tuple(
+                static_cast<const OperationalModelState&>(next),
+                std::make_tuple(movement.x, movement.y));
+        },
+        py::arg("state"),
+        py::arg("step"),
+        clean_doc(R"(
                 Run this model for one step.
 
                 Lets a custom model delegate to a built-in one. The agent's stored
@@ -250,7 +260,7 @@ void init_python_model(py::module_& m)
                         ``step`` is not an :class:`~jupedsim.AgentStep`, or a
                         neighbor carries a state this model cannot read.
             )")
-                .c_str());
+            .c_str());
 
     py::class_<PythonModel, OperationalModel, py::smart_holder>(m, "_PythonModel")
         .def(py::init<py::object>(), py::arg("model"));
