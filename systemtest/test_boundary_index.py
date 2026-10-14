@@ -12,9 +12,9 @@ import math
 from pathlib import Path
 
 import pytest
-from jupedsim import SimulationError
-from jupedsim.internal.routing import (
+from jupedsim import (
     Geometry,
+    SimulationError,
     make_portal_boundary_index,
 )
 
