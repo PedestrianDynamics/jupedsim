@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
-import jupedsim
-import jupedsim.pyjupedsim as jps
+import jupedsim as jps
 import pytest
 import shapely
 
@@ -11,21 +10,21 @@ def test_can_query_agents_in_range():
     def log_msg_handler(msg):
         messages.append(msg)
 
-    jupedsim.set_info_callback(log_msg_handler)
-    jupedsim.set_warning_callback(log_msg_handler)
-    jupedsim.set_error_callback(log_msg_handler)
+    jps.set_info_callback(log_msg_handler)
+    jps.set_warning_callback(log_msg_handler)
+    jps.set_error_callback(log_msg_handler)
 
     surface = jps.WalkableSurface()
     room = surface.add_region(boundary=[(0, 0), (100, 0), (100, 100), (0, 100)])
-    simulation = jupedsim.Simulation(
-        model=jupedsim.CollisionFreeSpeedModel(),
+    simulation = jps.Simulation(
+        model=jps.CollisionFreeSpeedModel(),
         geometry=surface,
     )
     exit = simulation.add_exit_stage(
         [(99, 45), (99, 55), (100, 55), (100, 45)], region_id=room
     )
 
-    journey = jupedsim.JourneyDescription([exit])
+    journey = jps.JourneyDescription([exit])
 
     journey_id = simulation.add_journey(journey)
 
@@ -82,16 +81,16 @@ def test_can_run_simulation():
     def log_msg_handler(msg):
         messages.append(msg)
 
-    # jupedsim.set_debug_callback(log_msg_handler)
-    jupedsim.set_info_callback(log_msg_handler)
-    jupedsim.set_warning_callback(log_msg_handler)
-    jupedsim.set_error_callback(log_msg_handler)
+    # jps.set_debug_callback(log_msg_handler)
+    jps.set_info_callback(log_msg_handler)
+    jps.set_warning_callback(log_msg_handler)
+    jps.set_error_callback(log_msg_handler)
 
     p1 = shapely.Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
     p2 = shapely.Polygon([(10, 4), (20, 4), (20, 6), (10, 6)])
     surface = jps.WalkableSurface()
     room = surface.add_region(polygon=p1.union(p2))
-    simulation = jupedsim.Simulation(
+    simulation = jps.Simulation(
         model=jps.CollisionFreeSpeedModel(), geometry=surface
     )
     exit_stage_id = simulation.add_exit_stage(
@@ -99,7 +98,7 @@ def test_can_run_simulation():
         region_id=room,
     )
 
-    journey = jupedsim.JourneyDescription([exit_stage_id])
+    journey = jps.JourneyDescription([exit_stage_id])
 
     journey_id = simulation.add_journey(journey)
 
@@ -136,7 +135,7 @@ def test_can_run_simulation():
     simulation.mark_agent_for_removal(agent_id)
     simulation.iterate()
 
-    with pytest.raises(jupedsim.SimulationError, match=r"Unknown agent id \d+"):
+    with pytest.raises(jps.SimulationError, match=r"Unknown agent id \d+"):
         simulation.mark_agent_for_removal(agent_id)
 
     while simulation.agent_count() > 0:
@@ -150,23 +149,23 @@ def test_get_single_agent_from_simulation():
     def log_msg_handler(msg):
         messages.append(msg)
 
-    # jupedsim.set_debug_callback(log_msg_handler)
-    jupedsim.set_info_callback(log_msg_handler)
-    jupedsim.set_warning_callback(log_msg_handler)
-    jupedsim.set_error_callback(log_msg_handler)
+    # jps.set_debug_callback(log_msg_handler)
+    jps.set_info_callback(log_msg_handler)
+    jps.set_warning_callback(log_msg_handler)
+    jps.set_error_callback(log_msg_handler)
 
     p1 = shapely.Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
     p2 = shapely.Polygon([(10, 4), (20, 4), (20, 6), (10, 6)])
     surface = jps.WalkableSurface()
     room = surface.add_region(polygon=p1.union(p2))
-    simulation = jupedsim.Simulation(
+    simulation = jps.Simulation(
         model=jps.CollisionFreeSpeedModel(), geometry=surface
     )
     exit_id = simulation.add_exit_stage(
         [(18, 4), (20, 4), (20, 6), (18, 6)], region_id=room
     )
 
-    journey = jupedsim.JourneyDescription([exit_id])
+    journey = jps.JourneyDescription([exit_id])
 
     journey_id = simulation.add_journey(journey)
     initial_agent_positions = [(7, 7), (1, 3), (1, 5), (1, 7), (2, 7)]
@@ -194,23 +193,23 @@ def test_get_agent_non_existing_agent_from_simulation():
     def log_msg_handler(msg):
         messages.append(msg)
 
-    # jupedsim.set_debug_callback(log_msg_handler)
-    jupedsim.set_info_callback(log_msg_handler)
-    jupedsim.set_warning_callback(log_msg_handler)
-    jupedsim.set_error_callback(log_msg_handler)
+    # jps.set_debug_callback(log_msg_handler)
+    jps.set_info_callback(log_msg_handler)
+    jps.set_warning_callback(log_msg_handler)
+    jps.set_error_callback(log_msg_handler)
 
     p1 = shapely.Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
     p2 = shapely.Polygon([(10, 4), (20, 4), (20, 6), (10, 6)])
     surface = jps.WalkableSurface()
     room = surface.add_region(polygon=p1.union(p2))
-    simulation = jupedsim.Simulation(
+    simulation = jps.Simulation(
         model=jps.CollisionFreeSpeedModel(), geometry=surface
     )
 
     exit_id = simulation.add_exit_stage(
         [(18, 4), (20, 4), (20, 6), (18, 6)], region_id=room
     )
-    journey = jupedsim.JourneyDescription([exit_id])
+    journey = jps.JourneyDescription([exit_id])
 
     journey_id = simulation.add_journey(journey)
 
@@ -225,7 +224,7 @@ def test_get_agent_non_existing_agent_from_simulation():
     assert simulation.agent(agent_id).id == agent_id
 
     with pytest.raises(
-        jupedsim.SimulationError, match=".*Trying to access unknown Agent.*"
+        jps.SimulationError, match=".*Trying to access unknown Agent.*"
     ):
         simulation.agent(1000)
 
@@ -236,16 +235,16 @@ def test_agent_can_be_removed_from_simulation():
     def log_msg_handler(msg):
         messages.append(msg)
 
-    # jupedsim.set_debug_callback(log_msg_handler)
-    jupedsim.set_info_callback(log_msg_handler)
-    jupedsim.set_warning_callback(log_msg_handler)
-    jupedsim.set_error_callback(log_msg_handler)
+    # jps.set_debug_callback(log_msg_handler)
+    jps.set_info_callback(log_msg_handler)
+    jps.set_warning_callback(log_msg_handler)
+    jps.set_error_callback(log_msg_handler)
 
     p1 = shapely.Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
     p2 = shapely.Polygon([(10, 4), (20, 4), (20, 6), (10, 6)])
     surface = jps.WalkableSurface()
     room = surface.add_region(polygon=p1.union(p2))
-    simulation = jupedsim.Simulation(
+    simulation = jps.Simulation(
         model=jps.CollisionFreeSpeedModel(), geometry=surface
     )
     exit_stage_id = simulation.add_exit_stage(
@@ -253,7 +252,7 @@ def test_agent_can_be_removed_from_simulation():
         region_id=room,
     )
 
-    journey = jupedsim.JourneyDescription([exit_stage_id])
+    journey = jps.JourneyDescription([exit_stage_id])
 
     journey_id = simulation.add_journey(journey)
 
@@ -285,7 +284,7 @@ def test_agent_can_be_removed_from_simulation():
     assert actual_agent_ids == expected_agent_ids
 
     # try removing the same agent will raise an error
-    with pytest.raises(jupedsim.SimulationError, match=r"Unknown agent id \d+"):
+    with pytest.raises(jps.SimulationError, match=r"Unknown agent id \d+"):
         simulation.mark_agent_for_removal(agent_removed_id)
 
     # remove second agent form simulation
@@ -304,13 +303,13 @@ def test_agent_can_not_be_added_outside_geometry():
     def log_msg_handler(msg):
         messages.append(msg)
 
-    jupedsim.set_info_callback(log_msg_handler)
-    jupedsim.set_warning_callback(log_msg_handler)
-    jupedsim.set_error_callback(log_msg_handler)
+    jps.set_info_callback(log_msg_handler)
+    jps.set_warning_callback(log_msg_handler)
+    jps.set_error_callback(log_msg_handler)
 
     surface = jps.WalkableSurface()
     room = surface.add_region(boundary=[(0, 0), (100, 0), (100, 100), (0, 100)])
-    simulation = jupedsim.Simulation(
+    simulation = jps.Simulation(
         model=jps.CollisionFreeSpeedModel(),
         geometry=surface,
     )
@@ -320,7 +319,7 @@ def test_agent_can_not_be_added_outside_geometry():
         region_id=room,
     )
 
-    journey = jupedsim.JourneyDescription([exit_id])
+    journey = jps.JourneyDescription([exit_id])
     journey_id = simulation.add_journey(journey)
 
     agent_position = (50, 50)
@@ -334,7 +333,7 @@ def test_agent_can_not_be_added_outside_geometry():
     )
 
     with pytest.raises(
-        jupedsim.SimulationError,
+        jps.SimulationError,
         match=r"Point \(-50, -50\) is not in region 0",
     ):
         assert simulation.add_agent(
@@ -349,12 +348,12 @@ def test_agent_can_not_be_added_outside_geometry():
 def test_direct_steering_target_must_be_inside_geometry():
     surface = jps.WalkableSurface()
     room = surface.add_region(boundary=[(0, 0), (100, 0), (100, 100), (0, 100)])
-    simulation = jupedsim.Simulation(
+    simulation = jps.Simulation(
         model=jps.CollisionFreeSpeedModel(),
         geometry=surface,
     )
     stage_id = simulation.add_direct_steering_stage()
-    journey_id = simulation.add_journey(jupedsim.JourneyDescription([stage_id]))
+    journey_id = simulation.add_journey(jps.JourneyDescription([stage_id]))
     agent_id = simulation.add_agent(
         journey_id=journey_id,
         stage_id=stage_id,
@@ -368,7 +367,7 @@ def test_direct_steering_target_must_be_inside_geometry():
     assert (agent.final_target.x, agent.final_target.y) == (60, 60)
 
     with pytest.raises(
-        jupedsim.SimulationError,
+        jps.SimulationError,
         match=r"Point \(-50, -50\) is outside of accessible area",
     ):
         agent.final_target = (-50, -50)
@@ -376,18 +375,18 @@ def test_direct_steering_target_must_be_inside_geometry():
 
 @pytest.mark.parametrize("level", ["debug", "info", "warning", "error"])
 def test_log_callback_setters_are_the_native_functions(level):
-    setter = getattr(jupedsim, f"set_{level}_callback")
-    assert setter is getattr(jps, f"set_{level}_callback")
+    setter = getattr(jps, f"set_{level}_callback")
+    assert setter is getattr(jps.pyjupedsim, f"set_{level}_callback")
     assert f"Set receiver for {level} messages" in setter.__doc__
     setter(fn=lambda msg: None)  # the keyword name stays "fn"
 
 
 def test_build_info_is_native():
-    info = jupedsim.get_build_info()
-    assert type(info) is jupedsim.BuildInfo
-    assert jupedsim.get_build_info is jps.get_build_info
+    info = jps.get_build_info()
+    assert type(info) is jps.BuildInfo
+    assert jps.get_build_info is jps.pyjupedsim.get_build_info
     assert not hasattr(jps, "buildinfo")
-    assert info.library_version == jupedsim.__version__
+    assert info.library_version == jps.__version__
     assert repr(info) == (
         f"JuPedSim {info.library_version}:\n"
         "--------------------------------\n"
@@ -395,6 +394,6 @@ def test_build_info_is_native():
         f" on {info.git_commit_date}\n"
         f"Compiler: {info.compiler} ({info.compiler_version})"
     )
-    assert repr(jupedsim.BuildInfo()) == repr(info)
-    assert "SHA1 commit hash" in jupedsim.BuildInfo.git_commit_hash.__doc__
-    assert "printable" in jupedsim.get_build_info.__doc__
+    assert repr(jps.BuildInfo()) == repr(info)
+    assert "SHA1 commit hash" in jps.BuildInfo.git_commit_hash.__doc__
+    assert "printable" in jps.get_build_info.__doc__
