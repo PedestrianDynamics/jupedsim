@@ -3,7 +3,6 @@
 # Copyright © 2012-2023 Forschungszentrum Jülich GmbH
 # SPDX-License-Identifier: LGPL-3.0-or-later
 import logging
-import math
 import pathlib
 import sys
 import time
@@ -40,19 +39,6 @@ def log_warn(msg):
 
 def log_error(msg):
     logging.error(msg)
-
-
-def distance(point1, point2):
-    return math.sqrt(
-        (point1[0] - point2[0]) ** 2 + (point1[1] - point2[1]) ** 2
-    )
-
-
-def get_travelled_distance(path_waypoints):
-    d = 0
-    for i in range(len(path_waypoints) - 1):
-        d = d + distance(path_waypoints[i], path_waypoints[i + 1])
-    return d
 
 
 def main(
@@ -98,16 +84,10 @@ def main(
         for source in sources.geoms:
             source_coordinates.append(list(source.exterior.coords))
 
-        # exit areas
-        exit_polygons = []
-        exit_ids = []  # sequence: A, B, C, D, E
-
-        for exit in exits.geoms:
-            exit_polygons.append(shapely.Polygon(list(exit.exterior.coords)))
-            exit_ids.append(simulation.add_exit_stage([(exit, region)]))
-
-        journey = jps.JourneyDescription(exit_ids)
-        journey_id = simulation.add_journey(journey)
+        exit_id = simulation.add_exit_stage(
+            [(exit, region) for exit in exits.geoms]
+        )
+        journey_id = simulation.add_journey(jps.JourneyDescription([exit_id]))
 
         number_agents_stage = int(number_of_agents * 2 / 5)
         number_agents_remaining = number_of_agents - number_agents_stage
@@ -137,36 +117,12 @@ def main(
         agent_parameters.radius = 0.15
         v_distribution = normal(1.34, 0.05, number_agents)
 
-        routing = jps.RoutingEngine(surface.create_geometry())
-
-        for i in range(len(agent_positions)):
-            agent_position = (
-                agent_positions[i][0],
-                agent_positions[i][1],
-            )
-            agent_parameters.desired_speed = v_distribution[i]
-
-            # choose shortest path
-            min_distance = float("inf")
-            min_exit_id = -1
-
-            for j in range(len(exit_polygons)):
-                # calc path to exit
-                polygon = exit_polygons[j]
-                exit_point = (
-                    polygon.centroid.xy[0][0],
-                    polygon.centroid.xy[1][0],
-                )
-                path = routing.compute_waypoints(agent_positions[i], exit_point)
-                distance_to_exit = get_travelled_distance(path)
-                if distance_to_exit < min_distance:
-                    min_distance = distance_to_exit
-                    min_exit_id = j
-
+        for position, desired_speed in zip(agent_positions, v_distribution):
+            agent_parameters.desired_speed = desired_speed
             simulation.add_agent(
                 journey_id=journey_id,
-                stage_id=exit_ids[min_exit_id],
-                position=agent_position,
+                stage_id=exit_id,
+                position=position,
                 state=agent_parameters,
                 region_id=region,
             )

@@ -1,5 +1,12 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
-"""Five agents walking up a U-shaped stair, from the ground floor to an exit above."""
+"""Example showing nearest waypoint/exit stage routing.
+
+Six agents walk towards a waypoint with multiple areas and each targets the area closer
+to its start position. Down the stairs, use different point-based waypoints to split the
+agents and use an exit with multiple areas. Once again agents target the nearer one.
+"""
+
+from itertools import pairwise
 
 import jupedsim as jps
 from simulation_viewer import SimulationViewer
@@ -46,25 +53,53 @@ surface.connect_regions(
 
 sim = jps.Simulation(model=jps.CollisionFreeSpeedModel(), geometry=surface)
 
-exit_id = sim.add_exit_stage(
-    [([(3.5, 12.5), (4.5, 12.5), (4.5, 13.5), (3.5, 13.5)], upper)]
+# An area on either side of the stairwell, close to the outer wall.
+upper_waypoint_id = sim.add_waypoint_stage(
+    [(rect(10, 0.5, 12, 1.5), upper), (rect(10, 18.5, 12, 19.5), upper)]
 )
-journey_id = sim.add_journey(jps.JourneyDescription([exit_id]))
+north_waypoint_id = sim.add_waypoint_stage(
+    [(jps.circle_to_polygon(center=(11, 16), radius=1), ground)]
+)
+south_waypoint_id = sim.add_waypoint_stage(
+    [(jps.circle_to_polygon(center=(11, 2), radius=1), ground)]
+)
+# One exit in the north-west corner and one in the south-east corner.
+exit_id = sim.add_exit_stage(
+    [(rect(0.5, 17, 1.5, 19), ground), (rect(18.5, 1, 19.5, 3), ground)]
+)
 
-start_positions = [
-    (3.3, 7.6),
-    (4.0, 7.6),
-    (3.3, 8.3),
-    (4.0, 8.3),
-    (3.65, 6.9),
+
+def add_journey_via(ground_waypoint_id):
+    stages = [upper_waypoint_id, ground_waypoint_id, exit_id]
+    journey = jps.JourneyDescription(stages)
+    for stage_id, next_stage_id in pairwise(stages):
+        journey.set_transition_for_stage(
+            stage_id, jps.Transition.create_fixed_transition(next_stage_id)
+        )
+    return sim.add_journey(journey)
+
+
+journey_ids = [
+    add_journey_via(north_waypoint_id),
+    add_journey_via(south_waypoint_id),
 ]
-for position in start_positions:
+
+# Three agents south and three north of the stairwell's centre line.
+start_positions = [
+    (17.5, 6.5),
+    (18.5, 6.5),
+    (18.0, 7.3),
+    (17.5, 11.5),
+    (18.5, 11.5),
+    (18.0, 10.7),
+]
+for i, position in enumerate(start_positions):
     sim.add_agent(
-        journey_id=journey_id,
-        stage_id=exit_id,
+        journey_id=journey_ids[i % 2],
+        stage_id=upper_waypoint_id,
         position=position,
         state=jps.CollisionFreeSpeedModelState(),
-        region_id=ground,
+        region_id=upper,
     )
 
 
