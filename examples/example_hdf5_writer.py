@@ -40,7 +40,7 @@ def main() -> None:
             dt=0.01,
         )
         exit_area = Polygon([(27, 4.5), (28, 4.5), (28, 5.5), (27, 5.5)])
-        exit_id = sim.add_exit_stage(exit_area, region_id=region)
+        exit_id = sim.add_exit_stage([(exit_area, region)])
         journey_id = sim.add_journey(jps.JourneyDescription([exit_id]))
         spawning_area = Polygon([(0, 0), (5, 0), (5, 10), (0, 10)])
         num_agents = 150

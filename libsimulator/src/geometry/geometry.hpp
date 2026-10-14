@@ -129,11 +129,9 @@ public:
 
     // -- Stage System API -------------------------------------------------------
 
-    /// Cut @p p along the region footprints into pieces that each lie in one region. The
-    /// region @p region_id seeds the search; regions joined to it by seams inside @p p follow.
-    /// A geometry without a 2D region graph (built from a raw mesh) throws an exception.
-    /// If there is no intersection between @p p and the seed region, an exception is thrown.
-    std::vector<AreaPiece> split_into_region_pieces(const Poly& p, size_t region_id) const;
+    /// The part of @p p inside the footprint of region @p region_id, as one or more pieces.
+    /// Throws if @p p does not intersect that region.
+    std::vector<AreaPiece> clip_to_region(const Poly& p, size_t region_id) const;
     // -- Viewer API -----------------------------------------------------------
 
     /// Vertex coordinates (x, y, z), indexable 0..n-1.

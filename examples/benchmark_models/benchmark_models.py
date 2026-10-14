@@ -106,8 +106,8 @@ def _setup_bidirectional(model, writer, dt, length=50.0, width=4.0):
     exit_right = shapely.Polygon(
         [(length - 1, 0), (length, 0), (length, width), (length - 1, width)]
     )
-    eid_l = sim.add_exit_stage(exit_left, region_id=region)
-    eid_r = sim.add_exit_stage(exit_right, region_id=region)
+    eid_l = sim.add_exit_stage([(exit_left, region)])
+    eid_r = sim.add_exit_stage([(exit_right, region)])
     jid_r = sim.add_journey(jps.JourneyDescription([eid_r]))
     jid_l = sim.add_journey(jps.JourneyDescription([eid_l]))
     return sim, area, region, {"right": (jid_r, eid_r), "left": (jid_l, eid_l)}
@@ -178,7 +178,7 @@ def _setup_bottleneck(model, writer, dt):
         model=model, geometry=surface, dt=dt, trajectory_writer=writer
     )
     exit_area = geometry.intersection(shapely.box(13, -5, 15, 5))
-    eid = sim.add_exit_stage(exit_area, region_id=region)
+    eid = sim.add_exit_stage([(exit_area, region)])
     jid = sim.add_journey(jps.JourneyDescription([eid]))
     return sim, geometry, region, {"exit": (jid, eid)}
 
@@ -236,7 +236,7 @@ def _setup_crossing(model, writer, dt):
     }
     routes = {}
     for name, poly in exits.items():
-        eid = sim.add_exit_stage(poly, region_id=region)
+        eid = sim.add_exit_stage([(poly, region)])
         jid = sim.add_journey(jps.JourneyDescription([eid]))
         routes[name] = (jid, eid)
     return sim, geometry, region, routes

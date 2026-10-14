@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "point.hpp"
 #include "polygon.hpp"
 
 #include <cstddef>
@@ -10,17 +9,18 @@
 
 struct DirectSteeringDescription {};
 
-struct WaypointDescription {
-    Point position;
-    double distance;
-    /// Region the waypoint lies in.
+/// Input area of a stage
+struct StageArea {
+    Polygon polygon;
     std::size_t region_id;
 };
 
+struct WaypointDescription {
+    std::vector<StageArea> areas;
+};
+
 struct ExitDescription {
-    Polygon polygon;
-    /// Region the exit lies in.
-    std::size_t region_id;
+    std::vector<StageArea> areas;
 };
 
 using StageDescription =

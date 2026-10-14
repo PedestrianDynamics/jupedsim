@@ -22,7 +22,6 @@
 #include <iterator>
 #include <limits>
 #include <map>
-#include <set>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -240,27 +239,6 @@ std::vector<std::array<std::size_t, 3>> Geometry::triangles() const
 
 namespace
 {
-/// The seam @p e as a segment of its source region's footprint.
-Segment2D seam_segment(const Geometry::RegionGraph2D& g, Geometry::RegionGraph2D::edge_descriptor e)
-{
-    const auto& footprint = g[boost::source(e, g)];
-    const auto& seam = g[e];
-    const Poly& ring =
-        seam.ring == 0 ? footprint.outer_boundary() : footprint.holes()[seam.ring - 1];
-    return ring.edge(seam.index);
-}
-
-/// Whether @p s lies inside @p area or crosses or touches its boundary.
-bool meets(const Poly& area, const Segment2D& s)
-{
-    if(area.bounded_side(s.source()) != CGAL::ON_UNBOUNDED_SIDE) {
-        return true;
-    }
-    return std::any_of(area.edges_begin(), area.edges_end(), [&s](const Segment2D& edge) {
-        return CGAL::do_intersect(edge, s);
-    });
-}
-
 /// Exact arithmetic for cutting areas. Boolean set operations construct the points where
 /// edges cross and run predicates on them again; with inexact constructions the two can
 /// disagree on (nearly) degenerate input the result is a crash or a wrong cut, not a small error.
@@ -308,51 +286,18 @@ Poly to_inexact(const ExactPoly& ring)
 
 } // namespace
 
-/// Split @p p into pieces that lie in a single region each. The pieces are clipped to the
-/// region's footprint. A vector of AreaPiece is returned, each with the piece's polygon and the
-/// region id it lies in.
-std::vector<AreaPiece> Geometry::split_into_region_pieces(const Poly& p, size_t region_id) const
+std::vector<AreaPiece> Geometry::clip_to_region(const Poly& p, size_t region_id) const
 {
-
-    // convert the polygon to exact arithmetic for cutting, and intersection test
-    const auto seed_poly = to_exact(polygon(region_id));
-    const auto* g = _region_graph_2d.get();
-    const auto exact_area = to_exact(p);
-    if(!CGAL::do_intersect(seed_poly, exact_area)) {
-        throw SimulationError("Area does not intersect region {}", region_id);
-    }
-    std::vector<bool> seen(boost::num_vertices(*g), false);
-
     std::vector<AreaPiece> pieces{};
-
-    // define lambda function to add pieces of a region to the pieces vector
-    const auto add_pieces_of = [&pieces, &exact_area, &g, &seen](std::size_t r) {
-        // CGAL::intersection returns a range of polygons with holes, however for the routing
-        // we only need the outer boundary of each piece, since agents never walk on holes.
-        seen[r] = true;
-        CGAL::intersection(
-            to_exact((*g)[r]),
-            exact_area,
-            boost::make_function_output_iterator([&pieces, r](const ExactPolyWithHoles& piece) {
-                pieces.push_back(AreaPiece{to_inexact(piece.outer_boundary()), r});
-            }));
-    };
-
-    // we start a graph traversal from the seed region, and add pieces of each region
-    // where a seam segment intersects the polygon p.
-    // We keep track of seen regions to avoid cycles.
-    std::set<std::size_t> todo;
-    todo.insert(region_id);
-    while(!todo.empty()) {
-        const auto r = *todo.begin();
-        todo.erase(todo.begin());
-        add_pieces_of(r);
-        for(auto e : boost::make_iterator_range(boost::out_edges(r, *g))) {
-            const auto n = boost::target(e, *g);
-            if(!seen[n] && meets(p, seam_segment(*g, e))) {
-                todo.insert(n);
-            }
-        }
+    // Only the outer boundary is needed as agents never stand in a hole.
+    CGAL::intersection(
+        to_exact(polygon(region_id)),
+        to_exact(p),
+        boost::make_function_output_iterator([&pieces, region_id](const ExactPolyWithHoles& piece) {
+            pieces.push_back(AreaPiece{to_inexact(piece.outer_boundary()), region_id});
+        }));
+    if(pieces.empty()) {
+        throw SimulationError("Area does not intersect region {}", region_id);
     }
     return pieces;
 }

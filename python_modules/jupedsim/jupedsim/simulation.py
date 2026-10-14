@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
+from collections.abc import Sequence
 from typing import Any, Iterator
 
 import shapely
@@ -117,45 +118,47 @@ class Simulation:
 
     def add_waypoint_stage(
         self,
-        position: tuple[float, float],
-        distance,
-        *,
-        region_id: int,
+        areas: Sequence[
+            tuple[shapely.Polygon | Sequence[tuple[float, float]], int]
+        ],
     ) -> int:
-        """Add a new waypoint stage to this simulation.
+        """Add a waypoint stage to the simulation.
 
         Args:
-            position: Position of the waypoint
-            distance: Minimum distance required to reach this waypoint.
-                Must be positive.
-            region_id: Region the waypoint lies in, see :func:`add_agent`.
+            areas: Pairs of an area and the region it lies in. An area is a
+                :class:`~shapely.Polygon` without holes or a list of 2D points
+                describing its boundary. Only the part of an area inside its
+                region belongs to the waypoint.
 
         Returns:
             Id of the new stage.
 
+        Raises:
+            ValueError: If an area has holes.
         """
-        return self._obj.add_waypoint_stage(position, distance, region_id)
+        return self._obj.add_waypoint_stage(areas)
 
     def add_exit_stage(
         self,
-        polygon: shapely.Polygon | list[tuple[float, float]],
-        *,
-        region_id: int,
+        areas: Sequence[
+            tuple[shapely.Polygon | Sequence[tuple[float, float]], int]
+        ],
     ) -> int:
         """Add an exit stage to the simulation.
 
         Args:
-            polygon: Area of the exit, as a :class:`~shapely.Polygon` without
-                holes or as a list of 2D points describing its boundary.
-            region_id: Region the exit lies in, see :func:`add_agent`.
+            areas: Pairs of an area and the region it lies in. An area is a
+                :class:`~shapely.Polygon` without holes or a list of 2D points
+                describing its boundary. Only the part of an area inside its
+                region belongs to the exit.
 
         Returns:
             Id of the added exit stage.
 
         Raises:
-            ValueError: If the polygon has holes.
+            ValueError: If an area has holes.
         """
-        return self._obj.add_exit_stage(polygon, region_id)
+        return self._obj.add_exit_stage(areas)
 
     def add_direct_steering_stage(self) -> int:
         """Add an direct steering stage to the simulation.
@@ -391,7 +394,7 @@ class Simulation:
 
     def agents_in_polygon(
         self,
-        poly: shapely.Polygon | list[tuple[float, float]],
+        poly: shapely.Polygon | Sequence[tuple[float, float]],
     ) -> list[Agent]:
         """Handles to all agents inside the given polygon.
 

@@ -21,8 +21,6 @@ class Polygon
 public:
     explicit Polygon(const std::vector<Point>& points);
     explicit Polygon(PolygonType polygon);
-    /// Approximate polygon with corners on the circle
-    static Polygon from_circle(Point center, double radius);
     ~Polygon() = default;
     Polygon(const Polygon& other) = default;
     Polygon& operator=(const Polygon& other) = default;

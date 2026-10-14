@@ -26,7 +26,7 @@ def _make_sim(model, geometry=None):
     room = surface.add_region(polygon=geometry)
     sim = jps.Simulation(model=model, geometry=surface, dt=0.05)
     exit_id = sim.add_exit_stage(
-        [(19, 9), (19, 11), (20, 11), (20, 9)], region_id=room
+        [([(19, 9), (19, 11), (20, 11), (20, 9)], room)]
     )
     journey_id = sim.add_journey(jps.JourneyDescription([exit_id]))
     return sim, exit_id, journey_id, room

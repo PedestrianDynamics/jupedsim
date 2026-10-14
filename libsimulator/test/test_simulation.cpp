@@ -52,9 +52,11 @@ const Point stacked_point{2, 10};
 
 /// A journey of one waypoint, so that agents have somewhere to be routed to.
 std::pair<Journey::ID, BaseStage::ID>
-journey_to(Simulation& sim, Point position, std::size_t region_id, double distance = 0.5)
+journey_to(Simulation& sim, Point position, std::size_t region_id)
 {
-    const auto stage = sim.add_stage(WaypointDescription{position, distance, region_id});
+    const Point half{0.5, 0.5};
+    const Polygon area{test_geometries::rectangle_points(position - half, position + half)};
+    const auto stage = sim.add_stage(WaypointDescription{{{area, region_id}}});
     const auto journey = sim.add_journey({{stage, NonTransitionDescription{}}});
     return {journey, stage};
 }
@@ -130,25 +132,18 @@ TEST(MultiStoreySimulation, ATargetWrittenFromOutsideLandsOnTheAgentsOwnStorey)
     EXPECT_EQ(std::get<Location>(sim.agent(downstairs).final_target).region(), stair.room_1);
 }
 
-TEST(Simulation, AWaypointNeedsAPositiveDistance)
-{
-    const auto flat = on_a_flat_room();
-    EXPECT_THROW(
-        flat.sim->add_stage(WaypointDescription{{5, 5}, 0.0, flat.room_id}), SimulationError);
-}
-
 TEST(Simulation, AnExitMayBeConcave)
 {
     const auto flat = on_a_flat_room();
     const Polygon l_shape{std::vector<Point>{{2, 2}, {6, 2}, {6, 4}, {4, 4}, {4, 6}, {2, 6}}};
-    EXPECT_NO_THROW(flat.sim->add_stage(ExitDescription{l_shape, flat.room_id}));
+    EXPECT_NO_THROW(flat.sim->add_stage(ExitDescription{{{l_shape, flat.room_id}}}));
 }
 
 TEST(Simulation, AStageInAnUnknownRegionIsRejected)
 {
     const auto flat = on_a_flat_room();
     const Polygon square{std::vector<Point>{{2, 2}, {4, 2}, {4, 4}, {2, 4}}};
-    EXPECT_THROW(flat.sim->add_stage(ExitDescription{square, 99}), SimulationError);
+    EXPECT_THROW(flat.sim->add_stage(ExitDescription{{{square, 99}}}), SimulationError);
 }
 
 TEST(MeshBuiltSimulation, IsRejected)
@@ -207,7 +202,7 @@ TEST(MultiStoreySimulation, WalkingUpTheUStairToTheExitAbove)
     // it -- inside its outline in plan. The only way there: east to the stairwell, up both
     // flights, and back west on the upper floor.
     const Polygon outline{{{0, 4}, {3, 4}, {3, 8}, {0, 8}}};
-    const auto exit = sim.add_stage(ExitDescription{outline, stair.room_2});
+    const auto exit = sim.add_stage(ExitDescription{{{outline, stair.room_2}}});
     const auto journey = sim.add_journey({{exit, NonTransitionDescription{}}});
     const auto id = sim.add_agent(journey, exit, Point{2, 6}, State{}, stair.room_1);
 

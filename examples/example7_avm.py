@@ -34,7 +34,7 @@ def main():
         ),
     )
 
-    exit_id = simulation.add_exit_stage(exit_polygon, region_id=region)
+    exit_id = simulation.add_exit_stage([(exit_polygon, region)])
     journey = jps.JourneyDescription([exit_id])
     journey_id = simulation.add_journey(journey)
 

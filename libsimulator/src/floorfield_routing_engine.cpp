@@ -82,7 +82,7 @@ Destination FloorfieldRoutingEngine::register_destination(const std::vector<Area
     std::vector<ff::AreaPiece> ff_pieces{};
     ff_pieces.reserve(pieces.size());
     for(const auto& piece : pieces) {
-        ff_pieces.push_back({piece.region, to_ring(piece.polygon)});
+        ff_pieces.push_back({piece.region_id, to_ring(piece.polygon)});
     }
     const auto id = checked([&] {
         return _field->add_area_destination(

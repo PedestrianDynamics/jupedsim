@@ -104,7 +104,7 @@ def main(
 
         for exit in exits.geoms:
             exit_polygons.append(shapely.Polygon(list(exit.exterior.coords)))
-            exit_ids.append(simulation.add_exit_stage(exit, region_id=region))
+            exit_ids.append(simulation.add_exit_stage([(exit, region)]))
 
         journey = jps.JourneyDescription(exit_ids)
         journey_id = simulation.add_journey(journey)

@@ -60,7 +60,7 @@ def square_simulation():
 
 def journey_to_upper_exit(sim, upper):
     exit_id = sim.add_exit_stage(
-        [(3.5, 12.5), (4.5, 12.5), (4.5, 13.5), (3.5, 13.5)], region_id=upper
+        [([(3.5, 12.5), (4.5, 12.5), (4.5, 13.5), (3.5, 13.5)], upper)]
     )
     journey_id = sim.add_journey(jps.JourneyDescription([exit_id]))
     return journey_id, exit_id
@@ -209,9 +209,7 @@ def test_a_direct_steering_target_can_be_given_as_a_location():
 
 def test_an_agent_heading_for_an_exit_has_no_final_target_location():
     sim, room = square_simulation()
-    exit_id = sim.add_exit_stage(
-        [(8, 4), (9, 4), (9, 6), (8, 6)], region_id=room
-    )
+    exit_id = sim.add_exit_stage([([(8, 4), (9, 4), (9, 6), (8, 6)], room)])
     journey_id = sim.add_journey(jps.JourneyDescription([exit_id]))
     agent = sim.agent(
         sim.add_agent(
@@ -305,25 +303,77 @@ def test_agents_walk_up_the_u_stair_to_an_exit_on_the_floor_above(model, state):
     assert any(1.0 < z < 2.0 for z in heights)
 
 
-def test_the_exit_an_agent_walks_towards_is_the_one_on_its_own_floor():
-    # Same (x, y) polygon on both floors: without the region id the two exits would be one place.
+def test_one_exit_with_an_area_on_each_floor_is_reached_from_both():
     sim, ground, upper = u_stair()
     polygon = [(3.5, 12.5), (4.5, 12.5), (4.5, 13.5), (3.5, 13.5)]
-    ground_exit = sim.add_exit_stage(polygon, region_id=ground)
-    upper_exit = sim.add_exit_stage(polygon, region_id=upper)
-    assert ground_exit != upper_exit
-
-    journey_id = sim.add_journey(jps.JourneyDescription([ground_exit]))
-    sim.add_agent(
-        journey_id=journey_id,
-        stage_id=ground_exit,
-        position=STACKED_XY,
-        state=jps.CollisionFreeSpeedModelState(),
-        region_id=ground,
-    )
-    # A few metres away on its own floor, so it walks there and is gone.
+    exit_id = sim.add_exit_stage(areas=[(polygon, ground), (polygon, upper)])
+    journey_id = sim.add_journey(jps.JourneyDescription([exit_id]))
+    floor_z = {
+        sim.add_agent(
+            journey_id=journey_id,
+            stage_id=exit_id,
+            position=STACKED_XY,
+            state=jps.CollisionFreeSpeedModelState(),
+            region_id=region_id,
+        ): z
+        for region_id, z in ((ground, GROUND_Z), (upper, UPPER_Z))
+    }
     for _ in range(1000):
         sim.iterate()
         if sim.agent_count() == 0:
             break
+        for agent in sim.agents():
+            assert agent.location.z == pytest.approx(floor_z[agent.id])
+    assert sim.agent_count() == 0
+
+
+def test_an_exit_area_reaching_over_a_seam_stays_in_its_region():
+    surface = jps.WalkableSurface()
+    ground = surface.add_region(boundary=rect(0, 0, 10, 10))
+    platform = surface.add_region(boundary=rect(14, 0, 20, 10), height=1.0)
+    ramp = surface.connect_regions(
+        from_region=ground,
+        from_edge=((10, 0), (10, 10)),
+        to_region=platform,
+        to_edge=((14, 0), (14, 10)),
+    )
+    sim = jps.Simulation(
+        model=jps.CollisionFreeSpeedModel(), geometry=surface, dt=0.01
+    )
+    # The exit reaches 2 m onto the ramp, where the agent stands.
+    exit_id = sim.add_exit_stage([(rect(8, 4, 12, 6), ground)])
+    sim.add_agent(
+        journey_id=sim.add_journey(jps.JourneyDescription([exit_id])),
+        stage_id=exit_id,
+        position=(11, 5),
+        state=jps.CollisionFreeSpeedModelState(),
+        region_id=ramp,
+    )
+    sim.iterate()
+    assert sim.agent_count() == 1
+
+
+def test_the_exit_an_agent_walks_towards_is_the_one_on_its_own_floor():
+    # Same (x, y) polygon on both floors: without the region id the two exits would be one place.
+    sim, ground, upper = u_stair()
+    polygon = [(3.5, 12.5), (4.5, 12.5), (4.5, 13.5), (3.5, 13.5)]
+    ground_exit = sim.add_exit_stage([(polygon, ground)])
+    upper_exit = sim.add_exit_stage([(polygon, upper)])
+    assert ground_exit != upper_exit
+
+    journey_id = sim.add_journey(jps.JourneyDescription([ground_exit]))
+    agent = sim.agent(
+        sim.add_agent(
+            journey_id=journey_id,
+            stage_id=ground_exit,
+            position=STACKED_XY,
+            state=jps.CollisionFreeSpeedModelState(),
+            region_id=ground,
+        )
+    )
+    for _ in range(1000):
+        sim.iterate()
+        if sim.agent_count() == 0:
+            break
+        assert agent.location.z == pytest.approx(GROUND_Z)
     assert sim.agent_count() == 0

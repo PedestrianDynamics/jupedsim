@@ -38,21 +38,21 @@ def main():
         ),
     )
     exit_left = simulation.add_exit_stage(
-        [(-24, -8), (-24, 8), (-23, 8), (-23, -8)],
-        region_id=region,
+        [([(-24, -8), (-24, 8), (-23, 8), (-23, -8)], region)]
     )
     exit_top = simulation.add_exit_stage(
-        [(-8, 24), (8, 24), (8, 23), (-8, 23)], region_id=region
+        [([(-8, 24), (8, 24), (8, 23), (-8, 23)], region)]
     )
     exit_right = simulation.add_exit_stage(
-        [(24, -8), (24, 8), (23, 8), (23, -8)],
-        region_id=region,
+        [([(24, -8), (24, 8), (23, 8), (23, -8)], region)]
     )
 
     waypoint_entrance = simulation.add_waypoint_stage(
-        (0, -4), 1, region_id=region
+        [(jps.circle_to_polygon(center=(0, -4), radius=1), region)]
     )
-    waypoint_middle = simulation.add_waypoint_stage((0, 0), 1, region_id=region)
+    waypoint_middle = simulation.add_waypoint_stage(
+        [(jps.circle_to_polygon(center=(0, 0), radius=1), region)]
+    )
 
     journey = jps.JourneyDescription(
         [waypoint_entrance, waypoint_middle, exit_left, exit_top, exit_right]

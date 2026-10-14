@@ -188,21 +188,22 @@ TEST(Floorfield, RoutableLocations)
     EXPECT_FALSE(field->region_is_routable(floors.room_1, {20, 2.5})) << "off the surface";
 }
 
-/// An exit across the doorway between two rooms, cut into one piece per region, is one
-/// destination: inside any piece the travel time is zero, and each room heads for its own side.
+/// An exit over both rooms and the doorway between them is one destination: inside any
+/// piece the travel time is zero, and each room heads for its own side.
 TEST(Floorfield, ExitSpanningSeveralRegions)
 {
     const auto rooms = test_geometries::two_rooms();
     const auto& geo = rooms.geometry;
     const std::vector<Point2D> corners{{9.5, 4}, {11.5, 4}, {11.5, 6}, {9.5, 6}};
     const Poly exit(corners.begin(), corners.end());
-    const auto pieces = geo->split_into_region_pieces(exit, rooms.room_1);
-    ASSERT_EQ(pieces.size(), 3u);
 
     std::vector<ff::AreaPiece> ff_pieces{};
-    for(const auto& piece : pieces) {
-        ff_pieces.push_back({piece.region, to_ring(piece.polygon)});
+    for(const std::size_t region : {0, 1, 2}) {
+        for(const auto& piece : geo->clip_to_region(exit, region)) {
+            ff_pieces.push_back({piece.region_id, to_ring(piece.polygon)});
+        }
     }
+    ASSERT_EQ(ff_pieces.size(), 3u);
 
     auto field = field_over(*geo, 0.1);
     const auto dest = field->add_area_destination({ff_pieces.data(), ff_pieces.size()});

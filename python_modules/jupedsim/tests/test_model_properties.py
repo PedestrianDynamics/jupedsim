@@ -46,7 +46,9 @@ def test_simulation_from_model_instance(model, state_cls, state_kwargs):
     surface = jps.WalkableSurface()
     room = surface.add_region(boundary=_UNIT_SQUARE_10)
     sim = jps.Simulation(model=model, geometry=surface)
-    wp = sim.add_waypoint_stage((9, 9), 0.5, region_id=room)
+    wp = sim.add_waypoint_stage(
+        [(jps.circle_to_polygon(center=(9, 9), radius=0.5), room)]
+    )
     journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
     agent_id = sim.add_agent(
@@ -80,7 +82,9 @@ def corridor():
 
 def test_set_desired_speed(corridor):
     sim, room = corridor
-    wp = sim.add_waypoint_stage((10, 1), 0.5, region_id=room)
+    wp = sim.add_waypoint_stage(
+        [(jps.circle_to_polygon(center=(10, 1), radius=0.5), room)]
+    )
     journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
     agent_id = sim.add_agent(
@@ -121,7 +125,9 @@ def test_initial_parameters_collision_free_speed_model_v2(
     simulation_with_collision_free_speed_model_v2,
 ):
     sim, room = simulation_with_collision_free_speed_model_v2
-    wp = sim.add_waypoint_stage((10, 1), 0.5, region_id=room)
+    wp = sim.add_waypoint_stage(
+        [(jps.circle_to_polygon(center=(10, 1), radius=0.5), room)]
+    )
     journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
     # Create an agent with distinct non-default values for each parameter.
@@ -170,7 +176,9 @@ def test_set_model_parameters_collision_free_speed_model_v2(
     simulation_with_collision_free_speed_model_v2,
 ):
     sim, room = simulation_with_collision_free_speed_model_v2
-    wp = sim.add_waypoint_stage((10, 1), 0.5, region_id=room)
+    wp = sim.add_waypoint_stage(
+        [(jps.circle_to_polygon(center=(10, 1), radius=0.5), room)]
+    )
     journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
     agent_id = sim.add_agent(
@@ -221,7 +229,9 @@ def test_set_model_parameters_anticipation_velocity_model(
     simulation_with_anticipation_velocity_model,
 ):
     sim, room = simulation_with_anticipation_velocity_model
-    wp = sim.add_waypoint_stage((10, 1), 0.5, region_id=room)
+    wp = sim.add_waypoint_stage(
+        [(jps.circle_to_polygon(center=(10, 1), radius=0.5), room)]
+    )
     journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
     agent_id = sim.add_agent(
@@ -275,7 +285,9 @@ def test_set_model_parameters_collision_free_speed_model(
     simulation_with_collision_free_speed_model,
 ):
     sim, room = simulation_with_collision_free_speed_model
-    wp = sim.add_waypoint_stage((10, 1), 0.5, region_id=room)
+    wp = sim.add_waypoint_stage(
+        [(jps.circle_to_polygon(center=(10, 1), radius=0.5), room)]
+    )
     journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
     agent_id = sim.add_agent(
@@ -312,7 +324,9 @@ def test_collision_free_speed_model_repulsion_parameters_are_model_level():
         ),
         geometry=surface,
     )
-    wp = sim.add_waypoint_stage((10, 1), 0.5, region_id=room)
+    wp = sim.add_waypoint_stage(
+        [(jps.circle_to_polygon(center=(10, 1), radius=0.5), room)]
+    )
     journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
     agent_id = sim.add_agent(
@@ -354,7 +368,9 @@ def test_set_model_parameters_generalized_centrifugal_force_model(
     simulation_with_generalized_centrifugal_force_model,
 ):
     sim, room = simulation_with_generalized_centrifugal_force_model
-    wp = sim.add_waypoint_stage((10, 1), 0.5, region_id=room)
+    wp = sim.add_waypoint_stage(
+        [(jps.circle_to_polygon(center=(10, 1), radius=0.5), room)]
+    )
     journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
     agent_id = sim.add_agent(
@@ -416,7 +432,9 @@ def test_set_model_parameters_social_force_model(
 ):
     sim, room = simulation_with_social_force_model
 
-    wp = sim.add_waypoint_stage((10, 1), 0.5, region_id=room)
+    wp = sim.add_waypoint_stage(
+        [(jps.circle_to_polygon(center=(10, 1), radius=0.5), room)]
+    )
     journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
     agent_id = sim.add_agent(
@@ -460,7 +478,9 @@ def test_social_force_model_body_force_and_friction_are_model_level():
         model=jps.SocialForceModel(body_force=100000.0, friction=200000.0),
         geometry=surface,
     )
-    wp = sim.add_waypoint_stage((10, 1), 0.5, region_id=room)
+    wp = sim.add_waypoint_stage(
+        [(jps.circle_to_polygon(center=(10, 1), radius=0.5), room)]
+    )
     journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
     agent_id = sim.add_agent(
@@ -536,7 +556,9 @@ def test_agent_handle_raises_after_removal(
     simulation_with_social_force_model,
 ):
     sim, room = simulation_with_social_force_model
-    wp = sim.add_waypoint_stage((10, 1), 0.5, region_id=room)
+    wp = sim.add_waypoint_stage(
+        [(jps.circle_to_polygon(center=(10, 1), radius=0.5), room)]
+    )
     journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
     agent_id = sim.add_agent(
@@ -580,7 +602,9 @@ def test_initial_parameters_collision_free_speed_model_v3(
     simulation_with_collision_free_speed_model_v3,
 ):
     sim, room = simulation_with_collision_free_speed_model_v3
-    wp = sim.add_waypoint_stage((10, 1), 0.5, region_id=room)
+    wp = sim.add_waypoint_stage(
+        [(jps.circle_to_polygon(center=(10, 1), radius=0.5), room)]
+    )
     journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
     state = jps.CollisionFreeSpeedModelV3State(
@@ -622,7 +646,9 @@ def test_set_model_parameters_collision_free_speed_model_v3(
     simulation_with_collision_free_speed_model_v3,
 ):
     sim, room = simulation_with_collision_free_speed_model_v3
-    wp = sim.add_waypoint_stage((10, 1), 0.5, region_id=room)
+    wp = sim.add_waypoint_stage(
+        [(jps.circle_to_polygon(center=(10, 1), radius=0.5), room)]
+    )
     journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
     agent_id = sim.add_agent(

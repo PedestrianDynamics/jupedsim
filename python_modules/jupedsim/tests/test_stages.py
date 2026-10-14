@@ -37,7 +37,15 @@ def square_room_5x5_with_obstacle():
 def test_exception_on_empty_polygon_in_exit_stage(square_room_5x5):
     sim, room = square_room_5x5
     with pytest.raises(Exception, match=r"Polygon must have at least 3 points"):
-        sim.add_exit_stage([], region_id=room)
+        sim.add_exit_stage([([], room)])
+
+
+def test_exception_on_exit_without_areas(square_room_5x5):
+    sim, _ = square_room_5x5
+    with pytest.raises(
+        jps.SimulationError, match="A stage needs at least one area"
+    ):
+        sim.add_exit_stage([])
 
 
 def test_exception_on_exit_polygon_with_hole(square_room_5x5):
@@ -47,7 +55,7 @@ def test_exception_on_exit_polygon_with_hole(square_room_5x5):
         [[(-1, -1), (1, -1), (1, 1), (-1, 1)]],
     )
     with pytest.raises(ValueError, match="Polygon must not have holes"):
-        sim.add_exit_stage(exit_with_hole, region_id=room)
+        sim.add_exit_stage([(exit_with_hole, room)])
 
 
 def test_can_use_stage_proxy():
@@ -72,11 +80,12 @@ def test_can_use_stage_proxy():
     )
 
     exit_id = simulation.add_exit_stage(
-        [(-2.5, -9.5), (-2.5, -10), (2.5, -10), (2.5, -9.5)],
-        region_id=room,
+        [([(-2.5, -9.5), (-2.5, -10), (2.5, -10), (2.5, -9.5)], room)]
     )
 
-    waypoint_id = simulation.add_waypoint_stage((9.5, 0), 1, region_id=room)
+    waypoint_id = simulation.add_waypoint_stage(
+        [(jps.circle_to_polygon(center=(9.5, 0), radius=1), room)]
+    )
 
     exit_journey_id = simulation.add_journey(
         jps.JourneyDescription(
@@ -136,11 +145,35 @@ def test_can_use_stage_proxy():
 def test_can_add_waypoint(square_room_5x5_with_obstacle, waypoint_position):
     simulation, room = square_room_5x5_with_obstacle
     waypoint_id = simulation.add_waypoint_stage(
-        waypoint_position, 1, region_id=room
+        [(jps.circle_to_polygon(center=waypoint_position, radius=1), room)]
     )
     waypoint_stage = simulation.get_stage(waypoint_id)
 
     assert type(waypoint_stage) is jps.WaypointStage
+
+
+def test_a_waypoint_given_by_its_area_is_reached(square_room_5x5):
+    sim, room = square_room_5x5
+    waypoint_id = sim.add_waypoint_stage(
+        [([(1, -0.5), (2, -0.5), (2, 0.5), (1, 0.5)], room)]
+    )
+    exit_id = sim.add_exit_stage(
+        [([(-2.5, -1), (-2, -1), (-2, 1), (-2.5, 1)], room)]
+    )
+    journey = jps.JourneyDescription([waypoint_id, exit_id])
+    journey.set_transition_for_stage(
+        waypoint_id, jps.Transition.create_fixed_transition(exit_id)
+    )
+    agent_id = sim.add_agent(
+        journey_id=sim.add_journey(journey),
+        stage_id=waypoint_id,
+        position=(1.5, 0),
+        state=jps.CollisionFreeSpeedModelState(),
+        region_id=room,
+    )
+    # It starts inside the waypoint, so the first step moves it on to the exit.
+    sim.iterate()
+    assert sim.agent(agent_id).stage_id == exit_id
 
 
 def test_can_not_add_waypoint_outside_geometry(square_room_5x5):
@@ -149,7 +182,9 @@ def test_can_not_add_waypoint_outside_geometry(square_room_5x5):
     with pytest.raises(
         jps.SimulationError, match=f"Area does not intersect region {room}"
     ):
-        simulation.add_waypoint_stage((10, 10), 1, region_id=room)
+        simulation.add_waypoint_stage(
+            [(jps.circle_to_polygon(center=(10, 10), radius=1), room)]
+        )
 
 
 def test_can_not_add_exit_completely_outside_geometry(square_room_5x5):
@@ -159,7 +194,7 @@ def test_can_not_add_exit_completely_outside_geometry(square_room_5x5):
         jps.SimulationError, match=f"Area does not intersect region {room}"
     ):
         simulation.add_exit_stage(
-            [(-10, -10), (-8, -10), (-8, -8), (-10, -8)], region_id=room
+            [([(-10, -10), (-8, -10), (-8, -8), (-10, -8)], room)]
         )
 
 
@@ -172,7 +207,7 @@ def test_can_not_add_exit_completely_outside_geometry(square_room_5x5):
 )
 def test_can_add_exit_partly_outside_geometry(square_room_5x5, polygon):
     sim, room = square_room_5x5
-    sim.add_exit_stage(polygon, region_id=room)
+    sim.add_exit_stage([(polygon, room)])
 
 
 def test_an_agent_standing_at_the_edge_of_an_exit_leaves():
@@ -183,7 +218,7 @@ def test_an_agent_standing_at_the_edge_of_an_exit_leaves():
         model=jps.CollisionFreeSpeedModel(), geometry=surface
     )
     exit_id = simulation.add_exit_stage(
-        [(8.05, 4), (9.5, 4), (9.5, 6), (8.05, 6)], region_id=room
+        [([(8.05, 4), (9.5, 4), (9.5, 6), (8.05, 6)], room)]
     )
     journey_id = simulation.add_journey(jps.JourneyDescription([exit_id]))
     simulation.add_agent(
@@ -202,9 +237,11 @@ def test_an_agent_standing_at_the_edge_of_an_exit_leaves():
 
 def test_get_stage_returns_the_native_stage_types(square_room_5x5):
     sim, room = square_room_5x5
-    waypoint_id = sim.add_waypoint_stage((0, 0), 1, region_id=room)
+    waypoint_id = sim.add_waypoint_stage(
+        [(jps.circle_to_polygon(center=(0, 0), radius=1), room)]
+    )
     exit_id = sim.add_exit_stage(
-        [(2, -1), (2.5, -1), (2.5, 1), (2, 1)], region_id=room
+        [([(2, -1), (2.5, -1), (2.5, 1), (2, 1)], room)]
     )
     steering_id = sim.add_direct_steering_stage()
 
@@ -228,7 +265,11 @@ def test_a_stage_keeps_its_simulation_alive():
         boundary=[(-2.5, -2.5), (2.5, -2.5), (2.5, 2.5), (-2.5, 2.5)]
     )
     sim = jps.Simulation(model=jps.CollisionFreeSpeedModel(), geometry=surface)
-    stage = sim.get_stage(sim.add_waypoint_stage((0, 0), 1, region_id=room))
+    stage = sim.get_stage(
+        sim.add_waypoint_stage(
+            [(jps.circle_to_polygon(center=(0, 0), radius=1), room)]
+        )
+    )
     native = weakref.ref(sim._obj)
     del sim
     gc.collect()
