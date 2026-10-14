@@ -26,13 +26,7 @@ from vtkmodules.vtkRenderingCore import vtkCellPicker  # noqa: E402
 
 pv.OFF_SCREEN = True
 
-from jupedsim import SimulationError  # noqa: E402
-from jupedsim.internal.routing import (  # noqa: E402
-    Geometry,
-    SurfaceMeshShortestPathRoutingEngine,
-    make_naive_boundary_index,
-    make_portal_boundary_index,
-)
+import jupedsim as jps  # noqa: E402
 from pyvista.trame.ui import plotter_ui  # noqa: E402
 from trame.app import get_server  # noqa: E402
 from trame.app.file_upload import ClientFile  # noqa: E402
@@ -44,8 +38,8 @@ TITLE = "JuPedSim - Multi-Level Viewer"
 # BoundaryIndex implementations selectable in Boundary Highlight mode:
 # (key stored in state, dropdown title, factory building the index from a Geometry).
 BOUNDARY_INDEX_VARIANTS = [
-    ("naive", "Naive", make_naive_boundary_index),
-    ("portal", "Portal", make_portal_boundary_index),
+    ("naive", "Naive", jps.pyjupedsim.make_naive_boundary_index),
+    ("portal", "Portal", jps.make_portal_boundary_index),
 ]
 
 
@@ -207,8 +201,8 @@ def build_app(obj_path: str | None):
         # Geometry is the single source of truth: the rendered vertices/faces
         # and the region colouring are read from it, and the engine borrows the
         # SAME instance, so routing, picking and region colouring all agree.
-        geo = Geometry.from_obj(obj_path)
-        engine = SurfaceMeshShortestPathRoutingEngine(geo)
+        geo = jps.Geometry.from_obj(obj_path)
+        engine = jps.SurfaceMeshShortestPathRoutingEngine(geo)
 
         verts = np.asarray(geo.vertices(), dtype=float)
         tris = np.asarray(geo.triangles(), dtype=np.int64)
@@ -587,7 +581,7 @@ def build_app(obj_path: str | None):
             loc = current["geometry"].get_location(
                 float(pos[0]), float(pos[1]), region_id=region_id
             )
-        except SimulationError:
+        except jps.SimulationError:
             return  # pick rounds off the region's edge
         boundary["loc"] = loc
         _place_marker("boundary_query", pos, "dodgerblue")
