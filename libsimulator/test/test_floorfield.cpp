@@ -175,9 +175,8 @@ TEST(Floorfield, DirectionIsAUnitVectorTowardsTheTarget)
     EXPECT_GT(dir.x, 0.99);
 }
 
-/// A doorway narrower than a cell holds no cell centre: the grid cannot pass it, and the room
-/// behind it has no way to the destination. Asking for a direction there throws; a straight
-/// line to the destination would lead through the wall.
+/// A doorway narrower than a cell holds no cell centre: the grid cannot pass it, so the room
+/// behind it is unreachable and building the field throws.
 TEST(Floorfield, RoomBehindADoorwayNarrowerThanACellThrows)
 {
     WalkableSurface surface{};
@@ -187,11 +186,7 @@ TEST(Floorfield, RoomBehindADoorwayNarrowerThanACellThrows)
         surface.add_region({{{11, 0}, {21, 0}, {21, 10}, {11, 10}, {11, 5.04}, {11, 5}}, {}}, 0.0);
     surface.connect_regions(a, {{10, 5}, {10, 5.04}}, b, {{11, 5}, {11, 5.04}});
     const auto geo = surface.create_geometry();
-    auto field = field_over(*geo, 0.1);
-    const auto dest = field->add_point_destination(a, {2, 2});
-
-    EXPECT_NO_THROW(field->region_direction(a, {8, 8}, dest));
-    EXPECT_THROW(field->region_direction(b, {15, 5}, dest), rust::Error);
+    EXPECT_THROW(field_over(*geo, 0.1), rust::Error);
 }
 
 TEST(Floorfield, RoutableLocations)
