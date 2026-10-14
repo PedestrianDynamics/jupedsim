@@ -5,18 +5,14 @@ from pathlib import Path
 import jupedsim as jps
 import pytest
 import shapely
-from jupedsim.internal.routing import (
-    Geometry,
-    SurfaceMeshShortestPathRoutingEngine,
-)
 
 OBJ = Path(__file__).parents[3] / "examples/geometry/multi_level_u_stair.obj"
 
 
 @pytest.fixture
 def engine():
-    geo = Geometry.from_obj(str(OBJ))
-    return SurfaceMeshShortestPathRoutingEngine(geo)
+    geo = jps.Geometry.from_obj(str(OBJ))
+    return jps.SurfaceMeshShortestPathRoutingEngine(geo)
 
 
 def test_valid_and_invalid_locations(engine):
@@ -46,7 +42,7 @@ def test_shortest_path_across_stair(engine):
 
 
 def test_geometry_regions_and_render_data():
-    geo = Geometry.from_obj(str(OBJ))
+    geo = jps.Geometry.from_obj(str(OBJ))
     verts = geo.vertices()
     tris = geo.triangles()
     ids = geo.region_id_per_face()
@@ -65,8 +61,8 @@ def test_geometry_regions_and_render_data():
 
 
 def test_orientation_is_unit_vector():
-    geo = Geometry.from_obj(str(OBJ))
-    engine = SurfaceMeshShortestPathRoutingEngine(geo)
+    geo = jps.Geometry.from_obj(str(OBJ))
+    engine = jps.SurfaceMeshShortestPathRoutingEngine(geo)
     d = engine.get_orientation(
         # from the ground floor (region 0) to the upper floor (region 1)
         geo.get_location(3, 4, region_id=0),
@@ -96,7 +92,7 @@ def test_a_route_on_a_flat_region_keeps_clear_of_a_hole():
     # the route has to bend around the hole: (2,5) -> (8,5) turns on two of
     # its corners, and the route is held off each of them by the wall clearance -- so it is
     # longer than the geodesic through them, which measures 2 + 2*sqrt(5).
-    engine = SurfaceMeshShortestPathRoutingEngine(geo)
+    engine = jps.SurfaceMeshShortestPathRoutingEngine(geo)
     path = engine.get_shortest_path((2, 5, 1), (8, 5, 1))
     corners = [(4, 4), (6, 4), (4, 6), (6, 6)]
     to_nearest_corner = [
