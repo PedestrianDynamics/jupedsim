@@ -47,8 +47,7 @@ surface.connect_regions(
 sim = jps.Simulation(model=jps.CollisionFreeSpeedModel(), geometry=surface)
 
 exit_id = sim.add_exit_stage(
-    [(3.5, 12.5), (4.5, 12.5), (4.5, 13.5), (3.5, 13.5)],
-    region_id=upper,
+    [([(3.5, 12.5), (4.5, 12.5), (4.5, 13.5), (3.5, 13.5)], upper)]
 )
 journey_id = sim.add_journey(jps.JourneyDescription([exit_id]))
 

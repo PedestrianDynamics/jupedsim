@@ -126,7 +126,7 @@ def _trajectory(model, state_cls):
     room = surface.add_region(boundary=_GEOMETRY)
     simulation = jps.Simulation(model=model, geometry=surface)
     exit_id = simulation.add_exit_stage(
-        [(49, -3), (49, 3), (50, 3), (50, -3)], region_id=room
+        [([(49, -3), (49, 3), (50, 3), (50, -3)], room)]
     )
     journey_id = simulation.add_journey(jps.JourneyDescription([exit_id]))
     agent_id = simulation.add_agent(

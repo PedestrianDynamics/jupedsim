@@ -18,7 +18,7 @@ def corridor_simulation():
     )
     sim = jps.Simulation(model=model, geometry=surface, dt=0.05)
     exit_id = sim.add_exit_stage(
-        [(19, 9), (19, 11), (20, 11), (20, 9)], region_id=room
+        [([(19, 9), (19, 11), (20, 11), (20, 9)], room)]
     )
     journey = jps.JourneyDescription([exit_id])
     journey_id = sim.add_journey(journey)
@@ -105,7 +105,7 @@ def test_social_force_prevents_agent_collapse():
     )
     sim = jps.Simulation(model=model, geometry=surface, dt=0.05)
     exit_id = sim.add_exit_stage(
-        [(19, 9), (19, 11), (20, 11), (20, 9)], region_id=room
+        [([(19, 9), (19, 11), (20, 11), (20, 9)], room)]
     )
     journey = jps.JourneyDescription([exit_id])
     journey_id = sim.add_journey(journey)
@@ -138,7 +138,7 @@ def test_custom_desired_speed_affects_movement():
     )
     sim = jps.Simulation(model=model, geometry=surface, dt=0.05)
     exit_id = sim.add_exit_stage(
-        [(19, 9), (19, 11), (20, 11), (20, 9)], region_id=room
+        [([(19, 9), (19, 11), (20, 11), (20, 9)], room)]
     )
     journey = jps.JourneyDescription([exit_id])
     journey_id = sim.add_journey(journey)
@@ -182,7 +182,7 @@ def test_obstacle_force_keeps_agents_from_walls():
     )
     sim = jps.Simulation(model=model, geometry=surface, dt=0.05)
     exit_id = sim.add_exit_stage(
-        [(19, 9), (19, 11), (20, 11), (20, 9)], region_id=room
+        [([(19, 9), (19, 11), (20, 11), (20, 9)], room)]
     )
     journey = jps.JourneyDescription([exit_id])
     journey_id = sim.add_journey(journey)

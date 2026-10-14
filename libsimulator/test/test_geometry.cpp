@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
+#include "geometry/area_piece.hpp"
 #include "geometry/geometry.hpp"
 #include "geometry/walkable_surface.hpp"
 #include "geometry_fixtures.hpp"
@@ -11,7 +12,6 @@
 
 #include <algorithm>
 #include <array>
-#include <map>
 #include <set>
 #include <vector>
 
@@ -46,14 +46,13 @@ std::ptrdiff_t pieces_along(const std::vector<LineSegment>& answer, double y)
     });
 }
 
-/// Area of the pieces, summed per region they lie in.
-std::map<std::size_t, double> area_per_region(const std::vector<AreaPiece>& pieces)
+double total_area(const std::vector<AreaPiece>& pieces)
 {
-    std::map<std::size_t, double> areas{};
+    double area = 0.0;
     for(const auto& piece : pieces) {
-        areas[piece.region] += CGAL::to_double(piece.polygon.area());
+        area += piece.polygon.area();
     }
-    return areas;
+    return area;
 }
 
 } // namespace
@@ -403,90 +402,60 @@ TEST(GeometryModelQueries, AWallOfTheFlightBelowIsNotInTheAnswerEither)
         << "the foot of the flight below";
 }
 
-TEST(GeometryAreaSplit, AnAreaWithinOneRegionStaysWhole)
+/*******************************************************************
+ *  Test clip_to_region()
+ ********************************************************************/
+
+TEST(GeometryClipToRegion, CompletelyInsideSurface)
 {
-    const auto rooms = test_geometries::two_rooms();
-    const auto pieces = rooms.geometry->split_into_region_pieces(
-        Polygon(test_geometries::rectangle_points({2, 2}, {4, 4})), rooms.room_1);
-    const auto areas = area_per_region(pieces); // sanity check
+    const auto room = test_geometries::rectangle({0, 0}, {10, 10});
+    const Polygon area{test_geometries::rectangle_points({2, 2}, {4, 4})};
+
+    const auto pieces = room.geometry->clip_to_region(area, room.room_id);
+
     ASSERT_EQ(pieces.size(), 1u);
-    EXPECT_NEAR(areas.at(pieces[0].region), 4.0, 1e-9);
-    EXPECT_EQ(pieces[0].region, rooms.room_1);
+    EXPECT_EQ(pieces[0].region_id, room.room_id);
+    EXPECT_NEAR(total_area(pieces), 4.0, 1e-9);
 }
 
-TEST(GeometryAreaSplit, AnAreaAcrossSeamsIsCutPerRegion)
+TEST(GeometryClipToRegion, TrimmedAtSurfaceBorder)
 {
+    const auto room = test_geometries::rectangle({0, 0}, {10, 10});
+    const Polygon area{test_geometries::rectangle_points({8, 2}, {12, 4})};
+
+    const auto pieces = room.geometry->clip_to_region(area, room.room_id);
+
+    EXPECT_NEAR(total_area(pieces), 2.0 * 2.0, 1e-9);
+}
+
+TEST(GeometryClipToRegion, ClippedAtSeam)
+{
+    // Seam between room_1 and the connector at x = 10.
     const auto rooms = test_geometries::two_rooms();
+    const Polygon area{test_geometries::rectangle_points({9, 2}, {12, 4})};
 
-    // x in [9, 12]: the end of room a, the whole connector, the start of room b.
-    const auto pieces = rooms.geometry->split_into_region_pieces(
-        Polygon(test_geometries::rectangle_points({9, 2}, {12, 8})), rooms.room_1);
+    const auto pieces = rooms.geometry->clip_to_region(area, rooms.room_1);
 
-    const auto areas = area_per_region(pieces);
-    EXPECT_EQ(areas.size(), 3u);
-    double area_sum = 0.0;
-    for(const auto& area : areas) {
-        area_sum += area.second;
-    }
-    EXPECT_NEAR(area_sum, 3.0 * 6.0, 1e-9);
+    EXPECT_NEAR(total_area(pieces), 1.0 * 2.0, 1e-9);
 }
 
-TEST(GeometryAreaSplit, AnAreaReachingOffTheSurfaceIsClipped)
+TEST(GeometryClipToRegion, ConcaveCreatesSeveralPieces)
 {
-    const auto rooms = test_geometries::two_rooms();
+    // A U open at the top. The area runs across both arms and the gap between them.
+    const auto room = test_geometries::from_polygons(
+        {{{0, 0}, {9, 0}, {9, 9}, {6, 9}, {6, 3}, {3, 3}, {3, 9}, {0, 9}}});
+    const Polygon area{test_geometries::rectangle_points({0, 6}, {9, 8})};
 
-    // A quarter of it lies below y = 0, off the walkable surface.
-    const auto pieces = rooms.geometry->split_into_region_pieces(
-        Polygon(test_geometries::rectangle_points({2, -1}, {4, 3})), rooms.room_1);
-    const auto areas = area_per_region(pieces);
-    ASSERT_EQ(pieces.size(), 1u);
-    EXPECT_NEAR(areas.at(pieces[0].region), 2.0 * 3.0, 1e-9);
+    const auto pieces = room.geometry->clip_to_region(area, room.room_id);
+
+    EXPECT_EQ(pieces.size(), 2u);
+    EXPECT_NEAR(total_area(pieces), 2.0 * (3.0 * 2.0), 1e-9);
 }
 
-TEST(GeometryAreaSplit, WrongRegionIDLeadsToException)
+TEST(GeometryClipToRegion, RejectedOutsideBoundary)
 {
-    const auto rooms = test_geometries::two_rooms();
+    const auto room = test_geometries::rectangle({0, 0}, {10, 10});
+    const Polygon area{test_geometries::rectangle_points({12, 2}, {14, 4})};
 
-    // The area lies in room 1, but the caller claims it is in room 2.
-    EXPECT_THROW(
-        rooms.geometry->split_into_region_pieces(
-            Polygon(test_geometries::rectangle_points({2, 2}, {4, 4})), rooms.room_2),
-        SimulationError);
-}
-
-TEST(GeometryAreaSplit, AnAreaOnTheFootOfARampIsCutBetweenRampAndGroundFloor)
-{
-    const auto rooms = test_geometries::stacked_floors_with_ramp();
-    ASSERT_EQ(std::set<std::size_t>({rooms.room_1, rooms.room_2, rooms.connector}).size(), 3u);
-
-    // x in [2, 6] on the ground floor -- under the upper floor in plan -- and x in [6, 8] on
-    // the foot of the ramp.
-    const auto pieces = rooms.geometry->split_into_region_pieces(
-        Polygon(test_geometries::rectangle_points({2, 4}, {8, 6})), rooms.room_1);
-
-    ASSERT_EQ(pieces.size(), 2u);
-    const auto areas = area_per_region(pieces);
-    ASSERT_EQ(areas.size(), 2u);
-    EXPECT_NEAR(areas.at(rooms.room_1), 4.0 * 2.0, 1e-9);
-    EXPECT_NEAR(areas.at(rooms.connector), 2.0 * 2.0, 1e-9);
-    // The upper floor lies right overhead, but is only reached over the top of the ramp.
-    EXPECT_EQ(areas.count(rooms.room_2), 0u);
-}
-
-TEST(GeometryAreaSplit, AnAreaOnTheTopOfARampIsCutBetweenRampAndUpperFloor)
-{
-    const auto rooms = test_geometries::stacked_floors_with_ramp();
-
-    // x in [12, 14] on the top of the ramp, x in [14, 18] on the upper floor -- over the
-    // ground floor in plan.
-    const auto pieces = rooms.geometry->split_into_region_pieces(
-        Polygon(test_geometries::rectangle_points({12, 4}, {18, 6})), rooms.room_2);
-
-    ASSERT_EQ(pieces.size(), 2u);
-    const auto areas = area_per_region(pieces);
-    ASSERT_EQ(areas.size(), 2u);
-    EXPECT_NEAR(areas.at(rooms.connector), 2.0 * 2.0, 1e-9);
-    EXPECT_NEAR(areas.at(rooms.room_2), 4.0 * 2.0, 1e-9);
-    // The ground floor lies right below, but is only reached over the foot of the ramp.
-    EXPECT_EQ(areas.count(rooms.room_1), 0u);
+    EXPECT_THROW(room.geometry->clip_to_region(area, room.room_id), SimulationError);
 }

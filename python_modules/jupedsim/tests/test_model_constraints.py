@@ -17,7 +17,7 @@ def square_room_100x100_cfsm():
     )
 
     exit_id = simulation.add_exit_stage(
-        [(49, -3), (49, 3), (50, 3), (50, -3)], region_id=room
+        [([(49, -3), (49, 3), (50, 3), (50, -3)], room)]
     )
 
     journey = jps.JourneyDescription([exit_id])
@@ -38,7 +38,7 @@ def square_room_100x100_gcfm():
     )
 
     exit_id = simulation.add_exit_stage(
-        [(49, -3), (49, 3), (50, 3), (50, -3)], region_id=room
+        [([(49, -3), (49, 3), (50, 3), (50, -3)], room)]
     )
 
     journey = jps.JourneyDescription([exit_id])
@@ -735,7 +735,7 @@ def square_room_100x100_avm():
     )
 
     exit_id = simulation.add_exit_stage(
-        [(49, -3), (49, 3), (50, 3), (50, -3)], region_id=room
+        [([(49, -3), (49, 3), (50, 3), (50, -3)], room)]
     )
 
     journey = jps.JourneyDescription([exit_id])
@@ -1235,7 +1235,7 @@ def test_add_agent_rejects_state_of_different_model_on_custom_simulation():
     )
     simulation = jps.Simulation(model=_MinimalCustomModel(), geometry=surface)
     exit_id = simulation.add_exit_stage(
-        [(49, -3), (49, 3), (50, 3), (50, -3)], region_id=room
+        [([(49, -3), (49, 3), (50, 3), (50, -3)], room)]
     )
     journey_id = simulation.add_journey(jps.JourneyDescription([exit_id]))
 
@@ -1259,7 +1259,7 @@ def test_add_agent_rejects_custom_state_on_builtin_model_simulation():
     )
     simulation = jps.Simulation(model=jps.SocialForceModel(), geometry=surface)
     exit_id = simulation.add_exit_stage(
-        [(49, -3), (49, 3), (50, 3), (50, -3)], region_id=room
+        [([(49, -3), (49, 3), (50, 3), (50, -3)], room)]
     )
     journey_id = simulation.add_journey(jps.JourneyDescription([exit_id]))
 
@@ -1306,7 +1306,7 @@ def _custom_model_simulation_with_agent(model):
     )
     simulation = jps.Simulation(model=model, geometry=surface)
     exit_id = simulation.add_exit_stage(
-        [(49, -3), (49, 3), (50, 3), (50, -3)], region_id=room
+        [([(49, -3), (49, 3), (50, 3), (50, -3)], room)]
     )
     journey_id = simulation.add_journey(jps.JourneyDescription([exit_id]))
     simulation.add_agent(
@@ -1326,7 +1326,7 @@ def test_add_agent_spawns_the_agent_where_add_agent_says():
     )
     simulation = jps.Simulation(model=_MinimalCustomModel(), geometry=surface)
     exit_id = simulation.add_exit_stage(
-        [(49, -3), (49, 3), (50, 3), (50, -3)], region_id=room
+        [([(49, -3), (49, 3), (50, 3), (50, -3)], room)]
     )
     journey_id = simulation.add_journey(jps.JourneyDescription([exit_id]))
 
@@ -1380,7 +1380,7 @@ def test_custom_model_movement_is_applied_as_given():
         model=_ConstantMovementModel((0.25, -0.5)), geometry=surface
     )
     exit_id = simulation.add_exit_stage(
-        [(49, -3), (49, 3), (50, 3), (50, -3)], region_id=room
+        [([(49, -3), (49, 3), (50, 3), (50, -3)], room)]
     )
     journey_id = simulation.add_journey(jps.JourneyDescription([exit_id]))
     agent_id = simulation.add_agent(
@@ -1428,7 +1428,7 @@ def test_add_agent_during_iterate_raises_simulation_error():
     )
     simulation = jps.Simulation(model=model, geometry=surface)
     exit_id = simulation.add_exit_stage(
-        [(49, -3), (49, 3), (50, 3), (50, -3)], region_id=room
+        [([(49, -3), (49, 3), (50, 3), (50, -3)], room)]
     )
     journey_id = simulation.add_journey(jps.JourneyDescription([exit_id]))
     model.simulation = simulation

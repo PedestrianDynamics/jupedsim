@@ -104,24 +104,28 @@ class RandomProfilePicker:
 
 
 def create_journey(sim: jps.Simulation, region_id: int):
-    stages = [
-        sim.add_waypoint_stage((1384.33, 635.51), 1.5, region_id=region_id),
-        sim.add_waypoint_stage((1283.35, 510.25), 1.5, region_id=region_id),
-        sim.add_waypoint_stage((1159.81, 693.19), 1.5, region_id=region_id),
-        sim.add_waypoint_stage((1223.74, 768.90), 1.5, region_id=region_id),
-        sim.add_waypoint_stage((1214.52, 766.20), 1.5, region_id=region_id),
-        sim.add_waypoint_stage((962.36, 555.14), 1.5, region_id=region_id),
-        sim.add_waypoint_stage((950.56, 538.72), 1.5, region_id=region_id),
-        sim.add_exit_stage(
-            [
-                (630.01, 25.88),
-                (630.03, 27.63),
-                (625.97, 28.03),
-                (625.92, 26.18),
-            ],
-            region_id=region_id,
-        ),
+    exit_area = [
+        (630.01, 25.88),
+        (630.03, 27.63),
+        (625.97, 28.03),
+        (625.92, 26.18),
     ]
+    waypoint_centers = [
+        (1384.33, 635.51),
+        (1283.35, 510.25),
+        (1159.81, 693.19),
+        (1223.74, 768.90),
+        (1214.52, 766.20),
+        (962.36, 555.14),
+        (950.56, 538.72),
+    ]
+    stages = [
+        sim.add_waypoint_stage(
+            [(jps.circle_to_polygon(center=center, radius=1.5), region_id)]
+        )
+        for center in waypoint_centers
+    ]
+    stages.append(sim.add_exit_stage([(exit_area, region_id)]))
 
     journey = jps.JourneyDescription(stages)
     for stages_start, stage_end in zip(stages[0:-1], stages[1:]):

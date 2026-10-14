@@ -21,7 +21,7 @@ def test_can_query_agents_in_range():
         geometry=surface,
     )
     exit = simulation.add_exit_stage(
-        [(99, 45), (99, 55), (100, 55), (100, 45)], region_id=room
+        [([(99, 45), (99, 55), (100, 55), (100, 45)], room)]
     )
 
     journey = jps.JourneyDescription([exit])
@@ -94,8 +94,7 @@ def test_can_run_simulation():
         model=jps.CollisionFreeSpeedModel(), geometry=surface
     )
     exit_stage_id = simulation.add_exit_stage(
-        [(18, 4), (20, 4), (20, 6), (18, 6)],
-        region_id=room,
+        [([(18, 4), (20, 4), (20, 6), (18, 6)], room)]
     )
 
     journey = jps.JourneyDescription([exit_stage_id])
@@ -162,7 +161,7 @@ def test_get_single_agent_from_simulation():
         model=jps.CollisionFreeSpeedModel(), geometry=surface
     )
     exit_id = simulation.add_exit_stage(
-        [(18, 4), (20, 4), (20, 6), (18, 6)], region_id=room
+        [([(18, 4), (20, 4), (20, 6), (18, 6)], room)]
     )
 
     journey = jps.JourneyDescription([exit_id])
@@ -207,7 +206,7 @@ def test_get_agent_non_existing_agent_from_simulation():
     )
 
     exit_id = simulation.add_exit_stage(
-        [(18, 4), (20, 4), (20, 6), (18, 6)], region_id=room
+        [([(18, 4), (20, 4), (20, 6), (18, 6)], room)]
     )
     journey = jps.JourneyDescription([exit_id])
 
@@ -248,8 +247,7 @@ def test_agent_can_be_removed_from_simulation():
         model=jps.CollisionFreeSpeedModel(), geometry=surface
     )
     exit_stage_id = simulation.add_exit_stage(
-        [(18, 4), (20, 4), (20, 6), (18, 6)],
-        region_id=room,
+        [([(18, 4), (20, 4), (20, 6), (18, 6)], room)]
     )
 
     journey = jps.JourneyDescription([exit_stage_id])
@@ -315,8 +313,7 @@ def test_agent_can_not_be_added_outside_geometry():
     )
 
     exit_id = simulation.add_exit_stage(
-        [(99, 45), (99, 55), (100, 55), (100, 45)],
-        region_id=room,
+        [([(99, 45), (99, 55), (100, 55), (100, 45)], room)]
     )
 
     journey = jps.JourneyDescription([exit_id])

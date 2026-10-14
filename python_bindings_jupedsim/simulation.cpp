@@ -47,6 +47,18 @@ std::vector<Point> boundary_without_holes(Area area)
     }
     return std::get<std::vector<Point>>(std::move(area));
 }
+
+using Areas = std::vector<std::pair<Area, std::size_t>>;
+
+std::vector<StageArea> stage_areas(Areas areas)
+{
+    std::vector<StageArea> result{};
+    result.reserve(areas.size());
+    for(auto& [area, region_id] : areas) {
+        result.push_back({Polygon{boundary_without_holes(std::move(area))}, region_id});
+    }
+    return result;
+}
 } // namespace
 
 void init_simulation(py::module_& m)
@@ -73,24 +85,16 @@ void init_simulation(py::module_& m)
             py::arg("dt"))
         .def(
             "add_waypoint_stage",
-            [](Simulation& sim,
-               std::tuple<double, double> position,
-               double distance,
-               std::size_t region_id) {
-                return sim.add_stage(WaypointDescription{into_point(position), distance, region_id})
-                    .get_id();
+            [](Simulation& sim, Areas areas) {
+                return sim.add_stage(WaypointDescription{stage_areas(std::move(areas))}).get_id();
             },
-            py::arg("position"),
-            py::arg("distance"),
-            py::arg("region_id"))
+            py::arg("areas"))
         .def(
             "add_exit_stage",
-            [](Simulation& sim, Area polygon, std::size_t region_id) {
-                const Polygon area{boundary_without_holes(std::move(polygon))};
-                return sim.add_stage(ExitDescription{area, region_id}).get_id();
+            [](Simulation& sim, Areas areas) {
+                return sim.add_stage(ExitDescription{stage_areas(std::move(areas))}).get_id();
             },
-            py::arg("polygon"),
-            py::arg("region_id"))
+            py::arg("areas"))
         .def(
             "add_direct_steering_stage",
             [](Simulation& sim) { return sim.add_stage(DirectSteeringDescription{}).get_id(); })

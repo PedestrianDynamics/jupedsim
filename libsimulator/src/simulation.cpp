@@ -2,6 +2,7 @@
 #include "simulation.hpp"
 
 #include "generic_agent.hpp"
+#include "geometry/area_piece.hpp"
 #include "iterator_pair.hpp"
 #include "journey.hpp"
 #include "operational_model.hpp"
@@ -42,6 +43,19 @@ public:
     IterationScope(const IterationScope&) = delete;
     IterationScope& operator=(const IterationScope&) = delete;
 };
+
+std::vector<AreaPiece> pieces_of(const Geometry& geometry, const std::vector<StageArea>& areas)
+{
+    if(areas.empty()) {
+        throw SimulationError("A stage needs at least one area");
+    }
+    std::vector<AreaPiece> pieces{};
+    for(const auto& area : areas) {
+        const auto clipped = geometry.clip_to_region(area.polygon, area.region_id);
+        pieces.insert(pieces.end(), clipped.begin(), clipped.end());
+    }
+    return pieces;
+}
 } // namespace
 
 void Simulation::throw_if_iterating(const char* operation) const
@@ -194,8 +208,6 @@ Journey::ID Simulation::add_journey(const std::map<BaseStage::ID, TransitionDesc
     return id;
 }
 
-// Each stage checks its description and cuts its area before it registers the destination, so
-// that a stage which cannot be added leaves nothing behind in the routing engine.
 BaseStage::ID Simulation::add_stage(const StageDescription& stage_description)
 {
     throw_if_iterating("AddStage");
@@ -203,15 +215,11 @@ BaseStage::ID Simulation::add_stage(const StageDescription& stage_description)
     auto stage = std::visit(
         Overloaded{
             [this](const WaypointDescription& d) -> std::unique_ptr<BaseStage> {
-                if(d.distance <= 0.0) {
-                    throw SimulationError("Waypoint distance must be positive, got {}", d.distance);
-                }
-                const auto pieces = _geometry->split_into_region_pieces(
-                    Polygon::from_circle(d.position, d.distance), d.region_id);
+                const auto pieces = pieces_of(*_geometry, d.areas);
                 return std::make_unique<Waypoint>(_routing_engine->register_destination(pieces));
             },
             [this](const ExitDescription& d) -> std::unique_ptr<BaseStage> {
-                const auto pieces = _geometry->split_into_region_pieces(d.polygon, d.region_id);
+                const auto pieces = pieces_of(*_geometry, d.areas);
                 return std::make_unique<Exit>(
                     _routing_engine->register_destination(pieces),
                     _removed_agents_in_last_iteration);

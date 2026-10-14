@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
 from jupedsim.agent import Agent
+from jupedsim.convenience import circle_to_polygon
 from jupedsim.custom_model import CustomOperationalModel
 from jupedsim.distributions import (
     AgentNumberError,
@@ -127,6 +128,7 @@ __all__ = [
     "__commit__",
     "__compiler__",
     "__version__",
+    "circle_to_polygon",
     "disable_tracing",
     "distribute_by_density",
     "distribute_by_number",

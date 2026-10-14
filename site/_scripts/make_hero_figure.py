@@ -76,7 +76,7 @@ def simulate(seed):
     surface = jps.WalkableSurface()
     room = surface.add_region(polygon=geometry)
     sim = jps.Simulation(model=jps.CollisionFreeSpeedModel(), geometry=surface)
-    exit_id = sim.add_exit_stage(EXIT, region_id=room)
+    exit_id = sim.add_exit_stage([(EXIT, room)])
     journey_id = sim.add_journey(jps.JourneyDescription([exit_id]))
     starts = jps.distribute_by_number(
         polygon=START,

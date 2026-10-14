@@ -56,7 +56,9 @@ def test_desired_speed_can_be_set_via_state(
 ):
     """Test that desired_speed passed to the state constructor is applied."""
     sim, room = create_simulation(model_class)
-    wp = sim.add_waypoint_stage((10, 1), 0.5, region_id=room)
+    wp = sim.add_waypoint_stage(
+        [(jps.circle_to_polygon(center=(10, 1), radius=0.5), room)]
+    )
     journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
     agent_id = sim.add_agent(
@@ -82,7 +84,9 @@ def test_desired_speed_can_be_mutated_via_agent_handle(
 ):
     """Test that desired_speed can be changed through the agent handle."""
     sim, room = create_simulation(model_class)
-    wp = sim.add_waypoint_stage((10, 1), 0.5, region_id=room)
+    wp = sim.add_waypoint_stage(
+        [(jps.circle_to_polygon(center=(10, 1), radius=0.5), room)]
+    )
     journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
     agent_id = sim.add_agent(
@@ -110,7 +114,9 @@ def test_removed_parameter_names_raise(
 ):
     """Test that pre-2.0 parameter names are gone without replacement."""
     sim, room = create_simulation(model_class)
-    wp = sim.add_waypoint_stage((10, 1), 0.5, region_id=room)
+    wp = sim.add_waypoint_stage(
+        [(jps.circle_to_polygon(center=(10, 1), radius=0.5), room)]
+    )
     journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
     for removed_attr in removed_attrs:

@@ -18,7 +18,7 @@ Destination destination_of(
     const Polygon& polygon,
     std::size_t region)
 {
-    return engine.register_destination(geometry.split_into_region_pieces(polygon, region));
+    return engine.register_destination(geometry.clip_to_region(polygon, region));
 }
 
 GenericAgent agent_at(Location location, BaseStage::ID stage_id)
@@ -46,10 +46,10 @@ public:
     }
 };
 
-TEST_F(StagesTests, WaypointIsReachedWithinItsDistance)
+TEST_F(StagesTests, WaypointIsReachedWithinItsArea)
 {
-    Waypoint waypoint(
-        destination_of(engine, *room.geometry, Polygon::from_circle({0, 0}, 1.0), room.room_id));
+    const Polygon area{test_geometries::rectangle_points({-1, -1}, {1, 1})};
+    Waypoint waypoint(destination_of(engine, *room.geometry, area, room.room_id));
 
     EXPECT_TRUE(waypoint.is_completed(agent_at({0.9, 0}, waypoint.id())));
     EXPECT_FALSE(waypoint.is_completed(agent_at({1.1, 0}, waypoint.id())));
@@ -72,16 +72,18 @@ public:
         return ::agent_at(at(p, region), stage_id);
     }
 
-    Destination circle_around(Point p, double radius, std::size_t region)
+    Destination square_around(Point p, double half_width, std::size_t region)
     {
-        return destination_of(engine, *rooms.geometry, Polygon::from_circle(p, radius), region);
+        const Point half{half_width, half_width};
+        const Polygon area{test_geometries::rectangle_points(p - half, p + half)};
+        return destination_of(engine, *rooms.geometry, area, region);
     }
 };
 
 TEST_F(StagesOnTwoStoreys, WaypointIsReachedOnlyFromItsOwnFloor)
 {
-    // A radius larger than the height between the floors.
-    Waypoint waypoint(circle_around({3, 3}, 3.1, rooms.room_2));
+    // Reaches further than the height between the floors.
+    Waypoint waypoint(square_around({3, 3}, 3.1, rooms.room_2));
 
     EXPECT_FALSE(waypoint.is_completed(agent_at({3, 3}, rooms.room_1, waypoint.id())));
     EXPECT_TRUE(waypoint.is_completed(agent_at({3, 3}, rooms.room_2, waypoint.id())));
@@ -113,14 +115,4 @@ TEST_F(StagesOnTwoStoreys, DirectSteeringHandsBackWhereTheAgentWasSteered)
     const auto target = std::get<Location>(steering.target(agent));
     EXPECT_EQ(target.xy(), Point(3, 3));
     EXPECT_EQ(target.region(), rooms.room_2);
-}
-
-TEST_F(StagesOnTwoStoreys, WaypointIsReachedFromTheRampLeadingToIt)
-{
-    // On the upper floor, 1 m past the top of the ramp at x = 14: its radius reaches back onto
-    // the ramp, but not down to the ground floor underneath.
-    Waypoint waypoint(circle_around({15, 5}, 1.5, rooms.room_2));
-
-    EXPECT_TRUE(waypoint.is_completed(agent_at({13.7, 5}, rooms.connector, waypoint.id())));
-    EXPECT_FALSE(waypoint.is_completed(agent_at({15, 5}, rooms.room_1, waypoint.id())));
 }

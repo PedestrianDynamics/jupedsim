@@ -9,5 +9,5 @@
 /// region's footprint, and only the outer boundary is taken (holes are ignored).
 struct AreaPiece {
     Poly polygon;
-    std::size_t region;
+    std::size_t region_id;
 };

@@ -41,7 +41,7 @@ def test_simulation_runs(warp_driver_corridor):
     """Test that a basic simulation runs without errors."""
     sim, room = warp_driver_corridor
     exit_area = shapely.Polygon([(19, 0), (20, 0), (20, 4), (19, 4)])
-    exit_id = sim.add_exit_stage(exit_area, region_id=room)
+    exit_id = sim.add_exit_stage([(exit_area, room)])
     journey_id = sim.add_journey(jps.JourneyDescription([exit_id]))
 
     aid = sim.add_agent(
@@ -64,7 +64,9 @@ def test_simulation_runs(warp_driver_corridor):
 def test_single_agent_straight_path(warp_driver_corridor):
     """Single agent with no neighbors follows straight path towards target."""
     sim, room = warp_driver_corridor
-    wp = sim.add_waypoint_stage((10, 2), 0.5, region_id=room)
+    wp = sim.add_waypoint_stage(
+        [(jps.circle_to_polygon(center=(10, 2), radius=0.5), room)]
+    )
     journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
     aid = sim.add_agent(
@@ -92,8 +94,8 @@ def test_two_agents_head_on_avoid(warp_driver_corridor):
     exit_left = shapely.Polygon([(0, 0), (1, 0), (1, 4), (0, 4)])
     exit_right = shapely.Polygon([(19, 0), (20, 0), (20, 4), (19, 4)])
 
-    exit_left_id = sim.add_exit_stage(exit_left, region_id=room)
-    exit_right_id = sim.add_exit_stage(exit_right, region_id=room)
+    exit_left_id = sim.add_exit_stage([(exit_left, room)])
+    exit_right_id = sim.add_exit_stage([(exit_right, room)])
 
     journey_right = sim.add_journey(jps.JourneyDescription([exit_right_id]))
     journey_left = sim.add_journey(jps.JourneyDescription([exit_left_id]))
@@ -136,7 +138,9 @@ def test_agent_parameters():
     )
     sim = jps.Simulation(model=jps.WarpDriverModel(), geometry=surface, dt=0.01)
 
-    wp = sim.add_waypoint_stage((5, 2), 0.5, region_id=room)
+    wp = sim.add_waypoint_stage(
+        [(jps.circle_to_polygon(center=(5, 2), radius=0.5), room)]
+    )
     journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
     aid = sim.add_agent(
@@ -166,7 +170,9 @@ def test_invalid_agent_state():
     )
     sim = jps.Simulation(model=jps.WarpDriverModel(), geometry=surface, dt=0.01)
 
-    wp = sim.add_waypoint_stage((5, 2), 0.5, region_id=room)
+    wp = sim.add_waypoint_stage(
+        [(jps.circle_to_polygon(center=(5, 2), radius=0.5), room)]
+    )
     journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
     with pytest.raises(jps.SimulationError, match="radius"):

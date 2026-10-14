@@ -7,7 +7,6 @@
 
 #include <gtest/gtest.h>
 
-#include <cmath>
 #include <limits>
 
 TEST(Polygon, PointIsInside)
@@ -74,19 +73,4 @@ TEST(Polygon, NonFiniteCoordinatesAreRejected)
         const std::vector<Point> points{{0, 0}, {bad, 0}, {1, 1}, {0, 1}};
         EXPECT_THROW(Polygon{points}, SimulationError) << bad;
     }
-}
-
-TEST(Polygon, FromCircleKeepsHasShortEdges)
-{
-    constexpr double target_length = 0.4;
-    for(const double radius : {0.05, 0.2, 1.0, 10.0}) {
-        const Poly circle = Polygon::from_circle({3, -2}, radius);
-        EXPECT_GE(circle.size(), 4u) << "radius " << radius;
-        for(auto edge = circle.edges_begin(); edge != circle.edges_end(); ++edge) {
-            EXPECT_LE(std::sqrt(edge->squared_length()), target_length) << "radius " << radius;
-        }
-    }
-    // Not finer than needed: the edges of a large circle come close to the limit.
-    const Poly large = Polygon::from_circle({3, -2}, 10.0);
-    EXPECT_GT(std::sqrt(large.edges_begin()->squared_length()), target_length - 0.05);
 }

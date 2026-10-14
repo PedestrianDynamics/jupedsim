@@ -67,24 +67,20 @@ simulation = jps.Simulation(
     ),
 )
 
-goal_1 = simulation.add_exit_stage(
-    [
-        (113.792, 106.106),
-        (113.502, 106.082),
-        (113.022, 103.660),
-        (114.308, 103.700),
-    ],
-    region_id=region,
-)
-goal_2 = simulation.add_exit_stage(
-    [
-        (109.723, 69.131),
-        (110.907, 68.319),
-        (109.883, 65.822),
-        (108.334, 67.112),
-    ],
-    region_id=region,
-)
+goal_1_area = [
+    (113.792, 106.106),
+    (113.502, 106.082),
+    (113.022, 103.660),
+    (114.308, 103.700),
+]
+goal_1 = simulation.add_exit_stage([(goal_1_area, region)])
+goal_2_area = [
+    (109.723, 69.131),
+    (110.907, 68.319),
+    (109.883, 65.822),
+    (108.334, 67.112),
+]
+goal_2 = simulation.add_exit_stage([(goal_2_area, region)])
 
 journey1 = jps.JourneyDescription([goal_1])
 journey2 = jps.JourneyDescription([goal_2])

@@ -25,21 +25,33 @@ def main():
             output_file=pathlib.Path("example2_out.sqlite"),
         ),
     )
-    stage_id = simulation.add_waypoint_stage((60, 50), 1, region_id=region)
+    stage_id = simulation.add_waypoint_stage(
+        [(jps.circle_to_polygon(center=(60, 50), radius=1), region)]
+    )
     exits = [
         simulation.add_exit_stage(
-            [(99, 40), (99, 60), (100, 60), (100, 40)], region_id=region
+            [([(99, 40), (99, 60), (100, 60), (100, 40)], region)]
         ),
         simulation.add_exit_stage(
-            [(99, 50), (99, 70), (100, 70), (100, 50)], region_id=region
+            [([(99, 50), (99, 70), (100, 70), (100, 50)], region)]
         ),
     ]
     waypoints = [
-        simulation.add_waypoint_stage((50, 50), 1, region_id=region),
-        simulation.add_waypoint_stage((60, 40), 1, region_id=region),
-        simulation.add_waypoint_stage((40, 40), 1, region_id=region),
-        simulation.add_waypoint_stage((40, 60), 1, region_id=region),
-        simulation.add_waypoint_stage((60, 60), 1, region_id=region),
+        simulation.add_waypoint_stage(
+            [(jps.circle_to_polygon(center=(50, 50), radius=1), region)]
+        ),
+        simulation.add_waypoint_stage(
+            [(jps.circle_to_polygon(center=(60, 40), radius=1), region)]
+        ),
+        simulation.add_waypoint_stage(
+            [(jps.circle_to_polygon(center=(40, 40), radius=1), region)]
+        ),
+        simulation.add_waypoint_stage(
+            [(jps.circle_to_polygon(center=(40, 60), radius=1), region)]
+        ),
+        simulation.add_waypoint_stage(
+            [(jps.circle_to_polygon(center=(60, 60), radius=1), region)]
+        ),
     ]
 
     short_journey = jps.JourneyDescription([waypoints[0], stage_id, exits[0]])

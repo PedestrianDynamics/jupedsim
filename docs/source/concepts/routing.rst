@@ -72,7 +72,7 @@ A Waypoint at :math:`(0.6, -1.4)` with an accepted distance of 2m can be added t
 
 .. code:: python
 
-    waypoint_id = simulation.add_waypoint_stage([0.6, -1.4], 2, region_id=region_id)
+    waypoint_id = simulation.add_waypoint_stage([(jps.circle_to_polygon(center=(0.6, -1.4), radius=2), region_id)])
 
 Exit
 ^^^^
@@ -98,11 +98,11 @@ An exit located in the polygon :math:`(-0.2, -1.9), (0.2, -1.9), (0.2, -1.7), (-
 .. code:: python
 
     # create exit from coordinates
-    exit_id = simulation.add_exit_stage([(-0.2, -1.9), (0.2, -1.9), (0.2, -1.7), (-0.2, -1.7)], region_id=region_id)
+    exit_id = simulation.add_exit_stage([([(-0.2, -1.9), (0.2, -1.9), (0.2, -1.7), (-0.2, -1.7)], region_id)])
 
     # create exit from shapely.Polygon
     exit_polygon = shapely.Polygon([(-0.2, -1.9), (0.2, -1.9), (0.2, -1.7), (-0.2, -1.7)])
-    exit_id = simulation.add_exit_stage(exit_polygon, region_id=region_id)
+    exit_id = simulation.add_exit_stage([(exit_polygon, region_id)])
 
 .. note::
 
