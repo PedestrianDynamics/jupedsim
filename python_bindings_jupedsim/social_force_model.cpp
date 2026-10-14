@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "social_force_model.hpp"
 
+#include "conversion.hpp"
 #include "operational_model.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep
 
@@ -12,14 +13,74 @@ namespace py = pybind11;
 
 void init_social_force_model(py::module_& m)
 {
-    py::class_<SocialForceModel, OperationalModel, py::smart_holder>(m, "SocialForceModel")
-        .def(
-            py::init<double, double>(),
-            py::kw_only(),
-            py::arg("body_force") = 120000,
-            py::arg("friction") = 240000);
+    py::class_<SocialForceModel, OperationalModel, py::smart_holder> model(m, "SocialForceModel");
+    model.doc() = clean_doc(R"(
+        Social Force Model.
+
+        See the scientific publication for more details about this model:
+        https://doi.org/10.1038/35035023
+
+        The model-level parameters (``body_force`` and ``friction``) are carried by
+        the model instance, which is passed to the simulation:
+
+        .. code:: python
+
+            sim = jupedsim.Simulation(
+                model=jupedsim.SocialForceModel(
+                    body_force=120000, friction=240000
+                ),
+                geometry=...,
+            )
+            sim.add_agent(
+                journey_id=journey_id,
+                stage_id=stage_id,
+                position=(1.0, 1.0),
+                state=jupedsim.SocialForceModelState(mass=75.0),
+                region_id=region_id,
+            )
+
+        .. warning::
+
+            The model instance is consumed by the ``Simulation`` constructor and must
+            not be reused afterwards.
+
+        Args:
+            body_force: Strength with which an agent is influenced by pushing forces
+                from obstacles and neighbors in its direct proximity [kg s^-2] (k).
+            friction: Strength with which an agent is influenced by frictional forces
+                from obstacles and neighbors in its direct proximity [kg m^-1 s^-1]
+                (kappa).
+    )");
+    model.def(
+        py::init<double, double>(),
+        py::kw_only(),
+        py::arg("body_force") = 120000,
+        py::arg("friction") = 240000);
+
     const SocialForceModel::State d{};
-    py::class_<SocialForceModel::State>(m, "SocialForceModelState")
+    py::class_<SocialForceModel::State> state(m, "SocialForceModelState");
+    state.doc() = clean_doc(R"(
+        Per-agent state of the Social Force Model.
+
+        All arguments are keyword-only with sensible defaults, and every argument is
+        also a read/write attribute of the same name.
+
+        Args:
+            velocity: Current velocity of the agent [m/s].
+            mass: Mass of the agent [kg] (m).
+            desired_speed: Desired speed of the agent [m/s] (v0).
+            reaction_time: Reaction time of the agent [s] (tau).
+            agent_scale: How strongly the agent is influenced by pushing forces from
+                neighbors [N] (A).
+            obstacle_scale: How strongly the agent is influenced by pushing forces
+                from obstacles [N] (A).
+            force_distance: How much the distance between the agent and obstacles or
+                neighbors influences the social forces [m] (B).
+            radius: Radius of the space the agent occupies [m] (r).
+
+        The read-only attribute ``orientation`` is the normalized ``velocity``.
+    )");
+    state
         .def(
             py::init([](Point velocity,
                         double mass,

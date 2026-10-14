@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "collision_free_speed_model_v2.hpp"
 
+#include "conversion.hpp"
 #include "operational_model.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep
 
@@ -12,11 +13,61 @@ namespace py = pybind11;
 
 void init_collision_free_speed_model_v2(py::module_& m)
 {
-    py::class_<CollisionFreeSpeedModelV2, OperationalModel, py::smart_holder>(
-        m, "CollisionFreeSpeedModelV2")
-        .def(py::init<>());
+    py::class_<CollisionFreeSpeedModelV2, OperationalModel, py::smart_holder> model(
+        m, "CollisionFreeSpeedModelV2");
+    model.doc() = clean_doc(R"(
+        Collision Free Speed Model V2.
+
+        Variant of the Collision Free Speed Model (https://arxiv.org/abs/1512.05597)
+        in which all repulsion parameters are per-agent instead of global.
+
+        The model has no model-level parameters; all parameters are per agent, see
+        :class:`~jupedsim.CollisionFreeSpeedModelV2State`. The model instance is
+        passed to the simulation:
+
+        .. code:: python
+
+            sim = jupedsim.Simulation(
+                model=jupedsim.CollisionFreeSpeedModelV2(),
+                geometry=...,
+            )
+            sim.add_agent(
+                journey_id=journey_id,
+                stage_id=stage_id,
+                position=(1.0, 1.0),
+                state=jupedsim.CollisionFreeSpeedModelV2State(strength_neighbor_repulsion=9.0),
+                region_id=region_id,
+            )
+
+        .. warning::
+
+            The model instance is consumed by the ``Simulation`` constructor and must
+            not be reused afterwards.
+    )");
+    model.def(py::init<>());
+
     const CollisionFreeSpeedModelV2::State d{};
-    py::class_<CollisionFreeSpeedModelV2::State>(m, "CollisionFreeSpeedModelV2State")
+    py::class_<CollisionFreeSpeedModelV2::State> state(m, "CollisionFreeSpeedModelV2State");
+    state.doc() = clean_doc(R"(
+        Per-agent state of the Collision Free Speed Model V2.
+
+        All arguments are keyword-only with sensible defaults, and every argument is
+        also a read/write attribute of the same name.
+
+        Args:
+            orientation: Unit vector the agent faces.
+            strength_neighbor_repulsion: Strength of the repulsion from neighbors.
+            range_neighbor_repulsion: Range of the repulsion from neighbors [m].
+            strength_geometry_repulsion: Strength of the repulsion from geometry
+                boundaries.
+            range_geometry_repulsion: Range of the repulsion from geometry boundaries
+                [m].
+            time_gap: Time constant that describes how fast a pedestrian closes gaps
+                [s].
+            desired_speed: Maximum (free) walking speed of the agent [m/s].
+            radius: Radius of the agent [m].
+    )");
+    state
         .def(
             py::init([](Point orientation,
                         double strength_neighbor_repulsion,
