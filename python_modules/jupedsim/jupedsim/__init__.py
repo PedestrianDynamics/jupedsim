@@ -58,7 +58,6 @@ from jupedsim.pyjupedsim import (
     set_warning_callback,
     start_trace_event,
 )
-from jupedsim.recording import Recording, RecordingAgent, RecordingFrame
 from jupedsim.routing import RoutingEngine
 from jupedsim.serialization import TrajectoryWriter
 from jupedsim.simulation import Simulation
@@ -109,9 +108,6 @@ __all__ = [
     "NegativeValueError",
     "NeighborView",
     "OverlappingCirclesError",
-    "Recording",
-    "RecordingAgent",
-    "RecordingFrame",
     "RoutingEngine",
     "Simulation",
     "SimulationError",
