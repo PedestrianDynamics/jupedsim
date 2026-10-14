@@ -47,14 +47,14 @@ pub enum MultiRegionError {
         x: f64,
         y: f64,
     },
-    /// The destination cannot be reached from the queried point: its region,
-    /// or the part of it the point lies in, has no way there.
-    Unreachable {
-        region: usize,
-        dest: usize,
-    },
     /// Propagation across seams kept improving past its iteration budget.
     NotConverged,
+    /// Some walkable cells cannot be reached from the others: the geometry
+    /// is not connected, or a passage is narrower than a cell.
+    ContainsUnreachableWalkableCells,
+    /// A broken internal invariant: a bug in this crate, not in the input.
+    /// Returned instead of panicking, which would abort the C++ caller.
+    Internal(String),
 }
 
 impl fmt::Display for MultiRegionError {
@@ -66,13 +66,14 @@ impl fmt::Display for MultiRegionError {
             Self::NotRoutable { region, x, y } => {
                 write!(f, "({x}, {y}) is not walkable in region {region}")
             }
-            Self::Unreachable { region, dest } => {
+            Self::NotConverged => write!(f, "propagation across seams did not converge"),
+            Self::Internal(msg) => write!(f, "internal error: {msg}"),
+            Self::ContainsUnreachableWalkableCells => {
                 write!(
                     f,
-                    "destination {dest} cannot be reached from there in region {region}"
+                    "some walkable cells could not be reached, you can try reducing the cell size."
                 )
             }
-            Self::NotConverged => write!(f, "propagation across seams did not converge"),
         }
     }
 }
@@ -259,13 +260,15 @@ impl MultiRegionFloorfield {
             })
             .collect();
 
-        Ok(Self {
+        let ff = Self {
             spec,
             regions,
             seams,
             out_seams,
             destinations: Vec::new(),
-        })
+        };
+        ff.check_reachability()?;
+        Ok(ff)
     }
 
     // ── Queries ─────────────────────────────────────────────────────────────
@@ -343,7 +346,7 @@ impl MultiRegionFloorfield {
     }
 
     /// Travel time to the destination for every cell of `region`.
-    /// Unreachable cells are infinite.
+    /// Obstacle cells are infinite.
     pub fn travel_times(&mut self, region: usize, dest: usize) -> Result<Vec<f64>> {
         self.region(region)?;
         let sol = self.solution(dest)?;
@@ -378,8 +381,7 @@ impl MultiRegionFloorfield {
     ///
     /// Errors: non-finite coordinates (`InvalidInput`); unknown region or
     /// destination; a point outside the region's grid or without a walkable
-    /// cell near it (`NotRoutable`); a point from which the destination cannot
-    /// be reached (`Unreachable`). Solves the destination on first use, which
+    /// cell near it (`NotRoutable`). Solves the destination on first use, which
     /// can fail with `NotConverged`.
     pub fn direction(&mut self, region: usize, x: f64, y: f64, dest: usize) -> Result<(f64, f64)> {
         let g = self.covered(region, x, y)?;
@@ -399,24 +401,31 @@ impl MultiRegionFloorfield {
             None => {}
         }
 
-        let unreachable = MultiRegionError::Unreachable { region, dest };
+        // `new` checked that every walkable cell is reachable, so every
+        // region has a field, `cell` a finite time in it, and a lower
+        // neighbour outside the destination. A miss is a bug: report it
+        // rather than panic across the FFI boundary.
+        let no_descent = || {
+            MultiRegionError::Internal(format!(
+                "no way down from ({x}, {y}) in region {region} to destination {dest}"
+            ))
+        };
         let sol = d.solution.as_ref().expect("solved above");
-        let query = sol.query[region].as_ref().ok_or(unreachable.clone())?;
+        let query = sol.query[region].as_ref().ok_or_else(no_descent)?;
         if !query[cell as usize].is_finite() {
-            return Err(unreachable);
+            return Err(no_descent());
         }
         let (row, col) = g.row_col(cell);
         let (gx, gy) = geometry::sobel_gradient(&g.grid, row, col, query);
         if gx.hypot(gy) > 1e-12 {
             return Ok(unit(-gx, -gy));
         }
-        steepest_descent(g, query, cell).ok_or(unreachable)
+        steepest_descent(g, query, cell).ok_or_else(no_descent)
     }
 
-    /// Travel time from (x, y) in `region` to `dest`: zero inside it, infinite
-    /// where it cannot be reached. Taken at the same cell as `direction`, with
-    /// the same errors except `Unreachable`. Solves the destination on first
-    /// use.
+    /// Travel time from (x, y) in `region` to `dest`: zero inside it. Taken at
+    /// the same cell as `direction`, with the same errors. Solves the
+    /// destination on first use.
     pub fn travel_time(&mut self, region: usize, x: f64, y: f64, dest: usize) -> Result<f64> {
         let g = self.covered(region, x, y)?;
         let cell = nearest_walkable(&self.spec, g, [x, y], None)
@@ -494,6 +503,42 @@ impl MultiRegionFloorfield {
             cells,
             kind: SourceKind::Area,
         })
+    }
+
+    /// Fails unless every walkable cell can be reached from every other:
+    /// floods the field from the first walkable cell found.
+    fn check_reachability(&self) -> Result<()> {
+        let (test_region, test_cell) = self
+            .regions
+            .iter()
+            .enumerate()
+            .find_map(|(r, g)| {
+                (0..g.grid.cell_count() as u32)
+                    .find(|&c| g.walkable(c))
+                    .map(|c| (r, c))
+            })
+            .ok_or(MultiRegionError::InvalidInput(
+                "no walkable cell in any region".into(),
+            ))?;
+        let mut dest_cells = vec![Vec::new(); self.regions.len()];
+        dest_cells[test_region].push(test_cell);
+        let test_solution = self.solve(&dest_cells)?;
+
+        // lambda function to check per region and per cell that a cell that is walkable has been solved to a finite value.
+        let walkable_cell_is_unreached = |r: usize, c: u32| -> bool {
+            self.regions[r].walkable(c)
+                && test_solution.query[r]
+                    .as_ref()
+                    .is_none_or(|q| q[c as usize].is_infinite())
+        };
+        // we iterate over all regions and then all cells within said region, applying the lambda from above.
+        let any_unreached = (0..self.regions.len()).any(|r| {
+            (0..self.regions[r].grid.cell_count() as u32).any(|c| walkable_cell_is_unreached(r, c))
+        });
+        if any_unreached {
+            return Err(MultiRegionError::ContainsUnreachableWalkableCells);
+        }
+        Ok(())
     }
 
     fn push_destination(&mut self, sources: Vec<Source>) -> usize {
@@ -1330,39 +1375,35 @@ mod tests {
         }
     }
 
+    /// Two regions without a seam: the second is never reached, so the field
+    /// is not built.
     #[test]
-    fn an_unreachable_region_has_no_field_and_no_direction() {
+    fn disconnected_regions_fail_construction() {
         let regions = vec![region(rect(0., 0., 5., 5.)), region(rect(10., 0., 15., 5.))];
-        let mut ff = build(regions, vec![]).unwrap();
-        let dest = ff.add_point_destination(0, 2.0, 2.0).unwrap();
-        assert!(ff
-            .travel_times(1, dest)
-            .unwrap()
-            .iter()
-            .all(|t| t.is_infinite()));
         assert_eq!(
-            ff.direction(1, 12.0, 2.0, dest),
-            Err(MultiRegionError::Unreachable { region: 1, dest })
+            build(regions, vec![]).err(),
+            Some(MultiRegionError::ContainsUnreachableWalkableCells)
         );
     }
 
-    /// Two rooms in one region, joined by a passage narrower than a cell: no
-    /// cell centre lies in it, so the far room is cut off although its region
-    /// has a field.
+    /// Two rooms in one region, joined by a passage 0.1 m wide: narrower than
+    /// a cell, so no cell centre lies in it and the far room is cut off.
     #[test]
-    fn a_pocket_cut_off_within_a_region_has_no_direction() {
+    fn a_passage_narrower_than_a_cell_fails_construction() {
         let outer = ring(&[
             0., 0., 5., 0., 5., 1.95, 6., 1.95, 6., 0., 11., 0., 11., 4., 6., 4., 6., 2.05, 5.,
             2.05, 5., 4., 0., 4.,
         ]);
-        let mut ff = build(vec![region(outer)], vec![]).unwrap();
-        let dest = ff.add_point_destination(0, 1.0, 2.0).unwrap();
-        assert!(time_at(&mut ff, 0, 3.0, 2.0, dest).is_finite());
-        assert!(ff.direction(0, 3.0, 2.0, dest).is_ok());
         assert_eq!(
-            ff.direction(0, 9.0, 2.0, dest),
-            Err(MultiRegionError::Unreachable { region: 0, dest })
+            build(vec![region(outer)], vec![]).err(),
+            Some(MultiRegionError::ContainsUnreachableWalkableCells)
         );
+    }
+
+    #[test]
+    fn a_connected_geometry_passes_the_reachability_check() {
+        assert_eq!(whole_corridor().check_reachability(), Ok(()));
+        assert_eq!(split_corridor().check_reachability(), Ok(()));
     }
 
     #[test]

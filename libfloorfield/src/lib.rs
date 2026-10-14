@@ -89,6 +89,7 @@ mod ffi {
         type MultiRegionFloorfield;
 
         /// Floor fields over the regions of `graph`, which is checked first.
+        /// Throws if some walkable cell cannot be reached from the others.
         /// The field keeps no reference to the graph.
         fn new_multi_region_floorfield(
             graph: &RegionGraph,
@@ -123,8 +124,8 @@ mod ffi {
         /// Which way to walk from `p` in `region` towards `dest`: a unit
         /// vector downhill, or the zero vector inside an area destination
         /// (inside a point destination's cell: towards the point, zero exactly
-        /// on it). Throws where the destination cannot be reached from `p`.
-        /// Solves the destination on first use. The caller tracks which region
+        /// on it). Throws where `p` is not routable. Solves the destination on
+        /// first use. The caller tracks which region
         /// a moving agent is in, also across seams (the geometry does).
         fn region_direction(
             self: &mut MultiRegionFloorfield,
@@ -132,9 +133,8 @@ mod ffi {
             p: Point2d,
             dest: usize,
         ) -> Result<Point2d>;
-        /// Travel time from `p` in `region` to `dest`: zero inside it,
-        /// infinite where it cannot be reached. Solves the destination on
-        /// first use.
+        /// Travel time from `p` in `region` to `dest`: zero inside it. Solves
+        /// the destination on first use.
         #[cxx_name = "travel_time"]
         fn travel_time_ffi(
             self: &mut MultiRegionFloorfield,
@@ -142,8 +142,8 @@ mod ffi {
             p: Point2d,
             dest: usize,
         ) -> Result<f64>;
-        /// Travel time to `dest` for every cell of `region`'s grid, infinite
-        /// where it cannot be reached. Solves the destination on first use.
+        /// Travel time to `dest` for every cell of `region`'s grid, infinite on
+        /// obstacles. Solves the destination on first use.
         fn region_travel_times(
             self: &mut MultiRegionFloorfield,
             region: usize,
