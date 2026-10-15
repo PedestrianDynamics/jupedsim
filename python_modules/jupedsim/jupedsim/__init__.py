@@ -60,7 +60,6 @@ from jupedsim.pyjupedsim import (
     set_warning_callback,
     start_trace_event,
 )
-from jupedsim.routing import RoutingEngine
 from jupedsim.serialization import TrajectoryWriter
 from jupedsim.simulation import Simulation
 from jupedsim.sqlite_serialization import SqliteTrajectoryWriter
@@ -110,7 +109,6 @@ __all__ = [
     "NegativeValueError",
     "NeighborView",
     "OverlappingCirclesError",
-    "RoutingEngine",
     "Simulation",
     "SimulationError",
     "SocialForceModel",

@@ -121,3 +121,64 @@ def test_fixed_target_several_sources(engine):
     # a different source reuses the same target and gets its own way there
     other = engine.get_shortest_path((13, 13, 15), target)
     assert other != first
+
+
+def _path_length(path):
+    return sum(math.dist(a, b) for a, b in zip(path, path[1:]))
+
+
+def test_simple_path():
+    surface = jps.WalkableSurface()
+    surface.add_region(boundary=[(0, 0), (0, 10), (10, 10), (10, 0)])
+    engine = jps.SurfaceMeshShortestPathRoutingEngine(surface.create_geometry())
+
+    # Ensure it does not cross the triangles so that the path length is 2
+    path = engine.get_shortest_path((1, 1, 0), (4, 1, 0))
+    assert len(path) == 2
+    # distance is simple as we only move along the x-axis
+    assert math.isclose(_path_length(path), 3)
+
+
+def _load_geometry_from_wkt(filename: str) -> jps.Geometry:
+    """Load a WKT file given relative to the repository root."""
+    repo_root = Path(__file__).parents[3]
+    wkt = shapely.from_wkt((repo_root / filename).read_text(encoding="utf-8"))
+    surface = jps.WalkableSurface()
+    surface.add_region(polygon=shapely.union_all(shapely.get_parts(wkt)))
+    return surface.create_geometry()
+
+
+ROUTE_LENGTH_CONTINUITY = [
+    {
+        "test_name": "corner_with_shortcut",
+        "description": "Same starting point, but end points differ just 0.2 on y axis",
+        "wkt_path": "examples/geometry/corner_with_shortcut.wkt",
+        "path1": [(11.43, 0.44, 0), (27.93, 15.0, 0)],
+        "path2": [(11.43, 0.44, 0), (27.93, 15.2, 0)],
+        "max_diff": 0.2,
+    },
+    {
+        "test_name": "corner_with_shortcut2",
+        "description": "Same starting point, but end points differ just 0.01 on y axis",
+        "wkt_path": "examples/geometry/corner_with_shortcut.wkt",
+        "path1": [(11.80, 1.00, 0), (28.50, 13.54, 0)],
+        "path2": [(11.80, 1.00, 0), (28.50, 13.55, 0)],
+        "max_diff": 0.01,
+    },
+]
+
+
+@pytest.mark.parametrize(
+    "test_entry",
+    ROUTE_LENGTH_CONTINUITY,
+    ids=lambda params: params["test_name"],
+)
+def test_route_length_follows_the_target(test_entry):
+    geometry = _load_geometry_from_wkt(test_entry["wkt_path"])
+    engine = jps.SurfaceMeshShortestPathRoutingEngine(geometry)
+
+    path1 = engine.get_shortest_path(*test_entry["path1"])
+    path2 = engine.get_shortest_path(*test_entry["path2"])
+
+    distance_diff = math.fabs(_path_length(path2) - _path_length(path1))
+    assert distance_diff <= test_entry["max_diff"]
