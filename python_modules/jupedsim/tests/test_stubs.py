@@ -8,7 +8,6 @@ MODULE = "jupedsim.pyjupedsim"
 # Every bound class has metaclass pybind11_builtins.pybind11_type, which the
 # stubs do not declare.
 CLASSES = [
-    "Agent",
     "AgentStep",
     "AgentView",
     "AnticipationVelocityModel",
@@ -39,6 +38,7 @@ CLASSES = [
     "WarpDriverModel",
     "WarpDriverModelState",
     "WaypointStage",
+    "_Agent",
     "_CustomModelState",
     "_PythonModel",
     "_Simulation",
@@ -47,7 +47,6 @@ CLASSES = [
 # Classes without a bound constructor inherit pybind11_object.__init__(*args,
 # **kwargs), which only raises; stubgen emits no __init__ for them.
 CLASSES_WITHOUT_CONSTRUCTOR = [
-    "Agent",
     "AgentStep",
     "AgentView",
     "BoundaryIndex",
@@ -61,6 +60,7 @@ CLASSES_WITHOUT_CONSTRUCTOR = [
     "Transition",
     "WallView",
     "WaypointStage",
+    "_Agent",
 ]
 
 
