@@ -2,6 +2,7 @@
 import json
 import logging
 import pathlib
+import tempfile
 from math import isclose
 from pathlib import Path
 from typing import List, Optional
@@ -110,6 +111,79 @@ def match_pattern(patterns, available_layers):
 
 console = Console()
 app = typer.Typer()
+
+
+def _selftest(dxf_dir: Path) -> int:
+    """Convert every DXF file in dxf_dir into a temporary directory.
+
+    Prints one PASS/FAIL line per file and returns the number of failures;
+    an empty directory counts as one failure so the check cannot pass
+    vacuously.
+    """
+    dxf_files = sorted(dxf_dir.glob("*.dxf"))
+    if not dxf_files:
+        print(f"FAIL no DXF files found in {dxf_dir}", flush=True)
+        return 1
+    failures = 0
+    with tempfile.TemporaryDirectory(prefix="dxf2wkt-selftest-") as tmp:
+        for dxf_file in dxf_files:
+            try:
+                convert(
+                    input=dxf_file,
+                    output=Path(tmp) / dxf_file.with_suffix(".wkt").name,
+                    dxf_output=None,
+                    walkable=None,
+                    obstacles=[],
+                    exits=[],
+                    distributions=[],
+                    waypoints=[],
+                    journeys=[],
+                    quad_segments=4,
+                )
+            except typer.Exit as e:
+                if e.exit_code != 0:
+                    failures += 1
+                    print(
+                        f"FAIL {dxf_file.name} (exit code {e.exit_code})",
+                        flush=True,
+                    )
+                    continue
+            except Exception as e:
+                failures += 1
+                print(f"FAIL {dxf_file.name}: {e}", flush=True)
+                continue
+            print(f"PASS {dxf_file.name}", flush=True)
+    print(
+        f"{len(dxf_files) - failures}/{len(dxf_files)} DXF files converted",
+        flush=True,
+    )
+    return failures
+
+
+@app.callback(invoke_without_command=True)
+def main(
+    ctx: typer.Context,
+    selftest: bool = typer.Option(
+        False,
+        "--selftest",
+        help=(
+            "Convert every DXF file under examples/geometry/dxf and exit "
+            "with 1 if any conversion fails."
+        ),
+    ),
+):
+    """Convert DXF geometry files to WKT (see `rich-help`)."""
+    if selftest:
+        dxf_dir = (
+            Path(__file__).resolve().parents[1]
+            / "examples"
+            / "geometry"
+            / "dxf"
+        )
+        raise typer.Exit(1 if _selftest(dxf_dir) else 0)
+    if ctx.invoked_subcommand is None:
+        console.print(ctx.get_help())
+        raise typer.Exit(1)
 
 
 @app.command()

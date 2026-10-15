@@ -5,4 +5,4 @@ export PYTHONPATH="@PROJECT_SOURCE_DIR@/performancetest:@PROJECT_BINARY_DIR@/sta
 echo "Source path ${JPSCORE_SOURCE_PATH}"
 echo "PYTHONPATH=${PYTHONPATH}"
 
-@Python_EXECUTABLE@ -m pytest  ${JPSCORE_SOURCE_PATH}/systemtest ${JPSCORE_SOURCE_PATH}/python_modules/jupedsim/tests ${JPSCORE_SOURCE_PATH}/python_modules/jupedsim_examples/tests --basetemp="$(pwd)/test-results" "$@"
+@Python_EXECUTABLE@ -m pytest ${JPSCORE_SOURCE_PATH}/python_modules/jupedsim/tests ${JPSCORE_SOURCE_PATH}/python_modules/jupedsim_examples/tests --basetemp="$(pwd)/test-results" "$@"

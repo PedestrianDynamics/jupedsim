@@ -22,3 +22,10 @@ ruff~=0.17.0
 pre-commit~=4.5
 mypy~=2.3
 types-shapely~=2.1
+# deps of scripts/dxf2wkt.py: `ninja tests` runs its `--selftest` (CMake
+# target scripttests); the jupedsim package itself does not need them
+ezdxf~=1.4
+geopandas~=1.2
+matplotlib~=3.11
+rich~=15.0
+typer~=0.27
