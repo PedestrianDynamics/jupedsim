@@ -19,7 +19,7 @@ from jupedsim import (
 )
 
 MESH = (
-    Path(__file__).parent.parent
+    Path(__file__).parents[3]
     / "examples"
     / "geometry"
     / "multi_level_u_stair.obj"

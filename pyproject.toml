@@ -75,6 +75,7 @@ sdist.include = [
 ]
 sdist.exclude = [
     "/libfloorfield/target/",
+    "/python_modules/jupedsim/tests/",
     "__pycache__/",
     ".git",
     "*.pdf",

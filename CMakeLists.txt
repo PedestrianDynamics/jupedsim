@@ -222,14 +222,19 @@ if(BUILD_TESTS)
         @ONLY
     )
     add_custom_target(tests
-        DEPENDS pythontests unittests
+        DEPENDS pythontests unittests scripttests
     )
     add_custom_target(pythontests
         COMMENT "Running system tests"
         COMMAND ${pytest-wrapper-out} -vv -s
-                --basetemp=${PROJECT_BINARY_DIR}/systemtest-out
+                --basetemp=${PROJECT_BINARY_DIR}/pythontests-out
                 --junit-xml=result-pythontests.xml
         DEPENDS pyjupedsim pyjupedsim_stubs
+        USES_TERMINAL
+    )
+    add_custom_target(scripttests
+        COMMENT "Running script self-tests"
+        COMMAND ${Python_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/dxf2wkt.py --selftest
         USES_TERMINAL
     )
     set(unittests_dependency_list libsimulator-unittests libfloorfield-unittests)
