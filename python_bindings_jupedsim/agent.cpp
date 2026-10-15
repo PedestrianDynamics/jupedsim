@@ -22,7 +22,7 @@ void init_agent(py::module_& m)
     // callback. They must never be stored across Simulation.iterate(). This is
     // not the Python-visible Agent; the public Agent is a handle that resolves
     // this wrapper freshly on every attribute access.
-    py::class_<GenericAgent>(m, "Agent")
+    py::class_<GenericAgent>(m, "_Agent")
         .def_property_readonly("id", [](const GenericAgent& agent) { return agent.id.get_id(); })
         .def_property_readonly(
             "journey_id", [](const GenericAgent& agent) { return agent.journey_id.get_id(); })
