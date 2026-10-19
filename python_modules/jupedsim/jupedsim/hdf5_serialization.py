@@ -102,11 +102,11 @@ class Hdf5TrajectoryWriter(TrajectoryWriter):
         self._output_file: Path = output_file
         self._every_nth_frame: int = every_nth_frame
         self._records_to_cache: int = 2**16 // self._trajectory_dtype().itemsize
-        self._trajectory_buffer: npt.NDArray[typing.Any] = np.empty(
+        self._trajectory_buffer: npt.NDArray[typing.Any] = np.zeros(
             self._records_to_cache, dtype=self._trajectory_dtype()
         )
         self._record_idx: int = 0
-        self._frame_offset_buffer: npt.NDArray[typing.Any] = np.empty(
+        self._frame_offset_buffer: npt.NDArray[typing.Any] = np.zeros(
             1024, dtype=np.dtype("<u8")
         )
         self._is_writing: bool = False
