@@ -265,16 +265,6 @@ if(BUILD_TESTS)
     )
 endif()
 
-if(UNIX)
-    set(performancetests-wrapper-in ${PROJECT_SOURCE_DIR}/cmake_templates/run-performancetests.unix.in)
-    set(performancetests-wrapper-out ${PROJECT_BINARY_DIR}/run-performancetests)
-    configure_file(
-        ${performancetests-wrapper-in}
-        ${performancetests-wrapper-out}
-        @ONLY
-    )
-endif()
-
 ################################################################################
 # Add libraries / executables
 ################################################################################
