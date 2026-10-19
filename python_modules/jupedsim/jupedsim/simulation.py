@@ -97,8 +97,9 @@ class Simulation:
             dt: Iteration step size in seconds. It is recommended to leave this at its default
                 value.
             trajectory_writer: Any object implementing the TrajectoryWriter interface. JuPedSim
-                provides a writer that outputs trajectory data in a sqlite database. If you want
-                other formats such as CSV you need to provide your own custom implementation.
+                provides :class:`~jupedsim.Hdf5TrajectoryWriter`, which writes HDF5 files. If
+                you want other formats such as CSV you need to provide your own custom
+                implementation.
         """
         if isinstance(model, OperationalModel):
             the_model = model

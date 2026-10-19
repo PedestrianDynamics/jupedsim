@@ -25,11 +25,11 @@ def main():
     surface = jps.WalkableSurface()
     region = surface.add_region(polygon=room1.union(room2).union(corridor))
     exit_polygon = Polygon([(24, 4.5), (25, 4.5), (25, 5.5), (24, 5.5)])
-    trajectory_file = "example_7.sqlite"
+    trajectory_file = "example_7.h5"
     simulation = jps.Simulation(
         model=jps.AnticipationVelocityModel(),
         geometry=surface,
-        trajectory_writer=jps.SqliteTrajectoryWriter(
+        trajectory_writer=jps.Hdf5TrajectoryWriter(
             output_file=pathlib.Path(trajectory_file)
         ),
     )

@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
-"""HDF5 trajectory writer, schema version 2.
+"""HDF5 trajectory writer and loader, schema version 2.
 
 File Layout:
 ```txt
@@ -60,6 +60,7 @@ opening it with h5py.
 
 from __future__ import annotations
 
+import types
 import typing
 from datetime import datetime, timezone
 from pathlib import Path
@@ -101,9 +102,9 @@ class Hdf5TrajectoryWriter(TrajectoryWriter):
             raise TrajectoryWriter.Exception("'every_nth_frame' has to be > 0")
         self._output_file: Path = output_file
         self._every_nth_frame: int = every_nth_frame
-        self._records_to_cache: int = 2**16 // self._trajectory_dtype().itemsize
+        self._records_to_cache: int = 2**16 // self.trajectory_dtype().itemsize
         self._trajectory_buffer: npt.NDArray[typing.Any] = np.zeros(
-            self._records_to_cache, dtype=self._trajectory_dtype()
+            self._records_to_cache, dtype=self.trajectory_dtype()
         )
         self._record_idx: int = 0
         self._frame_offset_buffer: npt.NDArray[typing.Any] = np.zeros(
@@ -119,6 +120,8 @@ class Hdf5TrajectoryWriter(TrajectoryWriter):
         once before the trajectory data can be written. E.g. Meta information
         such as frame rate etc...
 
+        Args:
+            simulation: Simulation object to query for data.
         """
         if self._is_writing:
             raise TrajectoryWriter.Exception(
@@ -139,7 +142,11 @@ class Hdf5TrajectoryWriter(TrajectoryWriter):
         self._file.flush()
 
     def _write_header(self, simulation: Simulation) -> None:
-        """Write the root attributes, create the datasets and store the geometry."""
+        """Write the root attributes, create the datasets and store the geometry.
+
+        Args:
+            simulation: Simulation object to query.
+        """
         self._file.attrs["schema_version"] = SCHEMA_VERSION
         self._file.attrs["producer"] = "JuPedSim"
         self._file.attrs["producer_version"] = get_build_info().library_version
@@ -151,7 +158,7 @@ class Hdf5TrajectoryWriter(TrajectoryWriter):
             "trajectory",
             shape=(0,),
             maxshape=(None,),
-            dtype=self._trajectory_dtype(),
+            dtype=self.trajectory_dtype(),
             chunks=self._records_to_cache,
             shuffle=True,
             **hdf5plugin.Zstd(clevel=3),  # pyright: ignore[reportUnknownArgumentType]
@@ -182,10 +189,7 @@ class Hdf5TrajectoryWriter(TrajectoryWriter):
             (idx, geo.polygon(region_id=idx).as_wkt())
             for idx in range(geo.region_count())
         ]
-        regions_dt = np.dtype(
-            [("id", "<u8"), ("wkt", h5py.string_dtype())], align=True
-        )
-        regions_arr = np.array(regions, dtype=regions_dt)
+        regions_arr = np.array(regions, dtype=self.regions_dtype())
         regions_ds = self._file.create_dataset("regions", data=regions_arr)
         regions_ds.attrs["id"] = "Id of the region."
         regions_ds.attrs["wkt"] = (
@@ -211,6 +215,8 @@ class Hdf5TrajectoryWriter(TrajectoryWriter):
         This method is intended to handle serialization of the trajectory data
         of a single iteration.
 
+        Args:
+            simulation: Simulation object to query.
         """
         if not self._is_writing:
             raise TrajectoryWriter.Exception(
@@ -288,7 +294,7 @@ class Hdf5TrajectoryWriter(TrajectoryWriter):
             self._file.close()
 
     @staticmethod
-    def _trajectory_dtype() -> "np.dtype":
+    def trajectory_dtype() -> "np.dtype":
         """Compound dtype of the /trajectory dataset."""
         return np.dtype(
             [
@@ -303,10 +309,167 @@ class Hdf5TrajectoryWriter(TrajectoryWriter):
         )
 
     @staticmethod
+    def regions_dtype() -> "np.dtype":
+        """Compound dtype of the /regions dataset."""
+        return np.dtype(
+            [("id", "<u8"), ("wkt", h5py.string_dtype())], align=True
+        )
+
+    @staticmethod
     def _append(
         dset: h5py.Dataset, data: npt.NDArray[typing.Any], count: int
     ) -> None:
+        """Append data to a Hdf5 dataset.
+
+        Args:
+            dset: dataset to append to
+            data: data to append
+            count: number of entries
+        """
         n: int = dset.shape[0]
         dset.resize(n + count, axis=0)
         dset[n:] = data[:count]
         dset.file.flush()
+
+
+class Hdf5TrajectoryLoader:
+    """HDF5 trajectory loader.
+
+    Loads files written by :class:`Hdf5TrajectoryWriter`. The file is opened
+    read-only on construction and validated against the schema; use
+    :meth:`close` or a ``with`` block to release it.
+    """
+
+    class Error(Exception):
+        """Type for all errors raised while loading a trajectory from an HDF5 file."""
+
+    def __init__(self, path: Path) -> None:
+        """Opens and validates an HDF5 trajectory file.
+
+        Args:
+            path: path to the hdf5 file to load.
+
+        Raises:
+            Hdf5TrajectoryLoader.Error: if the file does not follow the schema.
+        """
+        self._file: h5py.File = h5py.File(str(path), "r")
+        try:
+            self._validate()
+        except Exception:
+            # Don't leak the open handle (and the HDF5 file lock) on failure.
+            self._file.close()
+            raise
+
+    def _validate(self) -> None:
+        producer = self._read_root_attr("producer", str)
+        if producer != "JuPedSim":
+            raise Hdf5TrajectoryLoader.Error(
+                f"Not a JuPedSim HDF5 file. Found producer={producer}"
+            )
+
+        schema_version = self._read_root_attr("schema_version", int)
+        if schema_version != SCHEMA_VERSION:
+            raise Hdf5TrajectoryLoader.Error(
+                f"Unexpected schema version in file. Encountered {schema_version}, expected {SCHEMA_VERSION}"
+            )
+
+        dt = self._read_root_attr("dt", float)
+        if dt <= 0:
+            raise Hdf5TrajectoryLoader.Error(
+                f"Root attribute 'dt' has to be > 0, found {dt}"
+            )
+        every_nth_frame = self._read_root_attr("every_nth_frame", int)
+        if every_nth_frame < 1:
+            raise Hdf5TrajectoryLoader.Error(
+                f"Root attribute 'every_nth_frame' has to be > 0, found {every_nth_frame}"
+            )
+        self._fps = 1 / (dt * every_nth_frame)
+
+        trajectory_ds = self._file.get("trajectory")
+        if not isinstance(trajectory_ds, h5py.Dataset):
+            raise Hdf5TrajectoryLoader.Error("Trajectory dataset missing.")
+        if trajectory_ds.dtype != Hdf5TrajectoryWriter.trajectory_dtype():
+            raise Hdf5TrajectoryLoader.Error(
+                f"Trajectory dataset has wrong datatype: {trajectory_ds.dtype}, expected {Hdf5TrajectoryWriter.trajectory_dtype()}"
+            )
+
+        regions_ds = self._file.get("regions")
+        if not isinstance(regions_ds, h5py.Dataset):
+            raise Hdf5TrajectoryLoader.Error("Regions dataset missing.")
+        if regions_ds.dtype != Hdf5TrajectoryWriter.regions_dtype():
+            raise Hdf5TrajectoryLoader.Error(
+                f"Regions dataset has wrong datatype: {regions_ds.dtype}, expected {Hdf5TrajectoryWriter.regions_dtype()}"
+            )
+        self._trajectory: h5py.Dataset = trajectory_ds
+        self._regions: h5py.Dataset = regions_ds
+
+    def _read_root_attr[T](
+        self, name: str, cast: typing.Callable[[typing.Any], T]
+    ) -> T:
+        if name not in self._file.attrs:
+            raise Hdf5TrajectoryLoader.Error(
+                f"Root attribute '{name}' missing."
+            )
+        value = self._file.attrs[name]
+        if isinstance(value, bytes):
+            value = value.decode("utf-8")
+        try:
+            return cast(value)
+        except Exception as e:
+            raise Hdf5TrajectoryLoader.Error(
+                f"Root attribute '{name}' cannot be cast to {cast.__name__}: {e}"
+            ) from e
+
+    def close(self) -> None:
+        """Closes the underlying HDF5 file. Safe to call more than once."""
+        self._file.close()
+
+    def __enter__(self) -> typing.Self:
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: types.TracebackType | None,
+    ) -> None:
+        self.close()
+
+    def load_region_ids(self) -> list[int]:
+        """Returns the ids of all regions stored in the file."""
+        return np.asarray(self._regions.fields("id")[:]).tolist()
+
+    def load_region_trajectory(self, region_id: int) -> dict[str, typing.Any]:
+        """Loads the trajectory of all agents while inside one region.
+
+        Args:
+            region_id: id of the region, see :meth:`load_region_ids`.
+
+        Returns:
+            A dict with keys ``wkt`` (the region polygon as WKT string),
+            ``fps`` (recorded frames per second) and ``frame``, a dict with
+            ``columns`` (``["id", "frame", "x", "y"]``) and ``data`` (a
+            structured array with exactly these fields) suitable for
+            ``pandas.DataFrame(**result["frame"])``.
+
+        Raises:
+            Hdf5TrajectoryLoader.Error: if ``region_id`` is not in the file.
+        """
+        column_index = ["id", "frame", "x", "y"]
+
+        regions = self._regions[:]
+        wkt_list = regions[regions["id"] == region_id]["wkt"].tolist()
+        if len(wkt_list) != 1:
+            raise Hdf5TrajectoryLoader.Error(
+                f"Expected exactly 1 region for id={region_id}, found {len(wkt_list)}"
+            )
+        wkt = wkt_list[0].decode("utf-8")
+        # One sequential read + numpy mask is far cheaper than h5py point
+        # selection with a large index array.
+        trajectory = self._trajectory[:]
+        data = trajectory[trajectory["region_id"] == region_id][column_index]
+        return {
+            "wkt": wkt,
+            "fps": self._fps,
+            "frame": {"columns": column_index, "data": data},
+        }

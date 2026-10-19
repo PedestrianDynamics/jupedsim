@@ -2,7 +2,7 @@
 template: landing
 toc: false
 kicker: JuPedSim
-description: "Open-source framework for simulating pedestrian dynamics: a C++ core with several operational models, driven from a Python API with shapely geometry, journeys and stages, and SQLite trajectory output."
+description: "Open-source framework for simulating pedestrian dynamics: a C++ core with several operational models, driven from a Python API with shapely geometry, journeys and stages, and HDF5 trajectory output."
 cta_primary: "Get started|/docs/stable/"
 cta_secondary: "GitHub|https://github.com/PedestrianDynamics/jupedsim"
 ---

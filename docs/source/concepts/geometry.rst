@@ -161,7 +161,7 @@ This can be done with:
     simulation = jps.Simulation(
         model=jps.CollisionFreeSpeedModel(),
         geometry=surface,
-        trajectory_writer=jps.SqliteTrajectoryWriter(
-            output_file=pathlib.Path("traj.sqlite")
+        trajectory_writer=jps.Hdf5TrajectoryWriter(
+            output_file=pathlib.Path("traj.h5")
         ),
     )

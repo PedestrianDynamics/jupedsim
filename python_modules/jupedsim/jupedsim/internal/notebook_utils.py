@@ -7,7 +7,7 @@ reservere us the right to change the code here w.o. warning. Do not use the
 code here. Use it at your own peril.
 """
 
-import sqlite3
+import pathlib
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -15,6 +15,7 @@ import pandas as pd
 import pedpy
 import plotly.graph_objects as go
 import plotly.io as pio
+from jupedsim.hdf5_serialization import Hdf5TrajectoryLoader
 
 # Fix for plotly 6.x wrt animations in jupyter notebooks
 pio.renderers.default = "sphinx_gallery"
@@ -22,27 +23,36 @@ pio.renderers.default = "sphinx_gallery"
 DUMMY_SPEED = -1000
 
 
-def read_sqlite_file(
-    trajectory_file: str,
+def read_hdf5_file(
+    trajectory_file: str | pathlib.Path, region_id: int | None = None
 ) -> tuple[pedpy.TrajectoryData, pedpy.WalkableArea]:
-    """ """
-    with sqlite3.connect(trajectory_file) as con:
-        data = pd.read_sql_query(
-            "select frame, id, pos_x as x, pos_y as y from trajectory_data",
-            con,
-        )
-        fps = float(
-            con.cursor()
-            .execute("select value from metadata where key = 'fps'")
-            .fetchone()[0]
-        )
-        walkable_area = (
-            con.cursor().execute("select wkt from geometry").fetchone()[0]
-        )
-        return (
-            pedpy.TrajectoryData(data=data, frame_rate=fps),
-            pedpy.WalkableArea(walkable_area),
-        )
+    """Load one region of a JuPedSim HDF5 trajectory file for pedpy.
+
+    Args:
+        trajectory_file: file written by :class:`~jupedsim.Hdf5TrajectoryWriter`.
+        region_id: region to load. ``None`` picks the only region in the file.
+
+    Raises:
+        ValueError: if ``region_id`` is ``None`` and the file holds several
+            regions.
+        Hdf5TrajectoryLoader.Error: if ``region_id`` is not in the file.
+    """
+    with Hdf5TrajectoryLoader(pathlib.Path(trajectory_file)) as loader:
+        if region_id is None:
+            region_ids = loader.load_region_ids()
+            if len(region_ids) != 1:
+                raise ValueError(
+                    f"{trajectory_file} contains {len(region_ids)} regions "
+                    f"{region_ids}, pass region_id explicitly."
+                )
+            region_id = region_ids[0]
+        result = loader.load_region_trajectory(region_id)
+    return (
+        pedpy.TrajectoryData(
+            data=pd.DataFrame(**result["frame"]), frame_rate=result["fps"]
+        ),
+        pedpy.WalkableArea(result["wkt"]),
+    )
 
 
 def _speed_to_color(speed, min_speed, max_speed):

@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 from _metrics import compute_fluctuation
 
 
-def main(sqlite_file: str, title: str) -> None:
-    time_s, fluctuation = compute_fluctuation(sqlite_file)
+def main(trajectory_file: str, title: str) -> None:
+    time_s, fluctuation = compute_fluctuation(trajectory_file)
 
     phi_v = fluctuation.dropna().mean()
     print(f"Mean velocity fluctuation (phi_v): {phi_v:.4f} m/s^2")

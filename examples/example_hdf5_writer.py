@@ -3,8 +3,8 @@
 """Example: HDF5 trajectory writer.
 
 Runs a short simulation, writes the trajectory to an HDF5 file, then reads
-the file back with h5py and plots the trajectories on top of the walkable
-area.
+the file back with ``Hdf5TrajectoryLoader`` and plots the trajectories on top
+of the walkable area.
 
 Extra dependencies for this example (beyond JuPedSim itself):
 
@@ -16,8 +16,6 @@ current working directory.
 
 import pathlib
 
-import h5py
-import hdf5plugin  # noqa: F401  registers the Zstd filter used by the writer
 import jupedsim as jps
 import matplotlib.pyplot as plt
 import shapely
@@ -67,21 +65,25 @@ def main() -> None:
         f"every_nth_frame=4)"
     )
 
-    with h5py.File(out, "r") as hf:
-        traj = hf["trajectory"][:]
-        regions = [shapely.from_wkt(wkt) for wkt in hf["regions"]["wkt"]]
-    print(
-        f"Loaded {len(traj)} rows, {len(set(traj['id']))} agents, "
-        f"{traj['frame'].max() + 1} frames"
-    )
+    with jps.Hdf5TrajectoryLoader(out) as loader:
+        region_trajectories = [
+            loader.load_region_trajectory(int(region_id))
+            for region_id in loader.load_region_ids()
+        ]
 
     fig, ax = plt.subplots(figsize=(8, 6))
-    for region in regions:
-        for ring in [region.exterior, *region.interiors]:
+    for res in region_trajectories:
+        traj = res["frame"]["data"]
+        print(
+            f"Loaded {len(traj)} rows, {len(set(traj['id']))} agents, "
+            f"{traj['frame'].max() + 1} frames at {res['fps']:.1f} fps"
+        )
+        polygon = shapely.from_wkt(res["wkt"])
+        for ring in [polygon.exterior, *polygon.interiors]:
             ax.plot(*ring.xy, color="black", linewidth=1)
-    for agent_id in sorted(set(traj["id"])):
-        rows = traj[traj["id"] == agent_id]
-        ax.plot(rows["x"], rows["y"], linewidth=0.5)
+        for agent_id in sorted(set(traj["id"])):
+            rows = traj[traj["id"] == agent_id]
+            ax.plot(rows["x"], rows["y"], linewidth=0.5)
     ax.set_aspect("equal")
     ax.set_title("Hdf5TrajectoryWriter output")
     png = out.with_suffix(".png")

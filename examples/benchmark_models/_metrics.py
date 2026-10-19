@@ -7,13 +7,20 @@ not part of the public JuPedSim API.
 
 from pathlib import Path
 
+import jupedsim as jps
 import numpy as np
 import pandas as pd
-from pedpy import (
-    SpeedCalculation,
-    compute_individual_speed,
-    load_trajectory_from_jupedsim_sqlite,
-)
+from pedpy import SpeedCalculation, TrajectoryData, compute_individual_speed
+
+
+def load_trajectory(trajectory_file) -> TrajectoryData:
+    """Load a single-region JuPedSim HDF5 trajectory file as pedpy data."""
+    with jps.Hdf5TrajectoryLoader(Path(trajectory_file)) as loader:
+        (region_id,) = loader.load_region_ids()
+        res = loader.load_region_trajectory(int(region_id))
+    return TrajectoryData(
+        data=pd.DataFrame(**res["frame"]), frame_rate=res["fps"]
+    )
 
 
 def _individual_velocity(trajectory_data) -> pd.DataFrame:
@@ -27,7 +34,7 @@ def _individual_velocity(trajectory_data) -> pd.DataFrame:
     return trajectory_data.data.merge(individual_velocity, on=["id", "frame"])
 
 
-def compute_fluctuation(sqlite_file):
+def compute_fluctuation(trajectory_file):
     """Velocity fluctuation time series ``||v_i - v_{i-1}|| / dt``.
 
     Returns
@@ -37,7 +44,7 @@ def compute_fluctuation(sqlite_file):
     fluctuation : pandas.Series
         Instantaneous fluctuation magnitude in m/s^2.
     """
-    traj = load_trajectory_from_jupedsim_sqlite(Path(sqlite_file))
+    traj = load_trajectory(trajectory_file)
     fps = traj.frame_rate
     dt = 1.0 / fps
 
@@ -49,7 +56,7 @@ def compute_fluctuation(sqlite_file):
     return time_s, fluctuation
 
 
-def compute_order_parameter(sqlite_file):
+def compute_order_parameter(trajectory_file):
     """Alignment (order) parameter time series.
 
     For each agent, the goal is taken as its final position. The order
@@ -64,7 +71,7 @@ def compute_order_parameter(sqlite_file):
     alignment : numpy.ndarray
         Alignment parameter per frame.
     """
-    traj = load_trajectory_from_jupedsim_sqlite(Path(sqlite_file))
+    traj = load_trajectory(trajectory_file)
     fps = traj.frame_rate
     df = _individual_velocity(traj)
 

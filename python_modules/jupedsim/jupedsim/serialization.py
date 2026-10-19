@@ -14,8 +14,6 @@ import typing
 if typing.TYPE_CHECKING:
     from jupedsim.simulation import Simulation
 
-from jupedsim.pyjupedsim import SimulationError
-
 
 class TrajectoryWriter(metaclass=abc.ABCMeta):
     """Interface for trajectory serialization
@@ -85,31 +83,3 @@ class TrajectoryWriter(metaclass=abc.ABCMeta):
         """Represents exceptions specific to the trajectory writer."""
 
         pass
-
-
-def walkable_area_as_wkt(simulation: Simulation) -> str:
-    """The simulation's walkable area as WKT, for a writer's header.
-
-    Right now this only works for a geometry built from exactly 1 region.
-
-    Raises:
-        TrajectoryWriter.Exception: if the geometry has more than 1 region.
-    """
-    geometry = simulation.get_geometry()
-    num_regions = geometry.region_count()
-    if num_regions != 1:
-        raise TrajectoryWriter.Exception(
-            "Trajectories cannot be written for geometries so far that "
-            "do not consist of a single region. Your geometry contains "
-            f"{num_regions} regions."
-        )
-    try:
-        return geometry.polygon(region_id=0).as_wkt()
-    except SimulationError as e:
-        raise TrajectoryWriter.Exception(
-            "Cannot write trajectories for a simulation with a geometry "
-            "built from a surface "
-            "mesh: the trajectory formats JuPedSim ships are 2D so far. "
-            "Build the simulation from a polygon, or "
-            "pass a trajectory_writer of your own."
-        ) from e

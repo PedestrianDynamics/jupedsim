@@ -18,11 +18,11 @@ def main():
     exit_polygon = Polygon(
         [(length - 0.5, 0), (length, 0), (length, width), (length - 0.5, width)]
     )
-    trajectory_file = "headon_AVM.sqlite"
+    trajectory_file = "headon_AVM.h5"
     simulation = jps.Simulation(
         model=jps.AnticipationVelocityModel(),
         geometry=surface,
-        trajectory_writer=jps.SqliteTrajectoryWriter(
+        trajectory_writer=jps.Hdf5TrajectoryWriter(
             output_file=pathlib.Path(trajectory_file)
         ),
     )

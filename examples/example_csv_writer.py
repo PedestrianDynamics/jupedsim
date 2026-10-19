@@ -5,7 +5,7 @@
 """Example: Custom CSV trajectory writer.
 
 Demonstrates how to implement a custom TrajectoryWriter that outputs
-agent trajectory data to a CSV file instead of the built-in SQLite format.
+agent trajectory data to a CSV file instead of the built-in HDF5 format.
 """
 
 import csv
