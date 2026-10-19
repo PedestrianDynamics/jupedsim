@@ -22,6 +22,31 @@ Location located(const Geometry& geometry, double x, double y, double z_hint = 0
 {
     return geometry.get_location_near_z(x, y, z_hint).value();
 }
+
+/// True iff @p p lies on an edge that two faces of @p mesh share.
+bool on_an_interior_edge(const SurfaceMesh& mesh, const Point3D& p)
+{
+    for(const auto e : mesh.edges()) {
+        if(mesh.is_border(e)) {
+            continue;
+        }
+        const auto h = mesh.halfedge(e);
+        const K::Segment_3 edge{mesh.point(mesh.source(h)), mesh.point(mesh.target(h))};
+        if(CGAL::squared_distance(edge, p) < 1e-18) {
+            return true;
+        }
+    }
+    return false;
+}
+
+double length_of(const std::vector<Point3D>& path)
+{
+    double length = 0.0;
+    for(std::size_t i = 1; i < path.size(); ++i) {
+        length += std::sqrt(CGAL::squared_distance(path[i - 1], path[i]));
+    }
+    return length;
+}
 } // namespace
 
 class FlatSquare : public ::testing::Test
@@ -49,6 +74,23 @@ TEST_F(FlatSquare, OrientationRobustWhenSourceOnEdge)
     // Heading towards (8,7) from (4,4): (4,3) normalized = (0.8, 0.6).
     EXPECT_NEAR(dir.x, 0.8, 1e-6);
     EXPECT_NEAR(dir.y, 0.6, 1e-6);
+}
+
+TEST_F(FlatSquare, ATargetOnAnInteriorEdgeIsReachedInAStraightLine)
+{
+    // The square is two triangles meeting along the diagonal from (10, 0) to (0, 10), and the
+    // target lies on that edge, the one they share. On a flat, convex floor the shortest way
+    // there is the straight line, and it stays inside the room.
+    const Point3D source{3, 1, 0};
+    const Point3D target{2.5, 7.5, 0};
+    ASSERT_TRUE(on_an_interior_edge(_geometry->mesh(), target));
+
+    const auto path = _engine->get_shortest_path(source, target);
+
+    EXPECT_NEAR(length_of(path), std::sqrt(CGAL::squared_distance(source, target)), 1e-9);
+    for(const auto& p : path) {
+        EXPECT_TRUE(_geometry->is_valid_location(p)) << "(" << p << ") lies outside the room";
+    }
 }
 
 TEST(SurfaceMeshShortestPathLShape, OrientationBendsTowardsReflexCorner)
