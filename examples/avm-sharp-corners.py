@@ -9,7 +9,7 @@ from shapely.ops import unary_union
 # ---- Define simulation parameters
 N = 1000
 niterations = 10000
-output_file = "traj.sqlite"
+output_file = "traj.h5"
 
 # ---------------------------------
 
@@ -62,7 +62,7 @@ simulation = jps.Simulation(
     ),
     dt=0.05,
     geometry=surface,
-    trajectory_writer=jps.SqliteTrajectoryWriter(
+    trajectory_writer=jps.Hdf5TrajectoryWriter(
         output_file=pathlib.Path(output_file), every_nth_frame=1
     ),
 )

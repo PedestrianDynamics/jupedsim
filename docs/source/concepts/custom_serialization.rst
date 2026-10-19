@@ -2,9 +2,9 @@
 Custom Serialization
 =======================
 
-*JuPedSim* provides a built-in SQLite trajectory writer, but it is also
-possible to write your own serializer to output trajectory data in any format you need
-(CSV, JSON, HDF5, a remote API, etc.).
+*JuPedSim* provides a built-in HDF5 trajectory writer (see :ref:`hdf5-writer`),
+but it is also possible to write your own serializer to output trajectory data in
+any format you need (CSV, JSON, a remote API, etc.).
 
 This guide explains the serialization interface and shows how to implement a
 custom writer.
@@ -181,7 +181,7 @@ Here is a complete example that writes trajectory data to a CSV file:
                 self._file = None
 
 
-Using the custom writer is identical to using the built-in SQLite writer:
+Using the custom writer is identical to using the built-in HDF5 writer:
 
 .. code-block:: python
 
@@ -220,7 +220,7 @@ Tips for custom writers
   regardless of your interval setting.
 
 - **Buffering**: For performance, consider buffering writes in memory and
-  flushing periodically, as the built-in SQLite writer does.
+  flushing periodically, as the built-in HDF5 writer does.
 
 - **Resource cleanup**: Override ``close()`` if your writer buffers data or
   opens files, connections, or other resources. It is called when leaving a
@@ -258,6 +258,31 @@ Usage::
 The last buffered rows and the frame index are only written when the
 writer is closed, i.e. when leaving the ``with`` block. Without a ``with``
 block, call ``writer.close()`` once the simulation is done.
+
+Reading the file
+----------------
+
+:class:`jupedsim.Hdf5TrajectoryLoader` reads the files back. Trajectories are
+loaded per region; the result plugs straight into
+`PedPy <https://pedpy.readthedocs.io>`_::
+
+    import jupedsim as jps
+    import pandas as pd
+    import pedpy
+    from pathlib import Path
+
+    with jps.Hdf5TrajectoryLoader(Path("traj.h5")) as loader:
+        (region_id,) = loader.load_region_ids()  # single-region geometry
+        result = loader.load_region_trajectory(int(region_id))
+
+    trajectory = pedpy.TrajectoryData(
+        data=pd.DataFrame(**result["frame"]), frame_rate=result["fps"]
+    )
+    walkable_area = pedpy.WalkableArea(result["wkt"])
+
+``result["frame"]["data"]`` is a structured array with the columns ``id``,
+``frame``, ``x`` and ``y`` holding only the rows recorded while the agent was
+inside that region.
 
 File layout
 -----------

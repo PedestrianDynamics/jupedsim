@@ -33,8 +33,8 @@ def main():
     simulation = jps.Simulation(
         model=jps.CollisionFreeSpeedModel(),
         geometry=surface,
-        trajectory_writer=jps.SqliteTrajectoryWriter(
-            output_file=pathlib.Path("example4_out.sqlite"),
+        trajectory_writer=jps.Hdf5TrajectoryWriter(
+            output_file=pathlib.Path("example4_out.h5"),
         ),
     )
     exit_left = simulation.add_exit_stage(

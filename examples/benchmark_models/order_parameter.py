@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 from _metrics import compute_order_parameter
 
 
-def main(sqlite_file: str, title: str) -> None:
-    time_s, alignment = compute_order_parameter(sqlite_file)
+def main(trajectory_file: str, title: str) -> None:
+    time_s, alignment = compute_order_parameter(trajectory_file)
 
     plt.figure(figsize=(10, 6))
     plt.plot(time_s, alignment, label=r"Alignment Parameter $\phi_d$")

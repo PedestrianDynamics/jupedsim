@@ -21,8 +21,8 @@ def main():
     simulation = jps.Simulation(
         model=jps.CollisionFreeSpeedModel(),
         geometry=surface,
-        trajectory_writer=jps.SqliteTrajectoryWriter(
-            output_file=pathlib.Path("example2_out.sqlite"),
+        trajectory_writer=jps.Hdf5TrajectoryWriter(
+            output_file=pathlib.Path("example2_out.h5"),
         ),
     )
     stage_id = simulation.add_waypoint_stage(

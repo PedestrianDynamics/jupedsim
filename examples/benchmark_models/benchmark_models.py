@@ -5,7 +5,7 @@ Scenarios: bidirectional corridor, bottleneck, crossing.
 Models: CollisionFreeSpeedModelV2, AnticipationVelocityModel,
         SocialForceModel, WarpDriverModel.
 
-Produces SQLite trajectory files and a 4-column plot of trajectories.
+Produces HDF5 trajectory files and a 4-column plot of trajectories.
 """
 
 from __future__ import annotations
@@ -18,7 +18,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pedpy
 import shapely
-from _metrics import compute_fluctuation, compute_order_parameter
+from _metrics import (
+    compute_fluctuation,
+    compute_order_parameter,
+    load_trajectory,
+)
 from shapely import wkt
 
 SCRIPT_DIR = Path(__file__).parent
@@ -336,8 +340,8 @@ def run_single(scenario_name, model_name):
     state_kwargs = entry["state_kwargs"]
     dt = entry.get("dt", DEFAULT_DT)
 
-    sqlite_file = f"{scenario_name}_{model_name.lower()}.sqlite"
-    writer = jps.SqliteTrajectoryWriter(output_file=sqlite_file)
+    trajectory_file = f"{scenario_name}_{model_name.lower()}.h5"
+    writer = jps.Hdf5TrajectoryWriter(output_file=Path(trajectory_file))
 
     sim, geometry, region, routes = scen["setup"](model, writer, dt)
 
@@ -366,6 +370,7 @@ def run_single(scenario_name, model_name):
         if sim.agent_count() == 0:
             break
     elapsed = time.perf_counter() - t0
+    writer.close()
 
     remaining = sim.agent_count()
     ms_step = elapsed / steps * 1000 if steps else 0
@@ -376,7 +381,7 @@ def run_single(scenario_name, model_name):
     )
 
     return {
-        "sqlite": sqlite_file,
+        "trajectory": trajectory_file,
         "geometry": geometry,
         "elapsed": elapsed,
         "steps": steps,
@@ -406,7 +411,7 @@ def plot_scenario(results, axes_row):
     walkable_area = pedpy.WalkableArea(geometry)
 
     for ax, (model_name, r) in zip(axes_row, results.items()):
-        traj = pedpy.load_trajectory_from_jupedsim_sqlite(Path(r["sqlite"]))
+        traj = load_trajectory(r["trajectory"])
         streams = r["streams"]
 
         if streams is None:
@@ -453,7 +458,7 @@ def plot_fluctuation(results, axes_row):
         for i, name in enumerate(MODELS)
     }
     for ax, (model_name, r) in zip(axes_row, results.items()):
-        time_s, fluctuation = compute_fluctuation(r["sqlite"])
+        time_s, fluctuation = compute_fluctuation(r["trajectory"])
         color = model_colors[model_name]
         ax.plot(time_s, fluctuation, color=color, alpha=0.7, linewidth=0.5)
         ax.set_xlabel("Time (s)", fontsize=8)
@@ -470,7 +475,7 @@ def plot_order_parameter(results, axes_row):
         for i, name in enumerate(MODELS)
     }
     for ax, (model_name, r) in zip(axes_row, results.items()):
-        time_s, alignment = compute_order_parameter(r["sqlite"])
+        time_s, alignment = compute_order_parameter(r["trajectory"])
         color = model_colors[model_name]
         ax.plot(time_s, alignment, color=color, alpha=0.7, linewidth=0.5)
         ax.set_xlabel("Time (s)", fontsize=8)
@@ -481,9 +486,9 @@ def plot_order_parameter(results, axes_row):
         ax.grid(True, linestyle="--", alpha=0.5)
 
 
-def compute_min_distance(sqlite_file):
+def compute_min_distance(trajectory_file):
     """Compute minimum pairwise agent distance per frame."""
-    traj = pedpy.load_trajectory_from_jupedsim_sqlite(Path(sqlite_file))
+    traj = load_trajectory(trajectory_file)
     fps = traj.frame_rate
     df = traj.data
 
@@ -514,7 +519,7 @@ def plot_min_distance(results, axes_row):
         for i, name in enumerate(MODELS)
     }
     for ax, (model_name, r) in zip(axes_row, results.items()):
-        time_s, min_dists = compute_min_distance(r["sqlite"])
+        time_s, min_dists = compute_min_distance(r["trajectory"])
         color = model_colors[model_name]
         ax.plot(time_s, min_dists, color=color, alpha=0.7, linewidth=0.5)
         ax.axhline(y=0.3, color="r", linestyle="--", alpha=0.3, label="2r")

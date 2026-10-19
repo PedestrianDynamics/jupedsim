@@ -15,7 +15,10 @@ from jupedsim.distributions import (
     distribute_in_circles_by_number,
     distribute_until_filled,
 )
-from jupedsim.hdf5_serialization import Hdf5TrajectoryWriter
+from jupedsim.hdf5_serialization import (
+    Hdf5TrajectoryLoader,
+    Hdf5TrajectoryWriter,
+)
 from jupedsim.internal.tracing import Timer, trace_event
 from jupedsim.journey import JourneyDescription
 from jupedsim.pyjupedsim import (
@@ -62,7 +65,6 @@ from jupedsim.pyjupedsim import (
 )
 from jupedsim.serialization import TrajectoryWriter
 from jupedsim.simulation import Simulation
-from jupedsim.sqlite_serialization import SqliteTrajectoryWriter
 
 __version__ = get_build_info().library_version
 """
@@ -102,6 +104,7 @@ __all__ = [
     "GeneralizedCentrifugalForceModel",
     "GeneralizedCentrifugalForceModelState",
     "Geometry",
+    "Hdf5TrajectoryLoader",
     "Hdf5TrajectoryWriter",
     "IncorrectParameterError",
     "JourneyDescription",
@@ -113,7 +116,6 @@ __all__ = [
     "SimulationError",
     "SocialForceModel",
     "SocialForceModelState",
-    "SqliteTrajectoryWriter",
     "SurfaceMeshShortestPathRoutingEngine",
     "Timer",
     "TrajectoryWriter",

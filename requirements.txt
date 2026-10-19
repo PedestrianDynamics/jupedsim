@@ -14,6 +14,8 @@ pybind11-stubgen>=3.0,<4
 # test deps
 pytest~=9.1
 pandas~=2.2
+pedpy~=1.5
+plotly>=6
 
 # ci deps
 jinja2~=3.1

@@ -14,11 +14,11 @@ def main():
     region = surface.add_region(polygon=shapely.box(0, -2.5, 50, 2.5))
     exit_polygon = shapely.box(48, -2.5, 50, 2.5)
 
-    trajectory_file = "example_6.sqlite"
+    trajectory_file = "example_6.h5"
     simulation = jps.Simulation(
         model=jps.CollisionFreeSpeedModelV2(),
         geometry=surface,
-        trajectory_writer=jps.SqliteTrajectoryWriter(
+        trajectory_writer=jps.Hdf5TrajectoryWriter(
             output_file=pathlib.Path(trajectory_file)
         ),
     )
