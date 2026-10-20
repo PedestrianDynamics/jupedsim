@@ -28,8 +28,8 @@ void init_routing(py::module_& m)
         Args:
             cell_size: Edge length of a floor field grid cell [m]. Smaller cells give
                 smoother routes at the cost of memory and setup time.
-            wall_influence_radius: Distance from walls over which the wall repulsion acts
-                [m]. The repulsion decays linearly to zero at this distance.
+            wall_influence_radius: Distance from walls at which the speed field is reduced to avoid 
+            routing agents to close to walls. The reduction scales linearly from the influence radius to the wall.
     )");
     floorfield_options
         .def(
