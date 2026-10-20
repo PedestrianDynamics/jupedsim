@@ -902,7 +902,7 @@ fi
 
 echo "== requirements"
 # The site build (build-docs action, deploy-next-doc) gets Pagefind
-# only from site/requirements.txt.
+# only from jupedsim.org/site/requirements.txt.
 count "$www/site/requirements.txt" '^pagefind\[bin\]~=1\.5$' 1 "jupedsim.org/site/requirements.txt pins pagefind[bin]"
 
 echo "== next-doc publish"

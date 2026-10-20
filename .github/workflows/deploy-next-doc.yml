@@ -60,7 +60,7 @@ jobs:
           repositories: jupedsim-next-doc
           permission-contents: write
 
-      # Not "path: site": the source checkout already has a site/ directory.
+      # Not "path: site": that is where the build output goes locally.
       - name: Checkout pages repository
         uses: actions/checkout@v7
         with:

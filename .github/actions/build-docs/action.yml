@@ -44,8 +44,9 @@ runs:
         DOCS_VERSION: ${{ inputs.version }}
       run: |
         # --strict: Sphinx warnings in site/ or docs/ fail the build.
-        # Notebooks are executed. Pagefind is not installed, so the artifact
-        # has no search index (the deploy workflows build their own).
+        # Notebooks are executed. Pagefind comes from site/requirements.txt,
+        # so the artifact carries a search index; the deploy workflows rebuild
+        # it over the published tree anyway.
         python3 scripts/build_site.py --source jupedsim.org --out "$OUT_PATH" \
           --version "$DOCS_VERSION" --strict
 

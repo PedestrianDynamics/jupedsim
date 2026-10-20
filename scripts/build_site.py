@@ -146,10 +146,6 @@ def main() -> None:
     pagefind_script = ci_dir / "build_pagefind.sh"
 
     missing = []
-    if build_site and not (site_dir / "conf.py").is_file():
-        missing.append(f"site/ does not exist yet ({site_dir}/conf.py)")
-    if build_docs and not (docs_dir / "conf.py").is_file():
-        missing.append(f"{docs_dir}/conf.py does not exist")
     if build_docs and not versions_script.is_file():
         missing.append(f"{versions_script} does not exist yet")
     if args.only == "all" and not pagefind_script.is_file():
