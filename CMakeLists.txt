@@ -53,7 +53,7 @@ print_var(BUILD_TOOLS)
 set(USE_IPO ON CACHE BOOL "Build with interprocedural optimization (LTO) where supported")
 print_var(USE_IPO)
 
-set(BUILD_SITE OFF CACHE BOOL "Build the website (site/ + docs/) with Sphinx")
+set(BUILD_SITE OFF CACHE BOOL "Build the website (jupedsim.org/) with Sphinx")
 print_var(BUILD_SITE)
 
 set(WITH_FORMAT OFF CACHE BOOL "Create format tools")

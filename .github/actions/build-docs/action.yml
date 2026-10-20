@@ -1,6 +1,6 @@
 # .github/actions/build-docs/action.yml
 name: 'Build Documentation'
-description: 'Builds the jupedsim website (site/ + docs/) with Sphinx, warnings are errors'
+description: 'Builds the jupedsim website (jupedsim.org/: site + docs) with Sphinx, warnings are errors'
 
 inputs:
   python-version:
@@ -33,8 +33,9 @@ runs:
       shell: bash
       run: |
         # Whatever site/ needs (incl. Pagefind) is listed in
-        # site/requirements.txt; docs/ needs docs/requirements.txt.
-        python3 -m pip install -r docs/requirements.txt -r site/requirements.txt
+        # jupedsim.org/site/requirements.txt; docs/ needs
+        # jupedsim.org/docs/requirements.txt.
+        python3 -m pip install -r jupedsim.org/docs/requirements.txt -r jupedsim.org/site/requirements.txt
 
     - name: Build site and documentation
       shell: bash
@@ -45,7 +46,7 @@ runs:
         # --strict: Sphinx warnings in site/ or docs/ fail the build.
         # Notebooks are executed. Pagefind is not installed, so the artifact
         # has no search index (the deploy workflows build their own).
-        python3 scripts/build_site.py --source . --out "$OUT_PATH" \
+        python3 scripts/build_site.py --source jupedsim.org --out "$OUT_PATH" \
           --version "$DOCS_VERSION" --strict
 
     - name: Check and prune the assembled site
