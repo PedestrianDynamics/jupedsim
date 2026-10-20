@@ -28,9 +28,9 @@ __pycache__/
 /jupedsim_vis/jupedsim_vis.egg-info/
 /jupedsim_vis/dist/
 /jupedsim_vis/build/
-/docs/build
-/docs/source/citation/*.bib
-/docs/jupyter_execute/
+/jupedsim.org/docs/_build/
+/jupedsim.org/docs/citation/*.bib
+/jupedsim.org/docs/jupyter_execute/
 
 # clangd cache
 /.cache/
@@ -46,8 +46,8 @@ __pycache__/
 /libfloorfield/target/
 
 # doc-split theme fixture and site build output
-/docs/_theme/tests/_build/
-/docs/_theme/tests/fixture/_build/
-/docs/_theme/tests/fixture/api/
-/docs/_theme/tests/fixture/jupyter_execute/
-/site/_build/
+/jupedsim.org/theme/tests/_build/
+/jupedsim.org/theme/tests/fixture/_build/
+/jupedsim.org/theme/tests/fixture/api/
+/jupedsim.org/theme/tests/fixture/jupyter_execute/
+/jupedsim.org/site/_build/

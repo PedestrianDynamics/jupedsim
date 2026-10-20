@@ -15,9 +15,7 @@ _here = os.path.dirname(os.path.abspath(__file__))
 # dummymod must be importable so viewcode emits _modules/ and [source] links.
 sys.path.insert(0, _here)
 sys.path.insert(0, os.path.normpath(os.path.join(_here, "../..")))
-sys.path.insert(
-    0, os.path.normpath(os.path.join(_here, "../../../../site/_ext"))
-)
+sys.path.insert(0, os.path.normpath(os.path.join(_here, "../../../site/_ext")))
 
 project = "JuPedSim fixture"
 author = "JuPedSim"
@@ -57,7 +55,7 @@ html_last_updated_fmt = "%Y-%m-%d"
 favicons = [{"rel": "icon", "href": "favicon.svg", "type": "image/svg+xml"}]
 numfig = True
 
-# Same top-bar items as site/conf.py and docs/source/conf.py.
+# Same top-bar items as jupedsim.org/site/conf.py and jupedsim.org/docs/conf.py.
 _nav_items = [
     {
         "title": "Articles",
@@ -80,7 +78,7 @@ _nav_items = [
     },
 ]
 
-# Same footer as site/conf.py and docs/source/conf.py (all modes).
+# Same footer as jupedsim.org/site/conf.py and jupedsim.org/docs/conf.py (all modes).
 _footer_text = "© JuPedSim contributors · LGPL-3.0"
 _footer_links = [
     {

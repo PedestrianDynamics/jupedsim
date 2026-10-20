@@ -116,7 +116,7 @@ regex = 'project\(JuPedSim\s+VERSION\s+(?P<value>[0-9]+\.[0-9]+\.[0-9]+)'
 addopts = "--import-mode=importlib"
 
 [tool.ruff]
-extend-exclude = ["third-party", "docs"]
+extend-exclude = ["third-party", "jupedsim.org/docs"]
 line-length = 80
 indent-width = 4
 target-version = "py312"

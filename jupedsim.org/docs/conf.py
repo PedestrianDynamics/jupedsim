@@ -18,7 +18,7 @@ sys.path.insert(
 from generate_bibtex import get_latest_jupedsim_bibtex
 
 sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../_theme"))
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../theme"))
 )
 
 import jupedsim
@@ -199,7 +199,7 @@ nb_execution_raise_on_error = True
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = "jupedsim_book"
-html_theme_path = ["../_theme"]
+html_theme_path = ["../theme"]
 html_static_path = ["_static"]
 html_baseurl = "https://www.jupedsim.org/docs/stable/"
 html_permalinks_icon = "#"
