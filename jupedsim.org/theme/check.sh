@@ -2,11 +2,12 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 #
 # check.sh — build the jupedsim_book fixture (site and docs mode) plus the
-# real site/ and docs/ projects, then assert the theme's markup contract.
+# real jupedsim.org/site and jupedsim.org/docs projects, then assert the
+# theme's markup contract.
 # Prints one ok/FAIL line per assertion and ends with CHECK PASSED (exit 0)
 # or CHECK FAILED (exit 1).
 #
-#   bash docs/_theme/check.sh [--build-dir <path>] [--keep <dir>]
+#   bash jupedsim.org/theme/check.sh [--build-dir <path>] [--keep <dir>]
 #
 # --build-dir  build directory whose `environment` is sourced
 #              (default: <worktree>/../<worktree basename>-build)
@@ -19,6 +20,7 @@ set -euo pipefail
 theme_dir="$(cd "$(dirname "$0")" && pwd)"
 repo="$(cd "$theme_dir/../.." && pwd)"
 fixture="$theme_dir/tests/fixture"
+www="$repo/jupedsim.org"
 
 build_dir="$(dirname "$repo")/$(basename "$repo")-build"
 keep=""
@@ -112,14 +114,14 @@ FIXTURE_MODE=site-no-notfound build fixture-plain -T -W --keep-going -E -b html 
 # bad-template.md (template: nope) is only part of this build; without -W,
 # its one warning is asserted below.
 FIXTURE_MODE=bad-template build fixture-badtpl -T --keep-going -E -b html "$fixture"
-if [ -f "$repo/site/conf.py" ]; then
-    build site -T -W --keep-going -E -b html "$repo/site"
+if [ -f "$www/site/conf.py" ]; then
+    build site -T -W --keep-going -E -b html "$www/site"
     have_site=1
 else
-    echo "SKIP: build site (site/conf.py does not exist yet)"
+    echo "SKIP: build site (jupedsim.org/site/conf.py does not exist yet)"
     have_site=0
 fi
-build docs -T -W --keep-going -E -b html -D nb_execution_mode=off "$repo/docs/source"
+build docs -T -W --keep-going -E -b html -D nb_execution_mode=off "$www/docs"
 
 # Assertions never abort the script (set -e is off from here on).
 set +e
@@ -494,8 +496,8 @@ exists "$fs/_static/site.css" "site.css shipped"
 count "$fs/_static/site.css" 'scroll-margin-top' 1 "site.css sets scroll-margin-top"
 count "$fs/_static/site.css" '--bar-h' 1 "site.css defines --bar-h"
 before "$page" '<head>' '_static/book.css' '_static/site.css' "site.css loads after book.css"
-for f in "$theme_dir/jupedsim_book/theme.conf" "$fixture/conf.py" "$repo/site/conf.py" \
-    "$repo/docs/source/conf.py"; do
+for f in "$theme_dir/jupedsim_book/theme.conf" "$fixture/conf.py" "$www/site/conf.py" \
+    "$www/docs/conf.py"; do
     none "$f" 'nav_before|nav_after|nav_title' "no nav_before/nav_after/nav_title in ${f#"$repo"/}"
 done
 
@@ -597,7 +599,7 @@ for d in "$fs" "$fd" "$out/fixture-plain" "$theme_dir/jupedsim_book" "$fixture";
     label="${d#"$out"/}"
     absent "$d" 'jupedsim-labs-' "no jupedsim-labs- in ${label#"$repo"/}"
 done
-for f in "$repo/site/conf.py" "$repo/docs/source/conf.py"; do
+for f in "$www/site/conf.py" "$www/docs/conf.py"; do
     [ -f "$f" ] && none "$f" 'jupedsim-labs-' "no jupedsim-labs- in ${f#"$repo"/}"
 done
 # Theme marks are byte-identical to the logo sources (local checkout only).
@@ -642,8 +644,8 @@ else
 fi
 for f in "$theme_dir/jupedsim_book/theme.conf" "$theme_dir/jupedsim_book/__init__.py" \
     "$theme_dir/jupedsim_book/sidebar.html" "$theme_dir/jupedsim_book/topbar.html" \
-    "$fixture/conf.py" "$repo/site/conf.py" \
-    "$repo/docs/source/conf.py"; do
+    "$fixture/conf.py" "$www/site/conf.py" \
+    "$www/docs/conf.py"; do
     none "$f" 'brand_svg' "no brand_svg in ${f#"$repo"/}"
 done
 
@@ -678,7 +680,7 @@ none "$out/docs/_modules/jupedsim/simulation.html" 'data-pagefind-body' "docs _m
 none "$out/docs/genindex.html" 'data-pagefind-body' "docs genindex page not indexed"
 # Unresolved autoapi imports are filtered by message in conf.py, never
 # suppressed as a whole type (that would hide new gaps in the API reference).
-none "$repo/docs/source/conf.py" '"autoapi\.python_import_resolution"' \
+none "$www/docs/conf.py" '"autoapi\.python_import_resolution"' \
     "docs conf does not suppress all autoapi import warnings"
 
 echo "== real site"
@@ -713,7 +715,7 @@ if [ "$have_site" -eq 1 ]; then
     exactly "$si" '<ul class="post-rows">' 2 "site landing: articles + notes rows"
     exactly "$si" '<div class="hero-text" data-pagefind-body>' 1 "site landing: hero text indexed by Pagefind"
     none "$si" 'MyST would resolve' "site landing: source comments stay in index.md"
-    exactly "$repo/site/index.md" ':limit: 5' 2 "site landing: rows limited to 5"
+    exactly "$www/site/index.md" ':limit: 5' 2 "site landing: rows limited to 5"
     if res=$(python - "$si" "$out/docs" <<'P'
 import pathlib, re, sys
 html = pathlib.Path(sys.argv[1]).read_text(encoding="utf-8")
@@ -728,12 +730,12 @@ P
     none "$out/site/index.html" 'Last updated' "site pages carry no build-date footer"
     none "$out/site/notes/2026-09-28-new-website.html" 'Last updated' "notes carry no build-date footer"
     # /notes/ is the archive: it lists every note (only the landing page is limited).
-    none "$repo/site/notes/index.md" ':limit:' "notes archive has no :limit:"
-    n_notes=$(find "$repo/site/notes" -name '20*.md' | wc -l | tr -d ' ')
+    none "$www/site/notes/index.md" ':limit:' "notes archive has no :limit:"
+    n_notes=$(find "$www/site/notes" -name '20*.md' | wc -l | tr -d ' ')
     exactly "$out/site/notes/index.html" 'class="post-row"' "$n_notes" "notes archive lists all $n_notes notes as rows"
     exactly "$out/site/notes/index.html" '<span class="post-row-desc">' "$n_notes" "notes archive rows have descriptions"
     # /articles/: rows with descriptions; the hidden toctree keeps prev/next.
-    n_art=$(find "$repo/site/articles" \( -name '*.md' -o -name '*.ipynb' \) ! -name 'index.*' | wc -l | tr -d ' ')
+    n_art=$(find "$www/site/articles" \( -name '*.md' -o -name '*.ipynb' \) ! -name 'index.*' | wc -l | tr -d ' ')
     exactly "$out/site/articles/index.html" 'class="post-row"' "$n_art" "articles index lists all $n_art articles as rows"
     exactly "$out/site/articles/index.html" '<span class="post-row-desc">' "$n_art" "articles index rows have descriptions"
     none "$out/site/articles/index.html" 'toctree-l1' "articles toctree is hidden (no visible entries)"
@@ -743,7 +745,7 @@ P
     count "$out/site/articles/writing-guide.html" 'class="book-pagenav-prev" href="index\.html" rel="prev"' 1 "first article <- articles index"
     # build_site.py keeps build state (doctrees) out of the published tree.
     a="$out/assembled"
-    if python "$repo/scripts/build_site.py" --source "$repo" --out "$a" --version v0 \
+    if python "$repo/scripts/build_site.py" --source "$www" --out "$a" --version v0 \
         --only site --no-notebooks >"$out/assembled.log" 2>&1; then
         ok "build_site.py --only site"
     else
@@ -753,7 +755,7 @@ P
     if [ -e "$a/.doctrees" ]; then bad "assembled site has no .doctrees"; else ok "assembled site has no .doctrees"; fi
     if [ -d "$a-cache/doctrees-site" ]; then ok "doctrees kept in <out>-cache"; else bad "doctrees kept in <out>-cache (missing $a-cache/doctrees-site)"; fi
 else
-    bad "real site built (site/conf.py missing)"
+    bad "real site built (jupedsim.org/site/conf.py missing)"
 fi
 
 # The /docs/ stub written at release time forwards query and hash.
@@ -901,7 +903,7 @@ fi
 echo "== requirements"
 # The site build (build-docs action, deploy-next-doc) gets Pagefind
 # only from site/requirements.txt.
-count "$repo/site/requirements.txt" '^pagefind\[bin\]~=1\.5$' 1 "site/requirements.txt pins pagefind[bin]"
+count "$www/site/requirements.txt" '^pagefind\[bin\]~=1\.5$' 1 "jupedsim.org/site/requirements.txt pins pagefind[bin]"
 
 echo "== next-doc publish"
 # scripts/ci/publish_site_tree.sh <build-out> <pages-root> (deploy-next-doc.yml):
