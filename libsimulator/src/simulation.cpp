@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "simulation.hpp"
 
+#include "floorfield_routing_engine.hpp"
 #include "generic_agent.hpp"
 #include "geometry/area_piece.hpp"
 #include "iterator_pair.hpp"
@@ -71,11 +72,12 @@ void Simulation::throw_if_iterating(const char* operation) const
 Simulation::Simulation(
     std::unique_ptr<OperationalModel>&& operational_model,
     std::unique_ptr<Geometry>&& geometry,
-    double dt)
+    double dt,
+    FloorfieldOptions floorfield_options)
     : _clock(dt)
     , _operational_decision_system(std::move(operational_model))
     , _geometry(std::move(geometry))
-    , _routing_engine(std::make_unique<RoutingEngine>(*_geometry))
+    , _routing_engine(std::make_unique<RoutingEngine>(*_geometry, floorfield_options))
 {
 }
 

@@ -17,7 +17,7 @@ class RoutingEngine
 {
 public:
     /// Borrows @p geometry (non-owning); the caller keeps it alive for the engine's lifetime.
-    explicit RoutingEngine(const Geometry& geometry);
+    explicit RoutingEngine(const Geometry& geometry, FloorfieldOptions options);
     ~RoutingEngine() = default;
 
     RoutingEngine(const RoutingEngine&) = delete;

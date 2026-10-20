@@ -5,8 +5,8 @@
 
 #include <variant>
 
-RoutingEngine::RoutingEngine(const Geometry& geometry)
-    : _floorfield(geometry), _shortest_path(geometry)
+RoutingEngine::RoutingEngine(const Geometry& geometry, FloorfieldOptions options)
+    : _floorfield(geometry, options), _shortest_path(geometry)
 {
 }
 

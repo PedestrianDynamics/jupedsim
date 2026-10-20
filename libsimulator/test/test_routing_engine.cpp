@@ -11,7 +11,7 @@
 TEST(RoutingEngine, LeadsToTheNearestAreaOfADestination)
 {
     const auto room = test_geometries::rectangle({0, 0}, {10, 2});
-    RoutingEngine engine{*room.geometry};
+    RoutingEngine engine{*room.geometry, FloorfieldOptions{}};
 
     const std::vector<AreaPiece> exits{
         {Polygon{test_geometries::rectangle_points({0.5, 0.5}, {1.5, 1.5})}, room.room_id},
@@ -27,7 +27,7 @@ TEST(RoutingEngine, LeadsToTheNearestAreaOfADestination)
 TEST(RoutingEngine, ADestinationNeedsAnAreaInsideItsRegion)
 {
     const auto room = test_geometries::rectangle({0, 0}, {10, 2});
-    RoutingEngine engine{*room.geometry};
+    RoutingEngine engine{*room.geometry, FloorfieldOptions{}};
 
     EXPECT_THROW(engine.register_destination({}), SimulationError);
     const std::vector<AreaPiece> outside{

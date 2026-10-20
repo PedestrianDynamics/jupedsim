@@ -22,6 +22,7 @@ CLASSES = [
     "CollisionFreeSpeedModelV3State",
     "DirectSteeringStage",
     "ExitStage",
+    "FloorfieldOptions",
     "GeneralizedCentrifugalForceModel",
     "GeneralizedCentrifugalForceModelState",
     "Geometry",

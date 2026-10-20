@@ -15,9 +15,6 @@ namespace ff = jupedsim::floorfield;
 
 namespace
 {
-constexpr double cell_size = 0.2;
-/// Walls slow agents down within this distance, which keeps routes off them.
-constexpr double wall_influence_radius = 0.5;
 
 template <typename Call>
 auto checked(Call&& call)
@@ -69,10 +66,12 @@ ff::RegionGraph to_floorfield(const Geometry& geometry)
 }
 } // namespace
 
-FloorfieldRoutingEngine::FloorfieldRoutingEngine(const Geometry& geometry)
-    : _field(checked([&geometry] {
+FloorfieldRoutingEngine::FloorfieldRoutingEngine(
+    const Geometry& geometry,
+    FloorfieldOptions options)
+    : _field(checked([&geometry, options] {
         return ff::new_multi_region_floorfield(
-            to_floorfield(geometry), cell_size, wall_influence_radius);
+            to_floorfield(geometry), options.cell_size, options.wall_influence_radius);
     }))
 {
 }

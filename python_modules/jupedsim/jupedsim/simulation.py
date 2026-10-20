@@ -20,6 +20,7 @@ from jupedsim.pyjupedsim import (
     CollisionFreeSpeedModelV3State,
     DirectSteeringStage,
     ExitStage,
+    FloorfieldOptions,
     GeneralizedCentrifugalForceModel,
     GeneralizedCentrifugalForceModelState,
     Geometry,
@@ -72,6 +73,7 @@ class Simulation:
         ),
         geometry: WalkableSurface | Geometry,
         dt: float = 0.01,
+        floorfield_options: FloorfieldOptions | None = None,
         trajectory_writer: TrajectoryWriter | None = None,
         timer_log_level: int = 1,
     ) -> None:
@@ -96,6 +98,9 @@ class Simulation:
 
             dt: Iteration step size in seconds. It is recommended to leave this at its default
                 value.
+            floorfield_options: Parameters of the floor fields used to route agents to their
+                stage areas. Defaults to :class:`~jupedsim.FloorfieldOptions` with its default
+                values.
             trajectory_writer: Any object implementing the TrajectoryWriter interface. JuPedSim
                 provides :class:`~jupedsim.Hdf5TrajectoryWriter`, which writes HDF5 files. If
                 you want other formats such as CSV you need to provide your own custom
@@ -114,7 +119,14 @@ class Simulation:
         self._writer = trajectory_writer
         if isinstance(geometry, WalkableSurface):
             geometry = geometry.create_geometry()
-        self._obj = _Simulation(model=the_model, geometry=geometry, dt=dt)
+        if floorfield_options is None:
+            floorfield_options = FloorfieldOptions()
+        self._obj = _Simulation(
+            model=the_model,
+            geometry=geometry,
+            dt=dt,
+            floorfield_options=floorfield_options,
+        )
         self._timer = Timer(self._obj, timer_log_level=timer_log_level)
 
     def add_waypoint_stage(

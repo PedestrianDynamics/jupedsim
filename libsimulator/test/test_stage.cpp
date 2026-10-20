@@ -36,7 +36,7 @@ class StagesTests : public ::testing::Test
 {
 public:
     const test_geometries::SingleRoom room = test_geometries::rectangle({-10, -10}, {10, 10});
-    FloorfieldRoutingEngine engine{*room.geometry};
+    FloorfieldRoutingEngine engine{*room.geometry, FloorfieldOptions{}};
 
     Location at(Point p) const { return room.geometry->get_location(p.x, p.y, room.room_id); }
 
@@ -60,7 +60,7 @@ class StagesOnTwoStoreys : public ::testing::Test
 {
 public:
     const test_geometries::TwoConnectedRegions rooms = test_geometries::stacked_floors_with_ramp();
-    FloorfieldRoutingEngine engine{*rooms.geometry};
+    FloorfieldRoutingEngine engine{*rooms.geometry, FloorfieldOptions{}};
 
     Location at(Point p, std::size_t region) const
     {

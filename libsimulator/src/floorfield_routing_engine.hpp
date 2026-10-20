@@ -9,9 +9,18 @@
 #include "rust/cxx.h"
 
 #include <cstddef>
+#include <cstdint>
 #include <vector>
 
 class Geometry;
+
+struct FloorfieldOptions {
+    double cell_size = 0.2; // m
+    // The speed field value is linearly decreased from this influence radius (in meter) to the
+    // boundary. Reducing the speed field near walls has the effect that agents are not routed
+    // unphysically close to the wall.
+    double wall_influence_radius = 0.5;
+};
 
 /// Routes to registered areas along static floor fields over the region graph.
 class FloorfieldRoutingEngine
@@ -19,7 +28,7 @@ class FloorfieldRoutingEngine
 public:
     /// Throws if @p geometry has no region graph, i.e. was built from a raw mesh. The engine
     /// keeps no reference to @p geometry.
-    explicit FloorfieldRoutingEngine(const Geometry& geometry);
+    explicit FloorfieldRoutingEngine(const Geometry& geometry, FloorfieldOptions options);
 
     // Destinations point at their engine.
     FloorfieldRoutingEngine(const FloorfieldRoutingEngine&) = delete;
