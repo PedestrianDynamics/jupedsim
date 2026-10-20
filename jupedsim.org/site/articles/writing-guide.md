@@ -8,21 +8,21 @@ description: "How to write articles and notes for jupedsim.org, and a live refer
 
 # Writing for jupedsim.org
 
-jupedsim.org is a Sphinx project in the `site/` folder of the
+jupedsim.org is a Sphinx project in the `jupedsim.org/site/` folder of the
 [JuPedSim repository](https://github.com/PedestrianDynamics/jupedsim). Articles
-live in `site/articles/`, notes in `site/notes/`. Both are MyST Markdown (or
+live in `jupedsim.org/site/articles/`, notes in `jupedsim.org/site/notes/`. Both are MyST Markdown (or
 Jupyter notebooks for articles). This page is itself an article and shows every
 piece of markup the site supports, so you can compare source and rendering.
 
 ## Articles and notes
 
-**Articles** are longer, curated pieces. Add the file to `site/articles/` and
-list it in the hidden toctree of `site/articles/index.md`; the order there is the
+**Articles** are longer, curated pieces. Add the file to `jupedsim.org/site/articles/` and
+list it in the hidden toctree of `jupedsim.org/site/articles/index.md`; the order there is the
 previous/next order. The list on `/articles/` itself is sorted by date, newest
 first.
 
 **Notes** are short, dated news items. Name the file
-`site/notes/YYYY-MM-DD-slug.md`; the notes index picks it up automatically,
+`jupedsim.org/site/notes/YYYY-MM-DD-slug.md`; the notes index picks it up automatically,
 newest first, and the note appears in the RSS feed at `/notes/feed.xml` and on
 the landing page.
 
@@ -196,7 +196,7 @@ is reported as a build warning with the file and line.
 :alt: The JuPedSim logo
 :width: 160px
 
-A figure with a caption. Put images next to the article or in `site/_static/`.
+A figure with a caption. Put images next to the article or in `jupedsim.org/site/_static/`.
 ```
 
 ## Footnotes
