@@ -11,7 +11,7 @@ the mobile drawers, print styles, JS console errors and external requests. Build
 
     python -m pip install playwright
     python -m playwright install chromium
-    python docs/_theme/tests/smoke.py http://localhost:8000 --shots /tmp/shots
+    python jupedsim.org/theme/tests/smoke.py http://localhost:8000 --shots /tmp/shots
 
 Prints one ok/FAIL line per check and ends with "SMOKE <n> ok / <m> fail"
 (exit 1 on any failure). Screenshots (light/dark at 390, 1024, 1440 and

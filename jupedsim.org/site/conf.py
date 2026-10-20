@@ -2,7 +2,8 @@
 """Sphinx configuration for the jupedsim.org site (landing, articles, notes).
 
 Built from master and published at the root of jupedsim.org; the versioned
-documentation lives in ``docs/`` and is published under ``/docs/<version>/``.
+documentation lives in ``docs/`` next to this folder and is published under
+``/docs/<version>/``.
 """
 
 import html
@@ -16,7 +17,7 @@ from sphinx.util import logging
 from sphinx.util.math import get_node_equation_number
 
 _here = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.normpath(os.path.join(_here, "../docs/_theme")))
+sys.path.insert(0, os.path.normpath(os.path.join(_here, "../theme")))
 sys.path.insert(0, os.path.join(_here, "_ext"))
 
 project = "JuPedSim"
@@ -56,7 +57,7 @@ notes_feed_title = "JuPedSim notes"
 
 # -- HTML ------------------------------------------------------------------
 html_theme = "jupedsim_book"
-html_theme_path = ["../docs/_theme"]
+html_theme_path = ["../theme"]
 html_baseurl = "https://www.jupedsim.org/"
 html_static_path = ["_static"]
 html_permalinks_icon = "#"
