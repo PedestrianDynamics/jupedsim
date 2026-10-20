@@ -2,10 +2,13 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 """Assemble the complete jupedsim.org website into one output directory.
 
+``--source`` is the ``jupedsim.org/`` folder of the checkout, which holds the
+``site/`` and ``docs/`` Sphinx projects and their shared ``theme/``.
+
 Layout of the output directory (mirrors the gh-pages branch):
 
     <out>/                      site/ project (landing page, articles, notes)
-    <out>/docs/<version>/       docs/source project
+    <out>/docs/<version>/       docs/ project
     <out>/docs/stable           symlink to the newest docs version
     <out>/docs/versions.json    version switcher data
                                 (only <version> itself when it is not a
@@ -83,7 +86,7 @@ def main() -> None:
         "--source",
         required=True,
         type=Path,
-        help="jupedsim source checkout",
+        help="the jupedsim.org/ folder of the checkout (site/, docs/, theme/)",
     )
     parser.add_argument(
         "--out",
@@ -129,9 +132,18 @@ def main() -> None:
     build_docs = args.only in ("docs", "all")
 
     site_dir = source / "site"
-    docs_dir = source / "docs" / "source"
-    versions_script = source / "scripts" / "ci" / "write_docs_versions.py"
-    pagefind_script = source / "scripts" / "ci" / "build_pagefind.sh"
+    docs_dir = source / "docs"
+    if (
+        not (site_dir / "conf.py").is_file()
+        or not (docs_dir / "conf.py").is_file()
+    ):
+        fail(
+            f"{source} is not the jupedsim.org folder "
+            "(needs site/conf.py and docs/conf.py)"
+        )
+    ci_dir = Path(__file__).resolve().parent / "ci"
+    versions_script = ci_dir / "write_docs_versions.py"
+    pagefind_script = ci_dir / "build_pagefind.sh"
 
     missing = []
     if build_site and not (site_dir / "conf.py").is_file():
@@ -197,7 +209,7 @@ def main() -> None:
                     strict=args.strict,
                 ),
                 env,
-                "docs build (docs/source/)",
+                "docs build (docs/)",
             )
         finally:
             # Also on a failed build (run() exits), so the served tree

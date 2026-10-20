@@ -9,4 +9,4 @@ export PYTHONPATH="@PROJECT_BINARY_DIR@/stage"
 echo "Source path ${JPSCORE_SOURCE_PATH}"
 echo "PYTHONPATH=${PYTHONPATH}"
 
-exec @Python_EXECUTABLE@ @PROJECT_SOURCE_DIR@/scripts/build_site.py --source @PROJECT_SOURCE_DIR@ --out @PROJECT_BINARY_DIR@/site --version v@PROJECT_VERSION@ "$@"
+exec @Python_EXECUTABLE@ @PROJECT_SOURCE_DIR@/scripts/build_site.py --source @PROJECT_SOURCE_DIR@/jupedsim.org --out @PROJECT_BINARY_DIR@/site --version v@PROJECT_VERSION@ "$@"
