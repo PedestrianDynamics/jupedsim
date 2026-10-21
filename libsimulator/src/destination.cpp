@@ -12,3 +12,8 @@ Point Destination::orientation(const Location& from) const
 {
     return _engine->get_orientation(from, _id);
 }
+
+TravelTimeGrid Destination::travel_times(std::size_t region) const
+{
+    return _engine->travel_times(region, _id);
+}

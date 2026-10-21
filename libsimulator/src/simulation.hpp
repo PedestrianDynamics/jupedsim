@@ -98,6 +98,11 @@ public:
     AgentContainer<GenericAgent>& agents();
     OperationalModelType model_type() const;
     const BaseStage* stage(BaseStage::ID stage_id) const;
+    /// Ids of all stages, in ascending order.
+    std::vector<BaseStage::ID> stage_ids() const;
+    /// Travel times to the area of stage @p stage_id over the grid of every region, by region id.
+    /// Empty for a stage without an area, such as direct steering.
+    std::map<std::size_t, TravelTimeGrid> travel_times(BaseStage::ID stage_id);
     /// The geometry this simulation runs on. Borrowed: it lives as long as the simulation.
     const Geometry& geo() const;
     void push_timer(const std::string_view name, size_t probe_log_level = 0);

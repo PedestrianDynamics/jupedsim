@@ -297,3 +297,166 @@ def test_hdf5_trajectory_loading_load_region_ids(tmp_path) -> None:
         pass
     with jps.Hdf5TrajectoryLoader(p) as loader:
         assert np.array_equal(loader.load_region_ids(), [1337])
+
+
+def _rectangle(p1, p2):
+    return [p1, (p1[0], p2[1]), p2, (p2[0], p1[1])]
+
+
+@pytest.fixture
+def travel_time_file(tmp_path):
+    """Two floors joined by a seam, an exit upstairs, a waypoint downstairs and a
+    direct steering stage, written with travel times. Returns the file, the
+    simulation and the ids of the stages with an area."""
+    surface = jps.WalkableSurface()
+    ground_floor = surface.add_region(
+        boundary=_rectangle((0, 0), (5, 5)), height=0.0
+    )
+    upper_floor = surface.add_region(
+        boundary=_rectangle((10, 0), (15, 5)), height=3.0
+    )
+    surface.connect_regions(
+        from_region=ground_floor,
+        from_edge=((5, 0), (5, 5)),
+        to_region=upper_floor,
+        to_edge=((10, 0), (10, 5)),
+    )
+    out = tmp_path / "travel_times.h5"
+    writer = jps.Hdf5TrajectoryWriter(
+        output_file=out, every_nth_frame=1, write_travel_times=True
+    )
+    sim = jps.Simulation(
+        model=jps.CollisionFreeSpeedModelV2(),
+        geometry=surface,
+        trajectory_writer=writer,
+        dt=0.01,
+    )
+    exit_id = sim.add_exit_stage([(_rectangle((14, 0), (15, 5)), upper_floor)])
+    waypoint_id = sim.add_waypoint_stage(
+        [(_rectangle((1, 1), (2, 2)), ground_floor)]
+    )
+    sim.add_direct_steering_stage()
+    sim.iterate()
+    writer.close()
+    return out, sim, sorted([exit_id, waypoint_id])
+
+
+def test_hdf5_trajectory_loading_travel_times_round_trip(
+    travel_time_file,
+) -> None:
+    path, sim, stage_ids = travel_time_file
+    with jps.Hdf5TrajectoryLoader(path) as loader:
+        assert loader.has_travel_times()
+        assert loader.load_travel_time_stage_ids() == stage_ids
+        loaded = {stage: loader.load_travel_times(stage) for stage in stage_ids}
+
+    for stage in stage_ids:
+        expected = sim.travel_times(stage)
+        assert list(loaded[stage]) == list(expected)
+        for region, grid in loaded[stage].items():
+            want = expected[region]
+            assert grid.origin == want.origin
+            assert (grid.width, grid.height) == (want.width, want.height)
+            assert grid.cell_size == want.cell_size
+            assert grid.extent == pytest.approx(want.extent)
+            assert grid.values.dtype.str == "<f4"
+            np.testing.assert_array_equal(
+                grid.values, want.values.astype("<f4")
+            )
+            np.testing.assert_array_equal(
+                grid.directions, want.directions.astype("<f4")
+            )
+
+
+def test_hdf5_trajectory_loading_without_travel_times(tmp_path) -> None:
+    p = tmp_path / "sample.h5"
+    with h5_file(p):
+        pass
+    with jps.Hdf5TrajectoryLoader(p) as loader:
+        assert not loader.has_travel_times()
+        with pytest.raises(
+            jps.Hdf5TrajectoryLoader.Error, match="holds no travel times"
+        ):
+            loader.load_travel_time_stage_ids()
+        with pytest.raises(
+            jps.Hdf5TrajectoryLoader.Error, match="holds no travel times"
+        ):
+            loader.load_travel_times(0)
+
+
+def test_hdf5_trajectory_loading_travel_times_unknown_stage_reports_id(
+    travel_time_file,
+) -> None:
+    path, _, stage_ids = travel_time_file
+    with (
+        jps.Hdf5TrajectoryLoader(path) as loader,
+        pytest.raises(
+            jps.Hdf5TrajectoryLoader.Error,
+            match=rf"No travel times for stage_id=99, found stages \{stage_ids}",
+        ),
+    ):
+        loader.load_travel_times(99)
+
+
+def _replace(f: h5py.File, name: str, data) -> None:
+    del f[name]
+    f.create_dataset(name, data=data)
+
+
+@pytest.mark.parametrize(
+    "corrupt, message",
+    [
+        (
+            lambda f: f.__delitem__("travel_times/directions"),
+            "Travel times dataset 'directions' missing",
+        ),
+        (
+            lambda f: _replace(f, "travel_times/grids", np.zeros(1)),
+            "Travel times grids dataset has wrong datatype",
+        ),
+        (
+            lambda f: _replace(
+                f,
+                "travel_times/values",
+                f["travel_times/values"][:].astype("<f8"),
+            ),
+            "Travel times values dataset has to be 1-D <f4",
+        ),
+        (
+            lambda f: _replace(
+                f,
+                "travel_times/directions",
+                f["travel_times/directions"][:-1],
+            ),
+            "Travel times hold .* values but .* directions",
+        ),
+        (
+            lambda f: _replace(
+                f,
+                "travel_times/grids",
+                np.concatenate(
+                    [
+                        f["travel_times/grids"][:-1],
+                        _shifted(f["travel_times/grids"][-1:], 1),
+                    ]
+                ),
+            ),
+            "runs past the .* stored values",
+        ),
+    ],
+)
+def test_hdf5_trajectory_loading_rejects_broken_travel_times(
+    travel_time_file, corrupt, message
+) -> None:
+    path, _, _ = travel_time_file
+    with h5py.File(path, "r+") as f:
+        corrupt(f)
+    with pytest.raises(jps.Hdf5TrajectoryLoader.Error, match=message):
+        jps.Hdf5TrajectoryLoader(path)
+
+
+def _shifted(grids, by: int):
+    """@p grids with every offset moved @p by elements."""
+    grids = grids.copy()
+    grids["offset"] += by
+    return grids

@@ -19,7 +19,7 @@ class TrajectoryWriter(metaclass=abc.ABCMeta):
     """Interface for trajectory serialization
 
     Writers are context managers: leaving a ``with`` block calls
-    :meth:`close`, also when the block raises::
+    :meth:`close`, or :meth:`close_after_error` when the block raises::
 
         with jps.Hdf5TrajectoryWriter(output_file=path) as writer:
             sim = jps.Simulation(..., trajectory_writer=writer)
@@ -36,7 +36,10 @@ class TrajectoryWriter(metaclass=abc.ABCMeta):
         exc_value: BaseException | None,
         traceback: types.TracebackType | None,
     ) -> None:
-        self.close()
+        if exc_type is None:
+            self.close()
+        else:
+            self.close_after_error()
 
     def close(self) -> None:
         """Write all buffered data and release the writer's resources.
@@ -45,6 +48,15 @@ class TrajectoryWriter(metaclass=abc.ABCMeta):
         once. Does nothing by default; override it if the writer buffers data
         or holds resources such as open files.
         """
+
+    def close_after_error(self) -> None:
+        """Called instead of :meth:`close` when a ``with`` block ends on an
+        exception.
+
+        The error is still propagating, so do only what keeps the output
+        usable and skip expensive extras. Calls :meth:`close` by default.
+        """
+        self.close()
 
     @abc.abstractmethod
     def begin_writing(self, simulation: Simulation) -> None:

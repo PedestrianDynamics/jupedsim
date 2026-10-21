@@ -149,6 +149,15 @@ mod ffi {
             region: usize,
             dest: usize,
         ) -> Result<Vec<f64>>;
+        /// The walking direction to `dest` at the centre of every cell of
+        /// `region`'s grid, as `region_direction` gives it there; NaN where
+        /// `region_travel_times` is infinite. Solves the destination on first
+        /// use.
+        fn region_directions(
+            self: &mut MultiRegionFloorfield,
+            region: usize,
+            dest: usize,
+        ) -> Result<Vec<Point2d>>;
     }
 }
 
@@ -215,6 +224,18 @@ impl MultiRegionFloorfield {
         dest: usize,
     ) -> Result<Vec<f64>, MultiRegionError> {
         self.travel_times(region, dest)
+    }
+
+    fn region_directions(
+        &mut self,
+        region: usize,
+        dest: usize,
+    ) -> Result<Vec<Point2d>, MultiRegionError> {
+        Ok(self
+            .directions(region, dest)?
+            .into_iter()
+            .map(|(x, y)| Point2d { x, y })
+            .collect())
     }
 }
 
@@ -324,6 +345,24 @@ mod tests {
             d.x < -0.99,
             "should point toward the exit at x=0.5, got {d:?}"
         );
+    }
+
+    #[test]
+    fn region_directions_match_the_direction_at_each_cell_centre() {
+        let mut ff = room();
+        let exit = ff.add_point_destination(0, 0.5, 5.0).unwrap();
+        let tt = ff.region_travel_times(0, exit).unwrap();
+        let dirs = ff.region_directions(0, exit).unwrap();
+        let grid = *ff.grid(0).unwrap();
+        assert_eq!(dirs.len(), tt.len());
+        for (cell, (d, t)) in (0u32..).zip(dirs.iter().zip(&tt)) {
+            if t.is_finite() {
+                let (x, y) = grid.cell_center(cell);
+                assert_eq!(*d, ff.region_direction(0, pt(x, y), exit).unwrap());
+            } else {
+                assert!(d.x.is_nan() && d.y.is_nan(), "cell {cell}: {d:?}");
+            }
+        }
     }
 
     #[test]

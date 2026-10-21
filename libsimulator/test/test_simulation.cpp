@@ -13,6 +13,7 @@
 
 #include <gtest/gtest.h>
 
+#include <algorithm>
 #include <cstddef>
 #include <memory>
 #include <utility>
@@ -150,6 +151,85 @@ TEST(Simulation, AStageInAnUnknownRegionIsRejected)
     const auto flat = on_a_flat_room();
     const Polygon square{std::vector<Point>{{2, 2}, {4, 2}, {4, 4}, {2, 4}}};
     EXPECT_THROW(flat.sim->add_stage(ExitDescription{{{square, 99}}}), SimulationError);
+}
+
+/// Travel time of the cell of @p grid that @p xy lies in.
+double time_at(const TravelTimeGrid& grid, Point xy)
+{
+    const auto col = static_cast<std::size_t>((xy.x - grid.origin.x) / grid.cell_size);
+    const auto row = static_cast<std::size_t>((xy.y - grid.origin.y) / grid.cell_size);
+    return grid.values.at(row * grid.width + col);
+}
+
+TEST(Simulation, ReportsTheTravelTimesToAStage)
+{
+    const auto flat = on_a_flat_room();
+    const Polygon strip{std::vector<Point>{{0, 0}, {1, 0}, {1, 20}, {0, 20}}};
+    const auto exit = flat.sim->add_stage(ExitDescription{{{strip, flat.room_id}}});
+
+    const auto grids = flat.sim->travel_times(exit);
+    ASSERT_EQ(grids.size(), 1u);
+    const auto& grid = grids.at(flat.room_id);
+
+    EXPECT_EQ(grid.values.size(), std::size_t{grid.width} * grid.height);
+    // The grid covers the whole room.
+    EXPECT_LE(grid.origin.x, 0.0);
+    EXPECT_LE(grid.origin.y, 0.0);
+    EXPECT_GE(grid.origin.x + grid.width * grid.cell_size, 20.0);
+    EXPECT_GE(grid.origin.y + grid.height * grid.cell_size, 20.0);
+    EXPECT_EQ(time_at(grid, {0.5, 10}), 0.0) << "inside the exit";
+    EXPECT_GT(time_at(grid, {19.5, 10}), time_at(grid, {10, 10}));
+    EXPECT_GT(time_at(grid, {10, 10}), 0.0);
+
+    ASSERT_EQ(grid.directions.size(), grid.values.size());
+    const auto direction_at = [&grid](Point xy) {
+        const auto col = static_cast<std::size_t>((xy.x - grid.origin.x) / grid.cell_size);
+        const auto row = static_cast<std::size_t>((xy.y - grid.origin.y) / grid.cell_size);
+        return grid.directions.at(row * grid.width + col);
+    };
+    EXPECT_LT(direction_at({10, 10}).x, -0.99) << "towards the exit on the left";
+    EXPECT_EQ(direction_at({0.5, 10}), (Point{0, 0})) << "inside the exit";
+}
+
+TEST(Simulation, ListsItsStagesInAscendingOrder)
+{
+    const auto flat = on_a_flat_room();
+    const Polygon square{std::vector<Point>{{2, 2}, {4, 2}, {4, 4}, {2, 4}}};
+    const auto exit = flat.sim->add_stage(ExitDescription{{{square, flat.room_id}}});
+    const auto steering = flat.sim->add_stage(DirectSteeringDescription{});
+    const auto waypoint = flat.sim->add_stage(WaypointDescription{{{square, flat.room_id}}});
+    EXPECT_EQ(flat.sim->stage_ids(), (std::vector<BaseStage::ID>{exit, steering, waypoint}));
+}
+
+TEST(Simulation, ReportsTheTravelTimesOfEveryRegion)
+{
+    auto stair = test_geometries::u_stair();
+    const auto region_count = stair.geometry->region_count();
+    Simulation sim{model(), std::move(stair.geometry), 0.01, FloorfieldOptions{}};
+    const Polygon square{std::vector<Point>{{1, 9}, {3, 9}, {3, 11}, {1, 11}}};
+    const auto exit = sim.add_stage(ExitDescription{{{square, stair.room_2}}});
+
+    const auto grids = sim.travel_times(exit);
+
+    ASSERT_EQ(grids.size(), region_count);
+    for(const auto& [region_id, grid] : grids) {
+        EXPECT_EQ(grid.values.size(), std::size_t{grid.width} * grid.height)
+            << "region " << region_id;
+        const auto shortest = *std::min_element(grid.values.begin(), grid.values.end());
+        // Only the exit's own region holds cells inside it.
+        if(region_id == stair.room_2) {
+            EXPECT_EQ(shortest, 0.0);
+        } else {
+            EXPECT_GT(shortest, 0.0) << "region " << region_id;
+        }
+    }
+}
+
+TEST(Simulation, AStageWithoutAnAreaHasNoTravelTimes)
+{
+    const auto flat = on_a_flat_room();
+    const auto steering = flat.sim->add_stage(DirectSteeringDescription{});
+    EXPECT_TRUE(flat.sim->travel_times(steering).empty());
 }
 
 TEST(MeshBuiltSimulation, IsRejected)

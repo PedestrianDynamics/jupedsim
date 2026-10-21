@@ -418,6 +418,31 @@ const BaseStage* Simulation::stage(BaseStage::ID stage_id) const
 {
     return _stage_manager.stage(stage_id);
 }
+std::vector<BaseStage::ID> Simulation::stage_ids() const
+{
+    std::vector<BaseStage::ID> ids{};
+    ids.reserve(_stage_manager.stages().size());
+    for(const auto& [id, stage] : _stage_manager.stages()) {
+        ids.push_back(id);
+    }
+    std::sort(ids.begin(), ids.end());
+    return ids;
+}
+
+std::map<std::size_t, TravelTimeGrid> Simulation::travel_times(BaseStage::ID stage_id)
+{
+    throw_if_iterating("TravelTimes");
+    const auto* destination = _stage_manager.stage(stage_id)->destination();
+    std::map<std::size_t, TravelTimeGrid> grids{};
+    if(destination == nullptr) {
+        return grids; // nothing to route to, so no region has travel times to it
+    }
+    for(std::size_t region_id = 0; region_id < _geometry->region_count(); ++region_id) {
+        grids.emplace(region_id, destination->travel_times(region_id));
+    }
+    return grids;
+}
+
 const Geometry& Simulation::geo() const
 {
     return *_geometry;
