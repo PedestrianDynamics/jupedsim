@@ -99,7 +99,7 @@ class Hdf5TrajectoryWriter(TrajectoryWriter):
         every_nth_frame: int = 4,
     ):
         if every_nth_frame < 1:
-            raise TrajectoryWriter.Exception("'every_nth_frame' has to be > 0")
+            raise TrajectoryWriter.Error("'every_nth_frame' has to be > 0")
         self._output_file: Path = output_file
         self._every_nth_frame: int = every_nth_frame
         self._records_to_cache: int = 2**16 // self.trajectory_dtype().itemsize
@@ -124,9 +124,7 @@ class Hdf5TrajectoryWriter(TrajectoryWriter):
             simulation: Simulation object to query for data.
         """
         if self._is_writing:
-            raise TrajectoryWriter.Exception(
-                "'begin_writing()' already called!"
-            )
+            raise TrajectoryWriter.Error("'begin_writing()' already called!")
         self._file: h5py.File = h5py.File(str(self._output_file), "w")
         try:
             self._write_header(simulation)
@@ -219,7 +217,7 @@ class Hdf5TrajectoryWriter(TrajectoryWriter):
             simulation: Simulation object to query.
         """
         if not self._is_writing:
-            raise TrajectoryWriter.Exception(
+            raise TrajectoryWriter.Error(
                 "Need to call 'begin_writing()' before calling 'write_iteration_state()'"
             )
         iteration = simulation.iteration_count()
