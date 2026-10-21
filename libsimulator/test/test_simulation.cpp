@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
+#include "floorfield_routing_engine.hpp"
 #include "geometry/geometry.hpp"
 #include "geometry_fixtures.hpp"
 #include "journey.hpp"
@@ -32,7 +33,10 @@ std::unique_ptr<CollisionFreeSpeedModel> model()
 std::unique_ptr<Simulation> on_a_mesh_built_switchback_stair()
 {
     return std::make_unique<Simulation>(
-        model(), std::make_unique<Geometry>(fixtures::switchback_stair()), 0.01);
+        model(),
+        std::make_unique<Geometry>(fixtures::switchback_stair()),
+        0.01,
+        FloorfieldOptions{});
 }
 
 /// A simulation on a flat 20 x 20 room, and the id of that room's region.
@@ -44,7 +48,9 @@ struct FlatRoom {
 FlatRoom on_a_flat_room()
 {
     auto room = test_geometries::rectangle({0, 0}, {20, 20});
-    return {std::make_unique<Simulation>(model(), std::move(room.geometry), 0.01), room.room_id};
+    return {
+        std::make_unique<Simulation>(model(), std::move(room.geometry), 0.01, FloorfieldOptions{}),
+        room.room_id};
 }
 
 /// Both floors of the U-stair carry this (x, y).
@@ -66,7 +72,7 @@ journey_to(Simulation& sim, Point position, std::size_t region_id)
 TEST(MultiStoreySimulation, RunsOnAMultiStoreySurface)
 {
     auto stair = test_geometries::u_stair();
-    Simulation sim{model(), std::move(stair.geometry), 0.01};
+    Simulation sim{model(), std::move(stair.geometry), 0.01, FloorfieldOptions{}};
     const auto [journey, stage] = journey_to(sim, stacked_point, stair.room_2);
 
     const auto id = sim.add_agent(journey, stage, Point{2, 2}, State{}, stair.room_1);
@@ -83,7 +89,7 @@ TEST(MultiStoreySimulation, RunsOnAMultiStoreySurface)
 TEST(MultiStoreySimulation, AnAgentIsPutInTheRegionItNames)
 {
     auto stair = test_geometries::u_stair();
-    Simulation sim{model(), std::move(stair.geometry), 0.01};
+    Simulation sim{model(), std::move(stair.geometry), 0.01, FloorfieldOptions{}};
     const auto [journey, stage] = journey_to(sim, stacked_point, stair.room_2);
 
     const auto downstairs = sim.add_agent(journey, stage, stacked_point, State{}, stair.room_1);
@@ -97,7 +103,7 @@ TEST(MultiStoreySimulation, AnAgentIsPutInTheRegionItNames)
 TEST(MultiStoreySimulation, AStageIsPutInTheRegionItNames)
 {
     auto stair = test_geometries::u_stair();
-    Simulation sim{model(), std::move(stair.geometry), 0.01};
+    Simulation sim{model(), std::move(stair.geometry), 0.01, FloorfieldOptions{}};
     const auto [up_journey, up_stage] = journey_to(sim, stacked_point, stair.room_2);
     const auto [down_journey, down_stage] = journey_to(sim, stacked_point, stair.room_1);
 
@@ -118,7 +124,7 @@ TEST(MultiStoreySimulation, AStageIsPutInTheRegionItNames)
 TEST(MultiStoreySimulation, ATargetWrittenFromOutsideLandsOnTheAgentsOwnStorey)
 {
     auto stair = test_geometries::u_stair();
-    Simulation sim{model(), std::move(stair.geometry), 0.01};
+    Simulation sim{model(), std::move(stair.geometry), 0.01, FloorfieldOptions{}};
     const auto [journey, stage] = journey_to(sim, stacked_point, stair.room_2);
     const auto upstairs = sim.add_agent(journey, stage, stacked_point, State{}, stair.room_2);
 
@@ -196,7 +202,7 @@ void expect_climbed_without_stalling(const Climb& climb)
 TEST(MultiStoreySimulation, WalkingUpTheUStairToTheExitAbove)
 {
     auto stair = test_geometries::u_stair();
-    Simulation sim{model(), std::move(stair.geometry), 0.01};
+    Simulation sim{model(), std::move(stair.geometry), 0.01, FloorfieldOptions{}};
 
     // The exit lies on the upper floor, and the agent starts on the ground floor directly below
     // it -- inside its outline in plan. The only way there: east to the stairwell, up both
@@ -217,7 +223,7 @@ TEST(MultiStoreySimulation, WalkingUpTheUStairToTheExitAbove)
 TEST(MultiStoreySimulation, SteeredUpTheUStairToTheFloorAbove)
 {
     auto stair = test_geometries::u_stair();
-    Simulation sim{model(), std::move(stair.geometry), 0.01};
+    Simulation sim{model(), std::move(stair.geometry), 0.01, FloorfieldOptions{}};
 
     // The same way as to the exit above, steered towards a single place.
     const auto steering = sim.add_stage(DirectSteeringDescription{});

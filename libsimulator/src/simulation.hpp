@@ -2,6 +2,7 @@
 #pragma once
 
 #include "agent_removal_system.hpp"
+#include "floorfield_routing_engine.hpp"
 #include "generic_agent.hpp"
 #include "geometry/geometry.hpp"
 #include "journey.hpp"
@@ -55,7 +56,8 @@ public:
     Simulation(
         std::unique_ptr<OperationalModel>&& operational_model,
         std::unique_ptr<Geometry>&& geometry,
-        double dt);
+        double dt,
+        FloorfieldOptions floorfield_options);
 
     Simulation(const Simulation& other) = delete;
     Simulation& operator=(const Simulation& other) = delete;

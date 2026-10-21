@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "conversion.hpp"
+#include "floorfield_routing_engine.hpp"
 #include "geometry/geometry.hpp"
 #include "geometry/location.hpp"
 #include "geometry/validation.hpp"
@@ -19,6 +20,32 @@ namespace py = pybind11;
 
 void init_routing(py::module_& m)
 {
+    const FloorfieldOptions floorfield_defaults{};
+    py::class_<FloorfieldOptions> floorfield_options(m, "FloorfieldOptions");
+    floorfield_options.doc() = clean_doc(R"(
+        Parameters of the static floor fields used to route agents to their stage areas.
+
+        Args:
+            cell_size: Edge length of a floor field grid cell [m]. Smaller cells give
+                smoother routes at the cost of memory and setup time.
+            wall_influence_radius: Distance from walls at which the speed field is reduced to avoid 
+            routing agents to close to walls. The reduction scales linearly from the influence radius to the wall.
+    )");
+    floorfield_options
+        .def(
+            py::init([](double cell_size, double wall_influence_radius) {
+                return FloorfieldOptions{cell_size, wall_influence_radius};
+            }),
+            py::kw_only(),
+            py::arg("cell_size") = floorfield_defaults.cell_size,
+            py::arg("wall_influence_radius") = floorfield_defaults.wall_influence_radius)
+        .def_readwrite("cell_size", &FloorfieldOptions::cell_size)
+        .def_readwrite("wall_influence_radius", &FloorfieldOptions::wall_influence_radius)
+        .def("__repr__", [](const FloorfieldOptions& self) {
+            return py::str("FloorfieldOptions(cell_size={!r}, wall_influence_radius={!r})")
+                .format(self.cell_size, self.wall_influence_radius);
+        });
+
     py::class_<Location> location(m, "Location");
     location.doc() = clean_doc(R"(
         A point on the walkable surface, together with the region it lies in.

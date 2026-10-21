@@ -2,6 +2,7 @@
 #include "simulation.hpp"
 
 #include "conversion.hpp"
+#include "floorfield_routing_engine.hpp"
 #include "generic_agent.hpp"
 #include "geometry/geometry.hpp"
 #include "geometry/location.hpp"
@@ -26,6 +27,7 @@
 #include <map>
 #include <memory>
 #include <stdexcept>
+#include <string>
 #include <tuple>
 #include <utility>
 #include <variant>
@@ -70,19 +72,22 @@ void init_simulation(py::module_& m)
             // reused. The same goes for the geometry.
             py::init([](std::unique_ptr<OperationalModel> model,
                         std::unique_ptr<Geometry> geometry,
-                        double dt) {
+                        double dt,
+                        FloorfieldOptions floorfield_options) {
                 if(!model) {
                     throw std::invalid_argument("model must not be None");
                 }
                 if(!geometry) {
                     throw std::invalid_argument("geometry must not be None");
                 }
-                return std::make_unique<Simulation>(std::move(model), std::move(geometry), dt);
+                return std::make_unique<Simulation>(
+                    std::move(model), std::move(geometry), dt, floorfield_options);
             }),
             py::kw_only(),
             py::arg("model"),
             py::arg("geometry"),
-            py::arg("dt"))
+            py::arg("dt"),
+            py::arg("floorfield_options"))
         .def(
             "add_waypoint_stage",
             [](Simulation& sim, Areas areas) {
