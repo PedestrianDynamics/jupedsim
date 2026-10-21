@@ -206,8 +206,9 @@ Using the custom writer is identical to using the built-in HDF5 writer:
 .. note::
 
     Every ``TrajectoryWriter`` is a context manager: leaving the ``with``
-    block calls ``close()``, also when the simulation raises. Without a
-    ``with`` block, call ``close()`` yourself when the simulation is done.
+    block calls ``close()``, or ``close_after_error()`` when the simulation
+    raises. Without a ``with`` block, call ``close()`` yourself when the
+    simulation is done.
 
 
 .. _resource-cleanup:
@@ -225,6 +226,11 @@ Tips for custom writers
 - **Resource cleanup**: Override ``close()`` if your writer buffers data or
   opens files, connections, or other resources. It is called when leaving a
   ``with`` block and must be safe to call more than once.
+
+- **Closing after an error**: When a ``with`` block ends on an exception,
+  ``close_after_error()`` runs instead of ``close()``. It calls ``close()``
+  by default; override it to skip expensive finishing work, such as the
+  travel times the HDF5 writer leaves out then.
 
 - **Error handling**: Raise ``TrajectoryWriter.Exception`` for writer-specific
   errors to keep error reporting consistent.
@@ -283,6 +289,33 @@ loaded per region; the result plugs straight into
 ``result["frame"]["data"]`` is a structured array with the columns ``id``,
 ``frame``, ``x`` and ``y`` holding only the rows recorded while the agent was
 inside that region.
+
+Travel times
+------------
+
+With ``write_travel_times=True`` the writer also stores the floor field travel
+times and walking directions to every waypoint and exit stage when it is
+closed. The loader returns them per stage in the same form as
+:meth:`jupedsim.Simulation.travel_times`, one grid per region::
+
+    import matplotlib.pyplot as plt
+    import numpy as np
+
+    with jps.Hdf5TrajectoryLoader(Path("traj.h5")) as loader:
+        stage_id = loader.load_travel_time_stage_ids()[0]
+        grids = loader.load_travel_times(stage_id)
+
+    for region_id, grid in grids.items():
+        plt.imshow(
+            np.ma.masked_invalid(grid.values), origin="lower", extent=grid.extent
+        )
+
+Each grid has ``origin``, ``width``, ``height``, ``cell_size``, ``extent``,
+``values`` (seconds, shape ``(height, width)``) and ``directions`` (shape
+``(height, width, 2)``), stored as 32-bit floats. The arrays are read into
+memory, so they stay usable after the loader is closed.
+:meth:`~jupedsim.Hdf5TrajectoryLoader.has_travel_times` tells whether a file
+holds travel times at all.
 
 File layout
 -----------

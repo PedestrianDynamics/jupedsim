@@ -10,6 +10,7 @@
 #include <string>
 
 class FloorfieldRoutingEngine;
+struct TravelTimeGrid;
 
 /// An area agents are routed to. The engine that registered it has to outlive it.
 class Destination
@@ -25,6 +26,9 @@ public:
 
     /// Unit vector from @p from along the route to the destination. Zero once inside it.
     Point orientation(const Location& from) const;
+
+    /// Travel times to the destination over the grid of @p region.
+    TravelTimeGrid travel_times(std::size_t region) const;
 
 private:
     friend std::string format_as(const Destination& d)

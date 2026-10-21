@@ -23,6 +23,7 @@
 #include <pybind11/stl.h> // IWYU pragma: keep
 #include <pybind11/typing.h>
 
+#include <cstddef>
 #include <cstdint>
 #include <map>
 #include <memory>
@@ -182,6 +183,11 @@ void init_simulation(py::module_& m)
             py::arg("region_id"),
             // The returned token points into geometry the simulation owns.
             py::keep_alive<0, 1>())
+        .def("stage_ids", &Simulation::stage_ids)
+        .def(
+            "travel_times",
+            [](Simulation& sim, uint64_t stage_id) { return sim.travel_times(stage_id); },
+            py::arg("stage_id"))
         .def(
             "set_agent_target",
             [](Simulation& sim, uint64_t agent_id, std::tuple<double, double> target) {

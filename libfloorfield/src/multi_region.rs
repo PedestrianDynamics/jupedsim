@@ -389,38 +389,52 @@ impl MultiRegionFloorfield {
             .ok_or(MultiRegionError::NotRoutable { region, x, y })?;
         self.solution(dest)?;
         let d = &self.destinations[dest];
-        let g = &self.regions[region];
-
         let source = d
             .sources
             .iter()
-            .find(|s| s.region == region && s.cells.binary_search(&cell).is_ok());
-        match source.map(|s| s.kind) {
-            Some(SourceKind::Area) => return Ok((0.0, 0.0)),
-            Some(SourceKind::Point { anchor }) => return Ok(unit(anchor.0 - x, anchor.1 - y)),
-            None => {}
-        }
+            .find(|s| s.region == region && s.cells.binary_search(&cell).is_ok())
+            .map(|s| s.kind);
+        let query = d.solution.as_ref().expect("solved above").query[region].as_deref();
+        direction_at_cell(&self.regions[region], query, cell, source, (x, y))
+            .ok_or_else(|| no_descent(region, (x, y), dest))
+    }
 
-        // `new` checked that every walkable cell is reachable, so every
-        // region has a field, `cell` a finite time in it, and a lower
-        // neighbour outside the destination. A miss is a bug: report it
-        // rather than panic across the FFI boundary.
-        let no_descent = || {
-            MultiRegionError::Internal(format!(
-                "no way down from ({x}, {y}) in region {region} to destination {dest}"
-            ))
+    /// The direction of `direction` at the centre of every cell of `region`'s
+    /// grid, aligned with `travel_times`: what an agent standing there is sent
+    /// along. NaN where the travel time is not finite (obstacle cells).
+    ///
+    /// Works on cells directly: the solution and the destination's cells are
+    /// looked up once, not once per cell as calling `direction` would.
+    pub fn directions(&mut self, region: usize, dest: usize) -> Result<Vec<(f64, f64)>> {
+        self.region(region)?;
+        self.solution(dest)?;
+        let g = &self.regions[region];
+        let d = &self.destinations[dest];
+        let Some(query) = d.solution.as_ref().expect("solved above").query[region].as_deref()
+        else {
+            return Ok(vec![(f64::NAN, f64::NAN); g.grid.cell_count()]);
         };
-        let sol = d.solution.as_ref().expect("solved above");
-        let query = sol.query[region].as_ref().ok_or_else(no_descent)?;
-        if !query[cell as usize].is_finite() {
-            return Err(no_descent());
+        // The source each destination cell of this region belongs to: the
+        // first one listing it, as in `direction`.
+        let mut sources = HashMap::new();
+        for s in d.sources.iter().filter(|s| s.region == region) {
+            for &cell in &s.cells {
+                sources.entry(cell).or_insert(s.kind);
+            }
         }
-        let (row, col) = g.row_col(cell);
-        let (gx, gy) = geometry::sobel_gradient(&g.grid, row, col, query);
-        if gx.hypot(gy) > 1e-12 {
-            return Ok(unit(-gx, -gy));
-        }
-        steepest_descent(g, query, cell).ok_or_else(no_descent)
+        (0u32..)
+            .zip(query)
+            .map(|(cell, t)| {
+                // Halo cells hold neighbour values but are obstacles here:
+                // `travel_times` reports them infinite.
+                if !(g.walkable(cell) && t.is_finite()) {
+                    return Ok((f64::NAN, f64::NAN));
+                }
+                let p = g.grid.cell_center(cell);
+                direction_at_cell(g, Some(query), cell, sources.get(&cell).copied(), p)
+                    .ok_or_else(|| no_descent(region, p, dest))
+            })
+            .collect()
     }
 
     /// Travel time from (x, y) in `region` to `dest`: zero inside it. Taken at
@@ -808,6 +822,46 @@ fn unit(dx: f64, dy: f64) -> (f64, f64) {
     } else {
         (0.0, 0.0)
     }
+}
+
+/// `direction` for an agent at `p` in walkable cell `cell` of `g`: zero in an
+/// area destination, towards the anchor in a point destination's cell, else
+/// downhill on `query`, the region's travel times with halo. `source` is the
+/// destination source holding `cell`, if any.
+///
+/// `None` where there is no way down: no field for the region, an infinite
+/// time at `cell`, or no lower neighbour. `new` checked that every walkable
+/// cell is reachable, so that is a bug.
+fn direction_at_cell(
+    g: &RegionGrid,
+    query: Option<&[f64]>,
+    cell: u32,
+    source: Option<SourceKind>,
+    p: (f64, f64),
+) -> Option<(f64, f64)> {
+    match source {
+        Some(SourceKind::Area) => return Some((0.0, 0.0)),
+        Some(SourceKind::Point { anchor }) => return Some(unit(anchor.0 - p.0, anchor.1 - p.1)),
+        None => {}
+    }
+    let query = query?;
+    if !query[cell as usize].is_finite() {
+        return None;
+    }
+    let (row, col) = g.row_col(cell);
+    let (gx, gy) = geometry::sobel_gradient(&g.grid, row, col, query);
+    if gx.hypot(gy) > 1e-12 {
+        return Some(unit(-gx, -gy));
+    }
+    steepest_descent(g, query, cell)
+}
+
+/// The error for a `None` from `direction_at_cell`: a bug, reported rather
+/// than panicking across the FFI boundary.
+fn no_descent(region: usize, (x, y): (f64, f64), dest: usize) -> MultiRegionError {
+    MultiRegionError::Internal(format!(
+        "no way down from ({x}, {y}) in region {region} to destination {dest}"
+    ))
 }
 
 /// Towards the neighbour of `cell` (eight-neighbourhood, halo included) whose
@@ -1702,5 +1756,36 @@ mod tests {
             (fine - coarse).abs() < 0.05 * fine,
             "fine {fine}, coarse {coarse}"
         );
+    }
+
+    /// `directions` works on cells, `direction` on points: they must agree at
+    /// every cell centre, also next to a seam (halo cells hold finite values
+    /// but are obstacles) and inside each piece of an area destination.
+    #[test]
+    fn directions_match_direction_at_every_cell_centre_across_a_seam() {
+        let mut ff = split_corridor();
+        let area = ff
+            .add_area_destination(&[
+                piece(0, rect(1., 1., 2., 3.)),
+                piece(1, rect(18., 1., 19., 3.)),
+            ])
+            .unwrap();
+        let point = ff.add_point_destination(1, 15.1, 2.2).unwrap();
+        for dest in [area, point] {
+            for region in 0..ff.region_count() {
+                let tt = ff.travel_times(region, dest).unwrap();
+                let dirs = ff.directions(region, dest).unwrap();
+                let grid = *ff.grid(region).unwrap();
+                assert_eq!(dirs.len(), tt.len());
+                for (cell, (d, t)) in (0u32..).zip(dirs.iter().zip(&tt)) {
+                    if t.is_finite() {
+                        let (x, y) = grid.cell_center(cell);
+                        assert_eq!(*d, ff.direction(region, x, y, dest).unwrap());
+                    } else {
+                        assert!(d.0.is_nan() && d.1.is_nan(), "cell {cell}: {d:?}");
+                    }
+                }
+            }
+        }
     }
 }

@@ -22,6 +22,23 @@ struct FloorfieldOptions {
     double wall_influence_radius = 0.5;
 };
 
+/// Travel times and walking directions to one destination over one region's floor field grid.
+/// All regions share one lattice, so grids of neighbouring regions line up cell for cell.
+struct TravelTimeGrid {
+    /// Lower-left corner of cell (0, 0); cell (col, row) is centred at
+    /// origin + ((col + 0.5), (row + 0.5)) * cell_size.
+    Point origin;
+    std::uint32_t width;
+    std::uint32_t height;
+    double cell_size;
+    /// Row-major, height * width values in seconds: zero inside the destination, infinite where
+    /// the cell is not walkable.
+    std::vector<double> values;
+    /// Row-major, height * width unit vectors: the direction an agent at the cell's centre is
+    /// sent along. Zero inside the destination, NaN where the cell is not walkable.
+    std::vector<Point> directions;
+};
+
 /// Routes to registered areas along static floor fields over the region graph.
 class FloorfieldRoutingEngine
 {
@@ -42,6 +59,9 @@ public:
 
     bool contains(const Location& where, std::size_t id);
     Point get_orientation(const Location& from, std::size_t id);
+    /// Travel times and directions to destination @p id over the grid of @p region. Solves the
+    /// destination on first use.
+    TravelTimeGrid travel_times(std::size_t region, std::size_t id);
 
 private:
     rust::Box<jupedsim::floorfield::MultiRegionFloorfield> _field;

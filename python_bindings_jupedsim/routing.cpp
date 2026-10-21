@@ -9,14 +9,39 @@
 #include "type_casters.hpp"
 
 #include <CGAL/Polygon_mesh_processing/IO/polygon_mesh_io.h>
+#include <fmt/format.h>
+#include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h> // IWYU pragma: keep
 
+#include <algorithm>
+#include <cstddef>
 #include <memory>
+#include <stdexcept>
 #include <string>
+#include <tuple>
 #include <utility>
 
 namespace py = pybind11;
+
+namespace
+{
+/// Checks that the arrays of @p grid hold one entry per cell: the NumPy copies of its
+/// values and directions rely on it.
+void check_cell_count(const TravelTimeGrid& grid)
+{
+    const auto cells = std::size_t{grid.width} * grid.height;
+    if(grid.values.size() != cells || grid.directions.size() != cells) {
+        throw std::logic_error(
+            fmt::format(
+                "TravelTimeGrid of {}x{} cells holds {} values and {} directions",
+                grid.width,
+                grid.height,
+                grid.values.size(),
+                grid.directions.size()));
+    }
+}
+} // namespace
 
 void init_routing(py::module_& m)
 {
@@ -44,6 +69,81 @@ void init_routing(py::module_& m)
         .def("__repr__", [](const FloorfieldOptions& self) {
             return py::str("FloorfieldOptions(cell_size={!r}, wall_influence_radius={!r})")
                 .format(self.cell_size, self.wall_influence_radius);
+        });
+
+    py::class_<TravelTimeGrid> travel_time_grid(m, "TravelTimeGrid");
+    travel_time_grid.doc() = clean_doc(R"(
+        Travel times and walking directions to one stage over the floor field grid of one
+        region.
+
+        Get one from :func:`~jupedsim.Simulation.travel_times`. All regions share one
+        lattice, so the grids of neighbouring regions line up cell for cell. Plot one
+        with matplotlib:
+
+        .. code:: python
+
+            grid = sim.travel_times(exit_id)[room]
+            plt.imshow(
+                numpy.ma.masked_invalid(grid.values),
+                origin="lower",
+                extent=grid.extent,
+            )
+    )");
+    travel_time_grid
+        .def_property_readonly(
+            "origin",
+            [](const TravelTimeGrid& g) { return std::tuple{g.origin.x, g.origin.y}; },
+            "Lower-left corner of cell (0, 0) in metres.")
+        .def_readonly("width", &TravelTimeGrid::width, "Number of cells along x.")
+        .def_readonly("height", &TravelTimeGrid::height, "Number of cells along y.")
+        .def_readonly("cell_size", &TravelTimeGrid::cell_size, "Edge length of a cell in metres.")
+        .def_property_readonly(
+            "extent",
+            [](const TravelTimeGrid& g) {
+                return std::tuple{
+                    g.origin.x,
+                    g.origin.x + g.width * g.cell_size,
+                    g.origin.y,
+                    g.origin.y + g.height * g.cell_size};
+            },
+            "``(x_min, x_max, y_min, y_max)`` of the grid in metres, as matplotlib's "
+            "``extent`` expects it.")
+        .def_property_readonly(
+            "values",
+            [](const TravelTimeGrid& g) {
+                check_cell_count(g);
+                py::array_t<double> values(
+                    {static_cast<py::ssize_t>(g.height), static_cast<py::ssize_t>(g.width)});
+                std::copy(g.values.begin(), g.values.end(), values.mutable_data());
+                return values;
+            },
+            "Travel times in seconds as an array of shape ``(height, width)``; row 0 is the "
+            "lowest. Zero inside the stage's area, ``inf`` where a cell is not walkable. "
+            "Each access returns a new copy.")
+        .def_property_readonly(
+            "directions",
+            [](const TravelTimeGrid& g) {
+                check_cell_count(g);
+                py::array_t<double> directions(
+                    {static_cast<py::ssize_t>(g.height),
+                     static_cast<py::ssize_t>(g.width),
+                     py::ssize_t{2}});
+                auto* out = directions.mutable_data();
+                for(const auto& d : g.directions) {
+                    *out++ = d.x;
+                    *out++ = d.y;
+                }
+                return directions;
+            },
+            "Walking directions as unit vectors ``(x, y)`` in an array of shape "
+            "``(height, width, 2)``, laid out like :attr:`values`: the direction an agent at "
+            "a cell's centre is sent along. Zero inside the stage's area, ``nan`` where a "
+            "cell is not walkable. Each access returns a new copy.")
+        .def("__repr__", [](const TravelTimeGrid& g) {
+            return py::str(
+                       "TravelTimeGrid(origin=({!r}, {!r}), width={!r}, height={!r}, "
+                       "cell_size={!r})")
+                .format(g.origin.x, g.origin.y, g.width, g.height, g.cell_size);
         });
 
     py::class_<Location> location(m, "Location");

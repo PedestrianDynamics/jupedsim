@@ -28,6 +28,7 @@ from jupedsim.pyjupedsim import (
     OperationalModel,
     SocialForceModel,
     SocialForceModelState,
+    TravelTimeGrid,
     WalkableSurface,
     WarpDriverModel,
     WarpDriverModelState,
@@ -272,6 +273,25 @@ class Simulation:
         """
         return self._obj.get_location(x, y, region_id)
 
+    def travel_times(self, stage_id: int) -> dict[int, TravelTimeGrid]:
+        """Get the travel times to a stage's area over the floor field grid of every region.
+
+        Every region has its own grid. Solves the stage's floor field if no agent has
+        needed it yet.
+
+        Args:
+            stage_id: Id of the stage.
+
+        Returns:
+            The grid of every region by region id, in ascending order, each with its
+            placement, travel times in seconds and walking directions. Empty for a
+            stage without an area to route to, such as a direct steering stage.
+
+        Raises:
+            SimulationError: if the stage does not exist.
+        """
+        return self._obj.travel_times(stage_id)
+
     def mark_agent_for_removal(self, agent_id: int):
         """Marks an agent for removal.
 
@@ -426,6 +446,14 @@ class Simulation:
             Agent(self, agent_id)
             for agent_id in self._obj.agents_in_polygon(poly)
         ]
+
+    def stage_ids(self) -> list[int]:
+        """Get the ids of all stages.
+
+        Returns:
+            The ids of all stages in ascending order.
+        """
+        return self._obj.stage_ids()
 
     def get_stage(
         self, stage_id: int

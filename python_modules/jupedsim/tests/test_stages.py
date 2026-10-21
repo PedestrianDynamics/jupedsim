@@ -3,6 +3,7 @@ import gc
 import weakref
 
 import jupedsim as jps
+import numpy as np
 import pytest
 import shapely
 
@@ -282,3 +283,81 @@ def test_get_stage_rejects_ids_of_the_wrong_type(square_room_5x5, bad_id):
     sim, _ = square_room_5x5
     with pytest.raises(TypeError):
         sim.get_stage(bad_id)
+
+
+def test_travel_times_to_an_exit(square_room_5x5):
+    sim, room = square_room_5x5
+    exit_id = sim.add_exit_stage(
+        [([(-2.5, -2.5), (-2, -2.5), (-2, 2.5), (-2.5, 2.5)], room)]
+    )
+
+    grid = sim.travel_times(exit_id)[room]
+
+    assert grid.values.shape == (grid.height, grid.width)
+    x_min, x_max, y_min, y_max = grid.extent
+    assert (x_min, y_min) == grid.origin
+    assert x_max == pytest.approx(x_min + grid.width * grid.cell_size)
+    assert y_max == pytest.approx(y_min + grid.height * grid.cell_size)
+    assert x_min <= -2.5 and x_max >= 2.5 and y_min <= -2.5 and y_max >= 2.5
+
+    def time_at(x, y):
+        col = int((x - x_min) / grid.cell_size)
+        row = int((y - y_min) / grid.cell_size)
+        return grid.values[row, col]
+
+    assert time_at(-2.25, 0) == 0.0
+    assert 0.0 < time_at(0, 0) < time_at(2.25, 0)
+
+    directions = grid.directions
+    assert directions.shape == (grid.height, grid.width, 2)
+    walkable = np.isfinite(grid.values)
+    assert np.isnan(directions[~walkable]).all()
+    lengths = np.linalg.norm(directions[walkable], axis=1)
+    assert np.all((np.abs(lengths - 1.0) < 1e-9) | (lengths == 0.0))
+    row = int((0 - y_min) / grid.cell_size)
+    col = int((1.0 - x_min) / grid.cell_size)
+    assert directions[row, col, 0] < -0.9, "towards the exit on the left"
+
+
+def test_travel_times_follow_the_floorfield_options():
+    surface = jps.WalkableSurface()
+    room = surface.add_region(
+        boundary=[(-2.5, -2.5), (2.5, -2.5), (2.5, 2.5), (-2.5, 2.5)]
+    )
+    sim = jps.Simulation(
+        model=jps.CollisionFreeSpeedModel(),
+        geometry=surface,
+        floorfield_options=jps.FloorfieldOptions(cell_size=0.1),
+    )
+    exit_id = sim.add_exit_stage(
+        [([(-2.5, -2.5), (-2, -2.5), (-2, 2.5), (-2.5, 2.5)], room)]
+    )
+    assert sim.travel_times(exit_id)[room].cell_size == 0.1
+
+
+def test_travel_times_of_every_region(square_room_5x5):
+    sim, room = square_room_5x5
+    exit_id = sim.add_exit_stage(
+        [([(-2.5, -2.5), (-2, -2.5), (-2, 2.5), (-2.5, 2.5)], room)]
+    )
+
+    grids = sim.travel_times(exit_id)
+
+    assert list(grids) == [room]
+    assert isinstance(grids[room], jps.TravelTimeGrid)
+
+
+def test_a_direct_steering_stage_has_no_travel_times(square_room_5x5):
+    sim, room = square_room_5x5
+    steering_id = sim.add_direct_steering_stage()
+    assert sim.travel_times(steering_id) == {}
+
+
+def test_stage_ids(square_room_5x5):
+    sim, room = square_room_5x5
+    area = [(-2.5, -2.5), (-2, -2.5), (-2, 2.5), (-2.5, 2.5)]
+    exit_id = sim.add_exit_stage([(area, room)])
+    steering_id = sim.add_direct_steering_stage()
+    waypoint_id = sim.add_waypoint_stage([(area, room)])
+
+    assert sim.stage_ids() == [exit_id, steering_id, waypoint_id]

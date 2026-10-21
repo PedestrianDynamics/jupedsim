@@ -31,6 +31,8 @@ public:
     virtual ~BaseStage() = default;
     virtual bool is_completed(const GenericAgent& agent) = 0;
     virtual RoutingTarget target(const GenericAgent& agent) = 0;
+    /// The area this stage routes to, or nullptr if it has none.
+    virtual const Destination* destination() const { return nullptr; }
     ID id() const { return _id; }
     size_t count_targeting() const { return _targeting; }
     void increase_targeting() { _targeting = _targeting + 1; }
@@ -62,6 +64,7 @@ public:
     ~Waypoint() override = default;
     bool is_completed(const GenericAgent& agent) override;
     RoutingTarget target(const GenericAgent& agent) override;
+    const Destination* destination() const override { return &_destination; }
 };
 
 /// Notifies simulation of all agents that need to be removed at the beginning of the next iteration
@@ -75,6 +78,7 @@ public:
     ~Exit() override = default;
     bool is_completed(const GenericAgent& agent) override;
     RoutingTarget target(const GenericAgent& agent) override;
+    const Destination* destination() const override { return &_destination; }
 };
 
 class DirectSteering : public BaseStage
