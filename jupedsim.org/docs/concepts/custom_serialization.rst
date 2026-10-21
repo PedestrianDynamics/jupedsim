@@ -141,7 +141,7 @@ Here is a complete example that writes trajectory data to a CSV file:
 
         def __init__(self, output_file: Path, every_nth_frame: int = 1) -> None:
             if every_nth_frame < 1:
-                raise TrajectoryWriter.Exception("'every_nth_frame' must be > 0")
+                raise TrajectoryWriter.Error("'every_nth_frame' must be > 0")
 
             self._output_file = output_file
             self._every_nth_frame = every_nth_frame

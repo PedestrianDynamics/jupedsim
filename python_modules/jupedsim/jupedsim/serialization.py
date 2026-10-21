@@ -79,7 +79,7 @@ class TrajectoryWriter(metaclass=abc.ABCMeta):
 
         """
 
-    class Exception(Exception):
+    class Error(Exception):
         """Represents exceptions specific to the trajectory writer."""
 
         pass
