@@ -32,19 +32,6 @@
 
 namespace
 {
-/// RAII setter for Simulation::_iterating: set on construction, cleared on scope exit
-/// (including exception unwinding out of the iteration pipeline).
-class IterationScope
-{
-    bool& _flag;
-
-public:
-    explicit IterationScope(bool& flag) : _flag(flag) { _flag = true; }
-    ~IterationScope() { _flag = false; }
-    IterationScope(const IterationScope&) = delete;
-    IterationScope& operator=(const IterationScope&) = delete;
-};
-
 std::vector<AreaPiece> pieces_of(const Geometry& geometry, const std::vector<StageArea>& areas)
 {
     if(areas.empty()) {
@@ -59,13 +46,10 @@ std::vector<AreaPiece> pieces_of(const Geometry& geometry, const std::vector<Sta
 }
 } // namespace
 
-void Simulation::throw_if_iterating(const char* operation) const
+void Simulation::throw_if_state(State forbidden, const char* operation) const
 {
-    if(_iterating) {
-        throw SimulationError(
-            "{} is not allowed during iteration, e.g. from a custom model callback while "
-            "Iterate() is running",
-            operation);
+    if((_state & forbidden) != State{}) {
+        throw SimulationError("{} is not allowed in state {}", operation, _state);
     }
 }
 
@@ -83,11 +67,13 @@ Simulation::Simulation(
 
 const SimulationClock& Simulation::clock() const
 {
+    throw_if_state(State::Closed, "clock");
     return _clock;
 }
 
 void Simulation::set_tracing(bool status)
 {
+    throw_if_state(State::Closed, "set_tracing");
     if(status) {
         Profiler::instance().enable();
     } else {
@@ -97,8 +83,8 @@ void Simulation::set_tracing(bool status)
 
 void Simulation::iterate()
 {
-    throw_if_iterating("Iterate");
-    IterationScope iteration_scope(_iterating);
+    throw_if_state(State::Iterating | State::Closed, "iterate");
+    IterationScope iteration_scope(_state);
     JPS_SCOPED_TIMER_AND_TRACE(_timer, "Total Iteration", General);
 
     {
@@ -133,9 +119,16 @@ void Simulation::iterate()
     _clock.advance();
 }
 
+void Simulation::close()
+{
+    throw_if_state(State::Iterating, "close");
+    _state = State::Closed;
+    _routing_engine.reset();
+}
+
 Journey::ID Simulation::add_journey(const std::map<BaseStage::ID, TransitionDescription>& stages)
 {
-    throw_if_iterating("AddJourney");
+    throw_if_state(State::Iterating | State::Closed, "add_journey");
     JPS_SCOPED_TIMER_AND_TRACE(_timer, "Add Journey", Detailed);
     std::map<BaseStage::ID, JourneyNode> nodes;
     bool contains_direct_steering =
@@ -212,7 +205,7 @@ Journey::ID Simulation::add_journey(const std::map<BaseStage::ID, TransitionDesc
 
 BaseStage::ID Simulation::add_stage(const StageDescription& stage_description)
 {
-    throw_if_iterating("AddStage");
+    throw_if_state(State::Iterating | State::Closed, "add_stage");
     JPS_SCOPED_TIMER_AND_TRACE(_timer, "Add Stage", Detailed);
     auto stage = std::visit(
         Overloaded{
@@ -240,7 +233,7 @@ GenericAgent::ID Simulation::add_agent(
     OperationalModelState model,
     std::size_t region_id)
 {
-    throw_if_iterating("AddAgent");
+    throw_if_state(State::Iterating | State::Closed, "add_agent");
     JPS_SCOPED_TIMER_AND_TRACE(_timer, "Add Agent", Detailed);
     const auto location = _geometry->get_location(position.x, position.y, region_id);
     if(_journeys.count(journey_id) == 0) {
@@ -276,11 +269,13 @@ GenericAgent::ID Simulation::add_agent(
 
 Location Simulation::get_location(double x, double y, std::size_t region_id) const
 {
+    throw_if_state(State::Closed, "get_location");
     return _geometry->get_location(x, y, region_id);
 }
 
 void Simulation::set_agent_target(GenericAgent::ID id, Point target)
 {
+    throw_if_state(State::Closed, "set_agent_target");
     auto& agent = this->agent(id);
     const auto located = _geometry->get_location_near_z(
         target.x, target.y, agent.location.z(), std::numeric_limits<double>::max());
@@ -292,12 +287,13 @@ void Simulation::set_agent_target(GenericAgent::ID id, Point target)
 
 void Simulation::set_agent_target(GenericAgent::ID id, const Location& target)
 {
+    throw_if_state(State::Closed, "set_agent_target");
     agent(id).final_target = target;
 }
 
 void Simulation::mark_agent_for_removal(GenericAgent::ID id)
 {
-    throw_if_iterating("MarkAgentForRemoval");
+    throw_if_state(State::Iterating | State::Closed, "mark_agent_for_removal");
     JPS_TRACE_FUNC;
     const auto iter = std::find_if(
         std::begin(_agents), std::end(_agents), [id](auto& agent) { return agent.id == id; });
@@ -310,6 +306,7 @@ void Simulation::mark_agent_for_removal(GenericAgent::ID id)
 
 const GenericAgent& Simulation::agent(GenericAgent::ID id) const
 {
+    throw_if_state(State::Closed, "agent");
     JPS_TRACE_FUNC;
     const auto iter =
         std::find_if(_agents.begin(), _agents.end(), [id](auto& ped) { return id == ped.id; });
@@ -321,6 +318,7 @@ const GenericAgent& Simulation::agent(GenericAgent::ID id) const
 
 GenericAgent& Simulation::agent(GenericAgent::ID id)
 {
+    throw_if_state(State::Closed, "agent");
     JPS_TRACE_FUNC;
     const auto iter =
         std::find_if(_agents.begin(), _agents.end(), [id](auto& ped) { return id == ped.id; });
@@ -332,31 +330,37 @@ GenericAgent& Simulation::agent(GenericAgent::ID id)
 
 const std::vector<GenericAgent::ID>& Simulation::removed_agents() const
 {
+    throw_if_state(State::Closed, "removed_agents");
     return _removed_agents_in_last_iteration;
 }
 
 double Simulation::elapsed_time() const
 {
+    throw_if_state(State::Closed, "elapsed_time");
     return _clock.elapsed_time();
 }
 
 double Simulation::dt() const
 {
+    throw_if_state(State::Closed, "dt");
     return _clock.dt();
 }
 
 uint64_t Simulation::iteration() const
 {
+    throw_if_state(State::Closed, "iteration");
     return _clock.iteration();
 }
 
 size_t Simulation::agent_count() const
 {
+    throw_if_state(State::Closed, "agent_count");
     return _agents.size();
 }
 
 AgentContainer<GenericAgent>& Simulation::agents()
 {
+    throw_if_state(State::Closed, "agents");
     return _agents;
 };
 
@@ -365,7 +369,7 @@ void Simulation::switch_agent_journey(
     Journey::ID journey_id,
     BaseStage::ID stage_id)
 {
-    throw_if_iterating("SwitchAgentJourney");
+    throw_if_state(State::Iterating | State::Closed, "switch_agent_journey");
     JPS_TRACE_FUNC;
     const auto find_iter = _journeys.find(journey_id);
     if(find_iter == std::end(_journeys)) {
@@ -383,6 +387,7 @@ void Simulation::switch_agent_journey(
 
 std::vector<GenericAgent::ID> Simulation::agents_in_range(Point p, double distance)
 {
+    throw_if_state(State::Closed, "agents_in_range");
     JPS_SCOPED_TIMER_AND_TRACE(_timer, "Agents in Range", Debug);
     std::vector<GenericAgent::ID> neighbor_ids{};
     _neighborhood_search.for_each_in_range(p, distance, [&neighbor_ids](const GenericAgent& agent) {
@@ -393,6 +398,7 @@ std::vector<GenericAgent::ID> Simulation::agents_in_range(Point p, double distan
 
 std::vector<GenericAgent::ID> Simulation::agents_in_polygon(const std::vector<Point>& polygon)
 {
+    throw_if_state(State::Closed, "agents_in_polygon");
     JPS_SCOPED_TIMER_AND_TRACE(_timer, "Agents in Polygon", Debug);
     const Polygon poly{polygon};
     if(!poly.is_convex()) {
@@ -411,15 +417,18 @@ std::vector<GenericAgent::ID> Simulation::agents_in_polygon(const std::vector<Po
 
 OperationalModelType Simulation::model_type() const
 {
+    throw_if_state(State::Closed, "model_type");
     return _operational_decision_system.model_type();
 }
 
 const BaseStage* Simulation::stage(BaseStage::ID stage_id) const
 {
+    throw_if_state(State::Closed, "stage");
     return _stage_manager.stage(stage_id);
 }
 std::vector<BaseStage::ID> Simulation::stage_ids() const
 {
+    throw_if_state(State::Closed, "stage_ids");
     std::vector<BaseStage::ID> ids{};
     ids.reserve(_stage_manager.stages().size());
     for(const auto& [id, stage] : _stage_manager.stages()) {
@@ -431,7 +440,7 @@ std::vector<BaseStage::ID> Simulation::stage_ids() const
 
 std::map<std::size_t, TravelTimeGrid> Simulation::travel_times(BaseStage::ID stage_id)
 {
-    throw_if_iterating("TravelTimes");
+    throw_if_state(State::Iterating | State::Closed, "travel_times");
     const auto* destination = _stage_manager.stage(stage_id)->destination();
     std::map<std::size_t, TravelTimeGrid> grids{};
     if(destination == nullptr) {
@@ -445,6 +454,7 @@ std::map<std::size_t, TravelTimeGrid> Simulation::travel_times(BaseStage::ID sta
 
 const Geometry& Simulation::geo() const
 {
+    throw_if_state(State::Closed, "geo");
     return *_geometry;
 }
 

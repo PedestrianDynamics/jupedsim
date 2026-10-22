@@ -1,7 +1,8 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
+import types
 from collections.abc import Sequence
-from typing import Any, Iterator
+from typing import Any, Iterator, Self
 
 import shapely
 
@@ -330,6 +331,33 @@ class Simulation:
             self._obj.iterate()
             if self._writer:
                 self._writer.write_iteration_state(self)
+
+    def close(self) -> None:
+        """Close the simulation and free its memory.
+
+        The simulation cannot be used afterwards: any further use raises a
+        SimulationError.
+        """
+        try:
+            if self._writer:
+                self._writer.close()
+        finally:
+            self._obj.close()
+
+    def __enter__(self) -> Self:
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: types.TracebackType | None,
+    ) -> None:
+        try:
+            if exc_type is not None and self._writer:
+                self._writer.close_after_error()
+        finally:
+            self.close()
 
     def switch_agent_journey(
         self, agent_id: int, journey_id: int, stage_id: int

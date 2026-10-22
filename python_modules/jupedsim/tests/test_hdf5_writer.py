@@ -350,6 +350,37 @@ def test_travel_times_are_skipped_when_the_with_block_fails(tmp_path):
         assert hf["frame_offsets"].shape == (3,)
 
 
+def test_closing_the_simulation_writes_travel_times_before_freeing_them(
+    tmp_path,
+):
+    out = tmp_path / "nested.h5"
+    with jps.Hdf5TrajectoryWriter(
+        output_file=out, every_nth_frame=1, write_travel_times=True
+    ) as writer:
+        with _travel_time_simulation(writer) as sim:
+            sim.iterate()
+
+    with h5py.File(out, "r") as hf:
+        assert hf["travel_times/grids"].shape == (1,)
+
+
+def test_travel_times_are_skipped_when_the_simulation_with_block_fails(
+    tmp_path,
+):
+    out = tmp_path / "nested_failed.h5"
+    writer = jps.Hdf5TrajectoryWriter(
+        output_file=out, every_nth_frame=1, write_travel_times=True
+    )
+    with pytest.raises(RuntimeError, match="boom"):
+        with _travel_time_simulation(writer) as sim:
+            sim.iterate()
+            raise RuntimeError("boom")
+
+    with h5py.File(out, "r") as hf:
+        assert "travel_times" not in hf
+        assert hf["frame_offsets"].shape == (3,)
+
+
 def test_travel_times_are_written_all_or_nothing(tmp_path, monkeypatch):
     out = tmp_path / "partial.h5"
     writer = jps.Hdf5TrajectoryWriter(

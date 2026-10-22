@@ -1446,6 +1446,6 @@ def test_add_agent_during_iterate_raises_simulation_error():
     simulation.iterate()
 
     assert isinstance(model.error, jps.SimulationError)
-    assert "AddAgent is not allowed during iteration" in str(model.error)
+    assert "add_agent is not allowed in state Iterating" in str(model.error)
     # The re-entrant call must not have added an agent.
     assert simulation.agent_count() == 1

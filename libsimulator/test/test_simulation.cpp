@@ -11,6 +11,7 @@
 #include "stage_description.hpp"
 #include "test_common.hpp"
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include <algorithm>
@@ -320,4 +321,27 @@ TEST(MultiStoreySimulation, SteeredUpTheUStairToTheFloorAbove)
 
     EXPECT_TRUE(arrived()) << "never made it to the target";
     expect_climbed_without_stalling(walked);
+}
+
+TEST(SimulationClose, RejectsFurtherUse)
+{
+    using testing::HasSubstr;
+    using testing::ThrowsMessage;
+    const auto flat = on_a_flat_room();
+    auto& sim = *flat.sim;
+    const auto [journey, stage] = journey_to(sim, Point{15, 15}, flat.room_id);
+    const auto id = sim.add_agent(journey, stage, Point{5, 5}, State{}, flat.room_id);
+    sim.iterate();
+
+    sim.close();
+
+    const auto closed = ThrowsMessage<SimulationError>(HasSubstr("in state Closed"));
+    EXPECT_THAT([&] { sim.iterate(); }, closed);
+    EXPECT_THAT([&] { sim.agent(id); }, closed);
+    EXPECT_THAT([&] { sim.add_agent(journey, stage, Point{5, 5}, State{}, flat.room_id); }, closed);
+    EXPECT_THAT([&] { journey_to(sim, Point{10, 10}, flat.room_id); }, closed);
+    // The stage outlives close, its destination's floor field does not.
+    EXPECT_THAT([&] { sim.travel_times(stage); }, closed);
+    EXPECT_THAT([&] { sim.get_location(5, 5, flat.room_id); }, closed);
+    EXPECT_THAT([&] { sim.geo(); }, closed);
 }

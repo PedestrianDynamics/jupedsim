@@ -148,6 +148,7 @@ void init_simulation(py::module_& m)
                 return agent_ids;
             })
         .def("iterate", [](Simulation& sim) { sim.iterate(); })
+        .def("close", [](Simulation& sim) { sim.close(); })
         .def(
             "switch_agent_journey",
             [](Simulation& sim, uint64_t agent_id, uint64_t journey_id, uint64_t stage_id) {

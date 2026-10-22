@@ -377,3 +377,11 @@ def test_the_exit_an_agent_walks_towards_is_the_one_on_its_own_floor():
             break
         assert agent.location.z == pytest.approx(GROUND_Z)
     assert sim.agent_count() == 0
+
+
+def test_leaving_the_with_block_closes_the_simulation():
+    sim, _, _ = u_stair()
+    with sim:
+        sim.iterate()
+    with pytest.raises(jps.SimulationError, match="in state Closed"):
+        sim.iterate()
