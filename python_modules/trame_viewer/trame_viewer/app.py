@@ -70,6 +70,11 @@ class Hdf5Scene:
     triangles: np.ndarray  # [M, 3]
     face_regions: np.ndarray  # [M] region id per triangle
     n_regions: int
+    # Travel times by stage id, each the grid of every region by region id; None if the
+    # file was written without write_travel_times=True.
+    travel_times: (
+        dict[int, dict[int, jps.Hdf5TrajectoryLoader.TravelTimeGrid]] | None
+    )
 
 
 def read_hdf5(path: str) -> Hdf5Scene:
@@ -86,7 +91,29 @@ def read_hdf5(path: str) -> Hdf5Scene:
         triangles=triangles,
         face_regions=face_regions,
         n_regions=n_regions,
+        travel_times=read_travel_times(path),
     )
+
+
+def read_travel_times(
+    path: str,
+) -> dict[int, dict[int, jps.Hdf5TrajectoryLoader.TravelTimeGrid]] | None:
+    """All travel times in @p path by stage id, or None if it holds none.
+
+    A file the loader rejects still shows its mesh and agents, just without travel
+    times: the reason is printed.
+    """
+    try:
+        with jps.Hdf5TrajectoryLoader(path) as loader:
+            if not loader.has_travel_times():
+                return None
+            return {
+                stage: loader.load_travel_times(stage)
+                for stage in loader.load_travel_time_stage_ids()
+            }
+    except jps.Hdf5TrajectoryLoader.Error as e:
+        print(f"{path}: no travel times shown: {e}")
+        return None
 
 
 class Recording:
@@ -144,6 +171,128 @@ class Recording:
         if self._delete_on_close:
             self._delete_on_close = False
             os.unlink(self.path)
+
+
+def travel_time_surface(
+    grids: dict,
+    vertices: np.ndarray,
+    triangles: np.ndarray,
+    face_regions: np.ndarray,
+    lift: float,
+) -> pv.PolyData | None:
+    """One quad per walkable cell of @p grids, lying on its region's surface.
+
+    @p grids holds the grid of every region by region id, for one stage: as
+    Hdf5TrajectoryLoader.load_travel_times or Simulation.travel_times return them. Every
+    region of a WalkableSurface is planar - floors are flat, stairs and ramps are planar
+    quads - so a cell takes its region's plane and cells on stairs and ramps follow the
+    slope; @p lift raises the quads above the mesh to keep them from z-fighting.
+    Carries the cell scalar "travel_time" and the point scalar "elevation" (for clipping),
+    the cells' position on the lattice all grids share as "lattice_row" / "lattice_col",
+    and "direction": the walking direction tilted onto the cell's plane, zero inside the
+    destination.
+    """
+    points, travel_times, cell_directions, lattice = [], [], [], []
+    for region_id, grid in grids.items():
+        cell_size = float(grid.cell_size)
+        origin_x, origin_y = (float(v) for v in grid.origin)
+        tt = grid.values
+        rows, cols = np.nonzero(np.isfinite(tt))
+        region_tris = triangles[face_regions == region_id]
+        if len(rows) == 0 or len(region_tris) == 0:
+            continue
+        cx = origin_x + (cols + 0.5) * cell_size
+        cy = origin_y + (rows + 0.5) * cell_size
+
+        # The region's plane z = a * x + b * y + c, fitted to its vertices.
+        p = vertices[np.unique(region_tris)]
+        a, b, c = np.linalg.lstsq(
+            np.column_stack([p[:, 0], p[:, 1], np.ones(len(p))]),
+            p[:, 2],
+            rcond=None,
+        )[0]
+
+        # The 4 corners of every cell, counterclockwise, as consecutive points.
+        half = cell_size / 2
+        corners = []
+        for dx, dy in (
+            (-half, -half),
+            (half, -half),
+            (half, half),
+            (-half, half),
+        ):
+            x, y = cx + dx, cy + dy
+            z = a * x + b * y + c + lift
+            corners.append(np.column_stack([x, y, z]))
+        points.append(np.stack(corners, axis=1).reshape(-1, 3))
+        travel_times.append(tt[rows, cols])
+        # The grids share one lattice, so the origin is a whole number of cells away
+        # from the lattice's own: the same rounding holds for every grid.
+        lattice.append(
+            np.column_stack(
+                [
+                    rows + int(np.rint(origin_y / cell_size)),
+                    cols + int(np.rint(origin_x / cell_size)),
+                ]
+            )
+        )
+        d = grid.directions
+        dx, dy = (
+            d[rows, cols, 0].astype(float),
+            d[rows, cols, 1].astype(float),
+        )
+        # Along the plane z = a x + b y + c, so arrows follow stairs and ramps.
+        dz = a * dx + b * dy
+        cell_directions.append(np.column_stack([dx, dy, dz]))
+
+    if not travel_times:
+        return None
+    pts = np.vstack(points)
+    n = len(pts) // 4
+    quads = np.arange(4 * n, dtype=np.int64).reshape(n, 4)
+    faces = np.hstack([np.full((n, 1), 4, dtype=np.int64), quads]).ravel()
+    surface = pv.PolyData(pts, faces)
+    surface.cell_data["travel_time"] = np.concatenate(travel_times)
+    lattice_rc = np.vstack(lattice)
+    surface.cell_data["lattice_row"] = lattice_rc[:, 0]
+    surface.cell_data["lattice_col"] = lattice_rc[:, 1]
+    surface.cell_data["direction"] = np.vstack(cell_directions)
+    surface["elevation"] = pts[:, 2] - lift
+    return surface
+
+
+def direction_arrows(
+    surface: pv.PolyData, stride: int, length: float, lift: float
+):
+    """Arrows along the "direction" of every @p stride-th cell of @p surface in both
+    lattice directions, centred on the cells and @p lift above them; None if no cell
+    qualifies. Cells inside the destination (zero direction) get no arrow."""
+    if "direction" not in surface.cell_data or surface.n_cells == 0:
+        return None
+    directions = surface.cell_data["direction"]
+    keep = (
+        (surface.cell_data["lattice_row"] % stride == 0)
+        & (surface.cell_data["lattice_col"] % stride == 0)
+        & (np.linalg.norm(directions[:, :2], axis=1) > 0)
+    )
+    if not keep.any():
+        return None
+    centres = surface.cell_centers().points[keep]
+    centres[:, 2] += lift
+    anchors = pv.PolyData(centres)
+    anchors["direction"] = directions[keep]
+    arrow = pv.Arrow(
+        start=(-0.5, 0.0, 0.0),
+        direction=(1.0, 0.0, 0.0),
+        tip_length=0.35,
+        tip_radius=0.15,
+        shaft_radius=0.05,
+        tip_resolution=8,
+        shaft_resolution=8,
+    )
+    return anchors.glyph(
+        orient="direction", scale=False, factor=length, geom=arrow
+    )
 
 
 def find_free_port() -> int:
@@ -209,6 +358,18 @@ def build_app(obj_path: str | None, h5_path: str | None = None):
     # Pathfinding and Boundary Highlight need a jps.Geometry, which only an OBJ provides; an
     # HDF5 file brings just its mesh.
     state.has_geometry = False
+    # Travel Times mode: floor field travel times from an HDF5 file's /travel_times.
+    state.travel_available = False
+    state.travel_stages = []  # dropdown items, one per stage in the file
+    state.travel_stage = None  # selected stage id
+    state.travel_max = (
+        0.0  # largest finite travel time of the selected stage [s]
+    )
+    state.travel_pick = "—"  # travel time at the last right-clicked point
+    state.travel_arrows = True  # draw the walking directions as arrows
+    state.travel_arrow_stride = (
+        0  # an arrow every n-th cell; 0 picks n by cell count
+    )
     # Replay of the agents recorded in an HDF5 file. Independent of the interaction mode.
     state.replay_available = False
     state.replay_n_frames = 0
@@ -224,6 +385,15 @@ def build_app(obj_path: str | None, h5_path: str | None = None):
         "geometry": None,
         "n_regions": 0,
         "marker_r": 0.1,
+        "vertices": None,
+        "triangles": None,
+        "face_regions": None,
+    }
+    # Travel times of the loaded HDF5 file (see Hdf5Scene.travel_times), and the overlay
+    # surface per stage, built on first display.
+    travel: dict = {
+        "grids": None,
+        "surfaces": {},
     }
     # The open Recording of the loaded HDF5 file, the point set the agents actor draws
     # (updated in place per frame), and the running playback task.
@@ -270,13 +440,25 @@ def build_app(obj_path: str | None, h5_path: str | None = None):
                 sub = mesh.threshold((lo, lo + 1e-6), scalars="elevation")
         # Replace only the "mesh" actor by name (not plotter.clear()) so the route actors
         # survive a clip/wireframe change; drop old scalar bars to avoid stacking copies.
-        for title in ("Height z [m]", "Region"):
+        for title in ("Height z [m]", "Region", "Travel time [s]"):
             try:
                 plotter.remove_scalar_bar(title=title)
             except (KeyError, StopIteration):
                 pass
         by_region = bool(state.color_by_region) and current["n_regions"] > 0
-        if by_region:
+        if (
+            state.interaction_mode == "travel_times"
+            and state.travel_stage is not None
+        ):
+            # The travel time overlay carries the colour; the mesh is just the floor under it.
+            plotter.add_mesh(
+                sub,
+                name="mesh",
+                color="lightgray",
+                show_edges=bool(state.wireframe),
+                edge_color="black",
+            )
+        elif by_region:
             n = current["n_regions"]
             # region id is a per-cell scalar; a qualitative map + discrete colours
             # so adjacent regions stay visually distinct.
@@ -301,8 +483,68 @@ def build_app(obj_path: str | None, h5_path: str | None = None):
                 edge_color="black",
                 scalar_bar_args=dict(title="Height z [m]"),
             )
+        _draw_travel_times(lo, hi)
         _draw_agents()
         plotter.add_axes()
+
+    def _draw_travel_times(lo: float, hi: float) -> None:
+        plotter.remove_actor("travel_times", render=False)
+        plotter.remove_actor("travel_arrows", render=False)
+        stage = state.travel_stage
+        if state.interaction_mode != "travel_times" or stage is None:
+            return
+        surface = travel["surfaces"].get(stage)
+        if surface is None:
+            surface = travel["surfaces"][stage] = travel_time_surface(
+                travel["grids"][stage],
+                current["vertices"],
+                current["triangles"],
+                current["face_regions"],
+                lift=0.5 * current["marker_r"],
+            )
+        if surface is None:
+            return
+        if lo > current["z_min"] or hi < current["z_max"]:
+            surface = surface.threshold((lo, hi), scalars="elevation")
+            if surface.n_cells == 0:
+                return
+        times = surface.cell_data["travel_time"]
+        # A cell whose centre lies a hair inside a wall has a speed near zero and a
+        # travel time orders of magnitude above the rest; scaling to the true maximum
+        # would squeeze every other cell into the lowest colour. Cells above the
+        # percentile take the top colour; the drawer shows the true maximum.
+        state.travel_max = float(times.max())
+        plotter.add_mesh(
+            surface,
+            name="travel_times",
+            scalars="travel_time",
+            cmap="plasma",
+            clim=(0.0, max(float(np.percentile(times, 99.9)), 1e-6)),
+            show_edges=False,
+            scalar_bar_args=dict(title="Travel time [s]"),
+        )
+        if state.travel_arrows:
+            _draw_travel_arrows(surface)
+
+    def _draw_travel_arrows(surface) -> None:
+        # All grids share one lattice, so any of them has the cell size.
+        stage_grids = travel["grids"][state.travel_stage]
+        cell_size = float(next(iter(stage_grids.values())).cell_size)
+        stride = int(state.travel_arrow_stride or 0)
+        if stride <= 0:
+            # About 3000 arrows at most: enough to read the flow over the whole
+            # geometry without the arrows merging into a hatching.
+            stride = max(1, math.ceil(math.sqrt(surface.n_cells / 3000)))
+        arrows = direction_arrows(
+            surface,
+            stride,
+            length=0.8 * stride * cell_size,
+            lift=0.25 * current["marker_r"],
+        )
+        if arrows is not None:
+            plotter.add_mesh(
+                arrows, name="travel_arrows", color="white", pickable=False
+            )
 
     def _draw_agents() -> None:
         recording = replay["recording"]
@@ -323,7 +565,7 @@ def build_app(obj_path: str | None, h5_path: str | None = None):
             plotter.remove_actor("agents", render=False)
             replay["points"] = None
             return
-        # Lift above the mesh.
+        # Lift above the mesh and the travel time overlay.
         pts[:, 2] += current["marker_r"]
         new = pv.PolyData(pts)
         if replay["points"] is None:
@@ -421,6 +663,7 @@ def build_app(obj_path: str | None, h5_path: str | None = None):
         # SAME instance, so routing, picking and region colouring all agree.
         geo = jps.Geometry.from_obj(obj_path)
         engine = jps.SurfaceMeshShortestPathRoutingEngine(geo)
+        travel.update(grids=None, surfaces={})
         _set_recording(None)
         show_scene(
             np.asarray(geo.vertices(), dtype=float),
@@ -430,6 +673,7 @@ def build_app(obj_path: str | None, h5_path: str | None = None):
             geo,
             name,
         )
+        _publish_travel_stages()
         _publish_replay()
 
     def load_hdf5(h5_path: str, name: str, temporary: bool = False) -> None:
@@ -437,6 +681,9 @@ def build_app(obj_path: str | None, h5_path: str | None = None):
         nonlocal engine
         scene = read_hdf5(h5_path)
         engine = None  # no Geometry to route on
+        # Swap the data in before the mesh is drawn, and publish the stages only after, so
+        # no redraw ever pairs one file's grids with another file's mesh.
+        travel.update(grids=scene.travel_times, surfaces={})
         _set_recording(Recording(h5_path, delete_on_close=temporary))
         show_scene(
             scene.vertices,
@@ -446,7 +693,18 @@ def build_app(obj_path: str | None, h5_path: str | None = None):
             None,
             name,
         )
+        _publish_travel_stages()
         _publish_replay()
+
+    def _publish_travel_stages() -> None:
+        grids = travel["grids"]
+        stages = sorted(grids) if grids is not None else []
+        with state:
+            state.travel_available = grids is not None
+            state.travel_stages = [
+                {"title": f"Stage {s}", "value": s} for s in stages
+            ]
+            state.travel_stage = stages[0] if stages else None
 
     def show_scene(verts, tris, face_region_ids, n_regions, geo, name) -> None:
         """Show a mesh; @p geo is its jps.Geometry, or None if there is none."""
@@ -477,6 +735,9 @@ def build_app(obj_path: str | None, h5_path: str | None = None):
         current.update(
             mesh=mesh,
             geometry=geo,
+            vertices=verts,
+            triangles=tris,
+            face_regions=np.asarray(face_region_ids, dtype=np.int64),
             n_regions=n_regions,
             z_min=z_min,
             z_max=z_max,
@@ -866,6 +1127,105 @@ def build_app(obj_path: str | None, h5_path: str | None = None):
             state.boundary_count = 0
             state.boundary_query_us = 0
 
+    # -- travel times from an HDF5 file ---------------------------------
+
+    def _travel_click(fx, fy):
+        if state.travel_stage is None:
+            return
+        pos = _pick_world_fraction(fx, fy)
+        if pos is None:
+            return
+        # The overlay is lifted above the mesh, so a pick from above hits it first; a pick
+        # on the bare mesh (a cell that is not walkable) has no travel time.
+        times = picker.GetDataSet().GetCellData().GetArray("travel_time")
+        if times is None:
+            state.travel_pick = "—"
+            return
+        _place_marker("travel_query", pos, "dodgerblue")
+        cell = picker.GetCellId()
+        pick = f"{times.GetValue(cell):.2f} s at {_fmt(pos)}"
+        directions = picker.GetDataSet().GetCellData().GetArray("direction")
+        if directions is not None:
+            dx, dy, _ = directions.GetTuple3(cell)
+            pick += (
+                f", heading ({dx:.2f}, {dy:.2f})" if dx or dy else ", arrived"
+            )
+        state.travel_pick = pick
+        if ctrl.view_update:
+            ctrl.view_update()
+
+    @state.change("travel_stage")
+    def _on_travel_stage(**_):
+        if state.interaction_mode == "travel_times":
+            _reset_travel_pick()
+            _redraw()
+
+    @state.change("travel_arrows", "travel_arrow_stride")
+    def _on_travel_arrows(**_):
+        if state.interaction_mode == "travel_times":
+            _redraw()
+
+    def _reset_travel_pick() -> None:
+        plotter.remove_actor("travel_query", render=False)
+        state.travel_pick = "—"
+
+    def _reset_travel() -> None:
+        # The stage selection is a user setting and survives leaving the mode. The overlay
+        # itself goes with the next draw(), which only draws it in this mode.
+        _reset_travel_pick()
+
+    def _build_travel_drawer() -> None:
+        with v3.Template(v_if="!travel_available"):
+            v3.VListItem(
+                "Load an HDF5 file written with write_travel_times=True",
+                subtitle="No travel times",
+            )
+        with v3.Template(v_else=True):
+            v3.VListItem("right-click reads the travel time", subtitle="Usage")
+            v3.VSelect(
+                v_model=("travel_stage", None),
+                items=("travel_stages", []),
+                label="Stage",
+                density="compact",
+                variant="outlined",
+                hide_details=True,
+                classes="mx-4 mb-2",
+            )
+            v3.VListItem("{{ travel_pick }}", subtitle="Travel time")
+            v3.VSwitch(
+                v_model=("travel_arrows", True),
+                label="Walking directions",
+                hide_details=True,
+                density="compact",
+                classes="mx-4",
+            )
+            v3.VSelect(
+                v_model=("travel_arrow_stride", 0),
+                items=(
+                    "travel_arrow_strides",
+                    [{"title": "Auto", "value": 0}]
+                    + [
+                        {
+                            "title": f"every {n} cells"
+                            if n > 1
+                            else "every cell",
+                            "value": n,
+                        }
+                        for n in (1, 2, 4, 8, 16, 32)
+                    ],
+                ),
+                label="Arrow spacing",
+                disabled=("!travel_arrows",),
+                density="compact",
+                variant="outlined",
+                hide_details=True,
+                classes="mx-4 mb-2",
+            )
+            v3.VListItem(
+                "{{ travel_max.toFixed(1) }} s",
+                subtitle="Largest travel time (colours capped at the 99.9th percentile)",
+            )
+
     # -- interaction modes ---------------------------------------------
     # To add a mode: append a ViewerMode entry, gate its input handlers on
     # state.interaction_mode, and make reset() undo everything the mode did.
@@ -957,6 +1317,13 @@ def build_app(obj_path: str | None, h5_path: str | None = None):
             _build_boundary_drawer,
             on_right_click=_boundary_click,
         ),
+        ViewerMode(
+            "travel_times",
+            "Travel Times",
+            _reset_travel,
+            _build_travel_drawer,
+            on_right_click=_travel_click,
+        ),
     ]
     mode_by_key = {m.key: m for m in modes}
     active_mode = {"key": state.interaction_mode}
@@ -975,8 +1342,7 @@ def build_app(obj_path: str | None, h5_path: str | None = None):
         if prev == interaction_mode:
             return
         mode_by_key[prev].reset()  # leaving a mode drops all of its state
-        if ctrl.view_update:
-            ctrl.view_update()
+        _redraw()  # a mode may draw into the scene (Travel Times)
 
     with SinglePageWithDrawerLayout(server) as layout:
         layout.title.set_text(TITLE)
