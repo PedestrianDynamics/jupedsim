@@ -136,6 +136,9 @@ public:
         }
     }
 
+    /// All indexed segments.
+    const std::vector<LineSegment>& segments() const { return _segments; }
+
     /// Returns an iterator pair to all linesegments <= 'distance' away from 'p'
     /// @param distance from reference point
     /// @param p reference point

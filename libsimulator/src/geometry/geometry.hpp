@@ -4,6 +4,7 @@
 #include "cfg_cgal.hpp"
 #include "geometry/area_piece.hpp"
 #include "geometry/boundary_index.hpp"
+#include "geometry/clearance_field.hpp"
 #include "geometry/location.hpp"
 #include "geometry/region_split.hpp"
 #include "line_segment.hpp"
@@ -115,6 +116,13 @@ public:
     /// to the mesh face @p other is standing on.
     bool no_geometry_between(const Location& who, const Location& other) const;
 
+    /// Lower bound on the distance from @p who to the nearest wall or seam of its region.
+    /// Whatever lies closer than this to @p who is free of geometry.
+    double clearance(const Location& who) const
+    {
+        return _clearance.clearance(who.region(), who.xy());
+    }
+
     // -- region related API ---------------------------------------------------
 
     std::size_t region_count() const { return _region_split.count; }
@@ -159,6 +167,7 @@ private:
     std::unique_ptr<BoundaryIndex> _boundary_index{};
     std::unique_ptr<RegionGraph> _region_graph{};
     std::unique_ptr<RegionGraph2D> _region_graph_2d{};
+    ClearanceField _clearance{};
     RegionMap _region{};
     RegionSplit _region_split{};
 };
