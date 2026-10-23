@@ -13,6 +13,8 @@ requires-python = ">=3.12"
 # in-tree jupedsim (source `<build-dir>/environment` to make it importable) and
 # must not pull a released jupedsim from PyPI on `pip install -e`.
 dependencies = [
+    "h5py",
+    "hdf5plugin",
     "numpy",
     "pyvista",
     "trame",

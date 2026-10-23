@@ -14,7 +14,15 @@ Development flow (shared venv + build tree):
 source <build-dir>/environment               # PYTHONPATH: jupedsim + built bindings
 pip install -e python_modules/trame_viewer   # from the checkout root, once
 
-trame_viewer [--obj mesh.obj] [--native] [--port N]
+trame_viewer [--obj mesh.obj | --h5 run.h5] [--native] [--port N]
 ```
 
 `python -m trame_viewer` works as well.
+
+## Replay
+
+Opening a file written by `jupedsim.Hdf5TrajectoryWriter` (`--h5` or
+*File → Load OBJ or HDF5…*) shows its geometry and replays the recorded agents:
+play/pause, a frame slider and a playback speed sit in the drawer. Frames are
+read from the file as they are shown. Agents follow the height clip like the
+mesh. A file whose run stopped before the writer was closed plays too.
