@@ -22,6 +22,8 @@ target_sources(simulator PRIVATE
     src/geometry/area_piece.hpp
     src/geometry/boundary_index.cpp
     src/geometry/boundary_index.hpp
+    src/geometry/clearance_field.cpp
+    src/geometry/clearance_field.hpp
     src/geometry/geometry.cpp
     src/geometry/geometry.hpp
     src/geometry/location.cpp
@@ -112,6 +114,7 @@ if (BUILD_TESTS)
         test/test_agent_view.cpp
         test/test_basic_primitive_tests.cpp
         test/test_boundary_index.cpp
+        test/test_clearance_field.cpp
         test/test_common.hpp
         test/test_custom_model.cpp
         test/test_floorfield.cpp
