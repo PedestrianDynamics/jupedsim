@@ -7,6 +7,7 @@ in a native desktop window (``--native``, via pywebview's WebKitGTK).
 
 import argparse
 import asyncio
+import atexit
 import math
 import os
 import socket
@@ -28,7 +29,7 @@ pv.OFF_SCREEN = True
 
 import jupedsim as jps  # noqa: E402
 from pyvista.trame.ui import plotter_ui  # noqa: E402
-from trame.app import get_server  # noqa: E402
+from trame.app import asynchronous, get_server  # noqa: E402
 from trame.app.file_upload import ClientFile  # noqa: E402
 from trame.ui.vuetify3 import SinglePageWithDrawerLayout  # noqa: E402
 from trame.widgets import vuetify3 as v3  # noqa: E402
@@ -61,6 +62,90 @@ class ViewerMode:
     on_right_click: Callable[[float, float], None] | None = None
 
 
+@dataclass(frozen=True)
+class Hdf5Scene:
+    """What the viewer reads from a file written by jupedsim's Hdf5TrajectoryWriter."""
+
+    vertices: np.ndarray  # [N, 3]
+    triangles: np.ndarray  # [M, 3]
+    face_regions: np.ndarray  # [M] region id per triangle
+    n_regions: int
+
+
+def read_hdf5(path: str) -> Hdf5Scene:
+    import h5py
+    import hdf5plugin  # noqa: F401 -- registers the zstd filter the datasets use
+
+    with h5py.File(path, "r") as hf:
+        vertices = hf["mesh/vertices"][:].astype(float)
+        triangles = hf["mesh/triangles"][:].astype(np.int64)
+        face_regions = hf["mesh/regions"][:].astype(np.int64)
+        n_regions = int(hf["regions"].shape[0])
+    return Hdf5Scene(
+        vertices=vertices,
+        triangles=triangles,
+        face_regions=face_regions,
+        n_regions=n_regions,
+    )
+
+
+class Recording:
+    """The recorded agent positions of an HDF5 file, read one frame at a time.
+
+    Keeps the file open until close(). Frame i holds the rows
+    trajectory[frame_offsets[i]:frame_offsets[i + 1]]; a file whose run ended before the
+    writer was closed may lack the end of /frame_offsets, which is then rebuilt from the
+    rows' frame numbers.
+
+    With @p delete_on_close the recording owns the file, e.g. a temporary copy of an
+    upload, and deletes it in close(): not before, as Windows cannot delete a file that is
+    still open. If the constructor raises, the file stays the caller's.
+    """
+
+    def __init__(self, path: str, delete_on_close: bool = False):
+        import h5py
+        import hdf5plugin  # noqa: F401 -- registers the zstd filter the datasets use
+
+        self.path = path
+        self._delete_on_close = False
+        self._file = h5py.File(path, "r")
+        try:
+            self._trajectory = self._file["trajectory"]
+            offsets = self._file["frame_offsets"][:]
+            n_rows = self._trajectory.shape[0]
+            if len(offsets) == 0 or offsets[-1] != n_rows:
+                frames = self._trajectory.fields("frame")[:]
+                n = int(frames[-1]) + 1 if n_rows else 0
+                offsets = np.searchsorted(frames, np.arange(n + 1))
+            self._offsets = offsets.astype(np.int64)
+            # Seconds between two recorded frames.
+            self.frame_dt = float(self._file.attrs["dt"]) * int(
+                self._file.attrs["every_nth_frame"]
+            )
+        except BaseException:
+            self._file.close()
+            raise
+        self._delete_on_close = delete_on_close
+
+    @property
+    def n_frames(self) -> int:
+        return len(self._offsets) - 1
+
+    def positions(self, frame: int) -> np.ndarray:
+        """[N, 3] positions of the agents in @p frame."""
+        begin, end = self._offsets[frame], self._offsets[frame + 1]
+        rows = self._trajectory.fields(["x", "y", "z"])[begin:end]
+        return np.column_stack([rows["x"], rows["y"], rows["z"]]).astype(float)
+
+    def close(self) -> None:
+        """Close the file and, if the recording owns it, delete it. Safe to call more
+        than once."""
+        self._file.close()
+        if self._delete_on_close:
+            self._delete_on_close = False
+            os.unlink(self.path)
+
+
 def find_free_port() -> int:
     """Ask the OS for an unused TCP port (bind to :0, read it back, release it)."""
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -68,7 +153,7 @@ def find_free_port() -> int:
         return s.getsockname()[1]
 
 
-def build_app(obj_path: str | None):
+def build_app(obj_path: str | None, h5_path: str | None = None):
     """Build the trame server hosting a pyvista Plotter"""
     plotter = pv.Plotter()
     plotter.set_background("white")
@@ -121,6 +206,17 @@ def build_app(obj_path: str | None):
     state.boundary_query = "—"  # query point of the highlighted result
     state.boundary_count = 0  # number of highlighted segments
     state.boundary_query_us = 0  # BoundaryIndex.query() solve time
+    # Pathfinding and Boundary Highlight need a jps.Geometry, which only an OBJ provides; an
+    # HDF5 file brings just its mesh.
+    state.has_geometry = False
+    # Replay of the agents recorded in an HDF5 file. Independent of the interaction mode.
+    state.replay_available = False
+    state.replay_n_frames = 0
+    state.replay_frame = 0
+    state.replay_playing = False
+    state.replay_speed = 1.0  # playback speed relative to simulated time
+    state.replay_time = "—"
+    state.replay_agents = 0  # agents in the shown frame, including clipped ones
 
     # Holds the currently loaded geometry + mesh + its height range; swapped out by load_mesh().
     current: dict = {
@@ -129,6 +225,17 @@ def build_app(obj_path: str | None):
         "n_regions": 0,
         "marker_r": 0.1,
     }
+    # The open Recording of the loaded HDF5 file, the point set the agents actor draws
+    # (updated in place per frame), and the running playback task.
+    replay: dict = {"recording": None, "points": None, "task": None}
+
+    @atexit.register
+    def _close_recording() -> None:
+        # The recording of an upload deletes its temporary copy when closed: close the
+        # last one on exit so the copy does not outlive the viewer.
+        if replay["recording"] is not None:
+            replay["recording"].close()
+
     # Routing interaction state. Start/target are exact surface world positions (xyz), not mesh
     # vertices -- the geodesic is computed by the engine, not snapped to the triangulation.
     route: dict = {
@@ -194,7 +301,118 @@ def build_app(obj_path: str | None):
                 edge_color="black",
                 scalar_bar_args=dict(title="Height z [m]"),
             )
+        _draw_agents()
         plotter.add_axes()
+
+    def _draw_agents() -> None:
+        recording = replay["recording"]
+        if recording is None or recording.n_frames == 0:
+            plotter.remove_actor("agents", render=False)
+            replay["points"] = None
+            return
+        frame = min(max(int(state.replay_frame), 0), recording.n_frames - 1)
+        pts = recording.positions(frame)
+        state.replay_agents = len(pts)
+        state.replay_time = (
+            f"{frame * recording.frame_dt:.2f} s"
+            f" / {(recording.n_frames - 1) * recording.frame_dt:.2f} s"
+        )
+        lo, hi = (float(v) for v in state.clip_range)
+        pts = pts[(pts[:, 2] >= lo) & (pts[:, 2] <= hi)]
+        if len(pts) == 0:
+            plotter.remove_actor("agents", render=False)
+            replay["points"] = None
+            return
+        # Lift above the mesh.
+        pts[:, 2] += current["marker_r"]
+        new = pv.PolyData(pts)
+        if replay["points"] is None:
+            replay["points"] = new
+            plotter.add_mesh(
+                new,
+                name="agents",
+                color="black",
+                render_points_as_spheres=True,
+                point_size=10,
+                pickable=False,
+            )
+        else:
+            replay["points"].copy_from(new)
+
+    @state.change("replay_frame")
+    def _on_replay_frame(**_):
+        _draw_agents()
+        if ctrl.view_update:
+            ctrl.view_update()
+
+    async def _play() -> None:
+        """Advance replay_frame along the wall clock until paused or at the last frame.
+
+        Frames are picked by elapsed time, not counted, so a slow render skips frames
+        instead of slowing the replay down. Scrubbing or a new speed re-anchors the clock.
+        """
+        recording = replay["recording"]
+        last = recording.n_frames - 1
+        if int(state.replay_frame) >= last:
+            state.replay_frame = 0
+        anchor = (
+            time.perf_counter(),
+            int(state.replay_frame),
+            float(state.replay_speed),
+        )
+        shown = anchor[1]
+        while state.replay_playing and replay["recording"] is recording:
+            if (
+                int(state.replay_frame) != shown
+                or float(state.replay_speed) != anchor[2]
+            ):
+                anchor = (
+                    time.perf_counter(),
+                    int(state.replay_frame),
+                    float(state.replay_speed),
+                )
+            t0, start, speed = anchor
+            frame = start + int(
+                (time.perf_counter() - t0) * speed / recording.frame_dt
+            )
+            with state:
+                if frame >= last:
+                    state.replay_frame = last
+                    state.replay_playing = False
+                elif frame != shown:
+                    state.replay_frame = frame
+            shown = int(state.replay_frame)
+            await asyncio.sleep(1 / 60)
+
+    @state.change("replay_playing")
+    def _on_replay_playing(replay_playing, **_):
+        task = replay["task"]
+        if (
+            replay_playing
+            and replay["recording"] is not None
+            and (task is None or task.done())
+        ):
+            replay["task"] = asynchronous.create_task(_play())
+
+    def _set_recording(recording) -> None:
+        """Swap in @p recording (or None) before a scene is shown; see _publish_replay."""
+        state.replay_playing = False  # a running _play() sees the swap and ends
+        if replay["recording"] is not None:
+            replay["recording"].close()
+        replay.update(recording=recording, points=None)
+        plotter.remove_actor("agents", render=False)
+        state.replay_frame = 0
+
+    def _publish_replay() -> None:
+        recording = replay["recording"]
+        with state:
+            state.replay_available = (
+                recording is not None and recording.n_frames > 0
+            )
+            state.replay_n_frames = recording.n_frames if recording else 0
+            state.replay_frame = 0
+            state.replay_time = "—"
+            state.replay_agents = 0
 
     def load_mesh(obj_path: str, name: str) -> None:
         nonlocal engine
@@ -203,9 +421,35 @@ def build_app(obj_path: str | None):
         # SAME instance, so routing, picking and region colouring all agree.
         geo = jps.Geometry.from_obj(obj_path)
         engine = jps.SurfaceMeshShortestPathRoutingEngine(geo)
+        _set_recording(None)
+        show_scene(
+            np.asarray(geo.vertices(), dtype=float),
+            np.asarray(geo.triangles(), dtype=np.int64),
+            np.asarray(geo.region_id_per_face(), dtype=np.int64),
+            int(geo.region_count()),
+            geo,
+            name,
+        )
+        _publish_replay()
 
-        verts = np.asarray(geo.vertices(), dtype=float)
-        tris = np.asarray(geo.triangles(), dtype=np.int64)
+    def load_hdf5(h5_path: str, name: str, temporary: bool = False) -> None:
+        """Show @p h5_path; with @p temporary its recording deletes it once closed."""
+        nonlocal engine
+        scene = read_hdf5(h5_path)
+        engine = None  # no Geometry to route on
+        _set_recording(Recording(h5_path, delete_on_close=temporary))
+        show_scene(
+            scene.vertices,
+            scene.triangles,
+            scene.face_regions,
+            scene.n_regions,
+            None,
+            name,
+        )
+        _publish_replay()
+
+    def show_scene(verts, tris, face_region_ids, n_regions, geo, name) -> None:
+        """Show a mesh; @p geo is its jps.Geometry, or None if there is none."""
         # pyvista face stream: [3, i, j, k, 3, i, j, k, ...]
         faces = np.hstack(
             [np.full((len(tris), 1), 3, dtype=np.int64), tris]
@@ -214,10 +458,9 @@ def build_app(obj_path: str | None):
         mesh["elevation"] = verts[
             :, 2
         ]  # colour + clip by height (point scalar)
-        face_region_ids = np.asarray(geo.region_id_per_face(), dtype=float)
-        n_regions = int(geo.region_count())
         if len(face_region_ids) == mesh.n_cells:
-            mesh.cell_data["region"] = face_region_ids  # per-face region id
+            # per-face region id
+            mesh.cell_data["region"] = np.asarray(face_region_ids, dtype=float)
         else:  # face-count mismatch: disable region colouring rather than mislabel
             mesh.cell_data["region"] = np.zeros(mesh.n_cells, dtype=float)
             n_regions = 0
@@ -250,6 +493,7 @@ def build_app(obj_path: str | None):
             state.n_points = int(mesh.n_points)
             state.n_cells = int(mesh.n_cells)
             state.n_regions = n_regions
+            state.has_geometry = geo is not None
         draw()
         plotter.reset_camera()
         plotter.view_isometric()
@@ -293,14 +537,27 @@ def build_app(obj_path: str | None):
         client_file = ClientFile(entry)
         if client_file.is_empty:
             return
-        # pyvista picks the reader by extension, so the bytes need a real .obj file.
-        with tempfile.NamedTemporaryFile(suffix=".obj", delete=False) as tmp:
+        # Both readers want a real file with the right extension.
+        suffix = os.path.splitext(client_file.name)[1].lower()
+        with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
             tmp.write(client_file.content)
             tmp_path = tmp.name
+        if suffix not in (".h5", ".hdf5"):
+            try:
+                load_mesh(tmp_path, client_file.name)
+            finally:
+                # The mesh is read in full: nothing holds the file open any more.
+                os.unlink(tmp_path)
+            return
         try:
-            load_mesh(tmp_path, client_file.name)
-        finally:
-            os.unlink(tmp_path)
+            # The Recording reads from the file until it is closed, so it deletes the
+            # file then: Windows cannot delete a file that is still open.
+            load_hdf5(tmp_path, client_file.name, temporary=True)
+        except BaseException:
+            recording = replay["recording"]
+            if recording is None or recording.path != tmp_path:
+                os.unlink(tmp_path)  # failed before the Recording took the file
+            raise
 
     @ctrl.set("reset_view")
     def _reset_view():
@@ -459,7 +716,7 @@ def build_app(obj_path: str | None):
         # can be stale mid-switch.
         if state.interaction_mode != "pathfinding":
             return
-        if current["mesh"] is None:
+        if current["mesh"] is None or engine is None:
             return
         route["pending"] = (fx, fy)
         if route["busy"]:
@@ -477,7 +734,7 @@ def build_app(obj_path: str | None):
             route["busy"] = False
 
     def _pathfinding_click(fx, fy):
-        if current["mesh"] is None:
+        if current["mesh"] is None or engine is None:
             return
         if route["tracking"]:
             route["tracking"] = False  # freeze: keep the last path on screen
@@ -621,7 +878,15 @@ def build_app(obj_path: str | None):
     def _build_none_drawer() -> None:
         v3.VListItem("No interaction active", subtitle="Pick a mode above")
 
+    def _build_needs_geometry_hint() -> None:
+        v3.VListItem(
+            "needs an OBJ file; an HDF5 file brings no geometry",
+            subtitle="Unavailable",
+            v_if="!has_geometry",
+        )
+
     def _build_pathfinding_drawer() -> None:
+        _build_needs_geometry_hint()
         v3.VListItem(
             "right-click sets start / freezes the path", subtitle="Usage"
         )
@@ -636,6 +901,7 @@ def build_app(obj_path: str | None):
         )
 
     def _build_boundary_drawer() -> None:
+        _build_needs_geometry_hint()
         v3.VListItem("right-click sets the query point", subtitle="Usage")
         v3.VSelect(
             v_model=("boundary_index_variant", "naive"),
@@ -730,6 +996,46 @@ def build_app(obj_path: str | None):
                     subtitle="Height range z",
                 )
                 v3.VDivider(classes="my-2")
+                with v3.Template(v_if="replay_available"):
+                    v3.VListSubheader("Replay")
+                    with v3.VListItem():
+                        with v3.Template(v_slot_prepend=True):
+                            with v3.VBtn(
+                                icon=True,
+                                variant="text",
+                                density="comfortable",
+                                click="replay_playing = !replay_playing",
+                            ):
+                                v3.VIcon(
+                                    icon=(
+                                        "replay_playing ? 'mdi-pause' : 'mdi-play'",
+                                    )
+                                )
+                        v3.VSlider(
+                            v_model=("replay_frame", 0),
+                            min=0,
+                            max=("replay_n_frames - 1",),
+                            step=1,
+                            hide_details=True,
+                        )
+                    v3.VListItem("{{ replay_time }}", subtitle="Time")
+                    v3.VListItem("{{ replay_agents }}", subtitle="Agents")
+                    v3.VSelect(
+                        v_model=("replay_speed", 1.0),
+                        items=(
+                            "replay_speeds",
+                            [
+                                {"title": f"{v:g}×", "value": v}
+                                for v in (0.25, 0.5, 1.0, 2.0, 5.0, 10.0)
+                            ],
+                        ),
+                        label="Speed",
+                        density="compact",
+                        variant="outlined",
+                        hide_details=True,
+                        classes="mx-4 mb-2",
+                    )
+                    v3.VDivider(classes="my-2")
                 # One block per mode; only the selected mode's drawer is
                 # rendered, always headed by that mode's name.
                 for m in modes:
@@ -746,8 +1052,8 @@ def build_app(obj_path: str | None):
                     # event expressions in a sandbox without the global `document`.)
                     v3.VFileInput(
                         v_model=("obj_file", None),
-                        accept=".obj",
-                        label="Load OBJ…",
+                        accept=".obj,.h5,.hdf5",
+                        label="Load OBJ or HDF5…",
                         prepend_icon="mdi-folder-open",
                         density="comfortable",
                         hide_details=True,
@@ -841,10 +1147,12 @@ def build_app(obj_path: str | None):
                 view = plotter_ui(plotter, mode="server")
                 ctrl.view_update = view.update
 
-    # No initial mesh: start with an empty scene and let the user pick one via the
-    # toolbar's "File -> Load OBJ…" dialog.
+    # No initial file: start with an empty scene and let the user pick one via the
+    # toolbar's "File -> Load OBJ or HDF5…" dialog.
     if obj_path:
         load_mesh(obj_path, os.path.basename(obj_path))
+    elif h5_path:
+        load_hdf5(h5_path, os.path.basename(h5_path))
     return server
 
 
@@ -861,7 +1169,7 @@ def _wait_until_serving(port: int, timeout: float = 20.0) -> bool:
     return False
 
 
-def run_native(obj_path: str | None, port: int) -> None:
+def run_native(obj_path: str | None, h5_path: str | None, port: int) -> None:
     """Show the trame app in a native pywebview (WebKitGTK) window.
 
     The trame/aiohttp server installs SIGINT handlers that only work on the main thread, and
@@ -879,6 +1187,7 @@ def run_native(obj_path: str | None, port: int) -> None:
             "-m",
             "trame_viewer",
             *(["--obj", obj_path] if obj_path else []),
+            *(["--h5", h5_path] if h5_path else []),
             "--port",
             str(port),
             "--no-browser",
@@ -899,10 +1208,16 @@ def run_native(obj_path: str | None, port: int) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(add_help=False)
-    parser.add_argument(
+    sources = parser.add_mutually_exclusive_group()
+    sources.add_argument(
         "--obj",
         default=None,
         help="OBJ file to load on startup",
+    )
+    sources.add_argument(
+        "--h5",
+        default=None,
+        help="HDF5 file written by jupedsim's Hdf5TrajectoryWriter to load on startup",
     )
     parser.add_argument(
         "--native",
@@ -925,10 +1240,10 @@ def main() -> None:
     port = args.port or find_free_port()
 
     if args.native:
-        run_native(args.obj, port)
+        run_native(args.obj, args.h5, port)
         return
 
-    server = build_app(args.obj)
+    server = build_app(args.obj, args.h5)
     if not args.no_browser:
         print(f"Serving on http://localhost:{port}  (Ctrl-C to stop)")
     server.start(
