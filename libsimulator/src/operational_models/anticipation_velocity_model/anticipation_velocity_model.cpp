@@ -269,14 +269,14 @@ Point AnticipationVelocityModel::handle_wall_avoidance(
     const double critical_wall_distance = current_state.wall_buffer_distance + current_state.radius;
 
     Point modified_direction = direction;
-    for(const auto& wall : step.walls_in_range(critical_wall_distance)) {
-        const auto dot_product = modified_direction.scalar_product(wall.normal);
+    if(const auto wall = step.wall_ahead(direction * critical_wall_distance)) {
+        const auto dot_product = modified_direction.scalar_product(wall->normal);
 
         if(dot_product < 0) {
             // Direction points into wall - need to project it out
             // Remove the component pointing into the wall
-            const auto projected_direction = modified_direction - wall.normal * dot_product;
-            modified_direction = projected_direction + wall.normal * pushout_strength;
+            const auto projected_direction = modified_direction - wall->normal * dot_product;
+            modified_direction = projected_direction + wall->normal * pushout_strength;
         }
     }
 
