@@ -1,0 +1,43 @@
+# SPDX-License-Identifier: LGPL-3.0-or-later
+# Website tooling for jupedsim.org: build, preview and publish the site and
+# the documentation. Installed by the workflows (`python -m pip install
+# ./jupedsim.org/tools`); CMake and local use run it uninstalled through
+# PYTHONPATH and `python -m jps_site_tooling`. Never published.
+
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "jps-site-tooling"
+description = "Build, preview and publish jupedsim.org (site and docs)"
+dynamic = ["version"]
+requires-python = ">=3.14"
+license = "LGPL-3.0-or-later"
+classifiers = ["Private :: Do Not Upload"]
+dependencies = [
+    "packaging",
+    "pagefind[bin]~=1.5",
+    "PyGithub~=2.10",
+]
+
+[project.scripts]
+jps-site-tooling = "jps_site_tooling.cli:main"
+
+[tool.setuptools.dynamic]
+version = {attr = "jps_site_tooling.__version__"}
+
+[tool.setuptools.packages.find]
+include = ["jps_site_tooling*"]
+
+[tool.mypy]
+strict = true
+
+[[tool.mypy.overrides]]
+module = ["pagefind_bin"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "--import-mode=importlib"

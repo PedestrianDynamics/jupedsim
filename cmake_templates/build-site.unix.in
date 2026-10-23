@@ -3,10 +3,11 @@
 set -euo pipefail
 export JPSCORE_SOURCE_PATH="@PROJECT_SOURCE_DIR@"
 # The stage holds the package with the compiled module and its stubs; the docs
-# document the native types through those stubs.
-export PYTHONPATH="@PROJECT_BINARY_DIR@/stage"
+# document the native types through those stubs. The website tooling package
+# (jupedsim.org/tools) runs uninstalled from the checkout.
+export PYTHONPATH="@PROJECT_BINARY_DIR@/stage:@PROJECT_SOURCE_DIR@/jupedsim.org/tools"
 
 echo "Source path ${JPSCORE_SOURCE_PATH}"
 echo "PYTHONPATH=${PYTHONPATH}"
 
-exec @Python_EXECUTABLE@ @PROJECT_SOURCE_DIR@/scripts/build_site.py --source @PROJECT_SOURCE_DIR@/jupedsim.org --out @PROJECT_BINARY_DIR@/site --version v@PROJECT_VERSION@ "$@"
+exec @Python_EXECUTABLE@ -m jps_site_tooling build-site --source @PROJECT_SOURCE_DIR@/jupedsim.org --out @PROJECT_BINARY_DIR@/site --version v@PROJECT_VERSION@ "$@"

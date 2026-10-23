@@ -24,6 +24,12 @@ ruff~=0.17.0
 pre-commit~=4.5
 mypy~=2.3
 types-shapely~=2.1
+# deps of jupedsim.org/tools (jps_site_tooling); its tests run in `ninja tests`
+# and build a minimal Sphinx project (the Sphinx pin lives in the site file)
+packaging~=26.0
+pagefind[bin]~=1.5
+PyGithub~=2.10
+-r jupedsim.org/site/requirements.txt
 # deps of scripts/dxf2wkt.py: `ninja tests` runs its `--selftest` (CMake
 # target scripttests); the jupedsim package itself does not need them
 ezdxf~=1.4

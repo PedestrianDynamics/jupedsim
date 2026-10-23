@@ -67,10 +67,12 @@ jobs:
         uses: actions/checkout@v7
         with:
           submodules: true
-      - name: Set up Python 3.13
+      # 3.14: `ninja tests` runs the jupedsim.org/tools tests, whose package
+      # requires Python >= 3.14.
+      - name: Set up Python 3.14
         uses: actions/setup-python@v7
         with:
-          python-version: "3.13"
+          python-version: "3.14"
       - name: install rust toolchain
         uses: dtolnay/rust-toolchain@stable
       - name: Install dependencies
