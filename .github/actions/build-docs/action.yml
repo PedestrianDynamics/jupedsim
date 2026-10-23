@@ -37,6 +37,10 @@ runs:
         # jupedsim.org/docs/requirements.txt.
         python3 -m pip install -r jupedsim.org/docs/requirements.txt -r jupedsim.org/site/requirements.txt
 
+    - name: Install the website tooling
+      shell: bash
+      run: python3 -m pip install --quiet ./jupedsim.org/tools
+
     - name: Build site and documentation
       shell: bash
       env:
@@ -45,9 +49,9 @@ runs:
       run: |
         # --strict: Sphinx warnings in site/ or docs/ fail the build.
         # Notebooks are executed. Pagefind comes from site/requirements.txt,
-        # so the artifact carries a search index; the deploy workflows rebuild
-        # it over the published tree anyway.
-        python3 scripts/build_site.py --source jupedsim.org --out "$OUT_PATH" \
+        # so the artifact carries a search index; the publishers rebuild it
+        # over the published tree anyway.
+        jps-site-tooling build-site --source jupedsim.org --out "$OUT_PATH" \
           --version "$DOCS_VERSION" --strict
 
     - name: Check and prune the assembled site

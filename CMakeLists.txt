@@ -225,8 +225,13 @@ if(BUILD_TESTS)
         ${pytest-wrapper-out}
         @ONLY
     )
+    set(tests_dependency_list pythontests unittests scripttests)
+    if(UNIX)
+        # The tooling tests shell out to git and rsync and create symlinks.
+        list(APPEND tests_dependency_list sitetoolingtests)
+    endif()
     add_custom_target(tests
-        DEPENDS pythontests unittests scripttests
+        DEPENDS ${tests_dependency_list}
     )
     add_custom_target(pythontests
         COMMENT "Running system tests"
@@ -234,6 +239,16 @@ if(BUILD_TESTS)
                 --basetemp=${PROJECT_BINARY_DIR}/pythontests-out
                 --junit-xml=result-pythontests.xml
         DEPENDS pyjupedsim pyjupedsim_stubs
+        USES_TERMINAL
+    )
+    # jps_site_tooling (jupedsim.org/tools) does not import jupedsim: no
+    # dependency on the bindings. pytest reads jupedsim.org/tools/pyproject.toml
+    # (pythonpath = ["."]), so the package needs no install.
+    add_custom_target(sitetoolingtests
+        COMMENT "Running jps_site_tooling tests"
+        COMMAND ${Python_EXECUTABLE} -m pytest ${PROJECT_SOURCE_DIR}/jupedsim.org/tools/tests
+                -q --basetemp=${PROJECT_BINARY_DIR}/sitetoolingtests-out
+                --junit-xml=result-sitetoolingtests.xml
         USES_TERMINAL
     )
     add_custom_target(scripttests

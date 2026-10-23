@@ -146,7 +146,7 @@ class _KnownUnresolvedImportFilter(logging.Filter):
 
 
 # The docs build warns and continues without network. CI builds with -W
-# (build_site.py --strict), so network failures (Zenodo, intersphinx hosts)
+# (build-site --strict), so network failures (Zenodo, intersphinx hosts)
 # are printed to stderr instead of being Sphinx warnings: an outage must not
 # fail a PR or release build. Sphinx gives the intersphinx fetch warning no
 # type, so suppress_warnings cannot target it; this filter takes it out of the
