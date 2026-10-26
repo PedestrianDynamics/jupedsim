@@ -1,0 +1,111 @@
+name: Publish www
+
+on:
+  workflow_dispatch:
+
+# Only the publish job pushes; the build runs third-party code with a
+# read-only token.
+permissions:
+  contents: read
+
+env:
+  # Python of every job in this workflow.
+  PYTHON_VERSION: "3.14"
+  # Every publisher writes to this branch; release day flips it to gh-pages.
+  PAGES_BRANCH: gh-pages-new
+
+jobs:
+  build:
+    name: Build the www pages
+    runs-on: ubuntu-latest
+    steps:
+      # The www pages are published from master of the upstream repository only.
+      # GitHub's dispatch dialog cannot hide other branches, so the run
+      # refuses them here, before anything is checked out.
+      - name: Refuse anything but master of PedestrianDynamics/jupedsim
+        env:
+          REF: ${{ github.ref }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          if [ "$REF" != "refs/heads/master" ] || [ "$REPOSITORY" != "PedestrianDynamics/jupedsim" ]; then
+            echo "::error::The www pages are published from refs/heads/master of PedestrianDynamics/jupedsim only; this run is on $REF of $REPOSITORY. The branch picker of the dispatch dialog cannot be restricted: pick master."
+            exit 1
+          fi
+      - name: Checkout source
+        uses: actions/checkout@v7
+      # www alone: no docs, no jupedsim install, no Pagefind (the publish
+      # rebuilds the index over the published tree).
+      - name: Build the www pages
+        uses: ./.github/actions/build-website
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          target: www
+          retention-days: 1
+
+  publish:
+    name: Publish the www pages
+    needs: build
+    # One www publish at a time (a pending one can still be replaced by a
+    # newer pending one; re-run it). The docs publisher uses its own group;
+    # the two race on the Pages branch through the tooling's push-retry loop.
+    concurrency:
+      group: pages-www
+      cancel-in-progress: false
+    permissions:
+      actions: read
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source (website tooling, tag target)
+        uses: actions/checkout@v7
+        with:
+          path: jupedsim
+      - name: Checkout the Pages branch
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ env.PAGES_BRANCH }}
+          path: pages
+      - name: Download the website artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: website
+          path: ${{ runner.temp }}/html
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Install the website tooling
+        run: python3 -m pip install ./jupedsim/jupedsim.org/tools
+      # publish www: replaces everything at the root except docs/, CNAME,
+      # .nojekyll and the index it rebuilds; pushes with retries. The same
+      # www build twice is not an error (changed=false), the tag is still created.
+      - name: Publish the www pages
+        id: publish
+        env:
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          jps-website-tooling publish www --build "$RUNNER_TEMP/html" \
+            --checkout pages --source-sha "$SOURCE_SHA"
+      - name: Tag the source commit
+        id: tag
+        env:
+          SOURCE_SHA: ${{ github.sha }}
+          PAGES_SHA: ${{ steps.publish.outputs.pages_sha }}
+        run: |
+          jps-website-tooling tag www --checkout jupedsim \
+            --source-sha "$SOURCE_SHA" --pages-sha "$PAGES_SHA"
+      # Also after a failed tag push: the Pages commit landed and is named.
+      - name: Summary
+        if: always() && steps.publish.outcome == 'success'
+        env:
+          SOURCE_SHA: ${{ github.sha }}
+          PAGES_SHA: ${{ steps.publish.outputs.pages_sha }}
+          CHANGED: ${{ steps.publish.outputs.changed }}
+          SOURCE_TAG: ${{ steps.tag.outputs.tag }}
+        run: |
+          {
+            echo "## www pages published"
+            echo "- source: $SOURCE_SHA"
+            echo "- Pages commit ($PAGES_BRANCH): $PAGES_SHA (changed: $CHANGED)"
+            echo "- source tag: $SOURCE_TAG"
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -9,18 +9,34 @@ permissions:
   contents: read
   pull-requests: read
 
+env:
+  # Python of every job in this workflow.
+  PYTHON_VERSION: "3.14"
+
 jobs:
   cleanup:
     name: Delete Orphaned PR Previews
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout CI scripts
+      # The website tooling of the triggering branch (the default branch on
+      # the nightly run); no PR code is executed. Installed before the
+      # previews checkout puts its write token on disk.
+      - name: Checkout the website tooling
         uses: actions/checkout@v7
         with:
           path: jupedsim
-          sparse-checkout: scripts/ci
+          sparse-checkout: jupedsim.org/tools
           sparse-checkout-cone-mode: true
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install the website tooling
+        run: python -m pip install ./jupedsim/jupedsim.org/tools
 
       - name: Checkout PR previews
         uses: actions/checkout@v7
@@ -30,52 +46,22 @@ jobs:
           ref: main
           path: pr-previews
 
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.15"
-
-      - name: Install PyGithub
-        run: python -m pip install 'PyGithub~=2.10'
-
+      # `preview prune` deletes the previews of closed PRs, commits and pushes
+      # with retries; deletions are recomputed on every attempt (see the
+      # docstring of jps_website_tooling.previews).
       - name: Delete orphaned previews
-        working-directory: pr-previews
+        id: prune
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          jps-website-tooling preview prune --checkout pr-previews
 
-          # Preview deploys push to the same branch, so a push can be rejected
-          # as non-fast-forward. Rebasing a stale deletion commit onto the new
-          # tip could strip files of a preview that was re-deployed in the
-          # meantime (PR reopened, build in flight) or stop on modify/delete
-          # conflicts. On rejection, restart from the current remote tip and
-          # recompute the deletions.
-          for attempt in 1 2 3 4 5; do
-            git fetch origin main
-            git reset --hard origin/main
-
-            python3 "$GITHUB_WORKSPACE/jupedsim/scripts/ci/delete_orphaned_previews.py" \
-              pull-requests --repo "$GITHUB_REPOSITORY"
-
-            git add -A
-            if git diff --cached --quiet; then
-              echo "No orphaned previews to delete."
-              exit 0
-            fi
-            # Record which previews go, e.g. "#12, #34"; the run log expires.
-            numbers=$(git diff --cached --name-only --diff-filter=D \
-              | cut -d/ -f2 | sort -un | sed 's/^/#/' | paste -sd ',' - | sed 's/,/, /g')
-            git commit -m "docs: delete orphaned PR previews ($numbers)"
-
-            if git push origin HEAD:main; then
-              echo "Deleted orphaned previews: $numbers" >> "$GITHUB_STEP_SUMMARY"
-              exit 0
-            fi
-            echo "Push rejected (attempt $attempt), retrying"
-            sleep $((attempt * 5))
-          done
-
-          echo "::error::Failed to push cleanup after 5 attempts"
-          exit 1
+      - name: Summary
+        env:
+          DELETED: ${{ steps.prune.outputs.deleted }}
+        run: |
+          if [ -n "$DELETED" ]; then
+            echo "Deleted orphaned previews: #${DELETED//,/, #}" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "No orphaned previews to delete." >> "$GITHUB_STEP_SUMMARY"
+          fi

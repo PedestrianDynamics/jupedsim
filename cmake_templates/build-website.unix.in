@@ -1,0 +1,16 @@
+#! /usr/bin/env bash
+# SPDX-License-Identifier: LGPL-3.0-or-later
+set -euo pipefail
+export JPSCORE_SOURCE_PATH="@PROJECT_SOURCE_DIR@"
+# The stage holds the package with the compiled module and its stubs; the docs
+# document the native types through those stubs. The website tooling package
+# (jupedsim.org/tools) runs uninstalled from the checkout.
+export PYTHONPATH="@PROJECT_BINARY_DIR@/stage:@PROJECT_SOURCE_DIR@/jupedsim.org/tools"
+
+echo "Source path ${JPSCORE_SOURCE_PATH}"
+echo "PYTHONPATH=${PYTHONPATH}"
+
+# build-website takes the source from the working directory (<cwd>/jupedsim.org).
+# Warnings fail the build by default; pass --lenient to see the site anyway.
+cd "@PROJECT_SOURCE_DIR@"
+exec @Python_EXECUTABLE@ -m jps_website_tooling build-website --out @PROJECT_BINARY_DIR@/website --version v@PROJECT_VERSION@ "$@"

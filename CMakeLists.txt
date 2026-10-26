@@ -53,8 +53,11 @@ print_var(BUILD_TOOLS)
 set(USE_IPO ON CACHE BOOL "Build with interprocedural optimization (LTO) where supported")
 print_var(USE_IPO)
 
-set(BUILD_SITE OFF CACHE BOOL "Build the website (jupedsim.org/) with Sphinx")
-print_var(BUILD_SITE)
+set(BUILD_WEBSITE OFF CACHE BOOL "Build the website (jupedsim.org/) with Sphinx")
+if(DEFINED BUILD_SITE)
+    message(WARNING "BUILD_SITE was renamed to BUILD_WEBSITE; the website targets are off until you configure with -DBUILD_WEBSITE=ON (and -UBUILD_SITE)")
+endif()
+print_var(BUILD_WEBSITE)
 
 set(WITH_FORMAT OFF CACHE BOOL "Create format tools")
 print_var(WITH_FORMAT)
@@ -225,8 +228,13 @@ if(BUILD_TESTS)
         ${pytest-wrapper-out}
         @ONLY
     )
+    set(tests_dependency_list pythontests unittests scripttests)
+    if(UNIX)
+        # The tooling tests shell out to git and rsync and create symlinks.
+        list(APPEND tests_dependency_list websitetoolingtests)
+    endif()
     add_custom_target(tests
-        DEPENDS pythontests unittests scripttests
+        DEPENDS ${tests_dependency_list}
     )
     add_custom_target(pythontests
         COMMENT "Running system tests"
@@ -234,6 +242,16 @@ if(BUILD_TESTS)
                 --basetemp=${PROJECT_BINARY_DIR}/pythontests-out
                 --junit-xml=result-pythontests.xml
         DEPENDS pyjupedsim pyjupedsim_stubs
+        USES_TERMINAL
+    )
+    # jps_website_tooling (jupedsim.org/tools) does not import jupedsim: no
+    # dependency on the bindings. pytest reads jupedsim.org/tools/pyproject.toml
+    # (pythonpath = ["."]), so the package needs no install.
+    add_custom_target(websitetoolingtests
+        COMMENT "Running jps_website_tooling tests"
+        COMMAND ${Python_EXECUTABLE} -m pytest ${PROJECT_SOURCE_DIR}/jupedsim.org/tools/tests
+                -q --basetemp=${PROJECT_BINARY_DIR}/websitetoolingtests-out
+                --junit-xml=result-websitetoolingtests.xml
         USES_TERMINAL
     )
     add_custom_target(scripttests
@@ -279,21 +297,21 @@ endif()
 ################################################################################
 # Website
 ################################################################################
-if(BUILD_SITE AND UNIX)
+if(BUILD_WEBSITE AND UNIX)
     configure_file(
-        ${PROJECT_SOURCE_DIR}/cmake_templates/build-site.unix.in
-        ${PROJECT_BINARY_DIR}/build-site
+        ${PROJECT_SOURCE_DIR}/cmake_templates/build-website.unix.in
+        ${PROJECT_BINARY_DIR}/build-website
         @ONLY
     )
-    add_custom_target(site
-        COMMENT "Building website (site + docs, notebooks executed)"
-        COMMAND ${PROJECT_BINARY_DIR}/build-site
+    add_custom_target(website
+        COMMENT "Building website (www + docs, notebooks executed)"
+        COMMAND ${PROJECT_BINARY_DIR}/build-website
         DEPENDS pyjupedsim pyjupedsim_stubs
         USES_TERMINAL
     )
-    add_custom_target(site-fast
-        COMMENT "Building website (site + docs, notebooks not executed)"
-        COMMAND ${PROJECT_BINARY_DIR}/build-site --no-notebooks
+    add_custom_target(website-fast
+        COMMENT "Building website (www + docs, notebooks not executed)"
+        COMMAND ${PROJECT_BINARY_DIR}/build-website --no-notebooks
         DEPENDS pyjupedsim pyjupedsim_stubs
         USES_TERMINAL
     )

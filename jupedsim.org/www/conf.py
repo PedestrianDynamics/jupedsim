@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
-"""Sphinx configuration for the jupedsim.org site (landing, articles, notes).
+"""Sphinx configuration for the www project of jupedsim.org (landing, articles, notes).
 
 Built from master and published at the root of jupedsim.org; the versioned
 documentation lives in ``docs/`` next to this folder and is published under
@@ -44,11 +44,9 @@ myst_enable_extensions = [
     "html_image",
 ]
 
-# "auto" executes notebooks that carry no outputs, which requires an
-# importable jupedsim (the build's bindings or the PyPI wheel).
-nb_execution_mode = "auto"
-nb_execution_timeout = 900
-nb_execution_raise_on_error = True
+# www is not tied to a jupedsim version, so its notebooks are never
+# executed: they are rendered with the outputs they were committed with.
+nb_execution_mode = "off"
 
 # -- Notes -----------------------------------------------------------------
 notes_dirs = ["notes"]
@@ -63,7 +61,7 @@ html_static_path = ["_static"]
 html_permalinks_icon = "#"
 html_copy_source = False
 html_show_sourcelink = False
-# Math is rendered to MathML at build time (see setup below), so the site
+# Math is rendered to MathML at build time (see setup below), so the website
 # makes no request to a MathJax CDN.
 html_math_renderer = "mathml"
 favicons = ["logo.png"]
