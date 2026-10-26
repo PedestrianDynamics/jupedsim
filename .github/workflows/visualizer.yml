@@ -28,6 +28,8 @@ defaults:
     # (git-bash on Windows). Globs such as dist/*.whl expand as expected.
     shell: bash
 env:
+  # Python of every job in this workflow.
+  PYTHON_VERSION: "3.14"
   # The visualizer is a Qt application; everything CI runs is headless.
   # The render job overrides this at step level.
   QT_QPA_PLATFORM: offscreen
@@ -38,10 +40,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
-      - name: Set up Python 3.13
+      - name: Set up Python
         uses: actions/setup-python@v7
         with:
-          python-version: "3.13"
+          python-version: ${{ env.PYTHON_VERSION }}
       - name: Install dependencies
         run: python -m pip install "ruff~=0.14"
       - name: Run ruff check
@@ -62,10 +64,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
-      - name: Set up Python 3.13
+      - name: Set up Python
         uses: actions/setup-python@v7
         with:
-          python-version: "3.13"
+          python-version: ${{ env.PYTHON_VERSION }}
       - name: Install Qt system libraries
         if: runner.os == 'Linux'
         # Qt links these at load time; the GitHub Ubuntu image ships only
@@ -182,10 +184,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
-      - name: Set up Python 3.13
+      - name: Set up Python
         uses: actions/setup-python@v7
         with:
-          python-version: "3.13"
+          python-version: ${{ env.PYTHON_VERSION }}
       - name: Install Qt system libraries
         # Same list as the test job, plus xvfb (the virtual X server) and
         # libgl1-mesa-dri (the llvmpipe software rasterizer VTK renders on).

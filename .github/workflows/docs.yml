@@ -1,0 +1,148 @@
+name: Publish Documentation
+
+on:
+  release:
+    # 'released' fires for a published release and for a pre-release that is
+    # promoted to a release; never for drafts or pre-releases ('published'
+    # would miss the promotion).
+    types: [released]
+  workflow_dispatch:
+
+# Only the publish job pushes (Pages branch, source tag); the build job runs
+# third-party code (pip install, notebooks) with a read-only token.
+permissions:
+  contents: read
+
+env:
+  # Python of every job in this workflow.
+  PYTHON_VERSION: "3.14"
+  # Every publisher writes to this branch; release day flips it to gh-pages.
+  PAGES_BRANCH: gh-pages-new
+
+jobs:
+  resolve:
+    name: Resolve the docs version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.resolve.outputs.version }}
+      commits_since: ${{ steps.resolve.outputs.commits_since }}
+      source_sha: ${{ steps.resolve.outputs.source_sha }}
+    steps:
+      # The default ref is the dispatched branch or the release tag, pinned to
+      # github.sha. Full history and all tags: the tooling compares the
+      # branch with its release tags and refuses a shallow clone.
+      - name: Checkout source
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Install the website tooling
+        run: python3 -m pip install ./jupedsim.org/tools
+      # On a dispatch the checkout is on rls-X.Y, on a release it is detached
+      # at the release tag; the tooling tells the two apart itself.
+      - name: Resolve
+        id: resolve
+        run: jps-website-tooling resolve --checkout .
+
+  build:
+    name: Build documentation
+    needs: resolve
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.resolve.outputs.source_sha }}
+          submodules: true
+      - name: Build the website
+        uses: ./.github/actions/build-website
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          version: ${{ needs.resolve.outputs.version }}
+          target: all
+          # Long enough to re-run a failed publish from the same artifact.
+          retention-days: 30
+
+  publish:
+    name: Publish documentation
+    needs: [resolve, build]
+    # One docs publish at a time (a pending one can still be replaced by a
+    # newer pending one; re-run it within the artifact's 30-day retention).
+    # The www publisher uses its own group; the two race on the Pages
+    # branch through the tooling's push-retry loop.
+    concurrency:
+      group: pages-docs
+      cancel-in-progress: false
+    permissions:
+      actions: read
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source (website tooling, tag target)
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.resolve.outputs.source_sha }}
+          path: jupedsim
+      - name: Checkout the Pages branch
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ env.PAGES_BRANCH }}
+          path: pages
+      - name: Download the website artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: website
+          path: ${{ runner.temp }}/html
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Install the website tooling
+        run: python3 -m pip install ./jupedsim/jupedsim.org/tools
+      # publish docs: checks the artifact, replaces docs/<version>/, rewrites
+      # docs/stable and docs/versions.json, writes the /docs/ redirect,
+      # rebuilds the Pagefind index and pushes with retries.
+      - name: Publish the documentation
+        id: publish
+        env:
+          VERSION: ${{ needs.resolve.outputs.version }}
+          SOURCE_SHA: ${{ needs.resolve.outputs.source_sha }}
+        run: |
+          jps-website-tooling publish docs --build "$RUNNER_TEMP/html" --version "$VERSION" \
+            --checkout pages --source-sha "$SOURCE_SHA"
+      # docs-<version>-<commits_since>-<TS> on the source commit; runs also when nothing
+      # changed on the Pages branch.
+      - name: Tag the source commit
+        id: tag
+        env:
+          VERSION: ${{ needs.resolve.outputs.version }}
+          COMMITS_SINCE: ${{ needs.resolve.outputs.commits_since }}
+          SOURCE_SHA: ${{ needs.resolve.outputs.source_sha }}
+          PAGES_SHA: ${{ steps.publish.outputs.pages_sha }}
+        run: |
+          # A release has no commits after its tag: the flag is left out then.
+          since=()
+          if [ "$COMMITS_SINCE" -gt 0 ]; then since=(--commits-since "$COMMITS_SINCE"); fi
+          jps-website-tooling tag docs --version "$VERSION" "${since[@]}" \
+            --checkout jupedsim --source-sha "$SOURCE_SHA" --pages-sha "$PAGES_SHA"
+      # Also after a failed tag push: the Pages commit landed and is named.
+      - name: Summary
+        if: always() && steps.publish.outcome == 'success'
+        env:
+          VERSION: ${{ needs.resolve.outputs.version }}
+          COMMITS_SINCE: ${{ needs.resolve.outputs.commits_since }}
+          SOURCE_SHA: ${{ needs.resolve.outputs.source_sha }}
+          PAGES_SHA: ${{ steps.publish.outputs.pages_sha }}
+          CHANGED: ${{ steps.publish.outputs.changed }}
+          SOURCE_TAG: ${{ steps.tag.outputs.tag }}
+        run: |
+          {
+            echo "## Documentation published"
+            echo "- version: $VERSION ($COMMITS_SINCE commits after the release tag)"
+            echo "- source: $SOURCE_SHA"
+            echo "- Pages commit ($PAGES_BRANCH): $PAGES_SHA (changed: $CHANGED)"
+            echo "- source tag: $SOURCE_TAG"
+          } >> "$GITHUB_STEP_SUMMARY"

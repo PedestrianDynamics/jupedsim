@@ -1,28 +1,28 @@
 ---
 date: "2026-09-28"
 author: "JuPedSim team"
-description: "How to write articles and notes for jupedsim.org, and a live reference of the markup the site supports."
+description: "How to write articles and notes for jupedsim.org, and a live reference of the markup the website supports."
 ---
 
 <!-- SPDX-License-Identifier: LGPL-3.0-or-later -->
 
 # Writing for jupedsim.org
 
-jupedsim.org is a Sphinx project in the `jupedsim.org/site/` folder of the
+jupedsim.org is a Sphinx project in the `jupedsim.org/www/` folder of the
 [JuPedSim repository](https://github.com/PedestrianDynamics/jupedsim). Articles
-live in `jupedsim.org/site/articles/`, notes in `jupedsim.org/site/notes/`. Both are MyST Markdown (or
+live in `jupedsim.org/www/articles/`, notes in `jupedsim.org/www/notes/`. Both are MyST Markdown (or
 Jupyter notebooks for articles). This page is itself an article and shows every
-piece of markup the site supports, so you can compare source and rendering.
+piece of markup the website supports, so you can compare source and rendering.
 
 ## Articles and notes
 
-**Articles** are longer, curated pieces. Add the file to `jupedsim.org/site/articles/` and
-list it in the hidden toctree of `jupedsim.org/site/articles/index.md`; the order there is the
+**Articles** are longer, curated pieces. Add the file to `jupedsim.org/www/articles/` and
+list it in the hidden toctree of `jupedsim.org/www/articles/index.md`; the order there is the
 previous/next order. The list on `/articles/` itself is sorted by date, newest
 first.
 
 **Notes** are short, dated news items. Name the file
-`jupedsim.org/site/notes/YYYY-MM-DD-slug.md`; the notes index picks it up automatically,
+`jupedsim.org/www/notes/YYYY-MM-DD-slug.md`; the notes index picks it up automatically,
 newest first, and the note appears in the RSS feed at `/notes/feed.xml` and on
 the landing page.
 
@@ -59,13 +59,13 @@ into the notebook metadata instead of a Markdown cell, as top-level keys:
 }
 ```
 
-The first Markdown cell starts with the `# Title`. Notebooks stored without
-outputs are executed during the build (this needs an importable `jupedsim`;
-the timeout is 900 s per notebook), notebooks with outputs are used as they
-are. The published site executes notebooks against the latest `jupedsim`
-release on PyPI, not against master; commit the outputs of an article that
-needs unreleased features. Interactive outputs such as plotly figures are
-not supported and fail the build; save them as static images instead.
+The first Markdown cell starts with the `# Title`. Notebook articles are never
+executed by the build: an article is not tied to a `jupedsim` version, so it
+is rendered with the outputs it was committed with. Run the notebook against
+the `jupedsim` version it is about and commit it with its outputs; a notebook
+without outputs shows its code only. Interactive outputs such as plotly
+figures are not supported and fail the build; save them as static images
+instead.
 ## Headings
 
 Use `##` for sections and `###` for subsections; they appear in the
@@ -79,7 +79,7 @@ Deeper levels work too, but rarely help the reader.
 
 Paragraphs are separated by a blank line. Use *emphasis*, **strong**,
 `inline code` and [links](https://www.jupedsim.org/). Link to other pages of the
-site with relative paths, e.g. [the notes](../notes/index.md), and to the
+website with relative paths, e.g. [the notes](../notes/index.md), and to the
 documentation (which is a separate project) with an HTML link and an
 absolute path, `<a href="/docs/stable/">/docs/stable/</a>`, which renders as
 <a href="/docs/stable/">/docs/stable/</a>.
@@ -196,7 +196,7 @@ is reported as a build warning with the file and line.
 :alt: The JuPedSim logo
 :width: 160px
 
-A figure with a caption. Put images next to the article or in `jupedsim.org/site/_static/`.
+A figure with a caption. Put images next to the article or in `jupedsim.org/www/_static/`.
 ```
 
 ## Footnotes

@@ -18,6 +18,11 @@ on:
       - rls-*
 permissions:
   contents: read
+env:
+  # Python of every job in this workflow that is not a wheel build (the
+  # wheel and wheel-test matrices name their own).
+  PYTHON_VERSION: "3.14"
+
 jobs:
   checks:
     name: Check Format
@@ -25,10 +30,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
-      - name: Set up Python 3.13
+      - name: Set up Python
         uses: actions/setup-python@v7
         with:
-          python-version: "3.13"
+          python-version: ${{ env.PYTHON_VERSION }}
       - name: Install dependencies
         run: pip install pre-commit
       # Tool versions are pinned in .pre-commit-config.yaml, the same ones the local hooks use.
@@ -42,10 +47,10 @@ jobs:
         uses: actions/checkout@v7
         with:
           submodules: true
-      - name: Set up Python 3.13
+      - name: Set up Python
         uses: actions/setup-python@v7
         with:
-          python-version: "3.13"
+          python-version: ${{ env.PYTHON_VERSION }}
       - name: Install dependencies
         run: pip install pytest
       - name: Install clang-tidy-23
@@ -67,10 +72,12 @@ jobs:
         uses: actions/checkout@v7
         with:
           submodules: true
-      - name: Set up Python 3.13
+      # 3.14: `ninja tests` runs the jupedsim.org/tools tests, whose package
+      # requires Python >= 3.14.
+      - name: Set up Python
         uses: actions/setup-python@v7
         with:
-          python-version: "3.13"
+          python-version: ${{ env.PYTHON_VERSION }}
       - name: install rust toolchain
         uses: dtolnay/rust-toolchain@stable
       - name: Install dependencies
@@ -90,7 +97,7 @@ jobs:
       - uses: actions/setup-python@v7
         name: Install Python
         with:
-          python-version: 3.13
+          python-version: ${{ env.PYTHON_VERSION }}
       - name: Install dependencies
         run: python -m pip install build
       - name: Build sdist
@@ -223,10 +230,10 @@ jobs:
     needs: [build_sdist]
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Python 3.13
+      - name: Set up Python
         uses: actions/setup-python@v7
         with:
-          python-version: 3.13
+          python-version: ${{ env.PYTHON_VERSION }}
       - name: install rust toolchain
         uses: dtolnay/rust-toolchain@stable
       - name: Download packages

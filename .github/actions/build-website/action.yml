@@ -1,0 +1,105 @@
+# .github/actions/build-website/action.yml
+name: 'Build Website'
+description: 'Builds jupedsim.org (www + docs, or www alone) with Sphinx, warnings are errors; uploads the artifact "website"'
+
+inputs:
+  python-version:
+    description: 'Python for the build (the workflow passes its PYTHON_VERSION)'
+    required: true
+  target:
+    description: 'What to build: "all" (www + docs + search index) or "www" (the root pages only)'
+    required: false
+    default: 'all'
+  version:
+    description: 'Docs version directory name under docs/ (release tag, or stable); unused for target=www'
+    required: false
+    default: 'stable'
+  retention-days:
+    description: 'Number of days to retain the artifact'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v7
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    # The docs import jupedsim (autoapi, executed notebooks); www does not
+    # (it never executes notebooks).
+    - name: Install jupedsim
+      if: inputs.target == 'all'
+      shell: bash
+      run: python3 -m pip install .
+
+    - name: Install the docs requirements
+      if: inputs.target == 'all'
+      shell: bash
+      run: python3 -m pip install -r jupedsim.org/docs/requirements.txt
+
+    - name: Install the www requirements and the website tooling
+      shell: bash
+      run: |
+        # Whatever www/ needs (incl. Pagefind) is listed in
+        # jupedsim.org/www/requirements.txt.
+        python3 -m pip install -r jupedsim.org/www/requirements.txt
+        python3 -m pip install ./jupedsim.org/tools
+
+    - name: Build the website
+      shell: bash
+      env:
+        OUT_PATH: ${{ runner.temp }}/website
+        TARGET: ${{ inputs.target }}
+        VERSION: ${{ inputs.version }}
+      run: |
+        # Sphinx warnings fail the build (the default). The docs' notebooks are
+        # executed; www never executes notebooks.
+        # With target=all the artifact carries a search index over www and
+        # docs/stable; the publishers rebuild it over the published tree.
+        set -euo pipefail
+        case "$TARGET" in
+          all|www) ;;
+          *) echo "::error::input 'target' must be 'all' or 'www', got '$TARGET'"; exit 1 ;;
+        esac
+        # Runs at the repository root: the source is ./jupedsim.org. Strict
+        # (warnings fail the build) is the default.
+        if [ "$TARGET" = all ]; then
+          jps-website-tooling build-website --out "$OUT_PATH" --version "$VERSION" --target all
+        else
+          jps-website-tooling build-website --out "$OUT_PATH" --target "$TARGET"
+        fi
+
+    - name: Check and prune the assembled website
+      shell: bash
+      env:
+        OUT_PATH: ${{ runner.temp }}/website
+        TARGET: ${{ inputs.target }}
+        VERSION: ${{ inputs.version }}
+      run: |
+        set -euo pipefail
+        expected="$OUT_PATH/index.html"
+        if [ "$TARGET" = all ]; then
+          expected="$expected $OUT_PATH/docs/$VERSION/index.html"
+        fi
+        for f in $expected; do
+          if [ ! -f "$f" ]; then
+            echo "::error::Website build did not produce $f"
+            exit 1
+          fi
+        done
+        # A release build links docs/stable to docs/<tag>; the upload would
+        # follow the symlink and store the docs twice. Only docs/<tag> is
+        # published from the artifact. A stable build (previews) has
+        # docs/stable as a directory and keeps it.
+        if [ -L "$OUT_PATH/docs/stable" ]; then
+          rm "$OUT_PATH/docs/stable"
+        fi
+
+    - name: Store the website artifact
+      uses: actions/upload-artifact@v7
+      with:
+        name: website
+        path: ${{ runner.temp }}/website/
+        retention-days: ${{ inputs.retention-days }}
+        if-no-files-found: error

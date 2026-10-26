@@ -1,7 +1,7 @@
 ---
 # Naming convention and the few modernize checks that are clean. This file is the only
 # place that decides what clang-tidy checks: `ninja check-tidy` / `ninja tidy-fix` and
-# scripts/ci/check_tidy.sh pass no -checks. Full write-up: site/articles/coding-style.md.
+# scripts/ci/check_tidy.sh pass no -checks. Full write-up: jupedsim.org/www/articles/coding-style.md.
 #
 # Naming (readability-identifier-naming): types and template parameters CamelCase (clang-tidy's
 # name for PascalCase); functions, variables, constants and namespaces lower_case; private and

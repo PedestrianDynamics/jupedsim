@@ -1,13 +1,13 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
-"""Browser smoke checks for a served site build (optional, needs Playwright).
+"""Browser smoke checks for a served website build (optional, needs Playwright).
 
 Exercises what check.sh cannot see in static HTML: the top bar (layout,
 stickiness, grid alignment, the "/" shortcut, search results above it,
 anchors below it), row lists (whole row clickable), the landing hero
 (layout, dark colours, links), the accent budget, the
 footer's grid alignment and visibility on short pages, the version switcher, Pagefind search, the theme toggle,
-the mobile drawers, print styles, JS console errors and external requests. Build and serve the site first
-(`ninja site`, then `python -m http.server -d <build>/site 8000`), then:
+the mobile drawers, print styles, JS console errors and external requests. Build and serve the website first
+(`ninja website`, then `python -m http.server -d <build>/website 8000`), then:
 
     python -m pip install playwright
     python -m playwright install chromium
@@ -33,7 +33,7 @@ except ImportError:
 parser = argparse.ArgumentParser(
     description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
 )
-parser.add_argument("base_url", help="URL the site build is served at")
+parser.add_argument("base_url", help="URL the website build is served at")
 parser.add_argument(
     "--api",
     default="/docs/stable/api/jupedsim/index.html",

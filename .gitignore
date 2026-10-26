@@ -45,9 +45,14 @@ __pycache__/
 # Rust build artifacts
 /libfloorfield/target/
 
-# doc-split theme fixture and site build output
+# doc-split theme fixture and website build output
 /jupedsim.org/theme/tests/_build/
 /jupedsim.org/theme/tests/fixture/_build/
 /jupedsim.org/theme/tests/fixture/api/
 /jupedsim.org/theme/tests/fixture/jupyter_execute/
-/jupedsim.org/site/_build/
+/jupedsim.org/www/_build/
+
+# jps_website_tooling: pip/setuptools build leftovers and pytest cache
+/jupedsim.org/tools/build/
+/jupedsim.org/tools/*.egg-info/
+/jupedsim.org/tools/.pytest_cache/

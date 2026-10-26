@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 #
 # check.sh — build the jupedsim_book fixture (site and docs mode) plus the
-# real jupedsim.org/site and jupedsim.org/docs projects, then assert the
+# real jupedsim.org/www and jupedsim.org/docs projects, then assert the
 # theme's markup contract.
 # Prints one ok/FAIL line per assertion and ends with CHECK PASSED (exit 0)
 # or CHECK FAILED (exit 1).
@@ -20,7 +20,7 @@ set -euo pipefail
 theme_dir="$(cd "$(dirname "$0")" && pwd)"
 repo="$(cd "$theme_dir/../.." && pwd)"
 fixture="$theme_dir/tests/fixture"
-www="$repo/jupedsim.org"
+org="$repo/jupedsim.org"
 
 build_dir="$(dirname "$repo")/$(basename "$repo")-build"
 keep=""
@@ -114,14 +114,14 @@ FIXTURE_MODE=site-no-notfound build fixture-plain -T -W --keep-going -E -b html 
 # bad-template.md (template: nope) is only part of this build; without -W,
 # its one warning is asserted below.
 FIXTURE_MODE=bad-template build fixture-badtpl -T --keep-going -E -b html "$fixture"
-if [ -f "$www/site/conf.py" ]; then
-    build site -T -W --keep-going -E -b html "$www/site"
-    have_site=1
+if [ -f "$org/www/conf.py" ]; then
+    build www -T -W --keep-going -E -b html "$org/www"
+    have_www=1
 else
-    echo "SKIP: build site (jupedsim.org/site/conf.py does not exist yet)"
-    have_site=0
+    echo "SKIP: build www (jupedsim.org/www/conf.py does not exist yet)"
+    have_www=0
 fi
-build docs -T -W --keep-going -E -b html -D nb_execution_mode=off "$www/docs"
+build docs -T -W --keep-going -E -b html -D nb_execution_mode=off "$org/docs"
 
 # Assertions never abort the script (set -e is off from here on).
 set +e
@@ -320,6 +320,10 @@ count "$fs/articles/kitchen-md.html" 'class="report-subtitle"' 1 "kitchen-md des
 none "$fs/search.html" 'data-pagefind-body' "search page not indexed"
 none "$fs/genindex.html" 'data-pagefind-body' "genindex page not indexed"
 none "$fs/404.html" 'data-pagefind-body' "404 page not indexed"
+# Pagefind returns result URLs relative to the index's site root; search.js
+# derives that root from the pagefind.js URL (production: "/", previews:
+# /pull-requests/<N>/).
+count "$theme_dir/jupedsim_book/static/search.js" 'baseUrl' 1 "search.js sets Pagefind's baseUrl from the pagefind.js URL"
 count "$fs/search.html" 'class="report-header"' 1 "search page has report header"
 count "$fs/genindex.html" 'class="report-header"' 1 "genindex page has report header"
 none "$fs/articles/tiny.html" 'id="toc-control"' "no toc checkbox on page without sections"
@@ -496,8 +500,8 @@ exists "$fs/_static/site.css" "site.css shipped"
 count "$fs/_static/site.css" 'scroll-margin-top' 1 "site.css sets scroll-margin-top"
 count "$fs/_static/site.css" '--bar-h' 1 "site.css defines --bar-h"
 before "$page" '<head>' '_static/book.css' '_static/site.css' "site.css loads after book.css"
-for f in "$theme_dir/jupedsim_book/theme.conf" "$fixture/conf.py" "$www/site/conf.py" \
-    "$www/docs/conf.py"; do
+for f in "$theme_dir/jupedsim_book/theme.conf" "$fixture/conf.py" "$org/www/conf.py" \
+    "$org/docs/conf.py"; do
     none "$f" 'nav_before|nav_after|nav_title' "no nav_before/nav_after/nav_title in ${f#"$repo"/}"
 done
 
@@ -599,7 +603,7 @@ for d in "$fs" "$fd" "$out/fixture-plain" "$theme_dir/jupedsim_book" "$fixture";
     label="${d#"$out"/}"
     absent "$d" 'jupedsim-labs-' "no jupedsim-labs- in ${label#"$repo"/}"
 done
-for f in "$www/site/conf.py" "$www/docs/conf.py"; do
+for f in "$org/www/conf.py" "$org/docs/conf.py"; do
     [ -f "$f" ] && none "$f" 'jupedsim-labs-' "no jupedsim-labs- in ${f#"$repo"/}"
 done
 # Theme marks are byte-identical to the logo sources (local checkout only).
@@ -644,8 +648,8 @@ else
 fi
 for f in "$theme_dir/jupedsim_book/theme.conf" "$theme_dir/jupedsim_book/__init__.py" \
     "$theme_dir/jupedsim_book/sidebar.html" "$theme_dir/jupedsim_book/topbar.html" \
-    "$fixture/conf.py" "$www/site/conf.py" \
-    "$www/docs/conf.py"; do
+    "$fixture/conf.py" "$org/www/conf.py" \
+    "$org/docs/conf.py"; do
     none "$f" 'brand_svg' "no brand_svg in ${f#"$repo"/}"
 done
 
@@ -680,42 +684,42 @@ none "$out/docs/_modules/jupedsim/simulation.html" 'data-pagefind-body' "docs _m
 none "$out/docs/genindex.html" 'data-pagefind-body' "docs genindex page not indexed"
 # Unresolved autoapi imports are filtered by message in conf.py, never
 # suppressed as a whole type (that would hide new gaps in the API reference).
-none "$www/docs/conf.py" '"autoapi\.python_import_resolution"' \
+none "$org/docs/conf.py" '"autoapi\.python_import_resolution"' \
     "docs conf does not suppress all autoapi import warnings"
 
-echo "== real site"
-if [ "$have_site" -eq 1 ]; then
-    exists "$out/site/index.html" "site index.html"
-    exists "$out/site/404.html" "site 404.html"
-    count "$out/site/index.html" 'class="book-logo book-logo-dark"' 1 "site logo (light + dark)"
-    exists "$out/site/notes/feed.xml" "site notes/feed.xml"
-    for f in "$out/site/index.html" "$out/site/404.html" "$out/site/articles/writing-guide.html"; do
+echo "== real www"
+if [ "$have_www" -eq 1 ]; then
+    exists "$out/www/index.html" "www index.html"
+    exists "$out/www/404.html" "www 404.html"
+    count "$out/www/index.html" 'class="book-logo book-logo-dark"' 1 "www logo (light + dark)"
+    exists "$out/www/notes/feed.xml" "www notes/feed.xml"
+    for f in "$out/www/index.html" "$out/www/404.html" "$out/www/articles/writing-guide.html"; do
         exactly "$f" "$footer_text" 1 "footer text (${f#"$out"/})"
         exactly "$f" "$footer_links" 1 "footer links (${f#"$out"/})"
     done
-    no_external "$out/site"
+    no_external "$out/www"
     # Build-time MathML: accents keep their scripts to the right, numbered
     # equations show "(n)", amsmath environments render as tables.
-    g="$out/site/articles/writing-guide.html"
-    none "$g" '<munderover>' "site math: accent + subscript is not an under/over script"
-    count "$g" '<span class="eqno">\(1\)' 1 "site math: equation number"
-    count "$g" '<mtable' 1 "site math: amsmath align rendered"
+    g="$out/www/articles/writing-guide.html"
+    none "$g" '<munderover>' "www math: accent + subscript is not an under/over script"
+    count "$g" '<span class="eqno">\(1\)' 1 "www math: equation number"
+    count "$g" '<mtable' 1 "www math: amsmath align rendered"
     count "$g" 'id="notebook-articles"' 1 "writing guide documents notebook articles"
     # Landing page: hero + [DOCS] rows into /docs/stable/ (each target exists
     # in the docs build) + articles/notes rows (<= 5 each).
-    si="$out/site/index.html"
-    exactly "$si" '<main class="book book--no-tree book--landing">' 1 "site index is the landing page"
-    exactly "$si" '<h1 class="hero-title">Pedestrian dynamics, simulated</h1>' 1 "site landing: hero title"
-    exactly "$si" '<a class="btn btn-solid" href="/docs/stable/">Get started →</a>' 1 "site landing: Get started -> /docs/stable/"
-    exactly "$si" 'class="hf-alert"' 1 "site landing: hero figure"
-    exactly "$si" 'id="toc-control"|class="book-toc"|book-pagenav|class="report-header"' 0 "site landing: no TOC, prev/next or report header"
-    exactly "$si" '<div class="rows docutils container">' 1 "site landing: [DOCS] rows"
-    exactly "$si" '<li><p><a href="/docs/(stable|v1x)/[^"]*">' 5 "site landing: five docs rows"
-    count "$si" '<li><p><a href="/docs/v1x/v1\.4\.2/">1\.x documentation \(archive\)</a>' 1 "site landing: 1.x archive row -> v1.4.2"
-    exactly "$si" '<ul class="post-rows">' 2 "site landing: articles + notes rows"
-    exactly "$si" '<div class="hero-text" data-pagefind-body>' 1 "site landing: hero text indexed by Pagefind"
-    none "$si" 'MyST would resolve' "site landing: source comments stay in index.md"
-    exactly "$www/site/index.md" ':limit: 5' 2 "site landing: rows limited to 5"
+    si="$out/www/index.html"
+    exactly "$si" '<main class="book book--no-tree book--landing">' 1 "www index is the landing page"
+    exactly "$si" '<h1 class="hero-title">Pedestrian dynamics, simulated</h1>' 1 "www landing: hero title"
+    exactly "$si" '<a class="btn btn-solid" href="/docs/stable/">Get started →</a>' 1 "www landing: Get started -> /docs/stable/"
+    exactly "$si" 'class="hf-alert"' 1 "www landing: hero figure"
+    exactly "$si" 'id="toc-control"|class="book-toc"|book-pagenav|class="report-header"' 0 "www landing: no TOC, prev/next or report header"
+    exactly "$si" '<div class="rows docutils container">' 1 "www landing: [DOCS] rows"
+    exactly "$si" '<li><p><a href="/docs/(stable|v1x)/[^"]*">' 5 "www landing: five docs rows"
+    count "$si" '<li><p><a href="/docs/v1x/v1\.4\.2/">1\.x documentation \(archive\)</a>' 1 "www landing: 1.x archive row -> v1.4.2"
+    exactly "$si" '<ul class="post-rows">' 2 "www landing: articles + notes rows"
+    exactly "$si" '<div class="hero-text" data-pagefind-body>' 1 "www landing: hero text indexed by Pagefind"
+    none "$si" 'MyST would resolve' "www landing: source comments stay in index.md"
+    exactly "$org/www/index.md" ':limit: 5' 2 "www landing: rows limited to 5"
     if res=$(python - "$si" "$out/docs" <<'P'
 import pathlib, re, sys
 html = pathlib.Path(sys.argv[1]).read_text(encoding="utf-8")
@@ -725,49 +729,32 @@ missing = [r for r in rows if not (docs / (r or "index.html")).is_file()]
 print(f"{len(rows)} rows, missing: {missing or '-'}")
 sys.exit(len(rows) != 4 or bool(missing))
 P
-    ); then ok "site landing: docs rows exist in the docs build ($res)"
-    else bad "site landing: docs rows exist in the docs build ($res)"; fi
-    none "$out/site/index.html" 'Last updated' "site pages carry no build-date footer"
-    none "$out/site/notes/2026-09-28-new-website.html" 'Last updated' "notes carry no build-date footer"
+    ); then ok "www landing: docs rows exist in the docs build ($res)"
+    else bad "www landing: docs rows exist in the docs build ($res)"; fi
+    none "$out/www/index.html" 'Last updated' "www pages carry no build-date footer"
+    none "$out/www/notes/2026-09-28-new-website.html" 'Last updated' "notes carry no build-date footer"
     # /notes/ is the archive: it lists every note (only the landing page is limited).
-    none "$www/site/notes/index.md" ':limit:' "notes archive has no :limit:"
-    n_notes=$(find "$www/site/notes" -name '20*.md' | wc -l | tr -d ' ')
-    exactly "$out/site/notes/index.html" 'class="post-row"' "$n_notes" "notes archive lists all $n_notes notes as rows"
-    exactly "$out/site/notes/index.html" '<span class="post-row-desc">' "$n_notes" "notes archive rows have descriptions"
+    none "$org/www/notes/index.md" ':limit:' "notes archive has no :limit:"
+    n_notes=$(find "$org/www/notes" -name '20*.md' | wc -l | tr -d ' ')
+    exactly "$out/www/notes/index.html" 'class="post-row"' "$n_notes" "notes archive lists all $n_notes notes as rows"
+    exactly "$out/www/notes/index.html" '<span class="post-row-desc">' "$n_notes" "notes archive rows have descriptions"
     # /articles/: rows with descriptions; the hidden toctree keeps prev/next.
-    n_art=$(find "$www/site/articles" \( -name '*.md' -o -name '*.ipynb' \) ! -name 'index.*' | wc -l | tr -d ' ')
-    exactly "$out/site/articles/index.html" 'class="post-row"' "$n_art" "articles index lists all $n_art articles as rows"
-    exactly "$out/site/articles/index.html" '<span class="post-row-desc">' "$n_art" "articles index rows have descriptions"
-    none "$out/site/articles/index.html" 'toctree-l1' "articles toctree is hidden (no visible entries)"
-    exactly "$out/site/articles/index.html" 'book-pagenav' 0 "articles index: no prev/next (would repeat its first row)"
-    exactly "$out/site/articles/index.html" 'class="report-kicker"' 0 "articles index: no kicker"
-    exactly "$out/site/notes/index.html" 'book-pagenav' 0 "notes index: no prev/next"
-    count "$out/site/articles/writing-guide.html" 'class="book-pagenav-prev" href="index\.html" rel="prev"' 1 "first article <- articles index"
-    # build_site.py keeps build state (doctrees) out of the published tree.
-    a="$out/assembled"
-    if python "$repo/scripts/build_site.py" --source "$www" --out "$a" --version v0 \
-        --only site --no-notebooks >"$out/assembled.log" 2>&1; then
-        ok "build_site.py --only site"
-    else
-        bad "build_site.py --only site (log: $out/assembled.log)"
-    fi
-    exists "$a/index.html" "assembled site index.html"
-    if [ -e "$a/.doctrees" ]; then bad "assembled site has no .doctrees"; else ok "assembled site has no .doctrees"; fi
-    if [ -d "$a-cache/doctrees-site" ]; then ok "doctrees kept in <out>-cache"; else bad "doctrees kept in <out>-cache (missing $a-cache/doctrees-site)"; fi
+    n_art=$(find "$org/www/articles" \( -name '*.md' -o -name '*.ipynb' \) ! -name 'index.*' | wc -l | tr -d ' ')
+    exactly "$out/www/articles/index.html" 'class="post-row"' "$n_art" "articles index lists all $n_art articles as rows"
+    exactly "$out/www/articles/index.html" '<span class="post-row-desc">' "$n_art" "articles index rows have descriptions"
+    none "$out/www/articles/index.html" 'toctree-l1' "articles toctree is hidden (no visible entries)"
+    exactly "$out/www/articles/index.html" 'book-pagenav' 0 "articles index: no prev/next (would repeat its first row)"
+    exactly "$out/www/articles/index.html" 'class="report-kicker"' 0 "articles index: no kicker"
+    exactly "$out/www/notes/index.html" 'book-pagenav' 0 "notes index: no prev/next"
+    count "$out/www/articles/writing-guide.html" 'class="book-pagenav-prev" href="index\.html" rel="prev"' 1 "first article <- articles index"
 else
-    bad "real site built (jupedsim.org/site/conf.py missing)"
+    bad "real www built (jupedsim.org/www/conf.py missing)"
 fi
 
-# The /docs/ stub written at release time forwards query and hash.
-count "$repo/.github/workflows/deploy-documentation.yml" \
-    'location\.replace\("/docs/stable/" \+ location\.search \+ location\.hash\)' 1 \
-    "deploy-documentation.yml: /docs/ stub keeps location.search + hash"
-
-# The deploy scripts against a fake gh-pages tree (design: CI / deploy, Risks):
-# the pre-2.0 docs/stable stub dir becomes a symlink, docs/v1x (migrated: no
-# stable) and the frozen root versions.json stay untouched, Pagefind indexes the site plus a 2.x
-# docs/stable only. Every page carries data-pagefind-body and a unique word,
-# so only the directory scope of build_pagefind.sh keeps a page out.
+# jps_website_tooling against a fake gh-pages tree: the pre-2.0 docs/stable
+# stub dir becomes a symlink (versions), Pagefind indexes the www pages plus a 2.x
+# docs/stable only (pagefind). Every page carries data-pagefind-body and a
+# unique word, so only the staging scope of the indexer keeps a page out.
 echo "== gh-pages layout"
 t="$out/ghpages"
 ghp_page() {
@@ -786,237 +773,51 @@ for f in sorted(pathlib.Path(sys.argv[1]).glob("*.pf_fragment")):
     print(frag["url"], frag["content"])
 EOF
 }
+# Migrated layout: the www pages at the root, the hand-curated 1.x docs under
+# docs/v1x (with their own versions.json), no legacy root dirs.
 ghp_page index.html sitehome
 ghp_page notes/n.html sitenote
-ghp_page v1.4.2/index.html rootold
-ghp_page stable/index.html rootstable
-echo '[{"name": "v1.4.2", "url": "https://www.jupedsim.org/docs/v1x/v1.4.2/", "preferred": true}, {"name": "v1.4.1", "url": "https://www.jupedsim.org/docs/v1x/v1.4.1/"}]' >"$t/versions.json"
 ghp_page docs/v1x/v1.4.1/index.html archiveolder
 ghp_page docs/v1x/v1.4.2/index.html archiveold
-cp "$t/versions.json" "$t/docs/v1x/versions.json"
+echo '[{"name": "v1.4.2", "url": "https://www.jupedsim.org/docs/v1x/v1.4.2/", "preferred": true}, {"name": "v1.4.1", "url": "https://www.jupedsim.org/docs/v1x/v1.4.1/"}]' >"$t/docs/v1x/versions.json"
 ghp_page docs/stable/index.html stubpage
 ghp_page docs/v2.0.0/index.html twozero
 ghp_page docs/v2.1.0/index.html twoone
-cp "$t/versions.json" "$out/ghpages-root-versions.json"
 
-if bash "$repo/scripts/ci/build_pagefind.sh" "$t" >"$out/ghpages-pf1.log" 2>&1; then
-    ok "build_pagefind.sh before 2.0 (stub dir)"
+# pf_build LOG — rebuild $t/pagefind with the tooling package.
+pf_build() { PYTHONPATH="$org/tools" python -m jps_website_tooling build-search-index "$t" >"$out/$1" 2>&1; }
+if pf_build ghpages-pf1.log; then
+    ok "jps_website_tooling build-search-index before 2.0 (stub dir)"
     pf_urls ghpages-urls-stub.txt
-    exactly "$out/ghpages-urls-stub.txt" '^/' 2 "before 2.0: only the 2 site pages indexed"
-    none "$out/ghpages-urls-stub.txt" '^/(docs|stable|v[0-9])' "before 2.0: no docs, stub or 1.x pages indexed"
+    exactly "$out/ghpages-urls-stub.txt" '^/' 2 "before 2.0: only the 2 www pages indexed"
+    none "$out/ghpages-urls-stub.txt" '^/docs' "before 2.0: no docs or stub pages indexed"
 else
-    bad "build_pagefind.sh before 2.0 (log: $out/ghpages-pf1.log)"
+    bad "jps_website_tooling build-search-index before 2.0 (log: $out/ghpages-pf1.log)"
 fi
 
-wdv() { python "$repo/scripts/ci/write_docs_versions.py" "$t/docs" >>"$out/ghpages-wdv.log" 2>&1; }
-if wdv; then ok "write_docs_versions.py"; else bad "write_docs_versions.py (log: $out/ghpages-wdv.log)"; fi
-if [ -L "$t/docs/stable" ] && [ "$(readlink "$t/docs/stable")" = "v2.1.0" ]; then
-    ok "docs/stable stub dir replaced by symlink -> v2.1.0"
+# versions.json and the stable link come from jps_website_tooling (tested in
+# jupedsim.org/tools/tests/test_versions.py); only the link is needed here.
+if PYTHONPATH="$org/tools" python -m jps_website_tooling versions "$t/docs" >"$out/ghpages-versions.log" 2>&1 &&
+    [ "$(readlink "$t/docs/stable")" = "v2.1.0" ]; then
+    ok "jps_website_tooling versions: docs/stable -> v2.1.0"
 else
-    bad "docs/stable stub dir replaced by symlink -> v2.1.0"
-fi
-if res=$(python -c '
-import json, sys
-got = [(e["name"], e["url"], e.get("preferred", False)) for e in json.load(open(sys.argv[1]))]
-p = "https://www.jupedsim.org/docs/"
-want = [("stable", p + "stable/", True), ("v2.1.0", p + "v2.1.0/", False), ("v2.0.0", p + "v2.0.0/", False),
-        ("1.x (archive)", p + "v1x/v1.4.2/", False)]
-print(got)
-last = json.load(open(sys.argv[1]))[-1]
-sys.exit(got != want or last != {"name": "1.x (archive)", "version": "v1x", "url": p + "v1x/v1.4.2/"})
-' "$t/docs/versions.json" 2>&1); then
-    ok "docs/versions.json = stable (preferred), v2.1.0, v2.0.0, 1.x (archive -> v1x/v1.4.2/, last, not preferred) under /docs/"
-else
-    bad "docs/versions.json = stable (preferred), v2.1.0, v2.0.0, 1.x (archive -> v1x/v1.4.2/, last, not preferred) under /docs/ (got $res)"
-fi
-# Without docs/v1x (layout not migrated): no archive entry.
-mkdir -p "$out/ghpages-nov1x/v2.0.0"
-res=
-if python "$repo/scripts/ci/write_docs_versions.py" "$out/ghpages-nov1x" >>"$out/ghpages-wdv.log" 2>&1 &&
-    res=$(python -c '
-import json, sys
-got = [e["name"] for e in json.load(open(sys.argv[1]))]
-print(got)
-sys.exit(got != ["stable", "v2.0.0"])
-' "$out/ghpages-nov1x/versions.json" 2>&1); then
-    ok "docs/versions.json without docs/v1x has no archive entry"
-else
-    bad "docs/versions.json without docs/v1x has no archive entry (got ${res:-error, log: $out/ghpages-wdv.log})"
-fi
-# docs/v1x without a version directory: no archive entry either.
-mkdir -p "$out/ghpages-emptyv1x/v2.0.0" "$out/ghpages-emptyv1x/v1x"
-res=
-if python "$repo/scripts/ci/write_docs_versions.py" "$out/ghpages-emptyv1x" >>"$out/ghpages-wdv.log" 2>&1 &&
-    res=$(python -c '
-import json, sys
-got = [e["name"] for e in json.load(open(sys.argv[1]))]
-print(got)
-sys.exit(got != ["stable", "v2.0.0"])
-' "$out/ghpages-emptyv1x/versions.json" 2>&1); then
-    ok "docs/versions.json with an empty docs/v1x has no archive entry"
-else
-    bad "docs/versions.json with an empty docs/v1x has no archive entry (got ${res:-error, log: $out/ghpages-wdv.log})"
-fi
-if cmp -s "$t/versions.json" "$out/ghpages-root-versions.json"; then ok "root versions.json untouched"; else bad "root versions.json untouched"; fi
-if cmp -s "$t/docs/v1x/versions.json" "$out/ghpages-root-versions.json" && [ ! -e "$t/docs/v1x/stable" ] && [ ! -L "$t/docs/v1x/stable" ]; then
-    ok "docs/v1x untouched"
-else
-    bad "docs/v1x untouched"
-fi
-m1=$(python -c 'import os, sys; print(os.stat(sys.argv[1]).st_mtime_ns)' "$t/docs/versions.json")
-wdv
-m2=$(python -c 'import os, sys; print(os.stat(sys.argv[1]).st_mtime_ns)' "$t/docs/versions.json")
-if [ "$m1" = "$m2" ] && [ "$(readlink "$t/docs/stable")" = "v2.1.0" ]; then
-    ok "write_docs_versions.py second run changes nothing"
-else
-    bad "write_docs_versions.py second run changes nothing"
+    bad "jps_website_tooling versions: docs/stable -> v2.1.0 (log: $out/ghpages-versions.log)"
 fi
 
-if bash "$repo/scripts/ci/build_pagefind.sh" "$t" >"$out/ghpages-pf2.log" 2>&1; then
-    ok "build_pagefind.sh after 2.x (symlink)"
+if pf_build ghpages-pf2.log; then
+    ok "jps_website_tooling build-search-index after 2.x (symlink)"
     pf_urls ghpages-urls-2x.txt
-    exactly "$out/ghpages-urls-2x.txt" '^/' 3 "2.x: site pages + docs/stable indexed"
+    exactly "$out/ghpages-urls-2x.txt" '^/' 3 "2.x: www pages + docs/stable indexed"
     count "$out/ghpages-urls-2x.txt" '^/docs/stable/ .*twoone' 1 "2.x: docs/stable indexed from the newest version"
     none "$out/ghpages-urls-2x.txt" 'stubpage' "2.x: stub page not indexed"
-    none "$out/ghpages-urls-2x.txt" '^/(stable|v[0-9])|^/docs/(v1x|v2)' "2.x: no 1.x or versioned docs pages indexed"
+    none "$out/ghpages-urls-2x.txt" '^/docs/(v1x|v2)' "2.x: no 1.x or versioned docs pages indexed"
 else
-    bad "build_pagefind.sh after 2.x (log: $out/ghpages-pf2.log)"
+    bad "jps_website_tooling build-search-index after 2.x (log: $out/ghpages-pf2.log)"
 fi
-# The index records what built it (build_pagefind.sh --stamp), so a publisher
-# can tell an index built by an older build_pagefind.sh or Pagefind from a
-# current one.
-if stamp=$(bash "$repo/scripts/ci/build_pagefind.sh" --stamp 2>&1) &&
-    [ "$stamp" = "$(printf 'build_pagefind.sh sha256:%s\n%s' \
-        "$(python -c 'import hashlib, sys; print(hashlib.sha256(open(sys.argv[1], "rb").read()).hexdigest())' \
-            "$repo/scripts/ci/build_pagefind.sh")" \
-        "$(python -m pagefind --version)")" ]; then
-    ok "build_pagefind.sh --stamp = script sha256 + Pagefind version"
-else
-    bad "build_pagefind.sh --stamp = script sha256 + Pagefind version (got: $stamp)"
-fi
-if [ -f "$t/pagefind/build-stamp.txt" ] && [ "$(cat "$t/pagefind/build-stamp.txt")" = "$stamp" ]; then
-    ok "pagefind/build-stamp.txt = build_pagefind.sh --stamp"
-else
-    bad "pagefind/build-stamp.txt = build_pagefind.sh --stamp"
-fi
-
 echo "== requirements"
-# The site build (build-docs action, deploy-next-doc) gets Pagefind
-# only from jupedsim.org/site/requirements.txt.
-count "$www/site/requirements.txt" '^pagefind\[bin\]~=1\.5$' 1 "jupedsim.org/site/requirements.txt pins pagefind[bin]"
-
-echo "== next-doc publish"
-# scripts/ci/publish_site_tree.sh <build-out> <pages-root> (deploy-next-doc.yml):
-# replaces the site and docs, keeps CNAME, .nojekyll and the manual docs/v1x copy,
-# writes robots.txt, versions.json (with the archive entry) and the Pagefind index.
-nd_build="$out/nd-build"
-nd_pages="$out/nd-pages"
-rm -rf "$nd_build" "$nd_pages" "$out/nd-v1x-before"
-t="$nd_build"
-ghp_page index.html ndsitehome
-ghp_page docs/v2.0.0/index.html ndtwozero
-ln -s v2.0.0 "$nd_build/docs/stable"
-echo '[]' >"$nd_build/docs/versions.json"
-t="$nd_pages"
-mkdir -p "$nd_pages"
-echo next-doc.jupedsim.org >"$nd_pages/CNAME"
-touch "$nd_pages/.nojekyll"
-ghp_page old.html ndold
-ghp_page docs/v1.9.9/index.html ndstale
-ghp_page docs/v1x/v1.4.2/index.html ndarchiveword
-echo '[{"name": "v1.4.2", "url": "https://www.jupedsim.org/docs/v1x/v1.4.2/", "preferred": true}]' >"$nd_pages/docs/v1x/versions.json"
-cp -R "$nd_pages/docs/v1x" "$out/nd-v1x-before"
-if bash "$repo/scripts/ci/publish_site_tree.sh" "$nd_build" "$nd_pages" >"$out/nd-publish.log" 2>&1; then
-    ok "publish_site_tree.sh runs"
-else
-    bad "publish_site_tree.sh runs (log: $out/nd-publish.log)"
-fi
-[ "$(cat "$nd_pages/CNAME" 2>/dev/null)" = "next-doc.jupedsim.org" ] && [ -f "$nd_pages/.nojekyll" ] \
-    && ok "CNAME and .nojekyll kept" || bad "CNAME and .nojekyll kept"
-count "$nd_pages/robots.txt" '^Disallow: /$' 1 "robots.txt disallows indexing"
-[ ! -e "$nd_pages/old.html" ] && [ ! -e "$nd_pages/docs/v1.9.9" ] \
-    && ok "stale site page and stale docs version removed" || bad "stale site page and stale docs version removed"
-diff -r "$out/nd-v1x-before" "$nd_pages/docs/v1x" >/dev/null \
-    && ok "manual docs/v1x copy untouched" || bad "manual docs/v1x copy untouched"
-[ "$(readlink "$nd_pages/docs/stable")" = "v2.0.0" ] \
-    && ok "docs/stable -> v2.0.0" || bad "docs/stable -> v2.0.0 (got $(readlink "$nd_pages/docs/stable"))"
-if res=$(python - "$nd_pages/docs/versions.json" <<'P'
-import json, sys
-d = json.load(open(sys.argv[1]))
-names = [e["name"] for e in d]
-print(names, d[-1]["url"])
-sys.exit(not (names == ["stable", "v2.0.0", "1.x (archive)"]
-              and d[-1]["url"] == "https://www.jupedsim.org/docs/v1x/v1.4.2/"))
-P
-); then ok "versions.json: stable, v2.0.0, 1.x (archive)"; else bad "versions.json: stable, v2.0.0, 1.x (archive) (got $res)"; fi
-if [ -f "$nd_pages/pagefind/pagefind.js" ]; then
-    pf_urls nd-urls.txt
-    count "$out/nd-urls.txt" 'ndtwozero' 1 "next-doc index has the 2.x docs"
-    none "$out/nd-urls.txt" 'ndarchiveword' "next-doc index skips docs/v1x"
-else
-    bad "next-doc pagefind/pagefind.js written"
-fi
-# Without the manual 1.x copy: warns, no archive entry, still succeeds.
-rm -rf "$nd_pages/docs/v1x"
-if bash "$repo/scripts/ci/publish_site_tree.sh" "$nd_build" "$nd_pages" >"$out/nd-publish2.log" 2>&1 &&
-    grep -q '::warning::' "$out/nd-publish2.log" &&
-    ! grep -q '1.x (archive)' "$nd_pages/docs/versions.json"; then
-    ok "without docs/v1x: warning, no archive entry"
-else
-    bad "without docs/v1x: warning, no archive entry (log: $out/nd-publish2.log)"
-fi
-# A broken build output is refused before anything is touched.
-mkdir -p "$out/nd-empty"
-cp "$nd_pages/CNAME" "$out/nd-cname-before"
-bash "$repo/scripts/ci/publish_site_tree.sh" "$out/nd-empty" "$nd_pages" >"$out/nd-publish3.log" 2>&1
-rc=$?
-if [ "$rc" -eq 2 ] && [ -f "$nd_pages/index.html" ] && cmp -s "$out/nd-cname-before" "$nd_pages/CNAME"; then
-    ok "empty build output refused (exit 2), pages root unchanged"
-else
-    bad "empty build output refused (exit 2), pages root unchanged (rc=$rc)"
-fi
-
-echo "== preview links"
-# scripts/ci/rebase_preview_links.py <tree> <prefix> --stable <dir>
-# (deploy-previews.yml): previews live under /pull-requests/<N>/, so every
-# root-absolute URL the site uses must be moved under that prefix, and
-# docs/stable must exist (PR builds name their docs docs/dev/).
-pv="$out/preview"
-rm -rf "$pv"
-mkdir -p "$pv/docs/dev/concepts" "$pv/notes"
-cat >"$pv/index.html" <<'H'
-<a href="/docs/stable/">D</a> <a href='/articles/'>A</a> <img src="/_static/x.png">
-<input data-pagefind="/pagefind/pagefind.js"> <form action="/search.html"></form>
-<a href="//cdn.example.org/x.js">cdn</a> <a href="https://www.jupedsim.org/">abs</a>
-<a href="notes/index.html">rel</a> <a href="#top">frag</a>
-<p>Escaped text href=&quot;/not-an-attribute&quot;</p>
-H
-cat >"$pv/docs/dev/concepts/routing.html" <<'H'
-<select data-json="/docs/versions.json"></select><a href="/docs/v1x/v1.4.2/">v1</a>
-H
-echo '[{"name": "dev", "version": "dev", "url": "/docs/dev/", "preferred": true}, {"name": "x", "url": "https://www.jupedsim.org/docs/x/"}]' >"$pv/docs/versions.json"
-if python "$repo/scripts/ci/rebase_preview_links.py" "$pv" /pull-requests/42/ --stable dev >"$out/preview.log" 2>&1 &&
-    python "$repo/scripts/ci/rebase_preview_links.py" "$pv" /pull-requests/42/ --stable dev >>"$out/preview.log" 2>&1; then
-    ok "rebase_preview_links.py runs (twice)"
-else
-    bad "rebase_preview_links.py runs (twice) (log: $out/preview.log)"
-fi
-for want in 'href="/pull-requests/42/docs/stable/"' "href='/pull-requests/42/articles/'" \
-    'src="/pull-requests/42/_static/x.png"' 'data-pagefind="/pull-requests/42/pagefind/pagefind.js"' \
-    'action="/pull-requests/42/search.html"' 'href="//cdn.example.org/x.js"' \
-    'href="https://www.jupedsim.org/"' 'href="notes/index.html"' 'href="#top"'; do
-    count "$pv/index.html" "$(printf '%s' "$want" | sed 's/[.]/\\./g')" 1 "preview: $want"
-done
-exactly "$pv/index.html" 'pull-requests/42/pull-requests' 0 "preview: idempotent (no double prefix)"
-count "$pv/index.html" 'href=&quot;/not-an-attribute&quot;' 1 "preview: escaped text left alone"
-count "$pv/docs/dev/concepts/routing.html" 'data-json="/pull-requests/42/docs/versions\.json"' 1 "preview: switcher JSON under the prefix"
-count "$pv/docs/dev/concepts/routing.html" 'href="/pull-requests/42/docs/v1x/v1\.4\.2/"' 1 "preview: docs page nav under the prefix"
-count "$pv/docs/versions.json" '"url": "/pull-requests/42/docs/dev/"' 1 "preview: versions.json path urls prefixed"
-count "$pv/docs/versions.json" '"url": "https://www\.jupedsim\.org/docs/x/"' 1 "preview: versions.json absolute urls kept"
-[ "$(readlink "$pv/docs/stable")" = "dev" ] && ok "preview: docs/stable -> dev" || bad "preview: docs/stable -> dev"
-# Pagefind returns result URLs relative to the index's site root; search.js
-# derives that root from the pagefind.js URL (production: "/").
-count "$theme_dir/jupedsim_book/static/search.js" 'baseUrl' 1 "search.js sets Pagefind's baseUrl from the pagefind.js URL"
+# The website build (build-website action) gets Pagefind
+# only from jupedsim.org/www/requirements.txt.
+count "$org/www/requirements.txt" '^pagefind\[bin\]~=1\.5$' 1 "jupedsim.org/www/requirements.txt pins pagefind[bin]"
 
 echo
 echo "$pass ok / $fail fail"
