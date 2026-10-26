@@ -443,6 +443,64 @@ std::map<std::size_t, TravelTimeGrid> Simulation::travel_times(BaseStage::ID sta
     return grids;
 }
 
+std::map<std::size_t, SpeedGrid> Simulation::default_speed_fields() const
+{
+    std::map<std::size_t, SpeedGrid> grids{};
+    for(std::size_t region_id = 0; region_id < _geometry->region_count(); ++region_id) {
+        grids.emplace(region_id, _routing_engine->floorfield().default_speed(region_id));
+    }
+    return grids;
+}
+
+void Simulation::set_default_speed_field(std::size_t region_id, const std::vector<double>& values)
+{
+    throw_if_iterating("SetDefaultSpeedField");
+    _routing_engine->floorfield().set_default_speed(region_id, values);
+}
+
+std::map<std::size_t, SpeedGrid> Simulation::speed_fields(BaseStage::ID stage_id) const
+{
+    const auto* destination = _stage_manager.stage(stage_id)->destination();
+    std::map<std::size_t, SpeedGrid> grids{};
+    if(destination == nullptr) {
+        return grids; // nothing to route to, so no speed field to route with
+    }
+    for(std::size_t region_id = 0; region_id < _geometry->region_count(); ++region_id) {
+        grids.emplace(region_id, destination->speed(region_id));
+    }
+    return grids;
+}
+
+bool Simulation::has_speed_field_override(BaseStage::ID stage_id, std::size_t region_id) const
+{
+    const auto* destination = _stage_manager.stage(stage_id)->destination();
+    return destination != nullptr && destination->has_speed_override(region_id);
+}
+
+void Simulation::set_speed_field_override(
+    BaseStage::ID stage_id,
+    std::size_t region_id,
+    const std::vector<double>& values)
+{
+    throw_if_iterating("SetSpeedFieldOverride");
+    destination_of(stage_id).set_speed_override(region_id, values);
+}
+
+void Simulation::clear_speed_field_override(BaseStage::ID stage_id, std::size_t region_id)
+{
+    throw_if_iterating("ClearSpeedFieldOverride");
+    destination_of(stage_id).clear_speed_override(region_id);
+}
+
+const Destination& Simulation::destination_of(BaseStage::ID stage_id) const
+{
+    const auto* destination = _stage_manager.stage(stage_id)->destination();
+    if(destination == nullptr) {
+        throw SimulationError("Stage {} has no area to route to.", stage_id);
+    }
+    return *destination;
+}
+
 const Geometry& Simulation::geo() const
 {
     return *_geometry;

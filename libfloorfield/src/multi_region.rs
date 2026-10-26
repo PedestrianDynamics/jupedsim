@@ -87,7 +87,13 @@ struct RegionGrid {
     grid: GridParams,
     /// Lattice cell of this grid's cell (0, 0).
     offset: [i64; 2],
-    speed: Vec<f64>,
+    /// Which cells can be walked on: fixed by the geometry, a cell is walkable
+    /// if its centre lies inside the region's polygon. Speeds never change it.
+    walkable: Vec<bool>,
+    /// Speed of every destination without an override in this region: the
+    /// wall term until the user sets it. Positive on walkable cells, 0 on
+    /// all others (what `fsm` reads as an obstacle).
+    default_speed: Vec<f64>,
     /// The region's walkable polygon, for exact point-in-region tests: the
     /// grid only resolves it to whole cells.
     shape: Polygon<f64>,
@@ -113,7 +119,7 @@ impl RegionGrid {
     }
 
     fn walkable(&self, cell: u32) -> bool {
-        self.speed[cell as usize] > 0.0
+        self.walkable[cell as usize]
     }
 
     fn row_col(&self, cell: u32) -> (i32, i32) {
@@ -128,7 +134,8 @@ impl RegionGrid {
 /// it leaves from is implied: `out_seams[from]` lists it.
 struct SeamCells {
     to: usize,
-    /// (cell in `from`, cell in `to`, time to cross from one centre to the other)
+    /// (cell in `from`, cell in `to`, distance between their centres). The
+    /// time to cross depends on the speed field, see `crossing_time`.
     pairs: Vec<(u32, u32, f64)>,
 }
 
@@ -152,6 +159,9 @@ enum SourceKind {
 
 struct Destination {
     sources: Vec<Source>,
+    /// Per region: a speed field used instead of the region's default, for
+    /// this destination only.
+    speed_override: Vec<Option<Vec<f64>>>,
     solution: Option<Solution>,
 }
 
@@ -236,12 +246,13 @@ impl MultiRegionFloorfield {
             .map(|(id, (region, &(min, max)))| {
                 let (grid, offset) = spec.cover(min, max);
                 let portals = region_graph::portals(graph, id);
-                let speed =
+                let default_speed =
                     geometry::speed_field_on_grid(region, &portals, &grid, wall_influence_radius);
                 RegionGrid {
                     grid,
                     offset,
-                    speed,
+                    walkable: default_speed.iter().map(|&v| v > 0.0).collect(),
+                    default_speed,
                     shape: geometry::polygon(&region.outer, &region.holes),
                 }
             })
@@ -281,8 +292,10 @@ impl MultiRegionFloorfield {
         Ok(&self.region(region)?.grid)
     }
 
-    pub fn speed_field(&self, region: usize) -> Result<&[f64]> {
-        Ok(&self.region(region)?.speed)
+    /// Which cells of `region`'s grid are walkable, row-major. Fixed by the
+    /// geometry.
+    pub fn walkable(&self, region: usize) -> Result<&[bool]> {
+        Ok(&self.region(region)?.walkable)
     }
 
     /// Whether an agent at (x, y) can be routed in `region`: the point lies
@@ -306,6 +319,65 @@ impl MultiRegionFloorfield {
     /// narrow for the grid, or does not touch walkable cells on both sides).
     pub fn seam_pair_count(&self, seam: usize) -> usize {
         self.seams.get(seam).map_or(0, |s| s.pairs.len())
+    }
+
+    // ── Speed fields ────────────────────────────────────────────────────────
+
+    /// The speed field of `region` used by every destination without an
+    /// override there, row-major on its grid: 0 on cells that are not
+    /// walkable.
+    pub fn default_speed(&self, region: usize) -> Result<&[f64]> {
+        Ok(&self.region(region)?.default_speed)
+    }
+
+    /// Replace the default speed field of `region`, see `checked_speed` for
+    /// what `values` must hold. Destinations using it are solved again on
+    /// their next query.
+    pub fn set_default_speed(&mut self, region: usize, values: &[f64]) -> Result<()> {
+        let speed = self.checked_speed(region, values)?;
+        self.regions[region].default_speed = speed;
+        for d in &mut self.destinations {
+            if d.speed_override[region].is_none() {
+                d.solution = None;
+            }
+        }
+        Ok(())
+    }
+
+    /// The speed field `dest` is solved with in `region`: its override there,
+    /// else the region's default.
+    pub fn speed(&self, region: usize, dest: usize) -> Result<&[f64]> {
+        self.region(region)?;
+        Ok(self.speed_of(self.destination(dest)?, region))
+    }
+
+    /// Whether `dest` has its own speed field in `region`.
+    pub fn has_speed_override(&self, region: usize, dest: usize) -> Result<bool> {
+        self.region(region)?;
+        Ok(self.destination(dest)?.speed_override[region].is_some())
+    }
+
+    /// Solve `dest` with `values` in `region` instead of the default speed
+    /// field, see `checked_speed` for what `values` must hold. Other
+    /// destinations are not affected; `dest` is solved again on its next query.
+    pub fn set_speed_override(&mut self, region: usize, dest: usize, values: &[f64]) -> Result<()> {
+        self.destination(dest)?;
+        let speed = self.checked_speed(region, values)?;
+        let d = &mut self.destinations[dest];
+        d.speed_override[region] = Some(speed);
+        d.solution = None;
+        Ok(())
+    }
+
+    /// Solve `dest` with the default speed field of `region` again.
+    pub fn clear_speed_override(&mut self, region: usize, dest: usize) -> Result<()> {
+        self.region(region)?;
+        self.destination(dest)?;
+        let d = &mut self.destinations[dest];
+        if d.speed_override[region].take().is_some() {
+            d.solution = None;
+        }
+        Ok(())
     }
 
     // ── Destinations ────────────────────────────────────────────────────────
@@ -458,6 +530,52 @@ impl MultiRegionFloorfield {
             .ok_or(MultiRegionError::UnknownRegion(region))
     }
 
+    fn destination(&self, dest: usize) -> Result<&Destination> {
+        self.destinations
+            .get(dest)
+            .ok_or(MultiRegionError::UnknownDestination(dest))
+    }
+
+    fn speed_of<'a>(&'a self, d: &'a Destination, region: usize) -> &'a [f64] {
+        d.speed_override[region]
+            .as_deref()
+            .unwrap_or(&self.regions[region].default_speed)
+    }
+
+    /// A speed field for `region` from user input: one value per cell of its
+    /// grid, row-major. Walkable cells need a finite speed above 0; a zero
+    /// speed would change which cells can be walked, which is the geometry's
+    /// to decide. Values on cells that are not walkable are ignored and come
+    /// out as 0.
+    fn checked_speed(&self, region: usize, values: &[f64]) -> Result<Vec<f64>> {
+        let g = self.region(region)?;
+        if values.len() != g.grid.cell_count() {
+            return Err(MultiRegionError::InvalidInput(format!(
+                "speed field of region {region} needs {} values ({} x {} cells), got {}",
+                g.grid.cell_count(),
+                g.grid.height,
+                g.grid.width,
+                values.len()
+            )));
+        }
+        (0u32..)
+            .zip(values)
+            .map(|(cell, &v)| {
+                if !g.walkable(cell) {
+                    Ok(0.0)
+                } else if v > 0.0 && v.is_finite() {
+                    Ok(v)
+                } else {
+                    let (row, col) = g.row_col(cell);
+                    Err(MultiRegionError::InvalidInput(format!(
+                        "speed in region {region} must be positive and finite on walkable \
+                         cells, got {v} at row {row}, column {col}"
+                    )))
+                }
+            })
+            .collect()
+    }
+
     /// Check a query point coming from outside: finite (`InvalidInput`), in a
     /// known region (`UnknownRegion`), and covered by that region's grid
     /// (`NotRoutable`). A point outside the polygon but inside the grid passes:
@@ -536,7 +654,8 @@ impl MultiRegionFloorfield {
             ))?;
         let mut dest_cells = vec![Vec::new(); self.regions.len()];
         dest_cells[test_region].push(test_cell);
-        let test_solution = self.solve(&dest_cells)?;
+        let speeds: Vec<&[f64]> = self.regions.iter().map(|g| &g.default_speed[..]).collect();
+        let test_solution = self.solve(&dest_cells, &speeds)?;
 
         // lambda function to check per region and per cell that a cell that is walkable has been solved to a finite value.
         let walkable_cell_is_unreached = |r: usize, c: u32| -> bool {
@@ -558,19 +677,20 @@ impl MultiRegionFloorfield {
     fn push_destination(&mut self, sources: Vec<Source>) -> usize {
         self.destinations.push(Destination {
             sources,
+            speed_override: vec![None; self.regions.len()],
             solution: None,
         });
         self.destinations.len() - 1
     }
 
     fn solution(&mut self, dest: usize) -> Result<&Solution> {
-        let d = self
-            .destinations
-            .get(dest)
-            .ok_or(MultiRegionError::UnknownDestination(dest))?;
+        let d = self.destination(dest)?;
         if d.solution.is_none() {
             let cells = d.cells_per_region(self.regions.len());
-            let sol = self.solve(&cells)?;
+            let speeds: Vec<&[f64]> = (0..self.regions.len())
+                .map(|r| self.speed_of(d, r))
+                .collect();
+            let sol = self.solve(&cells, &speeds)?;
             self.destinations[dest].solution = Some(sol);
         }
         Ok(self.destinations[dest].solution.as_ref().expect("just set"))
@@ -585,6 +705,7 @@ impl MultiRegionFloorfield {
     fn solve_region(
         &self,
         region: usize,
+        speed: &[f64],
         previous: Option<Vec<f64>>,
         sources: &[u32],
         seeds: &[f64],
@@ -593,7 +714,7 @@ impl MultiRegionFloorfield {
         let mut out = previous.unwrap_or_else(|| vec![f64::INFINITY; g.grid.cell_count()]);
         fsm::solve_into_seeded(
             &mut out,
-            &g.speed,
+            speed,
             sources,
             seeds,
             g.grid.width as usize,
@@ -609,7 +730,8 @@ impl MultiRegionFloorfield {
     /// seams: a seam cell on the other side whose time improves becomes a seed
     /// there, and that region is queued (smallest seed first) to be solved,
     /// or solved again. Regions no seed ever reaches keep no field.
-    fn solve(&self, dest_cells: &[Vec<u32>]) -> Result<Solution> {
+    /// `speeds` holds the speed field of every region.
+    fn solve(&self, dest_cells: &[Vec<u32>], speeds: &[&[f64]]) -> Result<Solution> {
         let n = self.regions.len();
         let mut fields: Vec<Option<Vec<f64>>> = vec![None; n];
         let mut seeds: Vec<HashMap<u32, f64>> = vec![HashMap::new(); n];
@@ -645,14 +767,14 @@ impl MultiRegionFloorfield {
             let mut sources: Vec<(u32, f64)> = seeds[r].iter().map(|(&c, &t)| (c, t)).collect();
             sources.sort_unstable_by_key(|&(c, _)| c); // deterministic
             let (cells, values): (Vec<u32>, Vec<f64>) = sources.into_iter().unzip();
-            let field = self.solve_region(r, fields[r].take(), &cells, &values);
+            let field = self.solve_region(r, speeds[r], fields[r].take(), &cells, &values);
 
             for &s in &self.out_seams[r] {
                 let seam = &self.seams[s];
                 let y = seam.to;
                 let mut improved = false;
-                for &(cr, cy, cross) in &seam.pairs {
-                    let t = field[cr as usize] + cross;
+                for &(cr, cy, dist) in &seam.pairs {
+                    let t = field[cr as usize] + crossing_time(speeds[r], speeds[y], cr, cy, dist);
                     if !t.is_finite() {
                         continue;
                     }
@@ -762,10 +884,15 @@ fn seam_pairs(
         let pa = from.grid.cell_center(ca);
         let pb = to.grid.cell_center(cb);
         let dist = ((pa.0 - pb.0).powi(2) + (pa.1 - pb.1).powi(2)).sqrt();
-        let speed = 0.5 * (from.speed[ca as usize] + to.speed[cb as usize]);
-        pairs.push((ca, cb, dist / speed));
+        pairs.push((ca, cb, dist));
     }
     pairs
+}
+
+/// Time to cross a seam pair `dist` apart, from cell `ca` (speed field `from`)
+/// to cell `cb` (speed field `to`): at the mean of their speeds.
+fn crossing_time(from: &[f64], to: &[f64], ca: u32, cb: u32, dist: f64) -> f64 {
+    dist / (0.5 * (from[ca as usize] + to[cb as usize]))
 }
 
 /// Walkable cell for `p`: without `side`, the cell containing it if walkable,
@@ -1283,7 +1410,7 @@ mod tests {
             let seam = &ff.seams[s];
             let from = seam_from(&ff, s);
             assert!(seam.pairs.len() >= 14, "{} pairs", seam.pairs.len());
-            for &(ca, cb, cross) in &seam.pairs {
+            for &(ca, cb, stored) in &seam.pairs {
                 let (xa, ya) = ff.regions[from].grid.cell_center(ca);
                 let (xb, yb) = ff.regions[seam.to].grid.cell_center(cb);
                 let (left_x, right_x) = if from == 0 { (xa, xb) } else { (xb, xa) };
@@ -1294,8 +1421,19 @@ mod tests {
                     dist > 0.0 && dist <= 2f64.sqrt() * CS + 1e-12,
                     "dist {dist}"
                 );
-                // `cross` is a time: at least the distance (speed <= 1), more
-                // where the walls slow agents down.
+                assert!(
+                    (stored - dist).abs() < 1e-12,
+                    "stored {stored}, dist {dist}"
+                );
+                // Crossing at the default speed (<= 1) takes at least the
+                // distance, more where the walls slow agents down.
+                let cross = crossing_time(
+                    ff.default_speed(from).unwrap(),
+                    ff.default_speed(seam.to).unwrap(),
+                    ca,
+                    cb,
+                    dist,
+                );
                 assert!(cross >= dist - 1e-12, "cross {cross} < dist {dist}");
             }
         }
@@ -1787,5 +1925,210 @@ mod tests {
                 }
             }
         }
+    }
+
+    // ── Speed fields ────────────────────────────────────────────────────────
+
+    /// `region`'s default speed field, each walkable cell's value mapped by
+    /// `f(x, y, speed)` at its centre.
+    fn mapped_default(
+        ff: &MultiRegionFloorfield,
+        region: usize,
+        f: impl Fn(f64, f64, f64) -> f64,
+    ) -> Vec<f64> {
+        let grid = *ff.grid(region).unwrap();
+        (0u32..)
+            .zip(ff.default_speed(region).unwrap())
+            .map(|(cell, &v)| {
+                let (x, y) = grid.cell_center(cell);
+                f(x, y, v)
+            })
+            .collect()
+    }
+
+    fn all_travel_times(ff: &mut MultiRegionFloorfield, dest: usize) -> Vec<Vec<f64>> {
+        (0..ff.region_count())
+            .map(|r| ff.travel_times(r, dest).unwrap())
+            .collect()
+    }
+
+    /// Equal where both are finite, infinite at the same cells.
+    fn assert_fields_close(a: &[Vec<f64>], b: &[Vec<f64>], scale: f64) {
+        for (fa, fb) in a.iter().zip(b) {
+            for (&ta, &tb) in fa.iter().zip(fb) {
+                assert_eq!(ta.is_finite(), tb.is_finite());
+                if ta.is_finite() {
+                    assert!(
+                        (ta * scale - tb).abs() < 1e-9 * (1.0 + tb),
+                        "{ta} * {scale} != {tb}"
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn walkable_cells_are_those_with_a_default_speed() {
+        let ff = split_corridor();
+        for r in 0..2 {
+            let walkable = ff.walkable(r).unwrap();
+            let speed = ff.default_speed(r).unwrap();
+            assert_eq!(walkable.len(), ff.grid(r).unwrap().cell_count());
+            assert!(walkable.iter().any(|&w| w) && walkable.iter().any(|&w| !w));
+            for (&w, &v) in walkable.iter().zip(speed) {
+                assert_eq!(w, v > 0.0);
+            }
+        }
+    }
+
+    #[test]
+    fn setting_the_default_speed_it_has_changes_nothing() {
+        let mut ff = split_corridor();
+        let dest = ff.add_point_destination(1, 19.0, 2.0).unwrap();
+        let before = all_travel_times(&mut ff, dest);
+        for r in 0..2 {
+            let same = ff.default_speed(r).unwrap().to_vec();
+            ff.set_default_speed(r, &same).unwrap();
+        }
+        assert!(ff.destinations[dest].solution.is_none(), "not invalidated");
+        assert_fields_close(&before, &all_travel_times(&mut ff, dest), 1.0);
+    }
+
+    #[test]
+    fn scaling_the_speed_scales_travel_times_also_across_seams() {
+        for factor in [0.5, 2.0] {
+            let mut ff = split_corridor();
+            let dest = ff.add_point_destination(1, 19.0, 2.0).unwrap();
+            let before = all_travel_times(&mut ff, dest);
+            for r in 0..2 {
+                let scaled = mapped_default(&ff, r, |_, _, v| v * factor);
+                ff.set_default_speed(r, &scaled).unwrap();
+            }
+            assert_fields_close(&before, &all_travel_times(&mut ff, dest), 1.0 / factor);
+        }
+    }
+
+    #[test]
+    fn speed_override_applies_to_its_destination_only() {
+        let mut ff = split_corridor();
+        let slowed = ff.add_point_destination(1, 19.0, 2.0).unwrap();
+        let other = ff.add_point_destination(1, 19.0, 2.0).unwrap();
+        let before = all_travel_times(&mut ff, slowed);
+        all_travel_times(&mut ff, other);
+
+        let half = mapped_default(&ff, 0, |_, _, v| 0.5 * v);
+        ff.set_speed_override(0, slowed, &half).unwrap();
+        assert!(ff.has_speed_override(0, slowed).unwrap());
+        assert!(!ff.has_speed_override(1, slowed).unwrap());
+        assert!(!ff.has_speed_override(0, other).unwrap());
+        assert_eq!(ff.speed(0, slowed).unwrap(), &half[..]);
+        assert_eq!(ff.speed(0, other).unwrap(), ff.default_speed(0).unwrap());
+        assert!(
+            ff.destinations[other].solution.is_some(),
+            "other was invalidated"
+        );
+
+        // Region 0 only is slower: times there grow, region 1 is unchanged.
+        let after = all_travel_times(&mut ff, slowed);
+        assert_fields_close(&before[1..], &after[1..], 1.0);
+        let t0 = |tt: &[Vec<f64>]| tt[0].iter().copied().filter(|t| t.is_finite()).sum::<f64>();
+        assert!(t0(&after) > t0(&before));
+        assert_fields_close(&before, &all_travel_times(&mut ff, other), 1.0);
+
+        ff.clear_speed_override(0, slowed).unwrap();
+        assert!(!ff.has_speed_override(0, slowed).unwrap());
+        assert_fields_close(&before, &all_travel_times(&mut ff, slowed), 1.0);
+    }
+
+    #[test]
+    fn default_speed_does_not_reach_an_overridden_region() {
+        let mut ff = whole_corridor();
+        let dest = ff.add_point_destination(0, 19.0, 2.0).unwrap();
+        let own = ff.default_speed(0).unwrap().to_vec();
+        ff.set_speed_override(0, dest, &own).unwrap();
+        let before = all_travel_times(&mut ff, dest);
+
+        let half = mapped_default(&ff, 0, |_, _, v| 0.5 * v);
+        ff.set_default_speed(0, &half).unwrap();
+        assert!(ff.destinations[dest].solution.is_some(), "invalidated");
+        assert_fields_close(&before, &all_travel_times(&mut ff, dest), 1.0);
+    }
+
+    #[test]
+    fn slow_area_sends_agents_to_the_other_exit() {
+        // Exits at both ends of the corridor; x = 9 is nearer the left one.
+        let mut ff = whole_corridor();
+        let exits = ff
+            .add_area_destination(&[
+                piece(0, rect(0., 0., 1., 4.)),
+                piece(0, rect(19., 0., 20., 4.)),
+            ])
+            .unwrap();
+        let (dx, _) = ff.direction(0, 9.0, 2.0, exits).unwrap();
+        assert!(dx < -0.9, "heads left without smoke, dx {dx}");
+
+        // Smoke on the left half slows to a tenth.
+        let smoke = mapped_default(&ff, 0, |x, _, v| if x < 9.5 { 0.1 * v } else { v });
+        ff.set_speed_override(0, exits, &smoke).unwrap();
+        let (dx, _) = ff.direction(0, 9.0, 2.0, exits).unwrap();
+        assert!(dx > 0.9, "heads right through clear air, dx {dx}");
+    }
+
+    #[test]
+    fn values_off_walkable_cells_are_ignored() {
+        let mut ff = whole_corridor();
+        let dest = ff.add_point_destination(0, 19.0, 2.0).unwrap();
+        let ones = vec![1.0; ff.grid(0).unwrap().cell_count()];
+        ff.set_default_speed(0, &ones).unwrap();
+        ff.set_speed_override(0, dest, &ones).unwrap();
+        let walkable = ff.walkable(0).unwrap().to_vec();
+        for speed in [ff.default_speed(0).unwrap(), ff.speed(0, dest).unwrap()] {
+            for (&w, &v) in walkable.iter().zip(speed) {
+                assert_eq!(v, if w { 1.0 } else { 0.0 });
+            }
+        }
+    }
+
+    #[test]
+    fn invalid_speed_fields_are_rejected() {
+        let mut ff = whole_corridor();
+        let dest = ff.add_point_destination(0, 19.0, 2.0).unwrap();
+        let n = ff.grid(0).unwrap().cell_count();
+        let walkable_cell = ff.walkable(0).unwrap().iter().position(|&w| w).unwrap();
+        let before = ff.default_speed(0).unwrap().to_vec();
+
+        let invalid = |r: Result<()>| matches!(r, Err(MultiRegionError::InvalidInput(_)));
+        assert!(invalid(ff.set_default_speed(0, &vec![1.0; n - 1])));
+        assert!(invalid(ff.set_speed_override(0, dest, &vec![1.0; n + 1])));
+        for bad in [0.0, -1.0, f64::NAN, f64::INFINITY] {
+            let mut values = vec![1.0; n];
+            values[walkable_cell] = bad;
+            assert!(invalid(ff.set_default_speed(0, &values)), "accepted {bad}");
+            assert!(
+                invalid(ff.set_speed_override(0, dest, &values)),
+                "accepted {bad}"
+            );
+        }
+        // Nothing was changed by the rejected calls.
+        assert_eq!(ff.default_speed(0).unwrap(), &before[..]);
+        assert!(!ff.has_speed_override(0, dest).unwrap());
+
+        let ones = vec![1.0; n];
+        assert_eq!(
+            ff.set_default_speed(1, &ones),
+            Err(MultiRegionError::UnknownRegion(1))
+        );
+        assert_eq!(
+            ff.set_speed_override(0, 3, &ones),
+            Err(MultiRegionError::UnknownDestination(3))
+        );
+        assert_eq!(
+            ff.clear_speed_override(1, dest),
+            Err(MultiRegionError::UnknownRegion(1))
+        );
+        assert_eq!(
+            ff.speed(0, 3).err(),
+            Some(MultiRegionError::UnknownDestination(3))
+        );
     }
 }

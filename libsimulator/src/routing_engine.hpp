@@ -33,6 +33,10 @@ public:
     /// has reached @p to.
     Point get_orientation(const Location& from, const RoutingTarget& to);
 
+    /// The floor fields behind every Destination, for their default speed fields.
+    FloorfieldRoutingEngine& floorfield() { return _floorfield; }
+    const FloorfieldRoutingEngine& floorfield() const { return _floorfield; }
+
 private:
     FloorfieldRoutingEngine _floorfield;
     SurfaceMeshShortestPathRoutingEngine _shortest_path;

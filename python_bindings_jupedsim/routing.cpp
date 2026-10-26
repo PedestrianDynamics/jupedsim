@@ -21,6 +21,7 @@
 #include <string>
 #include <tuple>
 #include <utility>
+#include <vector>
 
 namespace py = pybind11;
 
@@ -40,6 +41,40 @@ void check_cell_count(const TravelTimeGrid& grid)
                 grid.values.size(),
                 grid.directions.size()));
     }
+}
+
+/// The placement properties every floor field grid has: origin, size and extent.
+template <typename Grid>
+void def_placement(py::class_<Grid>& grid)
+{
+    grid.def_property_readonly(
+            "origin",
+            [](const Grid& g) { return std::tuple{g.origin.x, g.origin.y}; },
+            "Lower-left corner of cell (0, 0) in metres.")
+        .def_readonly("width", &Grid::width, "Number of cells along x.")
+        .def_readonly("height", &Grid::height, "Number of cells along y.")
+        .def_readonly("cell_size", &Grid::cell_size, "Edge length of a cell in metres.")
+        .def_property_readonly(
+            "extent",
+            [](const Grid& g) {
+                return std::tuple{
+                    g.origin.x,
+                    g.origin.x + g.width * g.cell_size,
+                    g.origin.y,
+                    g.origin.y + g.height * g.cell_size};
+            },
+            "``(x_min, x_max, y_min, y_max)`` of the grid in metres, as matplotlib's "
+            "``extent`` expects it.")
+        .def("__repr__", [](const Grid& g) {
+            return py::str("{}(origin=({}, {}), width={}, height={}, cell_size={})")
+                .format(
+                    py::type::of<Grid>().attr("__name__"),
+                    g.origin.x,
+                    g.origin.y,
+                    g.width,
+                    g.height,
+                    g.cell_size);
+        });
 }
 } // namespace
 
@@ -89,25 +124,8 @@ void init_routing(py::module_& m)
                 extent=grid.extent,
             )
     )");
+    def_placement(travel_time_grid);
     travel_time_grid
-        .def_property_readonly(
-            "origin",
-            [](const TravelTimeGrid& g) { return std::tuple{g.origin.x, g.origin.y}; },
-            "Lower-left corner of cell (0, 0) in metres.")
-        .def_readonly("width", &TravelTimeGrid::width, "Number of cells along x.")
-        .def_readonly("height", &TravelTimeGrid::height, "Number of cells along y.")
-        .def_readonly("cell_size", &TravelTimeGrid::cell_size, "Edge length of a cell in metres.")
-        .def_property_readonly(
-            "extent",
-            [](const TravelTimeGrid& g) {
-                return std::tuple{
-                    g.origin.x,
-                    g.origin.x + g.width * g.cell_size,
-                    g.origin.y,
-                    g.origin.y + g.height * g.cell_size};
-            },
-            "``(x_min, x_max, y_min, y_max)`` of the grid in metres, as matplotlib's "
-            "``extent`` expects it.")
         .def_property_readonly(
             "values",
             [](const TravelTimeGrid& g) {
@@ -138,13 +156,63 @@ void init_routing(py::module_& m)
             "Walking directions as unit vectors ``(x, y)`` in an array of shape "
             "``(height, width, 2)``, laid out like :attr:`values`: the direction an agent at "
             "a cell's centre is sent along. Zero inside the stage's area, ``nan`` where a "
-            "cell is not walkable. Each access returns a new copy.")
-        .def("__repr__", [](const TravelTimeGrid& g) {
-            return py::str(
-                       "TravelTimeGrid(origin=({!r}, {!r}), width={!r}, height={!r}, "
-                       "cell_size={!r})")
-                .format(g.origin.x, g.origin.y, g.width, g.height, g.cell_size);
-        });
+            "cell is not walkable. Each access returns a new copy.");
+
+    py::class_<SpeedGrid> speed_grid(m, "SpeedGrid");
+    speed_grid.doc() = clean_doc(R"(
+        Walking speeds over the floor field grid of one region, the same grid as
+        :class:`~jupedsim.TravelTimeGrid`'s.
+
+        Get one from :func:`~jupedsim.Simulation.speed_fields`, change its values and
+        hand them back with :func:`~jupedsim.Simulation.set_speed_field`, for example to
+        slow agents down in smoke:
+
+        .. code:: python
+
+            grid = sim.speed_fields()[room]
+            x, y = grid.cell_centres
+            sim.set_speed_field(room, grid.values * visibility(x, y))
+    )");
+    def_placement(speed_grid);
+    speed_grid
+        .def_property_readonly(
+            "values",
+            [](const SpeedGrid& g) {
+                const auto cells = std::size_t{g.width} * g.height;
+                if(g.values.size() != cells) {
+                    throw std::logic_error(
+                        fmt::format(
+                            "SpeedGrid of {}x{} cells holds {} values",
+                            g.width,
+                            g.height,
+                            g.values.size()));
+                }
+                py::array_t<double> values(
+                    {static_cast<py::ssize_t>(g.height), static_cast<py::ssize_t>(g.width)});
+                std::copy(g.values.begin(), g.values.end(), values.mutable_data());
+                return values;
+            },
+            "Speeds in m/s as an array of shape ``(height, width)``; row 0 is the lowest. "
+            "Positive where a cell is walkable, 0 elsewhere. Each access returns a new copy.")
+        .def_property_readonly(
+            "cell_centres",
+            [](const SpeedGrid& g) {
+                const std::vector<py::ssize_t> shape{
+                    static_cast<py::ssize_t>(g.height), static_cast<py::ssize_t>(g.width)};
+                py::array_t<double> x(shape);
+                py::array_t<double> y(shape);
+                auto xs = x.mutable_unchecked<2>();
+                auto ys = y.mutable_unchecked<2>();
+                for(py::ssize_t row = 0; row < shape[0]; ++row) {
+                    for(py::ssize_t col = 0; col < shape[1]; ++col) {
+                        xs(row, col) = g.origin.x + (static_cast<double>(col) + 0.5) * g.cell_size;
+                        ys(row, col) = g.origin.y + (static_cast<double>(row) + 0.5) * g.cell_size;
+                    }
+                }
+                return std::tuple{x, y};
+            },
+            "``(x, y)``: the coordinates of every cell's centre in metres, two arrays laid "
+            "out like :attr:`values`.");
 
     py::class_<Location> location(m, "Location");
     location.doc() = clean_doc(R"(
