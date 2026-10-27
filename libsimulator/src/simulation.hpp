@@ -49,6 +49,8 @@ class Simulation
     enum LogLevel { General = 1, Detailed = 2, Debug = 3 };
 
     void throw_if_iterating(const char* operation) const;
+    /// The destination of stage @p stage_id; throws for a stage without an area.
+    const Destination& destination_of(BaseStage::ID stage_id) const;
 
 public:
     /// Takes the geometry over: after this the caller no longer owns it. `geo()` hands out a
@@ -103,6 +105,26 @@ public:
     /// Travel times to the area of stage @p stage_id over the grid of every region, by region id.
     /// Empty for a stage without an area, such as direct steering.
     std::map<std::size_t, TravelTimeGrid> travel_times(BaseStage::ID stage_id);
+    /// Speed fields every stage without an override is routed with, by region id.
+    std::map<std::size_t, SpeedGrid> default_speed_fields() const;
+    /// Replaces the default speed field of @p region_id, see
+    /// FloorfieldRoutingEngine::set_default_speed for what @p values must hold.
+    void set_default_speed_field(std::size_t region_id, const std::vector<double>& values);
+    /// Speed fields agents are routed to the area of stage @p stage_id with, by region id. Empty
+    /// for a stage without an area, such as direct steering.
+    std::map<std::size_t, SpeedGrid> speed_fields(BaseStage::ID stage_id) const;
+    /// Whether stage @p stage_id has its own speed field in @p region_id.
+    bool has_speed_field_override(BaseStage::ID stage_id, std::size_t region_id) const;
+    /// Routes agents to the area of stage @p stage_id with @p values in @p region_id instead of
+    /// the default speed field. Other stages are not affected. Throws for a stage without an
+    /// area.
+    void set_speed_field_override(
+        BaseStage::ID stage_id,
+        std::size_t region_id,
+        const std::vector<double>& values);
+    /// Routes agents to the area of stage @p stage_id with the default speed field of
+    /// @p region_id again. Throws for a stage without an area.
+    void clear_speed_field_override(BaseStage::ID stage_id, std::size_t region_id);
     /// The geometry this simulation runs on. Borrowed: it lives as long as the simulation.
     const Geometry& geo() const;
     void push_timer(const std::string_view name, size_t probe_log_level = 0);

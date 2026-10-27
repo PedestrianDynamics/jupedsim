@@ -14,7 +14,9 @@
 #include <gtest/gtest.h>
 
 #include <algorithm>
+#include <cmath>
 #include <cstddef>
+#include <iterator>
 #include <memory>
 #include <utility>
 #include <variant>
@@ -230,6 +232,132 @@ TEST(Simulation, AStageWithoutAnAreaHasNoTravelTimes)
     const auto flat = on_a_flat_room();
     const auto steering = flat.sim->add_stage(DirectSteeringDescription{});
     EXPECT_TRUE(flat.sim->travel_times(steering).empty());
+}
+
+/// @p grid's values, each multiplied by @p factor.
+std::vector<double> scaled(const SpeedGrid& grid, double factor)
+{
+    std::vector<double> values = grid.values;
+    for(auto& v : values) {
+        v *= factor;
+    }
+    return values;
+}
+
+TEST(Simulation, ReportsTheDefaultSpeedFieldOfEveryRegion)
+{
+    auto stair = test_geometries::u_stair();
+    const auto region_count = stair.geometry->region_count();
+    Simulation sim{model(), std::move(stair.geometry), 0.01, FloorfieldOptions{}};
+    const Polygon square{std::vector<Point>{{1, 9}, {3, 9}, {3, 11}, {1, 11}}};
+    const auto exit = sim.add_stage(ExitDescription{{{square, stair.room_2}}});
+
+    const auto defaults = sim.default_speed_fields();
+    const auto travel_times = sim.travel_times(exit);
+    ASSERT_EQ(defaults.size(), region_count);
+    for(const auto& [region_id, grid] : defaults) {
+        const auto& times = travel_times.at(region_id);
+        EXPECT_EQ(grid.origin, times.origin) << "region " << region_id;
+        EXPECT_EQ(grid.width, times.width);
+        EXPECT_EQ(grid.height, times.height);
+        ASSERT_EQ(grid.values.size(), std::size_t{grid.width} * grid.height);
+        // Walkable cells, and only those, have a speed and a finite travel time.
+        for(std::size_t cell = 0; cell < grid.values.size(); ++cell) {
+            EXPECT_EQ(grid.values[cell] > 0.0, std::isfinite(times.values[cell]))
+                << "region " << region_id << ", cell " << cell;
+        }
+    }
+    EXPECT_EQ(sim.speed_fields(exit).at(stair.room_2).values, defaults.at(stair.room_2).values)
+        << "a stage without an override is routed with the default";
+}
+
+TEST(Simulation, SlowingTheDefaultSpeedFieldSlowsEveryStage)
+{
+    const auto flat = on_a_flat_room();
+    const Polygon strip{std::vector<Point>{{0, 0}, {1, 0}, {1, 20}, {0, 20}}};
+    const auto exit = flat.sim->add_stage(ExitDescription{{{strip, flat.room_id}}});
+    const auto before = time_at(flat.sim->travel_times(exit).at(flat.room_id), {10, 10});
+
+    const auto defaults = flat.sim->default_speed_fields().at(flat.room_id);
+    flat.sim->set_default_speed_field(flat.room_id, scaled(defaults, 0.5));
+
+    EXPECT_EQ(flat.sim->default_speed_fields().at(flat.room_id).values, scaled(defaults, 0.5));
+    const auto after = time_at(flat.sim->travel_times(exit).at(flat.room_id), {10, 10});
+    EXPECT_NEAR(after, 2.0 * before, 1e-9);
+}
+
+TEST(Simulation, ASpeedFieldOverrideAppliesToItsStageOnly)
+{
+    const auto flat = on_a_flat_room();
+    const Polygon left{std::vector<Point>{{0, 0}, {1, 0}, {1, 20}, {0, 20}}};
+    const Polygon right{std::vector<Point>{{19, 0}, {20, 0}, {20, 20}, {19, 20}}};
+    const auto slowed = flat.sim->add_stage(ExitDescription{{{left, flat.room_id}}});
+    const auto other = flat.sim->add_stage(ExitDescription{{{right, flat.room_id}}});
+    const auto time = [&flat](BaseStage::ID stage) {
+        return time_at(flat.sim->travel_times(stage).at(flat.room_id), {10, 10});
+    };
+    const auto slowed_before = time(slowed);
+    const auto other_before = time(other);
+
+    const auto defaults = flat.sim->default_speed_fields().at(flat.room_id);
+    flat.sim->set_speed_field_override(slowed, flat.room_id, scaled(defaults, 0.5));
+
+    EXPECT_TRUE(flat.sim->has_speed_field_override(slowed, flat.room_id));
+    EXPECT_FALSE(flat.sim->has_speed_field_override(other, flat.room_id));
+    EXPECT_EQ(flat.sim->speed_fields(slowed).at(flat.room_id).values, scaled(defaults, 0.5));
+    EXPECT_EQ(flat.sim->speed_fields(other).at(flat.room_id).values, defaults.values);
+    EXPECT_NEAR(time(slowed), 2.0 * slowed_before, 1e-9);
+    EXPECT_EQ(time(other), other_before);
+
+    // The default no longer reaches the overridden stage.
+    flat.sim->set_default_speed_field(flat.room_id, scaled(defaults, 0.25));
+    EXPECT_NEAR(time(slowed), 2.0 * slowed_before, 1e-9);
+    EXPECT_NEAR(time(other), 4.0 * other_before, 1e-9);
+
+    flat.sim->clear_speed_field_override(slowed, flat.room_id);
+    EXPECT_FALSE(flat.sim->has_speed_field_override(slowed, flat.room_id));
+    EXPECT_NEAR(time(slowed), 4.0 * slowed_before, 1e-9);
+}
+
+TEST(Simulation, InvalidSpeedFieldsAreRejected)
+{
+    const auto flat = on_a_flat_room();
+    const Polygon strip{std::vector<Point>{{0, 0}, {1, 0}, {1, 20}, {0, 20}}};
+    const auto exit = flat.sim->add_stage(ExitDescription{{{strip, flat.room_id}}});
+    const auto steering = flat.sim->add_stage(DirectSteeringDescription{});
+    const auto defaults = flat.sim->default_speed_fields().at(flat.room_id);
+    const auto walkable = std::distance(
+        defaults.values.begin(),
+        std::find_if(
+            defaults.values.begin(), defaults.values.end(), [](double v) { return v > 0.0; }));
+
+    auto too_short = defaults.values;
+    too_short.pop_back();
+    EXPECT_THROW(flat.sim->set_default_speed_field(flat.room_id, too_short), SimulationError);
+    EXPECT_THROW(
+        flat.sim->set_speed_field_override(exit, flat.room_id, too_short), SimulationError);
+    for(const double bad : {0.0, -1.0, std::nan(""), HUGE_VAL}) {
+        auto values = defaults.values;
+        values[walkable] = bad;
+        EXPECT_THROW(flat.sim->set_default_speed_field(flat.room_id, values), SimulationError)
+            << bad;
+        EXPECT_THROW(
+            flat.sim->set_speed_field_override(exit, flat.room_id, values), SimulationError)
+            << bad;
+    }
+    EXPECT_EQ(flat.sim->default_speed_fields().at(flat.room_id).values, defaults.values);
+    EXPECT_FALSE(flat.sim->has_speed_field_override(exit, flat.room_id));
+
+    EXPECT_THROW(flat.sim->set_default_speed_field(99, defaults.values), SimulationError);
+    EXPECT_THROW(flat.sim->set_speed_field_override(exit, 99, defaults.values), SimulationError);
+
+    // A stage without an area has nothing to route to.
+    EXPECT_TRUE(flat.sim->speed_fields(steering).empty());
+    EXPECT_FALSE(flat.sim->has_speed_field_override(steering, flat.room_id));
+    EXPECT_THROW(
+        flat.sim->set_speed_field_override(steering, flat.room_id, defaults.values),
+        SimulationError);
+    EXPECT_THROW(flat.sim->clear_speed_field_override(steering, flat.room_id), SimulationError);
 }
 
 TEST(MeshBuiltSimulation, IsRejected)

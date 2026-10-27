@@ -16,9 +16,11 @@
 #include "transition.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep
 
+#include <fmt/format.h>
 #include <pybind11/attr.h>
 #include <pybind11/cast.h>
 #include <pybind11/detail/common.h>
+#include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h> // IWYU pragma: keep
 #include <pybind11/typing.h>
@@ -27,6 +29,7 @@
 #include <cstdint>
 #include <map>
 #include <memory>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <tuple>
@@ -184,6 +187,51 @@ void init_simulation(py::module_& m)
             // The returned token points into geometry the simulation owns.
             py::keep_alive<0, 1>())
         .def("stage_ids", &Simulation::stage_ids)
+        .def(
+            "speed_fields",
+            [](const Simulation& sim, std::optional<uint64_t> stage_id) {
+                return stage_id ? sim.speed_fields(*stage_id) : sim.default_speed_fields();
+            },
+            py::arg("stage_id") = py::none())
+        .def(
+            "set_speed_field",
+            [](Simulation& sim,
+               std::size_t region_id,
+               std::optional<py::array_t<double, py::array::c_style | py::array::forcecast>> values,
+               std::optional<uint64_t> stage_id) {
+                if(!values) {
+                    if(!stage_id) {
+                        throw py::value_error(
+                            "The default speed field cannot be cleared, only replaced.");
+                    }
+                    sim.clear_speed_field_override(*stage_id, region_id);
+                    return;
+                }
+                // The floor field only checks the number of values; a transposed array has
+                // the same number and would be taken row for column.
+                const auto defaults = sim.default_speed_fields();
+                if(const auto grid = defaults.find(region_id); grid != defaults.end()) {
+                    const auto& g = grid->second;
+                    if(values->ndim() != 2 || values->shape(0) != g.height ||
+                       values->shape(1) != g.width) {
+                        throw py::value_error(
+                            fmt::format(
+                                "The speed field of region {} needs shape ({}, {}).",
+                                region_id,
+                                g.height,
+                                g.width));
+                    }
+                } // an unknown region is reported by the simulation
+                const std::vector<double> flat(values->data(), values->data() + values->size());
+                if(stage_id) {
+                    sim.set_speed_field_override(*stage_id, region_id, flat);
+                } else {
+                    sim.set_default_speed_field(region_id, flat);
+                }
+            },
+            py::arg("region_id"),
+            py::arg("values"),
+            py::arg("stage_id") = py::none())
         .def(
             "travel_times",
             [](Simulation& sim, uint64_t stage_id) { return sim.travel_times(stage_id); },

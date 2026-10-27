@@ -1,15 +1,20 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-//! Static floor fields.
+//! Floor fields with optional user-defined speed fields.
 //!
-//! Static means: the geometry and the speed field never change. Agent density
-//! plays no part, and a solved field is never recomputed.
+//! The geometry and the walkable part of it are considered immutable.
+//! The default speed field is created per region and marks walkable areas
+//! and obstacles. Additionally, a term is added that expresses pedestrians'
+//! tendency to avoid getting to close to walls.
+//! This default field can be overwritten by the user, for example to encode
+//! local information like a higher density, fire or smoke.
 //!
-//! A `MultiRegionFloorfield` owns one grid and one speed field per region of
-//! a `RegionGraph`, joined along seams. A single walkable polygon is the
-//! special case of a graph with one region and no seams. The input types are
-//! plain structs shared with C++; they are checked once, when a field is built
-//! from them. Destinations are registered up front; each is solved on first
-//! use with the Fast Sweeping Method and then kept.
+//! A `MultiRegionFloorfield` owns one grid and one default speed field per
+//! region of a `RegionGraph`, joined along seams. A single walkable polygon is
+//! the special case of a graph with one region and no seams. The input types
+//! are plain structs shared with C++; they are checked once, when a field is
+//! built from them. Destinations are registered up front; each is solved on
+//! first use with the Fast Sweeping Method. If a speed field is changed during
+//! the simulation a recompute is triggered.
 
 pub mod fsm;
 pub mod geometry;
@@ -76,7 +81,7 @@ mod ffi {
         outer: Ring,
     }
 
-    /// Placement of one region's grid.
+    /// Metadata/placement of a region grid.
     struct GridInfo {
         origin_x: f64,
         origin_y: f64,
@@ -99,6 +104,48 @@ mod ffi {
 
         /// Where `region`'s grid lies; `region_travel_times` is row-major on it.
         fn region_grid(self: &MultiRegionFloorfield, region: usize) -> Result<GridInfo>;
+        /// The speed field of `region` used by every destination without an
+        /// override there, row-major: positive on walkable cells, 0 on all
+        /// others. Which cells are walkable is fixed by the geometry.
+        fn region_default_speed(self: &MultiRegionFloorfield, region: usize) -> Result<Vec<f64>>;
+        /// Replace the default speed field of `region`: one value per cell,
+        /// row-major, finite and positive on walkable cells; values on other
+        /// cells are ignored. Destinations using it are solved again on their
+        /// next query.
+        fn set_region_default_speed(
+            self: &mut MultiRegionFloorfield,
+            region: usize,
+            values: &[f64],
+        ) -> Result<()>;
+        /// The speed field used to solve this `region` for this destination `dest`.
+        /// If a custom speed field has been set it is returned otherwise the default field is returned.
+        fn region_speed(
+            self: &MultiRegionFloorfield,
+            region: usize,
+            dest: usize,
+        ) -> Result<Vec<f64>>;
+        /// Whether `dest` has a custom speed field in `region`.
+        fn region_has_speed_override(
+            self: &MultiRegionFloorfield,
+            region: usize,
+            dest: usize,
+        ) -> Result<bool>;
+        /// Solve `dest` with `values` in `region` instead of the default
+        /// speed field; same rules for `values` as the default. Other
+        /// destinations are not affected.
+        fn set_region_speed_override(
+            self: &mut MultiRegionFloorfield,
+            region: usize,
+            dest: usize,
+            values: &[f64],
+        ) -> Result<()>;
+        /// Solve `dest` with the default speed field of `region` again.
+        fn clear_region_speed_override(
+            self: &mut MultiRegionFloorfield,
+            region: usize,
+            dest: usize,
+        ) -> Result<()>;
+
         /// Whether `p` lies in `region`'s polygon with a walkable cell near
         /// enough to take a direction from.
         fn region_is_routable(self: &MultiRegionFloorfield, region: usize, p: Point2d) -> bool;
@@ -185,6 +232,47 @@ impl MultiRegionFloorfield {
             height: g.height,
             cell_size: g.cell_size,
         })
+    }
+
+    fn region_default_speed(&self, region: usize) -> Result<Vec<f64>, MultiRegionError> {
+        Ok(self.default_speed(region)?.to_vec())
+    }
+
+    fn set_region_default_speed(
+        &mut self,
+        region: usize,
+        values: &[f64],
+    ) -> Result<(), MultiRegionError> {
+        self.set_default_speed(region, values)
+    }
+
+    fn region_speed(&self, region: usize, dest: usize) -> Result<Vec<f64>, MultiRegionError> {
+        Ok(self.speed(region, dest)?.to_vec())
+    }
+
+    fn region_has_speed_override(
+        &self,
+        region: usize,
+        dest: usize,
+    ) -> Result<bool, MultiRegionError> {
+        self.has_speed_override(region, dest)
+    }
+
+    fn set_region_speed_override(
+        &mut self,
+        region: usize,
+        dest: usize,
+        values: &[f64],
+    ) -> Result<(), MultiRegionError> {
+        self.set_speed_override(region, dest, values)
+    }
+
+    fn clear_region_speed_override(
+        &mut self,
+        region: usize,
+        dest: usize,
+    ) -> Result<(), MultiRegionError> {
+        self.clear_speed_override(region, dest)
     }
 
     fn region_is_routable(&self, region: usize, p: Point2d) -> bool {

@@ -3,6 +3,8 @@
 from collections.abc import Sequence
 from typing import Any, Iterator
 
+import numpy as np
+import numpy.typing as npt
 import shapely
 
 from jupedsim.agent import Agent
@@ -28,6 +30,7 @@ from jupedsim.pyjupedsim import (
     OperationalModel,
     SocialForceModel,
     SocialForceModelState,
+    SpeedGrid,
     TravelTimeGrid,
     WalkableSurface,
     WarpDriverModel,
@@ -291,6 +294,62 @@ class Simulation:
             SimulationError: if the stage does not exist.
         """
         return self._obj.travel_times(stage_id)
+
+    def speed_fields(self, stage_id: int | None = None) -> dict[int, SpeedGrid]:
+        """Get the walking speeds the floor fields are computed with, for every region.
+
+        Every region has a default speed field, which starts out slowing agents down
+        near walls (see :class:`~jupedsim.FloorfieldOptions`). A stage can have its own
+        speed field in a region instead, see :func:`set_speed_field`.
+
+        Args:
+            stage_id: Id of the stage whose speed fields to get: its own where it has
+                one, else the default. ``None`` gets the defaults.
+
+        Returns:
+            The grid of every region by region id, in ascending order. Empty for a
+            stage without an area to route to, such as a direct steering stage.
+
+        Raises:
+            SimulationError: if the stage does not exist.
+        """
+        return self._obj.speed_fields(stage_id)
+
+    def set_speed_field(
+        self,
+        region_id: int,
+        values: npt.ArrayLike | None,
+        stage_id: int | None = None,
+    ) -> None:
+        """Set the walking speeds a region's floor field is computed with.
+
+        Use this to make agents route around slow areas, for example smoke: start
+        from :func:`speed_fields`, change the values and set them again. Floor fields
+        that use the changed speeds are computed again when next needed.
+
+        The speeds only change the routes, not how fast agents walk.
+
+        Args:
+            region_id: Region whose speed field to set.
+            values: Speeds in m/s in an array of shape ``(height, width)`` of the
+                region's grid, see :class:`~jupedsim.SpeedGrid`. Positive and finite
+                on every walkable cell; values on other cells are ignored, since which
+                cells are walkable is fixed by the geometry. ``None`` together with a
+                ``stage_id`` removes that stage's own speed field, so it uses the
+                default again.
+            stage_id: Stage whose own speed field to set; other stages are not
+                affected. ``None`` sets the default, which every stage without its
+                own speed field in this region uses.
+
+        Raises:
+            ValueError: if ``values`` has the wrong shape, or is ``None`` without a
+                ``stage_id``.
+            SimulationError: if a value is not allowed, the region or stage does not
+                exist, or the stage has no area to route to.
+        """
+        self._obj.set_speed_field(
+            region_id, None if values is None else np.asarray(values), stage_id
+        )
 
     def mark_agent_for_removal(self, agent_id: int):
         """Marks an agent for removal.

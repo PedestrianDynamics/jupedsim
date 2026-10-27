@@ -35,6 +35,21 @@ ff::Ring to_ring(const Poly& poly)
     return ring;
 }
 
+SpeedGrid to_speed_grid(const ff::GridInfo& grid, const rust::Vec<double>& values)
+{
+    return SpeedGrid{
+        {grid.origin_x, grid.origin_y},
+        grid.width,
+        grid.height,
+        grid.cell_size,
+        std::vector<double>(values.begin(), values.end())};
+}
+
+rust::Slice<const double> to_slice(const std::vector<double>& values)
+{
+    return {values.data(), values.size()};
+}
+
 /// The region graph of @p geometry in the bridge's layout, which mirrors RegionGraph2D: regions
 /// with their rings, and every directed edge as a seam through ring edge (ring, index) of its
 /// source. The floor field checks it; this only copies.
@@ -123,4 +138,43 @@ TravelTimeGrid FloorfieldRoutingEngine::travel_times(std::size_t region, std::si
             std::vector<double>(values.begin(), values.end()),
             std::move(points)};
     });
+}
+
+SpeedGrid FloorfieldRoutingEngine::default_speed(std::size_t region) const
+{
+    return checked([&] {
+        return to_speed_grid(_field->region_grid(region), _field->region_default_speed(region));
+    });
+}
+
+void FloorfieldRoutingEngine::set_default_speed(
+    std::size_t region,
+    const std::vector<double>& values)
+{
+    checked([&] { _field->set_region_default_speed(region, to_slice(values)); });
+}
+
+SpeedGrid FloorfieldRoutingEngine::speed(std::size_t region, std::size_t id) const
+{
+    return checked([&] {
+        return to_speed_grid(_field->region_grid(region), _field->region_speed(region, id));
+    });
+}
+
+bool FloorfieldRoutingEngine::has_speed_override(std::size_t region, std::size_t id) const
+{
+    return checked([&] { return _field->region_has_speed_override(region, id); });
+}
+
+void FloorfieldRoutingEngine::set_speed_override(
+    std::size_t region,
+    std::size_t id,
+    const std::vector<double>& values)
+{
+    checked([&] { _field->set_region_speed_override(region, id, to_slice(values)); });
+}
+
+void FloorfieldRoutingEngine::clear_speed_override(std::size_t region, std::size_t id)
+{
+    checked([&] { _field->clear_region_speed_override(region, id); });
 }
