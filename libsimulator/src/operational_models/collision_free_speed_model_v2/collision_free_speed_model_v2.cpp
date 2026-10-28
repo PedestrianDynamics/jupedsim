@@ -17,8 +17,8 @@
 
 namespace
 {
-/// How far to ask for walls. The repulsion decays with `range_geometry_repulsion` (0.02 m by
-/// default), so a wall this far off contributes "nothing".
+/// How far ahead to look for a wall. The repulsion decays with `range_geometry_repulsion` (0.02 m
+/// by default), so a wall this far off contributes "nothing".
 constexpr double wall_search_radius = 4.0;
 } // namespace
 
@@ -41,12 +41,13 @@ Point CollisionFreeSpeedModelV2::compute_next_state(
         neighbor_repulsion += this->neighbor_repulsion(current_state, neighbor);
     }
 
+    const auto desired_direction = step.route_orientation();
     Point boundary_repulsion{};
-    for(const auto& wall : step.walls_in_range(wall_search_radius)) {
-        boundary_repulsion += this->boundary_repulsion(current_state, wall);
+    if(const auto wall = step.wall_ahead(
+           (desired_direction + neighbor_repulsion).normalized() * wall_search_radius)) {
+        boundary_repulsion = this->boundary_repulsion(current_state, *wall);
     }
 
-    const auto desired_direction = step.route_orientation();
     auto direction = (desired_direction + neighbor_repulsion + boundary_repulsion).normalized();
     if(direction == Point{}) {
         direction = current_state.orientation;

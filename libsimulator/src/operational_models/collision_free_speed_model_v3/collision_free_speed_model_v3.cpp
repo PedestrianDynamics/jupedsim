@@ -24,8 +24,8 @@ constexpr double spacing_blend_weight =
 constexpr double tau_theta = 0.3; // Heading relaxation timescale [s] for temporal smoothing.
 constexpr double min_reverse_speed =
     -0.01; // Deterministic tiny reverse floor [m/s] to release local blockages.
-/// How far to ask for walls. The repulsion decays with `range_geometry_repulsion` (0.02 m by
-/// default), so a wall this far off contributes "nothing".
+/// How far ahead to look for a wall. The repulsion decays with `range_geometry_repulsion` (0.02 m
+/// by default), so a wall this far off contributes "nothing".
 constexpr double wall_search_radius = 4.0;
 
 double neighbor_influence(
@@ -78,9 +78,10 @@ Point CollisionFreeSpeedModelV3::compute_next_state(
     auto neighborhood = step.other_agents_in_range(
         _cut_off_radius, [&step](const NeighborView& n) { return step.no_geometry_between(n); });
 
+    // The final direction depends on the repulsion, so look along the current orientation.
     Point boundary_repulsion{};
-    for(const auto& wall : step.walls_in_range(wall_search_radius)) {
-        boundary_repulsion += this->boundary_repulsion(current_state, wall);
+    if(const auto wall = step.wall_ahead(current_state.orientation * wall_search_radius)) {
+        boundary_repulsion = this->boundary_repulsion(current_state, *wall);
     }
 
     const auto desired_direction = step.route_orientation();

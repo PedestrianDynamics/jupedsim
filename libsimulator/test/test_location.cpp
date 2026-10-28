@@ -370,3 +370,40 @@ TEST(LocationTryMove, LeavingOverBoundaryCornerReturnsNullopt)
     const auto loc = location_at(*room.geometry, 4, 3);
     EXPECT_FALSE(loc.try_move_on_surface(Point{12, 14}).has_value()); // through (10,10)
 }
+
+// -- wall_along (the wall a straight path would leave through) --
+
+TEST(LocationWallAlong, CrossingABorderEdgeReturnsThatEdge)
+{
+    const auto room = test_geometries::rectangle({0, 0}, {10, 10});
+
+    const auto loc = location_at(*room.geometry, 3, 2);
+    const auto wall = loc.wall_along(Point{17, 18}); // leaves through x = 10 at y ≈ 9.4
+    ASSERT_TRUE(wall.has_value());
+    EXPECT_DOUBLE_EQ(wall->p1.x, 10.0);
+    EXPECT_DOUBLE_EQ(wall->p2.x, 10.0);
+}
+
+TEST(LocationWallAlong, LeavingOverACornerReturnsTheCornerAsAPoint)
+{
+    const auto room = test_geometries::rectangle({0, 0}, {10, 10});
+
+    const auto loc = location_at(*room.geometry, 4, 3);
+    const auto wall = loc.wall_along(Point{12, 14}); // through (10,10)
+    ASSERT_TRUE(wall.has_value());
+    EXPECT_EQ(wall->p1, Point(10, 10));
+    EXPECT_EQ(wall->p2, Point(10, 10));
+}
+
+TEST(LocationWallAlong, StopsAtTheFirstWall)
+{
+    // The hole's near face at x = 0.9 lies in front of the outer boundary at x = 100.
+    const auto room =
+        test_geometries::rectangle_with_hole({-100, -100}, {100, 100}, {0.9, -50}, {1.1, 50});
+
+    const auto loc = location_at(*room.geometry, -1, 2);
+    const auto wall = loc.wall_along(Point{200, 0});
+    ASSERT_TRUE(wall.has_value());
+    EXPECT_DOUBLE_EQ(wall->p1.x, 0.9);
+    EXPECT_DOUBLE_EQ(wall->p2.x, 0.9);
+}

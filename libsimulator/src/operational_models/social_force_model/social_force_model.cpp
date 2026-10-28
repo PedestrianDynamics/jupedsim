@@ -13,7 +13,7 @@
 
 namespace
 {
-/// How far to ask for walls. The obstacle force decays with `force_distance` (0.08 m by
+/// How far ahead to look for a wall. The obstacle force decays with `force_distance` (0.08 m by
 /// default), so a wall this far off contributes "nothing".
 constexpr double wall_search_radius = 4.0;
 } // namespace
@@ -44,8 +44,9 @@ Point SocialForceModel::compute_next_state(
     }
     forces += f_rep / current_state.mass;
     Point obstacle_f{};
-    for(const auto& wall : step.walls_in_range(wall_search_radius)) {
-        obstacle_f += obstacle_force(current_state, wall);
+    if(const auto wall = step.wall_ahead(
+           (current_state.velocity + forces * step.dt()).normalized() * wall_search_radius)) {
+        obstacle_f = obstacle_force(current_state, *wall);
     }
     forces += obstacle_f / current_state.mass;
 

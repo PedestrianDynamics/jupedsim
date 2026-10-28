@@ -9,6 +9,7 @@
 
 #include <cmath>
 #include <concepts>
+#include <optional>
 #include <ranges>
 #include <type_traits>
 #include <vector>
@@ -130,14 +131,19 @@ private:
     {
         return std::move(segments) |
                std::views::transform([origin = location().xy()](const LineSegment& s) {
-                   const LineSegment segment{s.p1 - origin, s.p2 - origin};
-                   const Point closest_point = segment.shortest_point(Point{});
-                   return WallView{
-                       .segment = segment,
-                       .closest_point = closest_point,
-                       .distance = closest_point.norm(),
-                       .normal = (Point{} - closest_point).normalized()};
+                   return seen_from(origin, s);
                });
+    }
+
+    static WallView seen_from(Point origin, const LineSegment& s)
+    {
+        const LineSegment segment{s.p1 - origin, s.p2 - origin};
+        const Point closest_point = segment.shortest_point(Point{});
+        return WallView{
+            .segment = segment,
+            .closest_point = closest_point,
+            .distance = closest_point.norm(),
+            .normal = (Point{} - closest_point).normalized()};
     }
 
 public:
@@ -145,6 +151,17 @@ public:
     auto walls_in_range(double distance) const
     {
         return as_seen_from_agent(_world.line_segments_in_range(location(), distance));
+    }
+
+    /// The first wall the straight path along 'direction' would cross, relative to the
+    /// agent. The length of 'direction' is how far ahead to look.
+    std::optional<WallView> wall_ahead(Point direction) const
+    {
+        const auto wall = _world.wall_along(location(), direction);
+        if(!wall) {
+            return std::nullopt;
+        }
+        return seen_from(location().xy(), *wall);
     }
 
     /// The same view, but with neighbors seen through 'states'. 'states' has to outlive the

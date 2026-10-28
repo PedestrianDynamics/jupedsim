@@ -257,6 +257,33 @@ TEST(AgentView, WallViewProjectsOntoTheWallAndPointsBackAtTheAgent)
     EXPECT_NEAR(nearest.normal.y, 0.0, 1e-12);
 }
 
+TEST(AgentView, WallAheadIsRelativeToTheAgent)
+{
+    Environment env{};
+    env.add_agent({-1.0, 2.0});
+    const auto geo = walled_geometry();
+    const auto q = env.query(*geo);
+
+    const auto wall = env.first_agent_view(q).wall_ahead(Point{3, 0});
+    ASSERT_TRUE(wall.has_value());
+    // The near face of the wall block sits at x = 0.9, 1.9 ahead of the agent.
+    EXPECT_DOUBLE_EQ(wall->segment.p1.x, 1.9);
+    EXPECT_DOUBLE_EQ(wall->segment.p2.x, 1.9);
+    EXPECT_DOUBLE_EQ(wall->distance, 1.9);
+    EXPECT_DOUBLE_EQ(wall->normal.x, -1.0);
+    EXPECT_NEAR(wall->normal.y, 0.0, 1e-12);
+}
+
+TEST(AgentView, WallAheadBeyondTheLookAheadIsNotSeen)
+{
+    Environment env{};
+    env.add_agent({-1.0, 2.0});
+    const auto geo = walled_geometry();
+    const auto q = env.query(*geo);
+
+    EXPECT_FALSE(env.first_agent_view(q).wall_ahead(Point{1.5, 0}).has_value());
+}
+
 TEST(AgentView, AgentsOnAnotherStoreyAreNotNeighbours)
 {
     // Two floors sharing a footprint, one agent on each, standing at the same (x, y) three
