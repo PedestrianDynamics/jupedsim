@@ -54,6 +54,16 @@ void Geometry::build()
     _region = _region_split.region;
     _boundary_index = make_portal_boundary_index(_mesh, _region_split);
     _region_graph = create_region_graph(_mesh, _region_split);
+
+    const auto& graph = *_region_graph;
+    std::vector<std::vector<LineSegment>> boundaries(boost::num_vertices(graph));
+    for(const auto region : boost::make_iterator_range(boost::vertices(graph))) {
+        boundaries[region] = graph[region]->segments();
+        for(const auto edge : boost::make_iterator_range(boost::out_edges(region, graph))) {
+            boundaries[region].push_back(graph[edge]);
+        }
+    }
+    _clearance = ClearanceField(boundaries);
 }
 
 PolyWithHoles Geometry::polygon(size_t region_id) const
@@ -93,16 +103,28 @@ bool Geometry::is_valid_location(const Point3D& p) const
 std::vector<LineSegment>
 Geometry::line_segments_in_range(const Location& who, double distance) const
 {
+    // No wall of the region within reach, and no seam that could open a view onto others.
+    if(clearance(who) > distance) {
+        return {};
+    }
     return _boundary_index->query(who, distance);
 }
 
 bool Geometry::no_geometry_between(const Location& who, Point direction) const
 {
+    // The step stays within the clear disc around who: it crosses neither a wall nor a seam.
+    if(clearance(who) > direction.norm()) {
+        return true;
+    }
     return region_reached(who, direction).has_value();
 }
 
 bool Geometry::no_geometry_between(const Location& who, const Location& other) const
 {
+    // The way there crosses neither a wall nor a seam, so it never leaves who's region.
+    if(clearance(who) > distance(who.xy(), other.xy())) {
+        return who.region() == other.region();
+    }
     const auto arrival = region_reached(who, other.xy() - who.xy());
     return arrival == other.region();
 }

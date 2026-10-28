@@ -584,6 +584,11 @@ std::vector<LineSegment> PortalBoundaryIndex::query(const Location& loc, double 
     const Point p = loc.xy();
     const VisPoint q = to_exact(p);
     const auto candidates = collect_candidates(*_g, p, maximum_distance);
+    // The answer only ever holds pieces of candidate walls; seams alone open onto nothing that
+    // could be reported. With no wall in the disc the visibility work has nothing to find.
+    if(candidates.walls.empty()) {
+        return {};
+    }
 
     std::vector<std::vector<std::pair<double, double>>> parts_of_wall(candidates.walls.size());
     std::vector<WindowJob> pending{};
