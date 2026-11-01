@@ -28,11 +28,11 @@ from vtkmodules.vtkRenderingCore import vtkCellPicker  # noqa: E402
 pv.OFF_SCREEN = True
 
 import jupedsim as jps  # noqa: E402
-from pyvista.trame.ui import plotter_ui  # noqa: E402
 from trame.app import asynchronous, get_server  # noqa: E402
 from trame.app.file_upload import ClientFile  # noqa: E402
 from trame.ui.vuetify3 import SinglePageWithDrawerLayout  # noqa: E402
 from trame.widgets import vuetify3 as v3  # noqa: E402
+from trame_pyvista.ui import plotter_ui  # noqa: E402
 
 TITLE = "JuPedSim - Multi-Level Viewer"
 
