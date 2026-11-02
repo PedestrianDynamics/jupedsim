@@ -6,6 +6,7 @@
 #include "point.hpp"
 
 #include <cstddef>
+#include <vector>
 
 bool Destination::contains(const Location& where) const
 {
@@ -20,4 +21,24 @@ Point Destination::orientation(const Location& from) const
 TravelTimeGrid Destination::travel_times(std::size_t region) const
 {
     return _engine->travel_times(region, _id);
+}
+
+SpeedGrid Destination::speed(std::size_t region) const
+{
+    return _engine->speed(region, _id);
+}
+
+bool Destination::has_speed_override(std::size_t region) const
+{
+    return _engine->has_speed_override(region, _id);
+}
+
+void Destination::set_speed_override(std::size_t region, const std::vector<double>& values) const
+{
+    _engine->set_speed_override(region, _id, values);
+}
+
+void Destination::clear_speed_override(std::size_t region) const
+{
+    _engine->clear_speed_override(region, _id);
 }

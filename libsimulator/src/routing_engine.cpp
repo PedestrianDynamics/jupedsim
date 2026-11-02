@@ -10,6 +10,7 @@
 #include "routing_target.hpp"
 #include "visitor.hpp"
 
+#include <cstddef>
 #include <variant>
 #include <vector>
 
@@ -21,6 +22,21 @@ RoutingEngine::RoutingEngine(const Geometry& geometry, FloorfieldOptions options
 Destination RoutingEngine::register_destination(const std::vector<AreaPiece>& pieces)
 {
     return _floorfield.register_destination(pieces);
+}
+
+GridInfo RoutingEngine::grid_info(std::size_t region) const
+{
+    return _floorfield.grid_info(region);
+}
+
+SpeedGrid RoutingEngine::default_speed(std::size_t region) const
+{
+    return _floorfield.default_speed(region);
+}
+
+void RoutingEngine::set_default_speed(std::size_t region, const std::vector<double>& values)
+{
+    _floorfield.set_default_speed(region, values);
 }
 
 Point RoutingEngine::get_orientation(const Location& from, const RoutingTarget& to)

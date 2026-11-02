@@ -4,6 +4,7 @@ import types
 from collections.abc import Sequence
 from typing import Any, Iterator, Self
 
+import numpy.typing as npt
 import shapely
 
 from jupedsim.agent import Agent
@@ -29,6 +30,7 @@ from jupedsim.pyjupedsim import (
     OperationalModel,
     SocialForceModel,
     SocialForceModelState,
+    SpeedGrid,
     TravelTimeGrid,
     WalkableSurface,
     WarpDriverModel,
@@ -292,6 +294,106 @@ class Simulation:
             SimulationError: if the stage does not exist.
         """
         return self._obj.travel_times(stage_id)
+
+    def custom_speed_fields(self, stage_id: int) -> dict[int, SpeedGrid | None]:
+        """Get the speed fields a stage has of its own, for every region.
+
+        A stage can have its own speed field in a region instead of the default, see
+        :func:`set_custom_speed_field`.
+
+        Args:
+            stage_id: Id of the stage whose speed fields to get.
+
+        Returns:
+            The grid of every region by region id, in ascending order: ``None`` where
+            the stage has no speed field of its own and uses the default, see
+            :func:`default_speed_fields`. Empty for a stage without an area to route
+            to, such as a direct steering stage.
+
+        Raises:
+            SimulationError: if the stage does not exist.
+        """
+        return self._obj.custom_speed_fields(stage_id)
+
+    def default_speed_fields(self) -> dict[int, SpeedGrid]:
+        """Get the default walking speeds the floor fields are computed with, for every region.
+
+        Every region has a default speed field, which starts out slowing agents down
+        near walls (see :class:`~jupedsim.FloorfieldOptions`). Every stage uses it in
+        a region where it has no speed field of its own, see
+        :func:`custom_speed_fields`.
+
+        Returns:
+            The grid of every region by region id, in ascending order.
+        """
+        return self._obj.default_speed_fields()
+
+    def set_default_speed_field(
+        self, region_id: int, values: npt.ArrayLike
+    ) -> None:
+        """Set the default walking speeds a region's floor fields are computed with.
+
+        Use this to make agents route around slow areas, for example smoke: start
+        from :func:`default_speed_fields`, change the values and set them again.
+        Every stage without a speed field of its own in this region is affected; its
+        floor field is computed again when next needed.
+
+        The speeds only change the routes, not how fast agents walk.
+
+        Args:
+            region_id: Region whose default speed field to set.
+            values: Speeds in m/s in an array of shape ``(height, width)`` of the
+                region's grid, see :class:`~jupedsim.SpeedGrid`. Finite and at least
+                0.01 m/s on every walkable cell: slower cells would make travel times
+                infinite. Values on other cells are ignored, since which cells are
+                walkable is fixed by the geometry.
+
+        Raises:
+            ValueError: if ``values`` has the wrong shape.
+            SimulationError: if a value is not allowed or the region does not exist.
+        """
+        self._obj.set_default_speed_field(region_id, values)
+
+    def set_custom_speed_field(
+        self, stage_id: int, region_id: int, values: npt.ArrayLike
+    ) -> None:
+        """Set the walking speeds one stage's floor field is computed with in a region.
+
+        The stage then uses these speeds instead of the default in this region, for
+        example where smoke only matters on the way to one exit. Other stages are not
+        affected; the stage's floor field is computed again when next needed. Use
+        :func:`clear_custom_speed_field` to go back to the default.
+
+        The speeds only change the routes, not how fast agents walk.
+
+        Args:
+            stage_id: Stage whose speed field to set.
+            region_id: Region whose speed field to set.
+            values: Speeds in m/s, with the same rules as for
+                :func:`set_default_speed_field`.
+
+        Raises:
+            ValueError: if ``values`` has the wrong shape.
+            SimulationError: if a value is not allowed, the region or stage does not
+                exist, or the stage has no area to route to.
+        """
+        self._obj.set_custom_speed_field(stage_id, region_id, values)
+
+    def clear_custom_speed_field(self, stage_id: int, region_id: int) -> None:
+        """Remove a stage's own speed field in a region, so it uses the default again.
+
+        The stage's floor field is computed again when next needed. Nothing changes
+        if the stage has no speed field of its own in this region.
+
+        Args:
+            stage_id: Stage whose speed field to remove.
+            region_id: Region whose speed field to remove.
+
+        Raises:
+            SimulationError: if the region or stage does not exist, or the stage has
+                no area to route to.
+        """
+        self._obj.clear_custom_speed_field(stage_id, region_id)
 
     def mark_agent_for_removal(self, agent_id: int):
         """Marks an agent for removal.

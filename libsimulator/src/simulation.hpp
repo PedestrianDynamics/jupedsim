@@ -2,6 +2,7 @@
 #pragma once
 
 #include "agent_removal_system.hpp"
+#include "destination.hpp"
 #include "floorfield_routing_engine.hpp"
 #include "generic_agent.hpp"
 #include "geometry/geometry.hpp"
@@ -28,6 +29,7 @@
 #include <cstdint>
 #include <map>
 #include <memory>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -74,6 +76,8 @@ private:
 
     /// Throws SimulationError if the current state is in the mask @p forbidden.
     void throw_if_state(State forbidden, const char* operation) const;
+    /// The destination of stage @p stage_id; throws for a stage without an area.
+    const Destination& destination_of(BaseStage::ID stage_id) const;
 
 public:
     /// Takes the geometry over: after this the caller no longer owns it. `geo()` hands out a
@@ -130,6 +134,29 @@ public:
     /// Travel times to the area of stage @p stage_id over the grid of every region, by region id.
     /// Empty for a stage without an area, such as direct steering.
     std::map<std::size_t, TravelTimeGrid> travel_times(BaseStage::ID stage_id);
+    /// Speed fields every stage without an override is routed with, by region id.
+    std::map<std::size_t, SpeedGrid> default_speed_fields() const;
+    /// Placement of the floor field grid of @p region_id, which its travel times and speed
+    /// fields lie on. Throws for an unknown region.
+    GridInfo grid_info(std::size_t region_id) const;
+    /// Replaces the default speed field of @p region_id, see
+    /// FloorfieldRoutingEngine::set_default_speed for what @p values must hold.
+    void set_default_speed_field(std::size_t region_id, const std::vector<double>& values);
+    /// The speed fields of stage @p stage_id's own, by region id: empty (std::nullopt) where it
+    /// is routed with the default. An empty map for a stage without an area, such as direct
+    /// steering.
+    std::map<std::size_t, std::optional<SpeedGrid>>
+    custom_speed_fields(BaseStage::ID stage_id) const;
+    /// Routes agents to the area of stage @p stage_id with @p values in @p region_id instead of
+    /// the default speed field. Other stages are not affected. Throws for a stage without an
+    /// area.
+    void set_custom_speed_field(
+        BaseStage::ID stage_id,
+        std::size_t region_id,
+        const std::vector<double>& values);
+    /// Routes agents to the area of stage @p stage_id with the default speed field of
+    /// @p region_id again. Throws for a stage without an area.
+    void clear_custom_speed_field(BaseStage::ID stage_id, std::size_t region_id);
     /// The geometry this simulation runs on. Borrowed: it lives as long as the simulation.
     const Geometry& geo() const;
     void push_timer(const std::string_view name, size_t probe_log_level = 0);
