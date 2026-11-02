@@ -14,11 +14,12 @@
 //!
 //! Conventions shared by all functions:
 //! * Cells are row-major (`row * width + col`), row 0 at the lowest y.
-//! * A cell belongs to a polygon iff its centre lies strictly inside it.
+//! * A cell belongs to a polygon iff its centre lies strictly inside it. For
+//!   walking that is not enough: see `speed_field_on_grid`.
 //! * Rings come checked (`region_graph`): at least 3 finite points each.
 
 use crate::{Region, Ring};
-use geo::{BoundingRect, Contains, Coord, InteriorPoint, LineString, Point, Polygon};
+use geo::{BoundingRect, Contains, Coord, InteriorPoint, Line, LineString, Point, Polygon};
 use rstar::{PointDistance, RTreeObject, AABB};
 use std::collections::HashSet;
 
@@ -108,9 +109,22 @@ pub const MIN_SPEED: f64 = 1e-2;
 /// `portals` lists edges, as (ring, edge index), that are passages rather than
 /// walls: they still bound the polygon - cells beyond them stay 0 - but do not
 /// slow anyone down. Ring 0 is the outer boundary, ring k is hole k - 1.
+///
+/// A cell is inside a region if its centre lies strictly inside the polygon.
+/// In addition, if a cell centre lies exactly on a seam, one region has to
+/// claim the cell. Otherwise the cell would be unwalkable from both sides. To
+/// solve this, such a cell is claimed by the one of the two neighbouring
+/// regions with the lower ID.
+///
+/// Walls thinner than the cell size can become traversable for travel times.
+/// To avoid this, a cell intersected by a line segment of the boundary or of a
+/// hole is considered unwalkable. A wall along a cell's edge does not count, a
+/// portal neither. A consequence of this is that only a passage at least two
+/// cells wide is sure to stay open.
 pub fn speed_field_on_grid(
     region: &Region,
     portals: &HashSet<(u32, u32)>,
+    claimed: &[([f64; 2], [f64; 2])],
     grid: &GridParams,
     wall_influence_radius: f64,
 ) -> Vec<f64> {
@@ -120,8 +134,12 @@ pub fn speed_field_on_grid(
     let mut speed_field = vec![0.0f64; grid.cell_count()];
     for (idx, speed) in speed_field.iter_mut().enumerate() {
         let (px, py) = grid.cell_center(idx as u32);
-        if !polygon.contains(&Point::new(px, py)) {
+        let on_claimed_seam = || claimed.iter().any(|&(a, b)| on_segment(a, b, [px, py]));
+        if !polygon.contains(&Point::new(px, py)) && !on_claimed_seam() {
             continue; // outside: stays an obstacle
+        }
+        if cut_by_wall(&tree, [px, py], grid.cell_size) {
+            continue;
         }
         let dist2 = tree
             .nearest_neighbor_iter_with_distance_2(&[px, py])
@@ -131,6 +149,37 @@ pub fn speed_field_on_grid(
         *speed = (dist2.sqrt() / wall_influence_radius).clamp(MIN_SPEED, 1.0);
     }
     speed_field
+}
+
+/// Whether a wall runs through the inside of the cell around `centre`. The cell
+/// is shrunk a little, so that a wall on its edge is not counted because of a
+/// rounding error.
+fn cut_by_wall(walls: &rstar::RTree<BoundarySeg>, centre: [f64; 2], cell_size: f64) -> bool {
+    let half = cell_size * (0.5 - 1e-9);
+    let min = [centre[0] - half, centre[1] - half];
+    let max = [centre[0] + half, centre[1] + half];
+    walls
+        .locate_in_envelope_intersecting(&AABB::from_corners(min, max))
+        .any(|wall| segment_enters_box(wall.p0, wall.p1, min, max))
+}
+
+/// Whether part of the segment from `p0` to `p1` lies strictly inside the box:
+/// clips the segment to the box's two slabs (Liang-Barsky).
+fn segment_enters_box(p0: [f64; 2], p1: [f64; 2], min: [f64; 2], max: [f64; 2]) -> bool {
+    let (mut enter, mut leave) = (0.0f64, 1.0f64);
+    for axis in 0..2 {
+        let d = p1[axis] - p0[axis];
+        if d == 0.0 {
+            if p0[axis] <= min[axis] || p0[axis] >= max[axis] {
+                return false;
+            }
+            continue;
+        }
+        let (t0, t1) = ((min[axis] - p0[axis]) / d, (max[axis] - p0[axis]) / d);
+        enter = enter.max(t0.min(t1));
+        leave = leave.min(t0.max(t1));
+    }
+    enter < leave
 }
 
 /// Sobel gradient of a travel-time field at a cell. Out-of-grid and
@@ -189,6 +238,14 @@ pub fn cells_inside_polygon(grid: &GridParams, polygon: &Polygon<f64>) -> Vec<u3
 }
 
 /// The polygon bounded by `outer`, with `holes` cut out.
+/// Whether `p` lies on the segment from `a` to `b`, endpoints excluded. Exact:
+/// a point is on it or not, with no tolerance, so the two regions either side
+/// of a seam always agree on which cell centres lie on it.
+pub fn on_segment(a: [f64; 2], b: [f64; 2], p: [f64; 2]) -> bool {
+    Line::new(Coord { x: a[0], y: a[1] }, Coord { x: b[0], y: b[1] })
+        .contains(&Point::new(p[0], p[1]))
+}
+
 pub fn polygon(outer: &Ring, holes: &[Ring]) -> Polygon<f64> {
     Polygon::new(line_string(outer), holes.iter().map(line_string).collect())
 }
@@ -333,7 +390,7 @@ mod tests {
     #[test]
     fn interior_is_walkable_and_slows_near_walls() {
         let grid = unit_grid();
-        let speed = speed_field_on_grid(&square(10.0), &no_portals(), &grid, 2.0);
+        let speed = speed_field_on_grid(&square(10.0), &no_portals(), &[], &grid, 2.0);
         assert_eq!(speed.len(), 100);
         let at = |r: usize, c: usize| speed[r * grid.width as usize + c];
         assert!(at(5, 5) > 0.99, "centre should be at full speed");
@@ -345,12 +402,50 @@ mod tests {
     }
 
     #[test]
+    fn a_wall_through_a_cell_makes_it_an_obstacle() {
+        let grid = unit_grid();
+        let at = |room: &Region| speed_field_on_grid(room, &no_portals(), &[], &grid, 0.5);
+
+        // Walls along the cell edges take nothing away, whatever rounding does.
+        assert!(at(&square(10.0)).iter().all(|&v| v > 0.0));
+        let nudged = region(rect(0.0, 0.0, 10.0 + 1e-13, 10.0));
+        assert!(at(&nudged).iter().all(|&v| v > 0.0));
+
+        // A wall at x = 9.8 leaves the centre (9.5, y) inside, but cuts the cell.
+        let speed = at(&region(rect(0.0, 0.0, 9.8, 10.0)));
+        assert!((0..10).all(|r| speed[r * 10 + 9] == 0.0 && speed[r * 10 + 8] > 0.0));
+
+        // A portal in the same place takes nothing away.
+        let room = region(rect(0.0, 0.0, 9.8, 10.0));
+        let portal = speed_field_on_grid(&room, &HashSet::from([(0, 1)]), &[], &grid, 0.5);
+        assert!((0..10).all(|r| portal[r * 10 + 9] > 0.0));
+
+        // A slanted wall cuts cells it only clips the corner of, not those it
+        // passes by.
+        let speed = at(&region(ring(&[0.0, 0.0, 10.0, 0.0, 10.0, 4.3, 0.0, 10.0])));
+        assert_eq!(speed[4 * 10 + 8], 0.0);
+        assert!(speed[3 * 10 + 8] > 0.0);
+    }
+
+    #[test]
+    fn segments_only_enter_a_box_through_its_inside() {
+        let enters = |p0, p1| segment_enters_box(p0, p1, [0.0, 0.0], [1.0, 1.0]);
+        assert!(enters([-1.0, 0.5], [2.0, 0.5]), "straight through");
+        assert!(enters([0.5, 0.5], [2.0, 2.0]), "starts inside");
+        assert!(enters([-0.5, 0.7], [0.5, 1.2]), "across a corner");
+        assert!(!enters([0.0, -1.0], [0.0, 2.0]), "along an edge");
+        assert!(!enters([-1.0, 1.0], [1.0, 3.0]), "touches a corner");
+        assert!(!enters([2.0, 0.0], [2.0, 1.0]), "beside it");
+        assert!(!enters([-1.0, 0.5], [-0.5, 0.5]), "stops short of it");
+    }
+
+    #[test]
     fn hole_cells_are_obstacles() {
         let grid = unit_grid();
         let mut room = square(10.0);
         room.holes
             .push(ring(&[4.0, 4.0, 4.0, 6.0, 6.0, 6.0, 6.0, 4.0]));
-        let speed = speed_field_on_grid(&room, &no_portals(), &grid, 0.5);
+        let speed = speed_field_on_grid(&room, &no_portals(), &[], &grid, 0.5);
         // Cell centre (5.5, 5.5) sits inside the hole.
         assert_eq!(speed[5 * grid.width as usize + 5], 0.0);
     }
@@ -394,8 +489,8 @@ mod tests {
             height: 4,
             cell_size: 1.0,
         };
-        let walls = speed_field_on_grid(&room, &no_portals(), &grid, 2.0);
-        let portal = speed_field_on_grid(&room, &HashSet::from([(0, 1)]), &grid, 2.0);
+        let walls = speed_field_on_grid(&room, &no_portals(), &[], &grid, 2.0);
+        let portal = speed_field_on_grid(&room, &HashSet::from([(0, 1)]), &[], &grid, 2.0);
 
         let at = |f: &[f64], r: usize, c: usize| f[r * 5 + c];
         // Next to that edge (column 3, middle rows) agents are faster when it is a portal...
@@ -413,8 +508,8 @@ mod tests {
         let mut room = square(10.0);
         room.holes
             .push(ring(&[4.0, 4.0, 4.0, 6.0, 6.0, 6.0, 6.0, 4.0]));
-        let walls = speed_field_on_grid(&room, &no_portals(), &unit_grid(), 1.5);
-        let portal = speed_field_on_grid(&room, &HashSet::from([(1, 0)]), &unit_grid(), 1.5);
+        let walls = speed_field_on_grid(&room, &no_portals(), &[], &unit_grid(), 1.5);
+        let portal = speed_field_on_grid(&room, &HashSet::from([(1, 0)]), &[], &unit_grid(), 1.5);
 
         // Cell (row 4, col 3), centre (3.5, 4.5), lies 0.5 from that edge.
         let at = |f: &[f64]| f[4 * 10 + 3];
