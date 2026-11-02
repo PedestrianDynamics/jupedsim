@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "simulation.hpp"
 
+#include "destination.hpp"
 #include "floorfield_routing_engine.hpp"
 #include "generic_agent.hpp"
 #include "geometry/area_piece.hpp"
@@ -28,6 +29,7 @@
 #include <limits>
 #include <map>
 #include <memory>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <tuple>
@@ -455,6 +457,72 @@ std::map<std::size_t, TravelTimeGrid> Simulation::travel_times(BaseStage::ID sta
         grids.emplace(region_id, destination->travel_times(region_id));
     }
     return grids;
+}
+
+std::map<std::size_t, SpeedGrid> Simulation::default_speed_fields() const
+{
+    throw_if_state(State::Closed, "default_speed_fields");
+    std::map<std::size_t, SpeedGrid> grids{};
+    for(std::size_t region_id = 0; region_id < _geometry->region_count(); ++region_id) {
+        grids.emplace(region_id, _routing_engine->default_speed(region_id));
+    }
+    return grids;
+}
+
+GridInfo Simulation::grid_info(std::size_t region_id) const
+{
+    throw_if_state(State::Closed, "grid_info");
+    return _routing_engine->grid_info(region_id);
+}
+
+void Simulation::set_default_speed_field(std::size_t region_id, const std::vector<double>& values)
+{
+    throw_if_state(State::Iterating | State::Closed, "set_default_speed_field");
+    _routing_engine->set_default_speed(region_id, values);
+}
+
+std::map<std::size_t, std::optional<SpeedGrid>>
+Simulation::custom_speed_fields(BaseStage::ID stage_id) const
+{
+    throw_if_state(State::Closed, "custom_speed_fields");
+    const auto* destination = _stage_manager.stage(stage_id)->destination();
+    std::map<std::size_t, std::optional<SpeedGrid>> grids{};
+    if(destination == nullptr) {
+        return grids; // nothing to route to, so no speed field to route with
+    }
+    for(std::size_t region_id = 0; region_id < _geometry->region_count(); ++region_id) {
+        // With an override in place, the destination's speed field is that override.
+        grids.emplace(
+            region_id,
+            destination->has_speed_override(region_id) ?
+                std::optional{destination->speed(region_id)} :
+                std::nullopt);
+    }
+    return grids;
+}
+
+void Simulation::set_custom_speed_field(
+    BaseStage::ID stage_id,
+    std::size_t region_id,
+    const std::vector<double>& values)
+{
+    throw_if_state(State::Iterating | State::Closed, "set_custom_speed_field");
+    destination_of(stage_id).set_speed_override(region_id, values);
+}
+
+void Simulation::clear_custom_speed_field(BaseStage::ID stage_id, std::size_t region_id)
+{
+    throw_if_state(State::Iterating | State::Closed, "clear_custom_speed_field");
+    destination_of(stage_id).clear_speed_override(region_id);
+}
+
+const Destination& Simulation::destination_of(BaseStage::ID stage_id) const
+{
+    const auto* destination = _stage_manager.stage(stage_id)->destination();
+    if(destination == nullptr) {
+        throw SimulationError("Stage {} has no area to route to.", stage_id);
+    }
+    return *destination;
 }
 
 const Geometry& Simulation::geo() const

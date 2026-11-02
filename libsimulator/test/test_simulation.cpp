@@ -19,7 +19,9 @@
 #include <gtest/gtest.h>
 
 #include <algorithm>
+#include <cmath>
 #include <cstddef>
+#include <iterator>
 #include <memory>
 #include <utility>
 #include <vector>
@@ -157,12 +159,18 @@ TEST(Simulation, AStageInAnUnknownRegionIsRejected)
     EXPECT_THROW(flat.sim->add_stage(ExitDescription{{{square, 99}}}), SimulationError);
 }
 
+/// Row-major index of the cell of @p info that @p xy lies in.
+std::size_t cell_of(const GridInfo& info, Point xy)
+{
+    const auto col = static_cast<std::size_t>((xy.x - info.origin.x) / info.cell_size);
+    const auto row = static_cast<std::size_t>((xy.y - info.origin.y) / info.cell_size);
+    return row * info.width + col;
+}
+
 /// Travel time of the cell of @p grid that @p xy lies in.
 double time_at(const TravelTimeGrid& grid, Point xy)
 {
-    const auto col = static_cast<std::size_t>((xy.x - grid.origin.x) / grid.cell_size);
-    const auto row = static_cast<std::size_t>((xy.y - grid.origin.y) / grid.cell_size);
-    return grid.values.at(row * grid.width + col);
+    return grid.values.at(cell_of(grid.info, xy));
 }
 
 TEST(Simulation, ReportsTheTravelTimesToAStage)
@@ -175,21 +183,19 @@ TEST(Simulation, ReportsTheTravelTimesToAStage)
     ASSERT_EQ(grids.size(), 1u);
     const auto& grid = grids.at(flat.room_id);
 
-    EXPECT_EQ(grid.values.size(), std::size_t{grid.width} * grid.height);
+    EXPECT_EQ(grid.values.size(), grid.info.cell_count());
     // The grid covers the whole room.
-    EXPECT_LE(grid.origin.x, 0.0);
-    EXPECT_LE(grid.origin.y, 0.0);
-    EXPECT_GE(grid.origin.x + grid.width * grid.cell_size, 20.0);
-    EXPECT_GE(grid.origin.y + grid.height * grid.cell_size, 20.0);
+    EXPECT_LE(grid.info.origin.x, 0.0);
+    EXPECT_LE(grid.info.origin.y, 0.0);
+    EXPECT_GE(grid.info.origin.x + grid.info.width * grid.info.cell_size, 20.0);
+    EXPECT_GE(grid.info.origin.y + grid.info.height * grid.info.cell_size, 20.0);
     EXPECT_EQ(time_at(grid, {0.5, 10}), 0.0) << "inside the exit";
     EXPECT_GT(time_at(grid, {19.5, 10}), time_at(grid, {10, 10}));
     EXPECT_GT(time_at(grid, {10, 10}), 0.0);
 
     ASSERT_EQ(grid.directions.size(), grid.values.size());
     const auto direction_at = [&grid](Point xy) {
-        const auto col = static_cast<std::size_t>((xy.x - grid.origin.x) / grid.cell_size);
-        const auto row = static_cast<std::size_t>((xy.y - grid.origin.y) / grid.cell_size);
-        return grid.directions.at(row * grid.width + col);
+        return grid.directions.at(cell_of(grid.info, xy));
     };
     EXPECT_LT(direction_at({10, 10}).x, -0.99) << "towards the exit on the left";
     EXPECT_EQ(direction_at({0.5, 10}), (Point{0, 0})) << "inside the exit";
@@ -217,8 +223,7 @@ TEST(Simulation, ReportsTheTravelTimesOfEveryRegion)
 
     ASSERT_EQ(grids.size(), region_count);
     for(const auto& [region_id, grid] : grids) {
-        EXPECT_EQ(grid.values.size(), std::size_t{grid.width} * grid.height)
-            << "region " << region_id;
+        EXPECT_EQ(grid.values.size(), grid.info.cell_count()) << "region " << region_id;
         const auto shortest = *std::min_element(grid.values.begin(), grid.values.end());
         // Only the exit's own region holds cells inside it.
         if(region_id == stair.room_2) {
@@ -234,6 +239,119 @@ TEST(Simulation, AStageWithoutAnAreaHasNoTravelTimes)
     const auto flat = on_a_flat_room();
     const auto steering = flat.sim->add_stage(DirectSteeringDescription{});
     EXPECT_TRUE(flat.sim->travel_times(steering).empty());
+}
+
+/// @p grid's values, each multiplied by @p factor.
+std::vector<double> scaled(const SpeedGrid& grid, double factor)
+{
+    std::vector<double> values = grid.values;
+    for(auto& v : values) {
+        v *= factor;
+    }
+    return values;
+}
+
+TEST(Simulation, ReportsTheDefaultSpeedFieldOfEveryRegion)
+{
+    auto stair = test_geometries::u_stair();
+    const auto region_count = stair.geometry->region_count();
+    Simulation sim{model(), std::move(stair.geometry), 0.01, FloorfieldOptions{}};
+    const Polygon square{std::vector<Point>{{1, 9}, {3, 9}, {3, 11}, {1, 11}}};
+    const auto exit = sim.add_stage(ExitDescription{{{square, stair.room_2}}});
+
+    const auto defaults = sim.default_speed_fields();
+    const auto travel_times = sim.travel_times(exit);
+    ASSERT_EQ(defaults.size(), region_count);
+    for(const auto& [region_id, grid] : defaults) {
+        const auto& times = travel_times.at(region_id);
+        EXPECT_EQ(grid.info, times.info) << "region " << region_id;
+        EXPECT_EQ(sim.grid_info(region_id), grid.info) << "region " << region_id;
+        ASSERT_EQ(grid.values.size(), grid.info.cell_count());
+        // Walkable cells, and only those, have a speed and a finite travel time.
+        for(std::size_t cell = 0; cell < grid.values.size(); ++cell) {
+            EXPECT_EQ(grid.values[cell] > 0.0, std::isfinite(times.values[cell]))
+                << "region " << region_id << ", cell " << cell;
+        }
+    }
+    const auto custom = sim.custom_speed_fields(exit);
+    ASSERT_EQ(custom.size(), region_count);
+    for(const auto& [region_id, grid] : custom) {
+        EXPECT_FALSE(grid.has_value()) << "no override in region " << region_id;
+    }
+}
+
+// How speeds change travel times is the floor field's to test (libfloorfield); here only which
+// stage is routed with which speed field.
+TEST(Simulation, SpeedFieldsReachTheirStages)
+{
+    const auto flat = on_a_flat_room();
+    const Polygon left{std::vector<Point>{{0, 0}, {1, 0}, {1, 20}, {0, 20}}};
+    const Polygon right{std::vector<Point>{{19, 0}, {20, 0}, {20, 20}, {19, 20}}};
+    const auto custom = flat.sim->add_stage(ExitDescription{{{left, flat.room_id}}});
+    const auto other = flat.sim->add_stage(ExitDescription{{{right, flat.room_id}}});
+    const auto time = [&flat](BaseStage::ID stage) {
+        return time_at(flat.sim->travel_times(stage).at(flat.room_id), {10, 10});
+    };
+    const auto defaults = flat.sim->default_speed_fields().at(flat.room_id);
+    const auto custom_initial = time(custom);
+    const auto other_initial = time(other);
+
+    // A custom speed field reaches its own stage only.
+    flat.sim->set_custom_speed_field(custom, flat.room_id, scaled(defaults, 2.0));
+    const auto custom_field = flat.sim->custom_speed_fields(custom).at(flat.room_id);
+    ASSERT_TRUE(custom_field.has_value());
+    EXPECT_EQ(custom_field->values, scaled(defaults, 2.0));
+    EXPECT_FALSE(flat.sim->custom_speed_fields(other).at(flat.room_id).has_value());
+    const auto custom_faster = time(custom);
+    EXPECT_LT(custom_faster, custom_initial);
+    EXPECT_EQ(time(other), other_initial);
+
+    // The default reaches every stage but the one with a custom speed field.
+    flat.sim->set_default_speed_field(flat.room_id, scaled(defaults, 4.0));
+    EXPECT_EQ(flat.sim->default_speed_fields().at(flat.room_id).values, scaled(defaults, 4.0));
+    EXPECT_LT(time(other), other_initial);
+    EXPECT_EQ(time(custom), custom_faster);
+
+    // Without its custom speed field, the stage follows the default again.
+    flat.sim->clear_custom_speed_field(custom, flat.room_id);
+    EXPECT_FALSE(flat.sim->custom_speed_fields(custom).at(flat.room_id).has_value());
+    EXPECT_LT(time(custom), custom_faster);
+}
+
+TEST(Simulation, InvalidSpeedFieldsAreRejected)
+{
+    const auto flat = on_a_flat_room();
+    const Polygon strip{std::vector<Point>{{0, 0}, {1, 0}, {1, 20}, {0, 20}}};
+    const auto exit = flat.sim->add_stage(ExitDescription{{{strip, flat.room_id}}});
+    const auto steering = flat.sim->add_stage(DirectSteeringDescription{});
+    const auto defaults = flat.sim->default_speed_fields().at(flat.room_id);
+    const auto walkable = std::distance(
+        defaults.values.begin(),
+        std::find_if(
+            defaults.values.begin(), defaults.values.end(), [](double v) { return v > 0.0; }));
+
+    auto too_short = defaults.values;
+    too_short.pop_back();
+    EXPECT_THROW(flat.sim->set_default_speed_field(flat.room_id, too_short), SimulationError);
+    EXPECT_THROW(flat.sim->set_custom_speed_field(exit, flat.room_id, too_short), SimulationError);
+    // Which values are allowed is the floor field's to test; one is enough to see its error
+    // come through.
+    auto zero = defaults.values;
+    zero[walkable] = 0.0;
+    EXPECT_THROW(flat.sim->set_default_speed_field(flat.room_id, zero), SimulationError);
+    EXPECT_THROW(flat.sim->set_custom_speed_field(exit, flat.room_id, zero), SimulationError);
+    EXPECT_EQ(flat.sim->default_speed_fields().at(flat.room_id).values, defaults.values);
+    EXPECT_FALSE(flat.sim->custom_speed_fields(exit).at(flat.room_id).has_value());
+
+    EXPECT_THROW(flat.sim->grid_info(99), SimulationError);
+    EXPECT_THROW(flat.sim->set_default_speed_field(99, defaults.values), SimulationError);
+    EXPECT_THROW(flat.sim->set_custom_speed_field(exit, 99, defaults.values), SimulationError);
+
+    // A stage without an area has nothing to route to.
+    EXPECT_TRUE(flat.sim->custom_speed_fields(steering).empty());
+    EXPECT_THROW(
+        flat.sim->set_custom_speed_field(steering, flat.room_id, defaults.values), SimulationError);
+    EXPECT_THROW(flat.sim->clear_custom_speed_field(steering, flat.room_id), SimulationError);
 }
 
 TEST(MeshBuiltSimulation, IsRejected)
@@ -345,6 +463,12 @@ TEST(SimulationClose, RejectsFurtherUse)
     EXPECT_THAT([&] { journey_to(sim, Point{10, 10}, flat.room_id); }, closed);
     // The stage outlives close, its destination's floor field does not.
     EXPECT_THAT([&] { sim.travel_times(stage); }, closed);
+    EXPECT_THAT([&] { sim.custom_speed_fields(stage); }, closed);
+    EXPECT_THAT([&] { sim.set_custom_speed_field(stage, flat.room_id, {}); }, closed);
+    EXPECT_THAT([&] { sim.clear_custom_speed_field(stage, flat.room_id); }, closed);
+    EXPECT_THAT([&] { sim.default_speed_fields(); }, closed);
+    EXPECT_THAT([&] { sim.set_default_speed_field(flat.room_id, {}); }, closed);
+    EXPECT_THAT([&] { sim.grid_info(flat.room_id); }, closed);
     EXPECT_THAT([&] { sim.get_location(5, 5, flat.room_id); }, closed);
     EXPECT_THAT([&] { sim.geo(); }, closed);
 }

@@ -97,8 +97,13 @@ impl GridSpec {
     }
 }
 
-/// Rasterise a region onto an existing grid: 0.0 outside, (0, 1] inside,
-/// slowed within `wall_influence_radius` of a wall.
+/// Lowest speed, in m/s, a walkable cell can have. Travel times grow with
+/// 1 / speed: much slower cells would make them overflow to infinity, and
+/// cells that cannot be reached leave agents without a direction.
+pub const MIN_SPEED: f64 = 1e-2;
+
+/// Rasterise a region onto an existing grid: 0.0 outside, between
+/// [`MIN_SPEED`] and 1 inside, slowed within `wall_influence_radius` of a wall.
 ///
 /// `portals` lists edges, as (ring, edge index), that are passages rather than
 /// walls: they still bound the polygon - cells beyond them stay 0 - but do not
@@ -123,7 +128,7 @@ pub fn speed_field_on_grid(
             .next()
             .map(|(_, d2)| d2)
             .unwrap_or(f64::INFINITY); // no walls at all
-        *speed = (dist2.sqrt() / wall_influence_radius).clamp(0.0, 1.0);
+        *speed = (dist2.sqrt() / wall_influence_radius).clamp(MIN_SPEED, 1.0);
     }
     speed_field
 }

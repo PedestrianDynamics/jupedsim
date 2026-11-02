@@ -10,6 +10,7 @@
 #include "routing_target.hpp"
 #include "surface_mesh_shortest_path_routing_engine.hpp"
 
+#include <cstddef>
 #include <vector>
 
 /// Routes to registered destinations along floor fields, and to single locations along the
@@ -33,6 +34,14 @@ public:
     /// Unit vector from @p from along the route to @p to, projected to x/y. Zero once @p from
     /// has reached @p to.
     Point get_orientation(const Location& from, const RoutingTarget& to);
+
+    /// Placement of the floor field grid of @p region, see FloorfieldRoutingEngine::grid_info.
+    GridInfo grid_info(std::size_t region) const;
+    /// The default speed field of @p region, see FloorfieldRoutingEngine::default_speed.
+    SpeedGrid default_speed(std::size_t region) const;
+    /// Replaces the default speed field of @p region, see
+    /// FloorfieldRoutingEngine::set_default_speed.
+    void set_default_speed(std::size_t region, const std::vector<double>& values);
 
 private:
     FloorfieldRoutingEngine _floorfield;

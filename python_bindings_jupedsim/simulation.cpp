@@ -17,9 +17,11 @@
 #include "transition.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep
 
+#include <fmt/format.h>
 #include <pybind11/attr.h>
 #include <pybind11/cast.h>
 #include <pybind11/detail/common.h>
+#include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h> // IWYU pragma: keep
 #include <pybind11/typing.h>
@@ -63,6 +65,26 @@ std::vector<StageArea> stage_areas(Areas areas)
         result.push_back({Polygon{boundary_without_holes(std::move(area))}, region_id});
     }
     return result;
+}
+
+using SpeedArray = py::array_t<double, py::array::c_style | py::array::forcecast>;
+
+/// @p values as the flat, row-major speed field of region @p region_id. Throws unless its shape
+/// is the region grid's (height, width): the floor field only checks the number of values, and
+/// a transposed array has the same number and would be taken row for column.
+std::vector<double>
+flat_speed_field(const Simulation& sim, std::size_t region_id, const SpeedArray& values)
+{
+    const auto grid = sim.grid_info(region_id);
+    if(values.ndim() != 2 || values.shape(0) != grid.height || values.shape(1) != grid.width) {
+        throw py::value_error(
+            fmt::format(
+                "The speed field of region {} needs shape ({}, {}).",
+                region_id,
+                grid.height,
+                grid.width));
+    }
+    return {values.data(), values.data() + values.size()};
 }
 } // namespace
 
@@ -187,6 +209,41 @@ void init_simulation(py::module_& m)
             // The returned token points into geometry the simulation owns.
             py::keep_alive<0, 1>())
         .def("stage_ids", &Simulation::stage_ids)
+        .def(
+            "default_speed_fields",
+            [](const Simulation& sim) { return sim.default_speed_fields(); })
+        .def(
+            "custom_speed_fields",
+            [](const Simulation& sim, uint64_t stage_id) {
+                return sim.custom_speed_fields(stage_id);
+            },
+            py::arg("stage_id"))
+        .def(
+            "set_default_speed_field",
+            [](Simulation& sim, std::size_t region_id, const SpeedArray& values) {
+                sim.set_default_speed_field(region_id, flat_speed_field(sim, region_id, values));
+            },
+            py::arg("region_id"),
+            py::arg("values"))
+        .def(
+            "set_custom_speed_field",
+            [](Simulation& sim,
+               uint64_t stage_id,
+               std::size_t region_id,
+               const SpeedArray& values) {
+                sim.set_custom_speed_field(
+                    stage_id, region_id, flat_speed_field(sim, region_id, values));
+            },
+            py::arg("stage_id"),
+            py::arg("region_id"),
+            py::arg("values"))
+        .def(
+            "clear_custom_speed_field",
+            [](Simulation& sim, uint64_t stage_id, std::size_t region_id) {
+                sim.clear_custom_speed_field(stage_id, region_id);
+            },
+            py::arg("stage_id"),
+            py::arg("region_id"))
         .def(
             "travel_times",
             [](Simulation& sim, uint64_t stage_id) { return sim.travel_times(stage_id); },
