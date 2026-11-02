@@ -50,7 +50,8 @@ pub enum MultiRegionError {
     /// Propagation across seams kept improving past its iteration budget.
     NotConverged,
     /// Some walkable cells cannot be reached from the others: the geometry
-    /// is not connected, or a passage is narrower than a cell.
+    /// is not connected, or a passage is too narrow for the cells: one that
+    /// is at least two cells wide always keeps a walkable cell.
     ContainsUnreachableWalkableCells,
     /// A broken internal invariant: a bug in this crate, not in the input.
     /// Returned instead of panicking, which would abort the C++ caller.
@@ -238,6 +239,7 @@ impl MultiRegionFloorfield {
             .collect();
         check_cell_counts(&spec, &boxes)?;
 
+        let directed = region_graph::directed_seams(graph);
         let regions: Vec<RegionGrid> = graph
             .regions
             .iter()
@@ -246,8 +248,19 @@ impl MultiRegionFloorfield {
             .map(|(id, (region, &(min, max)))| {
                 let (grid, offset) = spec.cover(min, max);
                 let portals = region_graph::portals(graph, id);
-                let default_speed =
-                    geometry::speed_field_on_grid(region, &portals, &grid, wall_influence_radius);
+                // Cell centres on a seam belong to the region with the lower id.
+                let claimed: Vec<([f64; 2], [f64; 2])> = directed
+                    .iter()
+                    .filter(|s| s.from == id && s.from < s.to)
+                    .map(|s| (s.a, s.b))
+                    .collect();
+                let default_speed = geometry::speed_field_on_grid(
+                    region,
+                    &portals,
+                    &claimed,
+                    &grid,
+                    wall_influence_radius,
+                );
                 RegionGrid {
                     grid,
                     offset,
@@ -259,7 +272,7 @@ impl MultiRegionFloorfield {
             .collect();
 
         let mut out_seams = vec![Vec::new(); regions.len()];
-        let seams: Vec<SeamCells> = region_graph::directed_seams(graph)
+        let seams: Vec<SeamCells> = directed
             .iter()
             .enumerate()
             .map(|(index, seam)| {
@@ -871,8 +884,16 @@ fn seam_pairs(
     for k in 0..samples {
         let t = (k as f64 + 0.5) / samples as f64;
         let p = [seam.a[0] + d[0] * t, seam.a[1] + d[1] * t];
-        let side_a = Some((seam.a, left));
-        let side_b = Some((seam.a, right));
+        let side_a = Some(Side {
+            a: seam.a,
+            b: seam.b,
+            normal: left,
+        });
+        let side_b = Some(Side {
+            a: seam.a,
+            b: seam.b,
+            normal: right,
+        });
         let (Some(ca), Some(cb)) = (
             nearest_walkable(spec, from, p, side_a),
             nearest_walkable(spec, to, p, side_b),
@@ -896,15 +917,24 @@ fn crossing_time(from: &[f64], to: &[f64], ca: u32, cb: u32, dist: f64) -> f64 {
     dist / (0.5 * (from[ca as usize] + to[cb as usize]))
 }
 
+/// One side of a seam from `a` to `b`: the one `normal` points to.
+#[derive(Clone, Copy)]
+struct Side {
+    a: [f64; 2],
+    b: [f64; 2],
+    normal: [f64; 2],
+}
+
 /// Walkable cell for `p`: without `side`, the cell containing it if walkable,
-/// else the nearest walkable cell within two cells. With `side = (a, n)`, the
-/// nearest walkable cell whose centre lies strictly on the `n` side of the line
-/// through `a`.
+/// else the nearest walkable cell within two cells. With `side`, the nearest
+/// walkable cell whose centre lies strictly on that side of the line through
+/// the seam, or on the seam itself (a cell there is walkable in one of its two
+/// regions only).
 fn nearest_walkable(
     spec: &GridSpec,
     g: &RegionGrid,
     p: [f64; 2],
-    side: Option<([f64; 2], [f64; 2])>,
+    side: Option<Side>,
 ) -> Option<u32> {
     let centre = spec.lattice_cell(p[0], p[1]);
     if side.is_none() {
@@ -928,8 +958,9 @@ fn nearest_walkable(
                 continue;
             }
             let (cx, cy) = g.grid.cell_center(cell);
-            if let Some((a, n)) = side {
-                if (cx - a[0]) * n[0] + (cy - a[1]) * n[1] <= 0.0 {
+            if let Some(Side { a, b, normal: n }) = side {
+                let beyond = (cx - a[0]) * n[0] + (cy - a[1]) * n[1] <= 0.0;
+                if beyond && !geometry::on_segment(a, b, [cx, cy]) {
                     continue;
                 }
             }
@@ -1460,6 +1491,57 @@ mod tests {
     }
 
     #[test]
+    fn a_seam_through_a_column_of_cell_centres_is_crossed_like_open_floor() {
+        // x = 4.625 is the centre of lattice column 18 at CS = 0.25: those
+        // centres lie strictly inside neither region. Region 0, the lower id,
+        // takes them; else the column would be walkable on neither side and
+        // the gradient would flatten against the seam.
+        const SEAM: f64 = 4.625;
+        let regions = vec![
+            region(rect(0., 0., SEAM, 4.)),
+            region(rect(SEAM, 0., 10., 4.)),
+        ];
+        let mut split = build(regions, join(0, 1, 1, 3).to_vec()).unwrap();
+        let mut whole = build(vec![region(rect(0., 0., 10., 4.))], vec![]).unwrap();
+
+        let column = split.spec.lattice_cell(SEAM, 2.0)[0];
+        for row in 1..15 {
+            let lattice = [column, row];
+            let (x, _) = split.regions[0]
+                .grid
+                .cell_center(split.regions[0].local(lattice).unwrap());
+            assert_eq!(x, SEAM, "column {column} is centred on the seam");
+            let in_region = |r: usize| {
+                let g = &split.regions[r];
+                g.local(lattice).is_some_and(|c| g.walkable(c))
+            };
+            assert!(in_region(0), "row {row}: not walkable in region 0");
+            assert!(!in_region(1), "row {row}: walkable in region 1 too");
+        }
+
+        let ds = split.add_point_destination(1, 9.0, 2.0).unwrap();
+        let dw = whole.add_point_destination(0, 9.0, 2.0).unwrap();
+        for &(x, y) in &[(1.0, 2.0), (4.4, 1.0), (SEAM, 2.0), (4.9, 3.0), (7.0, 2.0)] {
+            let region = if x <= SEAM { 0 } else { 1 };
+            let s = time_at(&mut split, region, x, y, ds);
+            let w = time_at(&mut whole, 0, x, y, dw);
+            assert!(
+                (s - w).abs() < CS,
+                "at ({x}, {y}): split {s:.3} vs whole {w:.3}"
+            );
+        }
+        // Next to the seam, on both sides and on it, the way still leads east.
+        for &(region, x) in &[(0, 4.4), (0, SEAM), (1, 4.8)] {
+            let (dx, _) = split.direction(region, x, 2.0, ds).unwrap();
+            assert!(dx > 0.9, "region {region} at x = {x}: dx {dx}");
+        }
+        let path = walk(&mut split, 0, 1.0, 2.0, ds);
+        let &(r, x, _) = path.last().unwrap();
+        assert_eq!(r, 1, "ends in region 1");
+        assert!((x - 9.0).abs() < 2.0 * CS, "ends at x = {x}");
+    }
+
+    #[test]
     fn walk_crosses_a_wide_doorway_along_the_straight_line() {
         // Room A (0..10 x 0..10) opens into room B (10..20 x 0..10) through a
         // wide doorway x = 10, y in [0, 10]. Exit near the top right of B.
@@ -1575,6 +1657,43 @@ mod tests {
         let regions = vec![region(rect(0., 0., 5., 5.)), region(rect(10., 0., 15., 5.))];
         assert_eq!(
             build(regions, vec![]).err(),
+            Some(MultiRegionError::ContainsUnreachableWalkableCells)
+        );
+    }
+
+    /// Two rooms in one region, 2.65 m wide, either side of a wall 0.05 m thin
+    /// with a door from `door.0` to `door.1`. No cell centre lies in the wall:
+    /// those at x = 2.625 and x = 2.875 are the two closest to it.
+    fn rooms_behind_a_thin_wall(door: (f64, f64)) -> Result<MultiRegionFloorfield> {
+        let outer = ring(&[
+            0.0, 0.0, 2.65, 0.0, 2.65, door.0, 2.70, door.0, 2.70, 0.0, 5.4, 0.0, 5.4, 4.0, 2.70,
+            4.0, 2.70, door.1, 2.65, door.1, 2.65, 4.0, 0.0, 4.0,
+        ]);
+        build(vec![region(outer)], vec![])
+    }
+
+    #[test]
+    fn a_wall_thinner_than_a_cell_separates_the_rooms() {
+        let mut ff = rooms_behind_a_thin_wall((3.1, 3.6)).unwrap();
+        let dest = ff.add_point_destination(0, 4.0, 1.0).unwrap();
+
+        // The straight line is 1.7 m, the way through the door at least 4.6 m.
+        assert!(time_at(&mut ff, 0, 2.3, 1.0, dest) > 4.5);
+        let (_, dy) = ff.direction(0, 2.3, 1.0, dest).unwrap();
+        assert!(dy > 0.5, "heads for the wall instead of the door: {dy}");
+
+        let path = walk(&mut ff, 0, 2.3, 1.0, dest);
+        let &(_, x, y) = path.last().unwrap();
+        assert!((x - 4.0).hypot(y - 1.0) <= 1.5 * CS, "ends at ({x}, {y})");
+    }
+
+    #[test]
+    fn a_door_needs_a_cell_it_does_not_cut() {
+        // Two cells wide is always enough. This one is wider than a cell, but
+        // its jambs cut both rows it lies in.
+        assert!(rooms_behind_a_thin_wall((3.1, 3.6)).is_ok());
+        assert_eq!(
+            rooms_behind_a_thin_wall((3.3, 3.6)).err(),
             Some(MultiRegionError::ContainsUnreachableWalkableCells)
         );
     }
