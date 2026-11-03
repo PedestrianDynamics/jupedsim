@@ -3,9 +3,9 @@
 
 #include "agent_view.hpp"
 #include "generic_agent.hpp"
-#include "geometric_functions.hpp"
 #include "macros.hpp"
 #include "operational_model.hpp"
+#include "operational_model_state.hpp"
 #include "operational_model_type.hpp"
 #include "point.hpp"
 #include "simulation_error.hpp"
@@ -15,7 +15,6 @@
 #include <cstdint>
 #include <cstdlib>
 #include <limits>
-#include <vector>
 
 AnticipationVelocityModel::AnticipationVelocityModel(double pushout_strength, uint64_t rng_seed)
     : _pushout_strength(pushout_strength), _gen(rng_seed)

@@ -5,7 +5,9 @@
 
 #include <chrono>
 #include <cstdint>
-#include <functional>
+#include <map>
+#include <string>
+#include <string_view>
 #include <utility>
 
 namespace cr = std::chrono;

@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
+#include "cfg_cgal.hpp"
 #include "geometry/validation.hpp"
 
 #include <CGAL/IO/polygon_mesh_io.h>
@@ -10,10 +11,12 @@
 #include <algorithm>
 #include <charconv>
 #include <cstdlib>
+#include <exception>
 #include <filesystem>
 #include <iostream>
 #include <optional>
 #include <string_view>
+#include <system_error>
 #include <vector>
 
 namespace pmp = CGAL::Polygon_mesh_processing;

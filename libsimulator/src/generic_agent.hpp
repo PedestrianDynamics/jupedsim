@@ -1,18 +1,26 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
+#include "anticipation_velocity_model_state.hpp"
+#include "collision_free_speed_model_state.hpp"
+#include "collision_free_speed_model_v2_state.hpp"
+#include "collision_free_speed_model_v3_state.hpp"
+#include "custom_model_state.hpp"
+#include "generalized_centrifugal_force_model_state.hpp"
 #include "geometry/location.hpp"
 #include "operational_models/operational_model_state.hpp"
 #include "operational_models/operational_model_type.hpp"
 #include "point.hpp"
 #include "routing_target.hpp"
+#include "social_force_model_state.hpp"
 #include "unique_id.hpp"
 #include "visitor.hpp"
+#include "warp_driver_model_state.hpp"
 
 #include <fmt/core.h>
 
 #include <deque>
-#include <optional>
 #include <utility>
+#include <variant>
 class Journey;
 class BaseStage;
 

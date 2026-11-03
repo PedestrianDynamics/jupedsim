@@ -3,6 +3,11 @@
 
 #include <logger.hpp>
 
+#include <cmath>
+#include <cstdlib>
+#include <limits>
+#include <tuple>
+
 bool Point::is_zero_length() const
 {
     constexpr double epsilon = 1e-6;

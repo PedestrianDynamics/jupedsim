@@ -5,10 +5,12 @@
 #include "floorfield_routing_engine.hpp"
 #include "generic_agent.hpp"
 #include "geometry/geometry.hpp"
+#include "geometry/location.hpp"
 #include "journey.hpp"
 #include "neighborhood_search.hpp"
 #include "operational_decision_system.hpp"
 #include "operational_model.hpp"
+#include "operational_model_state.hpp"
 #include "operational_model_type.hpp"
 #include "point.hpp"
 #include "routing_engine.hpp"
@@ -26,8 +28,8 @@
 #include <cstdint>
 #include <map>
 #include <memory>
+#include <string>
 #include <string_view>
-#include <tuple>
 #include <unordered_map>
 #include <utility>
 #include <vector>

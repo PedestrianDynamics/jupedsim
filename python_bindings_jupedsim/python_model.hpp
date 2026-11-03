@@ -2,7 +2,10 @@
 #pragma once
 
 #include "agent_view.hpp"
+#include "generic_agent.hpp"
+#include "operational_model_state.hpp"
 #include "operational_models/custom_model/custom_model.hpp"
+#include "point.hpp"
 
 #include <pybind11/pybind11.h>
 

@@ -1,7 +1,14 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "floorfield_routing_engine.hpp"
 
+#include "cfg_cgal.hpp"
+#include "destination.hpp"
+#include "floorfield_cxx/lib.h"
+#include "geometry/area_piece.hpp"
 #include "geometry/geometry.hpp"
+#include "geometry/location.hpp"
+#include "point.hpp"
+#include "rust/cxx.h"
 #include "simulation_error.hpp"
 
 #include <boost/range/iterator_range.hpp>

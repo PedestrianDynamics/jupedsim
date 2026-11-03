@@ -1,17 +1,11 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "stage.hpp"
 
+#include "destination.hpp"
 #include "generic_agent.hpp"
-#include "point.hpp"
-#include "simulation.hpp"
-#include "simulation_error.hpp"
-#include "util.hpp"
+#include "routing_target.hpp"
 
-#include <algorithm>
 #include <cassert>
-#include <cstddef>
-#include <list>
-#include <utility>
 #include <vector>
 
 ////////////////////////////////////////////////////////////////////////////////

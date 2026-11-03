@@ -3,16 +3,21 @@
 #include "environment_query.hpp"
 #include "generic_agent.hpp"
 #include "geometry/geometry.hpp"
+#include "geometry/location.hpp"
 #include "geometry_fixtures.hpp"
+#include "line_segment.hpp"
 #include "neighborhood_search.hpp"
 #include "operational_models/collision_free_speed_model/collision_free_speed_model.hpp"
+#include "point.hpp"
 #include "test_common.hpp"
+#include "unique_id.hpp"
 
 #include <gtest/gtest.h>
 
 #include <algorithm>
 #include <limits>
 #include <memory>
+#include <utility>
 #include <vector>
 
 namespace

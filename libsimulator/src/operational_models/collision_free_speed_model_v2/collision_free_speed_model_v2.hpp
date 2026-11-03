@@ -3,6 +3,7 @@
 
 #include "collision_free_speed_model_v2_state.hpp"
 #include "operational_model.hpp"
+#include "operational_model_state.hpp"
 #include "operational_model_type.hpp"
 #include "point.hpp"
 

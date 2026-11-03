@@ -3,8 +3,8 @@
 
 #include "agent_view.hpp"
 #include "generic_agent.hpp"
-#include "geometric_functions.hpp"
 #include "operational_model.hpp"
+#include "operational_model_state.hpp"
 #include "operational_model_type.hpp"
 #include "point.hpp"
 #include "simulation_error.hpp"
@@ -13,7 +13,6 @@
 #include <cmath>
 #include <cstdlib>
 #include <limits>
-#include <vector>
 
 namespace
 {

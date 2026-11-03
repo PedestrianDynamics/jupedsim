@@ -1,10 +1,15 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "geometry/geometry.hpp"
 
+#include "cfg_cgal.hpp"
 #include "geometric_functions.hpp"
+#include "geometry/area_piece.hpp"
 #include "geometry/boundary_index.hpp"
+#include "geometry/clearance_field.hpp"
+#include "geometry/location.hpp"
+#include "geometry/region_split.hpp"
 #include "line_segment.hpp"
-#include "polygon.hpp"
+#include "point.hpp"
 #include "simulation_error.hpp"
 
 #include <CGAL/Boolean_set_operations_2.h>
@@ -20,8 +25,8 @@
 #include <cmath>
 #include <cstddef>
 #include <iterator>
-#include <limits>
-#include <map>
+#include <memory>
+#include <optional>
 #include <utility>
 #include <variant>
 #include <vector>

@@ -3,6 +3,7 @@
 
 #include "anticipation_velocity_model_state.hpp"
 #include "operational_model.hpp"
+#include "operational_model_state.hpp"
 #include "operational_model_type.hpp"
 #include "point.hpp"
 
@@ -10,7 +11,6 @@
 
 #include <cstdint>
 #include <random>
-#include <vector>
 
 struct NeighborView;
 struct WallView;

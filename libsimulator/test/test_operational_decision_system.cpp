@@ -5,8 +5,11 @@
 #include "geometry_fixtures.hpp"
 #include "neighborhood_search.hpp"
 #include "operational_decision_system.hpp"
+#include "operational_model_state.hpp"
 #include "operational_models/custom_model/custom_model.hpp"
+#include "point.hpp"
 #include "test_common.hpp"
+#include "unique_id.hpp"
 
 #include <gtest/gtest.h>
 

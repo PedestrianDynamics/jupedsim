@@ -2,7 +2,6 @@
 #pragma once
 
 #include "generic_agent.hpp"
-#include "point.hpp"
 #include "routing_target.hpp"
 #include "simulation_error.hpp"
 #include "stage.hpp"

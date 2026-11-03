@@ -3,6 +3,7 @@
 
 #include "custom_model_state.hpp"
 #include "operational_model.hpp"
+#include "operational_model_type.hpp"
 
 /// Base class for operational models implemented outside libsimulator.
 ///

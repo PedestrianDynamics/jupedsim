@@ -2,6 +2,7 @@
 #pragma once
 
 #include "geometry/walkable_surface.hpp"
+#include "line_segment.hpp"
 #include "point.hpp"
 #include "unique_id.hpp"
 
@@ -9,6 +10,10 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/typing.h>
+
+#include <optional>
+#include <utility>
+#include <vector>
 
 // Type caster: According to https://pybind11.readthedocs.io/en/stable/advanced/cast/custom.html
 // which coincidentally also shows a conversion for Point2D. :)

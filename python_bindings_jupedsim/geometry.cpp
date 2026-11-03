@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "geometry/geometry.hpp"
 
+#include "cfg_cgal.hpp"
 #include "conversion.hpp"
 #include "geometry/validation.hpp"
 #include "polygon.hpp"
@@ -11,7 +12,9 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h> // IWYU pragma: keep
 
+#include <memory>
 #include <string>
+#include <utility>
 
 namespace py = pybind11;
 

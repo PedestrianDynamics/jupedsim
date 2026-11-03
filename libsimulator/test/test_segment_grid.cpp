@@ -11,6 +11,7 @@
 #include <cstddef>
 #include <iterator>
 #include <set>
+#include <tuple>
 #include <vector>
 
 namespace

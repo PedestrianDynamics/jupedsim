@@ -6,7 +6,10 @@
 #include "conversion.hpp"
 #include "generic_agent.hpp"
 #include "operational_model.hpp"
+#include "operational_model_state.hpp"
+#include "operational_model_type.hpp"
 #include "operational_models/custom_model/custom_model.hpp"
+#include "point.hpp"
 #include "simulation_error.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep
 

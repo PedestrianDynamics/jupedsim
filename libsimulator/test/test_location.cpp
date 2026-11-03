@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
+#include "cfg_cgal.hpp"
 #include "geometry/geometry.hpp"
 #include "geometry/location.hpp"
 #include "geometry_fixtures.hpp"
+#include "point.hpp"
 #include "test_common.hpp"
 
 #include <gtest/gtest.h>

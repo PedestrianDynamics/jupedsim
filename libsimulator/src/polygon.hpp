@@ -7,6 +7,8 @@
 
 #include <CGAL/Boolean_set_operations_2.h>
 
+#include <concepts>
+#include <iterator>
 #include <ranges>
 #include <string>
 #include <tuple>

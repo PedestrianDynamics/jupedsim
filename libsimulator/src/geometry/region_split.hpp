@@ -4,6 +4,7 @@
 #include "cfg_cgal.hpp"
 
 #include <cstddef>
+#include <vector>
 
 /// Face -> 0-based region id, indexed by the face index.
 using RegionMap = std::vector<std::size_t>;

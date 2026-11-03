@@ -8,3 +8,4 @@ set -ex
 mkdir build && cd build
 cmake .. -DBUILD_TESTS=ON -DWITH_TIDY=ON
 cmake --build . --target check-tidy
+cmake --build . --target check-includes

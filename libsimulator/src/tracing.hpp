@@ -7,7 +7,6 @@ PERFETTO_DEFINE_CATEGORIES(
     perfetto::Category("C++").SetDescription("C++ Traces."),
     perfetto::Category("Python").SetDescription("Python Traces."));
 
-#include <functional>
 #include <memory>
 #include <string>
 

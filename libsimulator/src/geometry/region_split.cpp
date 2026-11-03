@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "geometry/region_split.hpp"
 
+#include "cfg_cgal.hpp"
 #include "geometry/projected_boundary.hpp"
 
 #include <CGAL/Polygon_mesh_processing/compute_normal.h>
@@ -9,7 +10,9 @@
 #include <array>
 #include <cassert>
 #include <cmath>
+#include <cstddef>
 #include <cstdint>
+#include <iterator>
 #include <limits>
 #include <map>
 #include <queue>

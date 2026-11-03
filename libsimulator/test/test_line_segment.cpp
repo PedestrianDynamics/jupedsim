@@ -6,7 +6,8 @@
 
 #include <gtest/gtest.h>
 
-#include <random>
+#include <cmath>
+#include <cstdlib>
 
 const double pi = acos(-1);
 

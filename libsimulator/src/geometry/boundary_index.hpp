@@ -11,6 +11,7 @@
 #include <boost/range/iterator_range.hpp>
 
 #include <memory>
+#include <tuple>
 #include <vector>
 
 //==================================================================================================

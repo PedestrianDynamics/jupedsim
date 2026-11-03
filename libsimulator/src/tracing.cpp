@@ -7,8 +7,8 @@
 
 #include <chrono>
 #include <filesystem>
-#include <sstream>
 #include <string>
+#include <system_error>
 
 PERFETTO_TRACK_EVENT_STATIC_STORAGE();
 

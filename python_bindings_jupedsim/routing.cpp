@@ -3,10 +3,8 @@
 #include "floorfield_routing_engine.hpp"
 #include "geometry/geometry.hpp"
 #include "geometry/location.hpp"
-#include "geometry/validation.hpp"
-#include "simulation_error.hpp"
 #include "surface_mesh_shortest_path_routing_engine.hpp"
-#include "type_casters.hpp"
+#include "type_casters.hpp" // IWYU pragma: keep
 
 #include <CGAL/Polygon_mesh_processing/IO/polygon_mesh_io.h>
 #include <fmt/format.h>
@@ -20,7 +18,6 @@
 #include <stdexcept>
 #include <string>
 #include <tuple>
-#include <utility>
 
 namespace py = pybind11;
 

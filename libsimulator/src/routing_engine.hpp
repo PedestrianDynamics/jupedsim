@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
+#include "destination.hpp"
 #include "floorfield_routing_engine.hpp"
 #include "geometry/area_piece.hpp"
 #include "geometry/geometry.hpp"

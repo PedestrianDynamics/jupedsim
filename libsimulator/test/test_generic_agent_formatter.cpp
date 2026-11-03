@@ -1,13 +1,21 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
+#include "anticipation_velocity_model_state.hpp"
+#include "collision_free_speed_model_state.hpp"
+#include "collision_free_speed_model_v2_state.hpp"
+#include "generalized_centrifugal_force_model_state.hpp"
 #include "generic_agent.hpp"
 #include "geometry/geometry.hpp"
 #include "geometry_fixtures.hpp"
+#include "operational_model_state.hpp"
+#include "social_force_model_state.hpp"
 #include "test_common.hpp"
+#include "unique_id.hpp"
 
 #include <fmt/format.h>
 #include <gtest/gtest.h>
 
 #include <memory>
+#include <utility>
 
 static GenericAgent make_agent(OperationalModelState model)
 {

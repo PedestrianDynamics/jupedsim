@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "polygon.hpp"
 
+#include "cfg_cgal.hpp"
 #include "point.hpp"
 #include "simulation_error.hpp"
 
@@ -10,9 +11,11 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstddef>
 #include <iterator>
 #include <string>
 #include <tuple>
+#include <utility>
 #include <vector>
 
 Polygon::Polygon(const std::vector<Point>& points)

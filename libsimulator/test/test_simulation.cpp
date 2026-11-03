@@ -1,13 +1,17 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "floorfield_routing_engine.hpp"
+#include "generic_agent.hpp"
 #include "geometry/geometry.hpp"
+#include "geometry/location.hpp"
 #include "geometry_fixtures.hpp"
 #include "journey.hpp"
 #include "mesh_fixtures.hpp"
 #include "operational_models/collision_free_speed_model/collision_free_speed_model.hpp"
+#include "point.hpp"
 #include "polygon.hpp"
 #include "simulation.hpp"
 #include "simulation_error.hpp"
+#include "stage.hpp"
 #include "stage_description.hpp"
 #include "test_common.hpp"
 
@@ -18,7 +22,6 @@
 #include <cstddef>
 #include <memory>
 #include <utility>
-#include <variant>
 #include <vector>
 
 namespace

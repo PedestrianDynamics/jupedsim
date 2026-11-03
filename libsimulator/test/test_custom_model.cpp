@@ -1,10 +1,24 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "agent_view.hpp"
+#include "anticipation_velocity_model_state.hpp"
+#include "collision_free_speed_model_state.hpp"
+#include "collision_free_speed_model_v2_state.hpp"
+#include "collision_free_speed_model_v3_state.hpp"
+#include "custom_model_state.hpp"
+#include "generalized_centrifugal_force_model_state.hpp"
 #include "generic_agent.hpp"
+#include "geometry/geometry.hpp"
 #include "geometry_fixtures.hpp"
+#include "neighborhood_search.hpp"
 #include "operational_decision_system.hpp"
+#include "operational_model_state.hpp"
+#include "operational_model_type.hpp"
 #include "operational_models/custom_model/custom_model.hpp"
+#include "point.hpp"
+#include "social_force_model_state.hpp"
 #include "test_common.hpp"
+#include "unique_id.hpp"
+#include "warp_driver_model_state.hpp"
 
 #include <fmt/format.h>
 #include <gtest/gtest.h>
@@ -14,6 +28,7 @@
 #include <string>
 #include <string_view>
 #include <type_traits>
+#include <utility>
 
 namespace
 {
