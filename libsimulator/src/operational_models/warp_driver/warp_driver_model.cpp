@@ -29,13 +29,19 @@
 
 #include "agent_view.hpp"
 #include "generic_agent.hpp"
+#include "operational_model_state.hpp"
 #include "operational_model_type.hpp"
 #include "point.hpp"
 #include "simulation_error.hpp"
 
 #include <algorithm>
 #include <cmath>
+#include <cstddef>
+#include <cstdint>
+#include <random>
+#include <utility>
 #include <variant>
+#include <vector>
 
 // ============================================================================
 // IntrinsicField

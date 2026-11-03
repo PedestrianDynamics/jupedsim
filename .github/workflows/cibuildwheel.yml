@@ -58,7 +58,7 @@ jobs:
           sudo add-apt-repository 'deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-23 main'
           wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
           sudo apt update
-          sudo apt install clang-tidy-23
+          sudo apt install clang-tidy-23 clang-tools-23
       - name: Run clang-tidy
         run: ./scripts/ci/check_tidy.sh
   tests:

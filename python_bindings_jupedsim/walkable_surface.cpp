@@ -2,10 +2,16 @@
 #include "geometry/walkable_surface.hpp"
 
 #include "geometry/geometry.hpp" // IWYU pragma: keep
-#include "type_casters.hpp"
+#include "line_segment.hpp"
+#include "point.hpp"
+#include "type_casters.hpp" // IWYU pragma: keep
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h> // IWYU pragma: keep
+
+#include <cstddef>
+#include <utility>
+#include <vector>
 namespace py = pybind11;
 
 void init_walkable_surface(py::module_& m)

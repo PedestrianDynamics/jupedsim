@@ -4,16 +4,20 @@
 #include "floorfield_routing_engine.hpp"
 #include "generic_agent.hpp"
 #include "geometry/area_piece.hpp"
+#include "geometry/location.hpp"
 #include "iterator_pair.hpp"
 #include "journey.hpp"
 #include "operational_model.hpp"
+#include "operational_model_state.hpp"
 #include "operational_model_type.hpp"
 #include "point.hpp"
 #include "polygon.hpp"
+#include "routing_engine.hpp"
 #include "simulation_clock.hpp"
 #include "simulation_error.hpp"
 #include "stage.hpp"
 #include "stage_description.hpp"
+#include "timing.hpp"
 #include "tracing.hpp"
 #include "visitor.hpp"
 
@@ -25,6 +29,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <tuple>
 #include <utility>
 #include <variant>

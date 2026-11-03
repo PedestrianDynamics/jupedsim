@@ -3,11 +3,13 @@
 // Multi-region floor fields (libfloorfield) over geometries built by WalkableSurface, driven
 // through the cxx bridge the way a routing engine would: translate the region graph, build the
 // field, register destinations, follow directions and query travel times.
+#include "cfg_cgal.hpp"
 #include "floorfield_cxx/lib.h"
 #include "geometry/geometry.hpp"
 #include "geometry/location.hpp"
 #include "geometry/walkable_surface.hpp"
 #include "geometry_fixtures.hpp"
+#include "point.hpp"
 #include "rust/cxx.h"
 #include "surface_mesh_shortest_path_routing_engine.hpp"
 
@@ -16,6 +18,7 @@
 #include <gtest/gtest.h>
 
 #include <cmath>
+#include <cstddef>
 #include <cstdint>
 #include <memory>
 #include <utility>

@@ -4,13 +4,17 @@
 #include "environment_query.hpp"
 #include "generic_agent.hpp"
 #include "geometric_functions.hpp"
+#include "geometry/geometry.hpp"
+#include "geometry/location.hpp"
 #include "line_segment.hpp"
+#include "operational_model_state.hpp"
 #include "point.hpp"
 
 #include <cmath>
 #include <concepts>
 #include <ranges>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 /// A neighbouring agent as seen from the agent that asked for it.

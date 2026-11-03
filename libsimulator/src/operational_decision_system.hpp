@@ -5,10 +5,13 @@
 #include "environment_query.hpp"
 #include "generic_agent.hpp"
 #include "geometry/geometry.hpp"
+#include "neighborhood_search.hpp"
 #include "operational_model.hpp"
 #include "operational_model_type.hpp"
+#include "point.hpp"
 
 #include <algorithm>
+#include <cstddef>
 #include <iterator>
 #include <memory>
 #include <utility>

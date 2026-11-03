@@ -2,6 +2,7 @@
 #include "geometry/boundary_index.hpp"
 
 #include "geometry/geometry.hpp"
+#include "geometry/location.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep
 
 #include <pybind11/pybind11.h>

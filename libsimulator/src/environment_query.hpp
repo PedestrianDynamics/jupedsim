@@ -7,7 +7,6 @@
 #include "line_segment.hpp"
 #include "neighborhood_search.hpp"
 #include "point.hpp"
-#include "simulation_error.hpp"
 
 #include <concepts>
 #include <vector>

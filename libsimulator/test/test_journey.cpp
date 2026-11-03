@@ -1,9 +1,18 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
+#include "generic_agent.hpp"
 #include "journey.hpp"
+#include "routing_target.hpp"
+#include "simulation_error.hpp"
+#include "stage.hpp"
 #include "test_common.hpp"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+
+#include <cstddef>
+#include <cstdint>
+#include <tuple>
+#include <vector>
 
 TEST(FixedTransition, NextIsCorrect)
 {

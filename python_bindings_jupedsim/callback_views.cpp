@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "callback_views.hpp"
 
+#include "agent_view.hpp"
+#include "operational_model_state.hpp"
 #include "operational_models/custom_model/custom_model.hpp"
 #include "python_model.hpp"
 #include "simulation_error.hpp"
@@ -8,6 +10,7 @@
 
 #include <pybind11/stl.h>
 
+#include <memory>
 #include <utility>
 #include <variant>
 

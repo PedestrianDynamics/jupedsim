@@ -2,6 +2,8 @@
 #pragma once
 
 #include "agent_view.hpp"
+#include "operational_model_state.hpp"
+#include "point.hpp"
 
 #include <pybind11/pybind11.h>
 

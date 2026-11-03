@@ -3,19 +3,13 @@
 
 #include "destination.hpp"
 #include "generic_agent.hpp"
-#include "geometric_functions.hpp"
-#include "line_segment.hpp"
-#include "point.hpp"
+#include "routing_target.hpp"
 #include "unique_id.hpp"
-#include "util.hpp"
 
 #include <fmt/core.h>
 
-#include <algorithm>
 #include <cassert>
 #include <cstddef>
-#include <iterator>
-#include <unordered_set>
 #include <vector>
 
 class BaseStage

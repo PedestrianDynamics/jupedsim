@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "generic_agent.hpp"
 #include "neighborhood_search.hpp"
+#include "point.hpp"
 #include "test_common.hpp"
 
 #include <gtest/gtest.h>

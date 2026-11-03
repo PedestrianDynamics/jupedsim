@@ -1,9 +1,13 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "aabb.hpp"
+#include "line_segment.hpp"
+#include "point.hpp"
 #include "simulation_error.hpp"
 #include "test_common.hpp"
 
 #include <gtest/gtest.h>
+
+#include <vector>
 
 TEST(AABB, CanConstructFromVector)
 {

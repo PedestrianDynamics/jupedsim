@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
+#include "cfg_cgal.hpp"
 #include "geometry/validation.hpp"
 
 #include <CGAL/boost/graph/helpers.h>

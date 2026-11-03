@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "geometry/location.hpp"
 
+#include "cfg_cgal.hpp"
 #include "geometry/geometry.hpp"
+#include "point.hpp"
 #include "simulation_error.hpp"
 
 #include <array>

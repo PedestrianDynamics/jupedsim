@@ -1,8 +1,12 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
+#include "cfg_cgal.hpp"
 #include "geometry/boundary_index.hpp"
 #include "geometry/geometry.hpp"
+#include "geometry/location.hpp"
 #include "geometry/region_split.hpp"
+#include "line_segment.hpp"
 #include "mesh_fixtures.hpp"
+#include "point.hpp"
 #include "test_common.hpp"
 
 #include <gtest/gtest.h>
@@ -12,6 +16,7 @@
 #include <cstddef>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 struct TestBoundaryIndexTwoLevelsWithStairs : public testing::Test {

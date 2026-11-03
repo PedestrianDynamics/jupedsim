@@ -5,7 +5,8 @@
 #include <fmt/format.h>
 #include <gtest/gtest.h>
 
-#include <memory>
+#include <functional>
+#include <utility>
 
 using namespace fmt::literals;
 using ::jps::UniqueID;

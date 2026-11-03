@@ -1,13 +1,16 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "geometry/projected_boundary.hpp"
 
+#include "cfg_cgal.hpp"
 #include "hash_combine.hpp"
 
 #include <CGAL/intersections.h>
 
 #include <algorithm>
 #include <cmath>
+#include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <unordered_map>
 #include <vector>
 

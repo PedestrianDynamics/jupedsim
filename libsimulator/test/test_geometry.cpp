@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
+#include "cfg_cgal.hpp"
 #include "geometry/area_piece.hpp"
 #include "geometry/geometry.hpp"
 #include "geometry/walkable_surface.hpp"
 #include "geometry_fixtures.hpp"
 #include "line_segment.hpp"
+#include "point.hpp"
 #include "polygon.hpp"
 #include "simulation_error.hpp"
 #include "test_common.hpp"
@@ -12,6 +14,8 @@
 
 #include <algorithm>
 #include <array>
+#include <cstddef>
+#include <cstdlib>
 #include <set>
 #include <vector>
 

@@ -2,6 +2,7 @@
 #pragma once
 
 #include "operational_model.hpp"
+#include "operational_model_state.hpp"
 
 class EnvironmentQuery;
 #include "operational_model_type.hpp"

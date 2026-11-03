@@ -3,6 +3,7 @@
 
 #include "cfg_cgal.hpp"
 #include "point.hpp"
+#include "polygon.hpp"
 
 #include <fmt/format.h>
 #include <fmt/ranges.h>

@@ -2,6 +2,11 @@
 #include "geometry/boundary_index.hpp"
 
 #include "cfg_cgal.hpp"
+#include "geometry/location.hpp"
+#include "geometry/region_split.hpp"
+#include "geometry/segment_grid.hpp"
+#include "line_segment.hpp"
+#include "point.hpp"
 #include "simulation_error.hpp"
 
 #include <CGAL/Arr_naive_point_location.h>
@@ -18,8 +23,10 @@
 #include <cmath>
 #include <cstddef>
 #include <iterator>
+#include <memory>
 #include <optional>
 #include <set>
+#include <tuple>
 #include <utility>
 #include <variant>
 #include <vector>

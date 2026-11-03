@@ -9,8 +9,11 @@
 #include <gtest/gtest.h>
 
 #include <array>
+#include <cstddef>
 #include <set>
 #include <string>
+#include <utility>
+#include <variant>
 #include <vector>
 
 namespace

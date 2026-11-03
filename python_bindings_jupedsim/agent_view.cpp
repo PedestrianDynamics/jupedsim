@@ -3,6 +3,7 @@
 
 #include "callback_views.hpp"
 #include "conversion.hpp"
+#include "point.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep
 
 #include <pybind11/pybind11.h>

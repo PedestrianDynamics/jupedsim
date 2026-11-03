@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
+#include "cfg_cgal.hpp"
 #include "geometry/walkable_surface.hpp"
 #include "geometry_fixtures.hpp"
 #include "simulation_error.hpp"
@@ -6,6 +7,7 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <gtest/gtest.h>
 
+#include <cstddef>
 #include <limits>
 #include <vector>
 

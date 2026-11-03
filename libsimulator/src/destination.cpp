@@ -2,6 +2,10 @@
 #include "destination.hpp"
 
 #include "floorfield_routing_engine.hpp"
+#include "geometry/location.hpp"
+#include "point.hpp"
+
+#include <cstddef>
 
 bool Destination::contains(const Location& where) const
 {

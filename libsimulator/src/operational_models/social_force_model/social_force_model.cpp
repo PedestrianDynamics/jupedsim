@@ -4,6 +4,7 @@
 #include "agent_view.hpp"
 #include "generic_agent.hpp"
 #include "operational_model.hpp"
+#include "operational_model_state.hpp"
 #include "operational_model_type.hpp"
 #include "point.hpp"
 #include "simulation_error.hpp"

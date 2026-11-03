@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "geometry/clearance_field.hpp"
 
+#include "line_segment.hpp"
+#include "point.hpp"
 #include "simulation_error.hpp"
 
 #include <algorithm>

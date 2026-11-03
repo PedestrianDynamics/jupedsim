@@ -1,8 +1,12 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "geometry/walkable_surface.hpp"
 
+#include "cfg_cgal.hpp"
 #include "geometry/geometry.hpp"
+#include "geometry/region_split.hpp"
 #include "geometry/validation.hpp"
+#include "line_segment.hpp"
+#include "point.hpp"
 #include "simulation_error.hpp"
 
 #include <CGAL/Boolean_set_operations_2.h>
@@ -11,10 +15,14 @@
 #include <CGAL/mark_domain_in_triangulation.h>
 #include <boost/range/iterator_range.hpp>
 
+#include <array>
 #include <cmath>
+#include <cstddef>
 #include <memory>
 #include <optional>
+#include <string_view>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 namespace

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "geometry/validation.hpp"
 
+#include "cfg_cgal.hpp"
+#include "geometry/region_split.hpp"
 #include "simulation_error.hpp"
 
 #include <CGAL/Polygon_mesh_processing/compute_normal.h>
@@ -13,6 +15,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstddef>
 #include <iterator>
 #include <numbers>
 #include <optional>

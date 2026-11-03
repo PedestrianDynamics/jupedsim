@@ -1,4 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
+#include "floorfield_routing_engine.hpp"
+#include "geometry/area_piece.hpp"
 #include "geometry_fixtures.hpp"
 #include "polygon.hpp"
 #include "routing_engine.hpp"

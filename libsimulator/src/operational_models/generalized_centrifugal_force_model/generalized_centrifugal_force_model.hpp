@@ -2,6 +2,7 @@
 #pragma once
 #include "generalized_centrifugal_force_model_state.hpp"
 #include "operational_model.hpp"
+#include "operational_model_state.hpp"
 #include "operational_model_type.hpp"
 #include "point.hpp"
 

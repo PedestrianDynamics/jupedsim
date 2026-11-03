@@ -6,7 +6,6 @@
 #include "geometry/area_piece.hpp"
 #include "geometry/location.hpp"
 #include "point.hpp"
-#include "rust/cxx.h"
 
 #include <cstddef>
 #include <cstdint>

@@ -1,5 +1,5 @@
 ---
-# Naming convention and the few modernize checks that are clean. This file is the only
+# Naming convention, include-cleaner and the few clean modernize checks. This file is the only
 # place that decides what clang-tidy checks: `ninja check-tidy` / `ninja tidy-fix` and
 # scripts/ci/check_tidy.sh pass no -checks. Full write-up: jupedsim.org/www/articles/coding-style.md.
 #
@@ -12,6 +12,7 @@
 # they would take precedence over the access-specific member rules and the variable rule.
 Checks: >-
     -*,
+    misc-include-cleaner,
     readability-identifier-naming,
     modernize-avoid-bind,
     modernize-concat-nested-namespaces,
@@ -34,6 +35,14 @@ Checks: >-
 # the checkout root.
 HeaderFilterRegex: '^.*/(libsimulator|libcommon|python_bindings_jupedsim|tools)/'
 CheckOptions:
+    # Headers from third-party/ are neither asked for nor removed: their symbols resolve to
+    # internal headers, and some only provide specializations. clangd does not read this
+    # option: keep .clangd in step. A project header that is only needed for what it declares
+    # or registers takes "// IWYU pragma: keep" where it is included.
+    misc-include-cleaner.IgnoreHeaders: 'third-party/.*'
+    # By default only the first reference to a symbol counts. If that one is implicit, an explicit
+    # use later in the file goes unreported and the header stays missing.
+    misc-include-cleaner.DeduplicateFindings: false
     readability-identifier-naming.ClassCase: CamelCase
     readability-identifier-naming.StructCase: CamelCase
     # Rebind_TDS is the name CGAL's triangulation data structure requires in a vertex base.

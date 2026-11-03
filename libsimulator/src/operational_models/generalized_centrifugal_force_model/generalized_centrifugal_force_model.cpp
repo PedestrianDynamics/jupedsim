@@ -7,14 +7,15 @@
 #include "macros.hpp"
 #include "mathematics.hpp"
 #include "operational_model.hpp"
+#include "operational_model_state.hpp"
 #include "operational_model_type.hpp"
-#include "simulation.hpp"
+#include "point.hpp"
 #include "simulation_error.hpp"
 
 #include <logger.hpp>
 
-#include <optional>
-#include <stdexcept>
+#include <algorithm>
+#include <cmath>
 
 namespace
 {

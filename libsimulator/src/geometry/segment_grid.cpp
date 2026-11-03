@@ -2,7 +2,6 @@
 #include "geometry/segment_grid.hpp"
 
 #include "aabb.hpp"
-#include "geometric_functions.hpp"
 #include "line_segment.hpp"
 #include "point.hpp"
 
@@ -10,7 +9,6 @@
 #include <cmath>
 #include <cstddef>
 #include <set>
-#include <utility>
 #include <vector>
 
 Cell make_cell(Point p)

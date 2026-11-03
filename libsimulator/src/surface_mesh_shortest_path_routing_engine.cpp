@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "surface_mesh_shortest_path_routing_engine.hpp"
 
+#include "cfg_cgal.hpp"
+#include "geometry/geometry.hpp"
+#include "geometry/location.hpp"
+#include "point.hpp"
 #include "simulation_error.hpp"
 
 #include <algorithm>
-#include <cstddef>
-#include <iterator>
-#include <tuple>
+#include <memory>
 #include <utility>
 #include <vector>
 

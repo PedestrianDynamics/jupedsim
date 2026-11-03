@@ -9,6 +9,7 @@
 #include "geometry/walkable_surface.hpp"
 #include "journey.hpp"
 #include "operational_model.hpp"
+#include "operational_model_state.hpp"
 #include "point.hpp"
 #include "polygon.hpp"
 #include "stage.hpp"
@@ -29,6 +30,7 @@
 #include <memory>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <tuple>
 #include <utility>
 #include <variant>

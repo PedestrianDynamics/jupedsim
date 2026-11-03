@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "conversion.hpp"
 #include "generic_agent.hpp"
+#include "geometry/location.hpp"
+#include "operational_model_state.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep
 
 #include <pybind11/cast.h>
@@ -9,7 +11,6 @@
 #include <pybind11/stl.h> // IWYU pragma: keep
 
 #include <optional>
-#include <tuple>
 #include <variant>
 
 namespace py = pybind11;

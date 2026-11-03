@@ -3,6 +3,7 @@
 
 #include "conversion.hpp"
 #include "operational_model.hpp"
+#include "point.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep
 
 #include <pybind11/cast.h>

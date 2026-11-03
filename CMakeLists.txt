@@ -65,7 +65,7 @@ if(WITH_FORMAT AND WIN32)
     message(FATAL_ERROR "Format target not supported on Windows")
 endif()
 
-set(WITH_TIDY OFF CACHE BOOL "Create clang-tidy targets (check-tidy, tidy-fix)")
+set(WITH_TIDY OFF CACHE BOOL "Create clang-tidy targets (check-tidy, tidy-fix, check-includes, includes-fix)")
 print_var(WITH_TIDY)
 if(WITH_TIDY AND WIN32)
     message(FATAL_ERROR "clang-tidy targets not supported on Windows")
@@ -489,6 +489,35 @@ if(UNIX AND WITH_TIDY)
         USES_TERMINAL
         VERBATIM
     )
+    # misc-include-cleaner only analyzes translation units; these targets cover the headers.
+    find_program(CLANG_INCLUDE_CLEANER
+        NAMES clang-include-cleaner-${clang-tidy-version} clang-include-cleaner
+        HINTS ${clang-tidy-bindir}
+        REQUIRED
+    )
+    set(include-cleaner-extra-arg "")
+    if(tidy-sysroot)
+        set(include-cleaner-extra-arg "-isysroot${tidy-sysroot}")
+    endif()
+    # Keep the ignore regex in step with .clang-tidy and .clangd.
+    foreach(mode check fix)
+        if(mode STREQUAL "check")
+            set(target check-includes)
+        else()
+            set(target includes-fix)
+        endif()
+        add_custom_target(${target}
+            COMMENT "Running clang-include-cleaner on headers (${mode})"
+            COMMAND sh ${PROJECT_SOURCE_DIR}/scripts/include_cleaner.sh ${mode}
+                ${CLANG_INCLUDE_CLEANER} ${PROJECT_BINARY_DIR} "third-party/.*"
+                "${include-cleaner-extra-arg}"
+                libcommon libsimulator python_bindings_jupedsim tools
+            DEPENDS floorfield_cxx
+            WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+            USES_TERMINAL
+            VERBATIM
+        )
+    endforeach()
 endif()
 
 ################################################################################
