@@ -91,7 +91,6 @@ target_link_libraries(simulator PUBLIC
     fmt::fmt
     CGAL::CGAL
     build_info
-    glm::glm
     perfetto
     floorfield_cxx
 )
