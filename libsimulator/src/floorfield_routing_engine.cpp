@@ -7,7 +7,7 @@
 #include "geometry/area_piece.hpp"
 #include "geometry/geometry.hpp"
 #include "geometry/location.hpp"
-#include "point.hpp"
+#include "kernel.hpp"
 #include "rust/cxx.h"
 #include "simulation_error.hpp"
 
@@ -115,14 +115,15 @@ Destination FloorfieldRoutingEngine::register_destination(const std::vector<Area
 bool FloorfieldRoutingEngine::contains(const Location& where, std::size_t id)
 {
     const auto xy = where.xy();
-    return checked([&] { return _field->travel_time(where.region(), {xy.x, xy.y}, id); }) == 0.0;
+    return checked([&] { return _field->travel_time(where.region(), {xy.x(), xy.y()}, id); }) ==
+           0.0;
 }
 
-Point FloorfieldRoutingEngine::get_orientation(const Location& from, std::size_t id)
+Vector FloorfieldRoutingEngine::get_orientation(const Location& from, std::size_t id)
 {
     const auto xy = from.xy();
     const auto direction =
-        checked([&] { return _field->region_direction(from.region(), {xy.x, xy.y}, id); });
+        checked([&] { return _field->region_direction(from.region(), {xy.x(), xy.y()}, id); });
     return {direction.x, direction.y};
 }
 
@@ -132,7 +133,7 @@ TravelTimeGrid FloorfieldRoutingEngine::travel_times(std::size_t region, std::si
         const auto grid = _field->region_grid(region);
         const auto values = _field->region_travel_times(region, id);
         const auto directions = _field->region_directions(region, id);
-        std::vector<Point> points{};
+        std::vector<Vector> points{};
         points.reserve(directions.size());
         for(const auto& d : directions) {
             points.emplace_back(d.x, d.y);

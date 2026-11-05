@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 #include "generalized_centrifugal_force_model_state.hpp"
+#include "kernel.hpp"
 #include "operational_model.hpp"
 #include "operational_model_state.hpp"
 #include "operational_model_type.hpp"
-#include "point.hpp"
 
 #include <fmt/core.h>
 
@@ -40,7 +40,7 @@ public:
     ~GeneralizedCentrifugalForceModel() override = default;
 
     OperationalModelType type() const override;
-    Point compute_next_state(
+    Vector compute_next_state(
         const OperationalModelState& current,
         OperationalModelState& next,
         const AgentStep& step) const override;
@@ -53,15 +53,15 @@ private:
      * @param self State of the pedestrian the force acts on
      * @param to_target Vector from the pedestrian to its next target
      *
-     * @return Point
+     * @return Vector
      */
-    Point force_driv(
+    Vector force_driv(
         const State& current_state,
-        Point orientation_to_target,
+        Vector orientation_to_target,
         double mass,
         double tau,
         double delta_t,
-        Point& e0update) const;
+        Vector& e0update) const;
     /**
      * Repulsive force between two pedestrians according to
      * the Generalized Centrifugal Force Model (chraibi2010a)
@@ -69,20 +69,20 @@ private:
      * @param self State of the pedestrian the force acts on
      * @param neighbor The other pedestrian, seen from the first one
      *
-     * @return Point
+     * @return Vector
      */
-    Point force_rep_ped(const State& current_state, const NeighborView& neighbor) const;
+    Vector force_rep_ped(const State& current_state, const NeighborView& neighbor) const;
     /**
      * Sum of the repulsive forces of all walls surrounding the pedestrian.
      * @see force_rep_wall
      */
-    Point force_rep_wall(const State& current_state, const WallView& wall) const;
-    Point
-    force_rep_stat_point(const State& current_state, const Point& p, double l, double vn) const;
-    Point force_interpolation(
+    Vector force_rep_wall(const State& current_state, const WallView& wall) const;
+    Vector
+    force_rep_stat_point(const State& current_state, const Vector& p, double l, double vn) const;
+    Vector force_interpolation(
         double v0,
         double k_ij,
-        const Point& e,
+        const Vector& e,
         double v,
         double d,
         double r,

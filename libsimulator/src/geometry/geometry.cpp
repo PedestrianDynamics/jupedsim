@@ -8,8 +8,8 @@
 #include "geometry/clearance_field.hpp"
 #include "geometry/location.hpp"
 #include "geometry/region_split.hpp"
+#include "kernel.hpp"
 #include "line_segment.hpp"
-#include "point.hpp"
 #include "simulation_error.hpp"
 
 #include <CGAL/Boolean_set_operations_2.h>
@@ -115,7 +115,7 @@ Geometry::line_segments_in_range(const Location& who, double distance) const
     return _boundary_index->query(who, distance);
 }
 
-bool Geometry::no_geometry_between(const Location& who, Point direction) const
+bool Geometry::no_geometry_between(const Location& who, Vector direction) const
 {
     // The step stays within the clear disc around who: it crosses neither a wall nor a seam.
     if(clearance(who) > direction.norm()) {
@@ -134,7 +134,7 @@ bool Geometry::no_geometry_between(const Location& who, const Location& other) c
     return arrival == other.region();
 }
 
-std::optional<std::size_t> Geometry::region_reached(const Location& who, Point direction) const
+std::optional<std::size_t> Geometry::region_reached(const Location& who, Vector direction) const
 {
     const LineSegment chord{who.xy(), who.xy() + direction};
     const auto& graph = *_region_graph;

@@ -2,7 +2,7 @@
 #pragma once
 
 #include "cfg_cgal.hpp"
-#include "point.hpp"
+#include "kernel.hpp"
 
 #include <fmt/core.h>
 
@@ -24,16 +24,16 @@ public:
     /// Cache of z coordinate.
     double z() const { return _z; }
 
-    Point3D position_3d() const { return Point3D{_xy.x, _xy.y, _z}; }
+    Point3D position_3d() const { return Point3D{_xy.x(), _xy.y(), _z}; }
 
     /// Move on surface along the provided horizontal @p xy_direction.
     /// Throws if the path hits a wall. On throw the location is left unchanged.
-    void move_on_surface(Point xy_direction);
+    void move_on_surface(Vector xy_direction);
 
     /// Feasibility variant of `move_on_surface`: walk along @p xy_direction and
     /// return the resulting Location, or `nullopt` if the straight path leaves
     /// the walkable area. Does not modify `*this`.
-    std::optional<Location> try_move_on_surface(Point xy_direction) const;
+    std::optional<Location> try_move_on_surface(Vector xy_direction) const;
 
     /// Whether walking straight from here arrives where @p other stands.
     bool can_walk_straight_to(const Location& other) const;
@@ -67,6 +67,6 @@ struct fmt::formatter<Location> {
     auto format(const Location& l, FormatContext& ctx) const
     {
         return fmt::format_to(
-            ctx.out(), "({}, {}, {}, region={})", l.xy().x, l.xy().y, l.z(), l.region());
+            ctx.out(), "({}, {}, {}, region={})", l.xy().x(), l.xy().y(), l.z(), l.region());
     }
 };

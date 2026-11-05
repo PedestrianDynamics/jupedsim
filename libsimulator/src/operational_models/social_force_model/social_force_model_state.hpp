@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
-#include "point.hpp"
+#include "kernel.hpp"
 
 #include <fmt/core.h>
 
 struct SocialForceModelState {
-    Point velocity{};
+    Vector velocity{};
     double mass{80.0};
     double desired_speed{0.8};
     double reaction_time{0.5};

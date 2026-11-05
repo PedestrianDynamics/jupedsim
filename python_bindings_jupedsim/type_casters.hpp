@@ -2,8 +2,8 @@
 #pragma once
 
 #include "geometry/walkable_surface.hpp"
+#include "kernel.hpp"
 #include "line_segment.hpp"
-#include "point.hpp"
 #include "unique_id.hpp"
 
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
@@ -19,9 +19,9 @@
 // which coincidentally also shows a conversion for Point2D. :)
 namespace pybind11::detail
 {
-template <>
-struct type_caster<Point> {
-    PYBIND11_TYPE_CASTER(Point, const_name("tuple[float, float]"));
+template <typename T>
+struct XyCaster {
+    PYBIND11_TYPE_CASTER(T, const_name("tuple[float, float]"));
 
     bool load(handle src, bool convert)
     {
@@ -37,16 +37,21 @@ struct type_caster<Point> {
         if(!x_caster.load(seq[0], convert) || !y_caster.load(seq[1], convert)) {
             return false;
         }
-        value.x = cast_op<double&&>(std::move(x_caster));
-        value.y = cast_op<double&&>(std::move(y_caster));
+        value = T{cast_op<double&&>(std::move(x_caster)), cast_op<double&&>(std::move(y_caster))};
         return true;
     }
 
-    static handle cast(const Point& src, return_value_policy, handle)
+    static handle cast(const T& src, return_value_policy, handle)
     {
-        return make_tuple(src.x, src.y).release();
+        return make_tuple(src.x(), src.y()).release();
     }
 };
+
+template <>
+struct type_caster<Point> : XyCaster<Point> {};
+
+template <>
+struct type_caster<Vector> : XyCaster<Vector> {};
 
 template <>
 struct type_caster<LineSegment> {
@@ -76,7 +81,8 @@ struct type_caster<LineSegment> {
 
     static handle cast(const LineSegment& src, return_value_policy, handle)
     {
-        return make_tuple(make_tuple(src.p1.x, src.p1.y), make_tuple(src.p2.x, src.p2.y)).release();
+        return make_tuple(make_tuple(src.p1.x(), src.p1.y()), make_tuple(src.p2.x(), src.p2.y()))
+            .release();
     }
 };
 

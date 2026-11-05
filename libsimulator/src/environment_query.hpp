@@ -4,9 +4,9 @@
 #include "generic_agent.hpp"
 #include "geometry/geometry.hpp"
 #include "geometry/location.hpp"
+#include "kernel.hpp"
 #include "line_segment.hpp"
 #include "neighborhood_search.hpp"
-#include "point.hpp"
 
 #include <concepts>
 #include <vector>
@@ -47,7 +47,7 @@ public:
         return neighbors;
     }
 
-    bool no_geometry_between(const Location& who, Point direction) const
+    bool no_geometry_between(const Location& who, Vector direction) const
     {
         return _geometry.no_geometry_between(who, direction);
     }

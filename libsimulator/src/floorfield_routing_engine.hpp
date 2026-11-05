@@ -5,7 +5,7 @@
 #include "floorfield_cxx/lib.h"
 #include "geometry/area_piece.hpp"
 #include "geometry/location.hpp"
-#include "point.hpp"
+#include "kernel.hpp"
 
 #include <cstddef>
 #include <cstdint>
@@ -44,7 +44,7 @@ struct TravelTimeGrid {
     std::vector<double> values;
     /// Row-major, height * width unit vectors: the direction an agent at the cell's centre is
     /// sent along. Zero inside the destination, NaN where the cell is not walkable.
-    std::vector<Point> directions;
+    std::vector<Vector> directions;
 };
 
 /// Walking speeds in m/s over one region's floor field grid, the same grid as TravelTimeGrid's.
@@ -75,7 +75,7 @@ public:
     Destination register_destination(const std::vector<AreaPiece>& pieces);
 
     bool contains(const Location& where, std::size_t id);
-    Point get_orientation(const Location& from, std::size_t id);
+    Vector get_orientation(const Location& from, std::size_t id);
     /// Travel times and directions to destination @p id over the grid of @p region. Solves the
     /// destination on first use.
     TravelTimeGrid travel_times(std::size_t region, std::size_t id);

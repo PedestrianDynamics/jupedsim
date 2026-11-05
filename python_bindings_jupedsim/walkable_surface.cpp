@@ -2,8 +2,8 @@
 #include "geometry/walkable_surface.hpp"
 
 #include "geometry/geometry.hpp" // IWYU pragma: keep
+#include "kernel.hpp"
 #include "line_segment.hpp"
-#include "point.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep
 
 #include <pybind11/pybind11.h>

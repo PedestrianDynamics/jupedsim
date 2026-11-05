@@ -3,7 +3,7 @@
 
 #include "callback_views.hpp"
 #include "conversion.hpp"
-#include "point.hpp"
+#include "kernel.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep
 
 #include <pybind11/pybind11.h>
@@ -139,11 +139,11 @@ void init_agent_view(py::module_& m)
                 .c_str())
         .def(
             "no_geometry_between",
-            [](const PyAgentView& self, const std::variant<Point, PyNeighborView>& target) {
+            [](const PyAgentView& self, const std::variant<Vector, PyNeighborView>& target) {
                 if(const auto* neighbor = std::get_if<PyNeighborView>(&target)) {
                     return self.view().no_geometry_between(neighbor->neighbor());
                 }
-                return self.view().no_geometry_between(std::get<Point>(target));
+                return self.view().no_geometry_between(std::get<Vector>(target));
             },
             py::arg("target"),
             clean_doc(R"(

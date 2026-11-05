@@ -53,8 +53,7 @@ target_sources(simulator PRIVATE
     src/mathematics.hpp
     src/neighborhood_search.hpp
     src/operational_decision_system.hpp
-    src/point.cpp
-    src/point.hpp
+    src/kernel.hpp
     src/polygon.cpp
     src/polygon.hpp
     src/routing_engine.cpp
@@ -124,7 +123,7 @@ if (BUILD_TESTS)
         test/test_location.cpp
         test/test_neighborhood_search.cpp
         test/test_operational_decision_system.cpp
-        test/test_point.cpp
+        test/test_kernel.cpp
         test/test_projected_boundary.cpp
         test/test_region_split.cpp
         test/test_routing_engine.cpp

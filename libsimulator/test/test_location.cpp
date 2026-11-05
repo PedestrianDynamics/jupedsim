@@ -3,7 +3,7 @@
 #include "geometry/geometry.hpp"
 #include "geometry/location.hpp"
 #include "geometry_fixtures.hpp"
-#include "point.hpp"
+#include "kernel.hpp"
 #include "test_common.hpp"
 
 #include <gtest/gtest.h>
@@ -104,8 +104,8 @@ TEST(Location, LocationOnFlatGround)
 
     const auto loc = room.geometry->get_location_near_z(5, 5, 0.0);
     ASSERT_TRUE(loc.has_value());
-    EXPECT_DOUBLE_EQ(loc->xy().x, 5.0);
-    EXPECT_DOUBLE_EQ(loc->xy().y, 5.0);
+    EXPECT_DOUBLE_EQ(loc->xy().x(), 5.0);
+    EXPECT_DOUBLE_EQ(loc->xy().y(), 5.0);
     EXPECT_NEAR(loc->z(), 0.0, 1e-9);
     EXPECT_EQ(loc->region(), 0u);
 }
@@ -118,8 +118,8 @@ TEST(Location, XyIsTheExactAndZCorrectlyCalculated)
     // On the ramp z == 0.4*y; the location keeps the exact (x,y) and caches z.
     const auto loc = geo->get_location_near_z(10, 2, 0.0, 1.0);
     ASSERT_TRUE(loc.has_value());
-    EXPECT_DOUBLE_EQ(loc->xy().x, 10.0);
-    EXPECT_DOUBLE_EQ(loc->xy().y, 2.0);
+    EXPECT_DOUBLE_EQ(loc->xy().x(), 10.0);
+    EXPECT_DOUBLE_EQ(loc->xy().y(), 2.0);
     EXPECT_NEAR(loc->z(), 0.8, 1e-9);
 }
 
@@ -200,9 +200,9 @@ TEST(LocationMove, AcrossInteriorDiagonalKeepsRegionAndInterpolatesHeight)
     // (10,2) and (10,8) sit in the two triangles of the ramp quad; the straight
     // move crosses the shared diagonal, stays in one region, z tracks 0.4*y.
     auto loc = location_at(*geo, 10, 2);
-    loc.move_on_surface(Point{0, 6}); // -> (10,8)
-    EXPECT_DOUBLE_EQ(loc.xy().x, 10.0);
-    EXPECT_DOUBLE_EQ(loc.xy().y, 8.0);
+    loc.move_on_surface(Vector{0, 6}); // -> (10,8)
+    EXPECT_DOUBLE_EQ(loc.xy().x(), 10.0);
+    EXPECT_DOUBLE_EQ(loc.xy().y(), 8.0);
     EXPECT_EQ(loc.region(), ramp.connector);
     EXPECT_NEAR(loc.z(), 3.2, 1e-9);
 }
@@ -214,9 +214,9 @@ TEST(LocationMove, HitsVertexWhileWalking)
     // Target (1,1.7) sits in the top triangle, touching the start (bottom)
     // triangle only at the centre vertex (1,1); the move hits that vertex.
     auto loc = location_at(geo, 1, 0.3);
-    loc.move_on_surface(Point{0, 1.4}); // -> (1,1.7)
-    EXPECT_DOUBLE_EQ(loc.xy().x, 1.0);
-    EXPECT_DOUBLE_EQ(loc.xy().y, 1.7);
+    loc.move_on_surface(Vector{0, 1.4}); // -> (1,1.7)
+    EXPECT_DOUBLE_EQ(loc.xy().x(), 1.0);
+    EXPECT_DOUBLE_EQ(loc.xy().y(), 1.7);
     EXPECT_NEAR(loc.z(), 0.0, 1e-9);
 }
 
@@ -236,8 +236,8 @@ TEST(LocationMove, StartingExactlyOnVertexResolvesToNeighbour)
     for(const auto& target : targets) {
         auto loc = location_at(geo, 1, 1);
         loc.move_on_surface(target - Point{1, 1});
-        EXPECT_DOUBLE_EQ(loc.xy().x, target.x);
-        EXPECT_DOUBLE_EQ(loc.xy().y, target.y);
+        EXPECT_DOUBLE_EQ(loc.xy().x(), target.x());
+        EXPECT_DOUBLE_EQ(loc.xy().y(), target.y());
         EXPECT_NEAR(loc.z(), 0.0, 1e-9);
     }
 }
@@ -248,9 +248,9 @@ TEST(LocationMove, WithinOneTriangleReturnsTargetHeight)
     const auto& geo = ramp.geometry;
 
     auto loc = location_at(*geo, 10, 2);
-    loc.move_on_surface(Point{1, 1}); // -> (11,3), start/end in one triangle
-    EXPECT_DOUBLE_EQ(loc.xy().x, 11.0);
-    EXPECT_DOUBLE_EQ(loc.xy().y, 3.0);
+    loc.move_on_surface(Vector{1, 1}); // -> (11,3), start/end in one triangle
+    EXPECT_DOUBLE_EQ(loc.xy().x(), 11.0);
+    EXPECT_DOUBLE_EQ(loc.xy().y(), 3.0);
     EXPECT_NEAR(loc.z(), 1.2, 1e-9); // 0.4*3
 }
 
@@ -261,10 +261,10 @@ TEST(LocationMove, LeavingWalkableAreaThrowsAndLeavesLocationUnchanged)
     auto loc = location_at(*room.geometry, 3, 2);
     // The straight path crosses a border edge -> leaves the walkable area.
     // --> move throws.
-    EXPECT_ANY_THROW(loc.move_on_surface(Point{17, 18})); // -> (20,20)
+    EXPECT_ANY_THROW(loc.move_on_surface(Vector{17, 18})); // -> (20,20)
     // Strong exception guarantee: the Location is unchanged.
-    EXPECT_DOUBLE_EQ(loc.xy().x, 3.0);
-    EXPECT_DOUBLE_EQ(loc.xy().y, 2.0);
+    EXPECT_DOUBLE_EQ(loc.xy().x(), 3.0);
+    EXPECT_DOUBLE_EQ(loc.xy().y(), 2.0);
     EXPECT_NEAR(loc.z(), 0.0, 1e-9);
 }
 
@@ -275,10 +275,10 @@ TEST(LocationMove, LeavingOverABoundaryCornerThrows)
     // The straight path passes exactly through the boundary corner (10,10) and
     // continues outward. It leaves the walkable area *at the vertex*.
     auto loc = location_at(*room.geometry, 4, 3);
-    EXPECT_ANY_THROW(loc.move_on_surface(Point{12, 14})); // through (10,10) -> (16,17)
+    EXPECT_ANY_THROW(loc.move_on_surface(Vector{12, 14})); // through (10,10) -> (16,17)
     // Strong exception guarantee: the Location is unchanged.
-    EXPECT_DOUBLE_EQ(loc.xy().x, 4.0);
-    EXPECT_DOUBLE_EQ(loc.xy().y, 3.0);
+    EXPECT_DOUBLE_EQ(loc.xy().x(), 4.0);
+    EXPECT_DOUBLE_EQ(loc.xy().y(), 3.0);
 }
 
 TEST(LocationMove, AlongAnInteriorEdgeChain)
@@ -290,9 +290,9 @@ TEST(LocationMove, AlongAnInteriorEdgeChain)
     // vertex (i,1) and collinear with each edge -- the "walk along an edge"
     // degenerate case.
     auto loc = location_at(geo, 0.5, 1.0);
-    loc.move_on_surface(Point{3, 0}); // -> (3.5,1.0)
-    EXPECT_DOUBLE_EQ(loc.xy().x, 3.5);
-    EXPECT_DOUBLE_EQ(loc.xy().y, 1.0);
+    loc.move_on_surface(Vector{3, 0}); // -> (3.5,1.0)
+    EXPECT_DOUBLE_EQ(loc.xy().x(), 3.5);
+    EXPECT_DOUBLE_EQ(loc.xy().y(), 1.0);
     EXPECT_EQ(loc.region(), 0u);
     EXPECT_NEAR(loc.z(), 0.0, 1e-9);
 }
@@ -309,10 +309,10 @@ TEST(LocationMove, NearTheApexOfASliverFan)
     constexpr double eps = 1e-3;
     const Point start{eps, spacing * eps * 0.5};
     const Point target{eps, spacing * eps * (n - 0.5)};
-    auto loc = location_at(geo, start.x, start.y);
+    auto loc = location_at(geo, start.x(), start.y());
     loc.move_on_surface(target - start);
-    EXPECT_DOUBLE_EQ(loc.xy().x, eps);
-    EXPECT_NEAR(loc.xy().y, target.y, 1e-18);
+    EXPECT_DOUBLE_EQ(loc.xy().x(), eps);
+    EXPECT_NEAR(loc.xy().y(), target.y(), 1e-18);
     EXPECT_NEAR(loc.z(), 0.0, 1e-9);
 }
 
@@ -324,10 +324,10 @@ TEST(LocationMove, LongStepCrossesManyFaces)
     // quad. Checks whether long steps are fine.
     const Point start{0.5, 0.3};
     const Point target{49.5, 0.7};
-    auto loc = location_at(geo, start.x, start.y);
+    auto loc = location_at(geo, start.x(), start.y());
     loc.move_on_surface(target - start);
-    EXPECT_DOUBLE_EQ(loc.xy().x, 49.5);
-    EXPECT_DOUBLE_EQ(loc.xy().y, 0.7);
+    EXPECT_DOUBLE_EQ(loc.xy().x(), 49.5);
+    EXPECT_DOUBLE_EQ(loc.xy().y(), 0.7);
     EXPECT_EQ(loc.region(), 0u);
     EXPECT_NEAR(loc.z(), 0.0, 1e-9);
 }
@@ -340,15 +340,15 @@ TEST(LocationTryMove, SucceedsReturnsResultAndLeavesSourceUnchanged)
     const auto& geo = ramp.geometry;
 
     const auto loc = location_at(*geo, 10, 2);
-    const auto moved = loc.try_move_on_surface(Point{1, 1}); // -> (11,3), z=1.2
+    const auto moved = loc.try_move_on_surface(Vector{1, 1}); // -> (11,3), z=1.2
     ASSERT_TRUE(moved.has_value());
-    EXPECT_DOUBLE_EQ(moved->xy().x, 11.0);
-    EXPECT_DOUBLE_EQ(moved->xy().y, 3.0);
+    EXPECT_DOUBLE_EQ(moved->xy().x(), 11.0);
+    EXPECT_DOUBLE_EQ(moved->xy().y(), 3.0);
     EXPECT_NEAR(moved->z(), 1.2, 1e-9);
     EXPECT_EQ(moved->region(), ramp.connector);
     // The source Location is const and must be untouched.
-    EXPECT_DOUBLE_EQ(loc.xy().x, 10.0);
-    EXPECT_DOUBLE_EQ(loc.xy().y, 2.0);
+    EXPECT_DOUBLE_EQ(loc.xy().x(), 10.0);
+    EXPECT_DOUBLE_EQ(loc.xy().y(), 2.0);
 }
 
 TEST(LocationTryMove, LeavingAcrossBorderEdgeReturnsNullopt)
@@ -357,10 +357,10 @@ TEST(LocationTryMove, LeavingAcrossBorderEdgeReturnsNullopt)
 
     const auto loc = location_at(*room.geometry, 3, 2);
     // Straight path crosses a border edge -> no result (instead of throwing).
-    EXPECT_FALSE(loc.try_move_on_surface(Point{17, 18}).has_value()); // -> (20,20)
+    EXPECT_FALSE(loc.try_move_on_surface(Vector{17, 18}).has_value()); // -> (20,20)
     // Source unchanged.
-    EXPECT_DOUBLE_EQ(loc.xy().x, 3.0);
-    EXPECT_DOUBLE_EQ(loc.xy().y, 2.0);
+    EXPECT_DOUBLE_EQ(loc.xy().x(), 3.0);
+    EXPECT_DOUBLE_EQ(loc.xy().y(), 2.0);
 }
 
 TEST(LocationTryMove, LeavingOverBoundaryCornerReturnsNullopt)
@@ -370,5 +370,5 @@ TEST(LocationTryMove, LeavingOverBoundaryCornerReturnsNullopt)
     // Straight path passes exactly through the boundary corner (10,10) and
     // continues outward -> leaves the area at the vertex.
     const auto loc = location_at(*room.geometry, 4, 3);
-    EXPECT_FALSE(loc.try_move_on_surface(Point{12, 14}).has_value()); // through (10,10)
+    EXPECT_FALSE(loc.try_move_on_surface(Vector{12, 14}).has_value()); // through (10,10)
 }

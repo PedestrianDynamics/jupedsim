@@ -2,8 +2,8 @@
 #include "generalized_centrifugal_force_model.hpp"
 
 #include "conversion.hpp"
+#include "kernel.hpp"
 #include "operational_model.hpp"
-#include "point.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep
 
 #include <pybind11/cast.h>
@@ -104,9 +104,9 @@ void init_generalized_centrifugal_force_model(py::module_& m)
     )");
     state
         .def(
-            py::init([](Point orientation,
+            py::init([](Vector orientation,
                         double speed,
-                        Point desired_direction,
+                        Vector desired_direction,
                         int orientation_delay,
                         double mass,
                         double tau,

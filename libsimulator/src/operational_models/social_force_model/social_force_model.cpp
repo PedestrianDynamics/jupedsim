@@ -3,10 +3,10 @@
 
 #include "agent_view.hpp"
 #include "generic_agent.hpp"
+#include "kernel.hpp"
 #include "operational_model.hpp"
 #include "operational_model_state.hpp"
 #include "operational_model_type.hpp"
-#include "point.hpp"
 #include "simulation_error.hpp"
 
 #include <cmath>
@@ -29,7 +29,7 @@ OperationalModelType SocialForceModel::type() const
     return OperationalModelType::SocialForce;
 }
 
-Point SocialForceModel::compute_next_state(
+Vector SocialForceModel::compute_next_state(
     const OperationalModelState& current,
     OperationalModelState& next,
     const AgentStep& step) const
@@ -39,12 +39,12 @@ Point SocialForceModel::compute_next_state(
 
     auto neighborhood = step.other_agents_in_range(
         _cut_off_radius, [&step](const NeighborView& n) { return step.no_geometry_between(n); });
-    Point f_rep;
+    Vector f_rep;
     for(const auto& neighbor : neighborhood) {
         f_rep += agent_force(current_state, neighbor);
     }
     forces += f_rep / current_state.mass;
-    Point obstacle_f{};
+    Vector obstacle_f{};
     for(const auto& wall : step.walls_in_range(wall_search_radius)) {
         obstacle_f += obstacle_force(current_state, wall);
     }
@@ -109,7 +109,7 @@ void SocialForceModel::check_model_constraint(const GenericAgent& agent, const A
     }
 }
 
-Point SocialForceModel::driving_force(const State& current_state, Point e0)
+Vector SocialForceModel::driving_force(const State& current_state, Vector e0)
 {
     return (e0 * current_state.desired_speed - current_state.velocity) /
            current_state.reaction_time;
@@ -119,7 +119,7 @@ double SocialForceModel::pushing_force_length(double a, double b, double r, doub
     return a * exp((r - distance) / b);
 }
 
-Point SocialForceModel::agent_force(const State& current_state, const NeighborView& neighbor) const
+Vector SocialForceModel::agent_force(const State& current_state, const NeighborView& neighbor) const
 {
     const auto& other = std::get<State>(*neighbor.state);
 
@@ -135,7 +135,7 @@ Point SocialForceModel::agent_force(const State& current_state, const NeighborVi
         this->_friction);
 };
 
-Point SocialForceModel::obstacle_force(const State& current_state, const WallView& wall) const
+Vector SocialForceModel::obstacle_force(const State& current_state, const WallView& wall) const
 {
     return force_from_separation(
         -wall.closest_point,
@@ -147,12 +147,12 @@ Point SocialForceModel::obstacle_force(const State& current_state, const WallVie
         this->_friction);
 }
 
-Point SocialForceModel::force_from_separation(
-    const Point separation,
+Vector SocialForceModel::force_from_separation(
+    const Vector separation,
     const double a,
     const double b,
     const double radius,
-    const Point velocity,
+    const Vector velocity,
     const double body_force,
     const double friction)
 {
@@ -160,8 +160,8 @@ Point SocialForceModel::force_from_separation(
     const double dist = separation.norm();
     double pushing_force_length = SocialForceModel::pushing_force_length(a, b, radius, dist);
     double friction_force_length = 0;
-    const Point n_ij = separation.normalized();
-    const Point tangent = n_ij.rotate90_deg();
+    const Vector n_ij = separation.normalized();
+    const Vector tangent = n_ij.rotate90_deg();
     if(dist < radius) {
         pushing_force_length += body_force * (radius - dist);
         friction_force_length = friction * (radius - dist) * (velocity.scalar_product(tangent));

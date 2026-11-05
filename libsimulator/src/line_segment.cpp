@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "line_segment.hpp"
 
+#include "kernel.hpp"
 #include "macros.hpp"
-#include "point.hpp"
 
 #include <CGAL/Distance_2/Point_2_Segment_2.h>
-#include <CGAL/Simple_cartesian.h>
 
 #include <cmath>
 #include <utility>
@@ -33,24 +32,24 @@ bool LineSegment::operator<(const LineSegment& other) const
     return false;
 }
 
-Point LineSegment::normal_vec() const
+Vector LineSegment::normal_vec() const
 {
-    const Point r = (p2 - p1);
-    return Point(-r.y, r.x).normalized();
+    const Vector r = (p2 - p1);
+    return Vector(-r.y(), r.x()).normalized();
 }
 
-double LineSegment::normal_comp(const Point& v) const
+double LineSegment::normal_comp(const Vector& v) const
 {
     // Normierte Vectoren
-    Point l = (p2 - p1).normalized();
-    const Point& n = normal_vec();
+    Vector l = (p2 - p1).normalized();
+    const Vector& n = normal_vec();
 
     double alpha;
 
-    if(fabs(l.x) < j_eps) {
-        alpha = v.x / n.x;
-    } else if(fabs(l.y) < j_eps) {
-        alpha = v.y / n.y;
+    if(fabs(l.x()) < j_eps) {
+        alpha = v.x() / n.x();
+    } else if(fabs(l.y()) < j_eps) {
+        alpha = v.y() / n.y();
     } else {
         alpha = l.cross_product(v) / n.cross_product(l);
     }
@@ -63,7 +62,7 @@ Point LineSegment::shortest_point(const Point& p) const
     if(p1 == p2)
         return p1;
 
-    const Point& t = p1 - p2;
+    const Vector& t = p1 - p2;
     double lambda = (p - p2).scalar_product(t) / t.scalar_product(t);
     if(lambda < 0)
         return p2;
@@ -75,14 +74,7 @@ Point LineSegment::shortest_point(const Point& p) const
 
 double LineSegment::dist_to(const Point& p) const
 {
-    using Kernel = CGAL::Simple_cartesian<double>;
-    using PointCGAL = Kernel::Point_2;
-    using SegmentCGAL = Kernel::Segment_2;
-
-    PointCGAL point(p.x, p.y);
-    SegmentCGAL segment(PointCGAL(p1.x, p1.y), PointCGAL(p2.x, p2.y));
-
-    return sqrt(CGAL::squared_distance(point, segment));
+    return sqrt(CGAL::squared_distance(p.cgal(), K::Segment_2(p1.cgal(), p2.cgal())));
 }
 
 double LineSegment::length_square() const

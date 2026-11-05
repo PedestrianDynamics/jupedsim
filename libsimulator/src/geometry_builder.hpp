@@ -2,7 +2,7 @@
 #pragma once
 
 #include "cfg_cgal.hpp"
-#include "point.hpp"
+#include "kernel.hpp"
 #include "polygon.hpp"
 
 #include <vector>

@@ -3,7 +3,7 @@
 #include "geometry/geometry.hpp"
 #include "geometry/location.hpp"
 #include "geometry_fixtures.hpp"
-#include "point.hpp"
+#include "kernel.hpp"
 #include "simulation_error.hpp"
 #include "surface_mesh_shortest_path_routing_engine.hpp"
 #include "test_common.hpp"
@@ -43,12 +43,12 @@ TEST_F(FlatSquare, OrientationRobustWhenSourceOnEdge)
     // source sits exactly on the shared diagonal (y=x). CGAL then emits a
     // duplicate leading waypoint; GetOrientation must skip it and still return
     // the real heading instead of a spurious (0,0).
-    const Point dir =
+    const Vector dir =
         _engine->get_orientation(located(*_geometry, 4, 4), located(*_geometry, 8, 7));
 
     // Heading towards (8,7) from (4,4): (4,3) normalized = (0.8, 0.6).
-    EXPECT_NEAR(dir.x, 0.8, 1e-6);
-    EXPECT_NEAR(dir.y, 0.6, 1e-6);
+    EXPECT_NEAR(dir.x(), 0.8, 1e-6);
+    EXPECT_NEAR(dir.y(), 0.6, 1e-6);
 }
 
 TEST(SurfaceMeshShortestPathLShape, OrientationBendsTowardsReflexCorner)
@@ -60,17 +60,17 @@ TEST(SurfaceMeshShortestPathLShape, OrientationBendsTowardsReflexCorner)
     // The route bends around the reflex corner (1,1), so the heading points there rather than at
     // the target -- at the turn the route makes, which is held off the corner itself. Heading for
     // the corner exactly is what leaves an agent stuck against it.
-    const Point turn = Point{1, 1} + Point{-1, -1}.normalized() * engine.wall_clearance();
+    const Point turn = Point{1, 1} + Vector{-1, -1}.normalized() * engine.wall_clearance();
     const auto from = located(*room.geometry, 2.5, 0.5);
-    const Point dir = engine.get_orientation(from, located(*room.geometry, 0.5, 2.5));
-    const Point expected = (turn - Point{2.5, 0.5}).normalized();
-    EXPECT_NEAR(dir.x, expected.x, 1e-6);
-    EXPECT_NEAR(dir.y, expected.y, 1e-6);
+    const Vector dir = engine.get_orientation(from, located(*room.geometry, 0.5, 2.5));
+    const Vector expected = (turn - Point{2.5, 0.5}).normalized();
+    EXPECT_NEAR(dir.x(), expected.x(), 1e-6);
+    EXPECT_NEAR(dir.y(), expected.y(), 1e-6);
 
     // Already at the target: no heading.
-    const Point at_goal = engine.get_orientation(from, from);
-    EXPECT_EQ(at_goal.x, 0.0);
-    EXPECT_EQ(at_goal.y, 0.0);
+    const Vector at_goal = engine.get_orientation(from, from);
+    EXPECT_EQ(at_goal.x(), 0.0);
+    EXPECT_EQ(at_goal.y(), 0.0);
 }
 
 TEST(SurfaceMeshShortestPathWallClearance, NegativeIsNoDistance)
@@ -116,9 +116,9 @@ TEST(SurfaceMeshShortestPathCorridor, TheOrientationNeverVanishesOnTheWay)
     constexpr double stride = 0.05;
     int steps = 0;
     while((exit->xy() - walker->xy()).norm() > stride) {
-        const Point onwards = engine.get_orientation(*walker, *exit);
-        ASSERT_FALSE(onwards.is_zero_length()) << "stuck at x=" << walker->xy().x;
-        ASSERT_LT(++steps, 2000) << "no progress at x=" << walker->xy().x;
+        const Vector onwards = engine.get_orientation(*walker, *exit);
+        ASSERT_FALSE(onwards.is_zero_length()) << "stuck at x=" << walker->xy().x();
+        ASSERT_LT(++steps, 2000) << "no progress at x=" << walker->xy().x();
         walker->move_on_surface(onwards * stride);
     }
     EXPECT_LE((exit->xy() - walker->xy()).norm(), stride);

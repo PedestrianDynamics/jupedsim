@@ -4,8 +4,8 @@
 #include "geometry/geometry.hpp"
 #include "geometry/walkable_surface.hpp"
 #include "geometry_fixtures.hpp"
+#include "kernel.hpp"
 #include "line_segment.hpp"
-#include "point.hpp"
 #include "polygon.hpp"
 #include "simulation_error.hpp"
 #include "test_common.hpp"
@@ -27,9 +27,9 @@ namespace
 /// wall is named by where it runs and not by a segment to compare against.
 bool sees_part_of(const std::vector<LineSegment>& answer, const LineSegment& wall)
 {
-    const Point along = wall.p2 - wall.p1;
+    const Vector along = wall.p2 - wall.p1;
     const auto on_wall = [&](Point p) {
-        const Point offset = p - wall.p1;
+        const Vector offset = p - wall.p1;
         if(std::abs(along.cross_product(offset)) > 1e-9) {
             return false;
         }
@@ -46,7 +46,7 @@ bool sees_part_of(const std::vector<LineSegment>& answer, const LineSegment& wal
 std::ptrdiff_t pieces_along(const std::vector<LineSegment>& answer, double y)
 {
     return std::count_if(answer.begin(), answer.end(), [y](const LineSegment& piece) {
-        return piece.p1.y == y && piece.p2.y == y;
+        return piece.p1.y() == y && piece.p2.y() == y;
     });
 }
 
@@ -229,7 +229,7 @@ TEST(GeometryModelQueries, AStepIsJudgedByTheWayThereNotByWhereItLands)
 
     // The last one is where the two questions part ways: it lands on walkable ground, and
     // there is still no straight step to it.
-    EXPECT_TRUE(room.geometry->is_valid_location({beyond_hole.x, beyond_hole.y, 0.0}));
+    EXPECT_TRUE(room.geometry->is_valid_location({beyond_hole.x(), beyond_hole.y(), 0.0}));
 }
 
 TEST(GeometryVisibility, TheFloorAboveIsNotInSightThoughNothingStandsBetween)
@@ -294,7 +294,7 @@ TEST(GeometryModelQueries, ASeamBringsTheNextRegionsWallsIntoTheAnswer)
 
     const auto walls = floors.geometry->line_segments_in_range(*who, 4.0);
     const bool reaches_across = std::any_of(walls.begin(), walls.end(), [](const LineSegment& w) {
-        return w.p1.y == 0.0 && w.p2.y == 0.0 && std::max(w.p1.x, w.p2.x) > 14.0;
+        return w.p1.y() == 0.0 && w.p2.y() == 0.0 && std::max(w.p1.x(), w.p2.x()) > 14.0;
     });
     EXPECT_TRUE(reaches_across) << "the answer stopped at the region boundary";
 }
@@ -344,7 +344,7 @@ TEST(GeometryModelQueries, TheFlightAboveIsNotAWall)
     const auto walls = floors.geometry->line_segments_in_range(*who, 10.0);
     const auto side_of_the_well = [&walls](double y) {
         return std::any_of(walls.begin(), walls.end(), [y](const LineSegment& w) {
-            return w.p1.y == y && w.p2.y == y;
+            return w.p1.y() == y && w.p2.y() == y;
         });
     };
     EXPECT_TRUE(side_of_the_well(2.0)) << "his own flight's wall, right beside him";

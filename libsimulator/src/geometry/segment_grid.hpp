@@ -5,8 +5,8 @@
 #include "geometric_functions.hpp"
 #include "hash_combine.hpp"
 #include "iterator_pair.hpp"
+#include "kernel.hpp"
 #include "line_segment.hpp"
-#include "point.hpp"
 
 #include <algorithm>
 #include <cstddef>
@@ -97,7 +97,7 @@ struct std::hash<Cell> {
     std::size_t operator()(const Point& pos) const noexcept
     {
         std::hash<double> hasher{};
-        return jps::hash_combine(hasher(pos.x), hasher(pos.y));
+        return jps::hash_combine(hasher(pos.x()), hasher(pos.y()));
     }
 };
 
@@ -108,7 +108,7 @@ std::set<Cell> cells_from_line_segment(LineSegment ls);
 inline AABB search_bounds(const LineSegment& ls, double radius)
 {
     const AABB bounds({ls.p1, ls.p2});
-    const Point extend(radius, radius);
+    const Vector extend(radius, radius);
     return AABB(bounds.bottom_left() - extend, bounds.top_right() + extend);
 }
 
@@ -195,12 +195,13 @@ private:
         const auto bottom_left = make_cell(bounds.bottom_left());
         const auto top_right = make_cell(bounds.top_right());
 
-        for(double x = bottom_left.x; x <= top_right.x; x += cell_extend) {
-            for(double y = bottom_left.y; y <= top_right.y; y += cell_extend) {
+        for(double x = bottom_left.x(); x <= top_right.x(); x += cell_extend) {
+            for(double y = bottom_left.y(); y <= top_right.y(); y += cell_extend) {
                 const auto cell = make_cell({x, y});
                 const AABB cell_with_search_radius(
-                    {cell.x - search_radius, cell.y - search_radius},
-                    {cell.x + search_radius + cell_extend, cell.y + search_radius + cell_extend});
+                    {cell.x() - search_radius, cell.y() - search_radius},
+                    {cell.x() + search_radius + cell_extend,
+                     cell.y() + search_radius + cell_extend});
                 if(cell_with_search_radius.intersects(segment)) {
                     _approximate_grid[cell].push_back(segment);
                 }

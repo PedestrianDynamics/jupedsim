@@ -3,8 +3,8 @@
 
 #include "cfg_cgal.hpp"
 #include "geometry/geometry.hpp"
+#include "kernel.hpp"
 #include "line_segment.hpp"
-#include "point.hpp"
 
 #include <boost/graph/adjacency_list.hpp>
 #include <fmt/ranges.h>

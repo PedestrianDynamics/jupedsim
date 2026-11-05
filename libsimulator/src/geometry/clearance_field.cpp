@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "geometry/clearance_field.hpp"
 
+#include "kernel.hpp"
 #include "line_segment.hpp"
-#include "point.hpp"
 #include "simulation_error.hpp"
 
 #include <algorithm>
@@ -41,10 +41,10 @@ ClearanceField::ClearanceField(
         double xmax = std::numeric_limits<double>::lowest();
         double ymax = std::numeric_limits<double>::lowest();
         for(const auto& s : segments) {
-            xmin = std::min({xmin, s.p1.x, s.p2.x});
-            ymin = std::min({ymin, s.p1.y, s.p2.y});
-            xmax = std::max({xmax, s.p1.x, s.p2.x});
-            ymax = std::max({ymax, s.p1.y, s.p2.y});
+            xmin = std::min({xmin, s.p1.x(), s.p2.x()});
+            ymin = std::min({ymin, s.p1.y(), s.p2.y()});
+            xmax = std::max({xmax, s.p1.x(), s.p2.x()});
+            ymax = std::max({ymax, s.p1.y(), s.p2.y()});
         }
         // The walls and seams enclose the region, so their bounding box covers all of it.
         raster.origin = {xmin, ymin};
@@ -61,10 +61,10 @@ ClearanceField::ClearanceField(
         // Only cells whose centre lies within 'reach' of a segment can be closer than
         // 'max_clearance' to it, and all of those lie in the segment's box grown by 'reach'.
         for(const auto& s : segments) {
-            const auto x0 = to_index(std::min(s.p1.x, s.p2.x) - reach, xmin, raster.width);
-            const auto x1 = to_index(std::max(s.p1.x, s.p2.x) + reach, xmin, raster.width);
-            const auto y0 = to_index(std::min(s.p1.y, s.p2.y) - reach, ymin, raster.height);
-            const auto y1 = to_index(std::max(s.p1.y, s.p2.y) + reach, ymin, raster.height);
+            const auto x0 = to_index(std::min(s.p1.x(), s.p2.x()) - reach, xmin, raster.width);
+            const auto x1 = to_index(std::max(s.p1.x(), s.p2.x()) + reach, xmin, raster.width);
+            const auto y0 = to_index(std::min(s.p1.y(), s.p2.y()) - reach, ymin, raster.height);
+            const auto y1 = to_index(std::max(s.p1.y(), s.p2.y()) + reach, ymin, raster.height);
             for(auto y = y0; y <= y1; ++y) {
                 for(auto x = x0; x <= x1; ++x) {
                     const Point centre{
@@ -85,8 +85,8 @@ double ClearanceField::clearance(std::size_t region, Point p) const
         throw SimulationError("ClearanceField: region id {} out of range", region);
     }
     const auto& raster = _rasters[region];
-    const double fx = std::floor((p.x - raster.origin.x) / _cell_size);
-    const double fy = std::floor((p.y - raster.origin.y) / _cell_size);
+    const double fx = std::floor((p.x() - raster.origin.x()) / _cell_size);
+    const double fy = std::floor((p.y() - raster.origin.y()) / _cell_size);
     // Also rejects NaN: every comparison with it is false.
     if(!(fx >= 0 && fy >= 0 && fx < static_cast<double>(raster.width) &&
          fy < static_cast<double>(raster.height))) {

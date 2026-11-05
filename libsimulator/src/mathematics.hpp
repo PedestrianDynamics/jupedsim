@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "point.hpp"
+#include "kernel.hpp"
 
 #include <complex>
 
@@ -14,8 +14,8 @@ double hermite_interp(double x, double x1, double x2, double y1, double y2, doub
 
 std::complex<double> c_cbrt(std::complex<double> x);
 
-Point mollify_e0(
-    const Point& orientation_to_target,
+Vector mollify_e0(
+    const Vector& orientation_to_target,
     double delta_t,
     int orientation_delay,
-    const Point& e0);
+    const Vector& e0);

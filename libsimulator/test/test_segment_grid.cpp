@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "geometry/segment_grid.hpp"
+#include "kernel.hpp"
 #include "line_segment.hpp"
-#include "point.hpp"
 #include "test_common.hpp"
 
 #include <fmt/format.h>
@@ -332,15 +332,15 @@ TEST_F(LongDiagonalRectangle, CellsAtBottomLeft)
 
     const auto middle_cell = Cell{-12, -16};
     const std::vector<Cell> candidates = {
-        {middle_cell.x - cell_extend, middle_cell.y - cell_extend},
-        {middle_cell.x - cell_extend, middle_cell.y},
-        {middle_cell.x - cell_extend, middle_cell.y + cell_extend},
-        {middle_cell.x, middle_cell.y - cell_extend},
-        {middle_cell.x, middle_cell.y},
-        {middle_cell.x, middle_cell.y + cell_extend},
-        {middle_cell.x + cell_extend, middle_cell.y - cell_extend},
-        {middle_cell.x + cell_extend, middle_cell.y},
-        {middle_cell.x + cell_extend, middle_cell.y + cell_extend}};
+        {middle_cell.x() - cell_extend, middle_cell.y() - cell_extend},
+        {middle_cell.x() - cell_extend, middle_cell.y()},
+        {middle_cell.x() - cell_extend, middle_cell.y() + cell_extend},
+        {middle_cell.x(), middle_cell.y() - cell_extend},
+        {middle_cell.x(), middle_cell.y()},
+        {middle_cell.x(), middle_cell.y() + cell_extend},
+        {middle_cell.x() + cell_extend, middle_cell.y() - cell_extend},
+        {middle_cell.x() + cell_extend, middle_cell.y()},
+        {middle_cell.x() + cell_extend, middle_cell.y() + cell_extend}};
 
     for(const auto& point : candidates) {
         const auto result = _grid.line_segments_in_approx_distance_to(point);
@@ -357,15 +357,15 @@ TEST_F(LongDiagonalRectangle, CellsAtTopRight)
 
     const auto middle_cell = Cell{4, 8};
     const std::vector<Cell> candidates = {
-        {middle_cell.x - cell_extend, middle_cell.y - cell_extend},
-        {middle_cell.x - cell_extend, middle_cell.y},
-        {middle_cell.x - cell_extend, middle_cell.y + cell_extend},
-        {middle_cell.x, middle_cell.y - cell_extend},
-        {middle_cell.x, middle_cell.y},
-        {middle_cell.x, middle_cell.y + cell_extend},
-        {middle_cell.x + cell_extend, middle_cell.y - cell_extend},
-        {middle_cell.x + cell_extend, middle_cell.y},
-        {middle_cell.x + cell_extend, middle_cell.y + cell_extend}};
+        {middle_cell.x() - cell_extend, middle_cell.y() - cell_extend},
+        {middle_cell.x() - cell_extend, middle_cell.y()},
+        {middle_cell.x() - cell_extend, middle_cell.y() + cell_extend},
+        {middle_cell.x(), middle_cell.y() - cell_extend},
+        {middle_cell.x(), middle_cell.y()},
+        {middle_cell.x(), middle_cell.y() + cell_extend},
+        {middle_cell.x() + cell_extend, middle_cell.y() - cell_extend},
+        {middle_cell.x() + cell_extend, middle_cell.y()},
+        {middle_cell.x() + cell_extend, middle_cell.y() + cell_extend}};
 
     for(const auto& point : candidates) {
         const auto result = _grid.line_segments_in_approx_distance_to(point);

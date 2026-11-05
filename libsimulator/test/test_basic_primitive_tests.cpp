@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "cfg_cgal.hpp"
-#include "point.hpp"
+#include "kernel.hpp"
 #include "polygon.hpp"
 #include "simulation_error.hpp"
 #include "test_common.hpp"

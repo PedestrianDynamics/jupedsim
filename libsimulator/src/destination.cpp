@@ -3,7 +3,7 @@
 
 #include "floorfield_routing_engine.hpp"
 #include "geometry/location.hpp"
-#include "point.hpp"
+#include "kernel.hpp"
 
 #include <cstddef>
 #include <vector>
@@ -13,7 +13,7 @@ bool Destination::contains(const Location& where) const
     return _engine->contains(where, _id);
 }
 
-Point Destination::orientation(const Location& from) const
+Vector Destination::orientation(const Location& from) const
 {
     return _engine->get_orientation(from, _id);
 }

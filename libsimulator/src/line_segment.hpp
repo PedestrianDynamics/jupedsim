@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "point.hpp"
+#include "kernel.hpp"
 
 #include <fmt/core.h>
 
@@ -21,12 +21,12 @@ public:
     bool operator!=(const LineSegment& other) const;
     bool operator<(const LineSegment& other) const;
 
-    Point normal_vec() const;
+    Vector normal_vec() const;
 
     /**
      *TODO: FIXME
      */
-    double normal_comp(const Point& v) const; // Normale Komponente von v auf l
+    double normal_comp(const Vector& v) const; // Normale Komponente von v auf l
 
     /**
      * Note that that result must not lie on the segment

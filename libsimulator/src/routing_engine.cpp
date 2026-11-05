@@ -6,7 +6,7 @@
 #include "geometry/area_piece.hpp"
 #include "geometry/geometry.hpp"
 #include "geometry/location.hpp"
-#include "point.hpp"
+#include "kernel.hpp"
 #include "routing_target.hpp"
 #include "visitor.hpp"
 
@@ -39,7 +39,7 @@ void RoutingEngine::set_default_speed(std::size_t region, const std::vector<doub
     _floorfield.set_default_speed(region, values);
 }
 
-Point RoutingEngine::get_orientation(const Location& from, const RoutingTarget& to)
+Vector RoutingEngine::get_orientation(const Location& from, const RoutingTarget& to)
 {
     return std::visit(
         Overloaded{

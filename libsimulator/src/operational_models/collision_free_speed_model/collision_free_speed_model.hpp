@@ -2,10 +2,10 @@
 #pragma once
 
 #include "collision_free_speed_model_state.hpp"
+#include "kernel.hpp"
 #include "operational_model.hpp"
 #include "operational_model_state.hpp"
 #include "operational_model_type.hpp"
-#include "point.hpp"
 
 #include <fmt/core.h>
 
@@ -32,7 +32,7 @@ public:
         double range_geometry_repulsion);
     ~CollisionFreeSpeedModel() override = default;
     OperationalModelType type() const override;
-    Point compute_next_state(
+    Vector compute_next_state(
         const OperationalModelState& current,
         OperationalModelState& next,
         const AgentStep& step) const override;
@@ -43,7 +43,7 @@ private:
     double get_spacing(
         const State& current_state,
         const NeighborView& neighbor,
-        const Point& direction) const;
-    Point neighbor_repulsion(const State& current_state, const NeighborView& neighbor) const;
-    Point boundary_repulsion(const State& current_state, const WallView& boundary) const;
+        const Vector& direction) const;
+    Vector neighbor_repulsion(const State& current_state, const NeighborView& neighbor) const;
+    Vector boundary_repulsion(const State& current_state, const WallView& boundary) const;
 };

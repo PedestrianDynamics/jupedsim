@@ -2,7 +2,7 @@
 #pragma once
 
 #include "geometry/location.hpp"
-#include "point.hpp"
+#include "kernel.hpp"
 
 #include <fmt/format.h>
 
@@ -27,7 +27,7 @@ public:
     bool contains(const Location& where) const;
 
     /// Unit vector from @p from along the route to the destination. Zero once inside it.
-    Point orientation(const Location& from) const;
+    Vector orientation(const Location& from) const;
 
     /// Travel times to the destination over the grid of @p region.
     TravelTimeGrid travel_times(std::size_t region) const;

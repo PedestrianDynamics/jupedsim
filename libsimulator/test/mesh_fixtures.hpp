@@ -2,7 +2,7 @@
 #pragma once
 
 #include "cfg_cgal.hpp"
-#include "point.hpp"
+#include "kernel.hpp"
 
 #include <CGAL/Polygon_mesh_processing/triangulate_faces.h>
 
@@ -84,10 +84,10 @@ inline SurfaceMesh stacked_floors(Point lower_left, Point upper_right, double fl
 {
     SurfaceMesh mesh{};
     const auto quad = [&](double z) {
-        const auto a = mesh.add_vertex(Point3D{lower_left.x, lower_left.y, z});
-        const auto b = mesh.add_vertex(Point3D{upper_right.x, lower_left.y, z});
-        const auto c = mesh.add_vertex(Point3D{upper_right.x, upper_right.y, z});
-        const auto d = mesh.add_vertex(Point3D{lower_left.x, upper_right.y, z});
+        const auto a = mesh.add_vertex(Point3D{lower_left.x(), lower_left.y(), z});
+        const auto b = mesh.add_vertex(Point3D{upper_right.x(), lower_left.y(), z});
+        const auto c = mesh.add_vertex(Point3D{upper_right.x(), upper_right.y(), z});
+        const auto d = mesh.add_vertex(Point3D{lower_left.x(), upper_right.y(), z});
         mesh.add_face(a, b, c);
         mesh.add_face(a, c, d);
     };

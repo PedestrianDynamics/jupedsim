@@ -6,7 +6,7 @@
 #include "geometry/area_piece.hpp"
 #include "geometry/geometry.hpp"
 #include "geometry/location.hpp"
-#include "point.hpp"
+#include "kernel.hpp"
 #include "routing_target.hpp"
 #include "surface_mesh_shortest_path_routing_engine.hpp"
 
@@ -33,7 +33,7 @@ public:
 
     /// Unit vector from @p from along the route to @p to, projected to x/y. Zero once @p from
     /// has reached @p to.
-    Point get_orientation(const Location& from, const RoutingTarget& to);
+    Vector get_orientation(const Location& from, const RoutingTarget& to);
 
     /// Placement of the floor field grid of @p region, see FloorfieldRoutingEngine::grid_info.
     GridInfo grid_info(std::size_t region) const;

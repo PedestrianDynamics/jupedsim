@@ -26,7 +26,7 @@
 /// class MyModel : public CustomModel
 /// {
 /// public:
-///     Point compute_next_state(
+///     Vector compute_next_state(
 ///         const OperationalModelState& current,
 ///         OperationalModelState& next,
 ///         const AgentStep& step) const override;

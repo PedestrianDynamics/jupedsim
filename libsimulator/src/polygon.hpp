@@ -2,7 +2,7 @@
 #pragma once
 
 #include "cfg_cgal.hpp"
-#include "point.hpp"
+#include "kernel.hpp"
 #include "simulation_error.hpp"
 
 #include <CGAL/Boolean_set_operations_2.h>

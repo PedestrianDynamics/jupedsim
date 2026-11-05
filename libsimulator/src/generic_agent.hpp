@@ -7,9 +7,9 @@
 #include "custom_model_state.hpp"
 #include "generalized_centrifugal_force_model_state.hpp"
 #include "geometry/location.hpp"
+#include "kernel.hpp"
 #include "operational_models/operational_model_state.hpp"
 #include "operational_models/operational_model_type.hpp"
-#include "point.hpp"
 #include "routing_target.hpp"
 #include "social_force_model_state.hpp"
 #include "unique_id.hpp"
@@ -36,7 +36,7 @@ struct GenericAgent {
 
     // This is evaluated by the "operational level"
     /// Unit vector along the route to the final target. Zero if the agent has reached it.
-    Point route_orientation{};
+    Vector route_orientation{};
     RoutingTarget final_target;
 
     OperationalModelState state{};

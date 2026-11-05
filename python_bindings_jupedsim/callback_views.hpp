@@ -2,8 +2,8 @@
 #pragma once
 
 #include "agent_view.hpp"
+#include "kernel.hpp"
 #include "operational_model_state.hpp"
-#include "point.hpp"
 
 #include <pybind11/pybind11.h>
 
@@ -107,7 +107,7 @@ public:
     /// The libsimulator neighbor; checks the scope first.
     const NeighborView& neighbor() const;
     /// A value copy, valid after the callback too.
-    Point relative_position() const { return _neighbor.relative_position; }
+    Vector relative_position() const { return _neighbor.relative_position; }
 
 private:
     NeighborView _neighbor;

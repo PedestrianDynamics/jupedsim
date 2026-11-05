@@ -5,8 +5,8 @@
 #include "geometry/location.hpp"
 #include "geometry/region_split.hpp"
 #include "geometry/segment_grid.hpp"
+#include "kernel.hpp"
 #include "line_segment.hpp"
-#include "point.hpp"
 #include "simulation_error.hpp"
 
 #include <CGAL/Arr_naive_point_location.h>
@@ -119,15 +119,16 @@ double snap_to_end(double s)
 /// Where @p x sits along @p ls, as the parameter of its projection onto it.
 double parameter_along(const LineSegment& ls, Point x)
 {
-    const Point along{ls.p2.x - ls.p1.x, ls.p2.y - ls.p1.y};
-    return Point{x.x - ls.p1.x, x.y - ls.p1.y}.scalar_product(along) / along.scalar_product(along);
+    const Vector along{ls.p2.x() - ls.p1.x(), ls.p2.y() - ls.p1.y()};
+    return Vector{x.x() - ls.p1.x(), x.y() - ls.p1.y()}.scalar_product(along) /
+           along.scalar_product(along);
 }
 
 /// The part of @p ls between the two parameters, or nothing when that is empty or too short
 /// to mean anything.
 std::optional<LineSegment> sub_segment(const LineSegment& ls, double from, double to)
 {
-    const Point along{ls.p2.x - ls.p1.x, ls.p2.y - ls.p1.y};
+    const Vector along{ls.p2.x() - ls.p1.x(), ls.p2.y() - ls.p1.y()};
     if(to <= from || (to - from) * along.norm() < min_part_length) {
         return std::nullopt;
     }
@@ -140,7 +141,7 @@ std::optional<LineSegment> sub_segment(const LineSegment& ls, double from, doubl
         if(s >= 1.0) {
             return ls.p2;
         }
-        return Point{ls.p1.x + s * along.x, ls.p1.y + s * along.y};
+        return Point{ls.p1.x() + s * along.x(), ls.p1.y() + s * along.y()};
     };
     return LineSegment{at(from), at(to)};
 }
@@ -148,8 +149,8 @@ std::optional<LineSegment> sub_segment(const LineSegment& ls, double from, doubl
 /// The part of @p ls inside the closed disc, or nothing if it does not reach into it.
 std::optional<LineSegment> clip_to_disc(const LineSegment& ls, Point center, double radius)
 {
-    const Point along{ls.p2.x - ls.p1.x, ls.p2.y - ls.p1.y};
-    const Point to_start{ls.p1.x - center.x, ls.p1.y - center.y};
+    const Vector along{ls.p2.x() - ls.p1.x(), ls.p2.y() - ls.p1.y()};
+    const Vector to_start{ls.p1.x() - center.x(), ls.p1.y() - center.y()};
     const double a = along.scalar_product(along);
     if(a <= 0.0) {
         return std::nullopt;
@@ -260,7 +261,7 @@ constexpr int max_window_depth = 128;
 
 VisPoint to_exact(Point p)
 {
-    return {p.x, p.y};
+    return {p.x(), p.y()};
 }
 
 Point from_exact(const VisPoint& p)
@@ -470,10 +471,10 @@ void process_window_job(
     // whatever the box hides is nothing the disc clip would have kept.
     const double half = maximum_distance + 1.0;
     const VisPoint corners[4] = {
-        {p.x - half, p.y - half},
-        {p.x + half, p.y - half},
-        {p.x + half, p.y + half},
-        {p.x - half, p.y + half}};
+        {p.x() - half, p.y() - half},
+        {p.x() + half, p.y() - half},
+        {p.x() + half, p.y() + half},
+        {p.x() - half, p.y() + half}};
     for(int i = 0; i < 4; ++i) {
         curves.push_back(VisSegment{corners[i], corners[(i + 1) % 4]});
     }

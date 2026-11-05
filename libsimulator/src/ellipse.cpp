@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "ellipse.hpp"
 
+#include "kernel.hpp"
 #include "macros.hpp"
-#include "point.hpp"
 
 #include <cmath>
 
@@ -59,13 +59,13 @@ double Ellipse::effective_distance_to_ellipse(
     double scale_second,
     double speed_first,
     double speed_second,
-    const Point& orientation_first,
-    const Point& orientation_second) const
+    const Vector& orientation_first,
+    const Vector& orientation_second) const
 {
-    Point e2in_e1 = center_second.transform_to_ellipse_coordinates(
-        center_first, orientation_first.x, orientation_first.y);
-    Point e1in_e2 = center_first.transform_to_ellipse_coordinates(
-        center_second, orientation_second.x, orientation_second.y);
+    Vector e2in_e1 = center_second.transform_to_ellipse_coordinates(
+        center_first, orientation_first.x(), orientation_first.y());
+    Vector e1in_e2 = center_first.transform_to_ellipse_coordinates(
+        center_second, orientation_second.x(), orientation_second.y());
 
     Point r1 =
         this->point_on_ellipse(e2in_e1, scale_first, center_first, speed_first, orientation_first);
@@ -89,19 +89,19 @@ double Ellipse::effective_distance_to_ellipse(
 ///
 /// @return Point on the ellipse boundary, transformed into the global coordinate system.
 Point Ellipse::point_on_ellipse(
-    const Point& p,
+    const Vector& p,
     double scale,
     const Point& center,
     double speed,
-    const Point& orientation) const
+    const Vector& orientation) const
 {
-    double x = p.x, y = p.y;
+    double x = p.x(), y = p.y();
     double r = x * x + y * y;
 
     // Handle degenerate case when P is very close to the ellipse center
     if(r < j_eps * j_eps) {
-        Point cp(this->get_ea(speed), 0);
-        return cp.transform_to_cartesian_coordinates(center, orientation.x, orientation.y);
+        Vector cp(this->get_ea(speed), 0);
+        return cp.transform_to_cartesian_coordinates(center, orientation.x(), orientation.y());
     }
 
     r = sqrt(r);
@@ -111,9 +111,7 @@ Point Ellipse::point_on_ellipse(
 
     double a = get_ea(speed);
     double b = get_eb(scale);
-    Point s;
-    s.x = a * cos_theta;
-    s.y = b * sin_theta;
+    const Vector s{a * cos_theta, b * sin_theta};
 
-    return s.transform_to_cartesian_coordinates(center, orientation.x, orientation.y);
+    return s.transform_to_cartesian_coordinates(center, orientation.x(), orientation.y());
 }

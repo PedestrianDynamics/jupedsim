@@ -9,7 +9,7 @@
 #include "geometry/location.hpp"
 #include "geometry/walkable_surface.hpp"
 #include "geometry_fixtures.hpp"
-#include "point.hpp"
+#include "kernel.hpp"
 #include "rust/cxx.h"
 #include "surface_mesh_shortest_path_routing_engine.hpp"
 
@@ -72,8 +72,10 @@ rust::Box<ff::MultiRegionFloorfield> field_over(const Geometry& geo, double cell
 double time_at(ff::MultiRegionFloorfield& field, std::size_t region, std::size_t dest, Point xy)
 {
     const auto grid = field.region_grid(region);
-    const auto col = static_cast<std::size_t>(std::floor((xy.x - grid.origin_x) / grid.cell_size));
-    const auto row = static_cast<std::size_t>(std::floor((xy.y - grid.origin_y) / grid.cell_size));
+    const auto col =
+        static_cast<std::size_t>(std::floor((xy.x() - grid.origin_x) / grid.cell_size));
+    const auto row =
+        static_cast<std::size_t>(std::floor((xy.y() - grid.origin_y) / grid.cell_size));
     return field.region_travel_times(region, dest)[row * grid.width + col];
 }
 /// Follow the field's directions from @p from the way an agent does, in steps of @p step_length:
@@ -88,11 +90,12 @@ trace(ff::MultiRegionFloorfield& field, Location from, std::size_t dest, double 
         if(time_at(field, from.region(), dest, from.xy()) == 0.0) {
             break;
         }
-        const auto dir = field.region_direction(from.region(), {from.xy().x, from.xy().y}, dest);
+        const auto dir =
+            field.region_direction(from.region(), {from.xy().x(), from.xy().y()}, dest);
         if(dir.x == 0.0 && dir.y == 0.0) {
             break;
         }
-        const auto moved = from.try_move_on_surface(Point{dir.x, dir.y} * step_length);
+        const auto moved = from.try_move_on_surface(Vector{dir.x, dir.y} * step_length);
         if(!moved) {
             break;
         }
@@ -125,7 +128,7 @@ TEST(Floorfield, ClimbsTheStairsToTheUpperFloor)
 
     ASSERT_GE(path.size(), 3u);
     EXPECT_DOUBLE_EQ(path.front().z(), 0.0);
-    EXPECT_NEAR(path.back().xy().x, 14.0, 0.1) << "ends at the target";
+    EXPECT_NEAR(path.back().xy().x(), 14.0, 0.1) << "ends at the target";
     EXPECT_EQ(path.back().region(), floors.room_2);
     EXPECT_NEAR(path.back().z(), 3.0, 1e-9);
     // Height never decreases on the way up.
@@ -146,7 +149,7 @@ TEST(Floorfield, DescendsTheStairsToTheGround)
     const auto dest = field->add_point_destination(floors.room_1, {1, 2.5});
     const auto path = trace(*field, geo->get_location(14, 2.5, floors.room_2), dest);
 
-    EXPECT_NEAR(path.back().xy().x, 1.0, 0.1) << "ends at the target";
+    EXPECT_NEAR(path.back().xy().x(), 1.0, 0.1) << "ends at the target";
     EXPECT_EQ(path.back().region(), floors.room_1);
     EXPECT_NEAR(path.back().z(), 0.0, 1e-9);
     for(std::size_t i = 1; i < path.size(); ++i) {
@@ -229,7 +232,7 @@ TEST(Floorfield, ExitSpanningSeveralRegions)
 
     const auto path = trace(*field, geo->get_location(2, 5, rooms.room_1), dest);
     EXPECT_EQ(path.back().region(), rooms.room_1) << "room 1 heads for its own piece";
-    EXPECT_GT(path.back().xy().x, 9.4);
+    EXPECT_GT(path.back().xy().x(), 9.4);
 }
 
 /// A seam on a hole edge: the ground floor opens through the inner edge of its hole onto a ramp
@@ -249,7 +252,7 @@ TEST(Floorfield, SeamOnAHoleEdge)
     const auto dest = field->add_point_destination(platform, {15, 5});
     const auto path = trace(*field, geo->get_location(1, 5, ground), dest);
     EXPECT_EQ(path.back().region(), platform);
-    EXPECT_NEAR(path.back().xy().x, 15.0, 0.15);
+    EXPECT_NEAR(path.back().xy().x(), 15.0, 0.15);
     EXPECT_NEAR(path.back().z(), 1.0, 1e-9);
 }
 
@@ -272,7 +275,7 @@ TEST(Floorfield, StackedFloorsAreKeptApart)
     }
     EXPECT_TRUE(on_ramp);
     EXPECT_EQ(path.back().region(), floors.room_2);
-    EXPECT_NEAR(path.back().xy().x, 2.0, 0.15);
+    EXPECT_NEAR(path.back().xy().x(), 2.0, 0.15);
 }
 
 /// The length walked along the field's directions, against the exact geodesic.

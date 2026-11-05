@@ -3,11 +3,11 @@
 
 #include "agent_view.hpp"
 #include "generic_agent.hpp"
+#include "kernel.hpp"
 #include "macros.hpp"
 #include "operational_model.hpp"
 #include "operational_model_state.hpp"
 #include "operational_model_type.hpp"
-#include "point.hpp"
 #include "simulation_error.hpp"
 
 #include <algorithm>
@@ -26,7 +26,7 @@ OperationalModelType AnticipationVelocityModel::type() const
     return OperationalModelType::AnticipationVelocityModel;
 }
 
-Point AnticipationVelocityModel::compute_next_state(
+Vector AnticipationVelocityModel::compute_next_state(
     const OperationalModelState& current,
     OperationalModelState& next,
     const AgentStep& step) const
@@ -37,13 +37,13 @@ Point AnticipationVelocityModel::compute_next_state(
         _cut_off_radius, [&step](const NeighborView& n) { return step.no_geometry_between(n); });
 
     const auto desired_direction = step.route_orientation();
-    Point neighbor_repulsion{};
+    Vector neighbor_repulsion{};
     for(const auto& neighbor : neighborhood) {
         neighbor_repulsion += this->neighbor_repulsion(current_state, desired_direction, neighbor);
     }
 
     auto direction = (desired_direction + neighbor_repulsion).normalized();
-    if(direction == Point{}) {
+    if(direction == Vector{}) {
         direction = current_state.orientation;
     }
 
@@ -65,14 +65,14 @@ Point AnticipationVelocityModel::compute_next_state(
     return velocity * step.dt();
 }
 
-Point AnticipationVelocityModel::update_direction(
+Vector AnticipationVelocityModel::update_direction(
     const State& current_state,
-    Point desired_direction,
-    const Point& calculated_direction,
+    Vector desired_direction,
+    const Vector& calculated_direction,
     double dt) const
 {
-    const Point actual_direction = current_state.orientation;
-    Point updated_direction;
+    const Vector actual_direction = current_state.orientation;
+    Vector updated_direction;
 
     if(desired_direction.scalar_product(calculated_direction) *
            desired_direction.scalar_product(actual_direction) <
@@ -80,7 +80,7 @@ Point AnticipationVelocityModel::update_direction(
         updated_direction = calculated_direction;
     } else {
         // Compute the rate of change of direction (Eq. 7)
-        const Point direction_derivative =
+        const Vector direction_derivative =
             (calculated_direction.normalized() - actual_direction) / current_state.reaction_time;
         updated_direction = actual_direction + direction_derivative * dt;
     }
@@ -178,7 +178,7 @@ double AnticipationVelocityModel::optimal_speed(
 double AnticipationVelocityModel::get_spacing(
     const State& current_state,
     const NeighborView& neighbor,
-    const Point& direction) const
+    const Vector& direction) const
 {
     const auto& neighbor_state = std::get<State>(*neighbor.state);
     const auto distp12 = neighbor.relative_position;
@@ -197,15 +197,15 @@ double AnticipationVelocityModel::get_spacing(
     return distp12.norm() - l;
 }
 
-Point AnticipationVelocityModel::calculate_influence_direction(
-    const Point& desired_direction,
-    const Point& predicted_direction) const
+Vector AnticipationVelocityModel::calculate_influence_direction(
+    const Vector& desired_direction,
+    const Vector& predicted_direction) const
 {
     // Eq. (5)
-    const Point orthogonal_direction =
-        Point(-desired_direction.y, desired_direction.x).normalized();
+    const Vector orthogonal_direction =
+        Vector(-desired_direction.y(), desired_direction.x()).normalized();
     const double alignment = orthogonal_direction.scalar_product(predicted_direction);
-    Point influence_direction = orthogonal_direction;
+    Vector influence_direction = orthogonal_direction;
     if(fabs(alignment) < j_eps) {
         // Choose a random direction (left or right)
         if(_gen() % 2 == 0) {
@@ -217,9 +217,9 @@ Point AnticipationVelocityModel::calculate_influence_direction(
     return influence_direction;
 }
 
-Point AnticipationVelocityModel::neighbor_repulsion(
+Vector AnticipationVelocityModel::neighbor_repulsion(
     const State& current_state,
-    Point desired_direction,
+    Vector desired_direction,
     const NeighborView& neighbor) const
 {
     const auto& neighbor_state = std::get<State>(*neighbor.state);
@@ -236,7 +236,7 @@ Point AnticipationVelocityModel::neighbor_repulsion(
     // Check perception range (Eq. 1)
     const auto in_perception_range = d1.scalar_product(ep12) >= 0 || e1.scalar_product(ep12) >= 0;
     if(!in_perception_range)
-        return Point(0, 0);
+        return Vector(0, 0);
 
     const double s_gap = (current_state.velocity - neighbor_state.velocity).scalar_product(ep12) *
                          current_state.anticipation_time;
@@ -259,15 +259,15 @@ Point AnticipationVelocityModel::neighbor_repulsion(
     return influence_direction * interaction_strength;
 }
 
-Point AnticipationVelocityModel::handle_wall_avoidance(
-    const Point& direction,
+Vector AnticipationVelocityModel::handle_wall_avoidance(
+    const Vector& direction,
     const State& current_state,
     const AgentStep& step,
     double pushout_strength) const
 {
     const double critical_wall_distance = current_state.wall_buffer_distance + current_state.radius;
 
-    Point modified_direction = direction;
+    Vector modified_direction = direction;
     for(const auto& wall : step.walls_in_range(critical_wall_distance)) {
         const auto dot_product = modified_direction.scalar_product(wall.normal);
 

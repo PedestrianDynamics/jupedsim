@@ -4,7 +4,7 @@
 #include "cfg_cgal.hpp"
 #include "geometry/geometry.hpp"
 #include "geometry/location.hpp"
-#include "point.hpp"
+#include "kernel.hpp"
 #include "simulation_error.hpp"
 
 #include <algorithm>
@@ -88,7 +88,7 @@ SurfaceMeshShortestPathRoutingEngine::trace_way(const Point3D& source, const Poi
         /// Which of the two directions is the open one needs no test: a geodesic only turns
         /// around a corner the walkable area bends away from, so the free side is always the
         /// wider one. Judged in plan, like everything a model is told.
-        Point out_of_the_corner(SurfaceMesh::Vertex_index v) const
+        Vector out_of_the_corner(SurfaceMesh::Vertex_index v) const
         {
             const auto border = CGAL::is_border(v, mesh);
             if(!border) {
@@ -96,8 +96,8 @@ SurfaceMeshShortestPathRoutingEngine::trace_way(const Point3D& source, const Poi
                 return {0.0, 0.0};
             }
             const Point here = xy(v);
-            const Point along = (xy(mesh.source(*border)) - here).normalized();
-            const Point onwards = (xy(mesh.target(mesh.next(*border))) - here).normalized();
+            const Vector along = (xy(mesh.source(*border)) - here).normalized();
+            const Vector onwards = (xy(mesh.target(mesh.next(*border))) - here).normalized();
             // A straight wall running through has no corner to step around.
             return (along + onwards).normalized() * -1.0;
         }
@@ -115,7 +115,7 @@ SurfaceMeshShortestPathRoutingEngine::trace_way(const Point3D& source, const Poi
 
         void operator()(SurfaceMesh::Halfedge_index e, K::FT t)
         {
-            way.push_back({tree.point(e, held_off_the_walls(e, t)), Point{0.0, 0.0}});
+            way.push_back({tree.point(e, held_off_the_walls(e, t)), Vector{0.0, 0.0}});
         }
         void operator()(SurfaceMesh::Vertex_index v)
         {
@@ -123,7 +123,7 @@ SurfaceMeshShortestPathRoutingEngine::trace_way(const Point3D& source, const Poi
         }
         void operator()(SurfaceMesh::Face_index f, const ShortestPath::Barycentric_coordinates& bc)
         {
-            way.push_back({tree.point(f, bc), Point{0.0, 0.0}});
+            way.push_back({tree.point(f, bc), Vector{0.0, 0.0}});
         }
     };
 
@@ -135,15 +135,16 @@ SurfaceMeshShortestPathRoutingEngine::trace_way(const Point3D& source, const Poi
 
 Point3D SurfaceMeshShortestPathRoutingEngine::held_off_the_wall(
     const Point3D& corner,
-    Point into_the_open) const
+    Vector into_the_open) const
 {
     const Point moved = Point{corner.x(), corner.y()} + into_the_open * wall_clearance();
     // Back onto the surface: beside a corner the floor may climb, and the route has to stay on
     // the storey the corner belongs to. Half a metre is far more than the clearance can climb
     // and far less than one storey.
     constexpr double same_storey = 0.5;
-    const auto located = _geometry.get_location_near_z(moved.x, moved.y, corner.z(), same_storey);
-    return located ? located->position_3d() : Point3D{moved.x, moved.y, corner.z()};
+    const auto located =
+        _geometry.get_location_near_z(moved.x(), moved.y(), corner.z(), same_storey);
+    return located ? located->position_3d() : Point3D{moved.x(), moved.y(), corner.z()};
 }
 
 std::vector<Point3D> SurfaceMeshShortestPathRoutingEngine::get_shortest_path(
@@ -179,9 +180,8 @@ Point SurfaceMeshShortestPathRoutingEngine::next_waypoint(
     return here;
 }
 
-Point SurfaceMeshShortestPathRoutingEngine::get_orientation(
-    const Location& from,
-    const Location& to)
+Vector
+SurfaceMeshShortestPathRoutingEngine::get_orientation(const Location& from, const Location& to)
 {
     // Zero when the way heads for where it already is: nowhere left to go.
     return (next_waypoint(from.position_3d(), to.position_3d()) - from.xy()).normalized();

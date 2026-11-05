@@ -3,7 +3,7 @@
 
 #include "cfg_cgal.hpp"
 #include "geometry_builder.hpp"
-#include "point.hpp"
+#include "kernel.hpp"
 
 #include <vector>
 

@@ -2,8 +2,8 @@
 #include "collision_free_speed_model_v2.hpp"
 
 #include "conversion.hpp"
+#include "kernel.hpp"
 #include "operational_model.hpp"
-#include "point.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep
 
 #include <pybind11/cast.h>
@@ -70,7 +70,7 @@ void init_collision_free_speed_model_v2(py::module_& m)
     )");
     state
         .def(
-            py::init([](Point orientation,
+            py::init([](Vector orientation,
                         double strength_neighbor_repulsion,
                         double range_neighbor_repulsion,
                         double strength_geometry_repulsion,

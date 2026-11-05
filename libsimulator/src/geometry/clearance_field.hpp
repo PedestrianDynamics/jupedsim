@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
+#include "kernel.hpp"
 #include "line_segment.hpp"
-#include "point.hpp"
 
 #include <cstddef>
 #include <cstdint>

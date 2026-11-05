@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
-#include "point.hpp"
+#include "kernel.hpp"
 
 #include <fmt/core.h>
 
 struct GeneralizedCentrifugalForceModelState {
-    Point orientation{1.0, 0.0};
+    Vector orientation{1.0, 0.0};
     double speed{};
-    Point e0{};
+    Vector e0{};
     int orientation_delay{};
     double mass{1.0};
     double tau{0.5};

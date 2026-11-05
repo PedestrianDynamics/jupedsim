@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "conversion.hpp"
 
-#include "point.hpp"
+#include "kernel.hpp"
 
 #include <algorithm>
 #include <cstddef>
@@ -12,12 +12,22 @@
 
 std::tuple<double, double> into_tuple(const Point& p)
 {
-    return std::make_tuple(p.x, p.y);
+    return std::make_tuple(p.x(), p.y());
+}
+
+std::tuple<double, double> into_tuple(const Vector& v)
+{
+    return std::make_tuple(v.x(), v.y());
 }
 
 Point into_point(const std::tuple<double, double>& p)
 {
     return Point{std::get<0>(p), std::get<1>(p)};
+}
+
+Vector into_vector(const std::tuple<double, double>& v)
+{
+    return Vector{std::get<0>(v), std::get<1>(v)};
 }
 
 std::string clean_doc(std::string_view raw)

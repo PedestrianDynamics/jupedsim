@@ -9,12 +9,12 @@
 #include "generic_agent.hpp"
 #include "geometry/geometry.hpp"
 #include "geometry_fixtures.hpp"
+#include "kernel.hpp"
 #include "neighborhood_search.hpp"
 #include "operational_decision_system.hpp"
 #include "operational_model_state.hpp"
 #include "operational_model_type.hpp"
 #include "operational_models/custom_model/custom_model.hpp"
-#include "point.hpp"
 #include "social_force_model_state.hpp"
 #include "test_common.hpp"
 #include "unique_id.hpp"
@@ -33,7 +33,7 @@
 namespace
 {
 struct MinimalState {
-    Point velocity{};
+    Vector velocity{};
     int applications{};
 };
 
@@ -52,7 +52,7 @@ struct ConstCharPointerToStringPayload {
 class MinimalCustomModel : public CustomModel
 {
 public:
-    Point compute_next_state(
+    Vector compute_next_state(
         const OperationalModelState& current,
         OperationalModelState& next,
         const AgentStep& step) const override
@@ -83,7 +83,7 @@ GenericAgent make_agent(OperationalModelState model, Point position = {})
         GenericAgent::ID::invalid,
         jps::UniqueID<Journey>::invalid,
         jps::UniqueID<BaseStage>::invalid,
-        *flat_square().get_location_near_z(position.x, position.y, 0.0),
+        *flat_square().get_location_near_z(position.x(), position.y(), 0.0),
         std::move(model));
 }
 } // namespace
@@ -143,7 +143,7 @@ TEST(CustomModel, FormatsAgentWithCustomModelState)
 TEST(CustomModel, RunsThroughOperationalDecisionSystem)
 {
     AgentContainer<GenericAgent> agents{};
-    agents.emplace_back(make_agent(CustomModel::State{MinimalState{Point{2.0, 0.0}, 0}}));
+    agents.emplace_back(make_agent(CustomModel::State{MinimalState{Vector{2.0, 0.0}, 0}}));
 
     NeighborhoodSearch<GenericAgent> neighborhood_search{2.2};
     neighborhood_search.update(agents);

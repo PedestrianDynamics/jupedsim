@@ -45,7 +45,7 @@ void def_placement(py::class_<Grid>& grid)
 {
     grid.def_property_readonly(
             "origin",
-            [](const Grid& g) { return std::tuple{g.info.origin.x, g.info.origin.y}; },
+            [](const Grid& g) { return std::tuple{g.info.origin.x(), g.info.origin.y()}; },
             "Lower-left corner of cell (0, 0) in metres.")
         .def_property_readonly(
             "width", [](const Grid& g) { return g.info.width; }, "Number of cells along x.")
@@ -60,18 +60,18 @@ void def_placement(py::class_<Grid>& grid)
             [](const Grid& g) {
                 const auto& i = g.info;
                 return std::tuple{
-                    i.origin.x,
-                    i.origin.x + i.width * i.cell_size,
-                    i.origin.y,
-                    i.origin.y + i.height * i.cell_size};
+                    i.origin.x(),
+                    i.origin.x() + i.width * i.cell_size,
+                    i.origin.y(),
+                    i.origin.y() + i.height * i.cell_size};
             },
             "``(x_min, x_max, y_min, y_max)``")
         .def("__repr__", [](const Grid& g) {
             return py::str("{}(origin=({}, {}), width={}, height={}, cell_size={})")
                 .format(
                     py::type::of<Grid>().attr("__name__"),
-                    g.info.origin.x,
-                    g.info.origin.y,
+                    g.info.origin.x(),
+                    g.info.origin.y(),
                     g.info.width,
                     g.info.height,
                     g.info.cell_size);
@@ -151,8 +151,8 @@ void init_routing(py::module_& m)
                      py::ssize_t{2}});
                 auto* out = directions.mutable_data();
                 for(const auto& d : g.directions) {
-                    *out++ = d.x;
-                    *out++ = d.y;
+                    *out++ = d.x();
+                    *out++ = d.y();
                 }
                 return directions;
             },
@@ -212,8 +212,10 @@ void init_routing(py::module_& m)
                 auto ys = y.mutable_unchecked<2>();
                 for(py::ssize_t row = 0; row < shape[0]; ++row) {
                     for(py::ssize_t col = 0; col < shape[1]; ++col) {
-                        xs(row, col) = i.origin.x + (static_cast<double>(col) + 0.5) * i.cell_size;
-                        ys(row, col) = i.origin.y + (static_cast<double>(row) + 0.5) * i.cell_size;
+                        xs(row, col) =
+                            i.origin.x() + (static_cast<double>(col) + 0.5) * i.cell_size;
+                        ys(row, col) =
+                            i.origin.y() + (static_cast<double>(row) + 0.5) * i.cell_size;
                     }
                 }
                 return std::tuple{x, y};
@@ -240,11 +242,11 @@ void init_routing(py::module_& m)
     location
         .def_property_readonly(
             "x",
-            [](const Location& l) { return l.xy().x; },
+            [](const Location& l) { return l.xy().x(); },
             clean_doc("x coordinate in metres.").c_str())
         .def_property_readonly(
             "y",
-            [](const Location& l) { return l.xy().y; },
+            [](const Location& l) { return l.xy().y(); },
             clean_doc("y coordinate in metres.").c_str())
         .def_property_readonly(
             "z", &Location::z, clean_doc("Height of the surface here, in metres.").c_str())
@@ -252,7 +254,7 @@ void init_routing(py::module_& m)
             "region_id", &Location::region, clean_doc("Region this location lies in.").c_str())
         .def("__repr__", [](const Location& l) {
             // Python float formatting (3.0, not fmt's 3), as the former Python wrapper printed.
-            return py::str("Location({!r}, {!r}, {!r})").format(l.xy().x, l.xy().y, l.z());
+            return py::str("Location({!r}, {!r}, {!r})").format(l.xy().x(), l.xy().y(), l.z());
         });
 
     py::class_<SurfaceMeshShortestPathRoutingEngine>(m, "SurfaceMeshShortestPathRoutingEngine")

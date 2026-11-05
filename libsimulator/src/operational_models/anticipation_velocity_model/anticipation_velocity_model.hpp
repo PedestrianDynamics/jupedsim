@@ -2,10 +2,10 @@
 #pragma once
 
 #include "anticipation_velocity_model_state.hpp"
+#include "kernel.hpp"
 #include "operational_model.hpp"
 #include "operational_model_state.hpp"
 #include "operational_model_type.hpp"
-#include "point.hpp"
 
 #include <fmt/core.h>
 
@@ -31,7 +31,7 @@ public:
     AnticipationVelocityModel(double pushout_strength, uint64_t rng_seed);
     ~AnticipationVelocityModel() override = default;
     OperationalModelType type() const override;
-    Point compute_next_state(
+    Vector compute_next_state(
         const OperationalModelState& current,
         OperationalModelState& next,
         const AgentStep& step) const override;
@@ -39,27 +39,27 @@ public:
 
 private:
     double optimal_speed(const State& current_state, double spacing, double time_gap) const;
-    Point calculate_influence_direction(
-        const Point& desired_direction,
-        const Point& predicted_direction) const;
+    Vector calculate_influence_direction(
+        const Vector& desired_direction,
+        const Vector& predicted_direction) const;
     double get_spacing(
         const State& current_state,
         const NeighborView& neighbor,
-        const Point& direction) const;
-    Point neighbor_repulsion(
+        const Vector& direction) const;
+    Vector neighbor_repulsion(
         const State& current_state,
-        Point desired_direction,
+        Vector desired_direction,
         const NeighborView& neighbor) const;
 
-    Point handle_wall_avoidance(
-        const Point& direction,
+    Vector handle_wall_avoidance(
+        const Vector& direction,
         const State& current_state,
         const AgentStep& step,
         double pushout_strength) const;
 
-    Point update_direction(
+    Vector update_direction(
         const State& current_state,
-        Point desired_direction,
-        const Point& calculated_direction,
+        Vector desired_direction,
+        const Vector& calculated_direction,
         double dt) const;
 };

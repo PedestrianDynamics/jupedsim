@@ -7,8 +7,8 @@
 #include "geometry/clearance_field.hpp"
 #include "geometry/location.hpp"
 #include "geometry/region_split.hpp"
+#include "kernel.hpp"
 #include "line_segment.hpp"
-#include "point.hpp"
 
 #include <array>
 #include <cstddef>
@@ -110,7 +110,7 @@ public:
 
     /// True iff the straight horizontal step @p direction, taken from @p who, crosses no
     /// wall and does not run off the surface.
-    bool no_geometry_between(const Location& who, Point direction) const;
+    bool no_geometry_between(const Location& who, Vector direction) const;
 
     /// True iff @p who can see @p other: the way there has to be clear, and it has to lead
     /// to the mesh face @p other is standing on.
@@ -160,7 +160,7 @@ private:
 
     /// The region a straight horizontal step from @p who along @p direction ends up in, or
     /// nothing when a wall stops it or it runs off the surface.
-    std::optional<std::size_t> region_reached(const Location& who, Point direction) const;
+    std::optional<std::size_t> region_reached(const Location& who, Vector direction) const;
 
     SurfaceMesh _mesh{};
     std::unique_ptr<AABBTree> _aabb_tree{};

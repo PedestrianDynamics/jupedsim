@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
+#include "kernel.hpp"
 #include "line_segment.hpp"
-#include "point.hpp"
 #include "simulation_error.hpp"
 
 #include <algorithm>
@@ -22,23 +22,26 @@ struct AABB {
         if(std::empty(container)) {
             throw SimulationError("Cannot create a AABB from zero points");
         }
-        for(const auto [x, y] : container) {
-            xmin = std::min(x, xmin);
-            xmax = std::max(x, xmax);
-            ymin = std::min(y, ymin);
-            ymax = std::max(y, ymax);
+        for(const Point& p : container) {
+            xmin = std::min(p.x(), xmin);
+            xmax = std::max(p.x(), xmax);
+            ymin = std::min(p.y(), ymin);
+            ymax = std::max(p.y(), ymax);
         };
     }
 
     AABB(const Point a, const Point b)
     {
-        xmin = std::min(b.x, std::min(a.x, xmin));
-        xmax = std::max(b.x, std::max(a.x, xmax));
-        ymin = std::min(b.y, std::min(a.y, ymin));
-        ymax = std::max(b.y, std::max(a.y, ymax));
+        xmin = std::min(b.x(), std::min(a.x(), xmin));
+        xmax = std::max(b.x(), std::max(a.x(), xmax));
+        ymin = std::min(b.y(), std::min(a.y(), ymin));
+        ymax = std::max(b.y(), std::max(a.y(), ymax));
     }
 
-    bool inside(Point p) const { return p.x >= xmin && p.x <= xmax && p.y >= ymin && p.y <= ymax; }
+    bool inside(Point p) const
+    {
+        return p.x() >= xmin && p.x() <= xmax && p.y() >= ymin && p.y() <= ymax;
+    }
 
     bool overlap(const AABB& other) const
     {

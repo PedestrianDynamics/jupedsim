@@ -3,7 +3,7 @@
 
 #include "cfg_cgal.hpp"
 #include "geometry/geometry.hpp"
-#include "point.hpp"
+#include "kernel.hpp"
 #include "simulation_error.hpp"
 
 #include <array>
@@ -176,15 +176,12 @@ std::optional<Geometry::FaceLocation> straight_walk(
 }
 } // namespace
 
-std::optional<Location> Location::try_move_on_surface(Point xy_direction) const
+std::optional<Location> Location::try_move_on_surface(Vector xy_direction) const
 {
     // Walk from current Location along the provided xy-direction. A null result
     // means the straight path leaves the walkable area.
-    const auto new_face_location = straight_walk(
-        _geometry->mesh(),
-        _face,
-        Point2D{_xy.x, _xy.y},
-        K::Vector_2{xy_direction.x, xy_direction.y});
+    const auto new_face_location =
+        straight_walk(_geometry->mesh(), _face, _xy.cgal(), xy_direction.cgal());
     if(new_face_location) {
         return Location{
             _geometry,
@@ -201,7 +198,7 @@ bool Location::can_walk_straight_to(const Location& other) const
     return _geometry->no_geometry_between(*this, other);
 }
 
-void Location::move_on_surface(Point xy_direction)
+void Location::move_on_surface(Vector xy_direction)
 {
     auto moved = try_move_on_surface(xy_direction);
     if(!moved) {
