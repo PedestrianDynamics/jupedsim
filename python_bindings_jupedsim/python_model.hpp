@@ -3,9 +3,9 @@
 
 #include "agent_view.hpp"
 #include "generic_agent.hpp"
+#include "kernel.hpp"
 #include "operational_model_state.hpp"
 #include "operational_models/custom_model/custom_model.hpp"
-#include "point.hpp"
 
 #include <pybind11/pybind11.h>
 
@@ -47,7 +47,7 @@ class PythonModel final : public CustomModel
 public:
     explicit PythonModel(py::object model);
 
-    Point compute_next_state(
+    Vector compute_next_state(
         const OperationalModelState& current,
         OperationalModelState& next,
         const AgentStep& step) const override;

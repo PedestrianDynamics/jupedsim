@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include <point.hpp>
+#include "kernel.hpp"
 
 #include <iterator>
 #include <ranges>
@@ -13,7 +13,11 @@
 
 std::tuple<double, double> into_tuple(const Point& p);
 
+std::tuple<double, double> into_tuple(const Vector& v);
+
 Point into_point(const std::tuple<double, double>& p);
+
+Vector into_vector(const std::tuple<double, double>& v);
 
 /// Normalizes the whitespace of a docstring written as an indented raw string literal.
 ///

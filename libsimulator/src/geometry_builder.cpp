@@ -2,7 +2,7 @@
 #include "geometry_builder.hpp"
 
 #include "cfg_cgal.hpp"
-#include "point.hpp"
+#include "kernel.hpp"
 #include "polygon.hpp"
 
 #include <fmt/format.h>

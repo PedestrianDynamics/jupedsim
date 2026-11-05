@@ -2,8 +2,8 @@
 #include "warp_driver_model.hpp"
 
 #include "conversion.hpp"
+#include "kernel.hpp"
 #include "operational_model.hpp"
-#include "point.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep
 
 #include <pybind11/cast.h>
@@ -105,7 +105,7 @@ void init_warp_driver_model(py::module_& m)
     )");
     state
         .def(
-            py::init([](Point orientation,
+            py::init([](Vector orientation,
                         double radius,
                         double desired_speed,
                         double stuck_time,

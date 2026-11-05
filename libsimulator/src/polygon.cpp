@@ -2,7 +2,7 @@
 #include "polygon.hpp"
 
 #include "cfg_cgal.hpp"
-#include "point.hpp"
+#include "kernel.hpp"
 #include "simulation_error.hpp"
 
 #include <CGAL/enum.h>
@@ -21,7 +21,7 @@
 Polygon::Polygon(const std::vector<Point>& points)
 {
     for(const auto& p : points) {
-        if(!std::isfinite(p.x) || !std::isfinite(p.y)) {
+        if(!std::isfinite(p.x()) || !std::isfinite(p.y())) {
             throw SimulationError("Polygon coordinates must be finite");
         }
     }
@@ -31,7 +31,7 @@ Polygon::Polygon(const std::vector<Point>& points)
         throw SimulationError("Polygon must have at least 3 points");
     }
     for(size_t index = 0; index < count; ++index) {
-        _polygon.push_back({points[index].x, points[index].y});
+        _polygon.push_back({points[index].x(), points[index].y()});
     }
 
     if(!_polygon.is_simple()) {
@@ -59,17 +59,17 @@ bool Polygon::is_convex() const
 
 bool Polygon::is_inside(Point p) const
 {
-    const auto side = _polygon.bounded_side(PolygonType::Point_2{p.x, p.y});
+    const auto side = _polygon.bounded_side(p.cgal());
     return side != CGAL::Bounded_side::ON_UNBOUNDED_SIDE;
 }
 
 Point Polygon::centroid() const
 {
-    Point sum{};
+    Vector sum{};
     std::for_each(_polygon.begin(), _polygon.end(), [&sum](const auto& p) {
-        sum += Point(CGAL::to_double(p.x()), CGAL::to_double(p.y()));
+        sum += offset_from_origin(Point(CGAL::to_double(p.x()), CGAL::to_double(p.y())));
     });
-    return sum / static_cast<double>(_polygon.size());
+    return at_offset(sum / static_cast<double>(_polygon.size()));
 }
 
 std::tuple<Point, double> Polygon::containing_circle() const

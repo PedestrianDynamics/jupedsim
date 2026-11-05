@@ -3,10 +3,10 @@
 
 #include "agent_view.hpp"
 #include "generic_agent.hpp"
+#include "kernel.hpp"
 #include "operational_model.hpp"
 #include "operational_model_state.hpp"
 #include "operational_model_type.hpp"
-#include "point.hpp"
 #include "simulation_error.hpp"
 
 #include <algorithm>
@@ -30,7 +30,7 @@ constexpr double wall_search_radius = 4.0;
 
 double neighbor_influence(
     const std::vector<NeighborView>& neighborhood,
-    const Point& reference_direction,
+    const Vector& reference_direction,
     const CollisionFreeSpeedModelV3::State& current_state)
 {
     const auto range_x =
@@ -69,7 +69,7 @@ OperationalModelType CollisionFreeSpeedModelV3::type() const
     return OperationalModelType::CollisionFreeSpeedV3;
 }
 
-Point CollisionFreeSpeedModelV3::compute_next_state(
+Vector CollisionFreeSpeedModelV3::compute_next_state(
     const OperationalModelState& current,
     OperationalModelState& next,
     const AgentStep& step) const
@@ -78,14 +78,14 @@ Point CollisionFreeSpeedModelV3::compute_next_state(
     auto neighborhood = step.other_agents_in_range(
         _cut_off_radius, [&step](const NeighborView& n) { return step.no_geometry_between(n); });
 
-    Point boundary_repulsion{};
+    Vector boundary_repulsion{};
     for(const auto& wall : step.walls_in_range(wall_search_radius)) {
         boundary_repulsion += this->boundary_repulsion(current_state, wall);
     }
 
     const auto desired_direction = step.route_orientation();
     auto reference_direction = (desired_direction + boundary_repulsion).normalized();
-    if(reference_direction == Point{}) {
+    if(reference_direction == Vector{}) {
         reference_direction = current_state.orientation;
     }
 
@@ -96,11 +96,11 @@ Point CollisionFreeSpeedModelV3::compute_next_state(
         current_state.heading_angle + alpha * (heading_target - current_state.heading_angle);
     auto direction =
         reference_direction.rotate(std::cos(heading_angle), std::sin(heading_angle)).normalized();
-    if(direction == Point{}) {
+    if(direction == Vector{}) {
         direction = reference_direction;
     }
 
-    const auto closest_spacing_towards = [&](Point towards) {
+    const auto closest_spacing_towards = [&](Vector towards) {
         auto spacing = std::numeric_limits<double>::max();
         for(const auto& neighbor : neighborhood) {
             spacing = std::min(spacing, get_spacing(current_state, neighbor, towards));
@@ -110,7 +110,7 @@ Point CollisionFreeSpeedModelV3::compute_next_state(
 
     const auto spacing_move = closest_spacing_towards(direction);
     const auto goal_direction =
-        (desired_direction == Point{}) ? reference_direction : desired_direction;
+        (desired_direction == Vector{}) ? reference_direction : desired_direction;
     const auto spacing_goal = closest_spacing_towards(goal_direction);
 
     const auto spacing =
@@ -198,7 +198,7 @@ double CollisionFreeSpeedModelV3::optimal_speed(
 double CollisionFreeSpeedModelV3::get_spacing(
     const State& current_state,
     const NeighborView& neighbor,
-    const Point& direction) const
+    const Vector& direction) const
 {
     const auto& other = std::get<State>(*neighbor.state);
     const auto distp12 = neighbor.relative_position;
@@ -216,7 +216,7 @@ double CollisionFreeSpeedModelV3::get_spacing(
     return distp12.norm() - l;
 }
 
-Point CollisionFreeSpeedModelV3::boundary_repulsion(
+Vector CollisionFreeSpeedModelV3::boundary_repulsion(
     const State& current_state,
     const WallView& boundary) const
 {

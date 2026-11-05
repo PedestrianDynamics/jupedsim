@@ -2,8 +2,8 @@
 #include "geometry/segment_grid.hpp"
 
 #include "aabb.hpp"
+#include "kernel.hpp"
 #include "line_segment.hpp"
-#include "point.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -13,13 +13,13 @@
 
 Cell make_cell(Point p)
 {
-    return {floor(p.x / cell_extend) * cell_extend, floor(p.y / cell_extend) * cell_extend};
+    return {floor(p.x() / cell_extend) * cell_extend, floor(p.y() / cell_extend) * cell_extend};
 }
 
 bool is_n4_adjacent(const Cell& a, const Cell& b)
 {
-    const auto dx = static_cast<int>(abs(a.x - b.x) / cell_extend);
-    const auto dy = static_cast<int>(abs(a.y - b.y) / cell_extend);
+    const auto dx = static_cast<int>(abs(a.x() - b.x()) / cell_extend);
+    const auto dy = static_cast<int>(abs(a.y() - b.y()) / cell_extend);
     return dx + dy == 1;
 }
 
@@ -43,17 +43,17 @@ std::set<Cell> cells_from_line_segment(LineSegment ls)
     std::vector<Point> intersections{};
     for(double x_intersect = to_multiple(bounds.xmin); x_intersect <= bounds.xmax;
         x_intersect += cell_extend) {
-        const double fact = (x_intersect - ls.p1.x) / vec_p1p2.x;
-        intersections.emplace_back(x_intersect, ls.p1.y + fact * vec_p1p2.y);
+        const double fact = (x_intersect - ls.p1.x()) / vec_p1p2.x();
+        intersections.emplace_back(x_intersect, ls.p1.y() + fact * vec_p1p2.y());
     }
     for(double y_intersect = to_multiple(bounds.ymin); y_intersect <= bounds.ymax;
         y_intersect += cell_extend) {
-        const double fact = (y_intersect - ls.p1.y) / vec_p1p2.y;
-        intersections.emplace_back(ls.p1.x + fact * vec_p1p2.x, y_intersect);
+        const double fact = (y_intersect - ls.p1.y()) / vec_p1p2.y();
+        intersections.emplace_back(ls.p1.x() + fact * vec_p1p2.x(), y_intersect);
     }
     std::sort(std::begin(intersections), std::end(intersections));
     for(size_t index = 1; index < intersections.size(); ++index) {
-        cells.insert(make_cell((intersections[index - 1] + intersections[index]) / 2));
+        cells.insert(make_cell(midpoint(intersections[index - 1], intersections[index])));
     }
     return cells;
 }

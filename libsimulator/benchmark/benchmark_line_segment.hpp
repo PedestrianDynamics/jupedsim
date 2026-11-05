@@ -2,8 +2,8 @@
 
 #pragma once
 
+#include "kernel.hpp"
 #include "line_segment.hpp"
-#include "point.hpp"
 
 #include <benchmark/benchmark.h>
 

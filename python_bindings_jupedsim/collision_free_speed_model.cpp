@@ -2,8 +2,8 @@
 #include "collision_free_speed_model.hpp"
 
 #include "conversion.hpp"
+#include "kernel.hpp"
 #include "operational_model.hpp"
-#include "point.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep
 
 #include <pybind11/cast.h>
@@ -79,7 +79,7 @@ void init_collision_free_speed_model(py::module_& m)
     )");
     state
         .def(
-            py::init([](Point orientation, double time_gap, double desired_speed, double radius) {
+            py::init([](Vector orientation, double time_gap, double desired_speed, double radius) {
                 return CollisionFreeSpeedModel::State{
                     .orientation = orientation,
                     .time_gap = time_gap,

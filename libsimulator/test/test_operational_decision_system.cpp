@@ -3,11 +3,11 @@
 #include "generic_agent.hpp"
 #include "geometry/geometry.hpp"
 #include "geometry_fixtures.hpp"
+#include "kernel.hpp"
 #include "neighborhood_search.hpp"
 #include "operational_decision_system.hpp"
 #include "operational_model_state.hpp"
 #include "operational_models/custom_model/custom_model.hpp"
-#include "point.hpp"
 #include "test_common.hpp"
 #include "unique_id.hpp"
 
@@ -18,7 +18,7 @@
 namespace
 {
 struct ConstantVelocity {
-    Point velocity{};
+    Vector velocity{};
 };
 
 /// Minimal model: advances the position by `velocity * dt` each step. Enough to
@@ -26,7 +26,7 @@ struct ConstantVelocity {
 class ConstantVelocityModel : public CustomModel
 {
 public:
-    Point compute_next_state(
+    Vector compute_next_state(
         const OperationalModelState& current,
         OperationalModelState&,
         const AgentStep& step) const override
@@ -38,13 +38,13 @@ public:
     void check_model_constraint(const GenericAgent&, const AgentView&) const override {}
 };
 
-GenericAgent make_agent(const Geometry& geometry, Point start, Point velocity)
+GenericAgent make_agent(const Geometry& geometry, Point start, Vector velocity)
 {
     return GenericAgent(
         GenericAgent::ID::invalid,
         jps::UniqueID<Journey>::invalid,
         jps::UniqueID<BaseStage>::invalid,
-        *geometry.get_location_near_z(start.x, start.y, 0.0),
+        *geometry.get_location_near_z(start.x(), start.y(), 0.0),
         CustomModel::State{ConstantVelocity{velocity}});
 }
 
@@ -61,7 +61,7 @@ TEST(OperationalDecisionSystemLocation, WalkingTheStepLandsWhereDeadReckoningSay
 
     AgentContainer<GenericAgent> agents{};
     const Point start{0.0, 0.0};
-    agents.emplace_back(make_agent(*geo, start, Point{2.0, 0.0}));
+    agents.emplace_back(make_agent(*geo, start, Vector{2.0, 0.0}));
 
     NeighborhoodSearch<GenericAgent> neighborhood_search{2.2};
     neighborhood_search.update(agents);
@@ -71,8 +71,8 @@ TEST(OperationalDecisionSystemLocation, WalkingTheStepLandsWhereDeadReckoningSay
 
     // velocity=2.0, dt=0.5 --> move x by 1.0
     const auto& agent = agents.front();
-    EXPECT_NEAR(agent.location.xy().x, start.x + 1.0, 1e-9);
-    EXPECT_NEAR(agent.location.xy().y, start.y, 1e-9);
+    EXPECT_NEAR(agent.location.xy().x(), start.x() + 1.0, 1e-9);
+    EXPECT_NEAR(agent.location.xy().y(), start.y(), 1e-9);
     EXPECT_NEAR(agent.location.z(), 0.0, 1e-9);
     EXPECT_EQ(agent.location.region(), 0u);
 }
@@ -83,7 +83,7 @@ TEST(OperationalDecisionSystemLocation, ItStaysOnTheSheetOverManySteps)
 
     AgentContainer<GenericAgent> agents{};
     const Point start{-5.0, -3.0};
-    const Point velocity{1.0, 0.5};
+    const Vector velocity{1.0, 0.5};
     const double dt = 0.1;
     const int steps = 20;
     agents.emplace_back(make_agent(*geo, start, velocity));
@@ -99,6 +99,6 @@ TEST(OperationalDecisionSystemLocation, ItStaysOnTheSheetOverManySteps)
         EXPECT_EQ(agent.location.region(), 0u);
     }
     // After `steps` steps the agent advanced by velocity * dt * steps.
-    EXPECT_NEAR(agents.front().location.xy().x, start.x + velocity.x * dt * steps, 1e-9);
-    EXPECT_NEAR(agents.front().location.xy().y, start.y + velocity.y * dt * steps, 1e-9);
+    EXPECT_NEAR(agents.front().location.xy().x(), start.x() + velocity.x() * dt * steps, 1e-9);
+    EXPECT_NEAR(agents.front().location.xy().y(), start.y() + velocity.y() * dt * steps, 1e-9);
 }

@@ -4,9 +4,9 @@
 #include "geometry/geometry.hpp"
 #include "geometry/location.hpp"
 #include "geometry/region_split.hpp"
+#include "kernel.hpp"
 #include "line_segment.hpp"
 #include "mesh_fixtures.hpp"
-#include "point.hpp"
 #include "test_common.hpp"
 
 #include <gtest/gtest.h>

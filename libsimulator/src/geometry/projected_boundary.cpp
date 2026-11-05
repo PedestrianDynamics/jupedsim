@@ -3,6 +3,7 @@
 
 #include "cfg_cgal.hpp"
 #include "hash_combine.hpp"
+#include "kernel.hpp"
 
 #include <CGAL/intersections.h>
 

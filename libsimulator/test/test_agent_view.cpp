@@ -5,10 +5,10 @@
 #include "geometry/geometry.hpp"
 #include "geometry/location.hpp"
 #include "geometry_fixtures.hpp"
+#include "kernel.hpp"
 #include "line_segment.hpp"
 #include "neighborhood_search.hpp"
 #include "operational_models/collision_free_speed_model/collision_free_speed_model.hpp"
-#include "point.hpp"
 #include "test_common.hpp"
 #include "unique_id.hpp"
 
@@ -32,7 +32,7 @@ GenericAgent make_agent(const Geometry& geo, Point pos, double radius = 0.2, dou
         GenericAgent::ID::invalid,
         jps::UniqueID<Journey>::invalid,
         jps::UniqueID<BaseStage>::invalid,
-        *geo.get_location_near_z(pos.x, pos.y, z),
+        *geo.get_location_near_z(pos.x(), pos.y(), z),
         std::move(s));
 }
 
@@ -124,11 +124,11 @@ TEST(AgentView, OtherAgentsInRangeCustomFilterSelectsSubset)
     const auto q = env.query(*geo);
 
     const auto result = env.first_agent_view(q).other_agents_in_range(
-        5.0, [](const NeighborView& n) { return n.relative_position.x >= 0.0; });
+        5.0, [](const NeighborView& n) { return n.relative_position.x() >= 0.0; });
 
     ASSERT_EQ(result.size(), 2u);
     for(const auto& neighbor : result) {
-        EXPECT_GE(neighbor.relative_position.x, 0.0);
+        EXPECT_GE(neighbor.relative_position.x(), 0.0);
     }
 }
 
@@ -146,7 +146,7 @@ TEST(AgentView, NoGeometryBetweenFiltersOccludedAgents)
         5.0, [&](const NeighborView& n) { return view.no_geometry_between(n); });
 
     ASSERT_EQ(result.size(), 1u);
-    EXPECT_EQ(result[0].relative_position, Point(0, 1));
+    EXPECT_EQ(result[0].relative_position, Vector(0, 1));
 }
 
 TEST(AgentView, OtherAgentsInRangeCustomFilterReceivesNoSelf)
@@ -207,7 +207,7 @@ TEST(AgentView, OtherAgentsInRangeCentresOnTheQueryingAgentNotTheOrigin)
     const auto result = env.first_agent_view(q).other_agents_in_range(2.0);
 
     ASSERT_EQ(result.size(), 1u);
-    EXPECT_EQ(result[0].relative_position, Point(1, 0));
+    EXPECT_EQ(result[0].relative_position, Vector(1, 0));
 }
 
 TEST(AgentView, WallsInRangeAreRelativeToTheAgent)
@@ -220,7 +220,7 @@ TEST(AgentView, WallsInRangeAreRelativeToTheAgent)
 
     std::vector<LineSegment> expected{};
     for(const auto& segment : q.line_segments_in_range(env.first_agent_location(), 3.0)) {
-        expected.push_back({segment.p1 - pos, segment.p2 - pos});
+        expected.push_back({at_offset(segment.p1 - pos), at_offset(segment.p2 - pos)});
     }
     ASSERT_FALSE(expected.empty());
 
@@ -254,12 +254,12 @@ TEST(AgentView, WallViewProjectsOntoTheWallAndPointsBackAtTheAgent)
     const WallView nearest =
         *std::ranges::min_element(walls, {}, [](const WallView& w) { return w.distance; });
 
-    EXPECT_DOUBLE_EQ(nearest.closest_point.x, 1.9);
-    EXPECT_NEAR(nearest.closest_point.y, 0.0, 1e-12);
+    EXPECT_DOUBLE_EQ(nearest.closest_point.x(), 1.9);
+    EXPECT_NEAR(nearest.closest_point.y(), 0.0, 1e-12);
     EXPECT_DOUBLE_EQ(nearest.distance, 1.9);
     // The wall is to the agent's right, so a normal pointing back at the agent faces -x.
-    EXPECT_DOUBLE_EQ(nearest.normal.x, -1.0);
-    EXPECT_NEAR(nearest.normal.y, 0.0, 1e-12);
+    EXPECT_DOUBLE_EQ(nearest.normal.x(), -1.0);
+    EXPECT_NEAR(nearest.normal.y(), 0.0, 1e-12);
 }
 
 TEST(AgentView, AgentsOnAnotherStoreyAreNotNeighbours)
@@ -318,5 +318,5 @@ TEST(AgentView, ANeighbourCloseEnoughToTouchCanStillBeOnAnotherStorey)
         10.0, [&](const NeighborView& n) { return view.no_geometry_between(n); });
 
     ASSERT_EQ(seen.size(), 1u);
-    EXPECT_EQ(seen[0].relative_position, Point(2.0, 0.0));
+    EXPECT_EQ(seen[0].relative_position, Vector(2.0, 0.0));
 }

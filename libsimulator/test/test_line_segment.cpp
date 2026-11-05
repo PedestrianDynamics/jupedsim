@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "geometric_functions.hpp"
+#include "kernel.hpp"
 #include "line_segment.hpp"
-#include "point.hpp"
 #include "test_common.hpp"
 
 #include <gtest/gtest.h>
@@ -17,8 +17,8 @@ TEST(LineSegment, ScalarProduct)
         Point p1(pi / i, pi * i);
         Point p2(i, std::sin(pi / i));
         LineSegment l1(p1, p2);
-        Point normal = l1.normal_vec();
-        Point diff = p2 - p1;
+        Vector normal = l1.normal_vec();
+        Vector diff = p2 - p1;
         ASSERT_NEAR(normal.scalar_product(diff), 0.0, 1.0e-12);
     }
 }
@@ -28,7 +28,7 @@ TEST(LineSegment, ShortestPoint)
     Point pa(-2, 4);
     Point pb(14, 9);
     LineSegment l1(pa, pb);
-    const Point& dpab = pa - pb;
+    const Vector& dpab = pa - pb;
     for(float i = -20; i < 20; ++i) {
         i = (i == 0) ? 0.5 : i;
         Point p1(i, std::sin(pi / i));

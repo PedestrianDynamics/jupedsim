@@ -2,7 +2,7 @@
 #pragma once
 #include "generic_agent.hpp"
 #include "hash_combine.hpp"
-#include "point.hpp"
+#include "kernel.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -70,8 +70,8 @@ class NeighborhoodSearch
 private:
     Grid2DIndex get_index(const Point& pos) const
     {
-        const int32_t idx = static_cast<int32_t>(pos.x / _cell_size);
-        const int32_t idy = static_cast<int32_t>(pos.y / _cell_size);
+        const int32_t idx = static_cast<int32_t>(pos.x() / _cell_size);
+        const int32_t idy = static_cast<int32_t>(pos.y() / _cell_size);
         return Grid2DIndex{idx, idy};
     }
 

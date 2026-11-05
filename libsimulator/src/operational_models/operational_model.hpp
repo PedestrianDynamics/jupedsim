@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
+#include "kernel.hpp"
 #include "operational_model_state.hpp"
 #include "operational_model_type.hpp"
-#include "point.hpp"
 #include "simulation_error.hpp"
 
 #include <fmt/core.h>
@@ -60,7 +60,7 @@ public:
     /// wants to move during this step. "next" arrives as an exact copy of "current";
     /// implementations overwrite only the fields they change. The returned movement is
     /// binding: the framework applies it as is.
-    virtual Point compute_next_state(
+    virtual Vector compute_next_state(
         const OperationalModelState& current,
         OperationalModelState& next,
         const AgentStep& step) const = 0;

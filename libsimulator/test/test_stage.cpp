@@ -7,7 +7,7 @@
 #include "geometry_fixtures.hpp"
 #include "gtest/gtest.h"
 #include "journey.hpp"
-#include "point.hpp"
+#include "kernel.hpp"
 #include "polygon.hpp"
 #include "stage.hpp"
 #include "test_common.hpp"
@@ -43,7 +43,7 @@ public:
     const test_geometries::SingleRoom room = test_geometries::rectangle({-10, -10}, {10, 10});
     FloorfieldRoutingEngine engine{*room.geometry, FloorfieldOptions{}};
 
-    Location at(Point p) const { return room.geometry->get_location(p.x, p.y, room.room_id); }
+    Location at(Point p) const { return room.geometry->get_location(p.x(), p.y(), room.room_id); }
 
     GenericAgent agent_at(Point p, BaseStage::ID stage_id) const
     {
@@ -69,7 +69,7 @@ public:
 
     Location at(Point p, std::size_t region) const
     {
-        return rooms.geometry->get_location(p.x, p.y, region);
+        return rooms.geometry->get_location(p.x(), p.y(), region);
     }
 
     GenericAgent agent_at(Point p, std::size_t region, BaseStage::ID stage_id) const
@@ -79,7 +79,7 @@ public:
 
     Destination square_around(Point p, double half_width, std::size_t region)
     {
-        const Point half{half_width, half_width};
+        const Vector half{half_width, half_width};
         const Polygon area{test_geometries::rectangle_points(p - half, p + half)};
         return destination_of(engine, *rooms.geometry, area, region);
     }

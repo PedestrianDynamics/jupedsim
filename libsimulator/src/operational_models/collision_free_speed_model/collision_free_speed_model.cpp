@@ -3,10 +3,10 @@
 
 #include "agent_view.hpp"
 #include "generic_agent.hpp"
+#include "kernel.hpp"
 #include "operational_model.hpp"
 #include "operational_model_state.hpp"
 #include "operational_model_type.hpp"
-#include "point.hpp"
 #include "simulation_error.hpp"
 
 #include <algorithm>
@@ -38,7 +38,7 @@ OperationalModelType CollisionFreeSpeedModel::type() const
     return OperationalModelType::CollisionFreeSpeed;
 }
 
-Point CollisionFreeSpeedModel::compute_next_state(
+Vector CollisionFreeSpeedModel::compute_next_state(
     const OperationalModelState& current,
     OperationalModelState& next,
     const AgentStep& step) const
@@ -47,19 +47,19 @@ Point CollisionFreeSpeedModel::compute_next_state(
     const auto neighborhood = step.other_agents_in_range(
         _cut_off_radius, [&step](const NeighborView& n) { return step.no_geometry_between(n); });
 
-    Point neighbor_repulsion{};
+    Vector neighbor_repulsion{};
     for(const auto& neighbor : neighborhood) {
         neighbor_repulsion += this->neighbor_repulsion(current_state, neighbor);
     }
 
-    Point boundary_repulsion{};
+    Vector boundary_repulsion{};
     for(const auto& wall : step.walls_in_range(wall_search_radius)) {
         boundary_repulsion += this->boundary_repulsion(current_state, wall);
     }
 
     const auto desired_direction = step.route_orientation();
     auto direction = (desired_direction + neighbor_repulsion + boundary_repulsion).normalized();
-    if(direction == Point{}) {
+    if(direction == Vector{}) {
         direction = current_state.orientation;
     }
     auto spacing = std::numeric_limits<double>::max();
@@ -128,7 +128,7 @@ double CollisionFreeSpeedModel::optimal_speed(
 double CollisionFreeSpeedModel::get_spacing(
     const State& current_state,
     const NeighborView& neighbor,
-    const Point& direction) const
+    const Vector& direction) const
 {
     const auto& other = std::get<State>(*neighbor.state);
     const auto distp12 = neighbor.relative_position;
@@ -145,7 +145,7 @@ double CollisionFreeSpeedModel::get_spacing(
     }
     return distp12.norm() - l;
 }
-Point CollisionFreeSpeedModel::neighbor_repulsion(
+Vector CollisionFreeSpeedModel::neighbor_repulsion(
     const State& current_state,
     const NeighborView& neighbor) const
 {
@@ -156,7 +156,7 @@ Point CollisionFreeSpeedModel::neighbor_repulsion(
                          exp((l - distance) / this->_range_neighbor_repulsion));
 }
 
-Point CollisionFreeSpeedModel::boundary_repulsion(
+Vector CollisionFreeSpeedModel::boundary_repulsion(
     const State& current_state,
     const WallView& boundary) const
 {

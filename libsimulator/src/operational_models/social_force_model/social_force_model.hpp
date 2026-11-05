@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
+#include "kernel.hpp"
 #include "operational_model.hpp"
 #include "operational_model_state.hpp"
 #include "operational_model_type.hpp"
-#include "point.hpp"
 #include "social_force_model_state.hpp"
 
 #include <fmt/core.h>
@@ -26,7 +26,7 @@ public:
     SocialForceModel(double body_force, double friction);
     ~SocialForceModel() override = default;
     OperationalModelType type() const override;
-    Point compute_next_state(
+    Vector compute_next_state(
         const OperationalModelState& current,
         OperationalModelState& next,
         const AgentStep& step) const override;
@@ -39,21 +39,21 @@ private:
      *
      * @return vector with driving force of pedestrian
      */
-    static Point driving_force(const State& current_state, Point e0);
+    static Vector driving_force(const State& current_state, Vector e0);
     /**
      *  Repulsive force acting on pedestrian <ped1> from pedestrian <ped2>
      * @param ped1 reference to Pedestrian 1 on whom the force acts on
      * @param ped2 reference to Pedestrian 2, from whom the force originates
      * @return vector with the repulsive force
      */
-    Point agent_force(const State& current_state, const NeighborView& neighbor) const;
+    Vector agent_force(const State& current_state, const NeighborView& neighbor) const;
     /**
      *  Repulsive force acting on pedestrian <agent> from line segment <segment>
      * @param agent reference to the Pedestrian on whom the force acts on
      * @param segment reference to line segment, from which the force originates
      * @return vector with the repulsive force
      */
-    Point obstacle_force(const State& current_state, const WallView& wall) const;
+    Vector obstacle_force(const State& current_state, const WallView& wall) const;
     /**
      * calculates the pushing and friction forces along <separation>
      * @param separation vector pointing from where the force originates to where it acts
@@ -64,12 +64,12 @@ private:
      * @param body_force body force parameter (k) of the agent the force acts on
      * @param friction friction parameter (kappa) of the agent the force acts on
      */
-    static Point force_from_separation(
-        const Point separation,
+    static Vector force_from_separation(
+        const Vector separation,
         const double a,
         const double b,
         const double radius,
-        const Point velocity,
+        const Vector velocity,
         const double body_force,
         const double friction);
 

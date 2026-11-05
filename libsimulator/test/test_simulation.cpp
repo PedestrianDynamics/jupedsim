@@ -5,9 +5,9 @@
 #include "geometry/location.hpp"
 #include "geometry_fixtures.hpp"
 #include "journey.hpp"
+#include "kernel.hpp"
 #include "mesh_fixtures.hpp"
 #include "operational_models/collision_free_speed_model/collision_free_speed_model.hpp"
-#include "point.hpp"
 #include "polygon.hpp"
 #include "simulation.hpp"
 #include "simulation_error.hpp"
@@ -67,7 +67,7 @@ const Point stacked_point{2, 10};
 std::pair<Journey::ID, BaseStage::ID>
 journey_to(Simulation& sim, Point position, std::size_t region_id)
 {
-    const Point half{0.5, 0.5};
+    const Vector half{0.5, 0.5};
     const Polygon area{test_geometries::rectangle_points(position - half, position + half)};
     const auto stage = sim.add_stage(WaypointDescription{{{area, region_id}}});
     const auto journey = sim.add_journey({{stage, NonTransitionDescription{}}});
@@ -89,7 +89,7 @@ TEST(MultiStoreySimulation, RunsOnAMultiStoreySurface)
     // Heading for the stair, which is the only way up: over there in plan, and still on the
     // ground floor.
     const auto& agent = sim.agent(id);
-    EXPECT_GT(agent.route_orientation.x, 0.0);
+    EXPECT_GT(agent.route_orientation.x(), 0.0);
     EXPECT_EQ(agent.location.z(), 0.0);
 }
 
@@ -117,15 +117,15 @@ TEST(MultiStoreySimulation, AStageIsPutInTheRegionItNames)
     // Upstairs, the waypoint is only reached over the stair to the east.
     const auto id = sim.add_agent(up_journey, up_stage, Point{2, 2}, State{}, stair.room_1);
     sim.iterate();
-    EXPECT_GT(sim.agent(id).route_orientation.x, 0.5);
+    EXPECT_GT(sim.agent(id).route_orientation.x(), 0.5);
 
     // Downstairs, it is in plain sight. Floor field directions follow a gradient on a grid, so
     // straight ahead holds only up to the grid.
     sim.switch_agent_journey(id, down_journey, down_stage);
     sim.iterate();
-    const Point straight = (stacked_point - sim.agent(id).location.xy()).normalized();
-    EXPECT_NEAR(sim.agent(id).route_orientation.x, straight.x, 1e-2);
-    EXPECT_NEAR(sim.agent(id).route_orientation.y, straight.y, 1e-2);
+    const Vector straight = (stacked_point - sim.agent(id).location.xy()).normalized();
+    EXPECT_NEAR(sim.agent(id).route_orientation.x(), straight.x(), 1e-2);
+    EXPECT_NEAR(sim.agent(id).route_orientation.y(), straight.y(), 1e-2);
 }
 
 TEST(MultiStoreySimulation, ATargetWrittenFromOutsideLandsOnTheAgentsOwnStorey)
@@ -162,8 +162,8 @@ TEST(Simulation, AStageInAnUnknownRegionIsRejected)
 /// Row-major index of the cell of @p info that @p xy lies in.
 std::size_t cell_of(const GridInfo& info, Point xy)
 {
-    const auto col = static_cast<std::size_t>((xy.x - info.origin.x) / info.cell_size);
-    const auto row = static_cast<std::size_t>((xy.y - info.origin.y) / info.cell_size);
+    const auto col = static_cast<std::size_t>((xy.x() - info.origin.x()) / info.cell_size);
+    const auto row = static_cast<std::size_t>((xy.y() - info.origin.y()) / info.cell_size);
     return row * info.width + col;
 }
 
@@ -185,10 +185,10 @@ TEST(Simulation, ReportsTheTravelTimesToAStage)
 
     EXPECT_EQ(grid.values.size(), grid.info.cell_count());
     // The grid covers the whole room.
-    EXPECT_LE(grid.info.origin.x, 0.0);
-    EXPECT_LE(grid.info.origin.y, 0.0);
-    EXPECT_GE(grid.info.origin.x + grid.info.width * grid.info.cell_size, 20.0);
-    EXPECT_GE(grid.info.origin.y + grid.info.height * grid.info.cell_size, 20.0);
+    EXPECT_LE(grid.info.origin.x(), 0.0);
+    EXPECT_LE(grid.info.origin.y(), 0.0);
+    EXPECT_GE(grid.info.origin.x() + grid.info.width * grid.info.cell_size, 20.0);
+    EXPECT_GE(grid.info.origin.y() + grid.info.height * grid.info.cell_size, 20.0);
     EXPECT_EQ(time_at(grid, {0.5, 10}), 0.0) << "inside the exit";
     EXPECT_GT(time_at(grid, {19.5, 10}), time_at(grid, {10, 10}));
     EXPECT_GT(time_at(grid, {10, 10}), 0.0);
@@ -197,8 +197,8 @@ TEST(Simulation, ReportsTheTravelTimesToAStage)
     const auto direction_at = [&grid](Point xy) {
         return grid.directions.at(cell_of(grid.info, xy));
     };
-    EXPECT_LT(direction_at({10, 10}).x, -0.99) << "towards the exit on the left";
-    EXPECT_EQ(direction_at({0.5, 10}), (Point{0, 0})) << "inside the exit";
+    EXPECT_LT(direction_at({10, 10}).x(), -0.99) << "towards the exit on the left";
+    EXPECT_EQ(direction_at({0.5, 10}), (Vector{0, 0})) << "inside the exit";
 }
 
 TEST(Simulation, ListsItsStagesInAscendingOrder)
@@ -396,7 +396,7 @@ void expect_climbed_without_stalling(const Climb& climb)
     for(std::size_t i = 100; i < climb.positions.size(); i += 100) {
         const auto& p = climb.positions[i];
         EXPECT_GT((p - climb.positions[i - 100]).norm(), 0.05)
-            << "stalled around " << p.x << ", " << p.y;
+            << "stalled around " << p.x() << ", " << p.y();
     }
 }
 } // namespace

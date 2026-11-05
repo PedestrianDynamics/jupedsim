@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "geometry/clearance_field.hpp"
 #include "geometry_fixtures.hpp"
+#include "kernel.hpp"
 #include "line_segment.hpp"
-#include "point.hpp"
 #include "simulation_error.hpp"
 
 #include <gtest/gtest.h>
@@ -59,8 +59,8 @@ TEST(ClearanceField, NeverExceedsTheTrueDistanceAndStaysClose)
         const Point p{coord(gen), coord(gen)};
         const double truth = true_clearance(walls, p);
         const double bound = field.clearance(0, p);
-        ASSERT_LE(bound, truth) << "at (" << p.x << ", " << p.y << ")";
-        ASSERT_GE(bound, std::min(truth, cap) - slack) << "at (" << p.x << ", " << p.y << ")";
+        ASSERT_LE(bound, truth) << "at (" << p.x() << ", " << p.y() << ")";
+        ASSERT_GE(bound, std::min(truth, cap) - slack) << "at (" << p.x() << ", " << p.y() << ")";
     }
 }
 
@@ -94,7 +94,7 @@ TEST(ClearanceField, CoversTheWholeBoundingBox)
     // The far edges map into the last row and column, not past them.
     const ClearanceField field({room_with_hole_walls()});
     for(const Point p : {Point{0, 0}, Point{10, 0}, Point{0, 10}, Point{10, 10}}) {
-        EXPECT_NO_THROW(field.clearance(0, p)) << "at (" << p.x << ", " << p.y << ")";
+        EXPECT_NO_THROW(field.clearance(0, p)) << "at (" << p.x() << ", " << p.y() << ")";
     }
 }
 
@@ -111,10 +111,10 @@ TEST(ClearanceField, GeometryAgreesWithBruteForceSight)
     const auto random_location = [&] {
         while(true) {
             const Point p{coord(gen), coord(gen)};
-            if(p.x > 4 && p.x < 6 && p.y > 4 && p.y < 6) {
+            if(p.x() > 4 && p.x() < 6 && p.y() > 4 && p.y() < 6) {
                 continue; // inside the hole
             }
-            return geo.get_location(p.x, p.y, room.room_id);
+            return geo.get_location(p.x(), p.y(), room.room_id);
         }
     };
     int shortcut_taken = 0;
@@ -123,12 +123,12 @@ TEST(ClearanceField, GeometryAgreesWithBruteForceSight)
         // Mostly short sight lines, so the early exit gets exercised.
         std::uniform_real_distribution<double> offset(-3.0, 3.0);
         const Point target{
-            std::clamp(a.xy().x + offset(gen), 0.05, 9.95),
-            std::clamp(a.xy().y + offset(gen), 0.05, 9.95)};
-        if(target.x > 4 && target.x < 6 && target.y > 4 && target.y < 6) {
+            std::clamp(a.xy().x() + offset(gen), 0.05, 9.95),
+            std::clamp(a.xy().y() + offset(gen), 0.05, 9.95)};
+        if(target.x() > 4 && target.x() < 6 && target.y() > 4 && target.y() < 6) {
             continue;
         }
-        const auto b = geo.get_location(target.x, target.y, room.room_id);
+        const auto b = geo.get_location(target.x(), target.y(), room.room_id);
         const bool expected = !crosses_any(walls, LineSegment{a.xy(), b.xy()});
         if(geo.clearance(a) > distance(a.xy(), b.xy())) {
             ++shortcut_taken;

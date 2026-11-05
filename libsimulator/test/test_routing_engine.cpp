@@ -22,8 +22,8 @@ TEST(RoutingEngine, LeadsToTheNearestAreaOfADestination)
 
     const auto right = room.geometry->get_location(7, 1, room.room_id);
     const auto left = room.geometry->get_location(3, 1, room.room_id);
-    EXPECT_GT(engine.get_orientation(right, destination).x, 0.0);
-    EXPECT_LT(engine.get_orientation(left, destination).x, 0.0);
+    EXPECT_GT(engine.get_orientation(right, destination).x(), 0.0);
+    EXPECT_LT(engine.get_orientation(left, destination).x(), 0.0);
 }
 
 TEST(RoutingEngine, ADestinationNeedsAnAreaInsideItsRegion)

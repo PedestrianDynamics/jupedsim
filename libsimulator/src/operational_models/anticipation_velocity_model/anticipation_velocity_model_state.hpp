@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
-#include "point.hpp"
+#include "kernel.hpp"
 
 #include <fmt/core.h>
 
 struct AnticipationVelocityModelState {
-    Point orientation{0.0, 0.0};
+    Vector orientation{0.0, 0.0};
     double strength_neighbor_repulsion{8.0};
     double range_neighbor_repulsion{0.1};
     double wall_buffer_distance{0.1};
     double anticipation_time{1.0};
     double reaction_time{0.3};
-    Point velocity{};
+    Vector velocity{};
     double time_gap{1.06};
     double v0{1.2};
     double radius{0.2};

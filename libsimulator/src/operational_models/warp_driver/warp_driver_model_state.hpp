@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
-#include "point.hpp"
+#include "kernel.hpp"
 
 #include <fmt/core.h>
 
 struct WarpDriverModelState {
-    Point orientation{0.0, 0.0};
+    Vector orientation{0.0, 0.0};
     double radius{0.15};
     double v0{1.2};
     double stuck_time{0.0};

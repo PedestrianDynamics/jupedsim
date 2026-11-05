@@ -29,9 +29,9 @@
 
 #include "agent_view.hpp"
 #include "generic_agent.hpp"
+#include "kernel.hpp"
 #include "operational_model_state.hpp"
 #include "operational_model_type.hpp"
-#include "point.hpp"
 #include "simulation_error.hpp"
 
 #include <algorithm>
@@ -52,7 +52,7 @@ void WarpDriverModel::IntrinsicField::compute(double sigma)
     nx = static_cast<int>(std::round((x_max - x_min) / dx)) + 1;
     ny = static_cast<int>(std::round((y_max - y_min) / dy)) + 1;
     values.resize(static_cast<size_t>(nx * ny), 0.0);
-    gradients.resize(static_cast<size_t>(nx * ny), Point{0.0, 0.0});
+    gradients.resize(static_cast<size_t>(nx * ny), Vector{0.0, 0.0});
 
     const double sigma_squared = sigma * sigma;
 
@@ -106,15 +106,15 @@ void WarpDriverModel::IntrinsicField::compute(double sigma)
                          values[static_cast<size_t>(ix * ny + (iy - 1))]) /
                         (2.0 * dy);
             }
-            gradients[static_cast<size_t>(ix * ny + iy)] = Point{d_idx, d_idy};
+            gradients[static_cast<size_t>(ix * ny + iy)] = Vector{d_idx, d_idy};
         }
     }
 }
 
-std::pair<double, Point> WarpDriverModel::IntrinsicField::sample(double x, double y) const
+std::pair<double, Vector> WarpDriverModel::IntrinsicField::sample(double x, double y) const
 {
     if(x < x_min || x > x_max || y < y_min || y > y_max) {
-        return {0.0, Point{0.0, 0.0}};
+        return {0.0, Vector{0.0, 0.0}};
     }
 
     const double fx = (x - x_min) / dx;
@@ -134,12 +134,12 @@ std::pair<double, Point> WarpDriverModel::IntrinsicField::sample(double x, doubl
     const double val =
         v00 * (1 - sx) * (1 - sy) + v10 * sx * (1 - sy) + v01 * (1 - sx) * sy + v11 * sx * sy;
 
-    const Point g00 = gradients[idx(ix, iy)];
-    const Point g10 = gradients[idx(ix + 1, iy)];
-    const Point g01 = gradients[idx(ix, iy + 1)];
-    const Point g11 = gradients[idx(ix + 1, iy + 1)];
-    const Point grad = g00 * ((1 - sx) * (1 - sy)) + g10 * (sx * (1 - sy)) + g01 * ((1 - sx) * sy) +
-                       g11 * (sx * sy);
+    const Vector g00 = gradients[idx(ix, iy)];
+    const Vector g10 = gradients[idx(ix + 1, iy)];
+    const Vector g01 = gradients[idx(ix, iy + 1)];
+    const Vector g11 = gradients[idx(ix + 1, iy + 1)];
+    const Vector grad = g00 * ((1 - sx) * (1 - sy)) + g10 * (sx * (1 - sy)) +
+                        g01 * ((1 - sx) * sy) + g11 * (sx * sy);
 
     return {val, grad};
 }
@@ -155,19 +155,19 @@ using STP = WarpDriverModel::SpaceTimePoint;
 
 // W_local: change of reference frame from agent a to agent b. Everything is expressed
 // relative to a, so a sits at the origin and b at 'rel_pos_b'.
-STP warp_local_forward(const STP& s, Point rel_pos_b, Point orient_a, Point orient_b)
+STP warp_local_forward(const STP& s, Vector rel_pos_b, Vector orient_a, Vector orient_b)
 {
     // Rotate from a's frame to the axis aligned frame around a
-    const double cos_a = orient_a.x;
-    const double sin_a = orient_a.y;
+    const double cos_a = orient_a.x();
+    const double sin_a = orient_a.y();
     const double wx = cos_a * s.x - sin_a * s.y;
     const double wy = sin_a * s.x + cos_a * s.y;
 
     // ... and on into b's frame
-    const double dx = wx - rel_pos_b.x;
-    const double dy = wy - rel_pos_b.y;
-    const double cos_b = orient_b.x;
-    const double sin_b = orient_b.y;
+    const double dx = wx - rel_pos_b.x();
+    const double dy = wy - rel_pos_b.y();
+    const double cos_b = orient_b.x();
+    const double sin_b = orient_b.y();
     return STP{cos_b * dx + sin_b * dy, -sin_b * dx + cos_b * dy, s.t};
 }
 
@@ -215,9 +215,9 @@ STP warp_velocity_uncertainty_forward(const STP& s, double uncertainty_x, double
 // Order: W_local -> W_v -> W_r -> W_ts -> W_vu
 // Then check W_th (time validity)
 struct WarpParams {
-    Point rel_pos_b;
-    Point orient_a;
-    Point orient_b;
+    Vector rel_pos_b;
+    Vector orient_a;
+    Vector orient_b;
     double speed_b;
     double radius_b;
     double lambda;
@@ -251,12 +251,12 @@ STP compose_forward(const STP& s, const WarpParams& p)
 
 // Gradient transform: takes 2D gradient from IntrinsicField, returns 3D space-time gradient
 // in a's frame. Applies inverse Jacobians in reverse order.
-STP compose_gradient_inverse(const Point& grad_i, const STP& s_original, const WarpParams& p)
+STP compose_gradient_inverse(const Vector& grad_i, const STP& s_original, const WarpParams& p)
 {
     // Start with 3-component gradient in Intrinsic Field space: (grad_i.x, grad_i.y, 0)
     // since dI/dt = 0
-    double gx = grad_i.x;
-    double gy = grad_i.y;
+    double gx = grad_i.x();
+    double gy = grad_i.y();
     double gt = 0.0;
 
     // Time normalization inverse Jacobian: dt_original = dt_normalized * time_horizon
@@ -301,10 +301,10 @@ STP compose_gradient_inverse(const Point& grad_i, const STP& s_original, const W
 
     // W_local inverse Jacobian: rotate from b's frame back to a's frame
     {
-        const double cos_a = p.orient_a.x;
-        const double sin_a = p.orient_a.y;
-        const double cos_b = p.orient_b.x;
-        const double sin_b = p.orient_b.y;
+        const double cos_a = p.orient_a.x();
+        const double sin_a = p.orient_a.y();
+        const double cos_b = p.orient_b.x();
+        const double sin_b = p.orient_b.y();
 
         // Combined rotation: b's frame -> world -> a's frame
         // R_a^T * R_b applied to gradient
@@ -440,7 +440,7 @@ void WarpDriverModel::check_model_constraint(const GenericAgent& agent, const Ag
     }
 }
 
-Point WarpDriverModel::compute_next_state(
+Vector WarpDriverModel::compute_next_state(
     const OperationalModelState& current,
     OperationalModelState& next,
     const AgentStep& step) const
@@ -450,16 +450,16 @@ Point WarpDriverModel::compute_next_state(
     const double speed = agent_data.v0;
 
     // State orientation (unit vector). If zero, default to +x.
-    Point orient = agent_data.orientation;
+    Vector orient = agent_data.orientation;
     if(orient.norm() < 1e-9) {
-        orient = Point{1.0, 0.0};
+        orient = Vector{1.0, 0.0};
     } else {
         orient = orient.normalized();
     }
 
     // Direction towards destination
-    Point desired_dir = step.route_orientation();
-    if(desired_dir == Point{}) {
+    Vector desired_dir = step.route_orientation();
+    if(desired_dir == Vector{}) {
         // The old update carried default-initialized stuck/detour state here,
         // so applying it reset that state; replicate that reset.
         // [RL, FIXME] This is expected to be dead code and should be removed in a subsequent
@@ -470,11 +470,11 @@ Point WarpDriverModel::compute_next_state(
         next_data.displacement_y = 0.0;
         next_data.detour_time = 0.0;
         next_data.detour_side = 1;
-        return Point{0.0, 0.0};
+        return Vector{0.0, 0.0};
     }
 
     // Use desired direction as agent's effective orientation for the frame
-    Point effective_orient = desired_dir;
+    Vector effective_orient = desired_dir;
 
     // === Step 1: Projected trajectory in agent-centric space ===
     // r(t) = (speed * t, 0, t) for t in [0, time_horizon]
@@ -489,20 +489,20 @@ Point WarpDriverModel::compute_next_state(
     // because the collision probability field alone cannot guarantee separation
     // when agents are already close (dense crowds, late reactions).
     // Similar to the pushout mechanisms in CFS and AVM.
-    Point repulsion{0.0, 0.0};
+    Vector repulsion{0.0, 0.0};
     for(const auto& neighbor : neighbors) {
         const auto* nb_data = std::get_if<State>(neighbor.state);
         if(!nb_data) {
             continue;
         }
-        Point diff = neighbor.relative_position * -1.0;
+        Vector diff = neighbor.relative_position * -1.0;
         const double dist = diff.norm();
         const double combined_radius = agent_data.radius + nb_data->radius;
         if(dist < combined_radius * 3.0 && dist > 1e-6) {
             const double overlap = combined_radius * 3.0 - dist;
             repulsion = repulsion + diff.normalized() * (speed * overlap / dist);
         } else if(dist <= 1e-6) {
-            repulsion = repulsion + Point{-desired_dir.y, desired_dir.x} * speed;
+            repulsion = repulsion + Vector{-desired_dir.y(), desired_dir.x()} * speed;
         }
     }
 
@@ -534,9 +534,9 @@ Point WarpDriverModel::compute_next_state(
         }
 
         // Neighbor orientation
-        Point nb_orient = nb_data->orientation;
+        Vector nb_orient = nb_data->orientation;
         if(nb_orient.norm() < 1e-9) {
-            nb_orient = Point{1.0, 0.0};
+            nb_orient = Vector{1.0, 0.0};
         } else {
             nb_orient = nb_orient.normalized();
         }
@@ -606,11 +606,11 @@ Point WarpDriverModel::compute_next_state(
         s.t += sample.p_total * sample.r.t * dt_sample;
     }
 
-    Point new_vel_local;
+    Vector new_vel_local;
 
     if(n < 1e-9) {
         // No collision risk — follow projected trajectory
-        new_vel_local = Point{speed, 0.0};
+        new_vel_local = Vector{speed, 0.0};
     } else {
         p /= n;
         g.x /= n;
@@ -627,9 +627,9 @@ Point WarpDriverModel::compute_next_state(
         q.t = s.t - this->_step_size * p * g.t;
 
         if(q.t > 1e-9) {
-            new_vel_local = Point{q.x / q.t, q.y / q.t};
+            new_vel_local = Vector{q.x / q.t, q.y / q.t};
         } else {
-            new_vel_local = Point{speed, 0.0};
+            new_vel_local = Vector{speed, 0.0};
         }
     }
 
@@ -637,14 +637,15 @@ Point WarpDriverModel::compute_next_state(
     const double new_speed = std::min(new_vel_local.norm(), agent_data.v0);
 
     // Convert to world coordinates: rotate by effective_orient
-    Point new_vel_world;
+    Vector new_vel_world;
     if(new_speed > 1e-9) {
-        Point new_dir_local = new_vel_local.normalized();
+        Vector new_dir_local = new_vel_local.normalized();
         // Rotate from agent-centric to world
         new_vel_world =
-            Point{
-                effective_orient.x * new_dir_local.x - effective_orient.y * new_dir_local.y,
-                effective_orient.y * new_dir_local.x + effective_orient.x * new_dir_local.y} *
+            Vector{
+                effective_orient.x() * new_dir_local.x() - effective_orient.y() * new_dir_local.y(),
+                effective_orient.y() * new_dir_local.x() +
+                    effective_orient.x() * new_dir_local.y()} *
             new_speed;
     } else {
         new_vel_world = desired_dir * agent_data.v0 * 0.01; // tiny push towards goal
@@ -676,21 +677,21 @@ Point WarpDriverModel::compute_next_state(
     // Catches oscillating agents that periodically spike above the speed threshold but make
     // no real progress.
     double stuck_time = agent_data.stuck_time;
-    Point displacement{agent_data.displacement_x, agent_data.displacement_y};
+    Vector displacement{agent_data.displacement_x, agent_data.displacement_y};
     double detour_time = agent_data.detour_time;
     int detour_side = agent_data.detour_side;
 
     // Detour mode: agent is currently on a lateral detour to break a deadlock
     if(detour_time > 0.0) {
         detour_time -= step.dt();
-        Point lateral{-desired_dir.y * detour_side, desired_dir.x * detour_side};
-        Point detour_dir = (lateral * 0.8 + desired_dir * 0.2).normalized();
-        Point detour_vel = detour_dir * agent_data.v0 * 0.5;
-        Point movement = detour_vel * step.dt();
+        Vector lateral{-desired_dir.y() * detour_side, desired_dir.x() * detour_side};
+        Vector detour_dir = (lateral * 0.8 + desired_dir * 0.2).normalized();
+        Vector detour_vel = detour_dir * agent_data.v0 * 0.5;
+        Vector movement = detour_vel * step.dt();
         // If detour would leave the walkable area, try the other side
         if(!step.no_geometry_between(movement)) {
             detour_side = -detour_side;
-            lateral = Point{-desired_dir.y * detour_side, desired_dir.x * detour_side};
+            lateral = Vector{-desired_dir.y() * detour_side, desired_dir.x() * detour_side};
             detour_dir = (lateral * 0.8 + desired_dir * 0.2).normalized();
             detour_vel = detour_dir * agent_data.v0 * 0.5;
             movement = detour_vel * step.dt();
@@ -708,12 +709,12 @@ Point WarpDriverModel::compute_next_state(
             // progress reset below drops it *excluding* it. The two resets therefore disagree
             // by one step, so the progress window starts later after a detour than after
             // normal progress. Kept as it was to keep the behaviour unchanged.
-            displacement = Point{};
+            displacement = Vector{};
         }
         next_data.orientation = detour_dir;
         next_data.stuck_time = stuck_time;
-        next_data.displacement_x = displacement.x;
-        next_data.displacement_y = displacement.y;
+        next_data.displacement_x = displacement.x();
+        next_data.displacement_y = displacement.y();
         next_data.detour_time = detour_time;
         next_data.detour_side = detour_side;
         return movement;
@@ -730,7 +731,7 @@ Point WarpDriverModel::compute_next_state(
     if(net_displacement > progress_radius) {
         // Real progress — start measuring again from where the agent stands now
         stuck_time = 0.0;
-        displacement = Point{};
+        displacement = Vector{};
     } else if(stuck_time >= stuck_threshold) {
         // Stuck: no net progress for stuck_threshold seconds — enter detour
         std::uniform_int_distribution<int> side_dist(0, 1);
@@ -742,21 +743,21 @@ Point WarpDriverModel::compute_next_state(
     // Velocity smoothing: blend new velocity with previous orientation to damp
     // oscillations in dense clusters where agents flip direction every frame.
     const double smoothing = 0.5; // weight of new velocity (1.0 = no smoothing)
-    Point smoothed_vel =
+    Vector smoothed_vel =
         new_vel_world * smoothing + orient * (new_vel_world.norm() * (1.0 - smoothing));
     double smoothed_speed = smoothed_vel.norm();
     if(smoothed_speed > agent_data.v0 && smoothed_speed > 1e-9) {
         smoothed_vel = smoothed_vel * (agent_data.v0 / smoothed_speed);
     }
 
-    Point new_orient = (smoothed_vel.norm() > 1e-9) ? smoothed_vel.normalized() : orient;
+    Vector new_orient = (smoothed_vel.norm() > 1e-9) ? smoothed_vel.normalized() : orient;
 
-    const Point movement = smoothed_vel * step.dt();
+    const Vector movement = smoothed_vel * step.dt();
 
     next_data.orientation = new_orient;
     next_data.stuck_time = stuck_time;
-    next_data.displacement_x = displacement.x + movement.x;
-    next_data.displacement_y = displacement.y + movement.y;
+    next_data.displacement_x = displacement.x() + movement.x();
+    next_data.displacement_y = displacement.y() + movement.y();
     next_data.detour_time = detour_time;
     next_data.detour_side = detour_side;
     return movement;

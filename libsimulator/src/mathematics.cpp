@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "mathematics.hpp"
 
-#include "point.hpp"
+#include "kernel.hpp"
 
 #include <cassert>
 #include <cmath>
@@ -68,14 +68,14 @@ std::complex<double> c_cbrt(std::complex<double> x)
     return rn * cos(phi) + i * rn * s;
 }
 
-Point mollify_e0(
-    const Point& orientation_to_target,
+Vector mollify_e0(
+    const Vector& orientation_to_target,
     double delta_t,
     int orientation_delay,
-    const Point& e0)
+    const Vector& e0)
 {
     constexpr double tau = 0.5;
-    const Point new_e0 = orientation_to_target;
+    const Vector new_e0 = orientation_to_target;
     const double t = orientation_delay * delta_t;
 
     // Handover new target

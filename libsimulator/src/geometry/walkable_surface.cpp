@@ -5,8 +5,8 @@
 #include "geometry/geometry.hpp"
 #include "geometry/region_split.hpp"
 #include "geometry/validation.hpp"
+#include "kernel.hpp"
 #include "line_segment.hpp"
-#include "point.hpp"
 #include "simulation_error.hpp"
 
 #include <CGAL/Boolean_set_operations_2.h>
@@ -147,7 +147,7 @@ size_t WalkableSurface::add_region(Polygon polygon, double height)
         converted_ring.reserve(count);
         for(size_t index = 0; index < count; ++index) {
             converted_ring.push_back(vertices.size());
-            vertices.push_back({ring[index].x, ring[index].y, height});
+            vertices.push_back({ring[index].x(), ring[index].y(), height});
         }
         polygons.emplace_back(std::move(converted_ring));
     };
@@ -266,8 +266,8 @@ size_t WalkableSurface::connect_regions(
     }
 
     if(CGAL::do_intersect(
-           Segment2D({from.p2.x, from.p2.y}, {to.p1.x, to.p1.y}),
-           Segment2D({to.p2.x, to.p2.y}, {from.p1.x, from.p1.y}))) {
+           Segment2D({from.p2.x(), from.p2.y()}, {to.p1.x(), to.p1.y()}),
+           Segment2D({to.p2.x(), to.p2.y()}, {from.p1.x(), from.p1.y()}))) {
         // flip one LS
         std::swap(from.p1, from.p2);
     }

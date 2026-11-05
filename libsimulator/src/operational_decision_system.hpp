@@ -5,10 +5,10 @@
 #include "environment_query.hpp"
 #include "generic_agent.hpp"
 #include "geometry/geometry.hpp"
+#include "kernel.hpp"
 #include "neighborhood_search.hpp"
 #include "operational_model.hpp"
 #include "operational_model_type.hpp"
-#include "point.hpp"
 
 #include <algorithm>
 #include <cstddef>
@@ -47,7 +47,7 @@ public:
             const auto& current = agents[index];
             auto& next = _next[index];
             const AgentStep step{env_query, current, dt};
-            const Point movement = _model->compute_next_state(current.state, next.state, step);
+            const Vector movement = _model->compute_next_state(current.state, next.state, step);
             next.location.move_on_surface(movement);
         }
         // Swap in the computed generation. This is safe because no caller retains

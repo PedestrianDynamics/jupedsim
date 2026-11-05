@@ -3,10 +3,10 @@
 
 #include "agent_view.hpp"
 #include "generic_agent.hpp"
+#include "kernel.hpp"
 #include "operational_model.hpp"
 #include "operational_model_state.hpp"
 #include "operational_model_type.hpp"
-#include "point.hpp"
 #include "simulation_error.hpp"
 
 #include <algorithm>
@@ -26,7 +26,7 @@ OperationalModelType CollisionFreeSpeedModelV2::type() const
     return OperationalModelType::CollisionFreeSpeedV2;
 }
 
-Point CollisionFreeSpeedModelV2::compute_next_state(
+Vector CollisionFreeSpeedModelV2::compute_next_state(
     const OperationalModelState& current,
     OperationalModelState& next,
     const AgentStep& step) const
@@ -35,19 +35,19 @@ Point CollisionFreeSpeedModelV2::compute_next_state(
     auto neighborhood = step.other_agents_in_range(
         _cut_off_radius, [&step](const NeighborView& n) { return step.no_geometry_between(n); });
 
-    Point neighbor_repulsion{};
+    Vector neighbor_repulsion{};
     for(const auto& neighbor : neighborhood) {
         neighbor_repulsion += this->neighbor_repulsion(current_state, neighbor);
     }
 
-    Point boundary_repulsion{};
+    Vector boundary_repulsion{};
     for(const auto& wall : step.walls_in_range(wall_search_radius)) {
         boundary_repulsion += this->boundary_repulsion(current_state, wall);
     }
 
     const auto desired_direction = step.route_orientation();
     auto direction = (desired_direction + neighbor_repulsion + boundary_repulsion).normalized();
-    if(direction == Point{}) {
+    if(direction == Vector{}) {
         direction = current_state.orientation;
     }
     auto spacing = std::numeric_limits<double>::max();
@@ -116,7 +116,7 @@ double CollisionFreeSpeedModelV2::optimal_speed(
 double CollisionFreeSpeedModelV2::get_spacing(
     const State& current_state,
     const NeighborView& neighbor,
-    const Point& direction) const
+    const Vector& direction) const
 {
     const auto& other = std::get<State>(*neighbor.state);
     const auto distp12 = neighbor.relative_position;
@@ -133,7 +133,7 @@ double CollisionFreeSpeedModelV2::get_spacing(
     }
     return distp12.norm() - l;
 }
-Point CollisionFreeSpeedModelV2::neighbor_repulsion(
+Vector CollisionFreeSpeedModelV2::neighbor_repulsion(
     const State& current_state,
     const NeighborView& neighbor) const
 {
@@ -144,7 +144,7 @@ Point CollisionFreeSpeedModelV2::neighbor_repulsion(
                          exp((l - distance) / current_state.range_neighbor_repulsion));
 }
 
-Point CollisionFreeSpeedModelV2::boundary_repulsion(
+Vector CollisionFreeSpeedModelV2::boundary_repulsion(
     const State& current_state,
     const WallView& boundary) const
 {

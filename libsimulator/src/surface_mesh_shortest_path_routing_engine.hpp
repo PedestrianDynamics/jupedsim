@@ -4,7 +4,7 @@
 #include "cfg_cgal.hpp"
 #include "geometry/geometry.hpp"
 #include "geometry/location.hpp"
-#include "point.hpp"
+#include "kernel.hpp"
 
 #include <CGAL/Surface_mesh_shortest_path.h>
 
@@ -43,7 +43,7 @@ public:
 
     /// Unit vector from @p from along the route to @p to, projected to x/y. Zero once @p from
     /// has reached @p to.
-    Point get_orientation(const Location& from, const Location& to);
+    Vector get_orientation(const Location& from, const Location& to);
 
     double wall_clearance() const { return _wall_clearance; }
 
@@ -54,7 +54,7 @@ private:
     struct Step {
         Point3D point;
         /// Unit vector off a wall corner, zero where there is no corner.
-        Point into_the_open;
+        Vector into_the_open;
     };
     using Way = std::vector<Step>;
 
@@ -68,7 +68,7 @@ private:
     Way trace_way(const Point3D& source, const Point3D& target);
 
     /// @p corner moved into the open by the wall clearance, put back onto the surface.
-    Point3D held_off_the_wall(const Point3D& corner, Point into_the_open) const;
+    Point3D held_off_the_wall(const Point3D& corner, Vector into_the_open) const;
 
     /// Next point of the path from @p source to @p target
     /// Returns @p source itself when @p target is already reached.

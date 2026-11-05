@@ -5,8 +5,8 @@
 #include "operational_model_state.hpp"
 
 class EnvironmentQuery;
+#include "kernel.hpp"
 #include "operational_model_type.hpp"
-#include "point.hpp"
 #include "warp_driver_model_state.hpp"
 
 #include <fmt/core.h>
@@ -35,7 +35,7 @@ private:
     /// Constant along time axis; time is a validity window [0,1] normalized.
     struct IntrinsicField {
         std::vector<double> values;
-        std::vector<Point> gradients; // (dI/dx, dI/dy)
+        std::vector<Vector> gradients; // (dI/dx, dI/dy)
         double x_min{-3.0};
         double x_max{3.0};
         double y_min{-3.0};
@@ -47,7 +47,7 @@ private:
 
         void compute(double sigma);
         /// Bilinear interpolation. Returns (0, {0,0}) for out-of-bounds.
-        std::pair<double, Point> sample(double x, double y) const;
+        std::pair<double, Vector> sample(double x, double y) const;
     };
 
     // Model-level parameters
@@ -79,7 +79,7 @@ public:
 
     OperationalModelType type() const override;
 
-    Point compute_next_state(
+    Vector compute_next_state(
         const OperationalModelState& current,
         OperationalModelState& next,
         const AgentStep& step) const override;

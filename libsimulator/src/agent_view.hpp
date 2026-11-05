@@ -6,9 +6,9 @@
 #include "geometric_functions.hpp"
 #include "geometry/geometry.hpp"
 #include "geometry/location.hpp"
+#include "kernel.hpp"
 #include "line_segment.hpp"
 #include "operational_model_state.hpp"
-#include "point.hpp"
 
 #include <cmath>
 #include <concepts>
@@ -19,13 +19,13 @@
 
 /// A neighbouring agent as seen from the agent that asked for it.
 struct NeighborView {
-    Point relative_position;
+    Vector relative_position;
     const OperationalModelState* state;
 
 private:
     /// Internal Location of the agent. Only AgentView has access to it.
     friend class AgentView;
-    NeighborView(Point relative, const OperationalModelState* model, const Location* where)
+    NeighborView(Vector relative, const OperationalModelState* model, const Location* where)
         : relative_position(relative), state(model), _location(where)
     {
     }
@@ -38,12 +38,12 @@ struct WallView {
     /// The segment itself, relative to the agent.
     LineSegment segment;
     /// The point on the segment closest to the agent.
-    Point closest_point;
+    Vector closest_point;
     /// Distance to that point.
     double distance;
     /// Unit vector pointing from the wall towards the agent, i.e. the direction a repulsion
     /// acts in. Zero for an agent standing exactly on the wall, where no direction exists.
-    Point normal;
+    Vector normal;
 };
 
 inline bool intersects(const LineSegment& los, const WallView& wall)
@@ -113,7 +113,7 @@ public:
     bool has_neighbor_mapping() const { return _neighbor_state_mapper != nullptr; }
 
     /// Whether the straight line to a point at 'relative_position' is free of geometry.
-    bool no_geometry_between(Point relative_position) const
+    bool no_geometry_between(Vector relative_position) const
     {
         return _world.no_geometry_between(location(), relative_position);
     }
@@ -134,13 +134,13 @@ private:
     {
         return std::move(segments) |
                std::views::transform([origin = location().xy()](const LineSegment& s) {
-                   const LineSegment segment{s.p1 - origin, s.p2 - origin};
-                   const Point closest_point = segment.shortest_point(Point{});
+                   const LineSegment segment{at_offset(s.p1 - origin), at_offset(s.p2 - origin)};
+                   const Vector closest_point = offset_from_origin(segment.shortest_point(Point{}));
                    return WallView{
                        .segment = segment,
                        .closest_point = closest_point,
                        .distance = closest_point.norm(),
-                       .normal = (Point{} - closest_point).normalized()};
+                       .normal = (Vector{} - closest_point).normalized()};
                });
     }
 
@@ -193,7 +193,7 @@ public:
 
     /// Unit vector along the route to the final target. Zero when the agent has already
     /// reached it.
-    Point route_orientation() const { return _agent.route_orientation; }
+    Vector route_orientation() const { return _agent.route_orientation; }
 
 private:
     double _dt;

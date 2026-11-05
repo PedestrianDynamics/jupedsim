@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
+#include "kernel.hpp"
+
 #include <CGAL/AABB_face_graph_triangle_primitive.h>
 #include <CGAL/AABB_traits_3.h>
 #include <CGAL/AABB_tree.h>
@@ -20,7 +22,6 @@
 #include <sstream>
 #include <string>
 
-using K = CGAL::Exact_predicates_inexact_constructions_kernel;
 using Point2D = K::Point_2;
 using Point3D = K::Point_3;
 using Triangle2D = K::Triangle_2;

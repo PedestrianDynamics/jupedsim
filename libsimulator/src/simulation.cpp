@@ -8,10 +8,10 @@
 #include "geometry/location.hpp"
 #include "iterator_pair.hpp"
 #include "journey.hpp"
+#include "kernel.hpp"
 #include "operational_model.hpp"
 #include "operational_model_state.hpp"
 #include "operational_model_type.hpp"
-#include "point.hpp"
 #include "polygon.hpp"
 #include "routing_engine.hpp"
 #include "simulation_clock.hpp"
@@ -242,7 +242,7 @@ GenericAgent::ID Simulation::add_agent(
 {
     throw_if_state(State::Iterating | State::Closed, "add_agent");
     JPS_SCOPED_TIMER_AND_TRACE(_timer, "Add Agent", Detailed);
-    const auto location = _geometry->get_location(position.x, position.y, region_id);
+    const auto location = _geometry->get_location(position.x(), position.y(), region_id);
     if(_journeys.count(journey_id) == 0) {
         throw SimulationError("Unknown journey id: {}", journey_id);
     }
@@ -285,7 +285,7 @@ void Simulation::set_agent_target(GenericAgent::ID id, Point target)
     throw_if_state(State::Closed, "set_agent_target");
     auto& agent = this->agent(id);
     const auto located = _geometry->get_location_near_z(
-        target.x, target.y, agent.location.z(), std::numeric_limits<double>::max());
+        target.x(), target.y(), agent.location.z(), std::numeric_limits<double>::max());
     if(!located) {
         throw SimulationError("Point {} is outside of accessible area", target);
     }

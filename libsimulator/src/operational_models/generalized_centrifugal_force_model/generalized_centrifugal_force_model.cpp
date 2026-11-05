@@ -4,12 +4,12 @@
 #include "agent_view.hpp"
 #include "ellipse.hpp"
 #include "generic_agent.hpp"
+#include "kernel.hpp"
 #include "macros.hpp"
 #include "mathematics.hpp"
 #include "operational_model.hpp"
 #include "operational_model_state.hpp"
 #include "operational_model_type.hpp"
-#include "point.hpp"
 #include "simulation_error.hpp"
 
 #include <logger.hpp>
@@ -49,7 +49,7 @@ OperationalModelType GeneralizedCentrifugalForceModel::type() const
     return OperationalModelType::GeneralizedCentrifugalForce;
 }
 
-Point GeneralizedCentrifugalForceModel::compute_next_state(
+Vector GeneralizedCentrifugalForceModel::compute_next_state(
     const OperationalModelState& current,
     OperationalModelState& next,
     const AgentStep& step) const
@@ -57,30 +57,30 @@ Point GeneralizedCentrifugalForceModel::compute_next_state(
     const auto& current_state = std::get<State>(current);
     const auto neighborhood = step.other_agents_in_range(
         _cut_off_radius, [&step](const NeighborView& n) { return step.no_geometry_between(n); });
-    Point f_rep;
+    Vector f_rep;
     for(const auto& neighbor : neighborhood) {
         f_rep += force_rep_ped(current_state, neighbor);
     }
 
     // force_driv leaves e0 untouched when the agent has practically arrived; the default
     // constructed value is what gets stored then.
-    Point e0{};
+    Vector e0{};
     // repulsive forces to the walls and transitions that are not my target
-    Point repwall{};
+    Vector repwall{};
     for(const auto& wall : step.walls_in_range(wall_search_radius)) {
         repwall += force_rep_wall(current_state, wall);
     }
 
-    const Point fd = force_driv(
+    const Vector fd = force_driv(
         current_state,
         step.route_orientation(),
         current_state.mass,
         current_state.tau,
         step.dt(),
         e0);
-    const Point acc = (fd + f_rep + repwall) / current_state.mass;
+    const Vector acc = (fd + f_rep + repwall) / current_state.mass;
 
-    const Point velocity = (current_state.orientation * current_state.speed) + acc * step.dt();
+    const Vector velocity = (current_state.orientation * current_state.speed) + acc * step.dt();
 
     auto& next_model = std::get<State>(next);
     next_model.e0 = e0;
@@ -162,25 +162,25 @@ void GeneralizedCentrifugalForceModel::check_model_constraint(
     }
 }
 
-Point GeneralizedCentrifugalForceModel::force_driv(
+Vector GeneralizedCentrifugalForceModel::force_driv(
     const State& current_state,
-    Point orientation_to_target,
+    Vector orientation_to_target,
     double mass,
     double tau,
     double delta_t,
-    Point& e0update) const
+    Vector& e0update) const
 {
-    Point f_driv;
-    if(orientation_to_target != Point{}) {
+    Vector f_driv;
+    if(orientation_to_target != Vector{}) {
         // expect this to never trigger as stage system should cover it.
-        const Point e0 = mollify_e0(
+        const Vector e0 = mollify_e0(
             orientation_to_target, delta_t, current_state.orientation_delay, current_state.e0);
         e0update = e0;
         f_driv =
             ((e0 * current_state.v0 - (current_state.orientation * current_state.speed)) * mass) /
             tau;
     } else {
-        const Point e0 = current_state.e0;
+        const Vector e0 = current_state.e0;
         f_driv =
             ((e0 * current_state.v0 - (current_state.orientation * current_state.speed)) * mass) /
             tau;
@@ -188,17 +188,17 @@ Point GeneralizedCentrifugalForceModel::force_driv(
     return f_driv;
 }
 
-Point GeneralizedCentrifugalForceModel::force_rep_ped(
+Vector GeneralizedCentrifugalForceModel::force_rep_ped(
     const State& current_state,
     const NeighborView& neighbor) const
 {
     const auto& neighbor_state = std::get<State>(*neighbor.state);
-    Point f_rep;
+    Vector f_rep;
     // x- and y-coordinate of the distance between p1 and p2
-    Point distp12 = neighbor.relative_position;
-    const Point vp1 = (current_state.orientation * current_state.speed); // v Ped1
-    const Point vp2 = (neighbor_state.orientation * neighbor_state.speed); // v Ped2
-    Point ep12; // x- and y-coordinate of the normalized vector between p1 and p2
+    Vector distp12 = neighbor.relative_position;
+    const Vector vp1 = (current_state.orientation * current_state.speed); // v Ped1
+    const Vector vp2 = (neighbor_state.orientation * neighbor_state.speed); // v Ped2
+    Vector ep12; // x- and y-coordinate of the normalized vector between p1 and p2
     double tmp, tmp2;
     double v_ij;
     double k_ij;
@@ -213,7 +213,7 @@ Point GeneralizedCentrifugalForceModel::force_rep_ped(
 
     // If the pedestrian is outside the cutoff distance, the force is zero.
     if(dist_eff >= _max_neighbor_interaction_distance) {
-        f_rep = Point(0.0, 0.0);
+        f_rep = Vector(0.0, 0.0);
         return f_rep;
     }
 
@@ -253,7 +253,7 @@ Point GeneralizedCentrifugalForceModel::force_rep_ped(
         k_ij = 0.25 * bla * bla / vp1.scalar_product(vp1); // squared
 
         if(k_ij < j_eps * j_eps) {
-            f_rep = Point(0.0, 0.0);
+            f_rep = Vector(0.0, 0.0);
             return f_rep;
         }
     }
@@ -288,22 +288,22 @@ Point GeneralizedCentrifugalForceModel::force_rep_ped(
             dist_eff, smax, dist_intpol_left, _max_neighbor_repulsion_force * f, f, 0, f1);
         f_rep = ep12 * px;
     }
-    if(f_rep.x != f_rep.x || f_rep.y != f_rep.y) {
+    if(f_rep.x() != f_rep.x() || f_rep.y() != f_rep.y()) {
         LOG_ERROR(
             "NAN return distp12 {} Frepx={:f} Frepy={:f} K_ij={:f}",
             distp12,
-            f_rep.x,
-            f_rep.y,
+            f_rep.x(),
+            f_rep.y(),
             k_ij);
     }
     return f_rep;
 }
 
-inline Point GeneralizedCentrifugalForceModel::force_rep_wall(
+inline Vector GeneralizedCentrifugalForceModel::force_rep_wall(
     const State& current_state,
     const WallView& wall) const
 {
-    Point f = Point(0.0, 0.0);
+    Vector f = Vector(0.0, 0.0);
     const auto& w = wall.segment;
 
     if(w.length_square() < 0.01) { // ignore walls smaller than 10 cm
@@ -311,7 +311,7 @@ inline Point GeneralizedCentrifugalForceModel::force_rep_wall(
     }
     // Kraft soll nur orthgonal wirken
     // ???
-    if(fabs((w.p1 - w.p2).scalar_product(Point{} - wall.closest_point)) > j_eps) {
+    if(fabs((w.p1 - w.p2).scalar_product(Vector{} - wall.closest_point)) > j_eps) {
         return f;
     }
     double mind = 0.5; // for performance reasons this distance is assumed to be constant
@@ -333,60 +333,60 @@ inline Point GeneralizedCentrifugalForceModel::force_rep_wall(
  *   - Vektor(x,y) mit abstoßender Kraft
  * */
 // TODO: use effective DistanceToEllipse and simplify this function.
-Point GeneralizedCentrifugalForceModel::force_rep_stat_point(
+Vector GeneralizedCentrifugalForceModel::force_rep_stat_point(
     const State& current_state,
-    const Point& p,
+    const Vector& p,
     double l,
     double vn) const
 {
-    Point f_rep = Point(0.0, 0.0);
+    Vector f_rep = Vector(0.0, 0.0);
     // TODO(kkratz): this will fail for speed 0.
     // I think the code can be rewritten to account for orientation and speed separately
-    const Point v = current_state.orientation * current_state.speed;
-    Point dist = p; // p is relative to the agent, so it already is the distance vector
+    const Vector v = current_state.orientation * current_state.speed;
+    Vector dist = p; // p is relative to the agent, so it already is the distance vector
     double d = dist.norm(); // distance between the centre of ped and point p
-    Point e_ij; // x- and y-coordinate of the normalized vector between ped and p
+    Vector e_ij; // x- and y-coordinate of the normalized vector between ped and p
 
     double tmp;
     double bla;
     Point r;
-    Point pin_e; // vorher x1, y1
+    Vector pin_e; // vorher x1, y1
     const Ellipse e{
         current_state.av, current_state.a_min, current_state.b_max, current_state.b_min};
 
     if(d < j_eps)
-        return Point(0.0, 0.0);
+        return Vector(0.0, 0.0);
     e_ij = dist / d;
     tmp = v.scalar_product(e_ij); // < v_i , e_ij >;
     bla = (tmp + fabs(tmp));
     if(!bla) // Fussgaenger nicht im Sichtfeld
-        return Point(0.0, 0.0);
-    if(fabs(v.x) < j_eps && fabs(v.y) < j_eps) // v==0)
-        return Point(0.0, 0.0);
+        return Vector(0.0, 0.0);
+    if(fabs(v.x()) < j_eps && fabs(v.y()) < j_eps) // v==0)
+        return Vector(0.0, 0.0);
     double k_ij;
     k_ij = 0.5 * bla / v.norm(); // K_ij
     // Punkt auf der Ellipse
-    pin_e = p.transform_to_ellipse_coordinates(
-        Point{}, current_state.orientation.x, current_state.orientation.y);
+    // p is relative to the agent, the centre of its ellipse, so only the rotation remains.
+    pin_e = p.rotate(current_state.orientation.x(), -current_state.orientation.y());
     const auto v0 = current_state.v0;
     // Punkt auf der Ellipse
     r = e.point_on_ellipse(
         pin_e, current_state.speed / v0, Point{}, current_state.speed, current_state.orientation);
     // interpolierte Kraft
-    f_rep = force_interpolation(v0, k_ij, e_ij, vn, d, r.norm(), l);
+    f_rep = force_interpolation(v0, k_ij, e_ij, vn, d, distance(r, Point{}), l);
     return f_rep;
 }
 
-Point GeneralizedCentrifugalForceModel::force_interpolation(
+Vector GeneralizedCentrifugalForceModel::force_interpolation(
     double v0,
     double k_ij,
-    const Point& e,
+    const Vector& e,
     double vn,
     double d,
     double r,
     double l) const
 {
-    Point f_rep;
+    Vector f_rep;
     double nominator = _strength_geometry_repulsion * v0 + vn;
     nominator *= nominator * k_ij;
     double f = 0, f1 = 0; // function value and its derivative at the interpolation point
@@ -408,7 +408,7 @@ Point GeneralizedCentrifugalForceModel::force_interpolation(
     double tmp5 = smax + r;
 
     if(dist_eff >= tmp1) { // 1
-        // f_rep = Point(0.0, 0.0);
+        // f_rep = Vector(0.0, 0.0);
         return f_rep;
     }
 
@@ -455,7 +455,7 @@ double GeneralizedCentrifugalForceModel::agent_to_agent_spacing(
     return e1.effective_distance_to_ellipse(
         e2,
         Point{0.0, 0.0},
-        neighbor.relative_position,
+        at_offset(neighbor.relative_position),
         scale1,
         scale2,
         current_state.speed,

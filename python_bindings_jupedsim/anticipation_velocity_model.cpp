@@ -2,8 +2,8 @@
 #include "anticipation_velocity_model.hpp"
 
 #include "conversion.hpp"
+#include "kernel.hpp"
 #include "operational_model.hpp"
-#include "point.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep
 
 #include <pybind11/cast.h>
@@ -86,13 +86,13 @@ void init_anticipation_velocity_model(py::module_& m)
     )");
     state
         .def(
-            py::init([](Point orientation,
+            py::init([](Vector orientation,
                         double strength_neighbor_repulsion,
                         double range_neighbor_repulsion,
                         double wall_buffer_distance,
                         double anticipation_time,
                         double reaction_time,
-                        Point velocity,
+                        Vector velocity,
                         double time_gap,
                         double desired_speed,
                         double radius) {

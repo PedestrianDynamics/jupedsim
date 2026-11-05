@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
-#include "point.hpp"
+#include "kernel.hpp"
 
 #include <fmt/core.h>
 
 struct CollisionFreeSpeedModelState {
-    Point orientation{0.0, 0.0};
+    Vector orientation{0.0, 0.0};
     double time_gap{1};
     double v0{1.2};
     double radius{0.2};

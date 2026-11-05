@@ -4,7 +4,7 @@
 #include "geometry/geometry.hpp"
 #include "geometry/walkable_surface.hpp"
 #include "geometry_builder.hpp"
-#include "point.hpp"
+#include "kernel.hpp"
 
 #include <array>
 #include <cstddef>
@@ -18,7 +18,11 @@ namespace test_geometries
 /// Convenience function to get all rectangle corner points.
 inline std::vector<Point> rectangle_points(Point lower_left, Point upper_right)
 {
-    return {lower_left, {upper_right.x, lower_left.y}, upper_right, {lower_left.x, upper_right.y}};
+    return {
+        lower_left,
+        {upper_right.x(), lower_left.y()},
+        upper_right,
+        {lower_left.x(), upper_right.y()}};
 }
 
 /// A structure to hold a single region and its geometry.
@@ -160,16 +164,19 @@ inline TwoConnectedRegions ramp(Point lower_left, Point upper_right, double heig
     TwoConnectedRegions out{};
     WalkableSurface surface{};
     out.room_1 = surface.add_region(
-        {rectangle_points({lower_left.x, lower_left.y - 1}, {upper_right.x, lower_left.y}), {}},
+        {rectangle_points({lower_left.x(), lower_left.y() - 1}, {upper_right.x(), lower_left.y()}),
+         {}},
         0.0);
     out.room_2 = surface.add_region(
-        {rectangle_points({lower_left.x, upper_right.y}, {upper_right.x, upper_right.y + 1}), {}},
+        {rectangle_points(
+             {lower_left.x(), upper_right.y()}, {upper_right.x(), upper_right.y() + 1}),
+         {}},
         height);
     out.connector = surface.connect_regions(
         out.room_1,
-        {lower_left, {upper_right.x, lower_left.y}},
+        {lower_left, {upper_right.x(), lower_left.y()}},
         out.room_2,
-        {{lower_left.x, upper_right.y}, upper_right});
+        {{lower_left.x(), upper_right.y()}, upper_right});
     out.geometry = surface.create_geometry();
     return out;
 }
@@ -199,37 +206,37 @@ inline TwoConnectedRegions stacked_floors(Point lower_left, Point upper_right, d
 {
     constexpr double width = 1.0;
     const double run = 2.0 * floor_height;
-    const double stair_top = upper_right.x + run;
+    const double stair_top = upper_right.x() + run;
     TwoConnectedRegions out{};
     WalkableSurface surface{};
     // (upper_right.x, lower_left.y + width) splits the east wall so the stair has an edge.
     out.room_1 = surface.add_region(
         {{lower_left,
-          {upper_right.x, lower_left.y},
-          {upper_right.x, lower_left.y + width},
+          {upper_right.x(), lower_left.y()},
+          {upper_right.x(), lower_left.y() + width},
           upper_right,
-          {lower_left.x, upper_right.y}},
+          {lower_left.x(), upper_right.y()}},
          {}},
         0.0);
     // The footprint, an arm east along its north side, and a column back down to the stair's
     // top.
     out.room_2 = surface.add_region(
         {{lower_left,
-          {upper_right.x, lower_left.y},
-          {upper_right.x, upper_right.y - width},
-          {stair_top, upper_right.y - width},
-          {stair_top, lower_left.y + width},
-          {stair_top, lower_left.y},
-          {stair_top + width, lower_left.y},
-          {stair_top + width, upper_right.y},
-          {lower_left.x, upper_right.y}},
+          {upper_right.x(), lower_left.y()},
+          {upper_right.x(), upper_right.y() - width},
+          {stair_top, upper_right.y() - width},
+          {stair_top, lower_left.y() + width},
+          {stair_top, lower_left.y()},
+          {stair_top + width, lower_left.y()},
+          {stair_top + width, upper_right.y()},
+          {lower_left.x(), upper_right.y()}},
          {}},
         floor_height);
     out.connector = surface.connect_regions(
         out.room_1,
-        {{upper_right.x, lower_left.y}, {upper_right.x, lower_left.y + width}},
+        {{upper_right.x(), lower_left.y()}, {upper_right.x(), lower_left.y() + width}},
         out.room_2,
-        {{stair_top, lower_left.y}, {stair_top, lower_left.y + width}});
+        {{stair_top, lower_left.y()}, {stair_top, lower_left.y() + width}});
     out.geometry = surface.create_geometry();
     return out;
 }

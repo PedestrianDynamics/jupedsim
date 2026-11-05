@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "aabb.hpp"
+#include "kernel.hpp"
 #include "line_segment.hpp"
-#include "point.hpp"
 #include "simulation_error.hpp"
 #include "test_common.hpp"
 
@@ -212,15 +212,15 @@ TEST(AABB, DoesNotIntersect)
         },
         {1., 1.});
 
-    const LineSegment l1({a.top_left() + Point{0., 1.}, a.top_right() + Point{0., 1.}});
+    const LineSegment l1({a.top_left() + Vector{0., 1.}, a.top_right() + Vector{0., 1.}});
     ASSERT_FALSE(a.intersects(l1));
 
-    const LineSegment l2({a.top_right() + Point{1., 0.}, a.bottom_right() + Point{1., 0.}});
+    const LineSegment l2({a.top_right() + Vector{1., 0.}, a.bottom_right() + Vector{1., 0.}});
     ASSERT_FALSE(a.intersects(l2));
 
-    const LineSegment l3({a.bottom_right() - Point{0., 1.}, a.bottom_left() - Point{0., 1.}});
+    const LineSegment l3({a.bottom_right() - Vector{0., 1.}, a.bottom_left() - Vector{0., 1.}});
     ASSERT_FALSE(a.intersects(l3));
 
-    const LineSegment l4({a.bottom_left() - Point{1., 0.}, a.top_left() - Point{1., 0.}});
+    const LineSegment l4({a.bottom_left() - Vector{1., 0.}, a.top_left() - Vector{1., 0.}});
     ASSERT_FALSE(a.intersects(l4));
 }

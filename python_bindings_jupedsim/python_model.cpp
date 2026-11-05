@@ -5,11 +5,11 @@
 #include "callback_views.hpp"
 #include "conversion.hpp"
 #include "generic_agent.hpp"
+#include "kernel.hpp"
 #include "operational_model.hpp"
 #include "operational_model_state.hpp"
 #include "operational_model_type.hpp"
 #include "operational_models/custom_model/custom_model.hpp"
-#include "point.hpp"
 #include "simulation_error.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep
 
@@ -111,7 +111,7 @@ static std::string describe(const py::object& obj)
     return fmt::format("{} (of type {})", repr, type);
 }
 
-Point PythonModel::compute_next_state(
+Vector PythonModel::compute_next_state(
     const OperationalModelState& current,
     OperationalModelState& next,
     const AgentStep& step) const
@@ -150,9 +150,9 @@ Point PythonModel::compute_next_state(
             "e.g. dataclasses.replace(state, ...).");
     }
 
-    Point movement{};
+    Vector movement{};
     try {
-        movement = into_point(py::cast<std::tuple<double, double>>(movement_value));
+        movement = into_vector(py::cast<std::tuple<double, double>>(movement_value));
     } catch(const py::cast_error&) {
         throw SimulationError(
             "Movement returned by compute_next_state() is of wrong type: "
@@ -220,7 +220,7 @@ void init_python_model(py::module_& m)
             }
             OperationalModelState next{current};
 
-            Point movement{};
+            Vector movement{};
             try {
                 movement = self.compute_next_state(current, next, agent_step);
             } catch(const std::bad_variant_access&) {
@@ -238,7 +238,7 @@ void init_python_model(py::module_& m)
 
             return std::make_tuple(
                 static_cast<const OperationalModelState&>(next),
-                std::make_tuple(movement.x, movement.y));
+                std::make_tuple(movement.x(), movement.y()));
         },
         py::arg("state"),
         py::arg("step"),
