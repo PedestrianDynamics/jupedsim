@@ -7,9 +7,6 @@
 [submodule "third-party/fmt"]
 	path = third-party/fmt
 	url = https://github.com/fmtlib/fmt.git
-[submodule "third-party/glm"]
-	path = third-party/glm
-	url = https://github.com/g-truc/glm.git
 [submodule "third-party/googletest"]
 	path = third-party/googletest
 	url = https://github.com/google/googletest.git
