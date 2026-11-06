@@ -29,13 +29,10 @@ west = sim.add_exit(
     [(0, 9), (0.5, 9), (0.5, 11), (0, 11)], region=hall, name="west"
 )
 
-# The entry rule picks a corridor when the agent is added; the corridors
-# lead to their exits.
-choose = jps.Route(
-    [(east_corridor, east), (west_corridor, west)],
-    start=jps.LeastTravelTime([east_corridor, west_corridor]),
-)
+# One route per exit; each agent takes the exit it reaches fastest.
+via_east = jps.Route([east_corridor, east])
 via_west = jps.Route([west_corridor, west])
+routes = {east: via_east, west: via_west}
 
 positions = jps.distribute_by_number(
     polygon=shapely.Polygon([(16, 6), (24, 6), (24, 14), (16, 14)]),
@@ -45,7 +42,9 @@ positions = jps.distribute_by_number(
     seed=1,
 )
 for x, y in positions:
-    sim.add_agent(hall.at(x, y), route=choose)
+    location = hall.at(x, y)
+    best = min(routes, key=lambda e: sim.travel_time(e, location))
+    sim.add_agent(location, route=routes[best])
 
 smoke = False
 while sim.agent_count() > 0 and sim.elapsed_time() < 600:
@@ -54,7 +53,7 @@ while sim.agent_count() > 0 and sim.elapsed_time() < 600:
         continue
     smoke = True
     # Agents still heading for the east corridor take the west route.
-    for agent in sim.agents_targeting(east_corridor, route=choose):
+    for agent in sim.agents_targeting(east_corridor, route=via_east):
         agent.follow(via_west)
     # Agents already past the corridor are stranded at the closed exit or
     # rerouted; with a fixed transition corridor -> east they are stranded.

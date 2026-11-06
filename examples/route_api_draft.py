@@ -201,16 +201,11 @@ route_n = jps.Route(
     start=wp1,
 )
 
-# Entry rule: `start` may be a rule instead of a stage, to choose the first
-# target without a dummy waypoint. It is evaluated at the agent's current
-# location when add_agent() or follow() uses the default start; afterwards
-# agent.stage is the selected stage. An explicit start=stage bypasses it.
-# The rule's targets must be stages of the route. A RoundRobin entry rule
-# has its own counter, separate from the counters at the route's stages.
-route_m = jps.Route(
-    [(wp1, exit1), (wp2, exit2)],
-    start=jps.LeastTravelTime([wp1, wp2]),
-)
+# `start` is always a stage: rules fire only on completing a stage. To
+# choose the first target from where the agent stands, choose it in the
+# script and give each choice its own route:
+best = min((exit1, exit2), key=lambda e: sim.travel_time(e, pos1))
+agent9 = sim.add_agent(pos1, route=jps.Route([best]))
 
 # --- Agents -----------------------------------------------------------
 # `start` is the agent's first target; agent.stage is always the stage the
@@ -391,6 +386,9 @@ via_landing = jps.Route([landing0, exit_ground])
 #     floorfield_options=jps.FloorfieldOptions(cell_size=0.2,
 #                                              wall_influence_radius=0.5))
 sim.travel_times(exit1)  # {floor0: TravelTimeGrid, staircase: ..., floor1: ...}
+# Travel time in seconds from a location to a stage, read from the same
+# floor field; inf if the stage cannot be reached from there.
+sim.travel_time(exit1, floor0.at(x, y))
 sim.default_speed_fields()  # {floor0: SpeedGrid, staircase: ..., floor1: ...}
 sim.set_default_speed_field(floor0, values)  # all stages without their own
 sim.set_custom_speed_field(exit1, floor0, values)  # one stage only
