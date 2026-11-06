@@ -53,6 +53,9 @@ while sim.agent_count() > 0 and sim.elapsed_time() < 600:
         continue
     smoke = True
     # Agents still heading for the east corridor take the west route.
+    # They and the agents stranded below are disjoint sets (target
+    # east_corridor vs. target east), so the order of the two loops does
+    # not matter.
     for agent in sim.agents_targeting(east_corridor, route=via_east):
         agent.follow(via_west)
     # Agents already past the corridor are stranded at the closed exit or

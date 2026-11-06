@@ -9,6 +9,7 @@
 # ground floor's left wall.
 
 import jupedsim as jps
+import numpy as np
 import shapely
 
 # The connector edges must be whole boundary edges, hence the extra
@@ -46,7 +47,9 @@ print(upstairs[0].stage)  # Exit(id=0, name="exit_ground")
 
 # Travel times to the exit, as seen on the upper floor.
 grid = sim.travel_times(exit_ground)[floor1]
-print(f"longest travel time upstairs: {grid.values.max():.1f} s")
+# Cells outside the walkable area are inf; skip them.
+finite = grid.values[np.isfinite(grid.values)]
+print(f"longest travel time upstairs: {finite.max():.1f} s")
 
 while sim.agent_count() > 0 and sim.elapsed_time() < 300:
     sim.iterate()

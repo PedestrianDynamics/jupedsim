@@ -46,9 +46,12 @@ surface.regions  # (Region(id=0, name="floor0", height=0.0), ..., Region(id=2, n
 surface.region("floor0")  # by name
 surface.region(id=0)  # by id, e.g. from saved results
 surface.regions_at((x, y))  # every region covering a point (discovery)
+# surface.regions, regions_at() and sim.stages are in creation order.
 
 # Locations: region.at(x, y) returns an immutable Location: coordinates plus
 # the region's identity. It is checked against the surface right away.
+# Locations compare and hash by (x, y, region): floor0.at(5, 2) equals
+# floor0.at(5, 2) but not floor1.at(5, 2).
 # A simulation resolves it against its own copy of the geometry when the
 # location is used (add_agent, steer_to), so the same Location works in
 # every simulation built from this surface.
@@ -101,6 +104,7 @@ sim = jps.Simulation(model, surface)
 # steer_to() no longer avoids areas made costly by speed fields (e.g.
 # smoke).
 #
+# `region`, `radius` and `name` are keyword-only.
 # `name` is optional and used in reprs and error messages; unnamed stages
 # appear as Waypoint(id=3). The messages below assume named stages.
 # Stage handles expose .id and .name (None if unnamed).
@@ -135,7 +139,7 @@ main_exits = sim.add_exit(
 # whose later target cannot be reached is stranded.
 
 # Linear (shorthand): a DIRECTED list of stages, walked in order.
-# The last stage must be an exit or jps.STAY, unless endless=True.
+# The last element must be an exit or jps.STAY, unless endless=True.
 route_a = jps.Route([wp1, wp2, exit1])
 route_b = jps.Route([wp2, wp3, exit2])
 route_x = jps.Route([exit1])  # minimal evacuation route: walk to exit1
@@ -171,7 +175,8 @@ route_f = jps.Route(
 
 # Endless loops (tours, single-file) must be explicit.
 # endless=True means the route never ends: a reachable exit or STAY is an error.
-# In a linear list, repeating the first stage at the end closes the loop.
+# With endless=True, repeating the first stage at the end of a linear list
+# closes the loop; no other stage may appear twice.
 patrol = jps.Route([wp1, wp2, wp3, wp4, wp1], endless=True)
 tour = jps.Route(
     [
@@ -196,6 +201,7 @@ tour = jps.Route(
 # LeastTravelTime: each agent picks the target with the least travel time
 # from its position, read from the targets' floor fields. The choice is made
 # once, when the agent completes the stage, and kept on the way. No weights.
+# Ties go to the earlier target in the list, as with min().
 route_n = jps.Route(
     [
         (wp1, jps.LeastTravelTime([exit1, exit2])),
@@ -241,7 +247,7 @@ agent6 = sim.add_agent(pos6, route=route_x)  # walks to exit1
 # --- Runtime changes --------------------------------------------------
 # Bound the loop by time: with holds or closures, agents may wait for a
 # later release or reopening, so "no agent is moving" is not a stop
-# condition.
+# condition. agent_count() includes held, stranded and arrived agents.
 while sim.agent_count() > 0 and sim.elapsed_time() < 600:
     sim.iterate()
 
@@ -258,6 +264,8 @@ while sim.agent_count() > 0 and sim.elapsed_time() < 600:
     agent3.follow(route_c, start=wp2)
     # direct steering -> route; route == route_a, stage == wp1
     agent5.follow(route_a)
+    # follow() to a route whose start is a closed exit does not raise: the
+    # agent is stranded at once, as if the exit had closed on its way.
 
     # Weights: a patch, like dict.update; targets not named keep their weight.
     # Validated against the whole route and applied atomically: on error the
@@ -322,7 +330,9 @@ print(agent3.held)  # True while held at a stage
 print(agent3.arrived)
 print(agent3.stranded)  # True once the agent cannot continue (closed exit)
 print(agent3.alive)  # False once the agent has left the simulation
-print(route_c.held_at(wp2))  # agents held at wp2
+# Agents stopped at wp2 (held == True); agents still walking to a held
+# wp2 are not included, but release() frees them as well.
+print(route_c.held_at(wp2))
 # Agents whose current target is wp2, on any route or only on route_c.
 # Membership is by assignment: agent.stage == wp2 (and agent.route ==
 # route_c if given), so held, stranded and arrived agents are included
@@ -330,7 +340,6 @@ print(route_c.held_at(wp2))  # agents held at wp2
 # follow() while iterating does not change which agents are visited.
 sim.agents_targeting(wp2)  # (Agent(id=3), Agent(id=4), ...)
 sim.agents_targeting(wp2, route=route_c)
-sim.run_until(t=600)  # needed for endless routes
 
 # Inspecting a route
 # next() returns the rule as an immutable value and weights() returns a copy:
@@ -392,8 +401,9 @@ via_landing = jps.Route([landing0, exit_ground])
 #     floorfield_options=jps.FloorfieldOptions(cell_size=0.2,
 #                                              wall_influence_radius=0.5))
 sim.travel_times(exit1)  # {floor0: TravelTimeGrid, staircase: ..., floor1: ...}
-# Travel time in seconds from a location to a stage, read from the same
-# floor field; inf if the stage cannot be reached from there.
+# Travel time in seconds from a location to a stage: the value of the
+# floor-field cell containing the location, so its resolution is
+# cell_size; inf if the stage cannot be reached from there.
 sim.travel_time(exit1, floor0.at(x, y))
 sim.default_speed_fields()  # {floor0: SpeedGrid, staircase: ..., floor1: ...}
 sim.set_default_speed_field(floor0, values)  # all stages without their own
@@ -456,7 +466,7 @@ jps.Route([exit1, wp1])
 jps.Route([wp1, other_sim_wp, exit1])
 # ValueError: all stages must belong to the same simulation
 jps.RoundRobin({exit1: 0.6, exit2: 0.4})
-# ValueError: weights must be integers; for probabilities use jps.Random({...}, seed=...)
+# ValueError: weights must be integers
 route_c.update_weights(wp1, {wp2: 3})
 # ValueError: wp1 has a fixed transition, not a weighted rule
 route_n.update_weights(wp1, {exit1: 2})

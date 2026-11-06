@@ -5,6 +5,8 @@
 # three agents take the left exit, one the right. After 60 s the split is
 # changed to 1:1.
 
+from collections import Counter
+
 import jupedsim as jps
 import shapely
 
@@ -41,15 +43,15 @@ positions = jps.distribute_by_number(
 for x, y in positions:
     sim.add_agent(hall.at(x, y), route=split)
 
-# Count the exits agents actually left through.
-counts = {left: 0, right: 0}
+# Count the exits agents actually left through (None: agent.remove()).
+counts = Counter()
 changed = False
 while sim.agent_count() > 0 and sim.elapsed_time() < 300:
     sim.iterate()
-    for removal in sim.removed_agents():
-        counts[removal.exit] += 1
+    counts.update(removal.exit for removal in sim.removed_agents())
     if not changed and sim.elapsed_time() >= 60:
-        split.update_weights(decision, {left: 1})  # now left: 1, right: 1
+        # A patch: right keeps its weight, so now left: 1, right: 1.
+        split.update_weights(decision, {left: 1})
         changed = True
 
-print({exit_.name: n for exit_, n in counts.items()})
+print({exit_.name: counts[exit_] for exit_ in (left, right)})

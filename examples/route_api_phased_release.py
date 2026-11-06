@@ -48,7 +48,9 @@ released = False
 while sim.agent_count() > 0 and sim.elapsed_time() < 600:
     sim.iterate()
     if not released and sim.elapsed_time() >= 60:
-        print(f"releasing {len(route_b.held_at(door_b))} agents from room B")
+        # held_at() lists agents stopped at door_b; release() also frees
+        # room B agents still walking there.
+        print(f"{len(route_b.held_at(door_b))} agents waiting at door_b")
         route_b.release(door_b)
         released = True
 
