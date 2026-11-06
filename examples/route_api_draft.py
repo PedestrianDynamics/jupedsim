@@ -41,7 +41,7 @@ staircase = surface.connect_regions(
 surface.regions  # (Region(id=0, name="floor0", height=0.0), ..., Region(id=2, name="staircase"))
 surface.region("floor0")  # by name
 surface.region(id=0)  # by id, e.g. from saved results
-surface.regions_at((x, y))  # every region covering a point
+surface.regions_at((x, y))  # every region covering a point (discovery)
 
 # Locations: region.at(x, y) returns an immutable Location: coordinates plus
 # the region's identity. It is checked against the surface right away.
@@ -50,10 +50,14 @@ surface.regions_at((x, y))  # every region covering a point
 # every simulation built from this surface.
 # Regions compare and hash by (surface, id), so a region handle from
 # `surface` is the same dict key in every simulation built from it.
-# regions_at is a lookup (which regions cover this point?); at() builds the
-# location in a region you name:
+# The region is always named: no call infers it from coordinates, so
+# adding a region (e.g. an upper floor) cannot make existing calls
+# ambiguous. regions_at is a lookup for discovery and interactive tools
+# (which regions cover this point?); at() builds the location in a region
+# you name:
 surface.regions_at((5, 2))  # (floor0, floor1): stacked floors
 floor1.at(5, 2)  # Location(5.0, 2.0, region=floor1)
+floor1.at(5, 2).xy  # (5.0, 2.0) when only the coordinates are needed
 
 # The surface is copied when the simulation is constructed: later edits to
 # `surface` do not affect `sim`. No builder is needed for this.
@@ -71,12 +75,9 @@ sim = jps.Simulation(model, surface)
 # shapely Polygon. Only the part of an area inside its region belongs to
 # the stage; an area whose clipped part has no area is an error.
 # Shorthands: a single polygon, or a point with `radius` (a disc-shaped
-# area). The region is inferred from the regions the area overlaps with
-# positive area (touching along an edge does not count): exactly one gives
-# that region; several (stacked floors, or an area straddling adjacent
-# regions) require region=.
-# Agent positions and target points are locations: region.at(x, y), or a
-# plain (x, y) whose region is inferred by the same rule.
+# area), each with region=. The area must overlap its region with
+# positive area; touching along an edge does not count.
+# Agent positions and target points are locations: region.at(x, y).
 # Coordinates are in metres, in the same frame as the geometry.
 #
 # Stage grouping sets what close() and hold() act on together: one exit
@@ -94,16 +95,16 @@ sim = jps.Simulation(model, surface)
 #
 # `name` is optional and used in reprs and error messages; unnamed stages
 # appear as Waypoint(id=3). The messages below assume named stages.
-wp1 = sim.add_waypoint((x1, y1), radius=0.5, name="wp1")
-wp2 = sim.add_waypoint((x2, y2), radius=0.5, name="wp2")
-wp3 = sim.add_waypoint((x3, y3), radius=0.5, name="wp3")
+wp1 = sim.add_waypoint((x1, y1), radius=0.5, region=floor0, name="wp1")
+wp2 = sim.add_waypoint((x2, y2), radius=0.5, region=floor0, name="wp2")
+wp3 = sim.add_waypoint((x3, y3), radius=0.5, region=floor0, name="wp3")
 door_polygon = [(), (), (), ()]
-wp4 = sim.add_waypoint(door_polygon, name="wp4")
+wp4 = sim.add_waypoint(door_polygon, region=floor0, name="wp4")
 doors = sim.add_waypoint(
-    [(door_a, floor0), (door_b, floor0)], name="doors"
-)  # either door completes it
-exit1 = sim.add_exit(exit_polygon1, name="exit1")
-exit2 = sim.add_exit(exit_polygon2, name="exit2")
+    [(door_a, floor0), (door_b, floor1)], name="doors"
+)  # either door completes it; areas may lie in different regions
+exit1 = sim.add_exit(exit_polygon1, region=floor0, name="exit1")
+exit2 = sim.add_exit(exit_polygon2, region=floor0, name="exit2")
 main_exits = sim.add_exit(
     [(exit_polygon3, floor0), (exit_polygon4, floor0)], name="main_exits"
 )  # main_exits.close() closes both doors; exit1, exit2 close one at a time
@@ -195,6 +196,7 @@ route_n = jps.Route(
 # `start` may be an exit: the agent walks to it and is removed on reaching it.
 # state=: the agent's model state. For built-in models it may be omitted;
 # the agent then gets the model's default state. Custom models must pass it.
+# pos1, pos2, ... are locations, e.g. pos1 = floor0.at(xa, ya).
 agent1 = sim.add_agent(pos1, route=route_a)  # starts at wp1
 agent8 = sim.add_agent(
     pos8,
@@ -206,7 +208,7 @@ agent3 = sim.add_agent(
     pos3, route=route_c
 )  # starts at the route's default (wp1)
 agent4 = sim.add_agent(pos4, route=route_c, start=wp2)  # overrides the default
-agent5 = sim.add_agent(pos5, target=(x, y))  # direct steering, no route
+agent5 = sim.add_agent(pos5, target=floor0.at(x, y))  # direct steering
 # Steering to a location on another floor walks there over the connecting
 # staircase.
 agent7 = sim.add_agent(floor0.at(x0, y0), target=floor1.at(x, y))
@@ -221,10 +223,10 @@ while sim.agent_count() > 0 and sim.elapsed_time() < 600:
 
     # Direct steering: change the target with steer_to(); also switches a
     # route agent to direct steering.
-    agent5.steer_to((x_new, y_new))
+    agent5.steer_to(floor0.at(x_new, y_new))
     agent7.steer_to(floor1.at(x_new, y_new))  # location on floor1
     # route -> direct steering; route and stage become None
-    agent2.steer_to((x_new, y_new))
+    agent2.steer_to(floor0.at(x_new, y_new))
 
     # Routes are changed with follow() only (route and start in one call).
     agent1.follow(route_b)  # starts at the first stage, wp2
@@ -278,6 +280,10 @@ print(agent2.route, agent2.stage)  # None, None in direct steering
 # Route(start=wp1, ...), Waypoint(id=1, name="wp1")
 print(agent5.route, agent5.stage)
 print(agent2.target)  # Location(x_new, y_new, region=floor0) in direct steering
+# Locations read from an agent keep their region, so they can be passed on
+# directly, e.g. agent5.steer_to(agent2.position).
+print(agent2.position)  # Location(..., region=floor0)
+print(agent2.position.xy)  # (x, y) only
 print(agent5.target)  # None on a route: use agent5.stage
 print(agent5.direction)  # unit vector the agent is currently steered along
 print(agent3.held)  # True while held at a stage
@@ -311,9 +317,8 @@ print(route_c)
 # already routes over it.
 exit_ground = sim.add_exit(
     ground_exit_polygon, region=floor0, name="exit_ground"
-)  # floors overlap in plan, so the region is named
+)
 evacuate = jps.Route([exit_ground])
-# floor0 and floor1 overlap in plan, so the position names its region
 upstairs = sim.add_agent(floor1.at(xu, yu), route=evacuate)
 print(upstairs.stage)  # Exit(id=8, name="exit_ground")
 grid = sim.travel_times(exit_ground)[floor1]  # floor1's grid
@@ -347,14 +352,14 @@ sim.clear_custom_speed_field(exit1, floor0)
 # created once and shared by routes.
 
 # --- Errors -----------------------------------------------------------
-sim.add_waypoint(door_polygon, radius=0.5)
+sim.add_waypoint(door_polygon, radius=0.5, region=floor0)
 # ValueError: radius applies to point waypoints only
-sim.add_waypoint((x1, y1), radius=0)
+sim.add_waypoint((x1, y1), radius=0, region=floor0)
 # ValueError: radius must be > 0
-sim.add_waypoint(landing_polygon)  # lies where floor0 and floor1 overlap
-# ValueError: area intersects floor0 and floor1; pass region=
+sim.add_waypoint(door_polygon)
+# TypeError: region= is required, e.g. sim.add_waypoint(area, region=floor0)
 sim.add_waypoint(door_polygon, region=floor1)  # door_polygon is not in floor1
-# ValueError: area does not intersect floor1
+# ValueError: area does not overlap floor1
 sim.add_waypoint(door_polygon, region=1)
 # TypeError: region must be a Region handle, e.g. surface.region("floor1")
 surface.region("floor2")
@@ -373,11 +378,13 @@ surface.connect_regions(
 #   landing region between two connectors
 sim.add_agent(new_region.at(x, y), route=route_a)  # region added after sim
 # ValueError: new_region is not part of this simulation's geometry
-sim.add_agent(pos5, target=(x, y))  # (x, y) on floor0 and floor1
-# ValueError: (x, y) lies in floor0 and floor1; use floor0.at(x, y) or floor1.at(x, y)
+sim.add_agent((x, y), route=route_a)
+# TypeError: position must be a Location, e.g. floor0.at(x, y)
+agent5.steer_to((x, y))
+# TypeError: target must be a Location, e.g. floor0.at(x, y)
 floor1.at(100, 100)
 # ValueError: (100, 100) is not in floor1
-sim.add_waypoint(polygon_with_hole)
+sim.add_waypoint(polygon_with_hole, region=floor0)
 # ValueError: waypoint polygons must be simple and without holes
 jps.Route([])
 # ValueError: route is empty
@@ -423,7 +430,7 @@ route_c.hold(exit1)
 # ValueError: exits cannot be held; use exit1.close()
 route_c.release(wp1)
 # ValueError: wp1 is not held
-sim.add_agent(pos, route=route_a, target=(x, y))
+sim.add_agent(pos, route=route_a, target=floor0.at(x, y))
 # ValueError: use route= or target=, not both
 sim.add_agent(pos, route=jps.Route([(wp1, wp2), (wp2, exit1)]))
 # ValueError: route given as pairs has no default start; pass start= here or to Route
@@ -434,7 +441,7 @@ other_sim.add_agent(pos, route=route_c)
 agent1.route = route_c
 # AttributeError: use agent.follow(route, start=...)
 agent5.target = (x_new, y_new)
-# AttributeError: use agent.steer_to(point)
+# AttributeError: use agent.steer_to(location)
 agent1.stage  # after agent1 left through an exit
 # RuntimeError: Agent(id=1) has left the simulation (agent.alive is False)
 custom_sim.add_agent(pos, route=route_a)  # simulation with a custom model
