@@ -429,10 +429,15 @@ class Simulation:
             self._writer.begin_writing(self)
             self._writer.write_iteration_state(self)
 
+        if not self._writer:
+            # One call into C++ for the whole batch.
+            self._obj.iterate(count)
+            return
+        # The writer decides per iteration whether to record a frame, so it has to see every
+        # iteration.
         for _ in range(0, count):
             self._obj.iterate()
-            if self._writer:
-                self._writer.write_iteration_state(self)
+            self._writer.write_iteration_state(self)
 
     def close(self) -> None:
         """Close the simulation and free its memory.

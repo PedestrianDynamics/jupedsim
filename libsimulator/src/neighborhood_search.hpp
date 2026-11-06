@@ -10,6 +10,7 @@
 #include <concepts>
 #include <cstddef>
 #include <cstdint>
+#include <cstdlib>
 #include <functional>
 #include <iterator>
 #include <type_traits>
@@ -65,6 +66,10 @@ struct std::hash<Grid2DIndex> {
 template <typename Value>
 class NeighborhoodSearch
 {
+    struct Bounds {
+        std::int32_t x0, x1, y0, y1;
+    };
+
     double _cell_size;
 
     // Flat layout ("compressed rows"): the items of each occupied cell lie contiguously in
@@ -86,6 +91,8 @@ class NeighborhoodSearch
     // Scratch, reused between updates.
     std::vector<Grid2DIndex> _keys{};
     std::vector<std::uint32_t> _cursor{};
+    std::vector<Bounds> _block_bounds{};
+    std::vector<std::uint32_t> _block_counts{};
 
 public:
     /// The cell @p pos falls into.
@@ -163,7 +170,7 @@ public:
                 key_of(i);
             }
         }
-        build_from_keys(items);
+        build_from_keys(items, pool);
     }
 
     /// Scratch for the cells of the next update_from_keys(): entry i is items[i]'s cell.
@@ -176,15 +183,118 @@ public:
     }
 
     /// Rebuilds from the cells stored through keys_for(); same result as update(items).
-    void update_from_keys(const AgentContainer<Value>& items)
+    template <typename Pool = void>
+    void update_from_keys(const AgentContainer<Value>& items, Pool* pool = nullptr)
     {
         _pending.clear();
-        build_from_keys(items);
+        build_from_keys(items, pool);
     }
 
 private:
-    void build_from_keys(const AgentContainer<Value>& items)
+    /// Parallel counting sort into the dense layout: per-block bounds and per-block cell counts,
+    /// a column-wise prefix over blocks (in parallel over cells), a serial prefix over cells,
+    /// and a parallel scatter. Blocks are contiguous index ranges, so container order within a
+    /// cell -- and with it the neighbour order -- is the same as the serial build's. Returns
+    /// false (and does nothing) when the crowd is too small or too sparse for it to pay off.
+    template <typename Pool>
+    bool build_dense_parallel(const AgentContainer<Value>& items, Pool& pool)
     {
+        // SPIKE: JPS_GRID_PAR_MIN is the crowd size from which this runs (default 2048).
+        static const std::size_t min_items = [] {
+            const char* env = std::getenv("JPS_GRID_PAR_MIN");
+            return env != nullptr ? static_cast<std::size_t>(std::strtoul(env, nullptr, 10)) :
+                                    std::size_t{2048};
+        }();
+        const std::size_t n = std::size(items);
+        if(n < min_items || pool.size() < 2) {
+            return false;
+        }
+        std::size_t blocks = std::min<std::size_t>(pool.size(), n / 256);
+        if(blocks < 2) {
+            return false;
+        }
+        const auto lo = [&](std::size_t b) { return b * n / blocks; };
+        _block_bounds.resize(blocks);
+        pool.parallel_for(blocks, 1, [&](std::size_t b) {
+            Bounds bb{_keys[lo(b)].idx, _keys[lo(b)].idx, _keys[lo(b)].idy, _keys[lo(b)].idy};
+            for(std::size_t i = lo(b); i < lo(b + 1); ++i) {
+                bb.x0 = std::min(bb.x0, _keys[i].idx);
+                bb.x1 = std::max(bb.x1, _keys[i].idx);
+                bb.y0 = std::min(bb.y0, _keys[i].idy);
+                bb.y1 = std::max(bb.y1, _keys[i].idy);
+            }
+            _block_bounds[b] = bb;
+        });
+        Bounds all = _block_bounds[0];
+        for(const auto& bb : _block_bounds) {
+            all.x0 = std::min(all.x0, bb.x0);
+            all.x1 = std::max(all.x1, bb.x1);
+            all.y0 = std::min(all.y0, bb.y0);
+            all.y1 = std::max(all.y1, bb.y1);
+        }
+        const auto nx = static_cast<std::int64_t>(all.x1) - all.x0 + 1;
+        const auto ny = static_cast<std::int64_t>(all.y1) - all.y0 + 1;
+        if(nx * ny > static_cast<std::int64_t>(8 * n + 4096)) {
+            return false; // sparse: the serial build's hash fallback handles it
+        }
+        const auto cells = static_cast<std::size_t>(nx * ny);
+        // Keep the per-block count table small next to the crowd.
+        blocks = std::min(blocks, std::max<std::size_t>(2, 4 * n / cells));
+        if(blocks < 2) {
+            return false;
+        }
+        _x0 = all.x0;
+        _y0 = all.y0;
+        _nx = static_cast<std::int32_t>(nx);
+        _ny = static_cast<std::int32_t>(ny);
+        _dense = true;
+        _sparse.clear();
+        _items.resize(n);
+        const auto cell_of = [&](const Grid2DIndex& k) {
+            return static_cast<std::size_t>(k.idx - _x0) * static_cast<std::size_t>(_ny) +
+                   static_cast<std::size_t>(k.idy - _y0);
+        };
+        _block_counts.resize(blocks * cells);
+        pool.parallel_for(blocks, 1, [&](std::size_t b) {
+            auto* row = _block_counts.data() + b * cells;
+            std::fill(row, row + cells, 0U);
+            for(std::size_t i = lo(b); i < lo(b + 1); ++i) {
+                ++row[cell_of(_keys[i])];
+            }
+        });
+        // Column prefix: per cell, where each block's items start relative to the cell start.
+        _cell_begin.assign(cells + 1, 0);
+        pool.parallel_for(
+            cells, std::max<std::size_t>(1024, cells / (pool.size() * 4)), [&](std::size_t c) {
+                std::uint32_t running = 0;
+                for(std::size_t b = 0; b < blocks; ++b) {
+                    const auto count = _block_counts[b * cells + c];
+                    _block_counts[b * cells + c] = running;
+                    running += count;
+                }
+                _cell_begin[c + 1] = running;
+            });
+        for(std::size_t c = 0; c < cells; ++c) {
+            _cell_begin[c + 1] += _cell_begin[c];
+        }
+        pool.parallel_for(blocks, 1, [&](std::size_t b) {
+            auto* row = _block_counts.data() + b * cells;
+            for(std::size_t i = lo(b); i < lo(b + 1); ++i) {
+                const auto c = cell_of(_keys[i]);
+                _items[_cell_begin[c] + row[c]++] = as_ptr(items[i]);
+            }
+        });
+        return true;
+    }
+
+    template <typename Pool>
+    void build_from_keys(const AgentContainer<Value>& items, Pool* pool)
+    {
+        if constexpr(!std::is_void_v<Pool>) {
+            if(pool != nullptr && build_dense_parallel(items, *pool)) {
+                return;
+            }
+        }
         const std::size_t n = std::size(items);
         _items.resize(n);
         _sparse.clear();

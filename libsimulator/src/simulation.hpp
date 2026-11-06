@@ -96,6 +96,9 @@ public:
     const SimulationClock& clock() const;
     void set_tracing(bool on);
     void iterate();
+    /// Runs @p count iterations in one call, so per-call costs (crossing into C++, the GIL)
+    /// are paid once per batch instead of once per iteration.
+    void iterate(std::size_t count);
     /// Closes the simulation freeing memory. Every entry point (except timer's) throws afterwards.
     void close();
     Journey::ID add_journey(const std::map<BaseStage::ID, TransitionDescription>& stages);

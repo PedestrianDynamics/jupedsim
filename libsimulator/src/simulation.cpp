@@ -102,6 +102,13 @@ void Simulation::set_tracing(bool status)
     }
 };
 
+void Simulation::iterate(std::size_t count)
+{
+    for(std::size_t i = 0; i < count; ++i) {
+        iterate();
+    }
+}
+
 void Simulation::iterate()
 {
     throw_if_state(State::Iterating | State::Closed, "iterate");
@@ -209,7 +216,7 @@ void Simulation::iterate()
         // add_agent validation).
         JPS_SCOPED_TIMER_AND_TRACE(_timer, "Neighborhood Search (post)", Detailed);
         if(next_cells != nullptr) {
-            _neighborhood_search.update_from_keys(_agents);
+            _neighborhood_search.update_from_keys(_agents, _operational_decision_system.pool());
         } else {
             _neighborhood_search.update(_agents);
         }

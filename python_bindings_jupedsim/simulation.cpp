@@ -173,12 +173,13 @@ void init_simulation(py::module_& m)
             })
         .def(
             "iterate",
-            [](Simulation& sim) {
+            [](Simulation& sim, std::size_t count) {
                 // Worker threads of the operational step may log; the Python log callbacks
                 // take the GIL themselves, so it must not be held here.
                 py::gil_scoped_release release;
-                sim.iterate();
-            })
+                sim.iterate(count);
+            },
+            py::arg("count") = 1)
         .def("set_num_threads", &Simulation::set_num_threads, py::arg("threads"))
         .def("num_threads", &Simulation::num_threads)
         .def(
