@@ -4,7 +4,8 @@
 # Ground floor 0..20 m x 0..10 m, upper floor 6..26 m x 0..10 m at 3 m.
 # The floors overlap in plan between x = 6 and x = 20. A staircase rises
 # from the ground floor's right wall (x = 20) to the upper floor's right
-# wall (x = 26). Agents start upstairs and leave through an exit on the
+# wall (x = 26), rising 3 m over 6 m (about 27 degrees, within master's
+# 50 degree limit). Agents start upstairs and leave through an exit on the
 # ground floor's left wall.
 
 import jupedsim as jps

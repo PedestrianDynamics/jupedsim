@@ -41,21 +41,15 @@ positions = jps.distribute_by_number(
 for x, y in positions:
     sim.add_agent(hall.at(x, y), route=split)
 
-# Count which exit each agent was sent to.
-# GAP: a removed agent keeps only .id and .alive, so the exit it used is
-# lost; the script has to record assignments itself while agents live.
-assigned = {}
+# Count the exits agents actually left through.
+counts = {left: 0, right: 0}
 changed = False
 while sim.agent_count() > 0 and sim.elapsed_time() < 300:
     sim.iterate()
-    for exit_ in (left, right):
-        for agent in sim.agents_targeting(exit_, route=split):
-            assigned[agent.id] = exit_.name
+    for removal in sim.removed_agents():
+        counts[removal.exit] += 1
     if not changed and sim.elapsed_time() >= 60:
         split.update_weights(decision, {left: 1})  # now left: 1, right: 1
         changed = True
 
-counts = {
-    name: list(assigned.values()).count(name) for name in ("left", "right")
-}
-print(counts)
+print({exit_.name: n for exit_, n in counts.items()})

@@ -16,7 +16,6 @@ hall = surface.add_region(polygon=hall_polygon, height=0.0, name="hall")
 
 sim = jps.Simulation(jps.CollisionFreeSpeedModel(), surface)
 
-start = sim.add_waypoint((20, 10), radius=2.0, region=hall, name="start")
 east_corridor = sim.add_waypoint(
     (32, 10), radius=1.0, region=hall, name="east_corridor"
 )
@@ -30,16 +29,11 @@ west = sim.add_exit(
     [(0, 9), (0.5, 9), (0.5, 11), (0, 11)], region=hall, name="west"
 )
 
-# GAP: a route cannot begin with a rule; choosing an exit right away
-# needs a first waypoint (here `start`) that agents complete on spawn.
-# The corridors lead to their exits.
+# The entry rule picks a corridor when the agent is added; the corridors
+# lead to their exits.
 choose = jps.Route(
-    [
-        (start, jps.LeastTravelTime([east_corridor, west_corridor])),
-        (east_corridor, east),
-        (west_corridor, west),
-    ],
-    start=start,
+    [(east_corridor, east), (west_corridor, west)],
+    start=jps.LeastTravelTime([east_corridor, west_corridor]),
 )
 via_west = jps.Route([west_corridor, west])
 

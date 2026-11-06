@@ -27,9 +27,10 @@ floor1 = surface.add_region(polygon=floor1_polygon, height=3.0, name="floor1")
 # A connector (staircase, ramp) is a region of its own: connect_regions returns
 # its handle. edge0 must be an edge of floor0's boundary and edge1 an edge of
 # floor1's; each is lifted to its region's height. The four endpoints must
-# lie in one plane that is not too steep to walk. The orientation of the
-# edges is fixed automatically. A connector cannot itself be connected
-# again: a staircase with a turn uses two connectors and a landing region.
+# lie in one plane inclined at most 50 degrees, as on master. The
+# orientation of the edges is fixed automatically. A connector cannot
+# itself be connected again: a staircase with a turn uses two connectors
+# and a landing region.
 staircase = surface.connect_regions(
     from_region=floor0,
     from_edge=edge0,
@@ -200,6 +201,17 @@ route_n = jps.Route(
     start=wp1,
 )
 
+# Entry rule: `start` may be a rule instead of a stage, to choose the first
+# target without a dummy waypoint. It is evaluated at the agent's current
+# location when add_agent() or follow() uses the default start; afterwards
+# agent.stage is the selected stage. An explicit start=stage bypasses it.
+# The rule's targets must be stages of the route. A RoundRobin entry rule
+# has its own counter, separate from the counters at the route's stages.
+route_m = jps.Route(
+    [(wp1, exit1), (wp2, exit2)],
+    start=jps.LeastTravelTime([wp1, wp2]),
+)
+
 # --- Agents -----------------------------------------------------------
 # `start` is the agent's first target; agent.stage is always the stage the
 # agent is heading for. An agent spawned inside its start stage's arrival
@@ -255,10 +267,11 @@ while sim.agent_count() > 0 and sim.elapsed_time() < 600:
     print(route_c.weights(wp2))  # {wp3: 0, exit1: 2, exit2: 1}
 
     # Hold agents at a stage (e.g. phased evacuation), weights are kept.
-    # hold() puts wp2 on route_c into a held state that lasts until
-    # release(): every agent on route_c whose target is wp2, now or later
-    # (including agents added after the call), stops inside wp2. Agents
-    # that completed wp2 before the call are not affected.
+    # The hold is scoped to (route_c, wp2) and lasts until release():
+    # every agent on route_c whose target is wp2, now or later (including
+    # agents added after the call), keeps walking to wp2 and stops there,
+    # held == True on arrival. Agents on other routes that use wp2 are not
+    # affected, nor are agents that completed wp2 before the call.
     # A held agent that follow()s another route is no longer held.
     route_c.hold(wp2)
     # Held agents go on in arrival order (ties by agent id), current rule.
@@ -294,7 +307,9 @@ print(agent2.route, agent2.stage)  # None, None in direct steering
 print(agent5.route, agent5.stage)
 print(agent2.target)  # Location(x_new, y_new, region=floor0) in direct steering
 # Locations read from an agent keep their region, so they can be passed on
-# directly, e.g. agent5.steer_to(agent2.position).
+# directly, e.g. agent5.steer_to(agent2.position). They are snapshots: a
+# saved agent.position does not follow the agent. Location.region,
+# Stage.name and the other handle attributes are read-only.
 print(agent2.position)  # Location(..., region=floor0)
 print(agent2.position.xy)  # (x, y) only
 print(agent5.target)  # None on a route: use agent5.stage
@@ -491,6 +506,13 @@ custom_sim.add_agent(pos, route=route_a)  # simulation with a custom model
 # A removed agent's handle keeps .id and .alive readable; everything else
 # raises.
 agent1.remove()
+# Each iterate() records the agents removed in it. A record holds the
+# agent's id, the exit it left through (None for agent.remove()) and the
+# removal time, e.g. for exit counts and flow over time.
+for removal in sim.removed_agents():
+    removal.id  # 17
+    removal.exit  # Exit(id=5, name="exit1"), or None
+    removal.time  # simulation time of the removal, in seconds
 sim.stages  # (Waypoint(id=0, name="wp1"), ..., Exit(id=8, name="exit_ground"))
 sim.stage("exit1")  # Exit(id=5, name="exit1")
 sim.stage(id=5)  # the same exit, by id
@@ -505,8 +527,8 @@ sim.agent(17)  # Agent(id=17)
 #    exit1 -> stage == exit1; the assignment is kept until exit1 or a
 #    change (follow, close with informed=True).
 # 3. Held:
-#    route_c.hold(wp2) while stage == wp2 -> agent stops inside wp2,
-#    held == True. route_c.release(wp2) -> served
+#    route_c.hold(wp2) while or before stage == wp2 -> agent stops inside
+#    wp2, held == True. route_c.release(wp2) -> served
 #    in arrival order by the current rule -> held == False.
 # 4. Exit closed on the way:
 #    stage == exit2, assigned by the rule at wp2:
@@ -542,8 +564,8 @@ sim.agent(17)  # Agent(id=17)
 # add_region(...) -> int                    surface.add_region(...) -> Region
 # connect_regions(...) -> int               surface.connect_regions(...) -> Region
 # mark_agent_for_removal(agent_id)          agent.remove(), see "Lookup and removal"
-# removed_agents() -> list[int]             sim.removed_agents() -> agents with
-#                                           alive == False
+# removed_agents() -> list[int]             sim.removed_agents() -> records
+#                                           with .id, .exit, .time
 # stage_ids() -> list[int]                  sim.stages -> tuple of handles
 # get_stage(stage_id)                       sim.stage("exit1") or
 #                                           sim.stage(id=5)
