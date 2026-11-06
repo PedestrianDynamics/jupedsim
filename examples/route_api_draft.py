@@ -13,23 +13,30 @@ import jupedsim as jps
 surface = jps.WalkableSurface()
 floor0 = surface.add_region(polygon=floor0_polygon, height=0.0, name="floor0")
 floor1 = surface.add_region(polygon=floor1_polygon, height=3.0, name="floor1")
-# A connector (stairs, ramp) is a region of its own: connect_regions returns
+# A connector (staircase, ramp) is a region of its own: connect_regions returns
 # its handle. edge0 lies on floor0's boundary and edge1 on floor1's; each is
 # a line segment lifted to its region's height. The quad they span must be
 # planar: the edges may be skewed but not twisted.
-stairs = surface.connect_regions(
+staircase = surface.connect_regions(
     from_region=floor0,
     from_edge=edge0,
     to_region=floor1,
     to_edge=edge1,
-    name="stairs",
+    name="staircase",
 )
 
 # Looking regions up, e.g. for a geometry loaded from a file:
-surface.regions  # (Region(id=0, name="floor0", height=0.0), ..., Region(id=2, name="stairs"))
+surface.regions  # (Region(id=0, name="floor0", height=0.0), ..., Region(id=2, name="staircase"))
 surface.region("floor0")  # by name
 surface.regions_at((x, y))  # every region covering a point
-floor1.at(x, y)  # Location: a point in floor1; raises if it is not in floor1
+
+# Locations: region.at(x, y) returns a Location (x, y, z, region). It is
+# checked against the surface right away and works in any simulation built
+# from this surface. z is the region's height, interpolated on a staircase.
+# regions_at is a lookup (which regions cover this point?); at() builds the
+# location in a region you name:
+surface.regions_at((5, 2))  # (floor0, floor1): stacked floors
+floor1.at(5, 2)  # Location(5.0, 2.0, 3.0) in floor1
 
 # The surface is copied when the simulation is constructed: later edits to
 # `surface` do not affect `sim`. No builder is needed for this.
@@ -172,7 +179,7 @@ agent3 = sim.add_agent(
 agent4 = sim.add_agent(pos4, route=route_c, start=wp2)  # overrides the default
 agent5 = sim.add_agent(pos5, target=(x, y))  # direct steering, no route
 # Steering to a location on another floor walks there over the connecting
-# stairs.
+# staircase.
 agent7 = sim.add_agent(floor0.at(x0, y0), target=floor1.at(x, y))
 agent6 = sim.add_agent(pos6, route=route_x)  # walks to exit1
 
@@ -270,9 +277,9 @@ print(route_c)
 #   wp3 -> exit2
 
 # --- Two floors -------------------------------------------------------
-# An agent upstairs leaves through an exit on the ground floor. The stairs
-# are a region (from connect_regions), not a stage: the exit's floor field
-# already routes over them.
+# An agent upstairs leaves through an exit on the ground floor. The staircase
+# is a region (from connect_regions), not a stage: the exit's floor field
+# already routes over it.
 exit_ground = sim.add_exit(ground_exit_polygon, name="exit_ground")  # floor0
 evacuate = jps.Route([exit_ground])
 # floor0 and floor1 overlap in plan, so the position names its region
@@ -281,9 +288,9 @@ print(upstairs.stage)  # Exit(id=8, name="exit_ground")
 grid = sim.travel_times(exit_ground)[floor1]  # floor1's grid
 grid.values  # seconds to exit_ground, shape (height, width); inf = not walkable
 grid.directions  # walking directions, shape (height, width, 2)
-# The stairs are a region, so they can also hold a stage, e.g. a waypoint
+# The staircase is a region, so it can also hold a stage, e.g. a waypoint
 # halfway up that agents must pass:
-mid_stairs = sim.add_waypoint(mid_stairs_polygon, region=stairs, name="mid")
+mid_stairs = sim.add_waypoint(mid_stairs_polygon, region=staircase, name="mid")
 # To make agents pass the lower landing (e.g. a counting line), make it a
 # stage of the route:
 landing0 = sim.add_waypoint(
@@ -298,11 +305,11 @@ via_landing = jps.Route([landing0, exit_ground])
 # Configuration: jps.Simulation(model, surface,
 #     floorfield_options=jps.FloorfieldOptions(cell_size=0.2,
 #                                              wall_influence_radius=0.5))
-sim.travel_times(exit1)  # {floor0: TravelTimeGrid, stairs: ..., floor1: ...}
-sim.default_speed_fields()  # {floor0: SpeedGrid, stairs: ..., floor1: ...}
+sim.travel_times(exit1)  # {floor0: TravelTimeGrid, staircase: ..., floor1: ...}
+sim.default_speed_fields()  # {floor0: SpeedGrid, staircase: ..., floor1: ...}
 sim.set_default_speed_field(floor0, values)  # all stages without their own
 sim.set_custom_speed_field(exit1, floor0, values)  # one stage only
-sim.custom_speed_fields(exit1)  # {floor0: SpeedGrid, stairs: None, ...}
+sim.custom_speed_fields(exit1)  # {floor0: SpeedGrid, staircase: None, ...}
 sim.clear_custom_speed_field(exit1, floor0)
 # Speed fields change routes, not walking speed. Floor fields are solved
 # when first needed and cost memory per stage and region, so stages are
@@ -320,7 +327,7 @@ sim.add_waypoint(door_polygon, region=floor1)  # door_polygon is not in floor1
 sim.add_waypoint(door_polygon, region=1)
 # TypeError: region must be a Region handle, e.g. surface.region("floor1")
 surface.region("floor2")
-# KeyError: no region named floor2; regions are floor0, floor1, stairs
+# KeyError: no region named floor2; regions are floor0, floor1, staircase
 surface.connect_regions(
     from_region=floor0,
     from_edge=edge0,
