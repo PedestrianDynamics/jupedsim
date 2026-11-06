@@ -90,8 +90,9 @@ sim = jps.Simulation(model, surface)
 # inside an area.
 # Direct steering (target= / steer_to) replaces the route with a single
 # point destination. Navigation to that point still follows the walkable
-# surface, including connectors (shortest path over the surface mesh, no
-# floor field); it is not a straight walk toward the point.
+# surface, including connectors (point-to-point shortest path over the
+# navigation mesh, no floor field); it is not a straight walk toward the
+# point.
 #
 # `name` is optional and used in reprs and error messages; unnamed stages
 # appear as Waypoint(id=3). The messages below assume named stages.
@@ -350,6 +351,9 @@ landing0 = sim.add_waypoint(
 via_landing = jps.Route([landing0, exit_ground])
 
 # --- Routing backend: floor fields ------------------------------------
+# Two fixed routing engines: floor fields for stages (routes), the
+# navigation mesh for point targets (direct steering). There is no option
+# to switch engines.
 # Everything floor-field-specific is in this section; the route API above
 # only needs "is the agent inside the stage's area" and "which
 # direction leads there", plus travel times for LeastTravelTime.
