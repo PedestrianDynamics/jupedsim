@@ -7,6 +7,16 @@
 
 import jupedsim as jps
 
+# --- Concepts ---------------------------------------------------------
+# Surface    the complete walkable geometry
+# Region     an identified patch of that surface
+# Floor      a building concept; one floor may consist of several regions
+# Connector  a region joining two other regions (staircase, ramp)
+# Staircase  one or more inclined connector regions, with landing regions
+#            in between where the staircase turns
+# Stage      destination areas attached to regions (waypoints, exits)
+# Route      the order in which an agent visits stages
+
 # --- Regions ----------------------------------------------------------
 # Regions are returned as handles, like stages, not as bare ints.
 # `name` is optional and used in reprs and error messages.
@@ -14,9 +24,11 @@ surface = jps.WalkableSurface()
 floor0 = surface.add_region(polygon=floor0_polygon, height=0.0, name="floor0")
 floor1 = surface.add_region(polygon=floor1_polygon, height=3.0, name="floor1")
 # A connector (staircase, ramp) is a region of its own: connect_regions returns
-# its handle. edge0 lies on floor0's boundary and edge1 on floor1's; each is
-# a line segment lifted to its region's height. The quad they span must be
-# planar: the edges may be skewed but not twisted.
+# its handle. edge0 must be an edge of floor0's boundary and edge1 an edge of
+# floor1's; each is lifted to its region's height. The four endpoints must
+# lie in one plane that is not too steep to walk. The orientation of the
+# edges is fixed automatically. A connector cannot itself be connected
+# again: a staircase with a turn uses two connectors and a landing region.
 staircase = surface.connect_regions(
     from_region=floor0,
     from_edge=edge0,
@@ -28,15 +40,20 @@ staircase = surface.connect_regions(
 # Looking regions up, e.g. for a geometry loaded from a file:
 surface.regions  # (Region(id=0, name="floor0", height=0.0), ..., Region(id=2, name="staircase"))
 surface.region("floor0")  # by name
+surface.region(id=0)  # by id, e.g. from saved results
 surface.regions_at((x, y))  # every region covering a point
 
-# Locations: region.at(x, y) returns a Location (x, y, z, region). It is
-# checked against the surface right away and works in any simulation built
-# from this surface. z is the region's height, interpolated on a staircase.
+# Locations: region.at(x, y) returns an immutable Location: coordinates plus
+# the region's identity. It is checked against the surface right away.
+# A simulation resolves it against its own copy of the geometry when the
+# location is used (add_agent, steer_to), so the same Location works in
+# every simulation built from this surface.
+# Regions compare and hash by (surface, id), so a region handle from
+# `surface` is the same dict key in every simulation built from it.
 # regions_at is a lookup (which regions cover this point?); at() builds the
 # location in a region you name:
 surface.regions_at((5, 2))  # (floor0, floor1): stacked floors
-floor1.at(5, 2)  # Location(5.0, 2.0, 3.0) in floor1
+floor1.at(5, 2)  # Location(5.0, 2.0, region=floor1)
 
 # The surface is copied when the simulation is constructed: later edits to
 # `surface` do not affect `sim`. No builder is needed for this.
@@ -52,11 +69,12 @@ sim = jps.Simulation(model, surface)
 # pairs, so one stage can cover several areas (e.g. two doors) and regions.
 # Area: a polygon without holes, as a sequence of >= 3 (x, y) vertices or a
 # shapely Polygon. Only the part of an area inside its region belongs to
-# the stage; an area whose clipped part is empty is an error.
+# the stage; an area whose clipped part has no area is an error.
 # Shorthands: a single polygon, or a point with `radius` (a disc-shaped
-# area). The region is inferred from the regions the area intersects
-# (non-empty intersection): exactly one gives that region; several (stacked
-# floors, or an area straddling adjacent regions) require region=.
+# area). The region is inferred from the regions the area overlaps with
+# positive area (touching along an edge does not count): exactly one gives
+# that region; several (stacked floors, or an area straddling adjacent
+# regions) require region=.
 # Agent positions and target points are locations: region.at(x, y), or a
 # plain (x, y) whose region is inferred by the same rule.
 # Coordinates are in metres, in the same frame as the geometry.
@@ -68,7 +86,11 @@ sim = jps.Simulation(model, surface)
 # Routing to areas uses floor fields (see "Routing backend" below): agents
 # move toward the area along paths of least travel time, which need not be
 # the geometrically nearest part. The stage is reached once the agent is
-# inside an area. Direct steering targets a point and uses no floor field.
+# inside an area.
+# Direct steering (target= / steer_to) replaces the route with a single
+# point destination. Navigation to that point still follows the walkable
+# surface, including connectors (shortest path over the surface mesh, no
+# floor field); it is not a straight walk toward the point.
 #
 # `name` is optional and used in reprs and error messages; unnamed stages
 # appear as Waypoint(id=3). The messages below assume named stages.
@@ -171,7 +193,14 @@ route_n = jps.Route(
 # agent is heading for. An agent spawned inside its start stage's arrival
 # region reaches it in the first iteration and goes on to the next stage.
 # `start` may be an exit: the agent walks to it and is removed on reaching it.
+# state=: the agent's model state. For built-in models it may be omitted;
+# the agent then gets the model's default state. Custom models must pass it.
 agent1 = sim.add_agent(pos1, route=route_a)  # starts at wp1
+agent8 = sim.add_agent(
+    pos8,
+    route=route_a,
+    state=jps.CollisionFreeSpeedModelState(desired_speed=1.2),
+)
 agent2 = sim.add_agent(pos2, route=route_b)  # starts at wp2
 agent3 = sim.add_agent(
     pos3, route=route_c
@@ -248,7 +277,7 @@ while sim.agent_count() > 0 and sim.elapsed_time() < 600:
 print(agent2.route, agent2.stage)  # None, None in direct steering
 # Route(start=wp1, ...), Waypoint(id=1, name="wp1")
 print(agent5.route, agent5.stage)
-print(agent2.target)  # (x_new, y_new): the steering point in direct steering
+print(agent2.target)  # Location(x_new, y_new, region=floor0) in direct steering
 print(agent5.target)  # None on a route: use agent5.stage
 print(agent5.direction)  # unit vector the agent is currently steered along
 print(agent3.held)  # True while held at a stage
@@ -280,7 +309,9 @@ print(route_c)
 # An agent upstairs leaves through an exit on the ground floor. The staircase
 # is a region (from connect_regions), not a stage: the exit's floor field
 # already routes over it.
-exit_ground = sim.add_exit(ground_exit_polygon, name="exit_ground")  # floor0
+exit_ground = sim.add_exit(
+    ground_exit_polygon, region=floor0, name="exit_ground"
+)  # floors overlap in plan, so the region is named
 evacuate = jps.Route([exit_ground])
 # floor0 and floor1 overlap in plan, so the position names its region
 upstairs = sim.add_agent(floor1.at(xu, yu), route=evacuate)
@@ -330,11 +361,18 @@ surface.region("floor2")
 # KeyError: no region named floor2; regions are floor0, floor1, staircase
 surface.connect_regions(
     from_region=floor0,
-    from_edge=edge0,
+    from_edge=edge_inside_floor0,
     to_region=floor1,
-    to_edge=edge1_reversed,
+    to_edge=edge1,
 )
-# ValueError: edges span a twisted quad; reverse to_edge
+# ValueError: from_edge is not an edge of floor0's boundary
+surface.connect_regions(
+    from_region=staircase, from_edge=edge2, to_region=floor2, to_edge=edge3
+)
+# ValueError: staircase is a connector and cannot be connected again; add a
+#   landing region between two connectors
+sim.add_agent(new_region.at(x, y), route=route_a)  # region added after sim
+# ValueError: new_region is not part of this simulation's geometry
 sim.add_agent(pos5, target=(x, y))  # (x, y) on floor0 and floor1
 # ValueError: (x, y) lies in floor0 and floor1; use floor0.at(x, y) or floor1.at(x, y)
 floor1.at(100, 100)
@@ -399,6 +437,8 @@ agent5.target = (x_new, y_new)
 # AttributeError: use agent.steer_to(point)
 agent1.stage  # after agent1 left through an exit
 # RuntimeError: Agent(id=1) has left the simulation (agent.alive is False)
+custom_sim.add_agent(pos, route=route_a)  # simulation with a custom model
+# ValueError: custom models need state=; pass your model's agent state
 
 # --- Lifecycle of one agent -------------------------------------------
 # 1. Spawned inside its first waypoint:
@@ -430,11 +470,11 @@ agent1.stage  # after agent1 left through an exit
 #    agent.follow(route_b) -> stage == wp2 (first stage of route_b);
 #    held/stranded are cleared; counters of route_c are not changed.
 
-# --- From 1.0 to 2.0: no int IDs in calls -----------------------------
-# IDs remain as attributes (agent.id, stage.id, region.id) to match
-# trajectory files, but no call takes or returns a bare int.
+# --- From the current API on master to 2.0 ----------------------------
+# Handles are used for object references; IDs remain available for lookup
+# and serialization (agent.id, stage.id, region.id match trajectory files).
 #
-# 1.0                                       2.0
+# Current API on master                     2.0
 # add_waypoint_stage(...) -> int            sim.add_waypoint(...) -> Waypoint
 # add_exit_stage(...) -> int                sim.add_exit(...) -> Exit
 # add_direct_steering_stage() -> int        removed: target= / agent.steer_to()
@@ -445,11 +485,12 @@ agent1.stage  # after agent1 left through an exit
 # get_location(x, y, region_id=)            region.at(x, y)
 # add_region(...) -> int                    surface.add_region(...) -> Region
 # connect_regions(...) -> int               surface.connect_regions(...) -> Region
-# mark_agent_for_removal(agent_id)          agent.remove()
+# mark_agent_for_removal(agent_id)          agent.remove(), see below
 # removed_agents() -> list[int]             sim.removed_agents() -> agents with
 #                                           alive == False
 # stage_ids() -> list[int]                  sim.stages -> tuple of handles
-# get_stage(stage_id)                       sim.stage("exit1"), by name
+# get_stage(stage_id)                       sim.stage("exit1") or
+#                                           sim.stage(id=5)
 # agent(agent_id)                           sim.agent(17), lookup by ID kept for
 #                                           matching trajectory files
 # travel_times(stage_id) -> {int: grid}     sim.travel_times(exit1)
@@ -460,7 +501,12 @@ agent1.stage  # after agent1 left through an exit
 # custom_speed_fields(stage_id)             sim.custom_speed_fields(exit1)
 # clear_custom_speed_field(stage_id,        sim.clear_custom_speed_field(exit1,
 #     region_id)                                floor0)
+# Removal is scheduled, as on master: the agent leaves at the start of the
+# next iterate(), before agents interact. Until then it is still alive.
+# A removed agent's handle keeps .id and .alive readable; everything else
+# raises.
 agent1.remove()
 sim.stages  # (Waypoint(id=0, name="wp1"), ..., Exit(id=8, name="exit_ground"))
 sim.stage("exit1")  # Exit(id=5, name="exit1")
+sim.stage(id=5)  # the same exit, by id
 sim.agent(17)  # Agent(id=17)
