@@ -5,6 +5,8 @@
 # - One way to do each thing; explicit keywords; errors are informative say how to fix the call.
 
 
+import math
+
 import jupedsim as jps
 
 # --- Concepts ---------------------------------------------------------
@@ -203,8 +205,12 @@ route_n = jps.Route(
 
 # `start` is always a stage: rules fire only on completing a stage. To
 # choose the first target from where the agent stands, choose it in the
-# script and give each choice its own route:
+# script and give each choice its own route. If no candidate is reachable,
+# min() returns one with travel time inf; add_agent() would then raise for
+# that exit alone, so check first to report all candidates.
 best = min((exit1, exit2), key=lambda e: sim.travel_time(e, pos1))
+if math.isinf(sim.travel_time(best, pos1)):
+    raise ValueError(f"none of exit1, exit2 is reachable from {pos1}")
 agent9 = sim.add_agent(pos1, route=jps.Route([best]))
 
 # --- Agents -----------------------------------------------------------
