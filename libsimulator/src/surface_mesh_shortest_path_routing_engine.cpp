@@ -25,16 +25,16 @@ SurfaceMeshShortestPathRoutingEngine::SurfaceMeshShortestPathRoutingEngine(
     }
 }
 
-bool SurfaceMeshShortestPathRoutingEngine::is_valid_location(const Point3D& loc) const
+bool SurfaceMeshShortestPathRoutingEngine::is_valid_location(const epick::Point3D& loc) const
 {
-    return _geometry.face_below(loc).face != SurfaceMesh::null_face();
+    return _geometry.face_below(loc).face != epick::Mesh::null_face();
 }
 
 Geometry::FaceLocation
-SurfaceMeshShortestPathRoutingEngine::on_surface(const Point3D& p, const char* what) const
+SurfaceMeshShortestPathRoutingEngine::on_surface(const epick::Point3D& p, const char* what) const
 {
     const auto below = _geometry.face_below(p);
-    if(below.face == SurfaceMesh::null_face()) {
+    if(below.face == epick::Mesh::null_face()) {
         throw SimulationError(
             "GetShortestPath(): {} does not project onto the walkable surface.", what);
     }
@@ -42,7 +42,7 @@ SurfaceMeshShortestPathRoutingEngine::on_surface(const Point3D& p, const char* w
 }
 
 SurfaceMeshShortestPathRoutingEngine::ShortestPath&
-SurfaceMeshShortestPathRoutingEngine::tree_for(const Point3D& target)
+SurfaceMeshShortestPathRoutingEngine::tree_for(const epick::Point3D& target)
 {
     if(_last_tree == nullptr || _last_target != target) {
         const auto below = on_surface(target, "target");
@@ -56,8 +56,9 @@ SurfaceMeshShortestPathRoutingEngine::tree_for(const Point3D& target)
     return *_last_tree;
 }
 
-SurfaceMeshShortestPathRoutingEngine::Way
-SurfaceMeshShortestPathRoutingEngine::trace_way(const Point3D& source, const Point3D& target)
+SurfaceMeshShortestPathRoutingEngine::Way SurfaceMeshShortestPathRoutingEngine::trace_way(
+    const epick::Point3D& source,
+    const epick::Point3D& target)
 {
     const auto from_below = on_surface(source, "source");
     auto& tree = tree_for(target);
@@ -67,17 +68,17 @@ SurfaceMeshShortestPathRoutingEngine::trace_way(const Point3D& source, const Poi
     // with the kind of simplex thrown away. Keeping it is what tells a corner from a crossing.
     struct Collector {
         ShortestPath& tree;
-        const SurfaceMesh& mesh;
+        const epick::Mesh& mesh;
         double clearance;
         Way& way;
 
-        Point xy(SurfaceMesh::Vertex_index v) const
+        Point xy(epick::Mesh::Vertex_index v) const
         {
             const auto& p = mesh.point(v);
             return Point{p.x(), p.y()};
         }
 
-        bool on_wall(SurfaceMesh::Vertex_index v) const
+        bool on_wall(epick::Mesh::Vertex_index v) const
         {
             return CGAL::is_border(v, mesh).has_value();
         }
@@ -88,7 +89,7 @@ SurfaceMeshShortestPathRoutingEngine::trace_way(const Point3D& source, const Poi
         /// Which of the two directions is the open one needs no test: a geodesic only turns
         /// around a corner the walkable area bends away from, so the free side is always the
         /// wider one. Judged in plan, like everything a model is told.
-        Vector out_of_the_corner(SurfaceMesh::Vertex_index v) const
+        Vector out_of_the_corner(epick::Mesh::Vertex_index v) const
         {
             const auto border = CGAL::is_border(v, mesh);
             if(!border) {
@@ -104,7 +105,7 @@ SurfaceMeshShortestPathRoutingEngine::trace_way(const Point3D& source, const Poi
 
         /// The crossing of @p e, held off whichever of its ends is a wall. CGAL weights the
         /// edge's target: the point is `t * target + (1 - t) * source`.
-        K::FT held_off_the_walls(SurfaceMesh::Halfedge_index e, K::FT t) const
+        epick::FT held_off_the_walls(epick::Mesh::Halfedge_index e, epick::FT t) const
         {
             const double length = (xy(mesh.target(e)) - xy(mesh.source(e))).norm();
             const double margin = std::min(clearance / length, 0.5);
@@ -113,15 +114,15 @@ SurfaceMeshShortestPathRoutingEngine::trace_way(const Point3D& source, const Poi
             return std::clamp(CGAL::to_double(t), low, high);
         }
 
-        void operator()(SurfaceMesh::Halfedge_index e, K::FT t)
+        void operator()(epick::Mesh::Halfedge_index e, epick::FT t)
         {
             way.push_back({tree.point(e, held_off_the_walls(e, t)), Vector{0.0, 0.0}});
         }
-        void operator()(SurfaceMesh::Vertex_index v)
+        void operator()(epick::Mesh::Vertex_index v)
         {
             way.push_back({tree.point(v), out_of_the_corner(v)});
         }
-        void operator()(SurfaceMesh::Face_index f, const ShortestPath::Barycentric_coordinates& bc)
+        void operator()(epick::Mesh::Face_index f, const ShortestPath::Barycentric_coordinates& bc)
         {
             way.push_back({tree.point(f, bc), Vector{0.0, 0.0}});
         }
@@ -133,8 +134,8 @@ SurfaceMeshShortestPathRoutingEngine::trace_way(const Point3D& source, const Poi
     return way;
 }
 
-Point3D SurfaceMeshShortestPathRoutingEngine::held_off_the_wall(
-    const Point3D& corner,
+epick::Point3D SurfaceMeshShortestPathRoutingEngine::held_off_the_wall(
+    const epick::Point3D& corner,
     Vector into_the_open) const
 {
     const Point moved = Point{corner.x(), corner.y()} + into_the_open * wall_clearance();
@@ -144,16 +145,16 @@ Point3D SurfaceMeshShortestPathRoutingEngine::held_off_the_wall(
     constexpr double same_storey = 0.5;
     const auto located =
         _geometry.get_location_near_z(moved.x(), moved.y(), corner.z(), same_storey);
-    return located ? located->position_3d() : Point3D{moved.x(), moved.y(), corner.z()};
+    return located ? located->position_3d() : epick::Point3D{moved.x(), moved.y(), corner.z()};
 }
 
-std::vector<Point3D> SurfaceMeshShortestPathRoutingEngine::get_shortest_path(
-    const Point3D& source,
-    const Point3D& target)
+std::vector<epick::Point3D> SurfaceMeshShortestPathRoutingEngine::get_shortest_path(
+    const epick::Point3D& source,
+    const epick::Point3D& target)
 {
     const auto way = trace_way(source, target);
 
-    std::vector<Point3D> path{};
+    std::vector<epick::Point3D> path{};
     path.reserve(way.size());
     for(const auto& step : way) {
         path.push_back(
@@ -165,8 +166,8 @@ std::vector<Point3D> SurfaceMeshShortestPathRoutingEngine::get_shortest_path(
 }
 
 Point SurfaceMeshShortestPathRoutingEngine::next_waypoint(
-    const Point3D& source,
-    const Point3D& target)
+    const epick::Point3D& source,
+    const epick::Point3D& target)
 {
     const Point here{source.x(), source.y()};
     // CGAL sets a point wherever the way crosses a triangle edge.

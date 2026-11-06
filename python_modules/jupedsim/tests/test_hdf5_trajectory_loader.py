@@ -308,7 +308,7 @@ def travel_time_file(tmp_path):
     """Two floors joined by a seam, an exit upstairs, a waypoint downstairs and a
     direct steering stage, written with travel times. Returns the file, the
     simulation and the ids of the stages with an area."""
-    surface = jps.WalkableSurface()
+    surface = jps.GeometryBuilder()
     ground_floor = surface.add_region(
         boundary=_rectangle((0, 0), (5, 5)), height=0.0
     )
@@ -327,7 +327,7 @@ def travel_time_file(tmp_path):
     )
     sim = jps.Simulation(
         model=jps.CollisionFreeSpeedModelV2(),
-        geometry=surface,
+        geometry=surface.build(),
         trajectory_writer=writer,
         dt=0.01,
     )
@@ -417,15 +417,15 @@ def test_hdf5_trajectory_loading_travel_times_before_the_first_snapshot(
 def test_hdf5_trajectory_loading_travel_times_of_a_stage_added_later(
     tmp_path,
 ) -> None:
-    surface = jps.WalkableSurface()
-    room = surface.add_region(boundary=_rectangle((0, 0), (5, 5)))
+    surface = jps.GeometryBuilder()
+    room = surface.add_region(boundary=_rectangle((0, 0), (5, 5)), height=0.0)
     out = tmp_path / "later.h5"
     writer = jps.Hdf5TrajectoryWriter(
         output_file=out, every_nth_frame=1, write_travel_times=True
     )
     sim = jps.Simulation(
         model=jps.CollisionFreeSpeedModelV2(),
-        geometry=surface,
+        geometry=surface.build(),
         trajectory_writer=writer,
         dt=0.01,
     )

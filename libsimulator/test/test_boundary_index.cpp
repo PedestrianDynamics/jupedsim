@@ -20,7 +20,7 @@
 #include <vector>
 
 struct TestBoundaryIndexTwoLevelsWithStairs : public testing::Test {
-    SurfaceMesh mesh;
+    epick::Mesh mesh;
     RegionSplit split;
     std::unique_ptr<Geometry> geo;
 
@@ -161,7 +161,7 @@ protected:
     /// Builds the index under test on @p mesh and keeps the geometry alive, so a test can ask
     /// it where to query from. Both come from the same region overlay on purpose: splitting
     /// the same mesh twice would leave it to chance that the region ids agree.
-    std::unique_ptr<BoundaryIndex> index_on(SurfaceMesh mesh)
+    std::unique_ptr<BoundaryIndex> index_on(epick::Mesh mesh)
     {
         _geo = std::make_unique<Geometry>(std::move(mesh));
         return make_portal_boundary_index(_geo->mesh(), _geo->region_split());

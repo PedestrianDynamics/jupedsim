@@ -122,9 +122,9 @@ def _default_state(state_cls):
 
 def _trajectory(model, state_cls):
     """Run a short simulation and collect the agent's positions."""
-    surface = jps.WalkableSurface()
-    room = surface.add_region(boundary=_GEOMETRY)
-    simulation = jps.Simulation(model=model, geometry=surface)
+    surface = jps.GeometryBuilder()
+    room = surface.add_region(boundary=_GEOMETRY, height=0.0)
+    simulation = jps.Simulation(model=model, geometry=surface.build())
     exit_id = simulation.add_exit_stage(
         [([(49, -3), (49, 3), (50, 3), (50, -3)], room)]
     )

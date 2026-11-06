@@ -22,13 +22,15 @@ def main():
             (10, 5 + width / 2),
         ]
     )
-    surface = jps.WalkableSurface()
-    region = surface.add_region(polygon=room1.union(room2).union(corridor))
+    geo_builder = jps.GeometryBuilder()
+    region = geo_builder.add_region(
+        polygon=room1.union(room2).union(corridor), height=0.0
+    )
     exit_polygon = Polygon([(24, 4.5), (25, 4.5), (25, 5.5), (24, 5.5)])
     trajectory_file = "example_7.h5"
     simulation = jps.Simulation(
         model=jps.AnticipationVelocityModel(),
-        geometry=surface,
+        geometry=geo_builder.build(),
         trajectory_writer=jps.Hdf5TrajectoryWriter(
             output_file=pathlib.Path(trajectory_file)
         ),

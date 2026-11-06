@@ -12,9 +12,10 @@ import shapely
 
 @pytest.fixture
 def square_simulation(tmp_path: pathlib.Path):
-    surface = jps.WalkableSurface()
+    surface = jps.GeometryBuilder()
     room = surface.add_region(
-        polygon=shapely.Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
+        polygon=shapely.Polygon([(0, 0), (10, 0), (10, 10), (0, 10)]),
+        height=0.0,
     )
     out_filename = tmp_path / "traj.h5"
     writer = jps.Hdf5TrajectoryWriter(
@@ -23,7 +24,7 @@ def square_simulation(tmp_path: pathlib.Path):
     )
     sim = jps.Simulation(
         model=jps.CollisionFreeSpeedModelV2(),
-        geometry=surface,
+        geometry=surface.build(),
         trajectory_writer=writer,
         dt=0.01,
     )
@@ -96,15 +97,15 @@ def test_metadata_attributes(square_simulation):
 
 
 def test_close_is_idempotent(tmp_path):
-    surface = jps.WalkableSurface()
+    surface = jps.GeometryBuilder()
     surface.add_region(
-        polygon=shapely.Polygon([(0, 0), (5, 0), (5, 5), (0, 5)])
+        polygon=shapely.Polygon([(0, 0), (5, 0), (5, 5), (0, 5)]), height=0.0
     )
     out = tmp_path / "empty.h5"
     writer = jps.Hdf5TrajectoryWriter(output_file=out, every_nth_frame=1)
     sim = jps.Simulation(
         model=jps.CollisionFreeSpeedModelV2(),
-        geometry=surface,
+        geometry=surface.build(),
         trajectory_writer=writer,
         dt=0.01,
     )
@@ -137,7 +138,7 @@ def test_regions_round_trip(tmp_path):
     def rectangle(p1, p2):
         return [p1, (p1[0], p2[1]), p2, (p2[0], p1[1])]
 
-    surface = jps.WalkableSurface()
+    surface = jps.GeometryBuilder()
     ground_floor = surface.add_region(
         boundary=rectangle((0, 0), (5, 5)), height=0.0
     )
@@ -160,7 +161,7 @@ def test_regions_round_trip(tmp_path):
     writer = jps.Hdf5TrajectoryWriter(output_file=out, every_nth_frame=1)
     sim = jps.Simulation(
         model=jps.CollisionFreeSpeedModelV2(),
-        geometry=surface,
+        geometry=surface.build(),
         trajectory_writer=writer,
         dt=0.01,
     )
@@ -184,13 +185,13 @@ def test_regions_round_trip(tmp_path):
 
 
 def _square_simulation(writer):
-    surface = jps.WalkableSurface()
+    surface = jps.GeometryBuilder()
     surface.add_region(
-        polygon=shapely.Polygon([(0, 0), (5, 0), (5, 5), (0, 5)])
+        polygon=shapely.Polygon([(0, 0), (5, 0), (5, 5), (0, 5)]), height=0.0
     )
     return jps.Simulation(
         model=jps.CollisionFreeSpeedModelV2(),
-        geometry=surface,
+        geometry=surface.build(),
         trajectory_writer=writer,
         dt=0.01,
     )
@@ -230,7 +231,7 @@ def test_travel_times_round_trip(tmp_path):
     def rectangle(p1, p2):
         return [p1, (p1[0], p2[1]), p2, (p2[0], p1[1])]
 
-    surface = jps.WalkableSurface()
+    surface = jps.GeometryBuilder()
     ground_floor = surface.add_region(
         boundary=rectangle((0, 0), (5, 5)), height=0.0
     )
@@ -250,7 +251,7 @@ def test_travel_times_round_trip(tmp_path):
     )
     sim = jps.Simulation(
         model=jps.CollisionFreeSpeedModelV2(),
-        geometry=surface,
+        geometry=surface.build(),
         trajectory_writer=writer,
         dt=0.01,
     )

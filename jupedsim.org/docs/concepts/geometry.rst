@@ -16,7 +16,9 @@ The borders of the walkable area may not be crossed by any agent.
 Walkable area
 =============
 
-The walkable area is built with a :class:`~jupedsim.WalkableSurface` out of regions.
+The walkable area is built with a :class:`~jupedsim.GeometryBuilder` out of regions.
+Its :meth:`~jupedsim.GeometryBuilder.build` creates the :class:`~jupedsim.Geometry` that is passed to :class:`~jupedsim.Simulation`.
+After that, the builder cannot be used any more; another geometry needs a new :class:`~jupedsim.GeometryBuilder`.
 Each region is one simple, i.e., non self intersecting polygon covering a non-zero area.
 It is added either as a *Shapely* :class:`~shapely.Polygon` or as a list of points describing its boundary.
 
@@ -34,17 +36,17 @@ Such a region can be added like:
     import jupedsim as jps
     import shapely
 
-    surface = jps.WalkableSurface()
-    room = surface.add_region(polygon=shapely.Polygon([(0, 0), (10, 0), (10, 10), (0, 10)]))
+    geo_builder = jps.GeometryBuilder()
+    room = geo_builder.add_region(polygon=shapely.Polygon([(0, 0), (10, 0), (10, 10), (0, 10)]), height=0.0)
 
     # or, equivalently, from the points of the boundary
-    room = surface.add_region(boundary=[(0, 0), (10, 0), (10, 10), (0, 10)])
+    room = geo_builder.add_region(boundary=[(0, 0), (10, 0), (10, 10), (0, 10)], height=0.0)
 
-:meth:`~jupedsim.WalkableSurface.add_region` returns the id of the new region.
+:meth:`~jupedsim.GeometryBuilder.add_region` returns the id of the new region.
 Agents and stages are placed in a region by this id, see :doc:`routing`.
 
 A walkable area may consist of several regions, e.g. floors at different heights joined by stairs.
-Each of them is added with its own call to :meth:`~jupedsim.WalkableSurface.add_region`.
+Each of them is added with its own call to :meth:`~jupedsim.GeometryBuilder.add_region`.
 
 Preparing polygons
 ------------------
@@ -110,19 +112,21 @@ For creating walkable areas with holes you can use:
             [(10, 1), (10, 2), (11, 2), (11, 1)],
         ],
     )
-    room = surface.add_region(polygon=walkable_area)
+    room = geo_builder.add_region(polygon=walkable_area, height=0.0)
 
     # or, equivalently, from points
-    room = surface.add_region(
+    room = geo_builder.add_region(
         boundary=[(0, 0), (20, 0), (20, 20), (0, 20)],
         holes=[
             [(1, 1), (1, 2), (2, 2), (2, 1)],
             [(10, 1), (10, 2), (11, 2), (11, 1)],
         ],
+        height=0.0,
     )
 
-Holes have to lie strictly inside the boundary.
-An obstacle that touches the boundary is instead "subtracted" from the walkable area:
+Holes have to lie strictly inside the boundary and must not touch each other, not even in a
+single point.
+An obstacle that touches the boundary along an edge is instead "subtracted" from the walkable area:
 
 .. code:: python
 
@@ -136,6 +140,34 @@ An obstacle that touches the boundary is instead "subtracted" from the walkable 
 .. warning::
 
     Be careful when adding obstacles, that they do not split the walkable area in two parts.
+
+Requirements for regions
+------------------------
+
+:meth:`~jupedsim.GeometryBuilder.add_region` rejects a region with a
+:class:`~jupedsim.SimulationError` if
+
+* a ring (the boundary or a hole) has fewer than three points or intersects itself,
+* a hole does not lie strictly inside the boundary, or two holes overlap or touch,
+* walls of the region come closer than 2.5 cm to each other, or
+* a coordinate or the height is not finite or larger than 100 km in magnitude.
+
+.. note::
+
+    Coordinates from external sources, e.g. georeferenced data, can be too large. Move such a
+    geometry close to the origin first, e.g. with ``shapely.affinity.translate``.
+
+Polygons from *Shapely* operations or from WKT files can have walls closer than 2.5 cm, e.g. the
+many vertices of a small circle made with ``buffer``. Use fewer segments, e.g.
+``point.buffer(0.2, quad_segs=4)``, or remove such vertices, e.g. with
+``shapely.simplify(walkable_area, 0.025)``, and check the result.
+
+Regions at the same height must neither overlap nor touch each other; join them into one polygon
+instead. Regions above each other must be at least 1.5 m apart in height where they overlap.
+:meth:`~jupedsim.GeometryBuilder.add_region` rejects a region that breaks this; the builder stays
+usable. Connectors are not checked for headroom: a connector below another region is accepted at
+any height. Only :meth:`~jupedsim.GeometryBuilder.build` rejects a connector that passes through
+another region.
 
 .. note::
 
@@ -155,12 +187,12 @@ This can be done with:
     import jupedsim as jps
 
     # define walkable area
-    surface = jps.WalkableSurface()
-    room = surface.add_region(polygon=...)
+    geo_builder = jps.GeometryBuilder()
+    room = geo_builder.add_region(polygon=..., height=0.0)
 
     simulation = jps.Simulation(
         model=jps.CollisionFreeSpeedModel(),
-        geometry=surface,
+        geometry=geo_builder.build(),
         trajectory_writer=jps.Hdf5TrajectoryWriter(
             output_file=pathlib.Path("traj.h5")
         ),

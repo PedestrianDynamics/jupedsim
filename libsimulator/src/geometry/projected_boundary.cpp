@@ -3,7 +3,6 @@
 
 #include "cfg_cgal.hpp"
 #include "hash_combine.hpp"
-#include "kernel.hpp"
 
 #include <CGAL/intersections.h>
 
@@ -31,16 +30,16 @@ struct GridKeyHash {
 };
 
 struct BoundarySegment {
-    Point2D a;
-    Point2D b;
-    SurfaceMesh::Vertex_index va;
-    SurfaceMesh::Vertex_index vb;
+    epick::Point2D a;
+    epick::Point2D b;
+    epick::Mesh::Vertex_index va;
+    epick::Mesh::Vertex_index vb;
 };
 
 /// The two segments' shared mesh vertex, or the null vertex. Two distinct boundary
 /// segments can share at most one vertex: an edge's two halfedges are never both
 /// boundary, and Surface_mesh has no multi-edges.
-SurfaceMesh::Vertex_index shared_mesh_vertex(const BoundarySegment& s, const BoundarySegment& t)
+epick::Mesh::Vertex_index shared_mesh_vertex(const BoundarySegment& s, const BoundarySegment& t)
 {
     if(s.va == t.va || s.va == t.vb) {
         return s.va;
@@ -48,7 +47,7 @@ SurfaceMesh::Vertex_index shared_mesh_vertex(const BoundarySegment& s, const Bou
     if(s.vb == t.va || s.vb == t.vb) {
         return s.vb;
     }
-    return SurfaceMesh::null_vertex();
+    return epick::Mesh::null_vertex();
 }
 
 /// Violation test for one segment pair. Segments sharing a mesh vertex may meet exactly at
@@ -57,8 +56,8 @@ SurfaceMesh::Vertex_index shared_mesh_vertex(const BoundarySegment& s, const Bou
 bool pair_violates(const BoundarySegment& s, const BoundarySegment& t)
 {
     const auto q = shared_mesh_vertex(s, t);
-    if(q == SurfaceMesh::null_vertex()) {
-        return CGAL::do_intersect(K::Segment_2(s.a, s.b), K::Segment_2(t.a, t.b));
+    if(q == epick::Mesh::null_vertex()) {
+        return CGAL::do_intersect(epick::Segment2D(s.a, s.b), epick::Segment2D(t.a, t.b));
     }
     const auto& shared = s.va == q ? s.a : s.b;
     const auto& p1 = s.va == q ? s.b : s.a;
@@ -69,10 +68,10 @@ bool pair_violates(const BoundarySegment& s, const BoundarySegment& t)
 }
 } // namespace
 
-std::vector<SurfaceMesh::Halfedge_index>
-region_boundary(const SurfaceMesh& mesh, const std::function<bool(SurfaceMesh::Face_index)>& keep)
+std::vector<epick::Mesh::Halfedge_index>
+region_boundary(const epick::Mesh& mesh, const std::function<bool(epick::Mesh::Face_index)>& keep)
 {
-    std::vector<SurfaceMesh::Halfedge_index> boundary{};
+    std::vector<epick::Mesh::Halfedge_index> boundary{};
     for(const auto f : faces(mesh)) {
         if(!keep(f)) {
             continue;
@@ -88,8 +87,8 @@ region_boundary(const SurfaceMesh& mesh, const std::function<bool(SurfaceMesh::F
 }
 
 bool is_projection_strictly_simple(
-    const SurfaceMesh& mesh,
-    const std::vector<SurfaceMesh::Halfedge_index>& boundary)
+    const epick::Mesh& mesh,
+    const std::vector<epick::Mesh::Halfedge_index>& boundary)
 {
     if(boundary.empty()) {
         return true;
@@ -98,7 +97,7 @@ bool is_projection_strictly_simple(
     // Every boundary vertex must be entered and left exactly once: a repeated vertex is a
     // pinch, which the strict certificate rejects outright. This also guarantees that two
     // segments sharing a mesh vertex are consecutive along a loop.
-    std::unordered_map<SurfaceMesh::Vertex_index, int> degree{};
+    std::unordered_map<epick::Mesh::Vertex_index, int> degree{};
     degree.reserve(2 * boundary.size());
     std::vector<BoundarySegment> segments{};
     segments.reserve(boundary.size());
@@ -109,7 +108,8 @@ bool is_projection_strictly_simple(
         const auto& pa = mesh.point(va);
         const auto& pb = mesh.point(vb);
         const auto& seg = segments.emplace_back(
-            BoundarySegment{Point2D{pa.x(), pa.y()}, Point2D{pb.x(), pb.y()}, va, vb});
+            BoundarySegment{
+                epick::Point2D{pa.x(), pa.y()}, epick::Point2D{pb.x(), pb.y()}, va, vb});
         if(seg.a == seg.b) {
             return false; // vertical edge: cannot occur on walkable meshes
         }

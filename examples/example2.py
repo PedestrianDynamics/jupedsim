@@ -13,14 +13,14 @@ def main():
     jps.set_warning_callback(lambda x: print(x))
     jps.set_error_callback(lambda x: print(x))
 
-    surface = jps.WalkableSurface()
-    region = surface.add_region(
-        boundary=[(0, 0), (100, 0), (100, 100), (0, 100)]
+    geo_builder = jps.GeometryBuilder()
+    region = geo_builder.add_region(
+        boundary=[(0, 0), (100, 0), (100, 100), (0, 100)], height=0.0
     )
 
     simulation = jps.Simulation(
         model=jps.CollisionFreeSpeedModel(),
-        geometry=surface,
+        geometry=geo_builder.build(),
         trajectory_writer=jps.Hdf5TrajectoryWriter(
             output_file=pathlib.Path("example2_out.h5"),
         ),

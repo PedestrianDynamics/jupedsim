@@ -12,11 +12,12 @@ from jupedsim_examples.models.pysocial_force import (
 def corridor_simulation():
     """20x20 room, exit on the right wall."""
     model = PythonSocialForceModel()
-    surface = jps.WalkableSurface()
+    surface = jps.GeometryBuilder()
     room = surface.add_region(
-        polygon=shapely.Polygon([(0, 0), (20, 0), (20, 20), (0, 20)])
+        polygon=shapely.Polygon([(0, 0), (20, 0), (20, 20), (0, 20)]),
+        height=0.0,
     )
-    sim = jps.Simulation(model=model, geometry=surface, dt=0.05)
+    sim = jps.Simulation(model=model, geometry=surface.build(), dt=0.05)
     exit_id = sim.add_exit_stage(
         [([(19, 9), (19, 11), (20, 11), (20, 9)], room)]
     )
@@ -37,11 +38,12 @@ def _add_agent(sim, room, journey_id, stage_id, position, velocity=(0.0, 0.0)):
 
 def test_simulation_can_be_created_with_python_social_force_model():
     model = PythonSocialForceModel()
-    surface = jps.WalkableSurface()
+    surface = jps.GeometryBuilder()
     surface.add_region(
-        polygon=shapely.Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
+        polygon=shapely.Polygon([(0, 0), (10, 0), (10, 10), (0, 10)]),
+        height=0.0,
     )
-    sim = jps.Simulation(model=model, geometry=surface, dt=0.05)
+    sim = jps.Simulation(model=model, geometry=surface.build(), dt=0.05)
     assert sim is not None
 
 
@@ -99,11 +101,12 @@ def test_multiple_agents_all_reach_exit(corridor_simulation):
 def test_social_force_prevents_agent_collapse():
     """Agents heading toward the same target should not collapse into each other."""
     model = PythonSocialForceModel()
-    surface = jps.WalkableSurface()
+    surface = jps.GeometryBuilder()
     room = surface.add_region(
-        polygon=shapely.Polygon([(0, 0), (20, 0), (20, 20), (0, 20)])
+        polygon=shapely.Polygon([(0, 0), (20, 0), (20, 20), (0, 20)]),
+        height=0.0,
     )
-    sim = jps.Simulation(model=model, geometry=surface, dt=0.05)
+    sim = jps.Simulation(model=model, geometry=surface.build(), dt=0.05)
     exit_id = sim.add_exit_stage(
         [([(19, 9), (19, 11), (20, 11), (20, 9)], room)]
     )
@@ -132,11 +135,12 @@ def test_social_force_prevents_agent_collapse():
 def test_custom_desired_speed_affects_movement():
     """Agents with higher desired_speed should travel further in the same time."""
     model = PythonSocialForceModel()
-    surface = jps.WalkableSurface()
+    surface = jps.GeometryBuilder()
     room = surface.add_region(
-        polygon=shapely.Polygon([(0, 0), (20, 0), (20, 20), (0, 20)])
+        polygon=shapely.Polygon([(0, 0), (20, 0), (20, 20), (0, 20)]),
+        height=0.0,
     )
-    sim = jps.Simulation(model=model, geometry=surface, dt=0.05)
+    sim = jps.Simulation(model=model, geometry=surface.build(), dt=0.05)
     exit_id = sim.add_exit_stage(
         [([(19, 9), (19, 11), (20, 11), (20, 9)], room)]
     )
@@ -176,11 +180,12 @@ def test_custom_desired_speed_affects_movement():
 def test_obstacle_force_keeps_agents_from_walls():
     """Agents near walls should be repelled and not pass through them."""
     model = PythonSocialForceModel()
-    surface = jps.WalkableSurface()
+    surface = jps.GeometryBuilder()
     room = surface.add_region(
-        polygon=shapely.Polygon([(0, 0), (20, 0), (20, 20), (0, 20)])
+        polygon=shapely.Polygon([(0, 0), (20, 0), (20, 20), (0, 20)]),
+        height=0.0,
     )
-    sim = jps.Simulation(model=model, geometry=surface, dt=0.05)
+    sim = jps.Simulation(model=model, geometry=surface.build(), dt=0.05)
     exit_id = sim.add_exit_stage(
         [([(19, 9), (19, 11), (20, 11), (20, 9)], room)]
     )

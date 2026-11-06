@@ -62,7 +62,7 @@ void Simulation::throw_if_state(State forbidden, const char* operation) const
 
 Simulation::Simulation(
     std::unique_ptr<OperationalModel>&& operational_model,
-    std::unique_ptr<Geometry>&& geometry,
+    std::shared_ptr<const Geometry> geometry,
     double dt,
     FloorfieldOptions floorfield_options)
     : _clock(dt)

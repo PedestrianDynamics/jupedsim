@@ -122,12 +122,13 @@ Fenced code blocks carry a language label that selects the highlighting:
 import jupedsim as jps
 import shapely
 
-surface = jps.WalkableSurface()
-surface.add_region(
-    polygon=shapely.Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
+geo_builder = jps.GeometryBuilder()
+geo_builder.add_region(
+    polygon=shapely.Polygon([(0, 0), (10, 0), (10, 10), (0, 10)]),
+    height=0.0,
 )
 simulation = jps.Simulation(
-    model=jps.CollisionFreeSpeedModel(), geometry=surface
+    model=jps.CollisionFreeSpeedModel(), geometry=geo_builder.build()
 )
 ```
 

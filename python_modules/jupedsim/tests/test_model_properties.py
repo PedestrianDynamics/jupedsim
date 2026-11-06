@@ -43,9 +43,9 @@ MODEL_INSTANCE_STATE = [
 )
 def test_simulation_from_model_instance(model, state_cls, state_kwargs):
     """Built-in models are constructed from a configured model instance."""
-    surface = jps.WalkableSurface()
-    room = surface.add_region(boundary=_UNIT_SQUARE_10)
-    sim = jps.Simulation(model=model, geometry=surface)
+    surface = jps.GeometryBuilder()
+    room = surface.add_region(boundary=_UNIT_SQUARE_10, height=0.0)
+    sim = jps.Simulation(model=model, geometry=surface.build())
     wp = sim.add_waypoint_stage(
         [(jps.circle_to_polygon(center=(9, 9), radius=0.5), room)]
     )
@@ -66,16 +66,18 @@ def test_simulation_from_model_instance(model, state_cls, state_kwargs):
 
 def test_simulation_rejects_wrong_model_argument():
     with pytest.raises(TypeError):
-        jps.Simulation(model=42, geometry=jps.WalkableSurface())
+        jps.Simulation(model=42, geometry=jps.GeometryBuilder())
 
 
 @pytest.fixture
 def corridor():
-    surface = jps.WalkableSurface()
-    room = surface.add_region(boundary=[(0, 0), (10, 0), (10, 2), (0, 2)])
+    surface = jps.GeometryBuilder()
+    room = surface.add_region(
+        boundary=[(0, 0), (10, 0), (10, 2), (0, 2)], height=0.0
+    )
     simulation = jps.Simulation(
         model=jps.CollisionFreeSpeedModelV2(),
-        geometry=surface,
+        geometry=surface.build(),
     )
     return simulation, room
 
@@ -112,11 +114,11 @@ def test_set_desired_speed(corridor):
 
 @pytest.fixture
 def simulation_with_collision_free_speed_model_v2():
-    surface = jps.WalkableSurface()
-    room = surface.add_region(boundary=_UNIT_SQUARE_10)
+    surface = jps.GeometryBuilder()
+    room = surface.add_region(boundary=_UNIT_SQUARE_10, height=0.0)
     simulation = jps.Simulation(
         model=jps.CollisionFreeSpeedModelV2(),
-        geometry=surface,
+        geometry=surface.build(),
     )
     return simulation, room
 
@@ -216,11 +218,11 @@ def test_set_model_parameters_collision_free_speed_model_v2(
 
 @pytest.fixture
 def simulation_with_anticipation_velocity_model():
-    surface = jps.WalkableSurface()
-    room = surface.add_region(boundary=_UNIT_SQUARE_10)
+    surface = jps.GeometryBuilder()
+    room = surface.add_region(boundary=_UNIT_SQUARE_10, height=0.0)
     simulation = jps.Simulation(
         model=jps.AnticipationVelocityModel(rng_seed=1234),
-        geometry=surface,
+        geometry=surface.build(),
     )
     return simulation, room
 
@@ -272,11 +274,11 @@ def test_set_model_parameters_anticipation_velocity_model(
 
 @pytest.fixture
 def simulation_with_collision_free_speed_model():
-    surface = jps.WalkableSurface()
-    room = surface.add_region(boundary=_UNIT_SQUARE_10)
+    surface = jps.GeometryBuilder()
+    room = surface.add_region(boundary=_UNIT_SQUARE_10, height=0.0)
     simulation = jps.Simulation(
         model=jps.CollisionFreeSpeedModel(),
-        geometry=surface,
+        geometry=surface.build(),
     )
     return simulation, room
 
@@ -313,8 +315,8 @@ def test_set_model_parameters_collision_free_speed_model(
 
 def test_collision_free_speed_model_repulsion_parameters_are_model_level():
     """The repulsion parameters are configured on the model instance."""
-    surface = jps.WalkableSurface()
-    room = surface.add_region(boundary=_UNIT_SQUARE_10)
+    surface = jps.GeometryBuilder()
+    room = surface.add_region(boundary=_UNIT_SQUARE_10, height=0.0)
     sim = jps.Simulation(
         model=jps.CollisionFreeSpeedModel(
             strength_neighbor_repulsion=7.5,
@@ -322,7 +324,7 @@ def test_collision_free_speed_model_repulsion_parameters_are_model_level():
             strength_geometry_repulsion=4.5,
             range_geometry_repulsion=0.03,
         ),
-        geometry=surface,
+        geometry=surface.build(),
     )
     wp = sim.add_waypoint_stage(
         [(jps.circle_to_polygon(center=(10, 1), radius=0.5), room)]
@@ -355,11 +357,11 @@ def test_collision_free_speed_model_repulsion_parameters_are_model_level():
 
 @pytest.fixture
 def simulation_with_generalized_centrifugal_force_model():
-    surface = jps.WalkableSurface()
-    room = surface.add_region(boundary=_UNIT_SQUARE_10)
+    surface = jps.GeometryBuilder()
+    room = surface.add_region(boundary=_UNIT_SQUARE_10, height=0.0)
     simulation = jps.Simulation(
         model=jps.GeneralizedCentrifugalForceModel(),
-        geometry=surface,
+        geometry=surface.build(),
     )
     return simulation, room
 
@@ -418,11 +420,11 @@ def test_set_model_parameters_generalized_centrifugal_force_model(
 
 @pytest.fixture
 def simulation_with_social_force_model():
-    surface = jps.WalkableSurface()
-    room = surface.add_region(boundary=_UNIT_SQUARE_10)
+    surface = jps.GeometryBuilder()
+    room = surface.add_region(boundary=_UNIT_SQUARE_10, height=0.0)
     simulation = jps.Simulation(
         model=jps.SocialForceModel(),
-        geometry=surface,
+        geometry=surface.build(),
     )
     return simulation, room
 
@@ -472,11 +474,11 @@ def test_set_model_parameters_social_force_model(
 
 def test_social_force_model_body_force_and_friction_are_model_level():
     """body_force and friction are configured on the model instance."""
-    surface = jps.WalkableSurface()
-    room = surface.add_region(boundary=_UNIT_SQUARE_10)
+    surface = jps.GeometryBuilder()
+    room = surface.add_region(boundary=_UNIT_SQUARE_10, height=0.0)
     sim = jps.Simulation(
         model=jps.SocialForceModel(body_force=100000.0, friction=200000.0),
-        geometry=surface,
+        geometry=surface.build(),
     )
     wp = sim.add_waypoint_stage(
         [(jps.circle_to_polygon(center=(10, 1), radius=0.5), room)]
@@ -507,11 +509,13 @@ def _velocity_along_wall(friction, y):
     corridor whose wall runs along y = 0. It starts at its desired speed of
     1 m/s along +x, so without other forces its speed stays constant.
     Use DirectSteering as FF-engine would push it away from the wall."""
-    surface = jps.WalkableSurface()
-    room = surface.add_region(boundary=[(0, 0), (60, 0), (60, 4), (0, 4)])
+    surface = jps.GeometryBuilder()
+    room = surface.add_region(
+        boundary=[(0, 0), (60, 0), (60, 4), (0, 4)], height=0.0
+    )
     sim = jps.Simulation(
         model=jps.SocialForceModel(body_force=120000.0, friction=friction),
-        geometry=surface,
+        geometry=surface.build(),
         dt=0.001,
     )
     stage_id = sim.add_direct_steering_stage()
@@ -589,11 +593,11 @@ def test_agent_handle_raises_after_removal(
 
 @pytest.fixture
 def simulation_with_collision_free_speed_model_v3():
-    surface = jps.WalkableSurface()
-    room = surface.add_region(boundary=_UNIT_SQUARE_10)
+    surface = jps.GeometryBuilder()
+    room = surface.add_region(boundary=_UNIT_SQUARE_10, height=0.0)
     simulation = jps.Simulation(
         model=jps.CollisionFreeSpeedModelV3(),
-        geometry=surface,
+        geometry=surface.build(),
     )
     return simulation, room
 
