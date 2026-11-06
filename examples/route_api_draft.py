@@ -106,6 +106,12 @@ sim = jps.Simulation(model, surface)
 # point. Speed fields therefore do not apply: a route agent switched to
 # steer_to() no longer avoids areas made costly by speed fields (e.g.
 # smoke).
+# On reaching the point (route_orientation becomes (0, 0)) the agent is
+# arrived, as with STAY: arrived == True, it stays at the point (steers
+# back if pushed away) and is not removed, until follow() or steer_to().
+# To pass a point and go on, make it a waypoint of the route instead, e.g.
+# Route([(wp_wait, wp_edge), (wp_edge, jps.RoundRobin({exit1: 1, exit2: 1}))],
+#       start=wp_wait).
 #
 # `region`, `radius` and `name` are keyword-only.
 # `name` is optional and used in reprs and error messages; unnamed stages
@@ -269,6 +275,8 @@ while sim.agent_count() > 0 and sim.elapsed_time() < 600:
     agent5.follow(route_a)
     # follow() to a route whose start is a closed exit does not raise: the
     # agent is stranded at once, as if the exit had closed on its way.
+    # follow() always restarts, also on the agent's current route: calling
+    # it every iteration sends the agent back to the start each time.
 
     # Weights: a patch, like dict.update; targets not named keep their weight.
     # Validated against the whole route and applied atomically: on error the
@@ -285,6 +293,7 @@ while sim.agent_count() > 0 and sim.elapsed_time() < 600:
     # held == True on arrival. Agents on other routes that use wp2 are not
     # affected, nor are agents that completed wp2 before the call.
     # A held agent that follow()s another route is no longer held.
+    # hold() on a stage that is already held does nothing.
     route_c.hold(wp2)
     # Held agents go on in arrival order (ties by agent id), current rule.
     route_c.release(wp2)
@@ -306,6 +315,8 @@ while sim.agent_count() > 0 and sim.elapsed_time() < 600:
     # Rules only skip closed immediate targets: in route_c, wp3 (which leads
     # only to exit2) can still be chosen at wp2 after exit2 closes; agents
     # sent there are stranded at wp3.
+    # close() on a closed exit and open() on an open one do nothing and
+    # return an empty tuple.
     stranded = exit2.close(informed=True)  # agents stranded now
     # Valid target again. Agents stranded by this exit resume: agents
     # assigned by a rule re-run the decision at their last decision stage;
@@ -332,8 +343,8 @@ print(agent5.target)  # None on a route: use agent5.stage
 # not the body orientation.
 print(agent5.route_orientation)
 print(agent3.held)  # True while held at a stage
-# True after completing a waypoint whose transition is STAY, until
-# follow() or steer_to()
+# True after completing a waypoint whose transition is STAY, or on
+# reaching a steer_to() point, until follow() or steer_to()
 print(agent3.arrived)
 print(agent3.stranded)  # True once the agent cannot continue (closed exit)
 print(agent3.alive)  # False once the agent has left the simulation
@@ -471,6 +482,8 @@ jps.Route([wp1, wp2, wp1, exit1])
 # ValueError: wp1 appears twice; only repeating the first stage at the end closes a loop
 jps.Route([exit1, wp1])
 # ValueError: exits are terminal; remove (exit1, wp1)
+jps.Route([(wp1, (15, 6.5)), ((15, 6.5), exit1)], start=wp1)
+# TypeError: (15, 6.5) is not a stage; use sim.add_waypoint((15, 6.5), ...)
 jps.Route([wp1, other_sim_wp, exit1])
 # ValueError: all stages must belong to the same simulation
 jps.RoundRobin({exit1: 0.6, exit2: 0.4})
