@@ -55,7 +55,9 @@ surface.regions_at((x, y))  # every region covering a point (discovery)
 # A simulation resolves it against its own copy of the geometry when the
 # location is used (add_agent, steer_to), so the same Location works in
 # every simulation built from this surface, provided that simulation's
-# snapshot contains the region and the position.
+# snapshot contains the region and the position. Otherwise add_agent and
+# steer_to raise ValueError: for a region from another surface, or one
+# added to `surface` after the simulation was built (see Errors).
 # Regions compare and hash by (surface, id), so a region handle from
 # `surface` is the same dict key in every simulation built from it.
 # The region is always supplied explicitly: no call infers it from
@@ -305,9 +307,11 @@ while sim.agent_count() > 0 and sim.elapsed_time() < 600:
     # only to exit2) can still be chosen at wp2 after exit2 closes; agents
     # sent there are stranded at wp3.
     stranded = exit2.close(informed=True)  # agents stranded now
-    # Valid target again. Agents stranded by this exit resume: they re-run
-    # the decision at their last decision stage. Agents already rerouted
-    # are not reassigned.
+    # Valid target again. Agents stranded by this exit resume: agents
+    # assigned by a rule re-run the decision at their last decision stage;
+    # agents on a fixed transition keep exit2 as their stage and walk on
+    # to it from where they stopped. Agents already rerouted are not
+    # reassigned.
     resumed = exit2.open()  # agents that resumed
 
 # --- State (read-only) ------------------------------------------------
@@ -511,6 +515,11 @@ sim.add_agent(pos, route=route_c, start=wp4)
 # ValueError: wp4 is not part of this route
 other_sim.add_agent(pos, route=route_c)
 # ValueError: route belongs to another simulation
+sim.add_agent(other_surface_region.at(x, y), route=route_a)
+# ValueError: Region(id=0, name="hall") belongs to another surface
+sim.add_agent(region_added_later.at(x, y), route=route_a)
+# ValueError: Region(id=3, name="annex") is not part of this simulation;
+#   it was added to the surface after the simulation was built
 agent1.route = route_c
 # AttributeError: use agent.follow(route, start=...)
 agent5.target = (x_new, y_new)
@@ -562,8 +571,9 @@ sim.agent(17)  # Agent(id=17)
 #    stage == exit2 via the fixed transition wp3 -> exit2:
 #      informed=True  -> stranded now, stops where it is.
 #      informed=False -> walks to exit2, stranded on arrival.
-#      Returned by exit2.close (informed=True); resumes on exit2.open(),
-#      or the user calls agent.follow(...).
+#      Returned by exit2.close (informed=True); on exit2.open() it walks
+#      on to exit2 from where it stopped, or the user calls
+#      agent.follow(...).
 # 5. No open target left:
 #    rule at wp2 is RoundRobin({exit1: 1, exit2: 1}); both exits closed ->
 #    agents deciding at wp2 are stranded inside wp2; agents walking to
