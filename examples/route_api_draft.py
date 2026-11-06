@@ -538,9 +538,6 @@ other_sim.add_agent(pos, route=route_c)
 # ValueError: route belongs to another simulation
 sim.add_agent(other_surface_region.at(x, y), route=route_a)
 # ValueError: Region(id=0, name="hall") belongs to another surface
-sim.add_agent(region_added_later.at(x, y), route=route_a)
-# ValueError: Region(id=3, name="annex") is not part of this simulation;
-#   it was added to the surface after the simulation was built
 agent1.route = route_c
 # AttributeError: use agent.follow(route, start=...)
 agent5.target = (x_new, y_new)
@@ -572,6 +569,11 @@ sim.stages  # (Waypoint(id=0, name="wp1"), ..., Exit(id=8, name="exit_ground"))
 sim.stage("exit1")  # Exit(id=5, name="exit1")
 sim.stage(id=5)  # the same exit, by id
 sim.agent(17)  # Agent(id=17)
+# All agents still in the simulation, in id order: held, stranded and
+# arrived agents included. A snapshot (tuple of handles), like
+# agents_targeting(): agents added or removed while iterating do not
+# change it.
+sim.agents()  # (Agent(id=2), Agent(id=3), ...)
 
 # --- Lifecycle of one agent -------------------------------------------
 # 1. Spawned inside its first waypoint:
@@ -629,6 +631,7 @@ sim.agent(17)  # Agent(id=17)
 #                                           sim.stage(id=5)
 # agent(agent_id)                           sim.agent(17), lookup by ID kept for
 #                                           matching trajectory files
+# agents() -> iterator                      sim.agents() -> tuple of handles
 # travel_times(stage_id) -> {int: grid}     sim.travel_times(exit1)
 #                                           -> {Region: grid}
 # set_default_speed_field(region_id, ...)   sim.set_default_speed_field(floor0, ...)
