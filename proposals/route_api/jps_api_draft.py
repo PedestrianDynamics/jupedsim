@@ -1,4 +1,5 @@
-# Draft
+# Draft (sketch, not runnable: names like model and x1 are placeholders)
+# ruff: noqa: F821
 # - Stages are owned by the simulation and returned as handles.
 # - Routes are built and validated in one call: either a valid route or an error.
 # - One way to do each thing; explicit keywords; errors are informative say how to fix the call.
@@ -106,13 +107,15 @@ while sim.agent_count(moving=True) > 0:
     # Direct steering: change the target with steer_to(); also switches a
     # route agent to direct steering.
     agent5.steer_to((x_new, y_new))
-    agent2.steer_to((x_new, y_new))  # route -> direct steering; route, stage become None
+    # route -> direct steering; route and stage become None
+    agent2.steer_to((x_new, y_new))
 
     # Routes are changed with follow() only (route and start in one call).
     agent1.follow(route_b)  # starts at the first stage, wp2
     agent1.follow(route_b, start=wp3)  # or an explicit start
     agent3.follow(route_c, start=wp2)
-    agent5.follow(route_a)  # direct steering -> route; route == route_a, stage == wp1
+    # direct steering -> route; route == route_a, stage == wp1
+    agent5.follow(route_a)
 
     # Weights: a patch, like dict.update; targets not named keep their weight.
     # Resets the counter of (route_c, wp2). Takes effect at the next decision;
