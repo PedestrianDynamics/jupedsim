@@ -11,33 +11,57 @@ import jupedsim as jps
 # Regions are returned as handles, like stages, not as bare ints.
 # `name` is optional and used in reprs and error messages.
 surface = jps.WalkableSurface()
-floor0 = surface.add_region(floor0_polygon, height=0.0, name="floor0")
-floor1 = surface.add_region(floor1_polygon, height=3.0, name="floor1")
-surface.connect_regions(floor0, edge0, floor1, edge1)  # e.g. stairs
+floor0 = surface.add_region(polygon=floor0_polygon, height=0.0, name="floor0")
+floor1 = surface.add_region(polygon=floor1_polygon, height=3.0, name="floor1")
+# A connector (stairs, ramp) is a region of its own: connect_regions returns
+# its handle. edge0 lies on floor0's boundary and edge1 on floor1's; each is
+# a line segment lifted to its region's height. The quad they span must be
+# planar: the edges may be skewed but not twisted.
+stairs = surface.connect_regions(
+    from_region=floor0,
+    from_edge=edge0,
+    to_region=floor1,
+    to_edge=edge1,
+    name="stairs",
+)
 
 # Looking regions up, e.g. for a geometry loaded from a file:
-surface.regions  # (Region(id=0, name="floor0", height=0.0), Region(id=1, ...))
+surface.regions  # (Region(id=0, name="floor0", height=0.0), ..., Region(id=2, name="stairs"))
 surface.region("floor0")  # by name
 surface.regions_at((x, y))  # every region covering a point
+floor1.at(x, y)  # Location: a point in floor1; raises if it is not in floor1
 
+# The surface is copied when the simulation is constructed: later edits to
+# `surface` do not affect `sim`. No builder is needed for this.
 sim = jps.Simulation(model, surface)
 
 # --- Stages -----------------------------------------------------------
+# - Regions describe where agents can walk.
+# - A stage's areas are alternative places that complete the stage:
+#   reaching any one of them is enough.
+# - A route describes the order of stages.
+#
 # Waypoints and exits are areas. General form: a list of (area, region)
 # pairs, so one stage can cover several areas (e.g. two doors) and regions.
 # Area: a polygon without holes, as a sequence of >= 3 (x, y) vertices or a
 # shapely Polygon. Only the part of an area inside its region belongs to
-# the stage.
+# the stage; an area whose clipped part is empty is an error.
 # Shorthands: a single polygon, or a point with `radius` (a disc-shaped
-# area). The region is inferred when the area lies in exactly one region;
-# region= is only needed where regions overlap in plan (stacked floors).
-# The same rule applies to agent positions in add_agent().
+# area). The region is inferred from the regions the area intersects
+# (non-empty intersection): exactly one gives that region; several (stacked
+# floors, or an area straddling adjacent regions) require region=.
+# Agent positions and target points are locations: region.at(x, y), or a
+# plain (x, y) whose region is inferred by the same rule.
 # Coordinates are in metres, in the same frame as the geometry.
 #
-# Each waypoint and exit gets its own floor field (travel times to its area,
-# per region). Agents follow it to the nearest part of the area; the stage
-# is reached once the agent is inside an area. Floor fields cost memory and
-# computing time, so stages are created once and shared by routes.
+# Stage grouping sets what close() and hold() act on together: one exit
+# with two doors closes both doors. Create separate exits for doors that
+# must close individually.
+#
+# Routing to areas uses floor fields (see "Routing backend" below): agents
+# move toward the area along paths of least travel time, which need not be
+# the geometrically nearest part. The stage is reached once the agent is
+# inside an area. Direct steering targets a point and uses no floor field.
 #
 # `name` is optional and used in reprs and error messages; unnamed stages
 # appear as Waypoint(id=3). The messages below assume named stages.
@@ -46,11 +70,14 @@ wp2 = sim.add_waypoint((x2, y2), radius=0.5, name="wp2")
 wp3 = sim.add_waypoint((x3, y3), radius=0.5, name="wp3")
 door_polygon = [(), (), (), ()]
 wp4 = sim.add_waypoint(door_polygon, name="wp4")
-stairs = sim.add_waypoint(
-    [(stair_top, floor1), (stair_bottom, floor0)], name="stairs"
-)
+doors = sim.add_waypoint(
+    [(door_a, floor0), (door_b, floor0)], name="doors"
+)  # either door completes it
 exit1 = sim.add_exit(exit_polygon1, name="exit1")
 exit2 = sim.add_exit(exit_polygon2, name="exit2")
+main_exits = sim.add_exit(
+    [(exit_polygon3, floor0), (exit_polygon4, floor0)], name="main_exits"
+)  # main_exits.close() closes both doors; exit1, exit2 close one at a time
 
 # --- Routes -----------------------------------------------------------
 # A route is a directed graph of stages. It is bound at construction to the
@@ -122,11 +149,12 @@ tour = jps.Route(
 # One counter per (route, stage), shared by all agents deciding there.
 # Agents arriving in the same step are served in agent-id order.
 
-# Nearest: each agent picks the target with the shortest travel time from
-# its position, read from the targets' floor fields. No weights.
+# LeastTravelTime: each agent picks the target with the least travel time
+# from its position, read from the targets' floor fields. The choice is made
+# once, when the agent completes the stage, and kept on the way. No weights.
 route_n = jps.Route(
     [
-        (wp1, jps.Nearest([exit1, exit2])),
+        (wp1, jps.LeastTravelTime([exit1, exit2])),
     ],
     start=wp1,
 )
@@ -143,6 +171,9 @@ agent3 = sim.add_agent(
 )  # starts at the route's default (wp1)
 agent4 = sim.add_agent(pos4, route=route_c, start=wp2)  # overrides the default
 agent5 = sim.add_agent(pos5, target=(x, y))  # direct steering, no route
+# Steering to a location on another floor walks there over the connecting
+# stairs.
+agent7 = sim.add_agent(floor0.at(x0, y0), target=floor1.at(x, y))
 agent6 = sim.add_agent(pos6, route=route_x)  # walks to exit1
 
 # --- Runtime changes --------------------------------------------------
@@ -155,6 +186,7 @@ while sim.agent_count() > 0 and sim.elapsed_time() < 600:
     # Direct steering: change the target with steer_to(); also switches a
     # route agent to direct steering.
     agent5.steer_to((x_new, y_new))
+    agent7.steer_to(floor1.at(x_new, y_new))  # location on floor1
     # route -> direct steering; route and stage become None
     agent2.steer_to((x_new, y_new))
 
@@ -183,9 +215,10 @@ while sim.agent_count() > 0 and sim.elapsed_time() < 600:
 
     # Close an exit for all routes (a method on the exit handle;
     # sim.close() frees the whole simulation). Rules skip closed targets.
-    # Closing decides which stages may be targets. To slow agents down or
-    # make them avoid an area (e.g. smoke), change the speed fields the
-    # floor fields are computed with instead.
+    # Closing decides which stages may be targets. To make agents prefer
+    # paths around costly areas (e.g. smoke), change the speed fields used
+    # to compute travel times instead. Speed fields change routes, not how
+    # fast agents walk: physical slowing is set in the movement model.
     # informed=True:  agents assigned to it by a rule are reassigned now by
     #                 that rule and walk directly to the new target.
     # informed=False: agents walk to the exit and are reassigned there.
@@ -208,7 +241,9 @@ while sim.agent_count() > 0 and sim.elapsed_time() < 600:
 print(agent2.route, agent2.stage)  # None, None in direct steering
 # Route(start=wp1, ...), Waypoint(id=1, name="wp1")
 print(agent5.route, agent5.stage)
-print(agent2.target)  # point the agent is heading for, in both modes
+print(agent2.target)  # (x_new, y_new): the steering point in direct steering
+print(agent5.target)  # None on a route: use agent5.stage
+print(agent5.direction)  # unit vector the agent is currently steered along
 print(agent3.held)  # True while held at a stage
 # True after completing a waypoint whose transition is STAY
 print(agent3.arrived)
@@ -234,17 +269,69 @@ print(route_c)
 #   wp2 -> RoundRobin(wp3: 0, exit1: 2, exit2: 1)
 #   wp3 -> exit2
 
+# --- Two floors -------------------------------------------------------
+# An agent upstairs leaves through an exit on the ground floor. The stairs
+# are a region (from connect_regions), not a stage: the exit's floor field
+# already routes over them.
+exit_ground = sim.add_exit(ground_exit_polygon, name="exit_ground")  # floor0
+evacuate = jps.Route([exit_ground])
+# floor0 and floor1 overlap in plan, so the position names its region
+upstairs = sim.add_agent(floor1.at(xu, yu), route=evacuate)
+print(upstairs.stage)  # Exit(id=8, name="exit_ground")
+grid = sim.travel_times(exit_ground)[floor1]  # floor1's grid
+grid.values  # seconds to exit_ground, shape (height, width); inf = not walkable
+grid.directions  # walking directions, shape (height, width, 2)
+# The stairs are a region, so they can also hold a stage, e.g. a waypoint
+# halfway up that agents must pass:
+mid_stairs = sim.add_waypoint(mid_stairs_polygon, region=stairs, name="mid")
+# To make agents pass the lower landing (e.g. a counting line), make it a
+# stage of the route:
+landing0 = sim.add_waypoint(
+    lower_landing_polygon, region=floor0, name="landing0"
+)
+via_landing = jps.Route([landing0, exit_ground])
+
+# --- Routing backend: floor fields ------------------------------------
+# Everything floor-field-specific is in this section; the route API above
+# only needs "is the agent inside the stage's area" and "which
+# direction leads there", plus travel times for LeastTravelTime.
+# Configuration: jps.Simulation(model, surface,
+#     floorfield_options=jps.FloorfieldOptions(cell_size=0.2,
+#                                              wall_influence_radius=0.5))
+sim.travel_times(exit1)  # {floor0: TravelTimeGrid, stairs: ..., floor1: ...}
+sim.default_speed_fields()  # {floor0: SpeedGrid, stairs: ..., floor1: ...}
+sim.set_default_speed_field(floor0, values)  # all stages without their own
+sim.set_custom_speed_field(exit1, floor0, values)  # one stage only
+sim.custom_speed_fields(exit1)  # {floor0: SpeedGrid, stairs: None, ...}
+sim.clear_custom_speed_field(exit1, floor0)
+# Speed fields change routes, not walking speed. Floor fields are solved
+# when first needed and cost memory per stage and region, so stages are
+# created once and shared by routes.
+
 # --- Errors -----------------------------------------------------------
 sim.add_waypoint(door_polygon, radius=0.5)
 # ValueError: radius applies to point waypoints only
 sim.add_waypoint((x1, y1), radius=0)
 # ValueError: radius must be > 0
 sim.add_waypoint(landing_polygon)  # lies where floor0 and floor1 overlap
-# ValueError: area lies in floor0 and floor1; pass region=
+# ValueError: area intersects floor0 and floor1; pass region=
+sim.add_waypoint(door_polygon, region=floor1)  # door_polygon is not in floor1
+# ValueError: area does not intersect floor1
 sim.add_waypoint(door_polygon, region=1)
 # TypeError: region must be a Region handle, e.g. surface.region("floor1")
 surface.region("floor2")
-# KeyError: no region named floor2; regions are floor0, floor1
+# KeyError: no region named floor2; regions are floor0, floor1, stairs
+surface.connect_regions(
+    from_region=floor0,
+    from_edge=edge0,
+    to_region=floor1,
+    to_edge=edge1_reversed,
+)
+# ValueError: edges span a twisted quad; reverse to_edge
+sim.add_agent(pos5, target=(x, y))  # (x, y) on floor0 and floor1
+# ValueError: (x, y) lies in floor0 and floor1; use floor0.at(x, y) or floor1.at(x, y)
+floor1.at(100, 100)
+# ValueError: (100, 100) is not in floor1
 sim.add_waypoint(polygon_with_hole)
 # ValueError: waypoint polygons must be simple and without holes
 jps.Route([])
@@ -268,7 +355,7 @@ jps.RoundRobin({exit1: 0.6, exit2: 0.4})
 route_c.update_weights(wp1, {wp2: 3})
 # ValueError: wp1 has a fixed transition, not a weighted rule
 route_n.update_weights(wp1, {exit1: 2})
-# ValueError: wp1 uses Nearest, which has no weights
+# ValueError: wp1 uses LeastTravelTime, which has no weights
 route_c.update_weights(wp2, {wp4: 1})
 # ValueError: wp4 is not a target of wp2; targets are wp3, exit1, exit2 (see route.weights(wp2))
 route_c.weights(wp1)
