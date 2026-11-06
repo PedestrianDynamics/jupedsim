@@ -7,16 +7,31 @@
 
 import jupedsim as jps
 
-sim = jps.Simulation(model, geometry)
+# --- Regions ----------------------------------------------------------
+# Regions are returned as handles, like stages, not as bare ints.
+# `name` is optional and used in reprs and error messages.
+surface = jps.WalkableSurface()
+floor0 = surface.add_region(floor0_polygon, height=0.0, name="floor0")
+floor1 = surface.add_region(floor1_polygon, height=3.0, name="floor1")
+surface.connect_regions(floor0, edge0, floor1, edge1)  # e.g. stairs
+
+# Looking regions up, e.g. for a geometry loaded from a file:
+surface.regions  # (Region(id=0, name="floor0", height=0.0), Region(id=1, ...))
+surface.region("floor0")  # by name
+surface.regions_at((x, y))  # every region covering a point
+
+sim = jps.Simulation(model, surface)
 
 # --- Stages -----------------------------------------------------------
-# Waypoints and exits are areas. General form: a list of (area, region_id)
+# Waypoints and exits are areas. General form: a list of (area, region)
 # pairs, so one stage can cover several areas (e.g. two doors) and regions.
 # Area: a polygon without holes, as a sequence of >= 3 (x, y) vertices or a
 # shapely Polygon. Only the part of an area inside its region belongs to
 # the stage.
 # Shorthands: a single polygon, or a point with `radius` (a disc-shaped
-# area). With several regions in the geometry, shorthands need region=.
+# area). The region is inferred when the area lies in exactly one region;
+# region= is only needed where regions overlap in plan (stacked floors).
+# The same rule applies to agent positions in add_agent().
 # Coordinates are in metres, in the same frame as the geometry.
 #
 # Each waypoint and exit gets its own floor field (travel times to its area,
@@ -32,7 +47,7 @@ wp3 = sim.add_waypoint((x3, y3), radius=0.5, name="wp3")
 door_polygon = [(), (), (), ()]
 wp4 = sim.add_waypoint(door_polygon, name="wp4")
 stairs = sim.add_waypoint(
-    [(stair_top, region_floor1), (stair_bottom, region_floor0)], name="stairs"
+    [(stair_top, floor1), (stair_bottom, floor0)], name="stairs"
 )
 exit1 = sim.add_exit(exit_polygon1, name="exit1")
 exit2 = sim.add_exit(exit_polygon2, name="exit2")
@@ -224,8 +239,12 @@ sim.add_waypoint(door_polygon, radius=0.5)
 # ValueError: radius applies to point waypoints only
 sim.add_waypoint((x1, y1), radius=0)
 # ValueError: radius must be > 0
-sim.add_waypoint(door_polygon)  # geometry with several regions
-# ValueError: geometry has several regions; pass region= or [(area, region_id)]
+sim.add_waypoint(landing_polygon)  # lies where floor0 and floor1 overlap
+# ValueError: area lies in floor0 and floor1; pass region=
+sim.add_waypoint(door_polygon, region=1)
+# TypeError: region must be a Region handle, e.g. surface.region("floor1")
+surface.region("floor2")
+# KeyError: no region named floor2; regions are floor0, floor1
 sim.add_waypoint(polygon_with_hole)
 # ValueError: waypoint polygons must be simple and without holes
 jps.Route([])
