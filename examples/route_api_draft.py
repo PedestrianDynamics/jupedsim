@@ -398,7 +398,7 @@ agent1.route = route_c
 agent5.target = (x_new, y_new)
 # AttributeError: use agent.steer_to(point)
 agent1.stage  # after agent1 left through an exit
-# RuntimeError: agent 1 has left the simulation (agent.alive is False)
+# RuntimeError: Agent(id=1) has left the simulation (agent.alive is False)
 
 # --- Lifecycle of one agent -------------------------------------------
 # 1. Spawned inside its first waypoint:
@@ -429,3 +429,38 @@ agent1.stage  # after agent1 left through an exit
 # 6. Switching routes:
 #    agent.follow(route_b) -> stage == wp2 (first stage of route_b);
 #    held/stranded are cleared; counters of route_c are not changed.
+
+# --- From 1.0 to 2.0: no int IDs in calls -----------------------------
+# IDs remain as attributes (agent.id, stage.id, region.id) to match
+# trajectory files, but no call takes or returns a bare int.
+#
+# 1.0                                       2.0
+# add_waypoint_stage(...) -> int            sim.add_waypoint(...) -> Waypoint
+# add_exit_stage(...) -> int                sim.add_exit(...) -> Exit
+# add_direct_steering_stage() -> int        removed: target= / agent.steer_to()
+# add_journey(JourneyDescription) -> int    jps.Route([...])
+# add_agent(journey_id, stage_id, ...)      sim.add_agent(pos, route=, start=)
+# switch_agent_journey(agent, journey,      agent.follow(route, start=)
+#     stage)
+# get_location(x, y, region_id=)            region.at(x, y)
+# add_region(...) -> int                    surface.add_region(...) -> Region
+# connect_regions(...) -> int               surface.connect_regions(...) -> Region
+# mark_agent_for_removal(agent_id)          agent.remove()
+# removed_agents() -> list[int]             sim.removed_agents() -> agents with
+#                                           alive == False
+# stage_ids() -> list[int]                  sim.stages -> tuple of handles
+# get_stage(stage_id)                       sim.stage("exit1"), by name
+# agent(agent_id)                           sim.agent(17), lookup by ID kept for
+#                                           matching trajectory files
+# travel_times(stage_id) -> {int: grid}     sim.travel_times(exit1)
+#                                           -> {Region: grid}
+# set_default_speed_field(region_id, ...)   sim.set_default_speed_field(floor0, ...)
+# set_custom_speed_field(stage_id,          sim.set_custom_speed_field(exit1,
+#     region_id, ...)                           floor0, ...)
+# custom_speed_fields(stage_id)             sim.custom_speed_fields(exit1)
+# clear_custom_speed_field(stage_id,        sim.clear_custom_speed_field(exit1,
+#     region_id)                                floor0)
+agent1.remove()
+sim.stages  # (Waypoint(id=0, name="wp1"), ..., Exit(id=8, name="exit_ground"))
+sim.stage("exit1")  # Exit(id=5, name="exit1")
+sim.agent(17)  # Agent(id=17)
