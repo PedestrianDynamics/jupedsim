@@ -91,9 +91,9 @@ def _corridor():
 
 
 def _make_sim(model):
-    surface = jps.WalkableSurface()
-    room = surface.add_region(polygon=_corridor())
-    sim = jps.Simulation(model=model, geometry=surface, dt=0.01)
+    surface = jps.GeometryBuilder()
+    room = surface.add_region(polygon=_corridor(), height=0.0)
+    sim = jps.Simulation(model=model, geometry=surface.build(), dt=0.01)
     exit_id = sim.add_exit_stage([([(29, 3), (29, 5), (30, 5), (30, 3)], room)])
     journey_id = sim.add_journey(jps.JourneyDescription([exit_id]))
     return sim, exit_id, journey_id, room

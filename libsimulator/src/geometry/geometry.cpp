@@ -8,13 +8,13 @@
 #include "geometry/clearance_field.hpp"
 #include "geometry/location.hpp"
 #include "geometry/region_split.hpp"
+#include "into.hpp"
 #include "kernel.hpp"
 #include "line_segment.hpp"
 #include "simulation_error.hpp"
 
 #include <CGAL/Boolean_set_operations_2.h>
 #include <CGAL/Cartesian_converter.h>
-#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 #include <CGAL/mark_domain_in_triangulation.h>
 #include <boost/iterator/function_output_iterator.hpp>
 #include <boost/range/iterator_range.hpp>
@@ -31,7 +31,7 @@
 #include <variant>
 #include <vector>
 
-Geometry::Geometry(SurfaceMesh mesh) : _mesh(std::move(mesh))
+Geometry::Geometry(epick::Mesh mesh) : _mesh(std::move(mesh))
 {
     // Compact vertex/face indices so vertices()/triangles()/region_id_per_face() are
     // contiguous.
@@ -41,7 +41,7 @@ Geometry::Geometry(SurfaceMesh mesh) : _mesh(std::move(mesh))
 }
 
 Geometry::Geometry(
-    SurfaceMesh&& mesh,
+    epick::Mesh&& mesh,
     RegionSplit&& region_split,
     std::unique_ptr<RegionGraph2D> region_graph_2d)
     : _mesh(std::move(mesh))
@@ -55,7 +55,8 @@ Geometry::Geometry(
 
 void Geometry::build()
 {
-    _aabb_tree = std::make_unique<AABBTree>(_mesh.faces().begin(), _mesh.faces().end(), _mesh);
+    _aabb_tree =
+        std::make_unique<epick::AABBTree>(_mesh.faces().begin(), _mesh.faces().end(), _mesh);
     _region = _region_split.region;
     _boundary_index = make_portal_boundary_index(_mesh, _region_split);
     _region_graph = create_region_graph(_mesh, _region_split);
@@ -71,7 +72,7 @@ void Geometry::build()
     _clearance = ClearanceField(boundaries);
 }
 
-PolyWithHoles Geometry::polygon(size_t region_id) const
+epick::PolyWithHoles Geometry::polygon(size_t region_id) const
 {
     if(!_region_graph_2d) {
         throw SimulationError("Geometry is built from mesh and has no 2D polygons");
@@ -82,27 +83,28 @@ PolyWithHoles Geometry::polygon(size_t region_id) const
     return (*_region_graph_2d)[region_id];
 }
 
-Geometry::FaceLocation Geometry::face_below(const Point3D& p) const
+Geometry::FaceLocation Geometry::face_below(const epick::Point3D& p) const
 {
     // first_intersection along -z returns the hit nearest to the ray source,
     // i.e. the face directly below the query point. The ray starts a hair
     // above p: a query point sitting exactly on the surface may round minimally
     // below its face's plane, and the strictly-downward ray would miss it.
     constexpr double on_surface_tolerance = 1e-9;
-    const Ray3D ray(Point3D{p.x(), p.y(), p.z() + on_surface_tolerance}, Direction3D(0, 0, -1));
+    const epick::Ray3D ray(
+        epick::Point3D{p.x(), p.y(), p.z() + on_surface_tolerance}, epick::Direction3D(0, 0, -1));
     const auto hit = aabb_tree().first_intersection(ray);
     if(!hit) {
-        return {SurfaceMesh::null_face(), K::Point_3{}};
+        return {epick::Mesh::null_face(), epick::Point3D{}};
     }
-    const auto* projected = std::get_if<K::Point_3>(&hit->first);
+    const auto* projected = std::get_if<epick::Point3D>(&hit->first);
     // Assert against vertical faces.
     assert(projected && "FATAL: vertical face hit by the face_below line");
     return {hit->second, *projected};
 }
 
-bool Geometry::is_valid_location(const Point3D& p) const
+bool Geometry::is_valid_location(const epick::Point3D& p) const
 {
-    return face_below(p).face != SurfaceMesh::null_face();
+    return face_below(p).face != epick::Mesh::null_face();
 }
 
 std::vector<LineSegment>
@@ -156,16 +158,16 @@ std::optional<std::size_t> Geometry::region_reached(const Location& who, Vector 
     return arrival.has_value() ? std::optional{arrival->region()} : std::nullopt;
 }
 
-std::vector<Geometry::FaceLocation> Geometry::faces_at(const Point2D& xy) const
+std::vector<Geometry::FaceLocation> Geometry::faces_at(const epick::Point2D& xy) const
 {
-    const Line3D vertical(Point3D{xy.x(), xy.y(), 0}, Direction3D(0, 0, 1));
-    std::vector<AABBTree::Intersection_and_primitive_id<Line3D>::Type> hits{};
+    const epick::Line3D vertical(epick::Point3D{xy.x(), xy.y(), 0}, epick::Direction3D(0, 0, 1));
+    std::vector<epick::AABBTree::Intersection_and_primitive_id<epick::Line3D>::Type> hits{};
     aabb_tree().all_intersections(vertical, std::back_inserter(hits));
 
     std::vector<FaceLocation> faces{};
     faces.reserve(hits.size());
     for(const auto& [where, face] : hits) {
-        const auto* point = std::get_if<Point3D>(&where);
+        const auto* point = std::get_if<epick::Point3D>(&where);
         // Assert against vertical faces - purely defensive.
         assert(point && "FATAL: vertical face hit by the locate line");
         faces.push_back({face, *point});
@@ -182,14 +184,15 @@ Location Geometry::location_at(Point xy, const FaceLocation& where) const
     return Location{this, xy, region_of(where.face), where.face, where.point.z()};
 }
 
-Geometry::FaceLocation Geometry::locate_in_region(std::size_t region_id, const Point2D& xy) const
+Geometry::FaceLocation
+Geometry::locate_in_region(std::size_t region_id, const epick::Point2D& xy) const
 {
     for(const auto& where : faces_at(xy)) {
         if(region_of(where.face) == region_id) {
             return where;
         }
     }
-    return {SurfaceMesh::null_face(), Point3D{}};
+    return {epick::Mesh::null_face(), epick::Point3D{}};
 }
 
 Location Geometry::get_location(double x, double y, std::size_t region_id) const
@@ -198,7 +201,7 @@ Location Geometry::get_location(double x, double y, std::size_t region_id) const
         throw SimulationError("Unknown region ID {}", region_id);
     }
     const auto face_location = locate_in_region(region_id, {x, y});
-    if(face_location.face == SurfaceMesh::null_face()) {
+    if(face_location.face == epick::Mesh::null_face()) {
         throw SimulationError("Point {} is not in region {}", Point{x, y}, region_id);
     }
     return location_at(Point{x, y}, face_location);
@@ -207,16 +210,17 @@ Location Geometry::get_location(double x, double y, std::size_t region_id) const
 std::optional<Location>
 Geometry::get_location_near_z(double x, double y, double z, double tol) const
 {
-    const auto where = locate_near_z(Point2D{x, y}, z, tol);
-    if(where.face == SurfaceMesh::null_face()) {
+    const auto where = locate_near_z(epick::Point2D{x, y}, z, tol);
+    if(where.face == epick::Mesh::null_face()) {
         return std::nullopt;
     }
     return location_at(Point{x, y}, where);
 }
 
-Geometry::FaceLocation Geometry::locate_near_z(const Point2D& xy, double z, double tolerance) const
+Geometry::FaceLocation
+Geometry::locate_near_z(const epick::Point2D& xy, double z, double tolerance) const
 {
-    FaceLocation best{SurfaceMesh::null_face(), Point3D{}};
+    FaceLocation best{epick::Mesh::null_face(), epick::Point3D{}};
     auto best_deviation = tolerance;
     for(const auto& face_location : faces_at(xy)) {
         const auto deviation = std::abs(face_location.point.z() - z);
@@ -266,39 +270,18 @@ std::vector<std::array<std::size_t, 3>> Geometry::triangles() const
 
 namespace
 {
-/// Exact arithmetic for cutting areas. Boolean set operations construct the points where
-/// edges cross and run predicates on them again; with inexact constructions the two can
-/// disagree on (nearly) degenerate input the result is a crash or a wrong cut, not a small error.
-/// With EPECK the one rounding step is the conversion of the finished pieces back to doubles.
-using ExactKernel = CGAL::Exact_predicates_exact_constructions_kernel;
-using ExactPoly = CGAL::Polygon_2<ExactKernel>;
-using ExactPolyWithHoles = CGAL::Polygon_with_holes_2<ExactKernel>;
-
-ExactPoly to_exact(const Poly& ring)
-{
-    const CGAL::Cartesian_converter<K, ExactKernel> convert{};
-    ExactPoly exact{};
-    for(auto v = ring.vertices_begin(); v != ring.vertices_end(); ++v) {
-        exact.push_back(convert(*v));
-    }
-    return exact;
-}
-
-ExactPolyWithHoles to_exact(const PolyWithHoles& area)
-{
-    std::vector<ExactPoly> holes{};
-    holes.reserve(area.number_of_holes());
-    for(const auto& hole : area.holes()) {
-        holes.push_back(to_exact(hole));
-    }
-    return ExactPolyWithHoles(to_exact(area.outer_boundary()), holes.begin(), holes.end());
-}
+// Exact arithmetic for cutting areas. Boolean set operations construct the points where
+// edges cross and run predicates on them again; with inexact constructions the two can
+// disagree on (nearly) degenerate input the result is a crash or a wrong cut, not a small error.
+// With epeck the one rounding step is the conversion of the finished pieces back to doubles.
 
 /// Rounds @p ring to doubles, dropping vertices that round onto their predecessor.
-Poly to_inexact(const ExactPoly& ring)
+/// Unlike into<epick::Poly>, which converts vertex by vertex: a cut piece may have vertices
+/// closer than a double can tell apart.
+epick::Poly to_inexact(const epeck::Poly& ring)
 {
-    const CGAL::Cartesian_converter<ExactKernel, K> convert{};
-    Poly inexact{};
+    const CGAL::Cartesian_converter<epeck::Kernel, epick::Kernel> convert{};
+    epick::Poly inexact{};
     for(auto v = ring.vertices_begin(); v != ring.vertices_end(); ++v) {
         const auto p = convert(*v);
         if(inexact.is_empty() || p != inexact.vertex(inexact.size() - 1)) {
@@ -313,16 +296,17 @@ Poly to_inexact(const ExactPoly& ring)
 
 } // namespace
 
-std::vector<AreaPiece> Geometry::clip_to_region(const Poly& p, size_t region_id) const
+std::vector<AreaPiece> Geometry::clip_to_region(const epick::Poly& p, size_t region_id) const
 {
     std::vector<AreaPiece> pieces{};
     // Only the outer boundary is needed as agents never stand in a hole.
     CGAL::intersection(
-        to_exact(polygon(region_id)),
-        to_exact(p),
-        boost::make_function_output_iterator([&pieces, region_id](const ExactPolyWithHoles& piece) {
-            pieces.push_back(AreaPiece{to_inexact(piece.outer_boundary()), region_id});
-        }));
+        into<epeck::PolyWithHoles>(polygon(region_id)),
+        into<epeck::Poly>(p),
+        boost::make_function_output_iterator(
+            [&pieces, region_id](const epeck::PolyWithHoles& piece) {
+                pieces.push_back(AreaPiece{to_inexact(piece.outer_boundary()), region_id});
+            }));
     if(pieces.empty()) {
         throw SimulationError("Area does not intersect region {}", region_id);
     }

@@ -82,12 +82,12 @@ def test_timer_integration_small_simulation(tmp_path):
         pytest.fail("jupedsim python bindings not importable or models missing")
 
     # Minimal geometry: small square
-    surface = jps.WalkableSurface()
+    surface = jps.GeometryBuilder()
     surface.add_region(
-        boundary=[(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)]
+        boundary=[(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)], height=0.0
     )
     sim = Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=surface, dt=0.01
+        model=jps.CollisionFreeSpeedModel(), geometry=surface.build(), dt=0.01
     )
 
     # underlying C++ simulation object exposed as _obj

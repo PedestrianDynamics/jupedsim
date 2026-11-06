@@ -10,27 +10,29 @@ import shapely
 
 @pytest.fixture
 def square_room_5x5():
-    surface = jps.WalkableSurface()
+    surface = jps.GeometryBuilder()
     room = surface.add_region(
-        boundary=[(-2.5, -2.5), (2.5, -2.5), (2.5, 2.5), (-2.5, 2.5)]
+        boundary=[(-2.5, -2.5), (2.5, -2.5), (2.5, 2.5), (-2.5, 2.5)],
+        height=0.0,
     )
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=surface
+        model=jps.CollisionFreeSpeedModel(), geometry=surface.build()
     )
     return simulation, room
 
 
 @pytest.fixture
 def square_room_5x5_with_obstacle():
-    surface = jps.WalkableSurface()
+    surface = jps.GeometryBuilder()
     room = surface.add_region(
         polygon=shapely.Polygon(
             [(-2.5, -2.5), (2.5, -2.5), (2.5, 2.5), (-2.5, 2.5)],
             [[(-0.5, -0.5), (-0.5, 0.5), (0.5, 0.5), (0.5, -0.5)]],
-        )
+        ),
+        height=0.0,
     )
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=surface
+        model=jps.CollisionFreeSpeedModel(), geometry=surface.build()
     )
     return simulation, room
 
@@ -74,10 +76,10 @@ def test_can_use_stage_proxy():
         shapely.Polygon([(-2.5, 2.5), (-2.5, -10), (2.5, -10), (2.5, 2.5)]),
     )
 
-    surface = jps.WalkableSurface()
-    room = surface.add_region(polygon=polygon)
+    surface = jps.GeometryBuilder()
+    room = surface.add_region(polygon=polygon, height=0.0)
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=surface
+        model=jps.CollisionFreeSpeedModel(), geometry=surface.build()
     )
 
     exit_id = simulation.add_exit_stage(
@@ -213,10 +215,12 @@ def test_can_add_exit_partly_outside_geometry(square_room_5x5, polygon):
 
 def test_an_agent_standing_at_the_edge_of_an_exit_leaves():
     # The exit's edge lies off the routing grid.
-    surface = jps.WalkableSurface()
-    room = surface.add_region(boundary=[(0, 0), (10, 0), (10, 10), (0, 10)])
+    surface = jps.GeometryBuilder()
+    room = surface.add_region(
+        boundary=[(0, 0), (10, 0), (10, 10), (0, 10)], height=0.0
+    )
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=surface
+        model=jps.CollisionFreeSpeedModel(), geometry=surface.build()
     )
     exit_id = simulation.add_exit_stage(
         [([(8.05, 4), (9.5, 4), (9.5, 6), (8.05, 6)], room)]
@@ -261,11 +265,14 @@ def test_get_stage_returns_the_native_stage_types(square_room_5x5):
 
 
 def test_a_stage_keeps_its_simulation_alive():
-    surface = jps.WalkableSurface()
+    surface = jps.GeometryBuilder()
     room = surface.add_region(
-        boundary=[(-2.5, -2.5), (2.5, -2.5), (2.5, 2.5), (-2.5, 2.5)]
+        boundary=[(-2.5, -2.5), (2.5, -2.5), (2.5, 2.5), (-2.5, 2.5)],
+        height=0.0,
     )
-    sim = jps.Simulation(model=jps.CollisionFreeSpeedModel(), geometry=surface)
+    sim = jps.Simulation(
+        model=jps.CollisionFreeSpeedModel(), geometry=surface.build()
+    )
     stage = sim.get_stage(
         sim.add_waypoint_stage(
             [(jps.circle_to_polygon(center=(0, 0), radius=1), room)]
@@ -320,13 +327,14 @@ def test_travel_times_to_an_exit(square_room_5x5):
 
 
 def test_travel_times_follow_the_floorfield_options():
-    surface = jps.WalkableSurface()
+    surface = jps.GeometryBuilder()
     room = surface.add_region(
-        boundary=[(-2.5, -2.5), (2.5, -2.5), (2.5, 2.5), (-2.5, 2.5)]
+        boundary=[(-2.5, -2.5), (2.5, -2.5), (2.5, 2.5), (-2.5, 2.5)],
+        height=0.0,
     )
     sim = jps.Simulation(
         model=jps.CollisionFreeSpeedModel(),
-        geometry=surface,
+        geometry=surface.build(),
         floorfield_options=jps.FloorfieldOptions(cell_size=0.1),
     )
     exit_id = sim.add_exit_stage(

@@ -101,10 +101,13 @@ def _make_state(state_cls, orientation=None, state_kwargs=None):
 
 def _setup_bidirectional(model, writer, dt, length=50.0, width=4.0):
     area = shapely.Polygon([(0, 0), (length, 0), (length, width), (0, width)])
-    surface = jps.WalkableSurface()
-    region = surface.add_region(polygon=area)
+    geo_builder = jps.GeometryBuilder()
+    region = geo_builder.add_region(polygon=area, height=0.0)
     sim = jps.Simulation(
-        model=model, geometry=surface, dt=dt, trajectory_writer=writer
+        model=model,
+        geometry=geo_builder.build(),
+        dt=dt,
+        trajectory_writer=writer,
     )
     exit_left = shapely.Polygon([(0, 0), (1, 0), (1, width), (0, width)])
     exit_right = shapely.Polygon(
@@ -176,10 +179,13 @@ def _load_wkt(name):
 
 def _setup_bottleneck(model, writer, dt):
     geometry = _load_wkt("bottleneck.wkt")
-    surface = jps.WalkableSurface()
-    region = surface.add_region(polygon=geometry)
+    geo_builder = jps.GeometryBuilder()
+    region = geo_builder.add_region(polygon=geometry, height=0.0)
     sim = jps.Simulation(
-        model=model, geometry=surface, dt=dt, trajectory_writer=writer
+        model=model,
+        geometry=geo_builder.build(),
+        dt=dt,
+        trajectory_writer=writer,
     )
     exit_area = geometry.intersection(shapely.box(13, -5, 15, 5))
     eid = sim.add_exit_stage([(exit_area, region)])
@@ -219,10 +225,13 @@ def _add_bottleneck(
 
 def _setup_crossing(model, writer, dt):
     geometry = _load_wkt("crossing.wkt")
-    surface = jps.WalkableSurface()
-    region = surface.add_region(polygon=geometry)
+    geo_builder = jps.GeometryBuilder()
+    region = geo_builder.add_region(polygon=geometry, height=0.0)
     sim = jps.Simulation(
-        model=model, geometry=surface, dt=dt, trajectory_writer=writer
+        model=model,
+        geometry=geo_builder.build(),
+        dt=dt,
+        trajectory_writer=writer,
     )
     exits = {
         "north": shapely.Polygon(

@@ -8,12 +8,12 @@ import pytest
 
 @pytest.fixture
 def square_room_100x100_cfsm():
-    surface = jps.WalkableSurface()
+    surface = jps.GeometryBuilder()
     room = surface.add_region(
-        boundary=[(-50, -50), (50, -50), (50, 50), (-50, 50)]
+        boundary=[(-50, -50), (50, -50), (50, 50), (-50, 50)], height=0.0
     )
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=surface
+        model=jps.CollisionFreeSpeedModel(), geometry=surface.build()
     )
 
     exit_id = simulation.add_exit_stage(
@@ -29,12 +29,12 @@ def square_room_100x100_cfsm():
 
 @pytest.fixture
 def square_room_100x100_gcfm():
-    surface = jps.WalkableSurface()
+    surface = jps.GeometryBuilder()
     room = surface.add_region(
-        boundary=[(-50, -50), (50, -50), (50, 50), (-50, 50)]
+        boundary=[(-50, -50), (50, -50), (50, 50), (-50, 50)], height=0.0
     )
     simulation = jps.Simulation(
-        model=jps.GeneralizedCentrifugalForceModel(), geometry=surface
+        model=jps.GeneralizedCentrifugalForceModel(), geometry=surface.build()
     )
 
     exit_id = simulation.add_exit_stage(
@@ -726,12 +726,13 @@ def test_generalized_centrifugal_force_model_can_add_agent_just_outside_the_marg
 
 @pytest.fixture
 def square_room_100x100_avm():
-    surface = jps.WalkableSurface()
+    surface = jps.GeometryBuilder()
     room = surface.add_region(
-        boundary=[(-50, -50), (50, -50), (50, 50), (-50, 50)]
+        boundary=[(-50, -50), (50, -50), (50, 50), (-50, 50)], height=0.0
     )
     simulation = jps.Simulation(
-        model=jps.AnticipationVelocityModel(rng_seed=1234), geometry=surface
+        model=jps.AnticipationVelocityModel(rng_seed=1234),
+        geometry=surface.build(),
     )
 
     exit_id = simulation.add_exit_stage(
@@ -1229,11 +1230,13 @@ class _MinimalCustomModel(jps.CustomOperationalModel):
 
 
 def test_add_agent_rejects_state_of_different_model_on_custom_simulation():
-    surface = jps.WalkableSurface()
+    surface = jps.GeometryBuilder()
     room = surface.add_region(
-        boundary=[(-50, -50), (50, -50), (50, 50), (-50, 50)]
+        boundary=[(-50, -50), (50, -50), (50, 50), (-50, 50)], height=0.0
     )
-    simulation = jps.Simulation(model=_MinimalCustomModel(), geometry=surface)
+    simulation = jps.Simulation(
+        model=_MinimalCustomModel(), geometry=surface.build()
+    )
     exit_id = simulation.add_exit_stage(
         [([(49, -3), (49, 3), (50, 3), (50, -3)], room)]
     )
@@ -1253,11 +1256,13 @@ def test_add_agent_rejects_state_of_different_model_on_custom_simulation():
 
 
 def test_add_agent_rejects_custom_state_on_builtin_model_simulation():
-    surface = jps.WalkableSurface()
+    surface = jps.GeometryBuilder()
     room = surface.add_region(
-        boundary=[(-50, -50), (50, -50), (50, 50), (-50, 50)]
+        boundary=[(-50, -50), (50, -50), (50, 50), (-50, 50)], height=0.0
     )
-    simulation = jps.Simulation(model=jps.SocialForceModel(), geometry=surface)
+    simulation = jps.Simulation(
+        model=jps.SocialForceModel(), geometry=surface.build()
+    )
     exit_id = simulation.add_exit_stage(
         [([(49, -3), (49, 3), (50, 3), (50, -3)], room)]
     )
@@ -1300,11 +1305,11 @@ class _ConstantMovementModel(jps.CustomOperationalModel):
 
 
 def _custom_model_simulation_with_agent(model):
-    surface = jps.WalkableSurface()
+    surface = jps.GeometryBuilder()
     room = surface.add_region(
-        boundary=[(-50, -50), (50, -50), (50, 50), (-50, 50)]
+        boundary=[(-50, -50), (50, -50), (50, 50), (-50, 50)], height=0.0
     )
-    simulation = jps.Simulation(model=model, geometry=surface)
+    simulation = jps.Simulation(model=model, geometry=surface.build())
     exit_id = simulation.add_exit_stage(
         [([(49, -3), (49, 3), (50, 3), (50, -3)], room)]
     )
@@ -1320,11 +1325,13 @@ def _custom_model_simulation_with_agent(model):
 
 
 def test_add_agent_spawns_the_agent_where_add_agent_says():
-    surface = jps.WalkableSurface()
+    surface = jps.GeometryBuilder()
     room = surface.add_region(
-        boundary=[(-50, -50), (50, -50), (50, 50), (-50, 50)]
+        boundary=[(-50, -50), (50, -50), (50, 50), (-50, 50)], height=0.0
     )
-    simulation = jps.Simulation(model=_MinimalCustomModel(), geometry=surface)
+    simulation = jps.Simulation(
+        model=_MinimalCustomModel(), geometry=surface.build()
+    )
     exit_id = simulation.add_exit_stage(
         [([(49, -3), (49, 3), (50, 3), (50, -3)], room)]
     )
@@ -1372,12 +1379,12 @@ def test_custom_model_update_returning_the_current_state_is_rejected():
 
 
 def test_custom_model_movement_is_applied_as_given():
-    surface = jps.WalkableSurface()
+    surface = jps.GeometryBuilder()
     room = surface.add_region(
-        boundary=[(-50, -50), (50, -50), (50, 50), (-50, 50)]
+        boundary=[(-50, -50), (50, -50), (50, 50), (-50, 50)], height=0.0
     )
     simulation = jps.Simulation(
-        model=_ConstantMovementModel((0.25, -0.5)), geometry=surface
+        model=_ConstantMovementModel((0.25, -0.5)), geometry=surface.build()
     )
     exit_id = simulation.add_exit_stage(
         [([(49, -3), (49, 3), (50, 3), (50, -3)], room)]
@@ -1422,11 +1429,11 @@ class _AddAgentDuringIterateModel(jps.CustomOperationalModel):
 
 def test_add_agent_during_iterate_raises_simulation_error():
     model = _AddAgentDuringIterateModel()
-    surface = jps.WalkableSurface()
+    surface = jps.GeometryBuilder()
     room = surface.add_region(
-        boundary=[(-50, -50), (50, -50), (50, 50), (-50, 50)]
+        boundary=[(-50, -50), (50, -50), (50, 50), (-50, 50)], height=0.0
     )
-    simulation = jps.Simulation(model=model, geometry=surface)
+    simulation = jps.Simulation(model=model, geometry=surface.build())
     exit_id = simulation.add_exit_stage(
         [([(49, -3), (49, 3), (50, 3), (50, -3)], room)]
     )

@@ -11,9 +11,10 @@ from shapely import Polygon
 def main():
     width = 2
     length = 10
-    surface = jps.WalkableSurface()
-    region = surface.add_region(
-        polygon=Polygon([(0, 0), (length, 0), (length, width), (0, width)])
+    geo_builder = jps.GeometryBuilder()
+    region = geo_builder.add_region(
+        polygon=Polygon([(0, 0), (length, 0), (length, width), (0, width)]),
+        height=0.0,
     )
     exit_polygon = Polygon(
         [(length - 0.5, 0), (length, 0), (length, width), (length - 0.5, width)]
@@ -21,7 +22,7 @@ def main():
     trajectory_file = "headon_AVM.h5"
     simulation = jps.Simulation(
         model=jps.AnticipationVelocityModel(),
-        geometry=surface,
+        geometry=geo_builder.build(),
         trajectory_writer=jps.Hdf5TrajectoryWriter(
             output_file=pathlib.Path(trajectory_file)
         ),

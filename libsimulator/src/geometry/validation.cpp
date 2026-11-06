@@ -5,15 +5,19 @@
 #include "geometry/region_split.hpp"
 #include "simulation_error.hpp"
 
+#include <CGAL/Bbox_2.h>
+#include <CGAL/Box_intersection_d/Box_with_info_d.h>
 #include <CGAL/Polygon_mesh_processing/compute_normal.h>
 #include <CGAL/Polygon_mesh_processing/connected_components.h>
 #include <CGAL/Polygon_mesh_processing/orientation.h>
 #include <CGAL/Polygon_mesh_processing/self_intersections.h>
 #include <CGAL/Polygon_mesh_processing/triangulate_faces.h>
 #include <CGAL/boost/graph/helpers.h>
+#include <CGAL/box_intersection_d.h>
 #include <boost/property_map/property_map.hpp>
 
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <cstddef>
 #include <iterator>
@@ -22,7 +26,7 @@
 #include <utility>
 #include <vector>
 
-bool is_walkable_normal(const Vector3D& n)
+bool is_walkable_normal(const epick::Vector3D& n)
 {
     constexpr double max_incline_deg = 50.0;
     constexpr double max_incline_rad = max_incline_deg * std::numbers::pi / 180.0;
@@ -33,10 +37,10 @@ bool is_walkable_normal(const Vector3D& n)
 
 namespace
 {
-std::optional<std::pair<SurfaceMesh::Face_index, SurfaceMesh::Face_index>>
-first_self_intersection(const SurfaceMesh& mesh)
+std::optional<std::pair<epick::Mesh::Face_index, epick::Mesh::Face_index>>
+first_self_intersection(const epick::Mesh& mesh)
 {
-    std::vector<std::pair<SurfaceMesh::Face_index, SurfaceMesh::Face_index>> intersecting{};
+    std::vector<std::pair<epick::Mesh::Face_index, epick::Mesh::Face_index>> intersecting{};
     CGAL::Polygon_mesh_processing::self_intersections(mesh, std::back_inserter(intersecting));
     if(intersecting.empty()) {
         return std::nullopt;
@@ -46,9 +50,9 @@ first_self_intersection(const SurfaceMesh& mesh)
 } // namespace
 
 bool is_face_in_mesh_planar(
-    const SurfaceMesh& mesh,
-    FaceDescriptor<SurfaceMesh> face,
-    std::vector<VertexDescriptor<SurfaceMesh>>& buffer)
+    const epick::Mesh& mesh,
+    FaceDescriptor<epick::Mesh> face,
+    std::vector<VertexDescriptor<epick::Mesh>>& buffer)
 {
     buffer.clear();
     for(auto half_edge : CGAL::halfedges_around_face(CGAL::halfedge(face, mesh), mesh)) {
@@ -72,9 +76,9 @@ bool is_face_in_mesh_planar(
     });
 }
 
-bool all_faces_in_mesh_planar(const SurfaceMesh& mesh)
+bool all_faces_in_mesh_planar(const epick::Mesh& mesh)
 {
-    std::vector<VertexDescriptor<SurfaceMesh>> buffer{};
+    std::vector<VertexDescriptor<epick::Mesh>> buffer{};
     buffer.reserve(3);
     return std::all_of(
         std::begin(CGAL::faces(mesh)), std::end(CGAL::faces(mesh)), [&buffer, &mesh](auto face) {
@@ -82,7 +86,7 @@ bool all_faces_in_mesh_planar(const SurfaceMesh& mesh)
         });
 }
 
-void normalise_and_validate_mesh(SurfaceMesh& mesh, const RegionMap* regions)
+void normalise_and_validate_mesh(epick::Mesh& mesh, const RegionMap* regions)
 {
     namespace pmp = CGAL::Polygon_mesh_processing;
     if(!CGAL::is_triangle_mesh(mesh)) {
@@ -102,6 +106,12 @@ void normalise_and_validate_mesh(SurfaceMesh& mesh, const RegionMap* regions)
         pmp::reverse_face_orientations(mesh);
     }
 
+    validate_mesh(mesh, regions);
+}
+
+void validate_mesh(const epick::Mesh& mesh, const RegionMap* regions)
+{
+    namespace pmp = CGAL::Polygon_mesh_processing;
     for(auto&& face : CGAL::faces(mesh)) {
         const auto n = pmp::compute_face_normal(face, mesh);
         if(!is_walkable_normal(n)) {
@@ -137,4 +147,61 @@ void normalise_and_validate_mesh(SurfaceMesh& mesh, const RegionMap* regions)
             }
         }
     }
+}
+
+std::optional<epick::Point2D>
+find_edge_clearance_violation(const epick::PolyWithHoles& polygon, double dist)
+{
+    // Each vertex gets a box around its point, each edge its axis-aligned bounding box (AABB)
+    // grown by dist. CGAL's box_intersection_d finds the overlapping pairs: the vertices that may
+    // be too close to an edge. For these, the exact distance decides.
+    std::vector<epick::Point2D> points{};
+    std::vector<std::array<size_t, 2>> edges{};
+    const auto add_ring = [&points, &edges](const epick::Poly& ring) {
+        const size_t first = points.size();
+        for(size_t index = 0; index < ring.size(); ++index) {
+            points.push_back(ring.vertex(index));
+            edges.push_back({first + index, first + (index + 1) % ring.size()});
+        }
+    };
+    add_ring(polygon.outer_boundary());
+    for(const auto& hole : polygon.holes()) {
+        add_ring(hole);
+    }
+
+    using Box = CGAL::Box_intersection_d::Box_with_info_d<double, 2, size_t>;
+    std::vector<Box> vertex_boxes{};
+    vertex_boxes.reserve(points.size());
+    for(size_t index = 0; index < points.size(); ++index) {
+        vertex_boxes.emplace_back(points[index].bbox(), index);
+    }
+    std::vector<Box> edge_boxes{};
+    edge_boxes.reserve(edges.size());
+    for(size_t index = 0; index < edges.size(); ++index) {
+        const CGAL::Bbox_2 box = points[edges[index][0]].bbox() + points[edges[index][1]].bbox();
+        edge_boxes.emplace_back(
+            CGAL::Bbox_2(
+                box.xmin() - dist, box.ymin() - dist, box.xmax() + dist, box.ymax() + dist),
+            index);
+    }
+
+    const double dist_sq = dist * dist;
+    std::optional<epick::Point2D> violation{};
+    CGAL::box_intersection_d(
+        vertex_boxes.begin(),
+        vertex_boxes.end(),
+        edge_boxes.begin(),
+        edge_boxes.end(),
+        [&](const Box& vertex_box, const Box& edge_box) {
+            const size_t vertex = vertex_box.info();
+            const auto [source, target] = edges[edge_box.info()];
+            if(violation || vertex == source || vertex == target) {
+                return;
+            }
+            const epick::Segment2D edge{points[source], points[target]};
+            if(CGAL::squared_distance(points[vertex], edge) < dist_sq) {
+                violation = points[vertex];
+            }
+        });
+    return violation;
 }

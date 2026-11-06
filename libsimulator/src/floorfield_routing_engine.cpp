@@ -33,7 +33,7 @@ auto checked(Call&& call)
     }
 }
 
-ff::Ring to_ring(const Poly& poly)
+ff::Ring to_ring(const epick::Poly& poly)
 {
     ff::Ring ring{};
     for(const auto& p : poly.container()) {
@@ -69,7 +69,7 @@ ff::RegionGraph to_floorfield(const Geometry& geometry)
     const auto& g = *graph;
     ff::RegionGraph out{};
     for(const auto r : boost::make_iterator_range(boost::vertices(g))) {
-        const PolyWithHoles& poly = g[r];
+        const epick::PolyWithHoles& poly = g[r];
         ff::Region region{};
         region.outer = to_ring(poly.outer_boundary());
         for(const auto& hole : poly.holes()) {

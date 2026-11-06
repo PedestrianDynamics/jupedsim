@@ -68,14 +68,14 @@ class CsvTrajectoryWriter(TrajectoryWriter):
 def main():
     p1 = Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
     p2 = Polygon([(10, 4), (20, 4), (20, 6), (10, 6)])
-    surface = jps.WalkableSurface()
-    region = surface.add_region(polygon=p1.union(p2))
+    geo_builder = jps.GeometryBuilder()
+    region = geo_builder.add_region(polygon=p1.union(p2), height=0.0)
 
     output_file = pathlib.Path("example_csv_out.csv")
 
     simulation = jps.Simulation(
         model=jps.CollisionFreeSpeedModel(),
-        geometry=surface,
+        geometry=geo_builder.build(),
         trajectory_writer=CsvTrajectoryWriter(
             output_file=output_file,
             every_nth_frame=5,

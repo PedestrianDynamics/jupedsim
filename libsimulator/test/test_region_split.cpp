@@ -21,9 +21,9 @@ namespace
 /// Flat floor (y in [0,10], z=0) joined at the seam y=10 to a ramp that folds
 /// *back* over the floor (y in [5,10], z rising to 5). Its (x,y)-footprint
 /// overlaps the floor -> not single-valued -> floor and ramp must split.
-SurfaceMesh ramp_back_over_floor()
+epick::Mesh ramp_back_over_floor()
 {
-    SurfaceMesh mesh{};
+    epick::Mesh mesh{};
     const auto v0 = mesh.add_vertex({0, 0, 0});
     const auto v1 = mesh.add_vertex({10, 0, 0});
     const auto v2 = mesh.add_vertex({10, 10, 0}); // seam
@@ -43,9 +43,9 @@ SurfaceMesh ramp_back_over_floor()
 /// floor + ramp.
 /// lower+ramp is single-valued and MUST merge; only the overlapping upper floor
 /// forces a second region. Expected: 2 regions, {lower, ramp} | {upper}.
-SurfaceMesh stacked_floors_via_ramp()
+epick::Mesh stacked_floors_via_ramp()
 {
-    SurfaceMesh mesh{};
+    epick::Mesh mesh{};
     const auto v0 = mesh.add_vertex({0, 0, 0});
     const auto v1 = mesh.add_vertex({10, 0, 0});
     const auto v2 = mesh.add_vertex({10, 5, 0}); // seam lower<->ramp
@@ -67,9 +67,9 @@ SurfaceMesh stacked_floors_via_ramp()
 /// through the hole footprint: the flight's remaining border edges coincide in (x, y) with
 /// the ring's other hole walls WITHOUT sharing those mesh edges -- the essence of
 /// examples/geometry/multi_level_u_stair.obj.
-SurfaceMesh ring_with_flight_in_the_stairwell()
+epick::Mesh ring_with_flight_in_the_stairwell()
 {
-    SurfaceMesh mesh{};
+    epick::Mesh mesh{};
     const auto o0 = mesh.add_vertex({0, 0, 0});
     const auto o1 = mesh.add_vertex({12, 0, 0});
     const auto o2 = mesh.add_vertex({12, 12, 0});
@@ -96,9 +96,9 @@ SurfaceMesh ring_with_flight_in_the_stairwell()
 /// A floor, a ramp up, an upper floor -- all welded -- and a wing whose single vertex
 /// (8, 2, 1) projects onto the interior of the floor's border edge y=2: exactly one
 /// isolated (x, y) coincidence between distinct surface points, shared with nothing.
-SurfaceMesh wing_tip_over_a_floor_edge()
+epick::Mesh wing_tip_over_a_floor_edge()
 {
-    SurfaceMesh mesh{};
+    epick::Mesh mesh{};
     const auto a0 = mesh.add_vertex({0, 0, 0});
     const auto a1 = mesh.add_vertex({10, 0, 0});
     const auto a2 = mesh.add_vertex({10, 2, 0});
@@ -124,7 +124,7 @@ SurfaceMesh wing_tip_over_a_floor_edge()
 
 using EK = CGAL::Exact_predicates_exact_constructions_kernel;
 
-EK::Triangle_2 project_exact(const SurfaceMesh& mesh, SurfaceMesh::Face_index f)
+EK::Triangle_2 project_exact(const epick::Mesh& mesh, epick::Mesh::Face_index f)
 {
     std::array<EK::Point_2, 3> p{};
     int i = 0;
@@ -135,7 +135,7 @@ EK::Triangle_2 project_exact(const SurfaceMesh& mesh, SurfaceMesh::Face_index f)
     return {p[0], p[1], p[2]};
 }
 
-bool faces_share_edge(const SurfaceMesh& mesh, SurfaceMesh::Face_index a, SurfaceMesh::Face_index b)
+bool faces_share_edge(const epick::Mesh& mesh, epick::Mesh::Face_index a, epick::Mesh::Face_index b)
 {
     for(const auto h : CGAL::halfedges_around_face(mesh.halfedge(a), mesh)) {
         if(mesh.face(mesh.opposite(h)) == b) {
@@ -146,9 +146,9 @@ bool faces_share_edge(const SurfaceMesh& mesh, SurfaceMesh::Face_index a, Surfac
 }
 
 bool faces_share_vertex(
-    const SurfaceMesh& mesh,
-    SurfaceMesh::Face_index a,
-    SurfaceMesh::Face_index b)
+    const epick::Mesh& mesh,
+    epick::Mesh::Face_index a,
+    epick::Mesh::Face_index b)
 {
     for(const auto v_a : mesh.vertices_around_face(mesh.halfedge(a))) {
         for(const auto v_b : mesh.vertices_around_face(mesh.halfedge(b))) {
@@ -163,9 +163,9 @@ bool faces_share_vertex(
 /// Independent oracle for the invariant split_into_regions() promises: within one region, a
 /// face pair's projected intersection may not exceed the dimension of the mesh element the
 /// two faces share -- a segment only across the shared edge, a point only at a shared vertex.
-void expect_valid_split(const SurfaceMesh& mesh, const RegionSplit& split)
+void expect_valid_split(const epick::Mesh& mesh, const RegionSplit& split)
 {
-    std::vector<SurfaceMesh::Face_index> all{};
+    std::vector<epick::Mesh::Face_index> all{};
     all.reserve(mesh.number_of_faces());
     for(const auto f : faces(mesh)) {
         all.push_back(f);
@@ -248,8 +248,8 @@ TEST(RegionSplit, EpsilonPerturbedFloorStaysOneRegion)
 {
     // A "flat" floor as a remesher leaves it: vertices jittered a few 1e-5 out of plane.
     // The split must not fragment it -- one region, exactly like a mathematically flat one.
-    SurfaceMesh mesh{};
-    std::array<std::array<SurfaceMesh::Vertex_index, 11>, 11> v{};
+    epick::Mesh mesh{};
+    std::array<std::array<epick::Mesh::Vertex_index, 11>, 11> v{};
     for(int j = 0; j < 11; ++j) {
         for(int i = 0; i < 11; ++i) {
             const double z = static_cast<double>((7 * i + 13 * j) % 5) * 2e-5;
@@ -272,7 +272,7 @@ TEST(RegionSplit, MicroFoldWithinToleranceStillSplits)
     // ramp_back_over_floor squeezed into a 5e-5 slab: the fold-back sheet sits within any
     // reasonable planarity tolerance of the floor, yet overlaps it in (x, y). The split
     // must still separate the sheets -- tolerance may cost performance, never correctness.
-    SurfaceMesh mesh{};
+    epick::Mesh mesh{};
     const auto v0 = mesh.add_vertex({0, 0, 0});
     const auto v1 = mesh.add_vertex({10, 0, 0});
     const auto v2 = mesh.add_vertex({10, 10, 0}); // seam
@@ -294,7 +294,7 @@ TEST(RegionSplit, MicroFoldWithinToleranceStillSplits)
 
 TEST(RegionSplit, EveryFixtureSplitsValidly)
 {
-    const std::vector<std::pair<std::string, SurfaceMesh>> meshes{
+    const std::vector<std::pair<std::string, epick::Mesh>> meshes{
         {"flat_square", fixtures::flat_square()},
         {"floor_with_ramp", fixtures::floor_with_ramp()},
         {"ramp_back_over_floor", ramp_back_over_floor()},

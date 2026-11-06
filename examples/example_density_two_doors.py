@@ -201,8 +201,10 @@ def main():
     )
     args = parser.parse_args()
 
-    surface = jps.WalkableSurface()
-    region = surface.add_region(polygon=walkable_area(args.door_width))
+    geo_builder = jps.GeometryBuilder()
+    region = geo_builder.add_region(
+        polygon=walkable_area(args.door_width), height=0.0
+    )
     writer = jps.Hdf5TrajectoryWriter(
         output_file=args.output,
         every_nth_frame=args.every_nth_frame,
@@ -212,7 +214,7 @@ def main():
     ff_options = jps.FloorfieldOptions(wall_influence_radius=1.0)
     simulation = jps.Simulation(
         model=jps.AnticipationVelocityModel(),
-        geometry=surface,
+        geometry=geo_builder.build(),
         trajectory_writer=writer,
         floorfield_options=ff_options,
     )

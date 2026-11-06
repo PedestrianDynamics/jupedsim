@@ -16,7 +16,7 @@
 #include <optional>
 #include <vector>
 
-class WalkableSurface;
+class GeometryBuilder;
 
 /// Default tolerance of get_location_near_z: how far the surface may lie from the given z.
 inline constexpr double near_z_tolerance = 0.1;
@@ -31,8 +31,8 @@ class Geometry
 public:
     /// Result of projecting a query point onto the surface along -z.
     struct FaceLocation {
-        SurfaceMesh::Face_index face;
-        K::Point_3 point;
+        epick::Mesh::Face_index face;
+        epick::Point3D point;
     };
 
     /// Seam as edge:
@@ -46,14 +46,14 @@ public:
 
     // Note: There is always at most 1 connection between 2 regions as regions are connected
     //       via Connectors which add a region of their own.
-    using RegionGraph2D =
-        boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS, PolyWithHoles, SeamEdge>;
+    using RegionGraph2D = boost::
+        adjacency_list<boost::vecS, boost::vecS, boost::directedS, epick::PolyWithHoles, SeamEdge>;
 
     /// 3D mesh. Perform auto-split into regions.
-    explicit Geometry(SurfaceMesh mesh);
-    /// Special constructor for WalkableSurface: Ensures consistency of parameters.
+    explicit Geometry(epick::Mesh mesh);
+    /// Special constructor for GeometryBuilder: Ensures consistency of parameters.
     explicit Geometry(
-        SurfaceMesh&& mesh,
+        epick::Mesh&& mesh,
         RegionSplit&& region_split,
         std::unique_ptr<RegionGraph2D> region_graph_2d);
 
@@ -66,29 +66,29 @@ public:
     Geometry(Geometry&&) = delete;
     Geometry& operator=(Geometry&&) = delete;
 
-    const SurfaceMesh& mesh() const { return _mesh; }
-    const AABBTree& aabb_tree() const { return *_aabb_tree; }
+    const epick::Mesh& mesh() const { return _mesh; }
+    const epick::AABBTree& aabb_tree() const { return *_aabb_tree; }
 
     /// Returns the 2D polygon of the specified region. Throws in case of error.
-    PolyWithHoles polygon(size_t region_id) const;
+    epick::PolyWithHoles polygon(size_t region_id) const;
 
     /// The exact 2D footprint of every region and the seams between them, as authored.
-    /// `nullptr` unless the geometry was built by `WalkableSurface`.
+    /// `nullptr` unless the geometry was built by `GeometryBuilder`.
     const RegionGraph2D* region_graph_2d() const { return _region_graph_2d.get(); }
 
     /// Face and on-surface point hit by the -z ray through @p p, or
     /// `null_face()` if the ray misses the walkable surface.
-    FaceLocation face_below(const Point3D& p) const;
+    FaceLocation face_below(const epick::Point3D& p) const;
 
     /// Locate @p xy within region @p region_id: the face of that region whose
     /// (x,y)-projection contains @p xy, and the on-surface point (its z on that
     /// face's plane). `null_face()` if @p xy is outside the region's footprint.
-    FaceLocation locate_in_region(std::size_t region_id, const Point2D& xy) const;
+    FaceLocation locate_in_region(std::size_t region_id, const epick::Point2D& xy) const;
 
     /// Locate @p xy on the mesh face whose surface z is nearest to @p z: among all
     /// faces stacked over @p xy pick the one whose on-surface z deviates least
     /// from the provided z. `null_face()` if no mesh face comes within @p tolerance.
-    FaceLocation locate_near_z(const Point2D& xy, double z, double tolerance) const;
+    FaceLocation locate_near_z(const epick::Point2D& xy, double z, double tolerance) const;
 
     /// The place at (@p x, @p y) in region @p region_id.
     /// Throws if @p region_id does not exist or (@p x, @p y) is not in it.
@@ -100,7 +100,7 @@ public:
     get_location_near_z(double x, double y, double z, double tol = near_z_tolerance) const;
 
     /// True iff @p p projects (along -z) onto the walkable surface.
-    bool is_valid_location(const Point3D& p) const;
+    bool is_valid_location(const epick::Point3D& p) const;
 
     // -- `EnvironmentQuery` API -----------------------------------------------
 
@@ -128,7 +128,7 @@ public:
     std::size_t region_count() const { return _region_split.count; }
 
     /// Region id (0-based) of a single face, as assigned by the region overlay.
-    std::size_t region_of(SurfaceMesh::Face_index face) const { return _region[face]; }
+    std::size_t region_of(epick::Mesh::Face_index face) const { return _region[face]; }
 
     /// One 0-based region id per triangle, in mesh face order.
     std::vector<std::size_t> region_id_per_face() const;
@@ -139,7 +139,7 @@ public:
 
     /// The part of @p p inside the footprint of region @p region_id, as one or more pieces.
     /// Throws if @p p does not intersect that region.
-    std::vector<AreaPiece> clip_to_region(const Poly& p, size_t region_id) const;
+    std::vector<AreaPiece> clip_to_region(const epick::Poly& p, size_t region_id) const;
     // -- Viewer API -----------------------------------------------------------
 
     /// Vertex coordinates (x, y, z), indexable 0..n-1.
@@ -154,7 +154,7 @@ private:
 
     /// Every face the vertical line through @p xy crosses, with its on-surface point, ordered
     /// by region id, then by face index.
-    std::vector<FaceLocation> faces_at(const Point2D& xy) const;
+    std::vector<FaceLocation> faces_at(const epick::Point2D& xy) const;
 
     Location location_at(Point xy, const FaceLocation& where) const;
 
@@ -162,8 +162,8 @@ private:
     /// nothing when a wall stops it or it runs off the surface.
     std::optional<std::size_t> region_reached(const Location& who, Vector direction) const;
 
-    SurfaceMesh _mesh{};
-    std::unique_ptr<AABBTree> _aabb_tree{};
+    epick::Mesh _mesh{};
+    std::unique_ptr<epick::AABBTree> _aabb_tree{};
     std::unique_ptr<BoundaryIndex> _boundary_index{};
     std::unique_ptr<RegionGraph> _region_graph{};
     std::unique_ptr<RegionGraph2D> _region_graph_2d{};

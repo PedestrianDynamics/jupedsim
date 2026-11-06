@@ -16,14 +16,14 @@ namespace
 /// A flat square split into four triangles by a centre vertex (1,1), so a
 /// straight move can pass exactly *through* that vertex from one triangle to a
 /// non-adjacent one -- the hits-vertex / start-on-vertex case.
-SurfaceMesh fan_square()
+epick::Mesh fan_square()
 {
-    SurfaceMesh mesh{};
-    const auto c00 = mesh.add_vertex(Point3D{0, 0, 0});
-    const auto c20 = mesh.add_vertex(Point3D{2, 0, 0});
-    const auto c22 = mesh.add_vertex(Point3D{2, 2, 0});
-    const auto c02 = mesh.add_vertex(Point3D{0, 2, 0});
-    const auto ctr = mesh.add_vertex(Point3D{1, 1, 0});
+    epick::Mesh mesh{};
+    const auto c00 = mesh.add_vertex(epick::Point3D{0, 0, 0});
+    const auto c20 = mesh.add_vertex(epick::Point3D{2, 0, 0});
+    const auto c22 = mesh.add_vertex(epick::Point3D{2, 2, 0});
+    const auto c02 = mesh.add_vertex(epick::Point3D{0, 2, 0});
+    const auto ctr = mesh.add_vertex(epick::Point3D{1, 1, 0});
     mesh.add_face(c00, c20, ctr); // bottom
     mesh.add_face(c20, c22, ctr); // right
     mesh.add_face(c22, c02, ctr); // top
@@ -33,13 +33,13 @@ SurfaceMesh fan_square()
 
 /// A connected flat strip of @p n unit quads along x-axis (2*n triangles sharing
 /// vertices), for straight moves that cross many faces.
-SurfaceMesh flat_strip(int n)
+epick::Mesh flat_strip(int n)
 {
-    SurfaceMesh mesh{};
-    std::vector<SurfaceMesh::Vertex_index> bottom{}, top{};
+    epick::Mesh mesh{};
+    std::vector<epick::Mesh::Vertex_index> bottom{}, top{};
     for(int i = 0; i <= n; ++i) {
-        bottom.push_back(mesh.add_vertex(Point3D{static_cast<double>(i), 0, 0}));
-        top.push_back(mesh.add_vertex(Point3D{static_cast<double>(i), 1, 0}));
+        bottom.push_back(mesh.add_vertex(epick::Point3D{static_cast<double>(i), 0, 0}));
+        top.push_back(mesh.add_vertex(epick::Point3D{static_cast<double>(i), 1, 0}));
     }
     for(int i = 0; i < n; ++i) {
         mesh.add_face(bottom[i], bottom[i + 1], top[i + 1]);
@@ -51,13 +51,13 @@ SurfaceMesh flat_strip(int n)
 /// A fan of @p n slivers sharing an apex at the origin; rim vertices sit at x=1,
 /// y=i*@p spacing. Moving close to the apex crosses all of triangles within a tiny
 /// band. "Stress test" for the face walk.
-SurfaceMesh sliver_fan(int n, double spacing)
+epick::Mesh sliver_fan(int n, double spacing)
 {
-    SurfaceMesh mesh{};
-    const auto apex = mesh.add_vertex(Point3D{0, 0, 0});
-    std::vector<SurfaceMesh::Vertex_index> rim{};
+    epick::Mesh mesh{};
+    const auto apex = mesh.add_vertex(epick::Point3D{0, 0, 0});
+    std::vector<epick::Mesh::Vertex_index> rim{};
     for(int i = 0; i <= n; ++i) {
-        rim.push_back(mesh.add_vertex(Point3D{1, i * spacing, 0}));
+        rim.push_back(mesh.add_vertex(epick::Point3D{1, i * spacing, 0}));
     }
     for(int i = 0; i < n; ++i) {
         mesh.add_face(apex, rim[i], rim[i + 1]);
@@ -68,15 +68,15 @@ SurfaceMesh sliver_fan(int n, double spacing)
 /// Two stacked rows of triangles sharing the horizontal interior edge chain at
 /// y=1 (vertices (i,1)). A straight move along y=1 runs exactly along that edge
 /// chain -- the collinear "walk along an edge" degenerate case.
-SurfaceMesh two_row_strip(int n)
+epick::Mesh two_row_strip(int n)
 {
-    SurfaceMesh mesh{};
-    std::vector<SurfaceMesh::Vertex_index> b{}, m{}, t{};
+    epick::Mesh mesh{};
+    std::vector<epick::Mesh::Vertex_index> b{}, m{}, t{};
     for(int i = 0; i <= n; ++i) {
         const auto x = static_cast<double>(i);
-        b.push_back(mesh.add_vertex(Point3D{x, 0, 0}));
-        m.push_back(mesh.add_vertex(Point3D{x, 1, 0}));
-        t.push_back(mesh.add_vertex(Point3D{x, 2, 0}));
+        b.push_back(mesh.add_vertex(epick::Point3D{x, 0, 0}));
+        m.push_back(mesh.add_vertex(epick::Point3D{x, 1, 0}));
+        t.push_back(mesh.add_vertex(epick::Point3D{x, 2, 0}));
     }
     for(int i = 0; i < n; ++i) {
         mesh.add_face(b[i], b[i + 1], m[i]); // row 0 (y in [0,1])

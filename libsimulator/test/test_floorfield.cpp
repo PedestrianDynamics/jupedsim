@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
-// Multi-region floor fields (libfloorfield) over geometries built by WalkableSurface, driven
+// Multi-region floor fields (libfloorfield) over geometries built by GeometryBuilder, driven
 // through the cxx bridge the way a routing engine would: translate the region graph, build the
 // field, register destinations, follow directions and query travel times.
 #include "cfg_cgal.hpp"
 #include "floorfield_cxx/lib.h"
 #include "geometry/geometry.hpp"
+#include "geometry/geometry_builder.hpp"
 #include "geometry/location.hpp"
-#include "geometry/walkable_surface.hpp"
 #include "geometry_fixtures.hpp"
 #include "kernel.hpp"
 #include "rust/cxx.h"
@@ -28,7 +28,7 @@ namespace ff = jupedsim::floorfield;
 
 namespace
 {
-ff::Ring to_ring(const Poly& poly)
+ff::Ring to_ring(const epick::Poly& poly)
 {
     ff::Ring ring{};
     for(const auto& p : poly.container()) {
@@ -44,7 +44,7 @@ ff::RegionGraph to_floorfield(const Geometry::RegionGraph2D& g)
 {
     ff::RegionGraph out{};
     for(const auto r : boost::make_iterator_range(boost::vertices(g))) {
-        const PolyWithHoles& poly = g[r];
+        const epick::PolyWithHoles& poly = g[r];
         ff::Region region{};
         region.outer = to_ring(poly.outer_boundary());
         for(const auto& hole : poly.holes()) {
@@ -62,7 +62,7 @@ ff::RegionGraph to_floorfield(const Geometry::RegionGraph2D& g)
     return out;
 }
 
-/// A floor field over the region graph of @p geo, which must be built by WalkableSurface.
+/// A floor field over the region graph of @p geo, which must be built by GeometryBuilder.
 rust::Box<ff::MultiRegionFloorfield> field_over(const Geometry& geo, double cell_size)
 {
     return ff::new_multi_region_floorfield(to_floorfield(*geo.region_graph_2d()), cell_size, 0.5);
@@ -173,13 +173,13 @@ TEST(Floorfield, DirectionIsAUnitVectorTowardsTheTarget)
 /// behind it is unreachable and building the field throws.
 TEST(Floorfield, RoomBehindADoorwayNarrowerThanACellThrows)
 {
-    WalkableSurface surface{};
+    GeometryBuilder surface{};
     const auto a =
         surface.add_region({{{0, 0}, {10, 0}, {10, 5}, {10, 5.04}, {10, 10}, {0, 10}}, {}}, 0.0);
     const auto b =
         surface.add_region({{{11, 0}, {21, 0}, {21, 10}, {11, 10}, {11, 5.04}, {11, 5}}, {}}, 0.0);
     surface.connect_regions(a, {{10, 5}, {10, 5.04}}, b, {{11, 5}, {11, 5.04}});
-    const auto geo = surface.create_geometry();
+    const auto geo = surface.build();
     EXPECT_THROW(field_over(*geo, 0.1), rust::Error);
 }
 
@@ -200,8 +200,8 @@ TEST(Floorfield, ExitSpanningSeveralRegions)
 {
     const auto rooms = test_geometries::two_rooms();
     const auto& geo = rooms.geometry;
-    const std::vector<Point2D> corners{{9.5, 4}, {11.5, 4}, {11.5, 6}, {9.5, 6}};
-    const Poly exit(corners.begin(), corners.end());
+    const std::vector<epick::Point2D> corners{{9.5, 4}, {11.5, 4}, {11.5, 6}, {9.5, 6}};
+    const epick::Poly exit(corners.begin(), corners.end());
 
     std::vector<ff::AreaPiece> ff_pieces{};
     for(const std::size_t region : {0, 1, 2}) {
@@ -239,14 +239,14 @@ TEST(Floorfield, ExitSpanningSeveralRegions)
 /// leading up to a platform inside the hole.
 TEST(Floorfield, SeamOnAHoleEdge)
 {
-    WalkableSurface surface{};
+    GeometryBuilder surface{};
     const auto ground = surface.add_region(
         {{{0, 0}, {20, 0}, {20, 10}, {0, 10}},
          {{{2, 2}, {18, 2}, {18, 8}, {2, 8}, {2, 7}, {2, 3}}}},
         0.0);
     const auto platform = surface.add_region({{{12, 3}, {17, 3}, {17, 7}, {12, 7}}, {}}, 1.0);
     surface.connect_regions(ground, {{2, 3}, {2, 7}}, platform, {{12, 3}, {12, 7}});
-    const auto geo = surface.create_geometry();
+    const auto geo = surface.build();
 
     auto field = field_over(*geo, 0.1);
     const auto dest = field->add_point_destination(platform, {15, 5});
@@ -285,9 +285,9 @@ TEST(Floorfield, ComparedWithTheExactGeodesic)
         const char* name;
         std::unique_ptr<Geometry> geo;
         std::size_t from_region;
-        Point3D from;
+        epick::Point3D from;
         std::size_t to_region;
-        Point3D to;
+        epick::Point3D to;
     };
     std::vector<Case> cases{};
     auto floors = test_geometries::floors_joined_by_stairs();

@@ -24,7 +24,7 @@ public:
     /// Cache of z coordinate.
     double z() const { return _z; }
 
-    Point3D position_3d() const { return Point3D{_xy.x(), _xy.y(), _z}; }
+    epick::Point3D position_3d() const { return epick::Point3D{_xy.x(), _xy.y(), _z}; }
 
     /// Move on surface along the provided horizontal @p xy_direction.
     /// Throws if the path hits a wall. On throw the location is left unchanged.
@@ -46,7 +46,7 @@ private:
         const Geometry* geometry,
         Point xy,
         std::size_t region_id,
-        SurfaceMesh::Face_index face,
+        epick::Mesh::Face_index face,
         double z)
         : _geometry(geometry), _xy(xy), _region_id(region_id), _face(face), _z(z)
     {
@@ -55,7 +55,7 @@ private:
     const Geometry* _geometry;
     Point _xy;
     std::size_t _region_id;
-    SurfaceMesh::Face_index _face; // cache; always valid (move throws before invalidating)
+    epick::Mesh::Face_index _face; // cache; always valid (move throws before invalidating)
     double _z; // cache
 };
 
