@@ -92,7 +92,7 @@ def test_metadata_attributes(square_simulation):
         ):
             assert key in hf.attrs, f"missing root attribute '{key}'"
         assert hf.attrs["producer"] == "JuPedSim"
-        assert hf.attrs["schema_version"] == 2
+        assert hf.attrs["schema_version"] == 3
 
 
 def test_close_is_idempotent(tmp_path):
@@ -257,7 +257,7 @@ def test_travel_times_round_trip(tmp_path):
     exit_id = sim.add_exit_stage([(rectangle((14, 0), (15, 5)), upper_floor)])
     sim.add_direct_steering_stage()
     sim.iterate()
-    # Added after writing began, still written on close.
+    # Added after the last iteration, still written on close.
     waypoint_id = sim.add_waypoint_stage(
         [(rectangle((1, 1), (2, 2)), ground_floor)]
     )
@@ -269,6 +269,7 @@ def test_travel_times_round_trip(tmp_path):
         directions = hf["travel_times/directions"][:]
 
     assert grids.dtype.names == (
+        "iteration",
         "stage_id",
         "region_id",
         "origin_x",
@@ -279,9 +280,13 @@ def test_travel_times_round_trip(tmp_path):
         "offset",
     )
     region_count = sim.get_geometry().region_count()
-    assert [(int(g["stage_id"]), int(g["region_id"])) for g in grids] == [
-        (stage, region)
-        for stage in sorted([exit_id, waypoint_id])
+    # The exit was added before the first iteration, the waypoint after it.
+    assert [
+        (int(g["iteration"]), int(g["stage_id"]), int(g["region_id"]))
+        for g in grids
+    ] == [
+        (iteration, stage, region)
+        for iteration, stage in [(0, exit_id), (1, waypoint_id)]
         for region in range(region_count)
     ]
     assert values.dtype.str == "<f4"
@@ -334,7 +339,9 @@ def _travel_time_simulation(writer):
     return sim
 
 
-def test_travel_times_are_skipped_when_the_with_block_fails(tmp_path):
+def test_changes_after_the_last_iteration_are_skipped_when_the_with_block_fails(
+    tmp_path,
+):
     out = tmp_path / "failed.h5"
     with pytest.raises(RuntimeError, match="boom"):
         with jps.Hdf5TrajectoryWriter(
@@ -342,10 +349,12 @@ def test_travel_times_are_skipped_when_the_with_block_fails(tmp_path):
         ) as writer:
             sim = _travel_time_simulation(writer)
             sim.iterate()
+            _halve_default_speed(sim)
             raise RuntimeError("boom")
 
     with h5py.File(out, "r") as hf:
-        assert "travel_times" not in hf
+        # Only the snapshot from the start: the change came after iteration 1.
+        assert hf["travel_times/grids"]["iteration"].tolist() == [0]
         # The trajectory is complete: frames 0 and 1 plus the end marker.
         assert hf["frame_offsets"].shape == (3,)
 
@@ -359,12 +368,13 @@ def test_closing_the_simulation_writes_travel_times_before_freeing_them(
     ) as writer:
         with _travel_time_simulation(writer) as sim:
             sim.iterate()
+            _halve_default_speed(sim)
 
     with h5py.File(out, "r") as hf:
-        assert hf["travel_times/grids"].shape == (1,)
+        assert hf["travel_times/grids"]["iteration"].tolist() == [0, 1]
 
 
-def test_travel_times_are_skipped_when_the_simulation_with_block_fails(
+def test_changes_after_the_last_iteration_are_skipped_when_the_simulation_with_block_fails(
     tmp_path,
 ):
     out = tmp_path / "nested_failed.h5"
@@ -374,14 +384,15 @@ def test_travel_times_are_skipped_when_the_simulation_with_block_fails(
     with pytest.raises(RuntimeError, match="boom"):
         with _travel_time_simulation(writer) as sim:
             sim.iterate()
+            _halve_default_speed(sim)
             raise RuntimeError("boom")
 
     with h5py.File(out, "r") as hf:
-        assert "travel_times" not in hf
+        assert hf["travel_times/grids"]["iteration"].tolist() == [0]
         assert hf["frame_offsets"].shape == (3,)
 
 
-def test_travel_times_are_written_all_or_nothing(tmp_path, monkeypatch):
+def test_an_interrupted_snapshot_leaves_a_loadable_file(tmp_path, monkeypatch):
     out = tmp_path / "partial.h5"
     writer = jps.Hdf5TrajectoryWriter(
         output_file=out, every_nth_frame=1, write_travel_times=True
@@ -389,6 +400,7 @@ def test_travel_times_are_written_all_or_nothing(tmp_path, monkeypatch):
     sim = _travel_time_simulation(writer)
     sim.add_exit_stage([([(0, 0), (1, 0), (1, 5), (0, 5)], 0)])
     sim.iterate()
+    _halve_default_speed(sim)  # both exits use the default
 
     real = jps.Simulation.travel_times
     calls = []
@@ -402,10 +414,136 @@ def test_travel_times_are_written_all_or_nothing(tmp_path, monkeypatch):
     monkeypatch.setattr(jps.Simulation, "travel_times", fail_on_second_stage)
     with pytest.raises(jps.SimulationError, match="solver failed"):
         writer.close()
-    assert len(calls) == 2, (
-        "the first stage's grid was written before the error"
+    first, second = calls
+
+    with jps.Hdf5TrajectoryLoader(out) as loader:
+        assert loader.load_travel_time_iterations(first) == [0, 1]
+        assert loader.load_travel_time_iterations(second) == [0]
+    with h5py.File(out, "r") as hf:
+        assert hf["frame_offsets"].shape == (3,)
+
+
+def _halve_default_speed(sim, region_id=0):
+    grid = sim.default_speed_fields()[region_id]
+    sim.set_default_speed_field(region_id, grid.values * 0.5)
+
+
+def _iterations(path, stage_id):
+    with jps.Hdf5TrajectoryLoader(path) as loader:
+        return loader.load_travel_time_iterations(stage_id)
+
+
+def test_travel_times_are_recorded_when_speed_fields_change(tmp_path):
+    out = tmp_path / "dynamic.h5"
+    writer = jps.Hdf5TrajectoryWriter(
+        output_file=out, every_nth_frame=4, write_travel_times=True
     )
+    sim = _square_simulation(writer)
+    left = sim.add_exit_stage([([(0, 0), (1, 0), (1, 5), (0, 5)], 0)])
+    right = sim.add_exit_stage([([(4, 0), (5, 0), (5, 5), (4, 5)], 0)])
+    expected = {(left, 0): sim.travel_times(left)[0].values}
+    sim.iterate(3)
+    # Not on a recorded frame: snapshots don't wait for one.
+    slow = sim.default_speed_fields()[0].values * 0.5
+    sim.set_custom_speed_field(left, 0, slow)
+    sim.iterate()
+    expected[(left, 3)] = sim.travel_times(left)[0].values
+    sim.iterate(2)
+    # Two changes before one iteration make one snapshot.
+    sim.set_custom_speed_field(left, 0, slow * 0.5)
+    sim.clear_custom_speed_field(left, 0)
+    sim.iterate()
+    expected[(left, 6)] = sim.travel_times(left)[0].values
+    writer.close()
+
+    assert _iterations(out, left) == [0, 3, 6]
+    assert _iterations(out, right) == [0]
+    with jps.Hdf5TrajectoryLoader(out) as loader:
+        for (stage, iteration), values in expected.items():
+            np.testing.assert_array_equal(
+                loader.load_travel_times(stage, iteration)[0].values,
+                values.astype("<f4"),
+            )
+        # Between snapshots the earlier one is in effect, without one the last.
+        np.testing.assert_array_equal(
+            loader.load_travel_times(left, 5)[0].values,
+            expected[(left, 3)].astype("<f4"),
+        )
+        np.testing.assert_array_equal(
+            loader.load_travel_times(left)[0].values,
+            expected[(left, 6)].astype("<f4"),
+        )
+    np.testing.assert_array_equal(
+        expected[(left, 0)], expected[(left, 6)]
+    )  # back on the default
+    assert not np.array_equal(expected[(left, 0)], expected[(left, 3)])
+
+
+def test_a_default_speed_change_skips_stages_with_their_own_field(tmp_path):
+    out = tmp_path / "default.h5"
+    writer = jps.Hdf5TrajectoryWriter(
+        output_file=out, every_nth_frame=1, write_travel_times=True
+    )
+    sim = _square_simulation(writer)
+    own = sim.add_exit_stage([([(0, 0), (1, 0), (1, 5), (0, 5)], 0)])
+    default = sim.add_exit_stage([([(4, 0), (5, 0), (5, 5), (4, 5)], 0)])
+    sim.set_custom_speed_field(own, 0, sim.default_speed_fields()[0].values)
+    sim.iterate()
+    _halve_default_speed(sim)
+    sim.iterate()
+    # Clearing a field the stage does not have changes nothing.
+    sim.clear_custom_speed_field(default, 0)
+    sim.iterate()
+    writer.close()
+
+    assert _iterations(out, own) == [0]
+    assert _iterations(out, default) == [0, 1]
+
+
+def test_without_changes_no_snapshots_are_added(tmp_path):
+    out = tmp_path / "static.h5"
+    writer = jps.Hdf5TrajectoryWriter(
+        output_file=out, every_nth_frame=1, write_travel_times=True
+    )
+    sim = _travel_time_simulation(writer)
+    sim.iterate(5)
+    writer.close()
 
     with h5py.File(out, "r") as hf:
-        assert "travel_times" not in hf
-        assert hf["frame_offsets"].shape == (3,)
+        assert hf["travel_times/grids"].shape == (1,)
+
+
+def test_every_nth_travel_time_field_keeps_the_first_and_every_nth_change(
+    tmp_path,
+):
+    out = tmp_path / "every_nth.h5"
+    writer = jps.Hdf5TrajectoryWriter(
+        output_file=out,
+        every_nth_frame=1,
+        write_travel_times=True,
+        every_nth_travel_time_field=2,
+    )
+    sim = _square_simulation(writer)
+    exit_id = sim.add_exit_stage([([(4, 0), (5, 0), (5, 5), (4, 5)], 0)])
+    sim.iterate()
+    later_id = sim.add_exit_stage([([(0, 0), (1, 0), (1, 5), (0, 5)], 0)])
+    # Five changes, at iterations 1..5; the later stage's first field is its own.
+    base = sim.default_speed_fields()[0].values
+    for factor in [0.5, 1.0, 0.5, 1.0, 0.5]:
+        sim.set_default_speed_field(0, base * factor)
+        sim.iterate()
+    writer.close()
+
+    assert _iterations(out, exit_id) == [0, 2, 4]
+    assert _iterations(out, later_id) == [1, 3, 5]
+    with h5py.File(out, "r") as hf:
+        assert hf["travel_times"].attrs["every_nth_travel_time_field"] == 2
+
+
+def test_every_nth_travel_time_field_has_to_be_positive(tmp_path):
+    with pytest.raises(
+        jps.TrajectoryWriter.Error, match="every_nth_travel_time_field"
+    ):
+        jps.Hdf5TrajectoryWriter(
+            output_file=tmp_path / "x.h5", every_nth_travel_time_field=0
+        )

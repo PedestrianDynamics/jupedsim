@@ -28,7 +28,7 @@ WKT_DATA = np.array(
 def h5_file(file_path: pathlib.Path):
     h5_file: h5py.File = h5py.File(str(file_path), "x")
     h5_file.attrs["producer"] = "JuPedSim"
-    h5_file.attrs["schema_version"] = "2"
+    h5_file.attrs["schema_version"] = "3"
     h5_file.attrs["dt"] = 0.01
     h5_file.attrs["every_nth_frame"] = 5
     trajectory_ds = h5_file.create_dataset(
@@ -396,6 +396,51 @@ def test_hdf5_trajectory_loading_travel_times_unknown_stage_reports_id(
         ),
     ):
         loader.load_travel_times(99)
+
+
+def test_hdf5_trajectory_loading_travel_times_before_the_first_snapshot(
+    travel_time_file,
+) -> None:
+    path, sim, stage_ids = travel_time_file
+    with jps.Hdf5TrajectoryLoader(path) as loader:
+        assert loader.load_travel_time_iterations(stage_ids[0]) == [0]
+        assert list(loader.load_travel_times(stage_ids[0], 7)) == list(
+            sim.travel_times(stage_ids[0])
+        )
+        with pytest.raises(
+            jps.Hdf5TrajectoryLoader.Error,
+            match=r"No travel times for stage_id=99, found stages",
+        ):
+            loader.load_travel_time_iterations(99)
+
+
+def test_hdf5_trajectory_loading_travel_times_of_a_stage_added_later(
+    tmp_path,
+) -> None:
+    surface = jps.WalkableSurface()
+    room = surface.add_region(boundary=_rectangle((0, 0), (5, 5)))
+    out = tmp_path / "later.h5"
+    writer = jps.Hdf5TrajectoryWriter(
+        output_file=out, every_nth_frame=1, write_travel_times=True
+    )
+    sim = jps.Simulation(
+        model=jps.CollisionFreeSpeedModelV2(),
+        geometry=surface,
+        trajectory_writer=writer,
+        dt=0.01,
+    )
+    sim.iterate(2)
+    exit_id = sim.add_exit_stage([(_rectangle((4, 0), (5, 5)), room)])
+    sim.iterate()
+    writer.close()
+    with jps.Hdf5TrajectoryLoader(out) as loader:
+        assert loader.load_travel_time_iterations(exit_id) == [2]
+        assert list(loader.load_travel_times(exit_id, 2)) == [room]
+        with pytest.raises(
+            jps.Hdf5TrajectoryLoader.Error,
+            match=rf"No travel times for stage_id={exit_id} at iteration 1, the first are from iteration 2",
+        ):
+            loader.load_travel_times(exit_id, 1)
 
 
 def _replace(f: h5py.File, name: str, data) -> None:
