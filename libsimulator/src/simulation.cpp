@@ -510,6 +510,13 @@ void Simulation::set_custom_speed_field(
     destination_of(stage_id).set_speed_override(region_id, values);
 }
 
+bool Simulation::has_custom_speed_field(BaseStage::ID stage_id, std::size_t region_id) const
+{
+    throw_if_state(State::Closed, "has_custom_speed_field");
+    const auto* destination = _stage_manager.stage(stage_id)->destination();
+    return destination != nullptr && destination->has_speed_override(region_id);
+}
+
 void Simulation::clear_custom_speed_field(BaseStage::ID stage_id, std::size_t region_id)
 {
     throw_if_state(State::Iterating | State::Closed, "clear_custom_speed_field");
