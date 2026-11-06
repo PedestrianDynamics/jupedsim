@@ -40,6 +40,14 @@ public:
         _stages.at(prev_target)->decrease_targeting();
     }
 
+    template <typename Fn>
+    void for_each_stage(Fn&& fn) const
+    {
+        for(const auto& [_, stage] : _stages) {
+            fn(*stage);
+        }
+    }
+
     void handle_new_agent(BaseStage::ID stage_id) { _stages.at(stage_id)->increase_targeting(); }
     void handle_remove_agent(BaseStage::ID stage_id) { _stages.at(stage_id)->decrease_targeting(); }
 

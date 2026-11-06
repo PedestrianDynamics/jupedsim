@@ -3,6 +3,7 @@
 
 #include "operational_model.hpp"
 #include "operational_model_state.hpp"
+#include "step_rng.hpp"
 
 class EnvironmentQuery;
 #include "kernel.hpp"
@@ -12,7 +13,6 @@ class EnvironmentQuery;
 #include <fmt/core.h>
 
 #include <cstdint>
-#include <random>
 #include <utility>
 #include <vector>
 
@@ -62,7 +62,7 @@ private:
     double _cut_off_radius;
 
     IntrinsicField _intrinsic_field;
-    mutable std::mt19937 _rng;
+    std::uint64_t _seed;
 
 public:
     WarpDriverModel(

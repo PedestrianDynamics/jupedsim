@@ -12,6 +12,7 @@
 
 #include <cmath>
 #include <concepts>
+#include <cstdint>
 #include <ranges>
 #include <type_traits>
 #include <utility>
@@ -86,6 +87,8 @@ public:
     std::vector<NeighborView> other_agents_in_range(double radius, Pred filter = {}) const
     {
         std::vector<NeighborView> neighbors{};
+        // One allocation for typical crowds instead of a growth sequence per query.
+        neighbors.reserve(64);
         // The grid searches by (x, y). Only filters out the asking agent itself plus applies
         // a quick z-filter - whether agents are "too far" away in z.
         const double z = location().z();
@@ -177,8 +180,13 @@ public:
         const EnvironmentQuery& world,
         const GenericAgent& agent,
         double dt,
-        const NeighborStateMapper* neighbor_state_mapper = nullptr)
-        : AgentView(world, agent, neighbor_state_mapper), _dt(dt)
+        const NeighborStateMapper* neighbor_state_mapper = nullptr,
+        std::uint64_t iteration = 0,
+        std::uint64_t agent_index = 0)
+        : AgentView(world, agent, neighbor_state_mapper)
+        , _dt(dt)
+        , _iteration(iteration)
+        , _agent_index(agent_index)
     {
     }
 
@@ -186,10 +194,16 @@ public:
     /// returned step.
     AgentStep with_neighbor_state_mapping(const NeighborStateMapper& states) const
     {
-        return AgentStep{_world, _agent, _dt, &states};
+        return AgentStep{_world, _agent, _dt, &states, _iteration, _agent_index};
     }
 
     double dt() const { return _dt; }
+
+    /// Iteration this step belongs to; with agent_index() it keys per-agent random streams.
+    std::uint64_t iteration() const { return _iteration; }
+
+    /// Position of the agent in this iteration's agent list.
+    std::uint64_t agent_index() const { return _agent_index; }
 
     /// Unit vector along the route to the final target. Zero when the agent has already
     /// reached it.
@@ -197,6 +211,8 @@ public:
 
 private:
     double _dt;
+    std::uint64_t _iteration;
+    std::uint64_t _agent_index;
 };
 
 // Both views are passed by reference and never deleted through a base pointer; keeping

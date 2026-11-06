@@ -180,6 +180,24 @@ mod ffi {
             p: Point2d,
             dest: usize,
         ) -> Result<Point2d>;
+        /// Solves `dest` on first use; afterwards `region_direction_solved` answers
+        /// for it without changing the field.
+        fn prepare_destination(self: &mut MultiRegionFloorfield, dest: usize) -> Result<()>;
+        /// `travel_time` for a prepared destination; `&self`, safe from several threads.
+        fn region_travel_time_solved(
+            self: &MultiRegionFloorfield,
+            region: usize,
+            p: Point2d,
+            dest: usize,
+        ) -> Result<f64>;
+        /// `region_direction` for a prepared destination. Takes `&self`: safe to
+        /// call from several threads at once.
+        fn region_direction_solved(
+            self: &MultiRegionFloorfield,
+            region: usize,
+            p: Point2d,
+            dest: usize,
+        ) -> Result<Point2d>;
         /// Travel time from `p` in `region` to `dest`: zero inside it. Solves
         /// the destination on first use.
         #[cxx_name = "travel_time"]
@@ -294,6 +312,29 @@ impl MultiRegionFloorfield {
         dest: usize,
     ) -> Result<Point2d, MultiRegionError> {
         let (x, y) = self.direction(region, p.x, p.y, dest)?;
+        Ok(Point2d { x, y })
+    }
+
+    fn prepare_destination(&mut self, dest: usize) -> Result<(), MultiRegionError> {
+        self.prepare(dest)
+    }
+
+    fn region_travel_time_solved(
+        &self,
+        region: usize,
+        p: Point2d,
+        dest: usize,
+    ) -> Result<f64, MultiRegionError> {
+        self.travel_time_solved(region, p.x, p.y, dest)
+    }
+
+    fn region_direction_solved(
+        &self,
+        region: usize,
+        p: Point2d,
+        dest: usize,
+    ) -> Result<Point2d, MultiRegionError> {
+        let (x, y) = self.direction_solved(region, p.x, p.y, dest)?;
         Ok(Point2d { x, y })
     }
 

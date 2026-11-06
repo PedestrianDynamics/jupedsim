@@ -66,4 +66,8 @@ public:
         const AgentStep& step) const = 0;
 
     virtual void check_model_constraint(const GenericAgent& agent, const AgentView& view) const = 0;
+
+    /// Whether compute_next_state() may run for several agents at once. Built-in models are;
+    /// models of unknown provenance (custom, Python) are not unless they say so.
+    virtual bool is_thread_safe() const { return true; }
 };

@@ -15,6 +15,12 @@ Waypoint::Waypoint(Destination destination) : _destination(destination)
 {
 }
 
+bool BaseStage::reached_prepared(const GenericAgent& agent) const
+{
+    const auto* d = destination();
+    return d != nullptr && d->prepared_contains(agent.location);
+}
+
 bool Waypoint::is_completed(const GenericAgent& agent)
 {
     return _destination.contains(agent.location);
