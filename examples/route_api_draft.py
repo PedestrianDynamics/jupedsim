@@ -401,9 +401,10 @@ via_landing = jps.Route([landing0, exit_ground])
 #     floorfield_options=jps.FloorfieldOptions(cell_size=0.2,
 #                                              wall_influence_radius=0.5))
 sim.travel_times(exit1)  # {floor0: TravelTimeGrid, staircase: ..., floor1: ...}
-# Travel time in seconds from a location to a stage: the value of the
-# floor-field cell containing the location, so its resolution is
-# cell_size; inf if the stage cannot be reached from there.
+# Travel time in seconds from a location to a stage, as on master: the
+# value at the nearest walkable floor-field cell, not interpolated, so its
+# resolution is cell_size; 0 inside the stage, inf if the stage cannot be
+# reached from there.
 sim.travel_time(exit1, floor0.at(x, y))
 sim.default_speed_fields()  # {floor0: SpeedGrid, staircase: ..., floor1: ...}
 sim.set_default_speed_field(floor0, values)  # all stages without their own
@@ -467,6 +468,8 @@ jps.Route([wp1, other_sim_wp, exit1])
 # ValueError: all stages must belong to the same simulation
 jps.RoundRobin({exit1: 0.6, exit2: 0.4})
 # ValueError: weights must be integers
+jps.RoundRobin({exit1: 0, exit2: 0})
+# ValueError: at least one weight must be > 0
 route_c.update_weights(wp1, {wp2: 3})
 # ValueError: wp1 has a fixed transition, not a weighted rule
 route_n.update_weights(wp1, {exit1: 2})
