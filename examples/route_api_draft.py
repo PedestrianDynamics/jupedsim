@@ -297,6 +297,11 @@ while sim.agent_count() > 0 and sim.elapsed_time() < 600:
     route_c.hold(wp2)
     # Held agents go on in arrival order (ties by agent id), current rule.
     route_c.release(wp2)
+    # Two ways to make agents wait: hold()/release() frees a group at one
+    # moment, in arrival order; a route ending in STAY plus follow() on
+    # agents with arrived == True decides agent by agent (e.g. by time or
+    # for a subset). For a group released at once, both behave the same,
+    # except that follow() goes in the order of the calls.
 
     # Close an exit for all routes (a method on the exit handle;
     # sim.close() frees the whole simulation). Rules skip closed targets.
