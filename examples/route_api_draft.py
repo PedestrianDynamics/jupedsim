@@ -1,0 +1,647 @@
+# Draft (sketch, not runnable: names like model and x1 are placeholders)
+# ruff: noqa: F821
+# - Stages are owned by the simulation and returned as handles.
+# - Routes are built and validated in one call: either a valid route or an error.
+# - One way to do each thing; explicit keywords; errors are informative say how to fix the call.
+
+
+import math
+
+import jupedsim as jps
+
+# --- Concepts ---------------------------------------------------------
+# Surface    the complete walkable geometry
+# Region     an identified patch of that surface
+# Floor      a building concept; one floor may consist of several regions
+# Connector  a region joining two other regions (staircase, ramp)
+# Staircase  one or more inclined connector regions, with landing regions
+#            in between where the staircase turns
+# Stage      destination areas attached to regions (waypoints, exits)
+# Route      the order in which an agent visits stages
+
+# --- Regions ----------------------------------------------------------
+# Regions are returned as handles, like stages, not as bare ints.
+# `name` is optional and used in reprs and error messages. Region handles
+# expose .id, .name (None if unnamed) and .height.
+surface = jps.WalkableSurface()
+floor0 = surface.add_region(polygon=floor0_polygon, height=0.0, name="floor0")
+floor1 = surface.add_region(polygon=floor1_polygon, height=3.0, name="floor1")
+# A connector (staircase, ramp) is a region of its own: connect_regions returns
+# its handle. edge0 must be an edge of floor0's boundary and edge1 an edge of
+# floor1's; each is lifted to its region's height. The four endpoints must
+# lie in one plane inclined at most 50 degrees, as on master. The
+# orientation of the edges is fixed automatically. A connector cannot
+# itself be connected again: a staircase with a turn uses two connectors
+# and a landing region.
+staircase = surface.connect_regions(
+    from_region=floor0,
+    from_edge=edge0,
+    to_region=floor1,
+    to_edge=edge1,
+    name="staircase",
+)
+
+# Looking regions up, e.g. for a geometry loaded from a file:
+surface.regions  # (Region(id=0, name="floor0", height=0.0), ..., Region(id=2, name="staircase"))
+surface.region("floor0")  # by name
+surface.region(id=0)  # by id, e.g. from saved results
+surface.regions_at((x, y))  # every region covering a point (discovery)
+# surface.regions, regions_at() and sim.stages are in creation order.
+
+# Locations: region.at(x, y) returns an immutable Location: coordinates plus
+# the region's identity. It is checked against the surface right away.
+# Locations compare and hash by (x, y, region): floor0.at(5, 2) equals
+# floor0.at(5, 2) but not floor1.at(5, 2).
+# A simulation resolves it against its own copy of the geometry when the
+# location is used (add_agent, steer_to), so the same Location works in
+# every simulation built from this surface, provided that simulation's
+# snapshot contains the region and the position. Otherwise add_agent and
+# steer_to raise ValueError: for a region from another surface, or one
+# added to `surface` after the simulation was built (see Errors).
+# Regions compare and hash by (surface, id), so a region handle from
+# `surface` is the same dict key in every simulation built from it.
+# The region is always supplied explicitly: no call infers it from
+# coordinates, so adding a region (e.g. an upper floor) cannot make
+# existing calls ambiguous. regions_at is a lookup for discovery and
+# interactive tools (which regions cover this point?); at() builds the
+# location in the region you pass:
+surface.regions_at((5, 2))  # (floor0, floor1): stacked floors
+floor1.at(5, 2)  # Location(5.0, 2.0, region=floor1)
+floor1.at(5, 2).xy  # (5.0, 2.0) when only the coordinates are needed
+floor1.at(5, 2).region  # floor1
+
+# The surface is copied when the simulation is constructed: later edits to
+# `surface` do not affect `sim`. No builder is needed for this.
+sim = jps.Simulation(model, surface)
+
+# --- Stages -----------------------------------------------------------
+# - Regions describe where agents can walk.
+# - A stage's areas are alternative places that complete the stage:
+#   reaching any one of them is enough.
+# - A route describes the order of stages.
+#
+# Waypoints and exits are areas. General form: a list of (area, region)
+# pairs, so one stage can cover several areas (e.g. two doors) and regions.
+# Area: a polygon without holes, as a sequence of >= 3 (x, y) vertices or a
+# shapely Polygon. Only the part of an area inside its region belongs to
+# the stage; an area whose clipped part has no area is an error.
+# Shorthands: a single polygon, or a point with `radius` (a disc-shaped
+# area), each with region=. The area must overlap its region with
+# positive area; touching along an edge does not count.
+# Agent positions and target points are locations: region.at(x, y).
+# Coordinates are in metres, in the same frame as the geometry.
+#
+# Stage grouping sets what close() and hold() act on together: one exit
+# with two doors closes both doors. Create separate exits for doors that
+# must close individually.
+#
+# Routing to areas uses floor fields (see "Routing backend" below): agents
+# move toward the area along paths of least travel time, which need not be
+# the geometrically nearest part. The stage is reached once the agent is
+# inside an area.
+# Direct steering (target= / steer_to) replaces the route with a single
+# point destination. Navigation to that point still follows the walkable
+# surface, including connectors (point-to-point shortest path over the
+# navigation mesh, no floor field); it is not a straight walk toward the
+# point. Speed fields therefore do not apply: a route agent switched to
+# steer_to() no longer avoids areas made costly by speed fields (e.g.
+# smoke).
+# On reaching the point (route_orientation becomes (0, 0)) the agent is
+# arrived, as with STAY: arrived == True, it stays at the point (steers
+# back if pushed away) and is not removed, until follow() or steer_to().
+# To pass a point and go on, make it a waypoint of the route instead, e.g.
+# Route([(wp_wait, wp_edge), (wp_edge, jps.RoundRobin({exit1: 1, exit2: 1}))],
+#       start=wp_wait).
+#
+# `region`, `radius` and `name` are keyword-only.
+# `name` is optional and used in reprs and error messages; unnamed stages
+# appear as Waypoint(id=3). The messages below assume named stages.
+# Stage handles expose .id and .name (None if unnamed).
+wp1 = sim.add_waypoint((x1, y1), radius=0.5, region=floor0, name="wp1")
+wp2 = sim.add_waypoint((x2, y2), radius=0.5, region=floor0, name="wp2")
+wp3 = sim.add_waypoint((x3, y3), radius=0.5, region=floor0, name="wp3")
+door_polygon = [(), (), (), ()]
+wp4 = sim.add_waypoint(door_polygon, region=floor0, name="wp4")
+doors = sim.add_waypoint(
+    [(door_a, floor0), (door_b, floor1)], name="doors"
+)  # either door completes it; areas may lie in different regions
+exit1 = sim.add_exit(exit_polygon1, region=floor0, name="exit1")
+exit2 = sim.add_exit(exit_polygon2, region=floor0, name="exit2")
+main_exits = sim.add_exit(
+    [(exit_polygon3, floor0), (exit_polygon4, floor0)], name="main_exits"
+)  # main_exits.close() closes both doors; exit1, exit2 close one at a time
+
+# --- Routes -----------------------------------------------------------
+# A route is a directed graph of stages. It is bound at construction to the
+# simulation that owns its stages and cannot be used in another simulation.
+#
+# Validation: from every stage of the route, an exit or STAY must be
+# reachable via weights > 0 (agents may enter at any stage via start=).
+# This is checked at construction and on every update_weights(); exit
+# closures are exempt because they are temporary by intent.
+# The check is structural: it does not guarantee that every agent
+# eventually leaves a loop.
+# Route validity is a property of the graph, not of the geometry: it does
+# not check that a stage can be reached from where an agent stands. That
+# is checked when a stage becomes an agent's target: add_agent(), follow()
+# and steer_to() raise if the first target cannot be reached; an agent
+# whose later target cannot be reached is stranded.
+
+# Linear (shorthand): a DIRECTED list of stages, walked in order.
+# The last element must be an exit or jps.STAY, unless endless=True.
+route_a = jps.Route([wp1, wp2, exit1])
+route_b = jps.Route([wp2, wp3, exit2])
+route_x = jps.Route([exit1])  # minimal evacuation route: walk to exit1
+
+# Branching (general form): a list of (from, to) pairs; order does not matter.
+# Each stage has exactly one outgoing transition: a stage or a rule.
+# `start` is the default start stage for agents on this route.
+route_c = jps.Route(
+    [
+        (wp1, wp2),
+        (wp2, jps.RoundRobin({wp3: 1, exit1: 2, exit2: 1})),
+        (wp3, exit2),
+    ],
+    start=wp1,
+)
+
+# Ending at an assembly point (Sammelstelle) must be explicit.
+# STAY is a terminal action, not a stage: on completing wp3 the agent is
+# arrived, agent.stage stays wp3, and it actively stays inside wp3's
+# arrival region (steers back if pushed out).
+route_e = jps.Route([wp1, wp2, wp3, jps.STAY])
+
+# Loops are allowed if an exit or STAY stays reachable from every stage.
+route_f = jps.Route(
+    [
+        (wp1, wp2),
+        (wp2, jps.RoundRobin({exit1: 2, exit2: 1, wp3: 1, wp4: 4})),
+        (wp3, jps.STAY),
+        (wp4, wp1),
+    ],
+    start=wp1,
+)
+
+# Endless loops (tours, single-file) must be explicit.
+# endless=True means the route never ends: a reachable exit or STAY is an error.
+# With endless=True, repeating the first stage at the end of a linear list
+# closes the loop; no other stage may appear twice.
+patrol = jps.Route([wp1, wp2, wp3, wp4, wp1], endless=True)
+tour = jps.Route(
+    [
+        (wp1, wp2),
+        (wp2, jps.RoundRobin({wp3: 1, wp4: 1})),
+        (wp3, wp1),
+        (wp4, wp1),
+    ],
+    start=wp1,
+    endless=True,
+)
+
+# Weights: non-negative integers, at least one > 0.
+# RoundRobin uses smooth weighted round-robin; ties go to the earlier target
+# in insertion order. With this algorithm only the ratio matters:
+# {exit1: 3, exit2: 2} and {exit1: 60, exit2: 40} behave the same.
+# - 3:2 gives e1 e2 e1 e2 e1 / repeat
+# - 60:40 gives exactly the same sequence
+# One counter per (route, stage), shared by all agents deciding there.
+# Agents arriving in the same step are served in agent-id order.
+
+# LeastTravelTime: each agent picks the target with the least travel time
+# from its position, read from the targets' floor fields. The choice is made
+# once, when the agent completes the stage, and kept on the way. No weights.
+# Ties go to the earlier target in the list, as with min().
+route_n = jps.Route(
+    [
+        (wp1, jps.LeastTravelTime([exit1, exit2])),
+    ],
+    start=wp1,
+)
+
+# `start` is always a stage: rules fire only on completing a stage. To
+# choose the first target from where the agent stands, choose it in the
+# script and give each choice its own route. If no candidate is reachable,
+# min() returns one with travel time inf; add_agent() would then raise for
+# that exit alone, so check first to report all candidates.
+best = min((exit1, exit2), key=lambda e: sim.travel_time(e, pos1))
+if math.isinf(sim.travel_time(best, pos1)):
+    raise ValueError(f"none of exit1, exit2 is reachable from {pos1}")
+agent9 = sim.add_agent(pos1, route=jps.Route([best]))
+
+# --- Agents -----------------------------------------------------------
+# `start` is the agent's first target; agent.stage is always the stage the
+# agent is heading for. An agent spawned inside its start stage's arrival
+# region reaches it in the first iteration and goes on to the next stage.
+# `start` may be an exit: the agent walks to it and is removed on reaching it.
+# state=: the agent's model state. For built-in models it may be omitted;
+# the agent then gets the model's default state. Custom models must pass it.
+# pos1, pos2, ... are locations, e.g. pos1 = floor0.at(xa, ya).
+agent1 = sim.add_agent(pos1, route=route_a)  # starts at wp1
+agent8 = sim.add_agent(
+    pos8,
+    route=route_a,
+    state=jps.CollisionFreeSpeedModelState(desired_speed=1.2),
+)
+agent2 = sim.add_agent(pos2, route=route_b)  # starts at wp2
+agent3 = sim.add_agent(
+    pos3, route=route_c
+)  # starts at the route's default (wp1)
+agent4 = sim.add_agent(pos4, route=route_c, start=wp2)  # overrides the default
+agent5 = sim.add_agent(pos5, target=floor0.at(x, y))  # direct steering
+# Steering to a location on another floor walks there over the connecting
+# staircase.
+agent7 = sim.add_agent(floor0.at(x0, y0), target=floor1.at(x, y))
+agent6 = sim.add_agent(pos6, route=route_x)  # walks to exit1
+
+# --- Runtime changes --------------------------------------------------
+# Bound the loop by time: with holds or closures, agents may wait for a
+# later release or reopening, so "no agent is moving" is not a stop
+# condition. agent_count() includes held, stranded and arrived agents.
+while sim.agent_count() > 0 and sim.elapsed_time() < 600:
+    sim.iterate()
+
+    # Direct steering: change the target with steer_to(); also switches a
+    # route agent to direct steering.
+    agent5.steer_to(floor0.at(x_new, y_new))
+    agent7.steer_to(floor1.at(x_new, y_new))  # location on floor1
+    # route -> direct steering; route and stage become None
+    agent2.steer_to(floor0.at(x_new, y_new))
+
+    # Routes are changed with follow() only (route and start in one call).
+    agent1.follow(route_b)  # starts at the first stage, wp2
+    agent1.follow(route_b, start=wp3)  # or an explicit start
+    agent3.follow(route_c, start=wp2)
+    # direct steering -> route; route == route_a, stage == wp1
+    agent5.follow(route_a)
+    # follow() to a route whose start is a closed exit does not raise: the
+    # agent is stranded at once, as if the exit had closed on its way.
+    # follow() always restarts, also on the agent's current route: calling
+    # it every iteration sends the agent back to the start each time.
+
+    # Weights: a patch, like dict.update; targets not named keep their weight.
+    # Validated against the whole route and applied atomically: on error the
+    # old weights and the old counter are kept. On success the counter of
+    # (route_c, wp2) resets. Takes effect at the next decision; agents
+    # already assigned keep their target.
+    route_c.update_weights(wp2, {wp3: 0})  # wp3: 0, exit1: 2, exit2: 1
+    print(route_c.weights(wp2))  # {wp3: 0, exit1: 2, exit2: 1}
+
+    # Hold agents at a stage (e.g. phased evacuation), weights are kept.
+    # The hold is scoped to (route_c, wp2) and lasts until release():
+    # every agent on route_c whose target is wp2, now or later (including
+    # agents added after the call), keeps walking to wp2 and stops there,
+    # held == True on arrival. Agents on other routes that use wp2 are not
+    # affected, nor are agents that completed wp2 before the call.
+    # A held agent that follow()s another route is no longer held.
+    # hold() on a stage that is already held does nothing.
+    route_c.hold(wp2)
+    # Held agents go on in arrival order (ties by agent id), current rule.
+    route_c.release(wp2)
+    # Two ways to make agents wait: hold()/release() frees a group at one
+    # moment, in arrival order; a route ending in STAY plus follow() on
+    # agents with arrived == True decides agent by agent (e.g. by time or
+    # for a subset). For a group released at once, both behave the same,
+    # except that follow() goes in the order of the calls.
+
+    # Close an exit for all routes (a method on the exit handle;
+    # sim.close() frees the whole simulation). Rules skip closed targets.
+    # Closing decides which stages may be targets. To make agents prefer
+    # paths around costly areas (e.g. smoke), change the speed fields used
+    # to compute travel times instead. Speed fields change routes, not how
+    # fast agents walk: physical slowing is set in the movement model.
+    # informed=True:  agents assigned to it by a rule are reassigned now by
+    #                 that rule and walk directly to the new target.
+    # informed=False: agents walk to the exit and are reassigned there.
+    # An agent is stranded once it cannot continue: its next target is the
+    # closed exit via a fixed transition, or its rule has no open target
+    # with weight > 0 left. Stranded agents stop where they are (informed),
+    # at the closed exit (not informed), or inside the waypoint whose rule
+    # has no open target.
+    # Rules only skip closed immediate targets: in route_c, wp3 (which leads
+    # only to exit2) can still be chosen at wp2 after exit2 closes; agents
+    # sent there are stranded at wp3.
+    # close() on a closed exit and open() on an open one do nothing and
+    # return an empty tuple.
+    stranded = exit2.close(informed=True)  # agents stranded now
+    # Valid target again. Agents stranded by this exit resume: agents
+    # assigned by a rule re-run the decision at their last decision stage;
+    # agents on a fixed transition keep exit2 as their stage and walk on
+    # to it from where they stopped. Agents already rerouted are not
+    # reassigned.
+    resumed = exit2.open()  # agents that resumed
+
+# --- State (read-only) ------------------------------------------------
+# After the runtime block: agent2 is in direct steering, agent5 on route_a.
+print(agent2.route, agent2.stage)  # None, None in direct steering
+# Route(start=wp1, ...), Waypoint(id=1, name="wp1")
+print(agent5.route, agent5.stage)
+print(agent2.target)  # Location(x_new, y_new, region=floor0) in direct steering
+# Locations read from an agent keep their region, so they can be passed on
+# directly, e.g. agent5.steer_to(agent2.position). They are snapshots: a
+# saved agent.position does not follow the agent. Location.region,
+# Stage.name and the other handle attributes are read-only.
+print(agent2.position)  # Location(..., region=floor0)
+print(agent2.position.xy)  # (x, y) only
+print(agent5.target)  # None on a route: use agent5.stage
+# Navigation direction (unit vector toward the current target, or (0, 0)
+# at the destination), as on master. Not the velocity (model state) and
+# not the body orientation.
+print(agent5.route_orientation)
+print(agent3.held)  # True while held at a stage
+# True after completing a waypoint whose transition is STAY, or on
+# reaching a steer_to() point, until follow() or steer_to()
+print(agent3.arrived)
+print(agent3.stranded)  # True once the agent cannot continue (closed exit)
+print(agent3.alive)  # False once the agent has left the simulation
+# Agents stopped at wp2 (held == True); agents still walking to a held
+# wp2 are not included, but release() frees them as well.
+print(route_c.held_at(wp2))
+# Whether a hold or a closure is in force (read-only; change them with
+# hold()/release() and close()/open()).
+print(route_c.is_held(wp2))  # True between hold(wp2) and release(wp2)
+print(exit2.closed)  # True between exit2.close() and exit2.open()
+# Agents whose current target is wp2, on any route or only on route_c.
+# Membership is by assignment: agent.stage == wp2 (and agent.route ==
+# route_c if given), so held, stranded and arrived agents are included
+# when their stage matches. Returns a snapshot (tuple of handles): calling
+# follow() while iterating does not change which agents are visited.
+sim.agents_targeting(wp2)  # (Agent(id=3), Agent(id=4), ...)
+sim.agents_targeting(wp2, route=route_c)
+
+# Inspecting a route
+# next() returns the rule as an immutable value and weights() returns a copy:
+# changing them has no effect on the route; use update_weights().
+route_c.next(wp1)  # wp2 (fixed transition)
+route_c.next(wp2)  # RoundRobin({wp3: 0, exit1: 2, exit2: 1})
+route_c.next(exit1)  # None: exits have no next stage
+route_c.weights(wp2)  # {wp3: 0, exit1: 2, exit2: 1}
+route_c.stages  # (wp1, wp2, wp3, exit1, exit2)
+print(route_c)
+# Route(start=wp1)
+#   wp1 -> wp2
+#   wp2 -> RoundRobin(wp3: 0, exit1: 2, exit2: 1)
+#   wp3 -> exit2
+
+# --- Rerouting --------------------------------------------------------
+# Smoke at wp2: agents on route1 that still target wp2 take route2
+# from wp3 on. Agents that already passed wp2 are not affected.
+route1 = jps.Route([wp1, wp2, exit1])
+route2 = jps.Route([wp1, wp3, exit1])
+for agent in sim.agents_targeting(wp2, route=route1):
+    agent.follow(route2, start=wp3)
+# Alternatives, depending on what the smoke does:
+# - wp2 is one branch of a rule: route.update_weights(..., {wp2: 0})
+# - paths near the smoke should cost more: speed fields (Routing backend)
+# - the smoke blocks an exit: exit.close()
+
+# --- Two floors -------------------------------------------------------
+# An agent upstairs leaves through an exit on the ground floor. The staircase
+# is a region (from connect_regions), not a stage: the exit's floor field
+# already routes over it.
+exit_ground = sim.add_exit(
+    ground_exit_polygon, region=floor0, name="exit_ground"
+)
+evacuate = jps.Route([exit_ground])
+upstairs = sim.add_agent(floor1.at(xu, yu), route=evacuate)
+print(upstairs.stage)  # Exit(id=8, name="exit_ground")
+grid = sim.travel_times(exit_ground)[floor1]  # floor1's grid
+grid.values  # seconds to exit_ground, shape (height, width); inf = not walkable
+grid.directions  # walking directions, shape (height, width, 2)
+# The staircase is a region, so it can also hold a stage, e.g. a waypoint
+# halfway up that agents must pass:
+mid_stairs = sim.add_waypoint(mid_stairs_polygon, region=staircase, name="mid")
+# To make agents pass the lower landing (e.g. a counting line), make it a
+# stage of the route:
+landing0 = sim.add_waypoint(
+    lower_landing_polygon, region=floor0, name="landing0"
+)
+via_landing = jps.Route([landing0, exit_ground])
+
+# --- Routing backend: floor fields ------------------------------------
+# Two fixed routing engines: floor fields for stages (routes), the
+# navigation mesh for point targets (direct steering). There is no option
+# to switch engines.
+# Everything floor-field-specific is in this section; the route API above
+# only needs "is the agent inside the stage's area" and "which
+# direction leads there", plus travel times for LeastTravelTime.
+# Configuration: jps.Simulation(model, surface,
+#     floorfield_options=jps.FloorfieldOptions(cell_size=0.2,
+#                                              wall_influence_radius=0.5))
+sim.travel_times(exit1)  # {floor0: TravelTimeGrid, staircase: ..., floor1: ...}
+# Travel time in seconds from a location to a stage, as on master: the
+# value at the nearest walkable floor-field cell, not interpolated, so its
+# resolution is cell_size; 0 inside the stage, inf if the stage cannot be
+# reached from there.
+sim.travel_time(exit1, floor0.at(x, y))
+sim.default_speed_fields()  # {floor0: SpeedGrid, staircase: ..., floor1: ...}
+sim.set_default_speed_field(floor0, values)  # all stages without their own
+sim.set_custom_speed_field(exit1, floor0, values)  # one stage only
+sim.custom_speed_fields(exit1)  # {floor0: SpeedGrid, staircase: None, ...}
+sim.clear_custom_speed_field(exit1, floor0)
+# Speed fields change routes, not walking speed. Floor fields are solved
+# when first needed and cost memory per stage and region, so stages are
+# created once and shared by routes.
+
+# --- Errors -----------------------------------------------------------
+sim.add_waypoint(door_polygon, radius=0.5, region=floor0)
+# ValueError: radius applies to point waypoints only
+sim.add_waypoint((x1, y1), radius=0, region=floor0)
+# ValueError: radius must be > 0
+sim.add_waypoint(door_polygon)
+# TypeError: region= is required, e.g. sim.add_waypoint(area, region=floor0)
+sim.add_waypoint(door_polygon, region=floor1)  # door_polygon is not in floor1
+# ValueError: area does not overlap floor1
+sim.add_waypoint(door_polygon, region=1)
+# TypeError: region must be a Region handle, e.g. surface.region("floor1")
+surface.region("floor2")
+# KeyError: no region named floor2; regions are floor0, floor1, staircase
+surface.connect_regions(
+    from_region=floor0,
+    from_edge=edge_inside_floor0,
+    to_region=floor1,
+    to_edge=edge1,
+)
+# ValueError: from_edge is not an edge of floor0's boundary
+surface.connect_regions(
+    from_region=staircase, from_edge=edge2, to_region=floor2, to_edge=edge3
+)
+# ValueError: staircase is a connector and cannot be connected again; add a
+#   landing region between two connectors
+sim.add_agent(new_region.at(x, y), route=route_a)  # region added after sim
+# ValueError: new_region is not part of this simulation's geometry
+sim.add_agent((x, y), route=route_a)
+# TypeError: position must be a Location, e.g. floor0.at(x, y)
+agent5.steer_to((x, y))
+# TypeError: target must be a Location, e.g. floor0.at(x, y)
+floor1.at(100, 100)
+# ValueError: (100, 100) is not in floor1
+sim.add_waypoint(polygon_with_hole, region=floor0)
+# ValueError: waypoint polygons must be simple and without holes
+jps.Route([])
+# ValueError: route is empty
+jps.Route([(wp1, wp2), (wp2, wp3)])
+# ValueError: wp3 has no next stage; end with an exit or add (wp3, jps.STAY)
+jps.Route([(wp1, wp2), (wp2, wp3), (wp2, jps.RoundRobin({exit1: 2, exit2: 1}))])
+# ValueError: wp2 has 2 outgoing transitions; combine them into one rule
+jps.Route([(wp1, wp2), (wp2, wp1)])
+# ValueError: no exit or STAY reachable; to loop on purpose, use endless=True
+jps.Route([wp1, wp2, exit1], endless=True)
+# ValueError: route can end at exit1; drop endless=True
+jps.Route([wp1, wp2, wp1, exit1])
+# ValueError: wp1 appears twice; only repeating the first stage at the end closes a loop
+jps.Route([exit1, wp1])
+# ValueError: exits are terminal; remove (exit1, wp1)
+jps.Route([(wp1, (15, 6.5)), ((15, 6.5), exit1)], start=wp1)
+# TypeError: (15, 6.5) is not a stage; use sim.add_waypoint((15, 6.5), ...)
+jps.Route([wp1, other_sim_wp, exit1])
+# ValueError: all stages must belong to the same simulation
+jps.RoundRobin({exit1: 0.6, exit2: 0.4})
+# ValueError: weights must be integers
+jps.RoundRobin({exit1: 0, exit2: 0})
+# ValueError: at least one weight must be > 0
+route_c.update_weights(wp1, {wp2: 3})
+# ValueError: wp1 has a fixed transition, not a weighted rule
+route_n.update_weights(wp1, {exit1: 2})
+# ValueError: wp1 uses LeastTravelTime, which has no weights
+route_c.update_weights(wp2, {wp4: 1})
+# ValueError: wp4 is not a target of wp2; targets are wp3, exit1, exit2 (see route.weights(wp2))
+route_c.weights(wp1)
+# ValueError: wp1 has a fixed transition; use route.next(wp1)
+route_c.next(wp4)
+# ValueError: wp4 is not part of this route; stages are wp1, wp2, wp3, exit1, exit2
+route_c.update_weights(wp2, {wp3: 0, exit1: 0, exit2: 0})
+# ValueError: at least one target at wp2 needs weight > 0; to stop agents, use route.hold(wp2)
+route_g = jps.Route(
+    [
+        (wp1, jps.RoundRobin({wp2: 1, exit1: 1})),
+        (wp2, wp1),
+    ],
+    start=wp1,
+)
+route_g.update_weights(wp1, {exit1: 0})
+# ValueError: with these weights no exit or STAY is reachable from wp1, wp2;
+#   weights unchanged
+route_c.hold(exit1)
+# ValueError: exits cannot be held; use exit1.close()
+route_c.release(wp1)
+# ValueError: wp1 is not held
+route_c.is_held(wp4)
+# ValueError: wp4 is not part of this route
+exit2.closed = True
+# AttributeError: use exit2.close()
+sim.agents_targeting(wp4, route=route_c)
+# ValueError: wp4 is not part of this route
+sim.add_agent(floor0.at(x_closed_room, y_closed_room), route=route_a)
+# ValueError: wp1 cannot be reached from Location(..., region=floor0)
+sim.add_agent(pos, route=route_a, target=floor0.at(x, y))
+# ValueError: use route= or target=, not both
+sim.add_agent(pos, route=jps.Route([(wp1, wp2), (wp2, exit1)]))
+# ValueError: route given as pairs has no default start; pass start= here or to Route
+sim.add_agent(pos, route=route_c, start=wp4)
+# ValueError: wp4 is not part of this route
+other_sim.add_agent(pos, route=route_c)
+# ValueError: route belongs to another simulation
+sim.add_agent(other_surface_region.at(x, y), route=route_a)
+# ValueError: Region(id=0, name="hall") belongs to another surface
+agent1.route = route_c
+# AttributeError: use agent.follow(route, start=...)
+agent5.target = (x_new, y_new)
+# AttributeError: use agent.steer_to(location)
+agent1.stage  # after agent1 left through an exit
+# RuntimeError: Agent(id=1) has left the simulation (agent.alive is False)
+custom_sim.add_agent(pos, route=route_a)  # simulation with a custom model
+# ValueError: custom models need state=; pass your model's agent state
+
+# --- Lookup and removal -----------------------------------------------
+# Removal is scheduled, as on master: the agent leaves at the start of the
+# next iterate(), before agents interact. Until then it is still alive.
+# A removed agent's handle keeps .id and .alive readable; everything else
+# raises.
+agent1.remove()
+# removed_agents() returns the records of the agents removed by the most
+# recent iterate(), as on master. Calls do not consume them: repeated
+# calls return the same records until the next iterate().
+# As on master, removal runs at the start of iterate(): an agent that
+# reaches an exit in one iteration is removed at the start of the next.
+# A record holds the agent's id, the exit it left through (None for
+# agent.remove()) and the time it reached that exit (for agent.remove(),
+# the time of removal), e.g. for exit counts and flow over time.
+for removal in sim.removed_agents():
+    removal.id  # 17
+    removal.exit  # Exit(id=5, name="exit1"), or None
+    removal.time  # simulation time in seconds, see above
+sim.stages  # (Waypoint(id=0, name="wp1"), ..., Exit(id=8, name="exit_ground"))
+sim.stage("exit1")  # Exit(id=5, name="exit1")
+sim.stage(id=5)  # the same exit, by id
+sim.agent(17)  # Agent(id=17)
+# All agents still in the simulation, in id order: held, stranded and
+# arrived agents included. A snapshot (tuple of handles), like
+# agents_targeting(): agents added or removed while iterating do not
+# change it.
+sim.agents()  # (Agent(id=2), Agent(id=3), ...)
+
+# --- Lifecycle of one agent -------------------------------------------
+# 1. Spawned inside its first waypoint:
+#    sim.add_agent(pos_in_wp1, route=route_c)
+#    stage == wp1 -> first iteration: wp1 reached -> stage == wp2.
+# 2. Weighted branch:
+#    reaches wp2 -> counter of (route_c, wp2) picks the next slot, e.g.
+#    exit1 -> stage == exit1; the assignment is kept until exit1 or a
+#    change (follow, close with informed=True).
+# 3. Held:
+#    route_c.hold(wp2) while or before stage == wp2 -> agent stops inside
+#    wp2, held == True. route_c.release(wp2) -> served
+#    in arrival order by the current rule -> held == False.
+# 4. Exit closed on the way:
+#    stage == exit2, assigned by the rule at wp2:
+#      exit2.close(informed=True)  -> reassigned now to exit1.
+#      exit2.close(informed=False) -> walks to exit2, reassigned there.
+#    stage == exit2 via the fixed transition wp3 -> exit2:
+#      informed=True  -> stranded now, stops where it is.
+#      informed=False -> walks to exit2, stranded on arrival.
+#      Returned by exit2.close (informed=True); on exit2.open() it walks
+#      on to exit2 from where it stopped, or the user calls
+#      agent.follow(...).
+# 5. No open target left:
+#    rule at wp2 is RoundRobin({exit1: 1, exit2: 1}); both exits closed ->
+#    agents deciding at wp2 are stranded inside wp2; agents walking to
+#    either exit are stranded where they are (informed) or at the exit.
+#    exit1.open() -> they re-run the decision at wp2 and go to exit1.
+# 6. Switching routes or steering directly:
+#    agent.follow(route_b) -> stage == wp2 (first stage of route_b);
+#    agent.steer_to(location) -> target == location, no route.
+#    Both clear held, stranded and arrived, so an agent leaves STAY this
+#    way; counters of route_c are not changed.
+
+# --- From the current API on master to 2.0 ----------------------------
+# Handles are used for object references; IDs remain available for lookup
+# and serialization (agent.id, stage.id, region.id match trajectory files).
+#
+# Current API on master                     2.0
+# add_waypoint_stage(...) -> int            sim.add_waypoint(...) -> Waypoint
+# add_exit_stage(...) -> int                sim.add_exit(...) -> Exit
+# add_direct_steering_stage() -> int        removed: target= / agent.steer_to()
+# add_journey(JourneyDescription) -> int    jps.Route([...])
+# add_agent(journey_id, stage_id, ...)      sim.add_agent(pos, route=, start=)
+# switch_agent_journey(agent, journey,      agent.follow(route, start=)
+#     stage)
+# get_location(x, y, region_id=)            region.at(x, y)
+# add_region(...) -> int                    surface.add_region(...) -> Region
+# connect_regions(...) -> int               surface.connect_regions(...) -> Region
+# mark_agent_for_removal(agent_id)          agent.remove(), see "Lookup and removal"
+# removed_agents() -> list[int]             sim.removed_agents() -> records
+#                                           with .id, .exit, .time
+# stage_ids() -> list[int]                  sim.stages -> tuple of handles
+# get_stage(stage_id)                       sim.stage("exit1") or
+#                                           sim.stage(id=5)
+# agent(agent_id)                           sim.agent(17), lookup by ID kept for
+#                                           matching trajectory files
+# agents() -> iterator                      sim.agents() -> tuple of handles
+# travel_times(stage_id) -> {int: grid}     sim.travel_times(exit1)
+#                                           -> {Region: grid}
+# set_default_speed_field(region_id, ...)   sim.set_default_speed_field(floor0, ...)
+# set_custom_speed_field(stage_id,          sim.set_custom_speed_field(exit1,
+#     region_id, ...)                           floor0, ...)
+# custom_speed_fields(stage_id)             sim.custom_speed_fields(exit1)
+# clear_custom_speed_field(stage_id,        sim.clear_custom_speed_field(exit1,
+#     region_id)                                floor0)
