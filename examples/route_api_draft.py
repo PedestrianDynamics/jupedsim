@@ -10,15 +10,20 @@ import jupedsim as jps
 sim = jps.Simulation(model, geometry)
 
 # --- Stages -----------------------------------------------------------
-# A waypoint is a point with an arrival radius or a polygon (area).
-# It counts as reached once the agent is within `radius` or inside the polygon.
-# Point: a pair of numbers or a shapely Point.
-# Polygon: a simple polygon without holes, as a sequence of >= 3 (x, y)
-# vertices or a shapely Polygon.
+# Waypoints and exits are areas. General form: a list of (area, region_id)
+# pairs, so one stage can cover several areas (e.g. two doors) and regions.
+# Area: a polygon without holes, as a sequence of >= 3 (x, y) vertices or a
+# shapely Polygon. Only the part of an area inside its region belongs to
+# the stage.
+# Shorthands: a single polygon, or a point with `radius` (a disc-shaped
+# area). With several regions in the geometry, shorthands need region=.
 # Coordinates are in metres, in the same frame as the geometry.
-# The agent navigates to the waypoint's arrival region. For a polygon it
-# steers to a point guaranteed to lie inside it (not the centroid, which can
-# lie outside a concave polygon).
+#
+# Each waypoint and exit gets its own floor field (travel times to its area,
+# per region). Agents follow it to the nearest part of the area; the stage
+# is reached once the agent is inside an area. Floor fields cost memory and
+# computing time, so stages are created once and shared by routes.
+#
 # `name` is optional and used in reprs and error messages; unnamed stages
 # appear as Waypoint(id=3). The messages below assume named stages.
 wp1 = sim.add_waypoint((x1, y1), radius=0.5, name="wp1")
@@ -26,6 +31,9 @@ wp2 = sim.add_waypoint((x2, y2), radius=0.5, name="wp2")
 wp3 = sim.add_waypoint((x3, y3), radius=0.5, name="wp3")
 door_polygon = [(), (), (), ()]
 wp4 = sim.add_waypoint(door_polygon, name="wp4")
+stairs = sim.add_waypoint(
+    [(stair_top, region_floor1), (stair_bottom, region_floor0)], name="stairs"
+)
 exit1 = sim.add_exit(exit_polygon1, name="exit1")
 exit2 = sim.add_exit(exit_polygon2, name="exit2")
 
@@ -99,6 +107,15 @@ tour = jps.Route(
 # One counter per (route, stage), shared by all agents deciding there.
 # Agents arriving in the same step are served in agent-id order.
 
+# Nearest: each agent picks the target with the shortest travel time from
+# its position, read from the targets' floor fields. No weights.
+route_n = jps.Route(
+    [
+        (wp1, jps.Nearest([exit1, exit2])),
+    ],
+    start=wp1,
+)
+
 # --- Agents -----------------------------------------------------------
 # `start` is the agent's first target; agent.stage is always the stage the
 # agent is heading for. An agent spawned inside its start stage's arrival
@@ -149,7 +166,11 @@ while sim.agent_count() > 0 and sim.elapsed_time() < 600:
     # Held agents go on in arrival order (ties by agent id), current rule.
     route_c.release(wp2)
 
-    # Close an exit for all routes. Rules skip closed targets.
+    # Close an exit for all routes (a method on the exit handle;
+    # sim.close() frees the whole simulation). Rules skip closed targets.
+    # Closing decides which stages may be targets. To slow agents down or
+    # make them avoid an area (e.g. smoke), change the speed fields the
+    # floor fields are computed with instead.
     # informed=True:  agents assigned to it by a rule are reassigned now by
     #                 that rule and walk directly to the new target.
     # informed=False: agents walk to the exit and are reassigned there.
@@ -161,11 +182,11 @@ while sim.agent_count() > 0 and sim.elapsed_time() < 600:
     # Rules only skip closed immediate targets: in route_c, wp3 (which leads
     # only to exit2) can still be chosen at wp2 after exit2 closes; agents
     # sent there are stranded at wp3.
-    stranded = sim.close(exit2, informed=True)  # agents stranded now
+    stranded = exit2.close(informed=True)  # agents stranded now
     # Valid target again. Agents stranded by this exit resume: they re-run
     # the decision at their last decision stage. Agents already rerouted
     # are not reassigned.
-    resumed = sim.open(exit2)  # agents that resumed
+    resumed = exit2.open()  # agents that resumed
 
 # --- State (read-only) ------------------------------------------------
 # After the runtime block: agent2 is in direct steering, agent5 on route_a.
@@ -203,6 +224,8 @@ sim.add_waypoint(door_polygon, radius=0.5)
 # ValueError: radius applies to point waypoints only
 sim.add_waypoint((x1, y1), radius=0)
 # ValueError: radius must be > 0
+sim.add_waypoint(door_polygon)  # geometry with several regions
+# ValueError: geometry has several regions; pass region= or [(area, region_id)]
 sim.add_waypoint(polygon_with_hole)
 # ValueError: waypoint polygons must be simple and without holes
 jps.Route([])
@@ -225,6 +248,8 @@ jps.RoundRobin({exit1: 0.6, exit2: 0.4})
 # ValueError: weights must be integers; for probabilities use jps.Random({...}, seed=...)
 route_c.update_weights(wp1, {wp2: 3})
 # ValueError: wp1 has a fixed transition, not a weighted rule
+route_n.update_weights(wp1, {exit1: 2})
+# ValueError: wp1 uses Nearest, which has no weights
 route_c.update_weights(wp2, {wp4: 1})
 # ValueError: wp4 is not a target of wp2; targets are wp3, exit1, exit2 (see route.weights(wp2))
 route_c.weights(wp1)
@@ -244,7 +269,7 @@ route_g.update_weights(wp1, {exit1: 0})
 # ValueError: with these weights no exit or STAY is reachable from wp1, wp2;
 #   weights unchanged
 route_c.hold(exit1)
-# ValueError: exits cannot be held; use sim.close(exit1)
+# ValueError: exits cannot be held; use exit1.close()
 route_c.release(wp1)
 # ValueError: wp1 is not held
 sim.add_agent(pos, route=route_a, target=(x, y))
@@ -276,18 +301,18 @@ agent1.stage  # after agent1 left through an exit
 #    in arrival order by the current rule -> held == False.
 # 4. Exit closed on the way:
 #    stage == exit2, assigned by the rule at wp2:
-#      sim.close(exit2, informed=True)  -> reassigned now to exit1.
-#      sim.close(exit2, informed=False) -> walks to exit2, reassigned there.
+#      exit2.close(informed=True)  -> reassigned now to exit1.
+#      exit2.close(informed=False) -> walks to exit2, reassigned there.
 #    stage == exit2 via the fixed transition wp3 -> exit2:
 #      informed=True  -> stranded now, stops where it is.
 #      informed=False -> walks to exit2, stranded on arrival.
-#      Returned by sim.close (informed=True); resumes on sim.open(exit2),
+#      Returned by exit2.close (informed=True); resumes on exit2.open(),
 #      or the user calls agent.follow(...).
 # 5. No open target left:
 #    rule at wp2 is RoundRobin({exit1: 1, exit2: 1}); both exits closed ->
 #    agents deciding at wp2 are stranded inside wp2; agents walking to
 #    either exit are stranded where they are (informed) or at the exit.
-#    sim.open(exit1) -> they re-run the decision at wp2 and go to exit1.
+#    exit1.open() -> they re-run the decision at wp2 and go to exit1.
 # 6. Switching routes:
 #    agent.follow(route_b) -> stage == wp2 (first stage of route_b);
 #    held/stranded are cleared; counters of route_c are not changed.
