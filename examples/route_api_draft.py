@@ -19,7 +19,8 @@ import jupedsim as jps
 
 # --- Regions ----------------------------------------------------------
 # Regions are returned as handles, like stages, not as bare ints.
-# `name` is optional and used in reprs and error messages.
+# `name` is optional and used in reprs and error messages. Region handles
+# expose .id, .name (None if unnamed) and .height.
 surface = jps.WalkableSurface()
 floor0 = surface.add_region(polygon=floor0_polygon, height=0.0, name="floor0")
 floor1 = surface.add_region(polygon=floor1_polygon, height=3.0, name="floor1")
@@ -58,6 +59,7 @@ surface.regions_at((x, y))  # every region covering a point (discovery)
 surface.regions_at((5, 2))  # (floor0, floor1): stacked floors
 floor1.at(5, 2)  # Location(5.0, 2.0, region=floor1)
 floor1.at(5, 2).xy  # (5.0, 2.0) when only the coordinates are needed
+floor1.at(5, 2).region  # floor1
 
 # The surface is copied when the simulation is constructed: later edits to
 # `surface` do not affect `sim`. No builder is needed for this.
@@ -98,6 +100,7 @@ sim = jps.Simulation(model, surface)
 #
 # `name` is optional and used in reprs and error messages; unnamed stages
 # appear as Waypoint(id=3). The messages below assume named stages.
+# Stage handles expose .id and .name (None if unnamed).
 wp1 = sim.add_waypoint((x1, y1), radius=0.5, region=floor0, name="wp1")
 wp2 = sim.add_waypoint((x2, y2), radius=0.5, region=floor0, name="wp2")
 wp3 = sim.add_waypoint((x3, y3), radius=0.5, region=floor0, name="wp3")
@@ -252,8 +255,10 @@ while sim.agent_count() > 0 and sim.elapsed_time() < 600:
     print(route_c.weights(wp2))  # {wp3: 0, exit1: 2, exit2: 1}
 
     # Hold agents at a stage (e.g. phased evacuation), weights are kept.
-    # Applies to all agents whose current target is wp2, including those
-    # already inside it; agents that completed wp2 are not affected.
+    # hold() puts wp2 on route_c into a held state that lasts until
+    # release(): every agent on route_c whose target is wp2, now or later
+    # (including agents added after the call), stops inside wp2. Agents
+    # that completed wp2 before the call are not affected.
     # A held agent that follow()s another route is no longer held.
     route_c.hold(wp2)
     # Held agents go on in arrival order (ties by agent id), current rule.

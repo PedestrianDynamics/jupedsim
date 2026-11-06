@@ -39,11 +39,8 @@ for polygon, route in ((room_a, route_a), (room_b, route_b)):
     for x, y in positions:
         sim.add_agent(floor.at(x, y), route=route)
 
-# Hold room B at its door before anyone moves.
-# GAP: the draft says hold() applies to agents whose current target is
-# door_b when it is called. This example also needs agents that target
-# door_b later (e.g. added after the call) to stop; the draft should say
-# that hold() is a state of the stage until release().
+# Hold room B at its door before anyone moves. hold() is a state of the
+# stage until release(), so it also stops agents that target door_b later.
 route_b.hold(door_b)
 
 released = False
