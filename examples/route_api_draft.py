@@ -468,6 +468,17 @@ agent1.stage  # after agent1 left through an exit
 custom_sim.add_agent(pos, route=route_a)  # simulation with a custom model
 # ValueError: custom models need state=; pass your model's agent state
 
+# --- Lookup and removal -----------------------------------------------
+# Removal is scheduled, as on master: the agent leaves at the start of the
+# next iterate(), before agents interact. Until then it is still alive.
+# A removed agent's handle keeps .id and .alive readable; everything else
+# raises.
+agent1.remove()
+sim.stages  # (Waypoint(id=0, name="wp1"), ..., Exit(id=8, name="exit_ground"))
+sim.stage("exit1")  # Exit(id=5, name="exit1")
+sim.stage(id=5)  # the same exit, by id
+sim.agent(17)  # Agent(id=17)
+
 # --- Lifecycle of one agent -------------------------------------------
 # 1. Spawned inside its first waypoint:
 #    sim.add_agent(pos_in_wp1, route=route_c)
@@ -513,7 +524,7 @@ custom_sim.add_agent(pos, route=route_a)  # simulation with a custom model
 # get_location(x, y, region_id=)            region.at(x, y)
 # add_region(...) -> int                    surface.add_region(...) -> Region
 # connect_regions(...) -> int               surface.connect_regions(...) -> Region
-# mark_agent_for_removal(agent_id)          agent.remove(), see below
+# mark_agent_for_removal(agent_id)          agent.remove(), see "Lookup and removal"
 # removed_agents() -> list[int]             sim.removed_agents() -> agents with
 #                                           alive == False
 # stage_ids() -> list[int]                  sim.stages -> tuple of handles
@@ -529,12 +540,3 @@ custom_sim.add_agent(pos, route=route_a)  # simulation with a custom model
 # custom_speed_fields(stage_id)             sim.custom_speed_fields(exit1)
 # clear_custom_speed_field(stage_id,        sim.clear_custom_speed_field(exit1,
 #     region_id)                                floor0)
-# Removal is scheduled, as on master: the agent leaves at the start of the
-# next iterate(), before agents interact. Until then it is still alive.
-# A removed agent's handle keeps .id and .alive readable; everything else
-# raises.
-agent1.remove()
-sim.stages  # (Waypoint(id=0, name="wp1"), ..., Exit(id=8, name="exit_ground"))
-sim.stage("exit1")  # Exit(id=5, name="exit1")
-sim.stage(id=5)  # the same exit, by id
-sim.agent(17)  # Agent(id=17)
