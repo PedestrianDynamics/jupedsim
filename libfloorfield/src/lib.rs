@@ -235,7 +235,7 @@ impl MultiRegionFloorfield {
     }
 
     fn region_default_speed(&self, region: usize) -> Result<Vec<f64>, MultiRegionError> {
-        Ok(self.default_speed(region)?.to_vec())
+        Ok(widen(self.default_speed(region)?))
     }
 
     fn set_region_default_speed(
@@ -243,11 +243,11 @@ impl MultiRegionFloorfield {
         region: usize,
         values: &[f64],
     ) -> Result<(), MultiRegionError> {
-        self.set_default_speed(region, values)
+        self.set_default_speed(region, &narrow(values))
     }
 
     fn region_speed(&self, region: usize, dest: usize) -> Result<Vec<f64>, MultiRegionError> {
-        Ok(self.speed(region, dest)?.to_vec())
+        Ok(widen(self.speed(region, dest)?))
     }
 
     fn region_has_speed_override(
@@ -264,7 +264,7 @@ impl MultiRegionFloorfield {
         dest: usize,
         values: &[f64],
     ) -> Result<(), MultiRegionError> {
-        self.set_speed_override(region, dest, values)
+        self.set_speed_override(region, dest, &narrow(values))
     }
 
     fn clear_region_speed_override(
@@ -303,7 +303,7 @@ impl MultiRegionFloorfield {
         p: Point2d,
         dest: usize,
     ) -> Result<f64, MultiRegionError> {
-        self.travel_time(region, p.x, p.y, dest)
+        self.travel_time(region, p.x, p.y, dest).map(f64::from)
     }
 
     fn region_travel_times(
@@ -311,7 +311,7 @@ impl MultiRegionFloorfield {
         region: usize,
         dest: usize,
     ) -> Result<Vec<f64>, MultiRegionError> {
-        self.travel_times(region, dest)
+        Ok(widen(&self.travel_times(region, dest)?))
     }
 
     fn region_directions(
@@ -325,6 +325,17 @@ impl MultiRegionFloorfield {
             .map(|(x, y)| Point2d { x, y })
             .collect())
     }
+}
+
+/// Speeds and travel times are stored as f32 and cross the bridge as f64.
+fn widen(values: &[f32]) -> Vec<f64> {
+    values.iter().map(|&v| f64::from(v)).collect()
+}
+
+/// A speed from C++ outside the f32 range becomes infinite or 0, which
+/// `checked_speed` rejects.
+fn narrow(values: &[f64]) -> Vec<f32> {
+    values.iter().map(|&v| v as f32).collect()
 }
 
 #[cfg(test)]

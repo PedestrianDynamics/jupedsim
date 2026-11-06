@@ -101,7 +101,7 @@ impl GridSpec {
 /// Lowest speed, in m/s, a walkable cell can have. Travel times grow with
 /// 1 / speed: much slower cells would make them overflow to infinity, and
 /// cells that cannot be reached leave agents without a direction.
-pub const MIN_SPEED: f64 = 1e-2;
+pub const MIN_SPEED: f32 = 1e-2;
 
 /// Rasterise a region onto an existing grid: 0.0 outside, between
 /// [`MIN_SPEED`] and 1 inside, slowed within `wall_influence_radius` of a wall.
@@ -127,11 +127,11 @@ pub fn speed_field_on_grid(
     claimed: &[([f64; 2], [f64; 2])],
     grid: &GridParams,
     wall_influence_radius: f64,
-) -> Vec<f64> {
+) -> Vec<f32> {
     let polygon = polygon(&region.outer, &region.holes);
     let tree = rstar::RTree::bulk_load(wall_segments(region, portals));
 
-    let mut speed_field = vec![0.0f64; grid.cell_count()];
+    let mut speed_field = vec![0.0f32; grid.cell_count()];
     for (idx, speed) in speed_field.iter_mut().enumerate() {
         let (px, py) = grid.cell_center(idx as u32);
         let on_claimed_seam = || claimed.iter().any(|&(a, b)| on_segment(a, b, [px, py]));
@@ -146,7 +146,7 @@ pub fn speed_field_on_grid(
             .next()
             .map(|(_, d2)| d2)
             .unwrap_or(f64::INFINITY); // no walls at all
-        *speed = (dist2.sqrt() / wall_influence_radius).clamp(MIN_SPEED, 1.0);
+        *speed = (dist2.sqrt() / wall_influence_radius).clamp(f64::from(MIN_SPEED), 1.0) as f32;
     }
     speed_field
 }
@@ -184,11 +184,12 @@ fn segment_enters_box(p0: [f64; 2], p1: [f64; 2], min: [f64; 2], max: [f64; 2]) 
 
 /// Sobel gradient of a travel-time field at a cell. Out-of-grid and
 /// unreachable neighbours fall back to the centre value, so the gradient stays
-/// finite next to walls.
-pub fn sobel_gradient(grid: &GridParams, row: i32, col: i32, tt: &[f64]) -> (f64, f64) {
+/// finite next to walls. Computed in f64: the differences of neighbouring
+/// times are small next to the times themselves.
+pub fn sobel_gradient(grid: &GridParams, row: i32, col: i32, tt: &[f32]) -> (f64, f64) {
     let w = grid.width as i32;
     let h = grid.height as i32;
-    let tc = tt[row as usize * grid.width as usize + col as usize];
+    let tc = f64::from(tt[row as usize * grid.width as usize + col as usize]);
     if !tc.is_finite() {
         return (0.0, 0.0);
     }
@@ -196,7 +197,7 @@ pub fn sobel_gradient(grid: &GridParams, row: i32, col: i32, tt: &[f64]) -> (f64
         if r < 0 || r >= h || c < 0 || c >= w {
             return tc;
         }
-        let v = tt[r as usize * grid.width as usize + c as usize];
+        let v = f64::from(tt[r as usize * grid.width as usize + c as usize]);
         if v.is_infinite() {
             tc
         } else {
@@ -492,7 +493,7 @@ mod tests {
         let walls = speed_field_on_grid(&room, &no_portals(), &[], &grid, 2.0);
         let portal = speed_field_on_grid(&room, &HashSet::from([(0, 1)]), &[], &grid, 2.0);
 
-        let at = |f: &[f64], r: usize, c: usize| f[r * 5 + c];
+        let at = |f: &[f32], r: usize, c: usize| f[r * 5 + c];
         // Next to that edge (column 3, middle rows) agents are faster when it is a portal...
         assert!(at(&portal, 2, 3) > at(&walls, 2, 3));
         // ...next to the opposite wall (column 0) nothing changes.
@@ -512,7 +513,7 @@ mod tests {
         let portal = speed_field_on_grid(&room, &HashSet::from([(1, 0)]), &[], &unit_grid(), 1.5);
 
         // Cell (row 4, col 3), centre (3.5, 4.5), lies 0.5 from that edge.
-        let at = |f: &[f64]| f[4 * 10 + 3];
+        let at = |f: &[f32]| f[4 * 10 + 3];
         assert!(at(&portal) > at(&walls));
         // The hole stays an obstacle either way.
         assert_eq!(portal[5 * 10 + 5], 0.0);
