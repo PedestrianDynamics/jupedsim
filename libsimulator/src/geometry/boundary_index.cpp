@@ -599,26 +599,6 @@ std::vector<LineSegment> PortalBoundaryIndex::query(const Location& loc, double 
     }
 
     std::vector<std::vector<std::pair<double, double>>> parts_of_wall(candidates.walls.size());
-
-    // Shortcut: one wall, in the agent's own region, and no seam in reach. Nothing else lies
-    // within the disc, so nothing can shadow any part of it: it is visible whole -- unless its
-    // supporting line runs through the agent, which the visibility pass leaves out (see
-    // process_window_job). The orientation test is exact on the double inputs, so this agrees
-    // with the exact pass without building an arrangement.
-    const bool no_seams =
-        std::all_of(candidates.seams_of.begin(), candidates.seams_of.end(), [](const auto& s) {
-            return s.empty();
-        });
-    if(no_seams && candidates.walls.size() == 1 &&
-       candidates.wall_ids_of[loc.region()].size() == 1) {
-        const auto& wall = candidates.walls.front();
-        if(CGAL::orientation(wall.p1.cgal(), wall.p2.cgal(), p.cgal()) == CGAL::COLLINEAR) {
-            return {};
-        }
-        parts_of_wall.front().emplace_back(0.0, 1.0);
-        return assemble_answer(candidates, p, maximum_distance, parts_of_wall);
-    }
-
     std::vector<WindowJob> pending{};
     pending.push_back(WindowJob{loc.region(), 0});
     while(!pending.empty()) {
