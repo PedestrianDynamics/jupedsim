@@ -147,6 +147,10 @@ public:
     /// steering.
     std::map<std::size_t, std::optional<SpeedGrid>>
     custom_speed_fields(BaseStage::ID stage_id) const;
+    /// Whether stage @p stage_id has a speed field of its own in @p region_id, without copying
+    /// it. False for a stage without an area, whatever @p region_id is; for a stage with an
+    /// area, throws for an unknown region.
+    bool has_custom_speed_field(BaseStage::ID stage_id, std::size_t region_id) const;
     /// Routes agents to the area of stage @p stage_id with @p values in @p region_id instead of
     /// the default speed field. Other stages are not affected. Throws for a stage without an
     /// area.

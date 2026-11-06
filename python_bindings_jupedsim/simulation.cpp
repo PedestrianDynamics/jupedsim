@@ -219,6 +219,13 @@ void init_simulation(py::module_& m)
             },
             py::arg("stage_id"))
         .def(
+            "has_custom_speed_field",
+            [](const Simulation& sim, uint64_t stage_id, std::size_t region_id) {
+                return sim.has_custom_speed_field(stage_id, region_id);
+            },
+            py::arg("stage_id"),
+            py::arg("region_id"))
+        .def(
             "set_default_speed_field",
             [](Simulation& sim, std::size_t region_id, const SpeedArray& values) {
                 sim.set_default_speed_field(region_id, flat_speed_field(sim, region_id, values));

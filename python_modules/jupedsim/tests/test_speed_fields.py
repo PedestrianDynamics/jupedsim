@@ -48,6 +48,7 @@ def test_speed_fields_round_trip(corridor):
     sim, room, left, right = corridor
     default = sim.default_speed_fields()[room].values
     assert sim.custom_speed_fields(left) == {room: None}
+    assert not sim.has_custom_speed_field(left, room)
 
     # Any array-like with the grid's shape is taken, a nested list too.
     sim.set_default_speed_field(room, (default * 2.0).tolist())
@@ -59,10 +60,13 @@ def test_speed_fields_round_trip(corridor):
     assert np.array_equal(
         sim.custom_speed_fields(left)[room].values, default * 4.0
     )
+    assert sim.has_custom_speed_field(left, room)
     assert sim.custom_speed_fields(right)[room] is None
+    assert not sim.has_custom_speed_field(right, room)
 
     sim.clear_custom_speed_field(left, room)
     assert sim.custom_speed_fields(left)[room] is None
+    assert not sim.has_custom_speed_field(left, room)
 
 
 def test_invalid_speed_fields_are_rejected(corridor):
@@ -87,7 +91,10 @@ def test_invalid_speed_fields_are_rejected(corridor):
 
     with pytest.raises(jps.SimulationError):
         sim.set_default_speed_field(room + 1, default)
+    with pytest.raises(jps.SimulationError):
+        sim.has_custom_speed_field(left, room + 1)
     assert sim.custom_speed_fields(steering) == {}
+    assert not sim.has_custom_speed_field(steering, room)
     with pytest.raises(jps.SimulationError, match="no area"):
         sim.set_custom_speed_field(steering, room, default)
     with pytest.raises(jps.SimulationError, match="no area"):

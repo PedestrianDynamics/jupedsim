@@ -301,7 +301,9 @@ TEST(Simulation, SpeedFieldsReachTheirStages)
     const auto custom_field = flat.sim->custom_speed_fields(custom).at(flat.room_id);
     ASSERT_TRUE(custom_field.has_value());
     EXPECT_EQ(custom_field->values, scaled(defaults, 2.0));
+    EXPECT_TRUE(flat.sim->has_custom_speed_field(custom, flat.room_id));
     EXPECT_FALSE(flat.sim->custom_speed_fields(other).at(flat.room_id).has_value());
+    EXPECT_FALSE(flat.sim->has_custom_speed_field(other, flat.room_id));
     const auto custom_faster = time(custom);
     EXPECT_LT(custom_faster, custom_initial);
     EXPECT_EQ(time(other), other_initial);
@@ -315,6 +317,7 @@ TEST(Simulation, SpeedFieldsReachTheirStages)
     // Without its custom speed field, the stage follows the default again.
     flat.sim->clear_custom_speed_field(custom, flat.room_id);
     EXPECT_FALSE(flat.sim->custom_speed_fields(custom).at(flat.room_id).has_value());
+    EXPECT_FALSE(flat.sim->has_custom_speed_field(custom, flat.room_id));
     EXPECT_LT(time(custom), custom_faster);
 }
 
@@ -346,9 +349,11 @@ TEST(Simulation, InvalidSpeedFieldsAreRejected)
     EXPECT_THROW(flat.sim->grid_info(99), SimulationError);
     EXPECT_THROW(flat.sim->set_default_speed_field(99, defaults.values), SimulationError);
     EXPECT_THROW(flat.sim->set_custom_speed_field(exit, 99, defaults.values), SimulationError);
+    EXPECT_THROW(flat.sim->has_custom_speed_field(exit, 99), SimulationError);
 
     // A stage without an area has nothing to route to.
     EXPECT_TRUE(flat.sim->custom_speed_fields(steering).empty());
+    EXPECT_FALSE(flat.sim->has_custom_speed_field(steering, flat.room_id));
     EXPECT_THROW(
         flat.sim->set_custom_speed_field(steering, flat.room_id, defaults.values), SimulationError);
     EXPECT_THROW(flat.sim->clear_custom_speed_field(steering, flat.room_id), SimulationError);
@@ -464,6 +469,7 @@ TEST(SimulationClose, RejectsFurtherUse)
     // The stage outlives close, its destination's floor field does not.
     EXPECT_THAT([&] { sim.travel_times(stage); }, closed);
     EXPECT_THAT([&] { sim.custom_speed_fields(stage); }, closed);
+    EXPECT_THAT([&] { sim.has_custom_speed_field(stage, flat.room_id); }, closed);
     EXPECT_THAT([&] { sim.set_custom_speed_field(stage, flat.room_id, {}); }, closed);
     EXPECT_THAT([&] { sim.clear_custom_speed_field(stage, flat.room_id); }, closed);
     EXPECT_THAT([&] { sim.default_speed_fields(); }, closed);

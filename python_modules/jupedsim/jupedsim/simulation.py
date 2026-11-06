@@ -132,6 +132,12 @@ class Simulation:
             floorfield_options=floorfield_options,
         )
         self._timer = Timer(self._obj, timer_log_level=timer_log_level)
+        # Stages with a floor field: a default speed field change reaches those
+        # without a speed field of their own in its region.
+        self._routed_stages: list[int] = []
+        # Stage id -> iteration from which on its travel times may differ from
+        # the last ones handed out by _take_travel_time_changes.
+        self._travel_time_changes: dict[int, int] = {}
 
     def add_waypoint_stage(
         self,
@@ -153,7 +159,9 @@ class Simulation:
         Raises:
             ValueError: If an area has holes.
         """
-        return self._obj.add_waypoint_stage(areas)
+        stage_id = self._obj.add_waypoint_stage(areas)
+        self._routed_stage_added(stage_id)
+        return stage_id
 
     def add_exit_stage(
         self,
@@ -175,7 +183,9 @@ class Simulation:
         Raises:
             ValueError: If an area has holes.
         """
-        return self._obj.add_exit_stage(areas)
+        stage_id = self._obj.add_exit_stage(areas)
+        self._routed_stage_added(stage_id)
+        return stage_id
 
     def add_direct_steering_stage(self) -> int:
         """Add an direct steering stage to the simulation.
@@ -315,6 +325,26 @@ class Simulation:
         """
         return self._obj.custom_speed_fields(stage_id)
 
+    def has_custom_speed_field(self, stage_id: int, region_id: int) -> bool:
+        """Whether a stage has a speed field of its own in a region.
+
+        Unlike :func:`custom_speed_fields`, this does not copy the speed fields.
+
+        Args:
+            stage_id: Id of the stage.
+            region_id: Id of the region.
+
+        Returns:
+            ``True`` if the stage uses its own speed field in this region, ``False`` if
+            it uses the default. ``False`` for a stage without an area to route to, such
+            as a direct steering stage, whatever ``region_id`` is.
+
+        Raises:
+            SimulationError: if the stage does not exist, or if it has an area to route
+                to and the region does not exist.
+        """
+        return self._obj.has_custom_speed_field(stage_id, region_id)
+
     def default_speed_fields(self) -> dict[int, SpeedGrid]:
         """Get the default walking speeds the floor fields are computed with, for every region.
 
@@ -353,6 +383,9 @@ class Simulation:
             SimulationError: if a value is not allowed or the region does not exist.
         """
         self._obj.set_default_speed_field(region_id, values)
+        for stage_id in self._routed_stages:
+            if not self.has_custom_speed_field(stage_id, region_id):
+                self._travel_times_changed(stage_id)
 
     def set_custom_speed_field(
         self, stage_id: int, region_id: int, values: npt.ArrayLike
@@ -378,6 +411,7 @@ class Simulation:
                 exist, or the stage has no area to route to.
         """
         self._obj.set_custom_speed_field(stage_id, region_id, values)
+        self._travel_times_changed(stage_id)
 
     def clear_custom_speed_field(self, stage_id: int, region_id: int) -> None:
         """Remove a stage's own speed field in a region, so it uses the default again.
@@ -393,7 +427,25 @@ class Simulation:
             SimulationError: if the region or stage does not exist, or the stage has
                 no area to route to.
         """
+        had_one = self.has_custom_speed_field(stage_id, region_id)
         self._obj.clear_custom_speed_field(stage_id, region_id)
+        if had_one:
+            self._travel_times_changed(stage_id)
+
+    def _routed_stage_added(self, stage_id: int) -> None:
+        self._routed_stages.append(stage_id)
+        self._travel_times_changed(stage_id)
+
+    def _travel_times_changed(self, stage_id: int) -> None:
+        self._travel_time_changes.setdefault(stage_id, self.iteration_count())
+
+    def _take_travel_time_changes(self) -> dict[int, int]:
+        """The stages whose travel times may have changed since the last call, each
+        with the iteration from which on agents are routed with the new ones, by
+        ascending stage id. For :class:`~jupedsim.Hdf5TrajectoryWriter`."""
+        changes = dict(sorted(self._travel_time_changes.items()))
+        self._travel_time_changes.clear()
+        return changes
 
     def mark_agent_for_removal(self, agent_id: int):
         """Marks an agent for removal.
