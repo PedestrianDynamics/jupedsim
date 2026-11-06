@@ -2,7 +2,7 @@
 #include "cfg_cgal.hpp"
 #include "geometry/area_piece.hpp"
 #include "geometry/geometry.hpp"
-#include "geometry/walkable_surface.hpp"
+#include "geometry/geometry_builder.hpp"
 #include "geometry_fixtures.hpp"
 #include "kernel.hpp"
 #include "line_segment.hpp"
@@ -67,7 +67,7 @@ TEST(GeometryLocate, FlatRegionYieldsGroundHeight)
     ASSERT_EQ(room.geometry->region_count(), 1);
 
     const auto loc = room.geometry->locate_in_region(room.room_id, {5, 5});
-    ASSERT_NE(loc.face, SurfaceMesh::null_face());
+    ASSERT_NE(loc.face, epick::Mesh::null_face());
     EXPECT_NEAR(loc.point.z(), 0.0, 1e-9);
     EXPECT_NEAR(loc.point.x(), 5.0, 1e-9);
     EXPECT_NEAR(loc.point.y(), 5.0, 1e-9);
@@ -77,7 +77,7 @@ TEST(GeometryLocate, PointOutsideRegionFootprintMisses)
 {
     const auto floors = test_geometries::stacked_floors({0, 0}, {10, 10}, 3.0);
     EXPECT_EQ(
-        floors.geometry->locate_in_region(floors.room_1, {20, 20}).face, SurfaceMesh::null_face());
+        floors.geometry->locate_in_region(floors.room_1, {20, 20}).face, epick::Mesh::null_face());
 }
 
 TEST(GeometryLocate, RampInterpolatesHeightOnFace)
@@ -247,7 +247,7 @@ TEST(GeometryVisibility, TheFloorAboveIsNotInSightThoughNothingStandsBetween)
     EXPECT_FALSE(floors.geometry->no_geometry_between(*below, *above));
 }
 
-TEST(GeometryVisibility, CrossingASeamOntoWalkableSurfaceDoesNotBlock)
+TEST(GeometryVisibility, CrossingASeamOntoTheSurfaceDoesNotBlock)
 {
     const auto floors = test_geometries::switchback_stair();
     const auto who = floors.geometry->get_location_near_z(12.0, 2.0, 1.5, 0.5);
@@ -446,8 +446,8 @@ TEST(GeometryClipToRegion, ClippedAtSeam)
 TEST(GeometryClipToRegion, ConcaveCreatesSeveralPieces)
 {
     // A U open at the top. The area runs across both arms and the gap between them.
-    const auto room = test_geometries::from_polygons(
-        {{{0, 0}, {9, 0}, {9, 9}, {6, 9}, {6, 3}, {3, 3}, {3, 9}, {0, 9}}});
+    const auto room = test_geometries::from_polygon(
+        {{0, 0}, {9, 0}, {9, 9}, {6, 9}, {6, 3}, {3, 3}, {3, 9}, {0, 9}});
     const Polygon area{test_geometries::rectangle_points({0, 6}, {9, 8})};
 
     const auto pieces = room.geometry->clip_to_region(area, room.room_id);

@@ -27,13 +27,15 @@ def main() -> None:
     room2 = Polygon([(15, 0), (25, 0), (25, 10), (15, 10)])
     corridor = Polygon([(10, 4.5), (28, 4.5), (28, 5.5), (10, 5.5)])
 
-    surface = jps.WalkableSurface()
-    region = surface.add_region(polygon=corridor.union(room1.union(room2)))
+    geo_builder = jps.GeometryBuilder()
+    region = geo_builder.add_region(
+        polygon=corridor.union(room1.union(room2)), height=0.0
+    )
     out = pathlib.Path("example_traj.h5")
     with jps.Hdf5TrajectoryWriter(output_file=out, every_nth_frame=4) as writer:
         sim = jps.Simulation(
             model=jps.CollisionFreeSpeedModelV2(),
-            geometry=surface,
+            geometry=geo_builder.build(),
             trajectory_writer=writer,
             dt=0.01,
         )

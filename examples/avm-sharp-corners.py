@@ -49,8 +49,8 @@ default_geometry_coordinates = [
 
 polygons = [Polygon(coords) for coords in default_geometry_coordinates]
 walkable_area = unary_union(polygons)
-surface = jps.WalkableSurface()
-region = surface.add_region(polygon=walkable_area)
+geo_builder = jps.GeometryBuilder()
+region = geo_builder.add_region(polygon=walkable_area, height=0.0)
 
 
 print(f"Distributing {N} agents.")
@@ -61,7 +61,7 @@ simulation = jps.Simulation(
         pushout_strength=0.3,  # high values lead to more distance kept away from walls.
     ),
     dt=0.05,
-    geometry=surface,
+    geometry=geo_builder.build(),
     trajectory_writer=jps.Hdf5TrajectoryWriter(
         output_file=pathlib.Path(output_file), every_nth_frame=1
     ),

@@ -28,7 +28,7 @@ void init_simulation(py::module_& m);
 void init_agent_view(py::module_& m);
 void init_python_model(py::module_& m);
 void init_boundary_index(py::module_& m);
-void init_walkable_surface(py::module_& m);
+void init_geometry_builder(py::module_& m);
 
 // Export every public name, recursing into submodules. Must run after all bindings are registered.
 static void set_all(py::module_& m)
@@ -75,6 +75,6 @@ PYBIND11_MODULE(pyjupedsim, m)
     init_stage(m);
     init_simulation(m);
     init_boundary_index(m);
-    init_walkable_surface(m);
+    init_geometry_builder(m);
     set_all(m);
 }

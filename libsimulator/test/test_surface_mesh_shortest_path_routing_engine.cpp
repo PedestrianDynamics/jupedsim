@@ -54,7 +54,7 @@ TEST_F(FlatSquare, OrientationRobustWhenSourceOnEdge)
 TEST(SurfaceMeshShortestPathLShape, OrientationBendsTowardsReflexCorner)
 {
 
-    const auto room = test_geometries::from_polygons({l_shape});
+    const auto room = test_geometries::from_polygon(l_shape);
     SurfaceMeshShortestPathRoutingEngine engine{*room.geometry};
 
     // The route bends around the reflex corner (1,1), so the heading points there rather than at
@@ -81,9 +81,9 @@ TEST(SurfaceMeshShortestPathWallClearance, NegativeIsNoDistance)
 
 TEST(SurfaceMeshShortestPathWallClearance, TheSurfaceEngineKeepsItToo)
 {
-    const auto room = test_geometries::from_polygons({l_shape});
-    const Point3D source{2.5, 0.5, 1};
-    const Point3D target{0.5, 2.5, 1};
+    const auto room = test_geometries::from_polygon(l_shape);
+    const epick::Point3D source{2.5, 0.5, 1};
+    const epick::Point3D target{0.5, 2.5, 1};
 
     // Zero routes through the corner, which is the bare geodesic.
     SurfaceMeshShortestPathRoutingEngine bare{*room.geometry, 0.0};

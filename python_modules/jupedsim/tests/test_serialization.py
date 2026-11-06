@@ -6,13 +6,13 @@ import shapely
 
 
 def _square_simulation(writer):
-    surface = jps.WalkableSurface()
+    surface = jps.GeometryBuilder()
     surface.add_region(
-        polygon=shapely.Polygon([(0, 0), (5, 0), (5, 5), (0, 5)])
+        polygon=shapely.Polygon([(0, 0), (5, 0), (5, 5), (0, 5)]), height=0.0
     )
     return jps.Simulation(
         model=jps.CollisionFreeSpeedModelV2(),
-        geometry=surface,
+        geometry=surface.build(),
         trajectory_writer=writer,
         dt=0.01,
     )

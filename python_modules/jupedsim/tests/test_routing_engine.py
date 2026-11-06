@@ -6,13 +6,10 @@ import jupedsim as jps
 import pytest
 import shapely
 
-OBJ = Path(__file__).parents[3] / "examples/geometry/multi_level_u_stair.obj"
-
 
 @pytest.fixture
-def engine():
-    geo = jps.Geometry.from_obj(str(OBJ))
-    return jps.SurfaceMeshShortestPathRoutingEngine(geo)
+def engine(u_stair_geometry):
+    return jps.SurfaceMeshShortestPathRoutingEngine(u_stair_geometry)
 
 
 def test_valid_and_invalid_locations(engine):
@@ -41,8 +38,8 @@ def test_shortest_path_across_stair(engine):
     assert length > math.dist(path[0], path[-1])
 
 
-def test_geometry_regions_and_render_data():
-    geo = jps.Geometry.from_obj(str(OBJ))
+def test_geometry_regions_and_render_data(u_stair_geometry):
+    geo = u_stair_geometry
     verts = geo.vertices()
     tris = geo.triangles()
     ids = geo.region_id_per_face()
@@ -51,17 +48,13 @@ def test_geometry_regions_and_render_data():
     assert all(len(t) == 3 for t in tris)
     # one region id per triangle, in triangle order
     assert len(ids) == len(tris)
-    # Four regions: lower floor, upper floor, first flight + mid landing, and
-    # the second flight. Fewer is not possible: each flight's border coincides
-    # in (x, y) with stairwell walls it shares no mesh edge with (see
-    # RegionSplit.AFlightCoincidingWithTheStairwellWallsSplitsOff), and the two
-    # flights overlap each other in plan across the U-turn.
-    assert geo.region_count() == 4
+    # Five regions: ground floor, upper floor, landing and the two flights.
+    assert geo.region_count() == 5
     assert max(ids) == geo.region_count() - 1
 
 
-def test_orientation_is_unit_vector():
-    geo = jps.Geometry.from_obj(str(OBJ))
+def test_orientation_is_unit_vector(u_stair_geometry):
+    geo = u_stair_geometry
     engine = jps.SurfaceMeshShortestPathRoutingEngine(geo)
     d = engine.get_orientation(
         # from the ground floor (region 0) to the upper floor (region 1)
@@ -73,14 +66,15 @@ def test_orientation_is_unit_vector():
 
 
 def test_a_route_on_a_flat_region_keeps_clear_of_a_hole():
-    surface = jps.WalkableSurface()
+    surface = jps.GeometryBuilder()
     surface.add_region(
         polygon=shapely.Polygon(
             [(0, 0), (10, 0), (10, 10), (0, 10)],
             holes=[[(4, 4), (6, 4), (6, 6), (4, 6)]],
-        )
+        ),
+        height=0.0,
     )
-    geo = surface.create_geometry()
+    geo = surface.build()
 
     assert geo.region_count() == 1
     assert geo.is_valid_location((1, 1, 1))
@@ -128,9 +122,11 @@ def _path_length(path):
 
 
 def test_simple_path():
-    surface = jps.WalkableSurface()
-    surface.add_region(boundary=[(0, 0), (0, 10), (10, 10), (10, 0)])
-    engine = jps.SurfaceMeshShortestPathRoutingEngine(surface.create_geometry())
+    surface = jps.GeometryBuilder()
+    surface.add_region(
+        boundary=[(0, 0), (0, 10), (10, 10), (10, 0)], height=0.0
+    )
+    engine = jps.SurfaceMeshShortestPathRoutingEngine(surface.build())
 
     # Ensure it does not cross the triangles so that the path length is 2
     path = engine.get_shortest_path((1, 1, 0), (4, 1, 0))
@@ -143,9 +139,11 @@ def _load_geometry_from_wkt(filename: str) -> jps.Geometry:
     """Load a WKT file given relative to the repository root."""
     repo_root = Path(__file__).parents[3]
     wkt = shapely.from_wkt((repo_root / filename).read_text(encoding="utf-8"))
-    surface = jps.WalkableSurface()
-    surface.add_region(polygon=shapely.union_all(shapely.get_parts(wkt)))
-    return surface.create_geometry()
+    surface = jps.GeometryBuilder()
+    surface.add_region(
+        polygon=shapely.union_all(shapely.get_parts(wkt)), height=0.0
+    )
+    return surface.build()
 
 
 ROUTE_LENGTH_CONTINUITY = [

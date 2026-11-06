@@ -51,7 +51,7 @@ The various types of stages will be explained below.
     This needs to be uphold when the geometry is changed.
 
 Each stage lies in one region of the walkable area. Its ``region_id`` is the id
-:meth:`~jupedsim.WalkableSurface.add_region` returned for that region, see :doc:`geometry`.
+:meth:`~jupedsim.GeometryBuilder.add_region` returned for that region, see :doc:`geometry`.
 
 Waypoint
 ^^^^^^^^

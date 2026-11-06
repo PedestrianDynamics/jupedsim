@@ -8,10 +8,10 @@ def test_geometry_holes_returns_coordinates():
     hole = [(40, 40), (60, 40), (60, 60), (40, 60)]
     poly = shapely.Polygon(outer, holes=[hole])
 
-    surface = jps.WalkableSurface()
-    room = surface.add_region(polygon=poly)
+    surface = jps.GeometryBuilder()
+    room = surface.add_region(polygon=poly, height=0.0)
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=surface
+        model=jps.CollisionFreeSpeedModel(), geometry=surface.build()
     )
     geo = simulation.get_geometry()
 

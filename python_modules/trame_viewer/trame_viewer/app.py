@@ -60,6 +60,8 @@ class ViewerMode:
     reset: Callable[[], None]
     build_drawer: Callable[[], None]
     on_right_click: Callable[[float, float], None] | None = None
+    # Offered only while a jps.Geometry is loaded, see state.has_geometry.
+    needs_geometry: bool = False
 
 
 @dataclass(frozen=True)
@@ -184,9 +186,10 @@ def travel_time_surface(
 
     @p grids holds the grid of every region by region id, for one stage: as
     Hdf5TrajectoryLoader.load_travel_times or Simulation.travel_times return them. Every
-    region of a WalkableSurface is planar - floors are flat, stairs and ramps are planar
-    quads - so a cell takes its region's plane and cells on stairs and ramps follow the
-    slope; @p lift raises the quads above the mesh to keep them from z-fighting.
+    region of a geometry built by a GeometryBuilder is planar - floors are flat, stairs and
+    ramps are planar quads - so a cell takes its region's plane and cells on stairs and
+    ramps follow the slope; @p lift raises the quads above the mesh to keep them from
+    z-fighting.
     Carries the cell scalar "travel_time" and the point scalar "elevation" (for clipping),
     the cells' position on the lattice all grids share as "lattice_row" / "lattice_col",
     and "direction": the walking direction tilted onto the cell's plane, zero inside the
@@ -302,7 +305,7 @@ def find_free_port() -> int:
         return s.getsockname()[1]
 
 
-def build_app(obj_path: str | None, h5_path: str | None = None):
+def build_app(h5_path: str | None = None):
     """Build the trame server hosting a pyvista Plotter"""
     plotter = pv.Plotter()
     plotter.set_background("white")
@@ -330,7 +333,7 @@ def build_app(obj_path: str | None, h5_path: str | None = None):
         False  # False -> colour by height, True -> by region id
     )
     state.mesh_name = ""
-    state.obj_file = None
+    state.h5_file = None
     state.n_points = 0
     state.n_cells = 0
     state.n_regions = 0
@@ -355,8 +358,8 @@ def build_app(obj_path: str | None, h5_path: str | None = None):
     state.boundary_query = "—"  # query point of the highlighted result
     state.boundary_count = 0  # number of highlighted segments
     state.boundary_query_us = 0  # BoundaryIndex.query() solve time
-    # Pathfinding and Boundary Highlight need a jps.Geometry, which only an OBJ provides; an
-    # HDF5 file brings just its mesh.
+    # Pathfinding and Boundary Highlight need a jps.Geometry, which no loadable format provides
+    # yet; an HDF5 file brings just its mesh.
     state.has_geometry = False
     # Travel Times mode: floor field travel times from an HDF5 file's /travel_times.
     state.travel_available = False
@@ -379,7 +382,7 @@ def build_app(obj_path: str | None, h5_path: str | None = None):
     state.replay_time = "—"
     state.replay_agents = 0  # agents in the shown frame, including clipped ones
 
-    # Holds the currently loaded geometry + mesh + its height range; swapped out by load_mesh().
+    # Holds the currently loaded geometry + mesh + its height range; swapped out on every load.
     current: dict = {
         "mesh": None,
         "geometry": None,
@@ -420,7 +423,7 @@ def build_app(obj_path: str | None, h5_path: str | None = None):
     # on its first query (users may never enter the mode / switch variants) and
     # cached per variant; all are dropped on mesh load.
     boundary: dict = {"indices": {}, "loc": None}
-    engine = None  # Routing engine - populated in load_mesh()
+    engine = None  # Routing engine - needs a Geometry, which no loadable format provides yet
     picker = vtkCellPicker()
     picker.SetTolerance(0.0005)
 
@@ -656,26 +659,6 @@ def build_app(obj_path: str | None, h5_path: str | None = None):
             state.replay_time = "—"
             state.replay_agents = 0
 
-    def load_mesh(obj_path: str, name: str) -> None:
-        nonlocal engine
-        # Geometry is the single source of truth: the rendered vertices/faces
-        # and the region colouring are read from it, and the engine borrows the
-        # SAME instance, so routing, picking and region colouring all agree.
-        geo = jps.Geometry.from_obj(obj_path)
-        engine = jps.SurfaceMeshShortestPathRoutingEngine(geo)
-        travel.update(grids=None, surfaces={})
-        _set_recording(None)
-        show_scene(
-            np.asarray(geo.vertices(), dtype=float),
-            np.asarray(geo.triangles(), dtype=np.int64),
-            np.asarray(geo.region_id_per_face(), dtype=np.int64),
-            int(geo.region_count()),
-            geo,
-            name,
-        )
-        _publish_travel_stages()
-        _publish_replay()
-
     def load_hdf5(h5_path: str, name: str, temporary: bool = False) -> None:
         """Show @p h5_path; with @p temporary its recording deletes it once closed."""
         nonlocal engine
@@ -790,26 +773,21 @@ def build_app(obj_path: str | None, h5_path: str | None = None):
         if band != [float(v) for v in state.clip_range]:
             state.clip_range = band  # reassign -> _on_range redraws
 
-    @state.change("obj_file")
-    def _on_file(obj_file, **_):
-        if not obj_file:
+    @state.change("h5_file")
+    def _on_file(h5_file, **_):
+        if not h5_file:
             return
-        entry = obj_file[0] if isinstance(obj_file, (list, tuple)) else obj_file
+        entry = h5_file[0] if isinstance(h5_file, (list, tuple)) else h5_file
         client_file = ClientFile(entry)
         if client_file.is_empty:
             return
-        # Both readers want a real file with the right extension.
         suffix = os.path.splitext(client_file.name)[1].lower()
+        if suffix not in (".h5", ".hdf5"):
+            return
+        # The reader wants a real file with the right extension.
         with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
             tmp.write(client_file.content)
             tmp_path = tmp.name
-        if suffix not in (".h5", ".hdf5"):
-            try:
-                load_mesh(tmp_path, client_file.name)
-            finally:
-                # The mesh is read in full: nothing holds the file open any more.
-                os.unlink(tmp_path)
-            return
         try:
             # The Recording reads from the file until it is closed, so it deletes the
             # file then: Windows cannot delete a file that is still open.
@@ -1240,7 +1218,7 @@ def build_app(obj_path: str | None, h5_path: str | None = None):
 
     def _build_needs_geometry_hint() -> None:
         v3.VListItem(
-            "needs an OBJ file; an HDF5 file brings no geometry",
+            "needs a Geometry; an HDF5 file brings none",
             subtitle="Unavailable",
             v_if="!has_geometry",
         )
@@ -1309,6 +1287,7 @@ def build_app(obj_path: str | None, h5_path: str | None = None):
             _reset_pathfinding,
             _build_pathfinding_drawer,
             on_right_click=_pathfinding_click,
+            needs_geometry=True,
         ),
         ViewerMode(
             "boundary",
@@ -1316,6 +1295,7 @@ def build_app(obj_path: str | None, h5_path: str | None = None):
             _reset_boundary,
             _build_boundary_drawer,
             on_right_click=_boundary_click,
+            needs_geometry=True,
         ),
         ViewerMode(
             "travel_times",
@@ -1326,6 +1306,24 @@ def build_app(obj_path: str | None, h5_path: str | None = None):
         ),
     ]
     mode_by_key = {m.key: m for m in modes}
+
+    def _mode_items(has_geometry: bool) -> list[dict]:
+        return [
+            {
+                "title": m.title,
+                "value": m.key,
+                "props": {"disabled": m.needs_geometry and not has_geometry},
+            }
+            for m in modes
+        ]
+
+    @state.change("has_geometry")
+    def _on_has_geometry(has_geometry, **_):
+        state.interaction_modes = _mode_items(has_geometry)
+        mode = mode_by_key.get(state.interaction_mode)
+        if mode is not None and mode.needs_geometry and not has_geometry:
+            state.interaction_mode = "none"
+
     active_mode = {"key": state.interaction_mode}
 
     @ctrl.trigger("mode_click")
@@ -1417,9 +1415,9 @@ def build_app(obj_path: str | None, h5_path: str | None = None):
                     # file dialog. (A JS handler touching `document` fails -- Vue evaluates
                     # event expressions in a sandbox without the global `document`.)
                     v3.VFileInput(
-                        v_model=("obj_file", None),
-                        accept=".obj,.h5,.hdf5",
-                        label="Load OBJ or HDF5…",
+                        v_model=("h5_file", None),
+                        accept=".h5,.hdf5",
+                        label="Load HDF5…",
                         prepend_icon="mdi-folder-open",
                         density="comfortable",
                         hide_details=True,
@@ -1427,10 +1425,7 @@ def build_app(obj_path: str | None, h5_path: str | None = None):
                     )
             v3.VSelect(
                 v_model=("interaction_mode", "none"),
-                items=(
-                    "interaction_modes",
-                    [{"title": m.title, "value": m.key} for m in modes],
-                ),
+                items=("interaction_modes", _mode_items(state.has_geometry)),
                 label="Mode",
                 density="compact",
                 variant="outlined",
@@ -1514,10 +1509,8 @@ def build_app(obj_path: str | None, h5_path: str | None = None):
                 ctrl.view_update = view.update
 
     # No initial file: start with an empty scene and let the user pick one via the
-    # toolbar's "File -> Load OBJ or HDF5…" dialog.
-    if obj_path:
-        load_mesh(obj_path, os.path.basename(obj_path))
-    elif h5_path:
+    # toolbar's "File -> Load HDF5…" dialog.
+    if h5_path:
         load_hdf5(h5_path, os.path.basename(h5_path))
     return server
 
@@ -1535,7 +1528,7 @@ def _wait_until_serving(port: int, timeout: float = 20.0) -> bool:
     return False
 
 
-def run_native(obj_path: str | None, h5_path: str | None, port: int) -> None:
+def run_native(h5_path: str | None, port: int) -> None:
     """Show the trame app in a native pywebview (WebKitGTK) window.
 
     The trame/aiohttp server installs SIGINT handlers that only work on the main thread, and
@@ -1552,7 +1545,6 @@ def run_native(obj_path: str | None, h5_path: str | None, port: int) -> None:
             sys.executable,
             "-m",
             "trame_viewer",
-            *(["--obj", obj_path] if obj_path else []),
             *(["--h5", h5_path] if h5_path else []),
             "--port",
             str(port),
@@ -1574,13 +1566,7 @@ def run_native(obj_path: str | None, h5_path: str | None, port: int) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(add_help=False)
-    sources = parser.add_mutually_exclusive_group()
-    sources.add_argument(
-        "--obj",
-        default=None,
-        help="OBJ file to load on startup",
-    )
-    sources.add_argument(
+    parser.add_argument(
         "--h5",
         default=None,
         help="HDF5 file written by jupedsim's Hdf5TrajectoryWriter to load on startup",
@@ -1606,10 +1592,10 @@ def main() -> None:
     port = args.port or find_free_port()
 
     if args.native:
-        run_native(args.obj, args.h5, port)
+        run_native(args.h5, port)
         return
 
-    server = build_app(args.obj, args.h5)
+    server = build_app(args.h5)
     if not args.no_browser:
         print(f"Serving on http://localhost:{port}  (Ctrl-C to stop)")
     server.start(

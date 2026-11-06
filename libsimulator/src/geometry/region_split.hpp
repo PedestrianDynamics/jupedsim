@@ -41,4 +41,4 @@ struct RegionSplit {
 /// surface points: contacts across them split, and since the faces are not
 /// mesh-adjacent no seam will connect the parts -- weld the mesh first.
 /// The mesh is not modified.
-RegionSplit split_into_regions(const SurfaceMesh& mesh);
+RegionSplit split_into_regions(const epick::Mesh& mesh);

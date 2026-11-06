@@ -36,9 +36,13 @@ def create_simulation():
     """Creates a generic simulation fixture for different models."""
 
     def _create(model_class):
-        surface = jps.WalkableSurface()
-        room = surface.add_region(boundary=[(0, 0), (10, 0), (10, 10), (0, 10)])
-        simulation = jps.Simulation(model=model_class(), geometry=surface)
+        surface = jps.GeometryBuilder()
+        room = surface.add_region(
+            boundary=[(0, 0), (10, 0), (10, 10), (0, 10)], height=0.0
+        )
+        simulation = jps.Simulation(
+            model=model_class(), geometry=surface.build()
+        )
         return simulation, room
 
     return _create

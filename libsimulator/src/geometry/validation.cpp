@@ -22,7 +22,7 @@
 #include <utility>
 #include <vector>
 
-bool is_walkable_normal(const Vector3D& n)
+bool is_walkable_normal(const epick::Vector3D& n)
 {
     constexpr double max_incline_deg = 50.0;
     constexpr double max_incline_rad = max_incline_deg * std::numbers::pi / 180.0;
@@ -33,10 +33,10 @@ bool is_walkable_normal(const Vector3D& n)
 
 namespace
 {
-std::optional<std::pair<SurfaceMesh::Face_index, SurfaceMesh::Face_index>>
-first_self_intersection(const SurfaceMesh& mesh)
+std::optional<std::pair<epick::Mesh::Face_index, epick::Mesh::Face_index>>
+first_self_intersection(const epick::Mesh& mesh)
 {
-    std::vector<std::pair<SurfaceMesh::Face_index, SurfaceMesh::Face_index>> intersecting{};
+    std::vector<std::pair<epick::Mesh::Face_index, epick::Mesh::Face_index>> intersecting{};
     CGAL::Polygon_mesh_processing::self_intersections(mesh, std::back_inserter(intersecting));
     if(intersecting.empty()) {
         return std::nullopt;
@@ -46,9 +46,9 @@ first_self_intersection(const SurfaceMesh& mesh)
 } // namespace
 
 bool is_face_in_mesh_planar(
-    const SurfaceMesh& mesh,
-    FaceDescriptor<SurfaceMesh> face,
-    std::vector<VertexDescriptor<SurfaceMesh>>& buffer)
+    const epick::Mesh& mesh,
+    FaceDescriptor<epick::Mesh> face,
+    std::vector<VertexDescriptor<epick::Mesh>>& buffer)
 {
     buffer.clear();
     for(auto half_edge : CGAL::halfedges_around_face(CGAL::halfedge(face, mesh), mesh)) {
@@ -72,9 +72,9 @@ bool is_face_in_mesh_planar(
     });
 }
 
-bool all_faces_in_mesh_planar(const SurfaceMesh& mesh)
+bool all_faces_in_mesh_planar(const epick::Mesh& mesh)
 {
-    std::vector<VertexDescriptor<SurfaceMesh>> buffer{};
+    std::vector<VertexDescriptor<epick::Mesh>> buffer{};
     buffer.reserve(3);
     return std::all_of(
         std::begin(CGAL::faces(mesh)), std::end(CGAL::faces(mesh)), [&buffer, &mesh](auto face) {
@@ -82,7 +82,7 @@ bool all_faces_in_mesh_planar(const SurfaceMesh& mesh)
         });
 }
 
-void normalise_and_validate_mesh(SurfaceMesh& mesh, const RegionMap* regions)
+void normalise_and_validate_mesh(epick::Mesh& mesh, const RegionMap* regions)
 {
     namespace pmp = CGAL::Polygon_mesh_processing;
     if(!CGAL::is_triangle_mesh(mesh)) {
@@ -102,6 +102,12 @@ void normalise_and_validate_mesh(SurfaceMesh& mesh, const RegionMap* regions)
         pmp::reverse_face_orientations(mesh);
     }
 
+    validate_mesh(mesh, regions);
+}
+
+void validate_mesh(const epick::Mesh& mesh, const RegionMap* regions)
+{
+    namespace pmp = CGAL::Polygon_mesh_processing;
     for(auto&& face : CGAL::faces(mesh)) {
         const auto n = pmp::compute_face_normal(face, mesh);
         if(!is_walkable_normal(n)) {

@@ -108,20 +108,20 @@ public:
 //==================================================================================================
 /// @precondition mesh has been split into region.
 std::unique_ptr<BoundaryIndex>
-make_naive_boundary_index(const SurfaceMesh& mesh, const RegionSplit& region_split);
+make_naive_boundary_index(const epick::Mesh& mesh, const RegionSplit& region_split);
 
 /// @precondition mesh has been split into region.
 std::unique_ptr<BoundaryIndex>
-make_portal_boundary_index(const SurfaceMesh& mesh, const RegionSplit& region_split);
+make_portal_boundary_index(const epick::Mesh& mesh, const RegionSplit& region_split);
 
 //==================================================================================================
 // Supporting code
 //==================================================================================================
-std::tuple<SurfaceMesh::Face_index, SurfaceMesh::Halfedge_index>
-incident_face_and_halfedge(const SurfaceMesh& mesh, SurfaceMesh::Edge_index e);
+std::tuple<epick::Mesh::Face_index, epick::Mesh::Halfedge_index>
+incident_face_and_halfedge(const epick::Mesh& mesh, epick::Mesh::Edge_index e);
 
 std::vector<SegmentGrid>
-create_per_region_segment_grids(const SurfaceMesh& mesh, const RegionSplit& region_split);
+create_per_region_segment_grids(const epick::Mesh& mesh, const RegionSplit& region_split);
 
 std::unique_ptr<RegionGraph>
-create_region_graph(const SurfaceMesh& mesh, const RegionSplit& region_split);
+create_region_graph(const epick::Mesh& mesh, const RegionSplit& region_split);

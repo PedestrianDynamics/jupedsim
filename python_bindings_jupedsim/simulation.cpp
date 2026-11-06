@@ -5,8 +5,8 @@
 #include "floorfield_routing_engine.hpp"
 #include "generic_agent.hpp"
 #include "geometry/geometry.hpp"
+#include "geometry/geometry_builder.hpp"
 #include "geometry/location.hpp"
-#include "geometry/walkable_surface.hpp"
 #include "journey.hpp"
 #include "kernel.hpp"
 #include "operational_model.hpp"
@@ -42,11 +42,11 @@ namespace py = pybind11;
 
 namespace
 {
-using Area = std::variant<WalkableSurface::Polygon, std::vector<Point>>;
+using Area = std::variant<GeometryBuilder::Polygon, std::vector<Point>>;
 
 std::vector<Point> boundary_without_holes(Area area)
 {
-    if(auto* polygon = std::get_if<WalkableSurface::Polygon>(&area)) {
+    if(auto* polygon = std::get_if<GeometryBuilder::Polygon>(&area)) {
         if(!polygon->holes.empty()) {
             throw py::value_error("Polygon must not have holes");
         }
@@ -94,9 +94,10 @@ void init_simulation(py::module_& m)
         .def(
             // The model is moved out of the Python object into Simulation. After this constructor
             // returns, the Python model object passed here is disowned/invalid and must not be
-            // reused. The same goes for the geometry.
+            // reused. The geometry is shared instead: the Python object stays valid and can be
+            // used for further simulations or routing engines.
             py::init([](std::unique_ptr<OperationalModel> model,
-                        std::unique_ptr<Geometry> geometry,
+                        std::shared_ptr<Geometry> geometry,
                         double dt,
                         FloorfieldOptions floorfield_options) {
                 if(!model) {

@@ -23,35 +23,37 @@ def rect(x0, y0, x1, y1):
 # (8, 9) and (13, 9) split the stairwell sides so each run has an edge of its own to attach to.
 STAIRWELL = [(8, 6), (14, 6), (14, 12), (8, 12), (8, 9)]
 
-surface = jps.WalkableSurface()
-ground = surface.add_region(
+geo_builder = jps.GeometryBuilder()
+ground = geo_builder.add_region(
     boundary=rect(0, 0, 20, 20),
     holes=[STAIRWELL, rect(3, 3, 5, 5), rect(15, 15, 17, 17)],
     height=GROUND_FLOOR,
 )
-upper = surface.add_region(
+upper = geo_builder.add_region(
     boundary=rect(0, 0, 20, 20),
     holes=[STAIRWELL, rect(15, 3, 17, 5), rect(3, 15, 5, 17)],
     height=UPPER_FLOOR,
 )
-landing = surface.add_region(
+landing = geo_builder.add_region(
     boundary=[(13, 6), (14, 6), (14, 12), (13, 12), (13, 9)],
     height=LANDING,
 )
-surface.connect_regions(
+geo_builder.connect_regions(
     from_region=ground,
     from_edge=((8, 6), (8, 9)),
     to_region=landing,
     to_edge=((13, 6), (13, 9)),
 )
-surface.connect_regions(
+geo_builder.connect_regions(
     from_region=landing,
     from_edge=((13, 9), (13, 12)),
     to_region=upper,
     to_edge=((8, 9), (8, 12)),
 )
 
-sim = jps.Simulation(model=jps.CollisionFreeSpeedModel(), geometry=surface)
+sim = jps.Simulation(
+    model=jps.CollisionFreeSpeedModel(), geometry=geo_builder.build()
+)
 
 # An area on either side of the stairwell, close to the outer wall.
 upper_waypoint_id = sim.add_waypoint_stage(
