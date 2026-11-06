@@ -112,7 +112,7 @@ while sim.agent_count(moving=True) > 0:
     agent1.follow(route_b)  # starts at the first stage, wp2
     agent1.follow(route_b, start=wp3)  # or an explicit start
     agent3.follow(route_c, start=wp2)
-    agent5.follow(route_a)  # direct steering -> route
+    agent5.follow(route_a)  # direct steering -> route; route == route_a, stage == wp1
 
     # Weights: a patch, like dict.update; targets not named keep their weight.
     # Resets the counter of (route_c, wp2). Takes effect at the next decision;
