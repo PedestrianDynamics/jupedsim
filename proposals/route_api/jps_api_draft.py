@@ -106,6 +106,7 @@ while sim.agent_count(moving=True) > 0:
     # Direct steering: change the target with steer_to(); also switches a
     # route agent to direct steering.
     agent5.steer_to((x_new, y_new))
+    agent2.steer_to((x_new, y_new))  # route -> direct steering; route, stage become None
 
     # Routes are changed with follow() only (route and start in one call).
     agent1.follow(route_b)  # starts at the first stage, wp2
