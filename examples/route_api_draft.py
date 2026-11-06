@@ -351,6 +351,10 @@ print(agent3.alive)  # False once the agent has left the simulation
 # Agents stopped at wp2 (held == True); agents still walking to a held
 # wp2 are not included, but release() frees them as well.
 print(route_c.held_at(wp2))
+# Whether a hold or a closure is in force (read-only; change them with
+# hold()/release() and close()/open()).
+print(route_c.is_held(wp2))  # True between hold(wp2) and release(wp2)
+print(exit2.closed)  # True between exit2.close() and exit2.open()
 # Agents whose current target is wp2, on any route or only on route_c.
 # Membership is by assignment: agent.stage == wp2 (and agent.route ==
 # route_c if given), so held, stranded and arrived agents are included
@@ -516,6 +520,10 @@ route_c.hold(exit1)
 # ValueError: exits cannot be held; use exit1.close()
 route_c.release(wp1)
 # ValueError: wp1 is not held
+route_c.is_held(wp4)
+# ValueError: wp4 is not part of this route
+exit2.closed = True
+# AttributeError: use exit2.close()
 sim.agents_targeting(wp4, route=route_c)
 # ValueError: wp4 is not part of this route
 sim.add_agent(floor0.at(x_closed_room, y_closed_room), route=route_a)
