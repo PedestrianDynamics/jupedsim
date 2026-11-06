@@ -19,9 +19,8 @@ door = sim.add_exit(
 )
 evacuate = jps.Route([door])
 
-# distribute_by_number returns (x, y) pairs; each becomes a location in room.
-# GAP: every distribution result has to be wrapped with room.at(); a
-# distribution helper that returns locations would avoid that.
+# distribute_by_number returns (x, y) pairs; room.at() turns each into a
+# location in room.
 positions = jps.distribute_by_number(
     polygon=room_polygon,
     number_of_agents=50,
@@ -35,4 +34,7 @@ for x, y in positions:
 while sim.agent_count() > 0 and sim.elapsed_time() < 300:
     sim.iterate()
 
-print(f"evacuated after {sim.elapsed_time():.1f} s")
+if sim.agent_count() == 0:
+    print(f"evacuated after {sim.elapsed_time():.1f} s")
+else:
+    print(f"time limit reached; {sim.agent_count()} agents remain")

@@ -2,8 +2,9 @@
 # Sketch against examples/route_api_draft.py; the API does not exist yet.
 #
 # A hall with a decision point in the middle and two exits. Two of every
-# three agents take the left exit, one the right. After 60 s the split is
-# changed to 1:1.
+# three agents take the left exit, one the right. Once half of the agents
+# have decided, the split is changed to 1:1. The change is triggered by
+# state, not by time: the agents reach the decision point within seconds.
 
 from collections import Counter
 
@@ -49,7 +50,11 @@ changed = False
 while sim.agent_count() > 0 and sim.elapsed_time() < 300:
     sim.iterate()
     counts.update(removal.exit for removal in sim.removed_agents())
-    if not changed and sim.elapsed_time() >= 60:
+    # Agents whose stage is still decision have not decided yet.
+    pending = sim.agents_targeting(decision, route=split)
+    if not changed and len(pending) <= 30:
+        # Acceptance: some agents decide under the changed weights.
+        assert pending, "all agents decided before the weight change"
         # A patch: right keeps its weight, so now left: 1, right: 1.
         split.update_weights(decision, {left: 1})
         changed = True

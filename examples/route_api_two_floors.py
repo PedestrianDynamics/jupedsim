@@ -1,34 +1,37 @@
 # Route API draft, example 2: two floors.
 # Sketch against examples/route_api_draft.py; the API does not exist yet.
 #
-# Ground floor 0..20 m x 0..10 m, upper floor 6..26 m x 0..10 m at 3 m.
-# The floors overlap in plan between x = 6 and x = 20. A staircase rises
-# from the ground floor's right wall (x = 20) to the upper floor's right
-# wall (x = 26), rising 3 m over 6 m (about 27 degrees, within master's
-# 50 degree limit). Agents start upstairs and leave through an exit on the
-# ground floor's left wall.
+# Two floors over the same 20 m x 10 m footprint, the upper one at 3 m,
+# both with a stairwell 12..18 m x 6..8 m. A staircase in the stairwell
+# rises 3 m over 6 m (about 27 degrees, within master's 50 degree limit)
+# from the stairwell's west edge on the ground floor to its east edge on
+# the upper floor. Each floor lies on the side of its edge away from the
+# staircase, so the surfaces join without folding back. Agents start
+# upstairs and leave through an exit on the ground floor's left wall.
 
 import jupedsim as jps
 import numpy as np
 import shapely
 
-# The connector edges must be whole boundary edges, hence the extra
-# vertices at y = 2.
-ground_polygon = shapely.Polygon([(0, 0), (20, 0), (20, 2), (20, 10), (0, 10)])
-upper_polygon = shapely.Polygon([(6, 0), (26, 0), (26, 2), (26, 10), (6, 10)])
+# The connector edges must be whole boundary edges: here, the stairwell's
+# west and east edges.
+footprint = [(0, 0), (20, 0), (20, 10), (0, 10)]
+stairwell = [(12, 6), (18, 6), (18, 8), (12, 8)]
+ground_polygon = shapely.Polygon(footprint, holes=[stairwell])
+upper_polygon = shapely.Polygon(footprint, holes=[stairwell])
 
 surface = jps.WalkableSurface()
 floor0 = surface.add_region(polygon=ground_polygon, height=0.0, name="floor0")
 floor1 = surface.add_region(polygon=upper_polygon, height=3.0, name="floor1")
 staircase = surface.connect_regions(
     from_region=floor0,
-    from_edge=((20, 0), (20, 2)),
+    from_edge=((12, 6), (12, 8)),
     to_region=floor1,
-    to_edge=((26, 0), (26, 2)),
+    to_edge=((18, 6), (18, 8)),
     name="staircase",
 )
 
-# (10, 5) lies on both floors: the region has to be named.
+# (10, 5) lies on both floors: the region has to be supplied explicitly.
 print(surface.regions_at((10, 5)))  # (floor0, floor1)
 
 sim = jps.Simulation(jps.CollisionFreeSpeedModel(), surface)

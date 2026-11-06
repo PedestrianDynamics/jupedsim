@@ -54,4 +54,7 @@ while sim.agent_count() > 0 and sim.elapsed_time() < 600:
         route_b.release(door_b)
         released = True
 
-print(f"evacuated after {sim.elapsed_time():.1f} s")
+if sim.agent_count() == 0:
+    print(f"evacuated after {sim.elapsed_time():.1f} s")
+else:
+    print(f"time limit reached; {sim.agent_count()} agents remain")

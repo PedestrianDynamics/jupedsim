@@ -2,9 +2,10 @@
 # Sketch against examples/route_api_draft.py; the API does not exist yet.
 #
 # A hall with two exits. Agents pick the exit with the least travel time.
-# After 30 s smoke blocks the east exit: it is closed, and agents still
-# heading for the corridor in front of it switch to a route via the
-# west corridor.
+# When the first agent leaves through the east exit, smoke blocks it: it
+# is closed, and agents still heading for the corridor in front of it
+# switch to a route via the west corridor. The closure is triggered by
+# state, not by time, so east-bound agents are still in the hall.
 
 import jupedsim as jps
 import shapely
@@ -49,22 +50,28 @@ for x, y in positions:
 smoke = False
 while sim.agent_count() > 0 and sim.elapsed_time() < 600:
     sim.iterate()
-    if smoke or sim.elapsed_time() < 30:
+    left_east = any(r.exit == east for r in sim.removed_agents())
+    if smoke or not left_east:
         continue
     smoke = True
     # Agents still heading for the east corridor take the west route.
     # They and the agents stranded below are disjoint sets (target
     # east_corridor vs. target east), so the order of the two loops does
     # not matter.
-    for agent in sim.agents_targeting(east_corridor, route=via_east):
+    heading = sim.agents_targeting(east_corridor, route=via_east)
+    for agent in heading:
         agent.follow(via_west)
     # Agents already past the corridor are stranded at the closed exit or
     # rerouted; with a fixed transition corridor -> east they are stranded.
     stranded = east.close(informed=True)
     for agent in stranded:
         agent.follow(via_west)
-    print(
-        f"t={sim.elapsed_time():.1f} s: east closed, {len(stranded)} rerouted"
-    )
+    affected = len(heading) + len(stranded)
+    # Acceptance: the closure reroutes at least one agent.
+    assert affected > 0, "no agent was heading east when it closed"
+    print(f"t={sim.elapsed_time():.1f} s: east closed, {affected} rerouted")
 
-print(f"evacuated after {sim.elapsed_time():.1f} s")
+if sim.agent_count() == 0:
+    print(f"evacuated after {sim.elapsed_time():.1f} s")
+else:
+    print(f"time limit reached; {sim.agent_count()} agents remain")

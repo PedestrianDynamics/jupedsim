@@ -54,14 +54,15 @@ surface.regions_at((x, y))  # every region covering a point (discovery)
 # floor0.at(5, 2) but not floor1.at(5, 2).
 # A simulation resolves it against its own copy of the geometry when the
 # location is used (add_agent, steer_to), so the same Location works in
-# every simulation built from this surface.
+# every simulation built from this surface, provided that simulation's
+# snapshot contains the region and the position.
 # Regions compare and hash by (surface, id), so a region handle from
 # `surface` is the same dict key in every simulation built from it.
-# The region is always named: no call infers it from coordinates, so
-# adding a region (e.g. an upper floor) cannot make existing calls
-# ambiguous. regions_at is a lookup for discovery and interactive tools
-# (which regions cover this point?); at() builds the location in a region
-# you name:
+# The region is always supplied explicitly: no call infers it from
+# coordinates, so adding a region (e.g. an upper floor) cannot make
+# existing calls ambiguous. regions_at is a lookup for discovery and
+# interactive tools (which regions cover this point?); at() builds the
+# location in the region you pass:
 surface.regions_at((5, 2))  # (floor0, floor1): stacked floors
 floor1.at(5, 2)  # Location(5.0, 2.0, region=floor1)
 floor1.at(5, 2).xy  # (5.0, 2.0) when only the coordinates are needed
@@ -322,11 +323,13 @@ print(agent2.target)  # Location(x_new, y_new, region=floor0) in direct steering
 print(agent2.position)  # Location(..., region=floor0)
 print(agent2.position.xy)  # (x, y) only
 print(agent5.target)  # None on a route: use agent5.stage
-# Navigation direction (unit vector toward the current target), as on
-# master. Not the velocity (model state) and not the body orientation.
+# Navigation direction (unit vector toward the current target, or (0, 0)
+# at the destination), as on master. Not the velocity (model state) and
+# not the body orientation.
 print(agent5.route_orientation)
 print(agent3.held)  # True while held at a stage
-# True after completing a waypoint whose transition is STAY
+# True after completing a waypoint whose transition is STAY, until
+# follow() or steer_to()
 print(agent3.arrived)
 print(agent3.stranded)  # True once the agent cannot continue (closed exit)
 print(agent3.alive)  # False once the agent has left the simulation
@@ -566,9 +569,11 @@ sim.agent(17)  # Agent(id=17)
 #    agents deciding at wp2 are stranded inside wp2; agents walking to
 #    either exit are stranded where they are (informed) or at the exit.
 #    exit1.open() -> they re-run the decision at wp2 and go to exit1.
-# 6. Switching routes:
+# 6. Switching routes or steering directly:
 #    agent.follow(route_b) -> stage == wp2 (first stage of route_b);
-#    held/stranded are cleared; counters of route_c are not changed.
+#    agent.steer_to(location) -> target == location, no route.
+#    Both clear held, stranded and arrived, so an agent leaves STAY this
+#    way; counters of route_c are not changed.
 
 # --- From the current API on master to 2.0 ----------------------------
 # Handles are used for object references; IDs remain available for lookup
