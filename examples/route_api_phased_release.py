@@ -1,0 +1,57 @@
+# Route API draft, example 4: phased release.
+# Sketch against examples/route_api_draft.py; the API does not exist yet.
+#
+# Two rooms open into a shared corridor that leads to one exit. Room A
+# evacuates at once; room B waits at its door and is released after 60 s.
+
+import jupedsim as jps
+import shapely
+
+# Rooms A and B side by side at the bottom, corridor along the top.
+floor_polygon = shapely.Polygon(
+    [(0, 0), (10, 0), (10, 8), (12, 8), (12, 0), (22, 0), (22, 12), (0, 12)]
+)
+room_a = shapely.Polygon([(0, 0), (10, 0), (10, 8), (0, 8)])
+room_b = shapely.Polygon([(12, 0), (22, 0), (22, 8), (12, 8)])
+
+surface = jps.WalkableSurface()
+floor = surface.add_region(polygon=floor_polygon, height=0.0, name="floor")
+
+sim = jps.Simulation(jps.CollisionFreeSpeedModel(), surface)
+
+door_a = sim.add_waypoint((5, 8.5), radius=0.8, region=floor, name="door_a")
+door_b = sim.add_waypoint((17, 8.5), radius=0.8, region=floor, name="door_b")
+exit_ = sim.add_exit(
+    [(0, 10), (0.5, 10), (0.5, 12), (0, 12)], region=floor, name="exit"
+)
+
+route_a = jps.Route([door_a, exit_])
+route_b = jps.Route([door_b, exit_])
+
+for polygon, route in ((room_a, route_a), (room_b, route_b)):
+    positions = jps.distribute_by_number(
+        polygon=polygon,
+        number_of_agents=30,
+        distance_to_agents=0.4,
+        distance_to_polygon=0.2,
+        seed=1,
+    )
+    for x, y in positions:
+        sim.add_agent(floor.at(x, y), route=route)
+
+# Hold room B at its door before anyone moves.
+# GAP: the draft says hold() applies to agents whose current target is
+# door_b when it is called. This example also needs agents that target
+# door_b later (e.g. added after the call) to stop; the draft should say
+# that hold() is a state of the stage until release().
+route_b.hold(door_b)
+
+released = False
+while sim.agent_count() > 0 and sim.elapsed_time() < 600:
+    sim.iterate()
+    if not released and sim.elapsed_time() >= 60:
+        print(f"releasing {len(route_b.held_at(door_b))} agents from room B")
+        route_b.release(door_b)
+        released = True
+
+print(f"evacuated after {sim.elapsed_time():.1f} s")
