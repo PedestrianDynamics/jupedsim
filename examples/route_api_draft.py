@@ -92,7 +92,9 @@ sim = jps.Simulation(model, surface)
 # point destination. Navigation to that point still follows the walkable
 # surface, including connectors (point-to-point shortest path over the
 # navigation mesh, no floor field); it is not a straight walk toward the
-# point.
+# point. Speed fields therefore do not apply: a route agent switched to
+# steer_to() no longer avoids areas made costly by speed fields (e.g.
+# smoke).
 #
 # `name` is optional and used in reprs and error messages; unnamed stages
 # appear as Waypoint(id=3). The messages below assume named stages.
@@ -120,6 +122,11 @@ main_exits = sim.add_exit(
 # closures are exempt because they are temporary by intent.
 # The check is structural: it does not guarantee that every agent
 # eventually leaves a loop.
+# Route validity is a property of the graph, not of the geometry: it does
+# not check that a stage can be reached from where an agent stands. That
+# is checked when a stage becomes an agent's target: add_agent(), follow()
+# and steer_to() raise if the first target cannot be reached; an agent
+# whose later target cannot be reached is stranded.
 
 # Linear (shorthand): a DIRECTED list of stages, walked in order.
 # The last stage must be an exit or jps.STAY, unless endless=True.
@@ -286,7 +293,9 @@ print(agent2.target)  # Location(x_new, y_new, region=floor0) in direct steering
 print(agent2.position)  # Location(..., region=floor0)
 print(agent2.position.xy)  # (x, y) only
 print(agent5.target)  # None on a route: use agent5.stage
-print(agent5.direction)  # unit vector the agent is currently steered along
+# Navigation direction (unit vector toward the current target), as on
+# master. Not the velocity (model state) and not the body orientation.
+print(agent5.route_orientation)
 print(agent3.held)  # True while held at a stage
 # True after completing a waypoint whose transition is STAY
 print(agent3.arrived)
@@ -300,9 +309,6 @@ print(route_c.held_at(wp2))  # agents held at wp2
 # follow() while iterating does not change which agents are visited.
 sim.agents_targeting(wp2)  # (Agent(id=3), Agent(id=4), ...)
 sim.agents_targeting(wp2, route=route_c)
-# Excludes held, arrived and stranded agents. Not a stop condition when
-# holds or closures are used (see the loop above).
-sim.agent_count(moving=True)
 sim.run_until(t=600)  # needed for endless routes
 
 # Inspecting a route
@@ -455,6 +461,8 @@ route_c.release(wp1)
 # ValueError: wp1 is not held
 sim.agents_targeting(wp4, route=route_c)
 # ValueError: wp4 is not part of this route
+sim.add_agent(floor0.at(x_closed_room, y_closed_room), route=route_a)
+# ValueError: wp1 cannot be reached from Location(..., region=floor0)
 sim.add_agent(pos, route=route_a, target=floor0.at(x, y))
 # ValueError: use route= or target=, not both
 sim.add_agent(pos, route=jps.Route([(wp1, wp2), (wp2, exit1)]))
@@ -493,7 +501,7 @@ sim.agent(17)  # Agent(id=17)
 #    change (follow, close with informed=True).
 # 3. Held:
 #    route_c.hold(wp2) while stage == wp2 -> agent stops inside wp2,
-#    held == True, not counted as moving. route_c.release(wp2) -> served
+#    held == True. route_c.release(wp2) -> served
 #    in arrival order by the current rule -> held == False.
 # 4. Exit closed on the way:
 #    stage == exit2, assigned by the rule at wp2:
