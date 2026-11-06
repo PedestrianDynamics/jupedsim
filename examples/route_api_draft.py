@@ -293,9 +293,13 @@ print(agent3.arrived)
 print(agent3.stranded)  # True once the agent cannot continue (closed exit)
 print(agent3.alive)  # False once the agent has left the simulation
 print(route_c.held_at(wp2))  # agents held at wp2
-# Agents whose current target is wp2, on any route or only on route_c:
-sim.agents_heading_to(wp2)  # (Agent(id=3), Agent(id=4), ...)
-sim.agents_heading_to(wp2, route=route_c)
+# Agents whose current target is wp2, on any route or only on route_c.
+# Membership is by assignment: agent.stage == wp2 (and agent.route ==
+# route_c if given), so held, stranded and arrived agents are included
+# when their stage matches. Returns a snapshot (tuple of handles): calling
+# follow() while iterating does not change which agents are visited.
+sim.agents_targeting(wp2)  # (Agent(id=3), Agent(id=4), ...)
+sim.agents_targeting(wp2, route=route_c)
 # Excludes held, arrived and stranded agents. Not a stop condition when
 # holds or closures are used (see the loop above).
 sim.agent_count(moving=True)
@@ -316,11 +320,11 @@ print(route_c)
 #   wp3 -> exit2
 
 # --- Rerouting --------------------------------------------------------
-# Smoke at wp2: agents on route1 that are still heading for wp2 take route2
+# Smoke at wp2: agents on route1 that still target wp2 take route2
 # from wp3 on. Agents that already passed wp2 are not affected.
 route1 = jps.Route([wp1, wp2, exit1])
 route2 = jps.Route([wp1, wp3, exit1])
-for agent in sim.agents_heading_to(wp2, route=route1):
+for agent in sim.agents_targeting(wp2, route=route1):
     agent.follow(route2, start=wp3)
 # Alternatives, depending on what the smoke does:
 # - wp2 is one branch of a rule: route.update_weights(..., {wp2: 0})
@@ -449,7 +453,7 @@ route_c.hold(exit1)
 # ValueError: exits cannot be held; use exit1.close()
 route_c.release(wp1)
 # ValueError: wp1 is not held
-sim.agents_heading_to(wp4, route=route_c)
+sim.agents_targeting(wp4, route=route_c)
 # ValueError: wp4 is not part of this route
 sim.add_agent(pos, route=route_a, target=floor0.at(x, y))
 # ValueError: use route= or target=, not both
