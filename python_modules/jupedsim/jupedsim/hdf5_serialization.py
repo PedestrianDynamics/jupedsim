@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
-"""HDF5 trajectory writer and loader, schema version 2.
+"""HDF5 trajectory writer and loader, schema version 3.
 
 File Layout:
 ```txt
     /
-    │  @schema_version   int  layout version, currently 2
+    │  @schema_version   int  layout version, currently 3
     │  @producer         str  "JuPedSim"
     │  @producer_version str  JuPedSim version that wrote the file
     │  @dt               f8   simulation time step [s]
@@ -52,12 +52,19 @@ File Layout:
     │   └── regions
     │       │  Region id of each triangle
     │       └─ [M] <u8
-    └── travel_times   only with write_travel_times=True, written on close
+    └── travel_times   only with write_travel_times=True
         │  Floor field travel times to every waypoint and exit stage, one
-        │  grid per stage and region
+        │  grid per region in every snapshot of a stage. A stage gets a
+        │  snapshot when it is added and whenever its speed fields change,
+        │  written after the next iteration (or on close); after the first,
+        │  only every n-th change is kept
+        │  @every_nth_travel_time_field int  n
         ├── grids
-        │   │  One row per grid, ordered by stage id, then region id
+        │   │  One row per grid, ordered by iteration, then stage id, then
+        │   │  region id
         │   │  type compound {
+        │   │    iteration <u8 iteration from which on agents are routed with
+        │   │                  these travel times, see @every_nth_frame
         │   │    stage_id  <u8 stage the travel times lead to
         │   │    region_id <u8 region the grid covers, see /regions
         │   │    origin_x  <f8 x of the lower-left corner of cell (0, 0) [m]
@@ -104,7 +111,7 @@ from jupedsim.pyjupedsim import Geometry, get_build_info
 from jupedsim.serialization import TrajectoryWriter
 from jupedsim.simulation import Simulation
 
-SCHEMA_VERSION: Final = 2
+SCHEMA_VERSION: Final = 3
 
 
 class Hdf5TrajectoryWriter(TrajectoryWriter):
@@ -120,11 +127,19 @@ class Hdf5TrajectoryWriter(TrajectoryWriter):
         output_file: File to write to; an existing file is overwritten.
         every_nth_frame: Record every n-th iteration, 1 records all of them.
         write_travel_times: Also store the floor field travel times to every
-            waypoint and exit stage in /travel_times. They are written by
-            :meth:`close`, so stages added during the run are included, and
-            fields no agent needed are solved then. Not written when a
-            ``with`` block ends on an exception, see
-            :meth:`close_after_error`.
+            waypoint and exit stage in /travel_times: a snapshot when the
+            stage is added, and again whenever its speed fields change, so a
+            run with dynamic speed fields can be replayed. Snapshots are
+            written after the next iteration, reusing the floor fields the
+            agents needed; fields no agent needed are solved for them.
+            Changes after the last iteration are written by :meth:`close`,
+            not by :meth:`close_after_error`.
+        every_nth_travel_time_field: Of the travel times written with
+            ``write_travel_times=True``, keep the first of every stage and
+            then every n-th change of it; 1 keeps all of them. Use it to make
+            the file smaller when the speed fields change often: a skipped
+            change is not in the file, the snapshot before it stays in effect
+            until the next one kept.
     """
 
     def __init__(
@@ -133,12 +148,20 @@ class Hdf5TrajectoryWriter(TrajectoryWriter):
         output_file: Path,
         every_nth_frame: int = 4,
         write_travel_times: bool = False,
+        every_nth_travel_time_field: int = 1,
     ):
         if every_nth_frame < 1:
             raise TrajectoryWriter.Error("'every_nth_frame' has to be > 0")
+        if every_nth_travel_time_field < 1:
+            raise TrajectoryWriter.Error(
+                "'every_nth_travel_time_field' has to be > 0"
+            )
         self._output_file: Path = output_file
         self._every_nth_frame: int = every_nth_frame
         self._write_travel_times: bool = write_travel_times
+        self._every_nth_travel_time_field: int = every_nth_travel_time_field
+        # Stage id -> travel time fields seen so far, written or skipped.
+        self._travel_time_fields_seen: dict[int, int] = {}
         self._simulation: Simulation | None = None
         self._records_to_cache: int = 2**16 // self.trajectory_dtype().itemsize
         self._trajectory_buffer: npt.NDArray[typing.Any] = np.zeros(
@@ -176,7 +199,7 @@ class Hdf5TrajectoryWriter(TrajectoryWriter):
         self._frame_idx = 0
         self._is_writing = True
         if self._write_travel_times:
-            # Kept until close, which writes the travel times.
+            # Kept until close, which writes the changes after the last iteration.
             self._simulation = simulation
         self._file.flush()
 
@@ -247,6 +270,9 @@ class Hdf5TrajectoryWriter(TrajectoryWriter):
         triangle_regions_arr = np.array(triangle_regions, dtype=np.dtype("<u8"))
         self._file.create_dataset("mesh/regions", data=triangle_regions_arr)
 
+        if self._write_travel_times:
+            self._create_travel_time_datasets()
+
     @override
     def write_iteration_state(self, simulation: Simulation) -> None:
         """Write trajectory data of one simulation iteration.
@@ -261,6 +287,8 @@ class Hdf5TrajectoryWriter(TrajectoryWriter):
             raise TrajectoryWriter.Error(
                 "Need to call 'begin_writing()' before calling 'write_iteration_state()'"
             )
+        if self._simulation is not None:
+            self._write_travel_time_changes(simulation)
         iteration = simulation.iteration_count()
         if iteration % self._every_nth_frame != 0:
             return
@@ -312,7 +340,7 @@ class Hdf5TrajectoryWriter(TrajectoryWriter):
     @override
     def close(self) -> None:
         """Write the remaining rows, the frame index and, if requested, the
-        travel times, then close the file."""
+        travel times changed since the last iteration, then close the file."""
         if not self._is_writing:
             return
         self._is_writing = False
@@ -331,31 +359,22 @@ class Hdf5TrajectoryWriter(TrajectoryWriter):
                     self._record_idx,
                 )
             if self._simulation is not None:
-                try:
-                    self._write_travel_time_grids(self._simulation)
-                except BaseException:
-                    # All or nothing: no values without the grids that index them.
-                    if "travel_times" in self._file:
-                        del self._file["travel_times"]
-                    raise
+                self._write_travel_time_changes(self._simulation)
         finally:
             self._simulation = None
             self._file.close()
 
     @override
     def close_after_error(self) -> None:
-        """Write the remaining rows and the frame index, but no travel times:
-        solving every floor field while an error propagates would delay it and
-        could replace it with an error of its own."""
+        """Write the remaining rows and the frame index, but not the travel
+        times changed since the last iteration: solving floor fields while an
+        error propagates would delay it and could replace it with an error of
+        its own. The snapshots written during the run are kept."""
         self._simulation = None
         self.close()
 
-    def _write_travel_time_grids(self, simulation: Simulation) -> None:
-        """Write /travel_times for every stage with an area and every region.
-
-        Each grid is appended as soon as it is computed, so memory holds one grid at a
-        time rather than all of them.
-        """
+    def _create_travel_time_datasets(self) -> None:
+        """Create the empty, appendable datasets of /travel_times."""
         values_ds = self._file.create_dataset(
             "travel_times/values",
             shape=(0,),
@@ -366,41 +385,30 @@ class Hdf5TrajectoryWriter(TrajectoryWriter):
             **hdf5plugin.Zstd(clevel=3),  # pyright: ignore[reportUnknownArgumentType]
         )
         values_ds.attrs["unit"] = "s"
-        directions_ds = self._file.create_dataset(
-            "travel_times/directions",
-            shape=(0, 2),
-            maxshape=(None, 2),
-            dtype="<f4",
-            chunks=(2**15, 2),
-            shuffle=True,
-            **hdf5plugin.Zstd(clevel=3),  # pyright: ignore[reportUnknownArgumentType]
+        self._file["travel_times"].attrs["every_nth_travel_time_field"] = (
+            self._every_nth_travel_time_field
         )
-
-        rows = []
-        offset = 0
-        # A stage without an area, such as direct steering, has no grids.
-        for stage_id in simulation.stage_ids():
-            for region_id, grid in simulation.travel_times(stage_id).items():
-                rows.append(
-                    (
-                        stage_id,
-                        region_id,
-                        *grid.origin,
-                        grid.width,
-                        grid.height,
-                        grid.cell_size,
-                        offset,
-                    )
-                )
-                values = grid.values.astype("<f4").ravel()
-                self._append(values_ds, values, len(values))
-                directions = grid.directions.astype("<f4").reshape(-1, 2)
-                self._append(directions_ds, directions, len(directions))
-                offset += grid.width * grid.height
-
+        self._travel_time_values_ds: h5py.Dataset = values_ds
+        self._travel_time_directions_ds: h5py.Dataset = (
+            self._file.create_dataset(
+                "travel_times/directions",
+                shape=(0, 2),
+                maxshape=(None, 2),
+                dtype="<f4",
+                chunks=(2**15, 2),
+                shuffle=True,
+                **hdf5plugin.Zstd(clevel=3),  # pyright: ignore[reportUnknownArgumentType]
+            )
+        )
         grids_ds = self._file.create_dataset(
             "travel_times/grids",
-            data=np.array(rows, dtype=self.travel_time_grid_dtype()),
+            shape=(0,),
+            maxshape=(None,),
+            dtype=self.travel_time_grid_dtype(),
+            chunks=(256,),
+        )
+        grids_ds.attrs["iteration"] = (
+            "Iteration from which on agents are routed with these travel times"
         )
         grids_ds.attrs["stage_id"] = "Stage the travel times lead to"
         grids_ds.attrs["region_id"] = "Region the grid covers"
@@ -416,6 +424,52 @@ class Hdf5TrajectoryWriter(TrajectoryWriter):
         grids_ds.attrs["offset"] = (
             "First element of the grid in /travel_times/values"
         )
+        self._travel_time_grids_ds: h5py.Dataset = grids_ds
+
+    def _write_travel_time_changes(self, simulation: Simulation) -> None:
+        """Append a snapshot of every stage whose travel times changed, see
+        :meth:`~jupedsim.Simulation._take_travel_time_changes`: its first, then
+        every n-th change, see ``every_nth_travel_time_field``.
+
+        A stage's travel times span all regions, so a snapshot holds a grid for
+        every region. Each grid's row is appended after its values, so an
+        interrupted run leaves no row pointing past the stored values; memory
+        holds one grid at a time.
+        """
+        for (
+            stage_id,
+            iteration,
+        ) in simulation._take_travel_time_changes().items():
+            seen = self._travel_time_fields_seen.get(stage_id, 0)
+            self._travel_time_fields_seen[stage_id] = seen + 1
+            if seen % self._every_nth_travel_time_field != 0:
+                continue
+            for region_id, grid in simulation.travel_times(stage_id).items():
+                offset = self._travel_time_values_ds.shape[0]
+                values = grid.values.astype("<f4").ravel()
+                self._append(self._travel_time_values_ds, values, len(values))
+                directions = grid.directions.astype("<f4").reshape(-1, 2)
+                self._append(
+                    self._travel_time_directions_ds,
+                    directions,
+                    len(directions),
+                )
+                row = np.array(
+                    [
+                        (
+                            iteration,
+                            stage_id,
+                            region_id,
+                            *grid.origin,
+                            grid.width,
+                            grid.height,
+                            grid.cell_size,
+                            offset,
+                        )
+                    ],
+                    dtype=self.travel_time_grid_dtype(),
+                )
+                self._append(self._travel_time_grids_ds, row, 1)
 
     @staticmethod
     def trajectory_dtype() -> "np.dtype":
@@ -444,6 +498,7 @@ class Hdf5TrajectoryWriter(TrajectoryWriter):
         """Compound dtype of the /travel_times/grids dataset."""
         return np.dtype(
             [
+                ("iteration", "<u8"),
                 ("stage_id", "<u8"),
                 ("region_id", "<u8"),
                 ("origin_x", "<f8"),
@@ -707,7 +762,7 @@ class Hdf5TrajectoryLoader:
 
     def has_travel_times(self) -> bool:
         """Whether the file holds /travel_times, i.e. was written with
-        ``write_travel_times=True`` and closed without an error."""
+        ``write_travel_times=True``."""
         return self._travel_time_grids is not None
 
     def load_travel_time_stage_ids(self) -> list[int]:
@@ -719,28 +774,54 @@ class Hdf5TrajectoryLoader:
         grids = self._require_travel_time_grids()
         return np.unique(grids["stage_id"]).tolist()
 
+    def load_travel_time_iterations(self, stage_id: int) -> list[int]:
+        """Returns the iterations at which the travel times to one stage were
+        recorded, ascending: when the stage was added, and whenever its speed
+        fields changed. Agents are routed with each snapshot from its iteration
+        until the next one.
+
+        Args:
+            stage_id: id of the stage, see :meth:`load_travel_time_stage_ids`.
+
+        Raises:
+            Hdf5TrajectoryLoader.Error: if the file holds no travel times, or none
+                for ``stage_id``.
+        """
+        return np.unique(
+            self._stage_travel_time_rows(stage_id)["iteration"]
+        ).tolist()
+
     def load_travel_times(
-        self, stage_id: int
+        self, stage_id: int, iteration: int | None = None
     ) -> dict[int, Hdf5TrajectoryLoader.TravelTimeGrid]:
         """Loads the travel times to one stage, the counterpart of
         :meth:`~jupedsim.Simulation.travel_times`.
 
         Args:
             stage_id: id of the stage, see :meth:`load_travel_time_stage_ids`.
+            iteration: iteration whose travel times to load: the last snapshot
+                recorded at or before it, see :meth:`load_travel_time_iterations`.
+                The frame ``f`` of the trajectory is iteration
+                ``f * every_nth_frame``. ``None`` loads the last snapshot.
 
         Returns:
             The grid of every region by region id, in ascending order.
 
         Raises:
-            Hdf5TrajectoryLoader.Error: if the file holds no travel times, or none
-                for ``stage_id``.
+            Hdf5TrajectoryLoader.Error: if the file holds no travel times, none
+                for ``stage_id``, or none recorded at or before ``iteration``.
         """
-        grids = self._require_travel_time_grids()
-        rows = grids[grids["stage_id"] == stage_id]
-        if len(rows) == 0:
-            raise Hdf5TrajectoryLoader.Error(
-                f"No travel times for stage_id={stage_id}, found stages {self.load_travel_time_stage_ids()}"
-            )
+        rows = self._stage_travel_time_rows(stage_id)
+        if iteration is None:
+            snapshot = rows["iteration"].max()
+        else:
+            earlier = rows["iteration"][rows["iteration"] <= iteration]
+            if len(earlier) == 0:
+                raise Hdf5TrajectoryLoader.Error(
+                    f"No travel times for stage_id={stage_id} at iteration {iteration}, the first are from iteration {rows['iteration'].min()}"
+                )
+            snapshot = earlier.max()
+        rows = rows[rows["iteration"] == snapshot]
         result: dict[int, Hdf5TrajectoryLoader.TravelTimeGrid] = {}
         for row in np.sort(rows, order="region_id"):
             width, height = int(row["width"]), int(row["height"])
@@ -759,6 +840,16 @@ class Hdf5TrajectoryLoader:
                 ),
             )
         return result
+
+    def _stage_travel_time_rows(self, stage_id: int) -> npt.NDArray[typing.Any]:
+        """The rows of /travel_times/grids for one stage, all snapshots."""
+        grids = self._require_travel_time_grids()
+        rows = grids[grids["stage_id"] == stage_id]
+        if len(rows) == 0:
+            raise Hdf5TrajectoryLoader.Error(
+                f"No travel times for stage_id={stage_id}, found stages {self.load_travel_time_stage_ids()}"
+            )
+        return rows
 
     def _require_travel_time_grids(self) -> npt.NDArray[typing.Any]:
         if self._travel_time_grids is None:
