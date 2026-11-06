@@ -7,14 +7,14 @@
 /// Initialises `out` to INFINITY, pins every source cell to zero, and sweeps
 /// to convergence. `sources` are row-major cell indices (`row * width + col`).
 pub fn solve_into(
-    out: &mut [f64],
-    speed_field: &[f64],
+    out: &mut [f32],
+    speed_field: &[f32],
     sources: &[u32],
     width: usize,
     height: usize,
-    cell_size: f64,
+    cell_size: f32,
 ) {
-    out.fill(f64::INFINITY);
+    out.fill(f32::INFINITY);
     solve_into_seeded(out, speed_field, sources, &[], width, height, cell_size);
 }
 
@@ -34,13 +34,13 @@ pub fn solve_into(
 /// Anything lower than the result (e.g. a zeroed buffer) is kept as it is:
 /// the sweeps cannot raise it.
 pub fn solve_into_seeded(
-    out: &mut [f64],
-    speed_field: &[f64],
+    out: &mut [f32],
+    speed_field: &[f32],
     sources: &[u32],
-    seed_values: &[f64],
+    seed_values: &[f32],
     width: usize,
     height: usize,
-    cell_size: f64,
+    cell_size: f32,
 ) {
     assert!(
         seed_values.is_empty() || seed_values.len() == sources.len(),
@@ -75,11 +75,11 @@ pub fn solve_into_seeded(
 /// One Gauss-Seidel pass over the grid, rows and columns in the given order.
 /// Returns whether any cell was lowered.
 fn sweep(
-    u: &mut [f64],
-    speed: &[f64],
+    u: &mut [f32],
+    speed: &[f32],
     width: usize,
     height: usize,
-    cell_size: f64,
+    cell_size: f32,
     i_rev: bool,
     j_rev: bool,
 ) -> bool {
@@ -107,7 +107,7 @@ fn sweep(
 }
 
 /// Upwind Godunov update: solves (u-a)+^2 + (u-b)+^2 = cost^2
-fn godunov_update(a: f64, b: f64, cost: f64) -> f64 {
+fn godunov_update(a: f32, b: f32, cost: f32) -> f32 {
     let lo = a.min(b);
     let hi = a.max(b);
 
@@ -123,37 +123,37 @@ fn godunov_update(a: f64, b: f64, cost: f64) -> f64 {
 }
 
 /// The lower of the left and right neighbours; infinite beyond the grid.
-fn min_neighbor_x(u: &[f64], i: usize, j: usize, width: usize) -> f64 {
+fn min_neighbor_x(u: &[f32], i: usize, j: usize, width: usize) -> f32 {
     let left = if j > 0 {
         u[i * width + j - 1]
     } else {
-        f64::INFINITY
+        f32::INFINITY
     };
     let right = if j + 1 < width {
         u[i * width + j + 1]
     } else {
-        f64::INFINITY
+        f32::INFINITY
     };
     left.min(right)
 }
 
 /// The lower of the neighbours above and below; infinite beyond the grid.
-fn min_neighbor_y(u: &[f64], i: usize, j: usize, width: usize, height: usize) -> f64 {
+fn min_neighbor_y(u: &[f32], i: usize, j: usize, width: usize, height: usize) -> f32 {
     let up = if i > 0 {
         u[(i - 1) * width + j]
     } else {
-        f64::INFINITY
+        f32::INFINITY
     };
     let down = if i + 1 < height {
         u[(i + 1) * width + j]
     } else {
-        f64::INFINITY
+        f32::INFINITY
     };
     up.min(down)
 }
 
 /// Speed 0, negative or NaN marks a cell as not walkable.
-fn is_walkable(f: f64) -> bool {
+fn is_walkable(f: f32) -> bool {
     f > 0.0
 }
 
@@ -190,7 +190,7 @@ mod tests {
     fn uniform_point_source_matches_euclidean() {
         let (w, h) = (101usize, 101usize);
         let (cx, cy) = (w / 2, h / 2);
-        let speed = vec![1.0f64; w * h];
+        let speed = vec![1.0f32; w * h];
         let mut u = vec![0.0; w * h];
         solve_into(&mut u, &speed, &[(cy * w + cx) as u32], w, h, 1.0);
 
@@ -205,7 +205,7 @@ mod tests {
         ] {
             let expected =
                 (((i as f64 - cy as f64).powi(2) + (j as f64 - cx as f64).powi(2)).sqrt()).abs();
-            let got = u[i * w + j];
+            let got = f64::from(u[i * w + j]);
             assert!(
                 (got - expected).abs() / expected < tol,
                 "({i},{j}): expected {expected:.3}, got {got:.3}"
@@ -217,10 +217,10 @@ mod tests {
     #[test]
     fn seeding_shifts_the_field() {
         let (w, h) = (30usize, 20usize);
-        let speed = vec![1.0f64; w * h];
+        let speed = vec![1.0f32; w * h];
         let sources: Vec<u32> = (0..h as u32).map(|r| r * w as u32).collect(); // left column
         let mut zero = vec![0.0; w * h];
-        let mut shifted = vec![f64::INFINITY; w * h];
+        let mut shifted = vec![f32::INFINITY; w * h];
         solve_into(&mut zero, &speed, &sources, w, h, 0.5);
         solve_into_seeded(&mut shifted, &speed, &sources, &vec![3.0; h], w, h, 0.5);
         for (a, b) in zero.iter().zip(&shifted) {
@@ -233,20 +233,20 @@ mod tests {
     #[test]
     fn warm_start_from_a_previous_solution_matches_a_cold_start() {
         let (w, h) = (30usize, 20usize);
-        let mut speed = vec![1.0f64; w * h];
+        let mut speed = vec![1.0f32; w * h];
         for r in 0..15 {
             speed[r * w + 15] = 0.0; // a wall with a gap at the top
         }
         let sources: Vec<u32> = (0..h as u32).map(|r| r * w as u32).collect(); // left column
         let mut seeds = vec![5.0; h];
 
-        let mut warm = vec![f64::INFINITY; w * h];
+        let mut warm = vec![f32::INFINITY; w * h];
         solve_into_seeded(&mut warm, &speed, &sources, &seeds, w, h, 0.5);
         seeds[3] = 1.0;
         seeds[17] = 2.0;
         solve_into_seeded(&mut warm, &speed, &sources, &seeds, w, h, 0.5);
 
-        let mut cold = vec![f64::INFINITY; w * h];
+        let mut cold = vec![f32::INFINITY; w * h];
         solve_into_seeded(&mut cold, &speed, &sources, &seeds, w, h, 0.5);
         for (i, (a, b)) in warm.iter().zip(&cold).enumerate() {
             assert!(
@@ -260,8 +260,8 @@ mod tests {
     #[test]
     fn inconsistent_seed_is_lowered() {
         let (w, h) = (10usize, 1usize);
-        let speed = vec![1.0f64; w * h];
-        let mut u = vec![f64::INFINITY; w * h];
+        let speed = vec![1.0f32; w * h];
+        let mut u = vec![f32::INFINITY; w * h];
         solve_into_seeded(&mut u, &speed, &[0, 5], &[0.0, 100.0], w, h, 1.0);
         assert!(
             (u[5] - 5.0).abs() < 1e-12,
@@ -275,14 +275,14 @@ mod tests {
     #[test]
     fn wave_bends_around_wall_through_gap() {
         let (w, h) = (21usize, 21usize);
-        let mut speed = vec![1.0f64; w * h];
+        let mut speed = vec![1.0f32; w * h];
         for row in 0..18 {
             speed[row * w + 10] = 0.0; // wall in column 10, gap in rows 18..21
         }
         let mut u = vec![0.0; w * h];
         solve_into(&mut u, &speed, &[(10 * w + 2) as u32], w, h, 1.0);
 
-        let got = u[10 * w + 18];
+        let got = f64::from(u[10 * w + 18]);
         let straight = 16.0;
         // Shortest path passes the gap at (18, 10): two legs of length sqrt(8^2 + 8^2).
         let detour = 2.0 * (8.0f64 * 8.0 + 8.0 * 8.0).sqrt();
@@ -304,7 +304,7 @@ mod tests {
     #[test]
     fn source_on_obstacle_is_ignored() {
         let (w, h) = (10usize, 1usize);
-        let mut speed = vec![1.0f64; w * h];
+        let mut speed = vec![1.0f32; w * h];
         speed[5] = 0.0;
         let mut u = vec![0.0; w * h];
         solve_into(&mut u, &speed, &[5], w, h, 1.0);
@@ -318,7 +318,7 @@ mod tests {
     #[test]
     fn no_sources_leaves_everything_unreachable() {
         let (w, h) = (8usize, 6usize);
-        let speed = vec![1.0f64; w * h];
+        let speed = vec![1.0f32; w * h];
         let mut u = vec![0.0; w * h];
         solve_into(&mut u, &speed, &[], w, h, 1.0);
         assert!(u.iter().all(|t| t.is_infinite()));
@@ -329,7 +329,7 @@ mod tests {
     #[test]
     fn varying_speed_accumulates_cell_costs() {
         let (w, h) = (10usize, 1usize);
-        let speed: Vec<f64> = (0..w).map(|j| if j < 5 { 1.0 } else { 2.0 }).collect();
+        let speed: Vec<f32> = (0..w).map(|j| if j < 5 { 1.0 } else { 2.0 }).collect();
         let mut u = vec![0.0; w * h];
         solve_into(&mut u, &speed, &[0], w, h, 1.0);
         // 4 cells at cost 1 to reach cell 4, then 5 cells at cost 0.5.
@@ -341,7 +341,7 @@ mod tests {
     /// the exact direction `(dx, dy)` away from where the wave came from.
     fn gradient_angle_error(
         grid: &GridParams,
-        u: &[f64],
+        u: &[f32],
         row: usize,
         col: usize,
         dx: f64,
@@ -368,7 +368,7 @@ mod tests {
     fn gradient_direction_open_space() {
         let (w, h) = (101usize, 101usize);
         let (cr, cc) = (h / 2, w / 2);
-        let speed = vec![1.0f64; w * h];
+        let speed = vec![1.0f32; w * h];
         let mut u = vec![0.0; w * h];
         solve_into(&mut u, &speed, &[(cr * w + cc) as u32], w, h, 1.0);
         let grid = unit_grid(w, h);
@@ -400,7 +400,7 @@ mod tests {
     #[test]
     fn gradient_direction_behind_wall_corner() {
         let (w, h) = (61usize, 61usize);
-        let mut speed = vec![1.0f64; w * h];
+        let mut speed = vec![1.0f32; w * h];
         for row in 0..40 {
             speed[row * w + 30] = 0.0; // wall cells x in [30, 31], y in [0, 40]
         }
@@ -435,7 +435,7 @@ mod tests {
     #[test]
     fn obstacle_cells_stay_infinite() {
         let (w, h) = (10usize, 1usize);
-        let mut speed = vec![1.0f64; w * h];
+        let mut speed = vec![1.0f32; w * h];
         speed[5] = 0.0;
         let mut u = vec![0.0; w * h];
         solve_into(&mut u, &speed, &[0], w, h, 1.0);

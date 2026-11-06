@@ -94,7 +94,7 @@ struct RegionGrid {
     /// Speed of every destination without an override in this region: the
     /// wall term until the user sets it. Positive on walkable cells, 0 on
     /// all others (what `fsm` reads as an obstacle).
-    default_speed: Vec<f64>,
+    default_speed: Vec<f32>,
     /// The region's walkable polygon, for exact point-in-region tests: the
     /// grid only resolves it to whole cells.
     shape: Polygon<f64>,
@@ -162,7 +162,7 @@ struct Destination {
     sources: Vec<Source>,
     /// Per region: a speed field used instead of the region's default, for
     /// this destination only.
-    speed_override: Vec<Option<Vec<f64>>>,
+    speed_override: Vec<Option<Vec<f32>>>,
     solution: Option<Solution>,
 }
 
@@ -183,7 +183,7 @@ struct Solution {
     /// the seams. What gradient descent reads. Halo cells are obstacles in
     /// their own region, so the plain field is this with them set to infinity
     /// - no second copy is kept.
-    query: Vec<Option<Vec<f64>>>,
+    query: Vec<Option<Vec<f32>>>,
     /// Halo cells per region: obstacles there, holding neighbour values.
     halo: Vec<HashSet<u32>>,
 }
@@ -196,11 +196,11 @@ pub struct MultiRegionFloorfield {
     destinations: Vec<Destination>,
 }
 
-const EPS: f64 = 1e-9;
+const EPS: f32 = 1e-3;
 
-/// Upper bound on cells per region grid. Every destination keeps one f64
+/// Upper bound on cells per region grid. Every destination keeps one f32
 /// array per region (`query`), so this caps one destination at
-/// about 800 MB per region; it also keeps cell indices well inside `u32`.
+/// about 400 MB per region; it also keeps cell indices well inside `u32`.
 const MAX_CELLS_PER_REGION: u64 = 100_000_000;
 
 /// Obstacle cells around every region's grid, holding the halo. Seam cells are
@@ -339,14 +339,14 @@ impl MultiRegionFloorfield {
     /// The speed field of `region` used by every destination without an
     /// override there, row-major on its grid: 0 on cells that are not
     /// walkable.
-    pub fn default_speed(&self, region: usize) -> Result<&[f64]> {
+    pub fn default_speed(&self, region: usize) -> Result<&[f32]> {
         Ok(&self.region(region)?.default_speed)
     }
 
     /// Replace the default speed field of `region`, see `checked_speed` for
     /// what `values` must hold. Destinations using it are solved again on
     /// their next query.
-    pub fn set_default_speed(&mut self, region: usize, values: &[f64]) -> Result<()> {
+    pub fn set_default_speed(&mut self, region: usize, values: &[f32]) -> Result<()> {
         let speed = self.checked_speed(region, values)?;
         self.regions[region].default_speed = speed;
         for d in &mut self.destinations {
@@ -359,7 +359,7 @@ impl MultiRegionFloorfield {
 
     /// The speed field `dest` is solved with in `region`: its override there,
     /// else the region's default.
-    pub fn speed(&self, region: usize, dest: usize) -> Result<&[f64]> {
+    pub fn speed(&self, region: usize, dest: usize) -> Result<&[f32]> {
         self.region(region)?;
         Ok(self.speed_of(self.destination(dest)?, region))
     }
@@ -373,7 +373,7 @@ impl MultiRegionFloorfield {
     /// Solve `dest` with `values` in `region` instead of the default speed
     /// field, see `checked_speed` for what `values` must hold. Other
     /// destinations are not affected; `dest` is solved again on its next query.
-    pub fn set_speed_override(&mut self, region: usize, dest: usize, values: &[f64]) -> Result<()> {
+    pub fn set_speed_override(&mut self, region: usize, dest: usize, values: &[f32]) -> Result<()> {
         self.destination(dest)?;
         let speed = self.checked_speed(region, values)?;
         let d = &mut self.destinations[dest];
@@ -432,7 +432,7 @@ impl MultiRegionFloorfield {
 
     /// Travel time to the destination for every cell of `region`.
     /// Obstacle cells are infinite.
-    pub fn travel_times(&mut self, region: usize, dest: usize) -> Result<Vec<f64>> {
+    pub fn travel_times(&mut self, region: usize, dest: usize) -> Result<Vec<f32>> {
         self.region(region)?;
         let sol = self.solution(dest)?;
         let halo = &sol.halo[region];
@@ -441,13 +441,13 @@ impl MultiRegionFloorfield {
                 .zip(query)
                 .map(|(cell, t)| {
                     if halo.contains(&cell) {
-                        f64::INFINITY // an obstacle here, see `Solution::query`
+                        f32::INFINITY // an obstacle here, see `Solution::query`
                     } else {
                         *t
                     }
                 })
                 .collect(),
-            None => vec![f64::INFINITY; self.regions[region].grid.cell_count()],
+            None => vec![f32::INFINITY; self.regions[region].grid.cell_count()],
         })
     }
 
@@ -525,14 +525,14 @@ impl MultiRegionFloorfield {
     /// Travel time from (x, y) in `region` to `dest`: zero inside it. Taken at
     /// the same cell as `direction`, with the same errors. Solves the
     /// destination on first use.
-    pub fn travel_time(&mut self, region: usize, x: f64, y: f64, dest: usize) -> Result<f64> {
+    pub fn travel_time(&mut self, region: usize, x: f64, y: f64, dest: usize) -> Result<f32> {
         let g = self.covered(region, x, y)?;
         let cell = nearest_walkable(&self.spec, g, [x, y], None)
             .ok_or(MultiRegionError::NotRoutable { region, x, y })?;
         let sol = self.solution(dest)?;
         Ok(sol.query[region]
             .as_ref()
-            .map_or(f64::INFINITY, |query| query[cell as usize]))
+            .map_or(f32::INFINITY, |query| query[cell as usize]))
     }
 
     // ── Internals ───────────────────────────────────────────────────────────
@@ -549,7 +549,7 @@ impl MultiRegionFloorfield {
             .ok_or(MultiRegionError::UnknownDestination(dest))
     }
 
-    fn speed_of<'a>(&'a self, d: &'a Destination, region: usize) -> &'a [f64] {
+    fn speed_of<'a>(&'a self, d: &'a Destination, region: usize) -> &'a [f32] {
         d.speed_override[region]
             .as_deref()
             .unwrap_or(&self.regions[region].default_speed)
@@ -561,7 +561,7 @@ impl MultiRegionFloorfield {
     /// is the geometry's to decide, and a tiny one would make travel times
     /// infinite. Values on cells that are not walkable are ignored and come
     /// out as 0.
-    fn checked_speed(&self, region: usize, values: &[f64]) -> Result<Vec<f64>> {
+    fn checked_speed(&self, region: usize, values: &[f32]) -> Result<Vec<f32>> {
         let g = self.region(region)?;
         if values.len() != g.grid.cell_count() {
             return Err(MultiRegionError::InvalidInput(format!(
@@ -668,7 +668,7 @@ impl MultiRegionFloorfield {
             ))?;
         let mut dest_cells = vec![Vec::new(); self.regions.len()];
         dest_cells[test_region].push(test_cell);
-        let speeds: Vec<&[f64]> = self.regions.iter().map(|g| &g.default_speed[..]).collect();
+        let speeds: Vec<&[f32]> = self.regions.iter().map(|g| &g.default_speed[..]).collect();
         let test_solution = self.solve(&dest_cells, &speeds)?;
 
         // lambda function to check per region and per cell that a cell that is walkable has been solved to a finite value.
@@ -701,7 +701,7 @@ impl MultiRegionFloorfield {
         let d = self.destination(dest)?;
         if d.solution.is_none() {
             let cells = d.cells_per_region(self.regions.len());
-            let speeds: Vec<&[f64]> = (0..self.regions.len())
+            let speeds: Vec<&[f32]> = (0..self.regions.len())
                 .map(|r| self.speed_of(d, r))
                 .collect();
             let sol = self.solve(&cells, &speeds)?;
@@ -719,13 +719,13 @@ impl MultiRegionFloorfield {
     fn solve_region(
         &self,
         region: usize,
-        speed: &[f64],
-        previous: Option<Vec<f64>>,
+        speed: &[f32],
+        previous: Option<Vec<f32>>,
         sources: &[u32],
-        seeds: &[f64],
-    ) -> Vec<f64> {
+        seeds: &[f32],
+    ) -> Vec<f32> {
         let g = &self.regions[region];
-        let mut out = previous.unwrap_or_else(|| vec![f64::INFINITY; g.grid.cell_count()]);
+        let mut out = previous.unwrap_or_else(|| vec![f32::INFINITY; g.grid.cell_count()]);
         fsm::solve_into_seeded(
             &mut out,
             speed,
@@ -733,7 +733,7 @@ impl MultiRegionFloorfield {
             seeds,
             g.grid.width as usize,
             g.grid.height as usize,
-            self.spec.cell_size,
+            self.spec.cell_size as f32,
         );
         out
     }
@@ -745,10 +745,10 @@ impl MultiRegionFloorfield {
     /// there, and that region is queued (smallest seed first) to be solved,
     /// or solved again. Regions no seed ever reaches keep no field.
     /// `speeds` holds the speed field of every region.
-    fn solve(&self, dest_cells: &[Vec<u32>], speeds: &[&[f64]]) -> Result<Solution> {
+    fn solve(&self, dest_cells: &[Vec<u32>], speeds: &[&[f32]]) -> Result<Solution> {
         let n = self.regions.len();
-        let mut fields: Vec<Option<Vec<f64>>> = vec![None; n];
-        let mut seeds: Vec<HashMap<u32, f64>> = vec![HashMap::new(); n];
+        let mut fields: Vec<Option<Vec<f32>>> = vec![None; n];
+        let mut seeds: Vec<HashMap<u32, f32>> = vec![HashMap::new(); n];
         let mut dirty = vec![false; n];
         let mut heap = BinaryHeap::new();
 
@@ -778,9 +778,9 @@ impl MultiRegionFloorfield {
             if pops > budget {
                 return Err(MultiRegionError::NotConverged);
             }
-            let mut sources: Vec<(u32, f64)> = seeds[r].iter().map(|(&c, &t)| (c, t)).collect();
+            let mut sources: Vec<(u32, f32)> = seeds[r].iter().map(|(&c, &t)| (c, t)).collect();
             sources.sort_unstable_by_key(|&(c, _)| c); // deterministic
-            let (cells, values): (Vec<u32>, Vec<f64>) = sources.into_iter().unzip();
+            let (cells, values): (Vec<u32>, Vec<f32>) = sources.into_iter().unzip();
             let field = self.solve_region(r, speeds[r], fields[r].take(), &cells, &values);
 
             for &s in &self.out_seams[r] {
@@ -792,11 +792,11 @@ impl MultiRegionFloorfield {
                     if !t.is_finite() {
                         continue;
                     }
-                    let known = fields[y].as_ref().map_or(f64::INFINITY, |f| f[cy as usize]);
+                    let known = fields[y].as_ref().map_or(f32::INFINITY, |f| f[cy as usize]);
                     let current = seeds[y]
                         .get(&cy)
                         .copied()
-                        .unwrap_or(f64::INFINITY)
+                        .unwrap_or(f32::INFINITY)
                         .min(known);
                     if t < current - EPS {
                         seeds[y].insert(cy, t);
@@ -805,7 +805,7 @@ impl MultiRegionFloorfield {
                 }
                 if improved {
                     dirty[y] = true;
-                    let key = seeds[y].values().copied().fold(f64::INFINITY, f64::min);
+                    let key = seeds[y].values().copied().fold(f32::INFINITY, f32::min);
                     heap.push(Entry::new(key, y));
                 }
             }
@@ -846,10 +846,10 @@ impl MultiRegionFloorfield {
 /// grid covers it and it is an obstacle there (never overwrite walkable cells).
 fn write_halo(
     g: &RegionGrid,
-    query: &mut [f64],
+    query: &mut [f32],
     halo: &mut HashSet<u32>,
     lattice: [i64; 2],
-    value: f64,
+    value: f32,
 ) {
     let Some(cell) = g.local(lattice) else { return };
     if g.walkable(cell) || !value.is_finite() {
@@ -913,8 +913,8 @@ fn seam_pairs(
 
 /// Time to cross a seam pair `dist` apart, from cell `ca` (speed field `from`)
 /// to cell `cb` (speed field `to`): at the mean of their speeds.
-fn crossing_time(from: &[f64], to: &[f64], ca: u32, cb: u32, dist: f64) -> f64 {
-    dist / (0.5 * (from[ca as usize] + to[cb as usize]))
+fn crossing_time(from: &[f32], to: &[f32], ca: u32, cb: u32, dist: f64) -> f32 {
+    dist as f32 / (0.5 * (from[ca as usize] + to[cb as usize]))
 }
 
 /// One side of a seam from `a` to `b`: the one `normal` points to.
@@ -993,7 +993,7 @@ fn unit(dx: f64, dy: f64) -> (f64, f64) {
 /// cell is reachable, so that is a bug.
 fn direction_at_cell(
     g: &RegionGrid,
-    query: Option<&[f64]>,
+    query: Option<&[f32]>,
     cell: u32,
     source: Option<SourceKind>,
     p: (f64, f64),
@@ -1027,7 +1027,7 @@ fn no_descent(region: usize, (x, y): (f64, f64), dest: usize) -> MultiRegionErro
 /// travel time drops fastest per distance; `None` if none is lower. A
 /// reachable cell outside the destination always has a lower neighbour: its
 /// time came from one.
-fn steepest_descent(g: &RegionGrid, query: &[f64], cell: u32) -> Option<(f64, f64)> {
+fn steepest_descent(g: &RegionGrid, query: &[f32], cell: u32) -> Option<(f64, f64)> {
     let t = query[cell as usize];
     let (row, col) = g.row_col(cell);
     let mut best: Option<(f64, (f64, f64))> = None;
@@ -1045,7 +1045,7 @@ fn steepest_descent(g: &RegionGrid, query: &[f64], cell: u32) -> Option<(f64, f6
         if r < 0 || c < 0 || r >= g.grid.height as i32 || c >= g.grid.width as i32 {
             continue;
         }
-        let drop = t - query[r as usize * g.grid.width as usize + c as usize];
+        let drop = f64::from(t) - f64::from(query[r as usize * g.grid.width as usize + c as usize]);
         let rate = drop / f64::from(dr * dr + dc * dc).sqrt();
         if rate > 0.0 && best.is_none_or(|(b, _)| rate > b) {
             best = Some((rate, unit(f64::from(dc), f64::from(dr))));
@@ -1110,12 +1110,12 @@ fn check_cell_counts(spec: &GridSpec, boxes: &[([f64; 2], [f64; 2])]) -> Result<
 /// Min-heap entry: smallest key first, ties by region index.
 #[derive(PartialEq)]
 struct Entry {
-    key: f64,
+    key: f32,
     region: usize,
 }
 
 impl Entry {
-    fn new(key: f64, region: usize) -> Self {
+    fn new(key: f32, region: usize) -> Self {
         Self { key, region }
     }
 }
@@ -1183,7 +1183,7 @@ mod tests {
     fn time_at(ff: &mut MultiRegionFloorfield, region: usize, x: f64, y: f64, dest: usize) -> f64 {
         let tt = ff.travel_times(region, dest).unwrap();
         let g = &ff.regions[region];
-        tt[g.local(ff.spec.lattice_cell(x, y)).unwrap() as usize]
+        f64::from(tt[g.local(ff.spec.lattice_cell(x, y)).unwrap() as usize])
     }
 
     /// Follow `direction` from (x, y) the way an agent does, in steps of one
@@ -1466,7 +1466,11 @@ mod tests {
                     cb,
                     dist,
                 );
-                assert!(cross >= dist - 1e-12, "cross {cross} < dist {dist}");
+                // `dist` is rounded to f32 on the way.
+                assert!(
+                    f64::from(cross) >= dist * (1.0 - 1e-6),
+                    "cross {cross} < dist {dist}"
+                );
             }
         }
     }
@@ -2054,8 +2058,8 @@ mod tests {
     fn mapped_default(
         ff: &MultiRegionFloorfield,
         region: usize,
-        f: impl Fn(f64, f64, f64) -> f64,
-    ) -> Vec<f64> {
+        f: impl Fn(f64, f64, f32) -> f32,
+    ) -> Vec<f32> {
         let grid = *ff.grid(region).unwrap();
         (0u32..)
             .zip(ff.default_speed(region).unwrap())
@@ -2066,14 +2070,14 @@ mod tests {
             .collect()
     }
 
-    fn all_travel_times(ff: &mut MultiRegionFloorfield, dest: usize) -> Vec<Vec<f64>> {
+    fn all_travel_times(ff: &mut MultiRegionFloorfield, dest: usize) -> Vec<Vec<f32>> {
         (0..ff.region_count())
             .map(|r| ff.travel_times(r, dest).unwrap())
             .collect()
     }
 
     /// Equal where both are finite, infinite at the same cells.
-    fn assert_fields_close(a: &[Vec<f64>], b: &[Vec<f64>], scale: f64) {
+    fn assert_fields_close(a: &[Vec<f32>], b: &[Vec<f32>], scale: f32) {
         for (fa, fb) in a.iter().zip(b) {
             for (&ta, &tb) in fa.iter().zip(fb) {
                 assert_eq!(ta.is_finite(), tb.is_finite());
@@ -2153,7 +2157,7 @@ mod tests {
         // Region 0 only is slower: times there grow, region 1 is unchanged.
         let after = all_travel_times(&mut ff, slowed);
         assert_fields_close(&before[1..], &after[1..], 1.0);
-        let t0 = |tt: &[Vec<f64>]| tt[0].iter().copied().filter(|t| t.is_finite()).sum::<f64>();
+        let t0 = |tt: &[Vec<f32>]| tt[0].iter().copied().filter(|t| t.is_finite()).sum::<f32>();
         assert!(t0(&after) > t0(&before));
         assert_fields_close(&before, &all_travel_times(&mut ff, other), 1.0);
 
@@ -2253,7 +2257,14 @@ mod tests {
         assert!(invalid(ff.set_default_speed(0, &vec![1.0; n - 1])));
         assert!(invalid(ff.set_speed_override(0, dest, &vec![1.0; n + 1])));
         // Tiny speeds would make travel times overflow to infinity.
-        for bad in [0.0, -1.0, f64::NAN, f64::INFINITY, 1e-320, 0.5 * MIN_SPEED] {
+        for bad in [
+            0.0,
+            -1.0,
+            f32::NAN,
+            f32::INFINITY,
+            f32::MIN_POSITIVE,
+            0.5 * MIN_SPEED,
+        ] {
             let mut values = vec![1.0; n];
             values[walkable_cell] = bad;
             assert!(invalid(ff.set_default_speed(0, &values)), "accepted {bad}");
