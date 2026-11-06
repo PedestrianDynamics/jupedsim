@@ -510,13 +510,18 @@ custom_sim.add_agent(pos, route=route_a)  # simulation with a custom model
 # A removed agent's handle keeps .id and .alive readable; everything else
 # raises.
 agent1.remove()
-# Each iterate() records the agents removed in it. A record holds the
-# agent's id, the exit it left through (None for agent.remove()) and the
-# removal time, e.g. for exit counts and flow over time.
+# removed_agents() returns the records of the agents removed by the most
+# recent iterate(), as on master. Calls do not consume them: repeated
+# calls return the same records until the next iterate().
+# As on master, removal runs at the start of iterate(): an agent that
+# reaches an exit in one iteration is removed at the start of the next.
+# A record holds the agent's id, the exit it left through (None for
+# agent.remove()) and the time it reached that exit (for agent.remove(),
+# the time of removal), e.g. for exit counts and flow over time.
 for removal in sim.removed_agents():
     removal.id  # 17
     removal.exit  # Exit(id=5, name="exit1"), or None
-    removal.time  # simulation time of the removal, in seconds
+    removal.time  # simulation time in seconds, see above
 sim.stages  # (Waypoint(id=0, name="wp1"), ..., Exit(id=8, name="exit_ground"))
 sim.stage("exit1")  # Exit(id=5, name="exit1")
 sim.stage(id=5)  # the same exit, by id
