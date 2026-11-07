@@ -91,18 +91,15 @@ class Exit(_Stage):
 
 @dataclass(frozen=True)
 class Removal:
-    """An agent's removal, see :meth:`Simulation.removed_agents`.
-
-    Attributes:
-        id: Id of the removed agent.
-        exit: The exit the agent left through, None for ``agent.remove()``.
-        time: Simulation time in seconds at which the agent reached the exit,
-            or at which ``agent.remove()`` was called.
-    """
+    """An agent's removal, see :meth:`Simulation.removed_agents`."""
 
     id: int
+    """Id of the removed agent."""
     exit: Exit | None
+    """The exit the agent left through, None for ``agent.remove()``."""
     time: float
+    """Simulation time in seconds at which the agent reached the exit, or at
+    which ``agent.remove()`` was called."""
 
 
 def _is_pair_list(area: Any) -> bool:

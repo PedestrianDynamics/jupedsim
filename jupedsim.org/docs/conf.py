@@ -128,7 +128,7 @@ def skip_rules(app, what, name, obj, skip, options):
     return skip
 
 
-# jupedsim.internal.{aabb,grid,tracing} are excluded via autoapi_ignore, so
+# jupedsim.internal.{aabb,agents,grid,tracing} are excluded via autoapi_ignore, so
 # autoapi cannot resolve imports from them and drops the imported names. Only
 # these known imports are silenced; any other unresolved import (including
 # jupedsim.pyjupedsim, which must resolve through the stubs) fails a -W build.
@@ -136,7 +136,7 @@ def skip_rules(app, what, name, obj, skip, options):
 # jupedsim.internal.tracing) are missing from the API reference.
 _KNOWN_UNRESOLVED_IMPORT = re.compile(
     r"Cannot resolve import of unknown module "
-    r"jupedsim\.internal\.(aabb|grid|tracing) in "
+    r"jupedsim\.internal\.(aabb|agents|grid|tracing) in "
 )
 
 
