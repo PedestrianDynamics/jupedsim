@@ -221,6 +221,14 @@ during iteration) now raises {class}`~jupedsim.SimulationError` instead of
 causing undefined behavior. Perform such mutations between `iterate()`
 calls.
 
+## Round-robin order
+
+`jps.RoundRobin` splits agents by smooth weighted round-robin: with the
+weights 3 and 2 the agents take e1 e2 e1 e2 e1, where 1.x sent them in
+blocks (e1 e1 e1 e2 e2). Each cycle has the same shares, but the order
+differs, so 1.x scenarios with round-robin transitions give different
+results.
+
 ## Removed APIs at a glance
 
 - All model builder classes (C++ and Python).
