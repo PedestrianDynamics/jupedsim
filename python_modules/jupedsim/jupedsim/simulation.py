@@ -502,12 +502,13 @@ class Simulation:
     def removed_agents(self) -> tuple[Removal, ...]:
         """Records of the agents removed by the most recent :func:`iterate`.
 
-        An agent that reaches an exit during an iteration, or is removed with
-        :meth:`Agent.remove`, gets its record when that iteration ends. The
-        agent itself leaves at the start of the next :func:`iterate`, so a
-        record appears one iterate before ``agent.alive`` turns False. The
-        next :func:`iterate` replaces the records; calls in between return
-        equal tuples.
+        An agent that reaches an exit during an iteration gets its record
+        when that iteration ends. The agent itself leaves at the start of the
+        next :func:`iterate`, so its record appears one iterate before
+        ``agent.alive`` turns False. An agent removed with
+        :meth:`Agent.remove` leaves at the start of the next :func:`iterate`
+        and gets its record when that iterate ends. The next :func:`iterate`
+        replaces the records; calls in between return equal tuples.
 
         Returns:
             One :class:`Removal` per agent: its id, the exit it left through

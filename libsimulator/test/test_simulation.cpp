@@ -262,12 +262,17 @@ TEST(Simulation, MarkingAnAgentForRemovalRecordsNoExit)
     const auto id = sim->add_agent(route, stage, Point{5, 5}, State{}, room);
     sim->iterate();
 
+    const auto marked_at = sim->elapsed_time();
     sim->mark_agent_for_removal(id);
+    // The record belongs to the iteration that removes the agent.
+    EXPECT_TRUE(sim->removed_agents().empty());
+    sim->iterate();
 
     ASSERT_EQ(sim->removed_agents().size(), 1u);
     EXPECT_EQ(sim->removed_agents().front().id, id);
     EXPECT_FALSE(sim->removed_agents().front().exit.has_value());
-    EXPECT_DOUBLE_EQ(sim->removed_agents().front().time, sim->elapsed_time());
+    EXPECT_DOUBLE_EQ(sim->removed_agents().front().time, marked_at);
+    EXPECT_EQ(sim->agent_count(), 0u);
 }
 
 TEST(Simulation, AnAgentHasOneRemovalRecord)
@@ -280,6 +285,7 @@ TEST(Simulation, AnAgentHasOneRemovalRecord)
     const auto other = sim->add_agent(route, exit, Point{7, 12}, State{}, room);
     sim->mark_agent_for_removal(other);
     sim->mark_agent_for_removal(other);
+    sim->iterate();
     ASSERT_EQ(sim->removed_agents().size(), 1u);
     EXPECT_FALSE(sim->removed_agents().front().exit.has_value());
 
@@ -294,6 +300,8 @@ TEST(Simulation, AnAgentHasOneRemovalRecord)
     ASSERT_EQ(sim->removed_agents().size(), 1u);
     EXPECT_EQ(sim->removed_agents().front().id, id);
     EXPECT_EQ(sim->removed_agents().front().exit, exit);
+    sim->iterate();
+    EXPECT_TRUE(sim->removed_agents().empty());
 }
 
 TEST(Simulation, TwoAgentsReachTheirOwnExits)

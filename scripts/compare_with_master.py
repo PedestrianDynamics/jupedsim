@@ -230,6 +230,10 @@ class _Recorder:
     def note_removed(self, sim, rec, it):
         for removed in sim.removed_agents():
             stage = self.api.removed_exit(rec, removed)
+            if stage is None:
+                # agent.remove(): no exit, and master never reported these
+                # after an iterate.
+                continue
             key = str(rec.exits.index(stage)) if stage in rec.exits else "other"
             rec.exit_counts.setdefault(key, []).append(it)
 

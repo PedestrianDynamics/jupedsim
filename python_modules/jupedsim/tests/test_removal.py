@@ -72,10 +72,29 @@ def test_remove_has_no_exit():
     sim.iterate(count=3)
     removal_time = sim.elapsed_time()
     agent.remove()
+    assert sim.removed_agents() == ()
+    sim.iterate()
     (removal,) = sim.removed_agents()
     assert removal.id == agent.id
     assert removal.exit is None
     assert removal.time == pytest.approx(removal_time)
+    assert not agent.alive
+
+
+def test_iterate_loop_sees_removals_by_remove():
+    sim, room, exit1 = make_sim()
+    removed = sim.add_agent(room.at(2, 5), route=jps.Route([exit1]))
+    leaving = sim.add_agent(room.at(7, 5), route=jps.Route([exit1]))
+    records = []
+    for i in range(5000):
+        if i == 3:
+            removed.remove()
+        sim.iterate()
+        records.extend(sim.removed_agents())
+        if not leaving.alive:
+            break
+    exits = {r.id: r.exit for r in records}
+    assert exits == {removed.id: None, leaving.id: exit1}
 
 
 def test_remove_after_exit_keeps_one_record():
@@ -85,6 +104,8 @@ def test_remove_after_exit_keeps_one_record():
     agent.remove()
     (removal,) = sim.removed_agents()
     assert removal.exit is exit1
+    sim.iterate()
+    assert sim.removed_agents() == ()
 
 
 def test_remove_twice_keeps_one_record():
@@ -92,6 +113,7 @@ def test_remove_twice_keeps_one_record():
     agent = sim.add_agent(room.at(2, 5), route=jps.Route([exit1]))
     agent.remove()
     agent.remove()
+    sim.iterate()
     (removal,) = sim.removed_agents()
     assert removal.id == agent.id
     assert removal.exit is None

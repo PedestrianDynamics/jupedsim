@@ -113,7 +113,8 @@ void Simulation::iterate()
 
     {
         JPS_SCOPED_TIMER_AND_TRACE(_timer, "Agent Removal System", Detailed);
-        _agent_removal_system.run(_agents, _removed_agents_in_last_iteration, _stage_manager);
+        _agent_removal_system.run(
+            _agents, _removed_agents_in_last_iteration, _marked_for_removal, _stage_manager);
     }
 
     {
@@ -349,14 +350,10 @@ void Simulation::mark_agent_for_removal(GenericAgent::ID id)
         throw SimulationError("Unknown agent id {}", id);
     }
 
-    const bool has_record = std::any_of(
-        std::begin(_removed_agents_in_last_iteration),
-        std::end(_removed_agents_in_last_iteration),
-        [id](const auto& record) { return record.id == id; });
-    if(has_record) {
+    if(is_leaving(id)) {
         return;
     }
-    _removed_agents_in_last_iteration.push_back({id, std::nullopt, _clock.elapsed_time()});
+    _marked_for_removal.push_back({id, std::nullopt, _clock.elapsed_time()});
 }
 
 const GenericAgent& Simulation::agent(GenericAgent::ID id) const
@@ -603,10 +600,12 @@ Exit& Simulation::exit_of(BaseStage::ID stage_id)
 
 bool Simulation::is_leaving(GenericAgent::ID id) const
 {
+    const auto of_agent = [id](const auto& record) { return record.id == id; };
     return std::any_of(
-        std::begin(_removed_agents_in_last_iteration),
-        std::end(_removed_agents_in_last_iteration),
-        [id](const auto& record) { return record.id == id; });
+               std::begin(_removed_agents_in_last_iteration),
+               std::end(_removed_agents_in_last_iteration),
+               of_agent) ||
+           std::any_of(std::begin(_marked_for_removal), std::end(_marked_for_removal), of_agent);
 }
 
 BaseStage* Simulation::decide_again(const GenericAgent& agent) const

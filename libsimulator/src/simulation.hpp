@@ -69,6 +69,8 @@ private:
     std::unique_ptr<RoutingEngine> _routing_engine{};
     AgentContainer<GenericAgent> _agents;
     std::vector<RemovalRecord> _removed_agents_in_last_iteration;
+    /// Records of agents marked for removal, reported once the next iteration removes them.
+    std::vector<RemovalRecord> _marked_for_removal;
     std::unordered_map<Route::ID, std::unique_ptr<Route>> _routes;
     Timer _timer{};
     State _state{State::Ready};
