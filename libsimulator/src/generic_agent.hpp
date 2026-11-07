@@ -47,6 +47,8 @@ struct GenericAgent {
 
     /// Where the agent stands. Only the geometry can say that, so only it can build one.
     Location location;
+    /// Horizontal displacement of the agent's most recent step; zero before its first.
+    Vector last_step{};
 
     // This is evaluated by the "operational level"
     /// Unit vector along the route to the final target. Zero if the agent has reached it.

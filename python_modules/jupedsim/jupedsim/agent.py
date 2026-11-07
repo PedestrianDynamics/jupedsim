@@ -152,8 +152,9 @@ class Agent:
         """True once the agent has completed a stage followed by STAY, or
         reached its steer_to() point, until follow() or steer_to().
 
-        A point counts as reached within 0.05 m (horizontal distance, same
-        region). Arrived agents keep steering to the stage or the point, so
+        A point counts as reached when the agent's last step passed within
+        0.05 m of it (horizontal distance, same region), whatever the step
+        length, so fast agents and large dt arrive too. Arrived agents keep steering to the stage or the point, so
         they stay there, and are not removed."""
         return self._resolve().arrived
 

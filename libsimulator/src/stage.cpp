@@ -57,7 +57,7 @@ RoutingTarget Exit::target(const GenericAgent&)
 bool DirectSteering::is_completed(const GenericAgent& agent)
 {
     const auto* point = std::get_if<Location>(&agent.final_target);
-    return point != nullptr && has_reached(agent.location, *point);
+    return point != nullptr && has_reached(agent.location, agent.last_step, *point);
 }
 
 RoutingTarget DirectSteering::target(const GenericAgent& agent)

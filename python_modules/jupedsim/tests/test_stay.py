@@ -181,3 +181,18 @@ def test_follow_sets_route_orientation_at_once():
     # next iterate().
     agent.follow(jps.Route([s["wp2"], jps.STAY]))
     assert agent.route_orientation[0] > 0.5
+
+
+@pytest.mark.parametrize("target", [(8.37, 5.21), (13.123, 2.777)])
+def test_fast_agent_with_large_dt_arrives(target):
+    # Steps of 0.4 m: much longer than the 0.05 m tolerance.
+    surface = WalkableSurface()
+    room = surface.add_region(polygon=ROOM, name="room")
+    sim = jps.Simulation(jps.CollisionFreeSpeedModel(), surface, dt=0.1)
+    agent = sim.add_agent(
+        room.at(2, 5),
+        target=room.at(*target),
+        state=jps.CollisionFreeSpeedModelState(desired_speed=4.0),
+    )
+    iterate_until(sim, lambda: agent.arrived, limit=200)
+    assert math.dist(agent.position.xy, target) <= 0.4
