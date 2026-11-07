@@ -139,10 +139,12 @@ class _Recorder:
         it = sim.iteration_count()
         agents = list(sim.agents())
         rec.targets = {a.id: self.api.target(a) for a in agents}
-        self.note_count(rec, it, len(agents))
+        if not rec.agent_count:
+            self.note_count(rec, it, len(agents))
         if it % SAMPLE_EVERY == 0:
             self.sample(rec, it, agents)
         original(sim, 1)
+        self.note_count(rec, it + 1, sim.agent_count())
         self.note_removed(sim, rec, it)
         rec.end_time = sim.elapsed_time()
 
@@ -309,6 +311,10 @@ def _environment():
     }
 
 
+class ScenarioCrashError(Exception):
+    """A scenario exited with an error; the message is its stderr tail."""
+
+
 def run_scenario(script):
     """Run one scenario in a child process; return its per-simulation metrics."""
     script = Path(script)
@@ -332,9 +338,7 @@ def run_scenario(script):
             text=True,
         )
         if proc.returncode != 0:
-            raise RuntimeError(
-                f"{script} failed:\n{proc.stdout[-2000:]}\n{proc.stderr[-4000:]}"
-            )
+            raise ScenarioCrashError(proc.stderr[-4000:])
         return json.loads(out.read_text())
 
 
@@ -366,29 +370,92 @@ def _exemptions():
     return exempt
 
 
-def first_difference(old, new):
+def _side(key, old, new):
+    return "baseline" if key in old else "current"
+
+
+def _diff_scalar(old, new):
+    return f"{old!r} vs {new!r}"
+
+
+def _diff_changes(old, new):
+    """Compare [iteration, value] change points."""
+    for a, b in zip(old, new):
+        if a != b:
+            return f"iteration {min(a[0], b[0])}: baseline {a[1]} vs current {b[1]}"
+    longer, side = (
+        (old, "baseline") if len(old) > len(new) else (new, "current")
+    )
+    return f"iteration {longer[min(len(old), len(new))][0]}: only in {side}"
+
+
+def _diff_exit_counts(old, new):
+    """Compare per-exit lists of removal iterations."""
+    for key in sorted(set(old) | set(new), key=_sort_key):
+        if key not in old or key not in new:
+            first = (old.get(key) or new.get(key))[0]
+            return (
+                f"exit {key}: only in {_side(key, old, new)}, "
+                f"first removal at iteration {first}"
+            )
+        a, b = old[key], new[key]
+        for i, (x, y) in enumerate(zip(a, b)):
+            if x != y:
+                return (
+                    f"exit {key}: removal #{i} at iteration "
+                    f"baseline {x} vs current {y}"
+                )
+        if len(a) != len(b):
+            longer, side = (
+                (a, "baseline") if len(a) > len(b) else (b, "current")
+            )
+            return (
+                f"exit {key}: extra removal at iteration "
+                f"{longer[min(len(a), len(b))]} only in {side}"
+            )
+    return None
+
+
+def _diff_sampled(old, new, fields):
+    """Compare {iteration: {agent id: value}} samples."""
+    for it in sorted(set(old) | set(new), key=_sort_key):
+        if it not in old or it not in new:
+            return f"iteration {it}: sampled only in {_side(it, old, new)}"
+        if old[it] == new[it]:
+            continue
+        for agent in sorted(set(old[it]) | set(new[it]), key=_sort_key):
+            a, b = old[it].get(agent), new[it].get(agent)
+            if a == b:
+                continue
+            where = f"iteration {it}, agent {agent}"
+            if a is None or b is None:
+                return f"{where}: only in {_side(agent, old[it], new[it])}"
+            return f"{where}, {_field_diff(a, b, fields)}"
+    return None
+
+
+def _field_diff(a, b, fields):
+    if not fields:
+        return f"target baseline {a!r} vs current {b!r}"
+    for name, x, y in zip(fields, a, b):
+        if x != y:
+            return f"{name} baseline {x!r} vs current {y!r}"
+    return f"baseline {a!r} vs current {b!r}"
+
+
+def first_difference(metric, old, new):
     """Return a description of the first differing point, or None."""
     if old == new:
         return None
-    if isinstance(old, list) and isinstance(new, list):
-        if all(isinstance(x, list) and len(x) == 2 for x in old + new):
-            for a, b in zip(old, new):
-                if a != b:
-                    return f"iteration {min(a[0], b[0])}: {a} vs {b}"
-            longer = old if len(old) > len(new) else new
-            return f"iteration {longer[min(len(old), len(new))][0]}: lengths differ"
-        for i, (a, b) in enumerate(zip(old, new)):
-            if a != b:
-                return f"entry {i}: {first_difference(a, b)}"
-        return "lengths differ"
-    if isinstance(old, dict) and isinstance(new, dict):
-        keys = sorted(set(old) | set(new), key=_sort_key)
-        for k in keys:
-            if old.get(k) != new.get(k):
-                if k not in old or k not in new:
-                    return f"key {k} present in only one"
-                return f"{k}: {first_difference(old[k], new[k])}"
-    return f"{old!r} vs {new!r}"
+    if metric == "agent_count":
+        return _diff_changes(old, new)
+    if metric == "exit_counts":
+        return _diff_exit_counts(old, new)
+    if metric == "positions":
+        return _diff_sampled(old, new, ("x", "y"))
+    if metric == "assignments":
+        return _diff_sampled(old, new, None)
+    return _diff_scalar(old, new)
 
 
 def _sort_key(k):
@@ -404,7 +471,7 @@ def compare(script, baseline, current, exempt):
         for metric in METRICS:
             if (script, metric) in exempt:
                 continue
-            diff = first_difference(old[metric], new[metric])
+            diff = first_difference(metric, old[metric], new[metric])
             if diff:
                 problems.append(f"{script} sim#{index} {metric}: {diff}")
     return problems
@@ -413,15 +480,21 @@ def compare(script, baseline, current, exempt):
 def cmd_record(selected):
     env = _environment()
     BASE_DIR.mkdir(exist_ok=True)
+    failed = False
     for script in _scenarios(selected):
         start = time.time()
-        metrics = run_scenario(ROOT / script)
+        try:
+            metrics = run_scenario(ROOT / script)
+        except ScenarioCrashError as crash:
+            print(f"FAIL {script}: crashed\n{crash}")
+            failed = True
+            continue
         data = {"environment": env, "simulations": metrics}
         _baseline_path(script).write_text(
             json.dumps(data, sort_keys=True, separators=(",", ":")) + "\n"
         )
         print(f"recorded {script} ({time.time() - start:.1f}s)")
-    return 0
+    return 1 if failed else 0
 
 
 def cmd_check(selected):
@@ -436,7 +509,12 @@ def cmd_check(selected):
             failed = True
             continue
         baseline = json.loads(path.read_text())
-        current = run_scenario(ROOT / script)
+        try:
+            current = run_scenario(ROOT / script)
+        except ScenarioCrashError as crash:
+            print(f"FAIL {script}: crashed\n{crash}")
+            failed = True
+            continue
         problems = compare(script, baseline["simulations"], current, exempt)
         status = "FAIL" if problems else "ok"
         print(f"{status} {script} ({time.time() - start:.1f}s)")
