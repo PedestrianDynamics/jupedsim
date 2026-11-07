@@ -43,8 +43,10 @@ class Region:
         id: int,
         name: str | None,
         height: float | None,
+        polygon: shapely.Polygon | None = None,
     ) -> None:
         self._surface = surface
+        self._polygon = polygon
         self._id = id
         self._name = name
         self._height = height
@@ -114,7 +116,7 @@ class WalkableSurface:
     ) -> Region:
         """Add a region at ``height`` and return its handle."""
         region_id = self._obj.add_region(polygon=polygon, height=height)
-        return self._register(region_id, name, height)
+        return self._register(region_id, name, height, polygon)
 
     def connect_regions(
         self,
@@ -167,9 +169,13 @@ class WalkableSurface:
         return self._regions[id]
 
     def _register(
-        self, region_id: int, name: str | None, height: float | None
+        self,
+        region_id: int,
+        name: str | None,
+        height: float | None,
+        polygon: shapely.Polygon | None = None,
     ) -> Region:
-        region = Region(self, region_id, name, height)
+        region = Region(self, region_id, name, height, polygon)
         self._regions.append(region)
         self._geometry = None
         return region

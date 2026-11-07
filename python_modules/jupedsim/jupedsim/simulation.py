@@ -41,6 +41,9 @@ from jupedsim.pyjupedsim import (
     _Simulation,
 )
 from jupedsim.serialization import TrajectoryWriter
+from jupedsim.stages import Exit, Waypoint, build_areas
+from jupedsim.surface import Region
+from jupedsim.surface import WalkableSurface as _SurfaceHandle
 
 _STATE_TYPES = (
     GeneralizedCentrifugalForceModelState,
@@ -121,6 +124,13 @@ class Simulation:
                 f"{type(model).__name__}"
             )
         self._writer = trajectory_writer
+        self._surface: _SurfaceHandle | None = None
+        self._region_count = 0
+        self._stages: list[Waypoint | Exit] = []
+        if isinstance(geometry, _SurfaceHandle):
+            self._surface = geometry
+            self._region_count = len(geometry.regions)
+            geometry = geometry._obj
         if isinstance(geometry, WalkableSurface):
             geometry = geometry.create_geometry()
         if floorfield_options is None:
@@ -176,6 +186,88 @@ class Simulation:
             ValueError: If an area has holes.
         """
         return self._obj.add_exit_stage(areas)
+
+    def add_waypoint(
+        self,
+        area: Any,
+        *,
+        region: Region | None = None,
+        radius: float | None = None,
+        name: str | None = None,
+    ) -> Waypoint:
+        """Add a waypoint and return its handle.
+
+        Args:
+            area: A list of ``(area, region)`` pairs, a single polygon, or
+                a point ``(x, y)`` together with ``radius``.
+            region: Region of a single area or point.
+            radius: Radius of the disc around a point.
+            name: Optional name used in reprs and error messages.
+
+        Raises:
+            TypeError: If ``region`` is missing or not a Region handle.
+            ValueError: If the area is invalid or does not overlap its
+                region.
+        """
+        areas = self._build_areas(area, region, radius, "add_waypoint")
+        handle = Waypoint(self, self._obj.add_waypoint_stage(areas), name)
+        self._stages.append(handle)
+        return handle
+
+    def add_exit(
+        self,
+        area: Any,
+        *,
+        region: Region | None = None,
+        name: str | None = None,
+    ) -> Exit:
+        """Add an exit and return its handle.
+
+        Args:
+            area: A list of ``(area, region)`` pairs or a single polygon.
+            region: Region of a single area.
+            name: Optional name used in reprs and error messages.
+
+        Raises:
+            TypeError: If ``region`` is missing or not a Region handle.
+            ValueError: If the area is invalid or does not overlap its
+                region.
+        """
+        areas = self._build_areas(area, region, None, "add_exit")
+        handle = Exit(self, self._obj.add_exit_stage(areas), name)
+        self._stages.append(handle)
+        return handle
+
+    @property
+    def stages(self) -> tuple[Waypoint | Exit, ...]:
+        """Waypoints and exits in creation order."""
+        return tuple(self._stages)
+
+    def stage(
+        self, name: str | None = None, *, id: int | None = None
+    ) -> Waypoint | Exit:
+        """Look a stage up by name or by id."""
+        if (name is None) == (id is None):
+            raise TypeError("give a name or an id, not both or neither")
+        for stage in self._stages:
+            if (stage.id == id) if id is not None else (stage.name == name):
+                return stage
+        if id is not None:
+            raise KeyError(f"no stage with id {id}")
+        known = ", ".join(s.name or repr(s) for s in self._stages)
+        raise KeyError(f"no stage named {name}; stages are {known}")
+
+    def _build_areas(
+        self, area: Any, region: Any, radius: float | None, method: str
+    ) -> list[tuple[shapely.Polygon, int]]:
+        return build_areas(
+            area,
+            region=region,
+            radius=radius,
+            method=method,
+            surface=self._surface,
+            region_count=self._region_count,
+        )
 
     def add_direct_steering_stage(self) -> int:
         """Add an direct steering stage to the simulation.
