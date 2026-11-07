@@ -197,6 +197,10 @@ class WalkableSurface:
         return region
 
     def _covers(self, region: Region, x: float, y: float, action: str) -> bool:
+        # A region's own polygon decides, so an unconnected surface does not
+        # matter; connectors have no polygon here and need the whole surface.
+        if region._polygon is not None:
+            return region._polygon.covers(shapely.Point(x, y))
         geometry = self._native_geometry(action)
         try:
             geometry.get_location(x, y, region_id=region.id)

@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
+import jupedsim as jps
 import pytest
 import shapely
 from jupedsim.surface import WalkableSurface
@@ -117,12 +118,40 @@ def test_region_id_not_found():
 def test_lookup_on_unconnected_surface():
     surface = WalkableSurface()
     floor0 = surface.add_region(polygon=shapely.box(0, 0, 1, 1), name="floor0")
-    surface.add_region(polygon=shapely.box(3, 0, 4, 1), name="floor1")
+    floor1 = surface.add_region(polygon=shapely.box(3, 0, 4, 1), name="floor1")
+    assert floor0.at(0.5, 0.5).region == floor0
+    assert floor1.at(3.5, 0.5).region == floor1
+    assert surface.regions_at((0.5, 0.5)) == (floor0,)
+    with pytest.raises(ValueError, match=r"\(3.5, 0.5\) is not in floor0"):
+        floor0.at(3.5, 0.5)
+
+
+def test_lookup_respects_holes_and_boundary():
+    floor0, _ = two_floor_surface()
+    assert floor0.at(0, 0).xy == (0.0, 0.0)
+    assert floor0.at(12, 7).xy == (12.0, 7.0)
+    with pytest.raises(ValueError, match=r"\(15, 7\) is not in floor0"):
+        floor0.at(15, 7)
+
+
+def test_lookup_survives_an_unconnected_region_added_later():
+    surface, floor0, floor1 = two_floor_surface(with_surface=True)
+    sim = jps.Simulation(jps.CollisionFreeSpeedModel(), surface)
+    surface.add_region(polygon=shapely.box(30, 0, 40, 10), name="later")
+    assert floor0.at(3, 5).region == floor0
+    assert floor1.at(3, 5).region == floor1
+    assert sim.add_agent(floor0.at(3, 5), target=floor0.at(5, 5)).alive
+
+
+def test_connector_lookup_on_unconnected_surface():
+    surface, _, _ = two_floor_surface(with_surface=True)
+    connector = surface.region("staircase")
+    surface.add_region(polygon=shapely.box(30, 0, 40, 10), name="later")
     with pytest.raises(ValueError, match="not connected yet") as info:
-        floor0.at(0.5, 0.5)
+        connector.at(15, 7)
     assert info.value.__cause__ is not None
     with pytest.raises(ValueError, match="not connected yet"):
-        surface.regions_at((0.5, 0.5))
+        surface.regions_at((3, 5))
 
 
 def test_connect_rejects_foreign_region():
