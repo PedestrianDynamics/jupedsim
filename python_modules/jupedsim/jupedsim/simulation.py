@@ -12,6 +12,7 @@ from jupedsim.agent import Agent
 from jupedsim.custom_model import CustomOperationalModel
 from jupedsim.internal.agents import (
     agent_state,
+    check_reachable,
     default_state_factory,
     direct_steering,
     first_stage,
@@ -258,8 +259,9 @@ class Simulation:
         Raises:
             TypeError: If ``position`` or ``target`` is not a Location.
             ValueError: If the arguments are inconsistent, a location or
-                route belongs to another surface or simulation, or a
-                custom model gets no ``state``.
+                route belongs to another surface or simulation, a
+                custom model gets no ``state``, or the first stage cannot
+                be reached from ``position``.
         """
         native_location(self, position, "position")
         if route is not None and target is not None:
@@ -272,6 +274,8 @@ class Simulation:
         if target is not None:
             native_target = native_location(self, target, "target")
         stage = first_stage(self, route, start) if route is not None else None
+        if stage is not None:
+            check_reachable(self, stage, position)
         native_state = agent_state(self, state)
         native_route, native_stage = (
             (route._native_id, stage.id)

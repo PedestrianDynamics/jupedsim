@@ -36,16 +36,27 @@ class _Stay:
 STAY = _Stay()
 
 
+def _check_weight(weight: Any) -> None:
+    if isinstance(weight, bool) or not isinstance(weight, int):
+        raise ValueError("weights must be integers")
+    if weight < 0:
+        raise ValueError("weights must be >= 0")
+
+
 class RoundRobin:
-    """Choose the next stage by smooth weighted round-robin."""
+    """Choose the next stage by smooth weighted round-robin.
+
+    Each decision adds every target's weight to its current weight, takes
+    the target with the largest current weight (ties: the earlier one) and
+    takes the sum of the weights off it. Only the ratio matters: weights
+    3 and 2 give the same sequence as 60 and 40. Targets of weight 0 are
+    never chosen.
+    """
 
     def __init__(self, weights: Mapping[_Stage, int]) -> None:
         for stage, weight in weights.items():
             _require_stage(stage)
-            if isinstance(weight, bool) or not isinstance(weight, int):
-                raise ValueError("weights must be integers")
-            if weight < 0:
-                raise ValueError("weights must be >= 0")
+            _check_weight(weight)
         if not any(weight > 0 for weight in weights.values()):
             raise ValueError("at least one weight must be > 0")
         self._weights = dict(weights)
@@ -59,11 +70,6 @@ class RoundRobin:
 
     def _live_targets(self) -> list[_Stage]:
         return [s for s, weight in self._weights.items() if weight > 0]
-
-    def _unsupported(self) -> str | None:
-        if 0 in self._weights.values():
-            return "zero weights in RoundRobin are not supported yet"
-        return None
 
     def _native(self) -> _NativeRule:
         pairs = [(s.id, w) for s, w in self._weights.items()]
@@ -104,9 +110,6 @@ class _ChoiceRule:
     def _live_targets(self) -> list[_Stage]:
         return list(self._stages)
 
-    def _unsupported(self) -> str | None:
-        return None
-
     def _describe(self) -> str:
         return repr(self)
 
@@ -131,10 +134,15 @@ class LeastTargeted(_ChoiceRule):
 
 
 class LeastTravelTime(_ChoiceRule):
-    """Choose the stage with the least travel time from the agent."""
+    """Choose the stage with the least travel time from the agent.
 
-    def _unsupported(self) -> str | None:
-        return "LeastTravelTime is not supported yet"
+    Read from the stages' floor fields when the agent completes the stage;
+    ties go to the earlier stage.
+    """
+
+    def _native(self) -> _NativeRule:
+        ids = [stage.id for stage in self._stages]
+        return _NativeRule.create_least_travel_time_transition(ids)
 
 
 _RULES = (RoundRobin, LeastTargeted, LeastTravelTime)
@@ -255,9 +263,11 @@ def _successors(target: Any) -> list[_Stage]:
     return target._live_targets() if hasattr(target, "_live_targets") else []
 
 
-def _stages_that_can_finish(
+def _stuck_stages(
     order: Sequence[_Stage], transitions: Mapping[_Stage, Any]
-) -> set[_Stage]:
+) -> list[_Stage]:
+    """Return the stages, in route order, from which no exit or STAY can be
+    reached through weights > 0."""
     done = {s for s in order if _is_terminal(s, transitions)}
     changed = True
     while changed:
@@ -267,7 +277,7 @@ def _stages_that_can_finish(
             if stage not in done and reaches:
                 done.add(stage)
                 changed = True
-    return done
+    return [s for s in order if s not in done]
 
 
 def _check_ending(
@@ -280,7 +290,7 @@ def _check_ending(
         )
     if endless:
         return
-    if set(order) - _stages_that_can_finish(order, transitions):
+    if _stuck_stages(order, transitions):
         raise ValueError(
             "no exit or STAY reachable; to loop on purpose, use endless=True"
         )
@@ -290,9 +300,6 @@ def _check_supported(transitions: Mapping[_Stage, Any]) -> None:
     for target in transitions.values():
         if target is STAY:
             raise NotImplementedError("STAY is not supported yet")
-        reason = getattr(target, "_unsupported", lambda: None)()
-        if reason is not None:
-            raise NotImplementedError(reason)
 
 
 def _native_rule(stage: _Stage, transitions: Mapping[_Stage, Any]) -> Any:
@@ -302,6 +309,27 @@ def _native_rule(stage: _Stage, transitions: Mapping[_Stage, Any]) -> Any:
     if isinstance(target, _Stage):
         return _NativeRule.create_fixed_transition(target.id)
     return target._native()
+
+
+def _patched(
+    label: str, current: Mapping[_Stage, int], patch: Mapping[_Stage, int]
+) -> dict[_Stage, int]:
+    """Return ``current`` updated by ``patch``, checked as weights of the
+    rule at the stage ``label``."""
+    for target, weight in patch.items():
+        if _require_stage(target) not in current:
+            raise ValueError(
+                f"{_label(target)} is not a target of {label}; targets are "
+                f"{_labels(current)} (see route.weights({label}))"
+            )
+        _check_weight(weight)
+    proposed = {**current, **patch}
+    if not any(weight > 0 for weight in proposed.values()):
+        raise ValueError(
+            f"at least one target at {label} needs weight > 0; "
+            f"to stop agents, use route.hold({label})"
+        )
+    return proposed
 
 
 class Route:
@@ -334,6 +362,7 @@ class Route:
         self._stages = tuple(order)
         self._transitions = transitions
         self._start = start
+        self._endless = endless
         native = {s.id: _native_rule(s, transitions) for s in order}
         self._native_id = simulation._obj.add_route(native)
         simulation._routes[self._native_id] = self
@@ -355,20 +384,66 @@ class Route:
 
     def weights(self, stage: _Stage) -> dict[_Stage, int]:
         """Return a copy of the weights of the rule at ``stage``."""
+        label = _label(stage)
+        fixed = f"{label} has a fixed transition; use route.next({label})"
+        return self._round_robin(stage, fixed).weights
+
+    def update_weights(
+        self, stage: _Stage, weights: Mapping[_Stage, int]
+    ) -> None:
+        """Change some weights of the round-robin rule at ``stage``.
+
+        A patch, like ``dict.update``: targets not named keep their weight.
+        The new weights are checked against the whole route first; on error
+        nothing changes. On success the rule's sequence starts afresh. Takes
+        effect at the next decision: agents already assigned keep their
+        target, and stranded agents decide again when an exit of their rule
+        opens.
+
+        Raises:
+            ValueError: If ``stage`` has no round-robin rule, a key is not
+                one of its targets, a weight is not a non-negative integer,
+                no weight would be > 0, or with these weights no exit or
+                STAY would be reachable from some stage.
+        """
+        label = _label(stage)
+        fixed = f"{label} has a fixed transition, not a weighted rule"
+        current = self._round_robin(stage, fixed).weights
+        proposed = _patched(label, current, weights)
+        transitions = {**self._transitions, stage: RoundRobin(proposed)}
+        self._check_reachable(transitions)
+        self._simulation._obj.set_round_robin_weights(
+            route_id=self._native_id,
+            stage_id=stage.id,
+            weights={target.id: weight for target, weight in proposed.items()},
+        )
+        self._transitions = transitions
+
+    def _round_robin(self, stage: _Stage, fixed: str) -> RoundRobin:
+        """Return the round-robin rule at ``stage``; raise with ``fixed`` for
+        a fixed transition."""
         self._check_member(stage)
         rule = self._transitions.get(stage)
         label = _label(stage)
         if isinstance(rule, RoundRobin):
-            return rule.weights
+            return rule
         if isinstance(rule, _ChoiceRule):
             raise ValueError(
                 f"{label} uses {type(rule).__name__}, which has no weights"
             )
         if isinstance(stage, Exit):
             raise ValueError(f"{label} is an exit; it has no weights")
-        raise ValueError(
-            f"{label} has a fixed transition; use route.next({label})"
-        )
+        raise ValueError(fixed)
+
+    def _check_reachable(self, transitions: Mapping[_Stage, Any]) -> None:
+        if self._endless:
+            return
+        stuck = _stuck_stages(self._stages, transitions)
+        if stuck:
+            raise ValueError(
+                f"with these weights no exit or STAY is reachable from "
+                f"{_labels(stuck)}; weights unchanged"
+            )
 
     def _check_member(self, stage: _Stage) -> None:
         if stage in self._stages:

@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 from jupedsim.internal.agents import (
+    check_reachable,
     direct_steering,
     first_stage,
     native_location,
@@ -167,9 +168,15 @@ class Agent:
         return _ModelStateHandle(self._simulation, self._id)
 
     def follow(self, route: Route, *, start: Waypoint | Exit | None = None):
-        """Follow ``route`` from ``start`` or the route's default start."""
+        """Follow ``route`` from ``start`` or the route's default start.
+
+        Raises:
+            ValueError: If the start stage cannot be reached from the
+                agent's position.
+        """
         self._resolve()
         stage = first_stage(self._simulation, route, start)
+        check_reachable(self._simulation, stage, self.position)
         self._simulation._obj.switch_agent_route(
             agent_id=self._id, route_id=route._native_id, stage_id=stage.id
         )

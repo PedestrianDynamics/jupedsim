@@ -2,6 +2,8 @@
 """Helpers of :class:`~jupedsim.simulation.Simulation` and
 :class:`~jupedsim.agent.Agent` that turn handles into native arguments."""
 
+import math
+import re
 from typing import Any
 
 from jupedsim.pyjupedsim import (
@@ -15,6 +17,7 @@ from jupedsim.pyjupedsim import (
     CollisionFreeSpeedModelV3State,
     GeneralizedCentrifugalForceModel,
     GeneralizedCentrifugalForceModelState,
+    SimulationError,
     SocialForceModel,
     SocialForceModelState,
     WarpDriverModel,
@@ -25,7 +28,7 @@ from jupedsim.pyjupedsim import (
     Location as _NativeLocation,
 )
 from jupedsim.pyjupedsim import Rule as _NativeRule
-from jupedsim.route import Route, _require_stage
+from jupedsim.route import Route, _label, _require_stage
 from jupedsim.stages import Exit, Waypoint, _check_region
 from jupedsim.surface import Location
 
@@ -81,6 +84,28 @@ def first_stage(
         )
     route._check_member(stage)
     return stage
+
+
+# The native travel time query raises this while iterating or once closed.
+_NOT_ALLOWED = re.compile(r"travel_time is not allowed in state ")
+
+
+def check_reachable(
+    simulation: Any, stage: Waypoint | Exit, location: Location
+) -> None:
+    """Raise if ``stage`` cannot be reached from ``location``.
+
+    While the simulation iterates or after it is closed nothing is checked:
+    the native call that follows raises for its own operation.
+    """
+    try:
+        time = simulation.travel_time(stage, location)
+    except SimulationError as error:
+        if _NOT_ALLOWED.match(str(error)):
+            return
+        raise
+    if math.isinf(time):
+        raise ValueError(f"{_label(stage)} cannot be reached from {location!r}")
 
 
 def agent_state(simulation: Any, state: Any) -> Any:

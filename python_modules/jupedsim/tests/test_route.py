@@ -177,6 +177,10 @@ class _Recorder:
         return ("least_targeted", list(ids))
 
     @staticmethod
+    def create_least_travel_time_transition(ids):
+        return ("least_travel_time", list(ids))
+
+    @staticmethod
     def create_none_transition():
         return ("none",)
 
@@ -212,11 +216,24 @@ def test_native_rules_follow_the_route(stages, monkeypatch):
     assert built == expected
 
 
+def test_least_travel_time_native_rule(stages, monkeypatch):
+    import jupedsim.route as route_module
+
+    _, s = stages
+    route = Route(
+        [(s["wp1"], LeastTravelTime([s["exit2"], s["exit1"]]))], start=s["wp1"]
+    )
+    monkeypatch.setattr(route_module, "_NativeRule", _Recorder)
+    built = route_module._native_rule(s["wp1"], route._transitions)
+    assert built == ("least_travel_time", [s["exit2"].id, s["exit1"].id])
+
+
 def test_every_rule_kind_is_one_native_type():
     rules = [
         NativeRule.create_fixed_transition(1),
         NativeRule.create_round_robin_transition([(1, 1), (2, 3)]),
         NativeRule.create_least_targeted_transition([1, 2]),
+        NativeRule.create_least_travel_time_transition([1, 2]),
         NativeRule.create_none_transition(),
     ]
     assert all(type(rule) is NativeRule for rule in rules)
@@ -234,6 +251,7 @@ def test_every_rule_kind_is_one_native_type():
         lambda: NativeRule.create_fixed_transition(0),
         lambda: NativeRule.create_round_robin_transition([(0, 1)]),
         lambda: NativeRule.create_least_targeted_transition([0]),
+        lambda: NativeRule.create_least_travel_time_transition([0]),
     ],
 )
 def test_a_rule_to_the_invalid_stage_id_is_rejected(create):
@@ -287,6 +305,15 @@ def test_route_bound_at_construction(stages):
     route._check_simulation(sim)
     with pytest.raises(ValueError, match="route belongs to another simulation"):
         route._check_simulation(other_sim)
+
+
+def test_update_weights_before_any_agent():
+    sim, room, decision, exits = _decision_room()
+    route = _split(decision, exits, 1, 1)
+    # Without the update the first agent would go to exit1.
+    route.update_weights(decision, {exits["exit1"]: 0})
+    agent = sim.add_agent(room.at(5, 5), route=route)
+    assert agent.stage == exits["exit2"]
 
 
 def test_each_route_gets_its_own_native_route(stages):
@@ -413,10 +440,287 @@ def test_unsupported_features_are_not_implemented(stages):
     _, s = stages
     with pytest.raises(NotImplementedError):
         Route([s["wp1"], STAY])
-    with pytest.raises(NotImplementedError):
-        Route([(s["wp1"], LeastTravelTime([s["exit1"], s["exit2"]]))])
-    with pytest.raises(NotImplementedError):
-        Route(
-            [(s["wp1"], RoundRobin({s["exit1"]: 0, s["exit2"]: 1}))],
-            start=s["wp1"],
+
+
+def test_zero_weights_and_least_travel_time_are_accepted(stages):
+    _, s = stages
+    Route([(s["wp1"], LeastTravelTime([s["exit1"], s["exit2"]]))])
+    route = Route(
+        [(s["wp1"], RoundRobin({s["exit1"]: 0, s["exit2"]: 1}))],
+        start=s["wp1"],
+    )
+    assert route.weights(s["wp1"]) == {s["exit1"]: 0, s["exit2"]: 1}
+
+
+def _decision_room(exit_areas=EXIT_AREAS):
+    """A 10 x 10 room with a decision waypoint of radius 1 at (5, 5)."""
+    sim, room = _simulation()
+    decision = sim.add_waypoint(
+        (5, 5), radius=1.0, region=room, name="decision"
+    )
+    exits = {
+        name: sim.add_exit(area, region=room, name=name)
+        for name, area in exit_areas.items()
+    }
+    return sim, room, decision, exits
+
+
+def _split(decision, exits, w1, w2):
+    rule = RoundRobin({exits["exit1"]: w1, exits["exit2"]: w2})
+    return Route([(decision, rule)], start=decision)
+
+
+# Spots inside the decision waypoint, far enough apart for the model.
+SPOTS = [(4.5, 5), (5.5, 5), (5, 4.5), (5, 5.5), (5, 5)]
+
+
+def _decide(sim, room, route, spot):
+    """Add an agent in the decision waypoint; it decides at once."""
+    return sim.add_agent(room.at(*SPOTS[spot]), route=route).stage
+
+
+def test_update_weights_patch(stages):
+    _, s = stages
+    route = route_c(s)
+    route.update_weights(s["wp2"], {s["wp3"]: 0})
+    assert route.weights(s["wp2"]) == {
+        s["wp3"]: 0,
+        s["exit1"]: 2,
+        s["exit2"]: 1,
+    }
+    assert list(route.weights(s["wp2"])) == [s["wp3"], s["exit1"], s["exit2"]]
+    assert route.next(s["wp2"]) == RoundRobin(
+        {s["wp3"]: 0, s["exit1"]: 2, s["exit2"]: 1}
+    )
+
+
+def test_update_weights_keeps_rules_returned_earlier(stages):
+    _, s = stages
+    route = route_c(s)
+    before = route.next(s["wp2"])
+    route.update_weights(s["wp2"], {s["wp3"]: 0})
+    assert before.weights == {s["wp3"]: 1, s["exit1"]: 2, s["exit2"]: 1}
+
+
+def test_update_weights_takes_effect_at_the_next_decision():
+    sim, room, decision, exits = _decision_room()
+    route = _split(decision, exits, 2, 1)
+    first = sim.add_agent(room.at(*SPOTS[0]), route=route)
+    assert first.stage == exits["exit1"]
+    route.update_weights(decision, {exits["exit1"]: 1, exits["exit2"]: 2})
+    # Assigned agents keep their target; the counter starts afresh: 1:2
+    # gives exit2, exit1, exit2.
+    assert first.stage == exits["exit1"]
+    decided = [_decide(sim, room, route, i) for i in (1, 2, 3)]
+    assert decided == [exits["exit2"], exits["exit1"], exits["exit2"]]
+
+
+def test_update_weights_invalid_keeps_state():
+    sim, room, decision, exits = _decision_room()
+    route = _split(decision, exits, 2, 1)
+    # 2:1 gives exit1, exit2, exit1.
+    assert _decide(sim, room, route, 0) == exits["exit1"]
+    with pytest.raises(ValueError):
+        route.update_weights(decision, {exits["exit1"]: 0, exits["exit2"]: 0})
+    with pytest.raises(ValueError):
+        route.update_weights(decision, {exits["exit1"]: 1.5})
+    assert route.weights(decision) == {exits["exit1"]: 2, exits["exit2"]: 1}
+    # A reset counter would give exit1 again.
+    assert _decide(sim, room, route, 1) == exits["exit2"]
+    assert _decide(sim, room, route, 2) == exits["exit1"]
+
+
+def test_update_weights_cycle_rejected():
+    sim, room, decision, exits = _decision_room()
+    back = sim.add_waypoint((2, 5), radius=0.5, region=room, name="back")
+    route_g = Route(
+        [
+            (decision, RoundRobin({back: 1, exits["exit1"]: 1})),
+            (back, decision),
+        ],
+        start=decision,
+    )
+    assert _decide(sim, room, route_g, 0) == back
+    with pytest.raises(
+        ValueError,
+        match="^with these weights no exit or STAY is reachable from "
+        "decision, back; weights unchanged$",
+    ):
+        route_g.update_weights(decision, {exits["exit1"]: 0})
+    assert route_g.weights(decision) == {back: 1, exits["exit1"]: 1}
+    # The counter is unchanged too: the next agent takes the next slot.
+    assert _decide(sim, room, route_g, 1) == exits["exit1"]
+
+
+def test_update_weights_on_an_endless_route(stages):
+    _, s = stages
+    tour = Route(
+        [
+            (s["wp1"], RoundRobin({s["wp2"]: 1, s["wp3"]: 1})),
+            (s["wp2"], s["wp1"]),
+            (s["wp3"], s["wp1"]),
+        ],
+        start=s["wp1"],
+        endless=True,
+    )
+    tour.update_weights(s["wp1"], {s["wp3"]: 0})
+    assert tour.weights(s["wp1"]) == {s["wp2"]: 1, s["wp3"]: 0}
+
+
+def test_update_weights_errors(stages):
+    _, s = stages
+    route = route_c(s)
+    with pytest.raises(
+        ValueError, match="^wp1 has a fixed transition, not a weighted rule$"
+    ):
+        route.update_weights(s["wp1"], {s["wp2"]: 3})
+    route_n = Route(
+        [(s["wp1"], LeastTravelTime([s["exit1"], s["exit2"]]))], start=s["wp1"]
+    )
+    with pytest.raises(
+        ValueError, match="^wp1 uses LeastTravelTime, which has no weights$"
+    ):
+        route_n.update_weights(s["wp1"], {s["exit1"]: 2})
+    with pytest.raises(
+        ValueError,
+        match=r"^wp4 is not a target of wp2; targets are wp3, exit1, exit2 "
+        r"\(see route.weights\(wp2\)\)$",
+    ):
+        route.update_weights(s["wp2"], {s["wp4"]: 1})
+    with pytest.raises(
+        ValueError,
+        match=r"^at least one target at wp2 needs weight > 0; to stop agents, "
+        r"use route.hold\(wp2\)$",
+    ):
+        route.update_weights(
+            s["wp2"], {s["wp3"]: 0, s["exit1"]: 0, s["exit2"]: 0}
         )
+    assert route.weights(s["wp2"]) == {
+        s["wp3"]: 1,
+        s["exit1"]: 2,
+        s["exit2"]: 1,
+    }
+
+
+def test_update_weights_errors_reuse_the_weights_wording(stages):
+    _, s = stages
+    route = route_c(s)
+    with pytest.raises(
+        ValueError, match="^exit1 is an exit; it has no weights$"
+    ):
+        route.update_weights(s["exit1"], {s["exit2"]: 1})
+    route_t = Route(
+        [(s["wp1"], LeastTargeted([s["exit1"], s["exit2"]]))], start=s["wp1"]
+    )
+    with pytest.raises(
+        ValueError, match="^wp1 uses LeastTargeted, which has no weights$"
+    ):
+        route_t.update_weights(s["wp1"], {s["exit1"]: 2})
+    with pytest.raises(ValueError, match="^wp4 is not part of this route"):
+        route.update_weights(s["wp4"], {s["exit1"]: 2})
+    with pytest.raises(ValueError, match="^weights must be integers$"):
+        route.update_weights(s["wp2"], {s["exit1"]: 0.5})
+    with pytest.raises(ValueError, match="^weights must be >= 0$"):
+        route.update_weights(s["wp2"], {s["exit1"]: -1})
+
+
+def test_counters_per_route():
+    sim, room, decision, exits = _decision_room()
+    first = _split(decision, exits, 1, 1)
+    second = _split(decision, exits, 1, 1)
+    assert _decide(sim, room, first, 0) == exits["exit1"]
+    assert _decide(sim, room, second, 1) == exits["exit1"]
+    assert _decide(sim, room, first, 2) == exits["exit2"]
+    assert _decide(sim, room, second, 3) == exits["exit2"]
+
+
+def test_update_weights_does_not_resume_stranded_agents():
+    areas = EXIT_AREAS | {"exit3": [(4, 9), (6, 9), (6, 10), (4, 10)]}
+    sim, room, decision, exits = _decision_room(areas)
+    route = _split(decision, exits, 0, 1)
+    exits["exit2"].close(informed=True)
+    exits["exit3"].close(informed=True)
+    agent = sim.add_agent(room.at(5, 5), route=route)
+    assert agent.stranded
+    route.update_weights(decision, {exits["exit1"]: 1})
+    assert agent.stranded
+    # exit3 is no target at the decision waypoint: the agent waits for an
+    # exit of its own rule, although exit1 would now be chosen.
+    assert exits["exit3"].open() == ()
+    assert agent.stranded
+    assert exits["exit2"].open() == (agent,)
+    assert not agent.stranded
+    assert agent.stage == exits["exit1"]
+
+
+def test_least_travel_time_picks_nearest():
+    # exit1 lies to the lower right of the decision waypoint, exit2 to the
+    # upper right.
+    sim, room, decision, exits = _decision_room()
+    route = Route(
+        [(decision, LeastTravelTime([exits["exit1"], exits["exit2"]]))],
+        start=decision,
+    )
+    lower = sim.add_agent(room.at(5, 4.4), route=route)
+    upper = sim.add_agent(room.at(5, 5.6), route=route)
+    assert lower.stage == exits["exit1"]
+    assert upper.stage == exits["exit2"]
+
+
+def test_least_travel_time_leads_agents_out():
+    sim, room, decision, exits = _decision_room()
+    route = Route(
+        [(decision, LeastTravelTime([exits["exit1"], exits["exit2"]]))],
+        start=decision,
+    )
+    for spot in SPOTS[:4]:
+        sim.add_agent(room.at(*spot), route=route)
+    while sim.agent_count() > 0 and sim.iteration_count() < 5000:
+        sim.iterate()
+    assert sim.agent_count() == 0
+
+
+def _unreachable(sim, monkeypatch, stage):
+    """Make ``stage`` unreachable for the reachability check.
+
+    The floor field rejects geometries with unreachable walkable cells at
+    construction, so no geometry gives an infinite travel time; the query is
+    replaced instead.
+    """
+    real = sim.travel_time
+
+    def travel_time(target, location):
+        if target == stage:
+            return float("inf")
+        return real(target, location)
+
+    monkeypatch.setattr(sim, "travel_time", travel_time)
+
+
+def test_add_agent_rejects_an_unreachable_first_target(stages, monkeypatch):
+    sim, s = stages
+    route = Route([s["wp1"], s["exit1"]])
+    _unreachable(sim, monkeypatch, s["wp1"])
+    location = sim._surface.region(id=0).at(5, 2)
+    with pytest.raises(
+        ValueError,
+        match=r"^wp1 cannot be reached from Location\(5(\.0)?, 2(\.0)?, "
+        r"region=.*\)$",
+    ):
+        sim.add_agent(location, route=route)
+    assert sim.agent_count() == 0
+    # A start that can be reached is fine.
+    sim.add_agent(location, route=route, start=s["exit1"])
+    assert sim.agent_count() == 1
+
+
+def test_follow_rejects_an_unreachable_first_target(stages, monkeypatch):
+    sim, s = stages
+    route = Route([s["wp1"], s["exit1"]])
+    other = Route([s["wp2"], s["exit2"]])
+    agent = sim.add_agent(sim._surface.region(id=0).at(5, 2), route=route)
+    _unreachable(sim, monkeypatch, s["wp2"])
+    with pytest.raises(ValueError, match="^wp2 cannot be reached from "):
+        agent.follow(other)
+    assert agent.route is route
+    assert agent.stage == s["wp1"]
