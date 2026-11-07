@@ -2,7 +2,7 @@
 #include "transition.hpp"
 
 #include "conversion.hpp"
-#include "journey.hpp"
+#include "route.hpp"
 #include "stage.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep
 
@@ -38,7 +38,7 @@ void init_transition(py::module_& m)
         * **Least targeted transition:** On completion of this stage agents will
           proceed towards the currently least targeted amongst the specified choices.
           The number of "targeting" agents is the amount of agents currently moving
-          towards this stage. This includes agents from different journeys.
+          towards this stage. This includes agents from different routes.
     )");
     transition
         .def_static(
@@ -105,7 +105,7 @@ void init_transition(py::module_& m)
             On completion of this stage agents will proceed towards the currently
             least targeted amongst the specified choices. The number of "targeting"
             agents is the amount of agents currently moving towards this stage.
-            This includes agents from different journeys.
+            This includes agents from different routes.
 
             Args:
                 stage_ids: Ids of the stages to choose the next target from.
@@ -125,7 +125,7 @@ void init_transition(py::module_& m)
 
             The next stage of a stage with this transition is the stage itself:
             agents completing it keep it as their target and stay there. It is the
-            default for every stage of a :class:`~jupedsim.JourneyDescription`.
+            default for every stage of a :class:`~jupedsim.RouteDescription`.
 
             Returns:
                 The transition.

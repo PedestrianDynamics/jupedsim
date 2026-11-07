@@ -35,7 +35,7 @@ void init_warp_driver_model(py::module_& m)
                 geometry=...,
             )
             sim.add_agent(
-                journey_id=journey_id,
+                route_id=route_id,
                 stage_id=stage_id,
                 position=(1.0, 1.0),
                 state=jupedsim.WarpDriverModelState(),

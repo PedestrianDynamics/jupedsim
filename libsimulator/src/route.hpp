@@ -162,24 +162,24 @@ public:
     }
 };
 
-struct JourneyNode {
+struct RouteNode {
     BaseStage* stage;
     std::unique_ptr<Transition> transition;
 };
 
-class Journey
+class Route
 {
 public:
-    using ID = jps::UniqueID<Journey>;
+    using ID = jps::UniqueID<Route>;
 
 private:
     ID _id{};
-    std::map<BaseStage::ID, JourneyNode> _stages{};
+    std::map<BaseStage::ID, RouteNode> _stages{};
 
 public:
-    ~Journey() = default;
+    ~Route() = default;
 
-    Journey(std::map<BaseStage::ID, JourneyNode> stages) : _stages(std::move(stages)) {}
+    Route(std::map<BaseStage::ID, RouteNode> stages) : _stages(std::move(stages)) {}
 
     ID id() const { return _id; }
 
@@ -204,5 +204,5 @@ public:
         return find_iter != std::end(_stages);
     }
 
-    const std::map<BaseStage::ID, JourneyNode>& stages() const { return _stages; };
+    const std::map<BaseStage::ID, RouteNode>& stages() const { return _stages; };
 };

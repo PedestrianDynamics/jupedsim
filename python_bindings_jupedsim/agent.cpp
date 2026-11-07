@@ -26,7 +26,7 @@ void init_agent(py::module_& m)
     py::class_<GenericAgent>(m, "_Agent")
         .def_property_readonly("id", [](const GenericAgent& agent) { return agent.id.get_id(); })
         .def_property_readonly(
-            "journey_id", [](const GenericAgent& agent) { return agent.journey_id.get_id(); })
+            "route_id", [](const GenericAgent& agent) { return agent.route_id.get_id(); })
         .def_property_readonly(
             "stage_id", [](const GenericAgent& agent) { return agent.stage_id.get_id(); })
         .def_property_readonly(

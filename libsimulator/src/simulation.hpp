@@ -7,13 +7,13 @@
 #include "generic_agent.hpp"
 #include "geometry/geometry.hpp"
 #include "geometry/location.hpp"
-#include "journey.hpp"
 #include "kernel.hpp"
 #include "neighborhood_search.hpp"
 #include "operational_decision_system.hpp"
 #include "operational_model.hpp"
 #include "operational_model_state.hpp"
 #include "operational_model_type.hpp"
+#include "route.hpp"
 #include "routing_engine.hpp"
 #include "simulation_clock.hpp"
 #include "stage.hpp"
@@ -69,7 +69,7 @@ private:
     std::unique_ptr<RoutingEngine> _routing_engine{};
     AgentContainer<GenericAgent> _agents;
     std::vector<GenericAgent::ID> _removed_agents_in_last_iteration;
-    std::unordered_map<Journey::ID, std::unique_ptr<Journey>> _journeys;
+    std::unordered_map<Route::ID, std::unique_ptr<Route>> _routes;
     Timer _timer{};
     State _state{State::Ready};
     enum LogLevel { General = 1, Detailed = 2, Debug = 3 };
@@ -98,15 +98,14 @@ public:
     void iterate();
     /// Closes the simulation freeing memory. Every entry point (except timer's) throws afterwards.
     void close();
-    Journey::ID add_journey(const std::map<BaseStage::ID, TransitionDescription>& stages);
+    Route::ID add_route(const std::map<BaseStage::ID, TransitionDescription>& stages);
     BaseStage::ID add_stage(const StageDescription& stage_description);
     void mark_agent_for_removal(GenericAgent::ID id);
     const std::vector<GenericAgent::ID>& removed_agents() const;
     size_t agent_count() const;
     double elapsed_time() const;
     double dt() const;
-    void
-    switch_agent_journey(GenericAgent::ID agent_id, Journey::ID journey_id, BaseStage::ID stage_id);
+    void switch_agent_route(GenericAgent::ID agent_id, Route::ID route_id, BaseStage::ID stage_id);
     uint64_t iteration() const;
     std::vector<GenericAgent::ID> agents_in_range(Point p, double distance);
     /// Returns IDs of all agents inside the defined polygon
@@ -114,7 +113,7 @@ public:
     std::vector<GenericAgent::ID> agents_in_polygon(const std::vector<Point>& polygon);
     /// @param region_id Region @p position lies in, see `Geometry::get_location`.
     GenericAgent::ID add_agent(
-        Journey::ID journey_id,
+        Route::ID route_id,
         BaseStage::ID stage_id,
         Point position,
         OperationalModelState model,

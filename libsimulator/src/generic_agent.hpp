@@ -21,14 +21,14 @@
 #include <deque>
 #include <utility>
 #include <variant>
-class Journey;
+class Route;
 class BaseStage;
 
 struct GenericAgent {
     using ID = jps::UniqueID<GenericAgent>;
     ID id{};
 
-    jps::UniqueID<Journey> journey_id{jps::UniqueID<Journey>::invalid};
+    jps::UniqueID<Route> route_id{jps::UniqueID<Route>::invalid};
     jps::UniqueID<BaseStage> stage_id{jps::UniqueID<BaseStage>::invalid};
 
     /// Where the agent stands. Only the geometry can say that, so only it can build one.
@@ -43,12 +43,12 @@ struct GenericAgent {
 
     GenericAgent(
         ID id,
-        jps::UniqueID<Journey> journey_id,
+        jps::UniqueID<Route> route_id,
         jps::UniqueID<BaseStage> stage_id,
         Location location,
         OperationalModelState state)
         : id(id != ID::invalid ? id : ID{})
-        , journey_id(journey_id)
+        , route_id(route_id)
         , stage_id(stage_id)
         , location(location)
         , final_target(location)
@@ -99,10 +99,10 @@ struct fmt::formatter<GenericAgent> {
             [&ctx, &agent](const auto& m) {
                 return fmt::format_to(
                     ctx.out(),
-                    "Agent[id={}, journey={}, stage={}, route_orientation={}, target={}, pos={}, "
+                    "Agent[id={}, route={}, stage={}, route_orientation={}, target={}, pos={}, "
                     "state={})",
                     agent.id,
-                    agent.journey_id,
+                    agent.route_id,
                     agent.stage_id,
                     agent.route_orientation,
                     agent.final_target,

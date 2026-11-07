@@ -81,7 +81,7 @@ GenericAgent make_agent(OperationalModelState model, Point position = {})
 {
     return GenericAgent(
         GenericAgent::ID::invalid,
-        jps::UniqueID<Journey>::invalid,
+        jps::UniqueID<Route>::invalid,
         jps::UniqueID<BaseStage>::invalid,
         *flat_square().get_location_near_z(position.x(), position.y(), 0.0),
         std::move(model));

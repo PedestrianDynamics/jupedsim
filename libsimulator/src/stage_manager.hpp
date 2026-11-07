@@ -47,7 +47,7 @@ public:
     {
         const auto iter = _stages.find(stage_id);
         if(iter == std::end(_stages)) {
-            throw SimulationError("Unknown stage id ({}) provided in journey.", stage_id.get_id());
+            throw SimulationError("Unknown stage id ({}) provided in route.", stage_id.get_id());
         }
         return iter->second.get();
     }
@@ -56,7 +56,7 @@ public:
     {
         auto iter = _stages.find(stage_id);
         if(iter == std::end(_stages)) {
-            throw SimulationError("Unknown stage id ({}) provided in journey.", stage_id.get_id());
+            throw SimulationError("Unknown stage id ({}) provided in route.", stage_id.get_id());
         }
         return iter->second.get();
     }

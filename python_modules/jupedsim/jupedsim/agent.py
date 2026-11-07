@@ -120,7 +120,7 @@ class Agent:
     @property
     def journey_id(self) -> int:
         """Id of the :class:`~jupedsim.JourneyDescription` the agent is currently following."""
-        return self.__resolve().journey_id
+        return self.__resolve().route_id
 
     @property
     def stage_id(self) -> int:

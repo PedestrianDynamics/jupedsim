@@ -7,12 +7,12 @@
 #include "geometry/area_piece.hpp"
 #include "geometry/location.hpp"
 #include "iterator_pair.hpp"
-#include "journey.hpp"
 #include "kernel.hpp"
 #include "operational_model.hpp"
 #include "operational_model_state.hpp"
 #include "operational_model_type.hpp"
 #include "polygon.hpp"
+#include "route.hpp"
 #include "routing_engine.hpp"
 #include "simulation_clock.hpp"
 #include "simulation_error.hpp"
@@ -106,7 +106,7 @@ void Simulation::iterate()
 
     {
         JPS_SCOPED_TIMER_AND_TRACE(_timer, "Strategical Decision System", General);
-        _stategical_decision_system.run(_journeys, _agents, _stage_manager);
+        _stategical_decision_system.run(_routes, _agents, _stage_manager);
     }
 
     {
@@ -133,11 +133,11 @@ void Simulation::close()
     _routing_engine.reset();
 }
 
-Journey::ID Simulation::add_journey(const std::map<BaseStage::ID, TransitionDescription>& stages)
+Route::ID Simulation::add_route(const std::map<BaseStage::ID, TransitionDescription>& stages)
 {
-    throw_if_state(State::Iterating | State::Closed, "add_journey");
-    JPS_SCOPED_TIMER_AND_TRACE(_timer, "Add Journey", Detailed);
-    std::map<BaseStage::ID, JourneyNode> nodes;
+    throw_if_state(State::Iterating | State::Closed, "add_route");
+    JPS_SCOPED_TIMER_AND_TRACE(_timer, "Add Route", Detailed);
+    std::map<BaseStage::ID, RouteNode> nodes;
     bool contains_direct_steering =
         std::find_if(std::begin(stages), std::end(stages), [this](auto const& pair) {
             return dynamic_cast<const DirectSteering*>(stage(pair.first)) != nullptr;
@@ -145,19 +145,19 @@ Journey::ID Simulation::add_journey(const std::map<BaseStage::ID, TransitionDesc
 
     if(contains_direct_steering && stages.size() > 1) {
         throw SimulationError(
-            "Journeys containing a DirectSteeringStage, may only contain this stage.");
+            "Routes containing a DirectSteeringStage, may only contain this stage.");
     }
 
     std::transform(
         std::begin(stages),
         std::end(stages),
         std::inserter(nodes, std::end(nodes)),
-        [this](auto const& pair) -> std::pair<BaseStage::ID, JourneyNode> {
+        [this](auto const& pair) -> std::pair<BaseStage::ID, RouteNode> {
             const auto& [id, desc] = pair;
             auto stage = _stage_manager.stage(id);
             return {
                 id,
-                JourneyNode{
+                RouteNode{
                     stage,
                     std::visit(
                         Overloaded{
@@ -204,9 +204,9 @@ Journey::ID Simulation::add_journey(const std::map<BaseStage::ID, TransitionDesc
                         desc)}};
         });
 
-    auto journey = std::make_unique<Journey>(std::move(nodes));
-    const auto id = journey->id();
-    _journeys.emplace(id, std::move(journey));
+    auto route = std::make_unique<Route>(std::move(nodes));
+    const auto id = route->id();
+    _routes.emplace(id, std::move(route));
     return id;
 }
 
@@ -234,7 +234,7 @@ BaseStage::ID Simulation::add_stage(const StageDescription& stage_description)
 }
 
 GenericAgent::ID Simulation::add_agent(
-    Journey::ID journey_id,
+    Route::ID route_id,
     BaseStage::ID stage_id,
     Point position,
     OperationalModelState model,
@@ -243,11 +243,11 @@ GenericAgent::ID Simulation::add_agent(
     throw_if_state(State::Iterating | State::Closed, "add_agent");
     JPS_SCOPED_TIMER_AND_TRACE(_timer, "Add Agent", Detailed);
     const auto location = _geometry->get_location(position.x(), position.y(), region_id);
-    if(_journeys.count(journey_id) == 0) {
-        throw SimulationError("Unknown journey id: {}", journey_id);
+    if(_routes.count(route_id) == 0) {
+        throw SimulationError("Unknown route id: {}", route_id);
     }
 
-    if(!_journeys.at(journey_id)->contains_stage(stage_id)) {
+    if(!_routes.at(route_id)->contains_stage(stage_id)) {
         throw SimulationError("Unknown stage id: {}", stage_id);
     }
 
@@ -260,7 +260,7 @@ GenericAgent::ID Simulation::add_agent(
             to_string(_operational_decision_system.model_type()));
     }
 
-    GenericAgent agent{GenericAgent::ID::invalid, journey_id, stage_id, location, std::move(model)};
+    GenericAgent agent{GenericAgent::ID::invalid, route_id, stage_id, location, std::move(model)};
 
     _operational_decision_system.validate_agent(agent, _neighborhood_search, *_geometry);
 
@@ -269,7 +269,7 @@ GenericAgent::ID Simulation::add_agent(
     _neighborhood_search.add_agent(_agents.back());
 
     auto v = IteratorPair(std::prev(std::end(_agents)), std::end(_agents));
-    _stategical_decision_system.run(_journeys, v, _stage_manager);
+    _stategical_decision_system.run(_routes, v, _stage_manager);
     _tactical_decision_system.run(*_routing_engine, v);
     return _agents.back().id.get_id();
 }
@@ -371,23 +371,23 @@ AgentContainer<GenericAgent>& Simulation::agents()
     return _agents;
 };
 
-void Simulation::switch_agent_journey(
+void Simulation::switch_agent_route(
     GenericAgent::ID agent_id,
-    Journey::ID journey_id,
+    Route::ID route_id,
     BaseStage::ID stage_id)
 {
-    throw_if_state(State::Iterating | State::Closed, "switch_agent_journey");
+    throw_if_state(State::Iterating | State::Closed, "switch_agent_route");
     JPS_TRACE_FUNC;
-    const auto find_iter = _journeys.find(journey_id);
-    if(find_iter == std::end(_journeys)) {
-        throw SimulationError("Unknown Journey id {}", journey_id);
+    const auto find_iter = _routes.find(route_id);
+    if(find_iter == std::end(_routes)) {
+        throw SimulationError("Unknown Route id {}", route_id);
     }
-    auto& journey = find_iter->second;
-    if(!journey->contains_stage(stage_id)) {
-        throw SimulationError("Stage {} not part of Journey {}", stage_id, journey_id);
+    auto& route = find_iter->second;
+    if(!route->contains_stage(stage_id)) {
+        throw SimulationError("Stage {} not part of Route {}", stage_id, route_id);
     }
     auto& agent = this->agent(agent_id);
-    agent.journey_id = journey_id;
+    agent.route_id = route_id;
     _stage_manager.migrate_agent(agent.stage_id, stage_id);
     agent.stage_id = stage_id;
 }

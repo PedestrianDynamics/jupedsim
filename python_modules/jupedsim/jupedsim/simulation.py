@@ -203,7 +203,7 @@ class Simulation:
             Id of the added Journey.
 
         """
-        return self._obj.add_journey(dict(journey._transitions))
+        return self._obj.add_route(dict(journey._transitions))
 
     def add_agent(
         self,
@@ -244,14 +244,14 @@ class Simulation:
         """
         if isinstance(state, _STATE_TYPES):
             return self._obj.add_agent(
-                journey_id=journey_id,
+                route_id=journey_id,
                 stage_id=stage_id,
                 position=position,
                 state=state,
                 region_id=region_id,
             )
         return self._obj.add_agent(
-            journey_id=journey_id,
+            route_id=journey_id,
             stage_id=stage_id,
             position=position,
             state=_CustomModelState(state),
@@ -471,8 +471,8 @@ class Simulation:
             journey_id: Id of the new journey to follow
             stage_id: Id of the stage in the new journey the agent continues with
         """
-        self._obj.switch_agent_journey(
-            agent_id=agent_id, journey_id=journey_id, stage_id=stage_id
+        self._obj.switch_agent_route(
+            agent_id=agent_id, route_id=journey_id, stage_id=stage_id
         )
 
     def agent_count(self) -> int:

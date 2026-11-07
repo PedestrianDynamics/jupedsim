@@ -52,6 +52,6 @@ void init_stage(py::module_& m)
         see :attr:`~jupedsim.Agent.final_target`. It bypasses the tactical and
         strategical level of the simulation; the operational level stays active.
         A direct steering stage can only be used if it is the only stage in a
-        journey.
+        route.
     )");
 }

@@ -6,9 +6,9 @@
 #include "geometry/location.hpp"
 #include "geometry_fixtures.hpp"
 #include "gtest/gtest.h"
-#include "journey.hpp"
 #include "kernel.hpp"
 #include "polygon.hpp"
+#include "route.hpp"
 #include "stage.hpp"
 #include "test_common.hpp"
 
@@ -30,7 +30,7 @@ GenericAgent agent_at(Location location, BaseStage::ID stage_id)
 {
     return GenericAgent(
         GenericAgent::ID::invalid,
-        Journey::ID::invalid,
+        Route::ID::invalid,
         stage_id,
         location,
         CollisionFreeSpeedModelState{});
