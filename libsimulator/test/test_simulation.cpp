@@ -1,14 +1,15 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
+#include "destination.hpp"
 #include "floorfield_routing_engine.hpp"
 #include "generic_agent.hpp"
 #include "geometry/geometry.hpp"
 #include "geometry/location.hpp"
 #include "geometry_fixtures.hpp"
-#include "journey.hpp"
 #include "kernel.hpp"
 #include "mesh_fixtures.hpp"
 #include "operational_models/collision_free_speed_model/collision_free_speed_model.hpp"
 #include "polygon.hpp"
+#include "route.hpp"
 #include "simulation.hpp"
 #include "simulation_error.hpp"
 #include "stage.hpp"
@@ -24,6 +25,7 @@
 #include <iterator>
 #include <memory>
 #include <utility>
+#include <variant>
 #include <vector>
 
 namespace
@@ -63,16 +65,98 @@ FlatRoom on_a_flat_room()
 /// Both floors of the U-stair carry this (x, y).
 const Point stacked_point{2, 10};
 
-/// A journey of one waypoint, so that agents have somewhere to be routed to.
-std::pair<Journey::ID, BaseStage::ID>
-journey_to(Simulation& sim, Point position, std::size_t region_id)
+/// A route of one waypoint, so that agents have somewhere to be routed to.
+std::pair<Route::ID, BaseStage::ID> route_to(Simulation& sim, Point position, std::size_t region_id)
 {
     const Vector half{0.5, 0.5};
     const Polygon area{test_geometries::rectangle_points(position - half, position + half)};
     const auto stage = sim.add_stage(WaypointDescription{{{area, region_id}}});
-    const auto journey = sim.add_journey({{stage, NonTransitionDescription{}}});
-    return {journey, stage};
+    const auto route = sim.add_route({{stage, NoRuleDescription{}}});
+    return {route, stage};
 }
+
+/// A 1 x 1 m square around @p centre.
+Polygon square_at(Point centre)
+{
+    const Vector half{0.5, 0.5};
+    return Polygon{test_geometries::rectangle_points(centre - half, centre + half)};
+}
+
+/// A flat room with a waypoint at (14, 10) and exits at (3, 10) and (17, 10).
+struct ClosureRoom {
+    std::unique_ptr<Simulation> sim;
+    std::size_t room;
+    BaseStage::ID wp;
+    BaseStage::ID exit1;
+    BaseStage::ID exit2;
+};
+
+ClosureRoom a_closure_room()
+{
+    auto [sim, room] = on_a_flat_room();
+    const auto wp = sim->add_stage(WaypointDescription{{{square_at({14, 10}), room}}});
+    const auto exit1 = sim->add_stage(ExitDescription{{{square_at({3, 10}), room}}});
+    const auto exit2 = sim->add_stage(ExitDescription{{{square_at({17, 10}), room}}});
+    return {std::move(sim), room, wp, exit1, exit2};
+}
+
+/// At the waypoint, a round robin sends agents to exit1 and exit2 in turn.
+Route::ID branch(ClosureRoom& r)
+{
+    return r.sim->add_route(
+        {{r.wp, RoundRobinDescription({{r.exit1, 1}, {r.exit2, 1}})},
+         {r.exit1, NoRuleDescription{}},
+         {r.exit2, NoRuleDescription{}}});
+}
+
+/// From the waypoint, a fixed transition leads to exit2.
+Route::ID corridor(ClosureRoom& r)
+{
+    return r.sim->add_route(
+        {{r.wp, FixedRuleDescription(r.exit2)}, {r.exit2, NoRuleDescription{}}});
+}
+
+/// An agent standing in the waypoint, which decides on its next stage in the iteration that
+/// follows its addition.
+GenericAgent::ID add_at_waypoint(ClosureRoom& r, Route::ID route, double y = 10)
+{
+    const auto id = r.sim->add_agent(route, r.wp, Point{14, y}, State{}, r.room);
+    r.sim->iterate();
+    return id;
+}
+
+/// Iterates until @p done holds; fails after 5000 iterations.
+template <typename Done>
+void iterate_until(Simulation& sim, Done done)
+{
+    while(!done()) {
+        sim.iterate();
+        ASSERT_LT(sim.iteration(), 5000u) << "condition never met";
+    }
+}
+
+/// Whether @p where lies in the area of stage @p stage.
+bool in_area(const ClosureRoom& r, BaseStage::ID stage, const Location& where)
+{
+    return r.sim->stage(stage)->destination()->contains(where);
+}
+
+/// Whether agent @p id is routed to the area of stage @p stage, told by its centre.
+bool heads_for(const ClosureRoom& r, GenericAgent::ID id, Point centre)
+{
+    const auto* target = std::get_if<Destination>(&r.sim->agent(id).final_target);
+    return target != nullptr &&
+           target->contains(r.sim->get_location(centre.x(), centre.y(), r.room));
+}
+
+/// Where a stranded agent stands still.
+const Location& stranded_at(const ClosureRoom& r, GenericAgent::ID id)
+{
+    return std::get<Location>(r.sim->agent(id).final_target);
+}
+
+const Point exit1_centre{3, 10};
+const Point exit2_centre{17, 10};
 
 } // namespace
 
@@ -80,9 +164,9 @@ TEST(MultiStoreySimulation, RunsOnAMultiStoreySurface)
 {
     auto stair = test_geometries::u_stair();
     Simulation sim{model(), std::move(stair.geometry), 0.01, FloorfieldOptions{}};
-    const auto [journey, stage] = journey_to(sim, stacked_point, stair.room_2);
+    const auto [route, stage] = route_to(sim, stacked_point, stair.room_2);
 
-    const auto id = sim.add_agent(journey, stage, Point{2, 2}, State{}, stair.room_1);
+    const auto id = sim.add_agent(route, stage, Point{2, 2}, State{}, stair.room_1);
     ASSERT_EQ(sim.agent_count(), 1u);
     EXPECT_NO_THROW(sim.iterate());
 
@@ -97,10 +181,10 @@ TEST(MultiStoreySimulation, AnAgentIsPutInTheRegionItNames)
 {
     auto stair = test_geometries::u_stair();
     Simulation sim{model(), std::move(stair.geometry), 0.01, FloorfieldOptions{}};
-    const auto [journey, stage] = journey_to(sim, stacked_point, stair.room_2);
+    const auto [route, stage] = route_to(sim, stacked_point, stair.room_2);
 
-    const auto downstairs = sim.add_agent(journey, stage, stacked_point, State{}, stair.room_1);
-    const auto upstairs = sim.add_agent(journey, stage, stacked_point, State{}, stair.room_2);
+    const auto downstairs = sim.add_agent(route, stage, stacked_point, State{}, stair.room_1);
+    const auto upstairs = sim.add_agent(route, stage, stacked_point, State{}, stair.room_2);
 
     EXPECT_EQ(sim.agent(downstairs).location.region(), stair.room_1);
     EXPECT_EQ(sim.agent(upstairs).location.region(), stair.room_2);
@@ -111,17 +195,17 @@ TEST(MultiStoreySimulation, AStageIsPutInTheRegionItNames)
 {
     auto stair = test_geometries::u_stair();
     Simulation sim{model(), std::move(stair.geometry), 0.01, FloorfieldOptions{}};
-    const auto [up_journey, up_stage] = journey_to(sim, stacked_point, stair.room_2);
-    const auto [down_journey, down_stage] = journey_to(sim, stacked_point, stair.room_1);
+    const auto [up_route, up_stage] = route_to(sim, stacked_point, stair.room_2);
+    const auto [down_route, down_stage] = route_to(sim, stacked_point, stair.room_1);
 
     // Upstairs, the waypoint is only reached over the stair to the east.
-    const auto id = sim.add_agent(up_journey, up_stage, Point{2, 2}, State{}, stair.room_1);
+    const auto id = sim.add_agent(up_route, up_stage, Point{2, 2}, State{}, stair.room_1);
     sim.iterate();
     EXPECT_GT(sim.agent(id).route_orientation.x(), 0.5);
 
     // Downstairs, it is in plain sight. Floor field directions follow a gradient on a grid, so
     // straight ahead holds only up to the grid.
-    sim.switch_agent_journey(id, down_journey, down_stage);
+    sim.switch_agent_route(id, down_route, down_stage);
     sim.iterate();
     const Vector straight = (stacked_point - sim.agent(id).location.xy()).normalized();
     EXPECT_NEAR(sim.agent(id).route_orientation.x(), straight.x(), 1e-2);
@@ -132,17 +216,118 @@ TEST(MultiStoreySimulation, ATargetWrittenFromOutsideLandsOnTheAgentsOwnStorey)
 {
     auto stair = test_geometries::u_stair();
     Simulation sim{model(), std::move(stair.geometry), 0.01, FloorfieldOptions{}};
-    const auto [journey, stage] = journey_to(sim, stacked_point, stair.room_2);
-    const auto upstairs = sim.add_agent(journey, stage, stacked_point, State{}, stair.room_2);
+    const auto [route, stage] = route_to(sim, stacked_point, stair.room_2);
+    const auto upstairs = sim.add_agent(route, stage, stacked_point, State{}, stair.room_2);
 
     // Only (x, y) is given, and two storeys carry it. It has to mean the one the agent is on --
     // anything else routes it through the wrong floor.
     sim.set_agent_target(upstairs, Point{2, 6});
     EXPECT_EQ(std::get<Location>(sim.agent(upstairs).final_target).region(), stair.room_2);
 
-    const auto downstairs = sim.add_agent(journey, stage, stacked_point, State{}, stair.room_1);
+    const auto downstairs = sim.add_agent(route, stage, stacked_point, State{}, stair.room_1);
     sim.set_agent_target(downstairs, Point{2, 6});
     EXPECT_EQ(std::get<Location>(sim.agent(downstairs).final_target).region(), stair.room_1);
+}
+
+TEST(Simulation, RemovalRecordHoldsExitAndTime)
+{
+    auto [sim, room] = on_a_flat_room();
+    const Polygon area{test_geometries::rectangle_points({9.5, 9.5}, {10.5, 10.5})};
+    const auto exit = sim->add_stage(ExitDescription{{{area, room}}});
+    const auto route = sim->add_route({{exit, NoRuleDescription{}}});
+    const auto id = sim->add_agent(route, exit, Point{7, 10}, State{}, room);
+
+    // The record appears after the iteration in which the agent reached the exit, stamped with
+    // the elapsed time at which it did, while the agent is still in the simulation.
+    double reached_at = 0;
+    while(sim->removed_agents().empty()) {
+        reached_at = sim->elapsed_time();
+        sim->iterate();
+        ASSERT_LT(sim->iteration(), 5000u) << "never reached the exit";
+    }
+    ASSERT_EQ(sim->removed_agents().size(), 1u);
+    const auto& record = sim->removed_agents().front();
+    EXPECT_EQ(record.id, id);
+    EXPECT_EQ(record.exit, exit);
+    EXPECT_DOUBLE_EQ(record.time, reached_at);
+    EXPECT_EQ(sim->agent_count(), 1u);
+
+    // The next iteration removes the agent and replaces the records.
+    sim->iterate();
+    EXPECT_EQ(sim->agent_count(), 0u);
+    EXPECT_TRUE(sim->removed_agents().empty());
+}
+
+TEST(Simulation, MarkingAnAgentForRemovalRecordsNoExit)
+{
+    auto [sim, room] = on_a_flat_room();
+    const auto [route, stage] = route_to(*sim, {10, 10}, room);
+    const auto id = sim->add_agent(route, stage, Point{5, 5}, State{}, room);
+    sim->iterate();
+
+    const auto marked_at = sim->elapsed_time();
+    sim->mark_agent_for_removal(id);
+    // The record belongs to the iteration that removes the agent.
+    EXPECT_TRUE(sim->removed_agents().empty());
+    sim->iterate();
+
+    ASSERT_EQ(sim->removed_agents().size(), 1u);
+    EXPECT_EQ(sim->removed_agents().front().id, id);
+    EXPECT_FALSE(sim->removed_agents().front().exit.has_value());
+    EXPECT_DOUBLE_EQ(sim->removed_agents().front().time, marked_at);
+    EXPECT_EQ(sim->agent_count(), 0u);
+}
+
+TEST(Simulation, AnAgentHasOneRemovalRecord)
+{
+    auto [sim, room] = on_a_flat_room();
+    const Polygon area{test_geometries::rectangle_points({9.5, 9.5}, {10.5, 10.5})};
+    const auto exit = sim->add_stage(ExitDescription{{{area, room}}});
+    const auto route = sim->add_route({{exit, NoRuleDescription{}}});
+    const auto id = sim->add_agent(route, exit, Point{7, 10}, State{}, room);
+    const auto other = sim->add_agent(route, exit, Point{7, 12}, State{}, room);
+    sim->mark_agent_for_removal(other);
+    sim->mark_agent_for_removal(other);
+    sim->iterate();
+    ASSERT_EQ(sim->removed_agents().size(), 1u);
+    EXPECT_FALSE(sim->removed_agents().front().exit.has_value());
+
+    sim->iterate();
+    while(sim->removed_agents().empty()) {
+        sim->iterate();
+        ASSERT_LT(sim->iteration(), 5000u) << "never reached the exit";
+    }
+    sim->mark_agent_for_removal(id);
+
+    // The exit record wins over the later removal.
+    ASSERT_EQ(sim->removed_agents().size(), 1u);
+    EXPECT_EQ(sim->removed_agents().front().id, id);
+    EXPECT_EQ(sim->removed_agents().front().exit, exit);
+    sim->iterate();
+    EXPECT_TRUE(sim->removed_agents().empty());
+}
+
+TEST(Simulation, TwoAgentsReachTheirOwnExits)
+{
+    auto [sim, room] = on_a_flat_room();
+    const Polygon left{test_geometries::rectangle_points({4.5, 9.5}, {5.5, 10.5})};
+    const Polygon right{test_geometries::rectangle_points({14.5, 9.5}, {15.5, 10.5})};
+    const auto exit_left = sim->add_stage(ExitDescription{{{left, room}}});
+    const auto exit_right = sim->add_stage(ExitDescription{{{right, room}}});
+    const auto route_left = sim->add_route({{exit_left, NoRuleDescription{}}});
+    const auto route_right = sim->add_route({{exit_right, NoRuleDescription{}}});
+    const auto a = sim->add_agent(route_left, exit_left, Point{3, 10}, State{}, room);
+    const auto b = sim->add_agent(route_right, exit_right, Point{17, 10}, State{}, room);
+
+    while(sim->removed_agents().empty()) {
+        sim->iterate();
+        ASSERT_LT(sim->iteration(), 5000u) << "never reached an exit";
+    }
+    ASSERT_EQ(sim->removed_agents().size(), 2u);
+    for(const auto& record : sim->removed_agents()) {
+        EXPECT_EQ(record.exit, record.id == a ? exit_left : exit_right);
+        EXPECT_TRUE(record.id == a || record.id == b);
+    }
 }
 
 TEST(Simulation, AnExitMayBeConcave)
@@ -411,8 +596,8 @@ TEST(MultiStoreySimulation, WalkingUpTheUStairToTheExitAbove)
     // flights, and back west on the upper floor.
     const Polygon outline{{{0, 4}, {3, 4}, {3, 8}, {0, 8}}};
     const auto exit = sim.add_stage(ExitDescription{{{outline, stair.room_2}}});
-    const auto journey = sim.add_journey({{exit, NonTransitionDescription{}}});
-    const auto id = sim.add_agent(journey, exit, Point{2, 6}, State{}, stair.room_1);
+    const auto route = sim.add_route({{exit, NoRuleDescription{}}});
+    const auto id = sim.add_agent(route, exit, Point{2, 6}, State{}, stair.room_1);
 
     const auto walked = climb(sim, id, [&sim] { return sim.agent_count() == 0; });
 
@@ -429,8 +614,8 @@ TEST(MultiStoreySimulation, SteeredUpTheUStairToTheFloorAbove)
 
     // The same way as to the exit above, steered towards a single place.
     const auto steering = sim.add_stage(DirectSteeringDescription{});
-    const auto journey = sim.add_journey({{steering, NonTransitionDescription{}}});
-    const auto id = sim.add_agent(journey, steering, Point{2, 6}, State{}, stair.room_1);
+    const auto route = sim.add_route({{steering, NoRuleDescription{}}});
+    const auto id = sim.add_agent(route, steering, Point{2, 6}, State{}, stair.room_1);
     const auto target = sim.get_location(2, 6, stair.room_2);
     sim.set_agent_target(id, target);
 
@@ -450,8 +635,8 @@ TEST(SimulationClose, RejectsFurtherUse)
     using testing::ThrowsMessage;
     const auto flat = on_a_flat_room();
     auto& sim = *flat.sim;
-    const auto [journey, stage] = journey_to(sim, Point{15, 15}, flat.room_id);
-    const auto id = sim.add_agent(journey, stage, Point{5, 5}, State{}, flat.room_id);
+    const auto [route, stage] = route_to(sim, Point{15, 15}, flat.room_id);
+    const auto id = sim.add_agent(route, stage, Point{5, 5}, State{}, flat.room_id);
     sim.iterate();
 
     sim.close();
@@ -459,8 +644,8 @@ TEST(SimulationClose, RejectsFurtherUse)
     const auto closed = ThrowsMessage<SimulationError>(HasSubstr("in state Closed"));
     EXPECT_THAT([&] { sim.iterate(); }, closed);
     EXPECT_THAT([&] { sim.agent(id); }, closed);
-    EXPECT_THAT([&] { sim.add_agent(journey, stage, Point{5, 5}, State{}, flat.room_id); }, closed);
-    EXPECT_THAT([&] { journey_to(sim, Point{10, 10}, flat.room_id); }, closed);
+    EXPECT_THAT([&] { sim.add_agent(route, stage, Point{5, 5}, State{}, flat.room_id); }, closed);
+    EXPECT_THAT([&] { route_to(sim, Point{10, 10}, flat.room_id); }, closed);
     // The stage outlives close, its destination's floor field does not.
     EXPECT_THAT([&] { sim.travel_times(stage); }, closed);
     EXPECT_THAT([&] { sim.custom_speed_fields(stage); }, closed);
@@ -471,4 +656,512 @@ TEST(SimulationClose, RejectsFurtherUse)
     EXPECT_THAT([&] { sim.grid_info(flat.room_id); }, closed);
     EXPECT_THAT([&] { sim.get_location(5, 5, flat.room_id); }, closed);
     EXPECT_THAT([&] { sim.geo(); }, closed);
+}
+
+TEST(Simulation, CloseInformedReassignsRuleAgents)
+{
+    auto r = a_closure_room();
+    const auto route = branch(r);
+    const auto first = add_at_waypoint(r, route, 9.7);
+    const auto second = add_at_waypoint(r, route, 10.3);
+    ASSERT_EQ(r.sim->agent(first).stage_id, r.exit1);
+    ASSERT_EQ(r.sim->agent(second).stage_id, r.exit2);
+    EXPECT_EQ(r.sim->agent(second).decision_stage, r.wp);
+
+    EXPECT_TRUE(r.sim->close_exit(r.exit2, true).empty());
+
+    const auto& agent = r.sim->agent(second);
+    EXPECT_EQ(agent.stage_id, r.exit1);
+    EXPECT_EQ(agent.decision_stage, r.wp);
+    EXPECT_FALSE(agent.stranded);
+    EXPECT_TRUE(std::holds_alternative<Destination>(agent.final_target));
+    EXPECT_EQ(r.sim->stage(r.exit2)->count_targeting(), 0u);
+    EXPECT_EQ(r.sim->stage(r.exit1)->count_targeting(), 2u);
+}
+
+TEST(Simulation, CloseUninformedReassignsAtExit)
+{
+    auto r = a_closure_room();
+    const auto route = branch(r);
+    add_at_waypoint(r, route, 9.7);
+    const auto id = add_at_waypoint(r, route, 10.3);
+    ASSERT_EQ(r.sim->agent(id).stage_id, r.exit2);
+
+    EXPECT_TRUE(r.sim->close_exit(r.exit2, false).empty());
+    EXPECT_EQ(r.sim->agent(id).stage_id, r.exit2);
+
+    // Where the agent stood when it was reassigned: the decision comes before the step.
+    auto decided_at = r.sim->agent(id).location;
+    iterate_until(*r.sim, [&] {
+        if(r.sim->agent(id).stage_id != r.exit2) {
+            return true;
+        }
+        decided_at = r.sim->agent(id).location;
+        return false;
+    });
+    const auto& agent = r.sim->agent(id);
+    EXPECT_EQ(agent.stage_id, r.exit1);
+    EXPECT_FALSE(agent.stranded);
+    EXPECT_TRUE(in_area(r, r.exit2, decided_at)) << "reassigned before reaching the exit";
+    EXPECT_TRUE(heads_for(r, id, exit1_centre));
+    EXPECT_TRUE(r.sim->removed_agents().empty());
+}
+
+TEST(Simulation, FixedTransitionStrandedInformed)
+{
+    auto r = a_closure_room();
+    const auto id = add_at_waypoint(r, corridor(r));
+    ASSERT_EQ(r.sim->agent(id).stage_id, r.exit2);
+    for(int i = 0; i < 20; ++i) {
+        r.sim->iterate();
+    }
+    const auto where = r.sim->agent(id).location.xy();
+
+    EXPECT_EQ(r.sim->close_exit(r.exit2, true), std::vector<GenericAgent::ID>{id});
+
+    const auto& agent = r.sim->agent(id);
+    EXPECT_TRUE(agent.stranded);
+    EXPECT_EQ(agent.stage_id, r.exit2);
+    ASSERT_TRUE(std::holds_alternative<Location>(agent.final_target));
+    EXPECT_EQ(std::get<Location>(agent.final_target).xy(), where);
+    for(int i = 0; i < 100; ++i) {
+        r.sim->iterate();
+    }
+    EXPECT_NEAR((r.sim->agent(id).location.xy() - where).norm(), 0.0, 1e-2);
+}
+
+TEST(Simulation, FixedTransitionStrandedUninformed)
+{
+    auto r = a_closure_room();
+    const auto id = add_at_waypoint(r, corridor(r));
+
+    EXPECT_TRUE(r.sim->close_exit(r.exit2, false).empty());
+    EXPECT_FALSE(r.sim->agent(id).stranded);
+
+    iterate_until(*r.sim, [&] { return r.sim->agent(id).stranded; });
+    const auto& agent = r.sim->agent(id);
+    EXPECT_EQ(agent.stage_id, r.exit2);
+    EXPECT_TRUE(in_area(r, r.exit2, stranded_at(r, id))) << "stranded before reaching the exit";
+    EXPECT_TRUE(r.sim->removed_agents().empty());
+    r.sim->iterate();
+    EXPECT_EQ(r.sim->agent_count(), 1u);
+}
+
+TEST(Simulation, NoOpenTargetStrandsInsideWaypoint)
+{
+    auto r = a_closure_room();
+    const auto route = branch(r);
+    r.sim->close_exit(r.exit1, true);
+    r.sim->close_exit(r.exit2, true);
+
+    const auto id = r.sim->add_agent(route, r.wp, Point{11, 10}, State{}, r.room);
+    EXPECT_FALSE(r.sim->agent(id).stranded);
+    iterate_until(*r.sim, [&] { return r.sim->agent(id).stranded; });
+
+    const auto& agent = r.sim->agent(id);
+    EXPECT_EQ(agent.stage_id, r.wp);
+    EXPECT_EQ(agent.decision_stage, r.wp);
+    EXPECT_TRUE(in_area(r, r.wp, stranded_at(r, id)));
+    for(int i = 0; i < 100; ++i) {
+        r.sim->iterate();
+    }
+    EXPECT_TRUE(in_area(r, r.wp, r.sim->agent(id).location));
+}
+
+TEST(Simulation, OpenResumesRuleAgentsAtDecisionStage)
+{
+    auto r = a_closure_room();
+    const auto route = branch(r);
+    const auto walking = add_at_waypoint(r, route, 9.7);
+    ASSERT_EQ(r.sim->agent(walking).stage_id, r.exit1);
+    r.sim->close_exit(r.exit2, true);
+    EXPECT_EQ(r.sim->close_exit(r.exit1, true), std::vector<GenericAgent::ID>{walking});
+    const auto deciding = add_at_waypoint(r, route, 10.3);
+    ASSERT_TRUE(r.sim->agent(deciding).stranded);
+
+    const auto resumed = r.sim->open_exit(r.exit1);
+
+    EXPECT_EQ(resumed, (std::vector<GenericAgent::ID>{walking, deciding}));
+    for(const auto id : resumed) {
+        const auto& agent = r.sim->agent(id);
+        EXPECT_FALSE(agent.stranded);
+        EXPECT_EQ(agent.stage_id, r.exit1);
+        EXPECT_EQ(agent.decision_stage, r.wp);
+        EXPECT_TRUE(heads_for(r, id, exit1_centre));
+    }
+    const auto x_walking = r.sim->agent(walking).location.xy().x();
+    const auto x_deciding = r.sim->agent(deciding).location.xy().x();
+    for(int i = 0; i < 20; ++i) {
+        r.sim->iterate();
+    }
+    EXPECT_LT(r.sim->agent(walking).location.xy().x(), x_walking);
+    EXPECT_LT(r.sim->agent(deciding).location.xy().x(), x_deciding);
+}
+
+TEST(Simulation, OpenResumesFixedTransitionAgentsTowardExit)
+{
+    auto r = a_closure_room();
+    const auto id = add_at_waypoint(r, corridor(r));
+    r.sim->iterate();
+    ASSERT_EQ(r.sim->close_exit(r.exit2, true), std::vector<GenericAgent::ID>{id});
+    const auto where = r.sim->agent(id).location.xy();
+
+    EXPECT_EQ(r.sim->open_exit(r.exit2), std::vector<GenericAgent::ID>{id});
+
+    EXPECT_FALSE(r.sim->agent(id).stranded);
+    EXPECT_EQ(r.sim->agent(id).stage_id, r.exit2);
+    EXPECT_TRUE(heads_for(r, id, exit2_centre));
+    for(int i = 0; i < 20; ++i) {
+        r.sim->iterate();
+    }
+    EXPECT_GT(r.sim->agent(id).location.xy().x(), where.x());
+}
+
+TEST(Simulation, RepeatedCloseIsNoOp)
+{
+    auto r = a_closure_room();
+    const auto id = add_at_waypoint(r, corridor(r));
+    EXPECT_TRUE(r.sim->open_exit(r.exit2).empty());
+
+    ASSERT_EQ(r.sim->close_exit(r.exit2, true), std::vector<GenericAgent::ID>{id});
+    EXPECT_TRUE(r.sim->close_exit(r.exit2, true).empty());
+    EXPECT_TRUE(r.sim->close_exit(r.exit2, false).empty());
+    EXPECT_TRUE(r.sim->stage(r.exit2)->closed());
+    EXPECT_TRUE(r.sim->agent(id).stranded);
+
+    EXPECT_EQ(r.sim->open_exit(r.exit2), std::vector<GenericAgent::ID>{id});
+    EXPECT_TRUE(r.sim->open_exit(r.exit2).empty());
+    EXPECT_FALSE(r.sim->stage(r.exit2)->closed());
+
+    // A second close on an uninformed closure informs nobody: walking agents walk on.
+    EXPECT_TRUE(r.sim->close_exit(r.exit2, false).empty());
+    EXPECT_TRUE(r.sim->close_exit(r.exit2, true).empty());
+    EXPECT_FALSE(r.sim->agent(id).stranded);
+    EXPECT_EQ(r.sim->agent(id).stage_id, r.exit2);
+    EXPECT_TRUE(heads_for(r, id, exit2_centre));
+}
+
+TEST(Simulation, CloseRejectsAStageThatIsNotAnExit)
+{
+    auto r = a_closure_room();
+    EXPECT_THROW(r.sim->close_exit(r.wp, true), SimulationError);
+    EXPECT_THROW(r.sim->open_exit(r.wp), SimulationError);
+}
+
+TEST(Simulation, CloseInformedSkipsAgentsAlreadyLeaving)
+{
+    auto r = a_closure_room();
+    const auto route = r.sim->add_route({{r.exit2, NoRuleDescription{}}});
+    const auto id = r.sim->add_agent(route, r.exit2, Point{17, 10}, State{}, r.room);
+    // The exit is completed in iterate(), not in add_agent().
+    ASSERT_TRUE(r.sim->removed_agents().empty());
+    r.sim->iterate();
+    ASSERT_EQ(r.sim->removed_agents().size(), 1u);
+
+    EXPECT_TRUE(r.sim->close_exit(r.exit2, true).empty());
+    EXPECT_FALSE(r.sim->agent(id).stranded);
+    r.sim->iterate();
+    EXPECT_EQ(r.sim->agent_count(), 0u);
+}
+
+TEST(Simulation, SwitchToAClosedExitStrandsAtOnce)
+{
+    auto r = a_closure_room();
+    const auto id = add_at_waypoint(r, branch(r));
+    const auto to_exit2 = r.sim->add_route({{r.exit2, NoRuleDescription{}}});
+    r.sim->close_exit(r.exit2, false);
+
+    r.sim->switch_agent_route(id, to_exit2, r.exit2);
+
+    const auto& agent = r.sim->agent(id);
+    EXPECT_TRUE(agent.stranded);
+    EXPECT_EQ(agent.decision_stage, r.exit2);
+    EXPECT_TRUE(std::holds_alternative<Location>(agent.final_target));
+    EXPECT_EQ(r.sim->open_exit(r.exit2), std::vector<GenericAgent::ID>{id});
+}
+
+TEST(Simulation, OpenDoesNotReassignReroutedAgents)
+{
+    auto r = a_closure_room();
+    const auto id = add_at_waypoint(r, corridor(r));
+    ASSERT_EQ(r.sim->close_exit(r.exit2, true), std::vector<GenericAgent::ID>{id});
+    const auto to_exit1 = r.sim->add_route({{r.exit1, NoRuleDescription{}}});
+    r.sim->switch_agent_route(id, to_exit1, r.exit1);
+    EXPECT_FALSE(r.sim->agent(id).stranded);
+
+    EXPECT_TRUE(r.sim->open_exit(r.exit2).empty());
+
+    EXPECT_EQ(r.sim->agent(id).route_id, to_exit1);
+    EXPECT_EQ(r.sim->agent(id).stage_id, r.exit1);
+}
+
+TEST(Simulation, RulesSkipOnlyClosedImmediateTargets)
+{
+    auto r = a_closure_room();
+    const auto wp3 = r.sim->add_stage(WaypointDescription{{{square_at({14, 6}), r.room}}});
+    const auto route = r.sim->add_route(
+        {{r.wp, RoundRobinDescription({{wp3, 1}, {r.exit1, 1}})},
+         {wp3, FixedRuleDescription(r.exit2)},
+         {r.exit1, NoRuleDescription{}},
+         {r.exit2, NoRuleDescription{}}});
+    r.sim->close_exit(r.exit2, true);
+
+    // wp3 leads only to the closed exit2, but is open itself, so it can still be chosen.
+    const auto id = add_at_waypoint(r, route);
+    ASSERT_EQ(r.sim->agent(id).stage_id, wp3);
+
+    iterate_until(*r.sim, [&] { return r.sim->agent(id).stranded; });
+    const auto& agent = r.sim->agent(id);
+    EXPECT_EQ(agent.stage_id, wp3);
+    EXPECT_EQ(agent.decision_stage, wp3);
+    EXPECT_TRUE(in_area(r, wp3, stranded_at(r, id)));
+}
+
+TEST(Simulation, CloseUninformedWithNoOpenTargetStrandsAtExit)
+{
+    auto r = a_closure_room();
+    const auto route = branch(r);
+    const auto first = add_at_waypoint(r, route, 9.7);
+    const auto second = add_at_waypoint(r, route, 10.3);
+    ASSERT_EQ(r.sim->agent(second).stage_id, r.exit2);
+    r.sim->close_exit(r.exit1, true);
+    ASSERT_EQ(r.sim->agent(first).stage_id, r.exit2);
+
+    EXPECT_TRUE(r.sim->close_exit(r.exit2, false).empty());
+
+    iterate_until(
+        *r.sim, [&] { return r.sim->agent(first).stranded && r.sim->agent(second).stranded; });
+    for(const auto id : {first, second}) {
+        const auto& agent = r.sim->agent(id);
+        EXPECT_EQ(agent.stage_id, r.exit2);
+        EXPECT_EQ(agent.decision_stage, r.wp);
+        EXPECT_TRUE(in_area(r, r.exit2, stranded_at(r, id)));
+    }
+    EXPECT_EQ(r.sim->agent_count(), 2u);
+}
+
+TEST(Route, SharedCounterSameStep)
+{
+    auto r = a_closure_room();
+    // wp0 lies on the waypoint: agents added in it go on to the waypoint in the first step and
+    // reach it together in the second.
+    const auto wp0 = r.sim->add_stage(WaypointDescription{{{square_at({14, 10}), r.room}}});
+    const auto route = r.sim->add_route(
+        {{wp0, FixedRuleDescription(r.wp)},
+         {r.wp, RoundRobinDescription({{r.exit1, 3}, {r.exit2, 2}})},
+         {r.exit1, NoRuleDescription{}},
+         {r.exit2, NoRuleDescription{}}});
+    std::vector<GenericAgent::ID> ids{};
+    for(const Point p : {Point{13.7, 9.8}, Point{14.3, 9.8}, Point{14, 10.2}}) {
+        ids.push_back(r.sim->add_agent(route, wp0, p, State{}, r.room));
+        ASSERT_EQ(r.sim->agent(ids.back()).stage_id, wp0);
+    }
+
+    r.sim->iterate();
+    for(const auto id : ids) {
+        ASSERT_EQ(r.sim->agent(id).stage_id, r.wp);
+    }
+    r.sim->iterate();
+
+    // In agent-id order, consecutive slots of 3:2: exit1, exit2, exit1.
+    EXPECT_EQ(r.sim->agent(ids[0]).stage_id, r.exit1);
+    EXPECT_EQ(r.sim->agent(ids[1]).stage_id, r.exit2);
+    EXPECT_EQ(r.sim->agent(ids[2]).stage_id, r.exit1);
+    // The next decision there takes the next slot.
+    const auto next = r.sim->add_agent(route, r.wp, Point{13.6, 10.4}, State{}, r.room);
+    iterate_until(*r.sim, [&] { return r.sim->agent(next).stage_id != r.wp; });
+    EXPECT_EQ(r.sim->agent(next).stage_id, r.exit2);
+}
+
+TEST(Simulation, SetRoundRobinWeightsTakesEffectAtTheNextDecision)
+{
+    auto r = a_closure_room();
+    const auto route = branch(r);
+    const auto first = add_at_waypoint(r, route, 9.7);
+    ASSERT_EQ(r.sim->agent(first).stage_id, r.exit1);
+
+    r.sim->set_round_robin_weights(route, r.wp, {{r.exit1, 0}, {r.exit2, 1}});
+
+    // Already assigned agents keep their target; the next decision uses the new weights.
+    EXPECT_EQ(r.sim->agent(first).stage_id, r.exit1);
+    const auto second = add_at_waypoint(r, route, 10.3);
+    EXPECT_EQ(r.sim->agent(second).stage_id, r.exit2);
+    const auto third = r.sim->add_agent(route, r.wp, Point{14.3, 10.0}, State{}, r.room);
+    r.sim->iterate();
+    EXPECT_EQ(r.sim->agent(third).stage_id, r.exit2);
+}
+
+TEST(Simulation, SetRoundRobinWeightsRejectsOtherRules)
+{
+    auto r = a_closure_room();
+    const auto route = corridor(r);
+    EXPECT_THROW(r.sim->set_round_robin_weights(route, r.wp, {{r.exit2, 1}}), SimulationError);
+    EXPECT_THROW(
+        r.sim->set_round_robin_weights(Route::ID{12345}, r.wp, {{r.exit2, 1}}), SimulationError);
+}
+
+TEST(Simulation, OpenResumesOnlyAgentsWhoseRuleTargetsTheExit)
+{
+    auto r = a_closure_room();
+    const auto exit3 = r.sim->add_stage(ExitDescription{{{square_at({10, 18}), r.room}}});
+    const auto route = r.sim->add_route(
+        {{r.wp, RoundRobinDescription({{r.exit1, 0}, {r.exit2, 1}})},
+         {r.exit1, NoRuleDescription{}},
+         {r.exit2, NoRuleDescription{}}});
+    r.sim->close_exit(r.exit2, true);
+    r.sim->close_exit(exit3, true);
+    const auto id = add_at_waypoint(r, route);
+    ASSERT_TRUE(r.sim->agent(id).stranded);
+
+    // New weights do not resume stranded agents: they decide again when an exit of their rule
+    // opens.
+    r.sim->set_round_robin_weights(route, r.wp, {{r.exit1, 1}, {r.exit2, 1}});
+    EXPECT_TRUE(r.sim->agent(id).stranded);
+
+    // exit3 is no target of the rule at the waypoint, although exit1 would now be open.
+    EXPECT_TRUE(r.sim->open_exit(exit3).empty());
+    EXPECT_TRUE(r.sim->agent(id).stranded);
+
+    EXPECT_EQ(r.sim->open_exit(r.exit2), std::vector<GenericAgent::ID>{id});
+    EXPECT_FALSE(r.sim->agent(id).stranded);
+    // Ties go to the earlier target: exit1, with the counter reset by the new weights.
+    EXPECT_EQ(r.sim->agent(id).stage_id, r.exit1);
+}
+
+TEST(Simulation, ReportsThePathLengthOverTheSurface)
+{
+    auto [sim, room] = on_a_flat_room();
+    const auto from = sim->get_location(2, 2, room);
+    const auto to = sim->get_location(5, 6, room);
+    EXPECT_NEAR(sim->path_length(from, to), 5.0, 1e-9);
+    EXPECT_NEAR(sim->path_length(from, from), 0.0, 1e-9);
+}
+
+TEST(Simulation, HoldStopsAgentsWhereTheyEnter)
+{
+    auto r = a_closure_room();
+    const auto route = branch(r);
+    r.sim->hold(route, r.wp);
+    const auto id = r.sim->add_agent(route, r.wp, Point{11, 10}, State{}, r.room);
+    EXPECT_FALSE(r.sim->agent(id).held);
+    iterate_until(*r.sim, [&] { return r.sim->agent(id).held; });
+
+    const auto& agent = r.sim->agent(id);
+    EXPECT_EQ(agent.stage_id, r.wp);
+    EXPECT_FALSE(agent.stranded);
+    // Stopped in the iteration just run.
+    EXPECT_EQ(agent.held_since, r.sim->iteration() - 1);
+    EXPECT_TRUE(in_area(r, r.wp, stranded_at(r, id)));
+    for(int i = 0; i < 100; ++i) {
+        r.sim->iterate();
+    }
+    EXPECT_TRUE(r.sim->agent(id).held);
+    EXPECT_TRUE(in_area(r, r.wp, r.sim->agent(id).location));
+}
+
+TEST(Simulation, ReleaseServesHeldAgentsInArrivalOrder)
+{
+    auto r = a_closure_room();
+    const auto route = branch(r);
+    r.sim->hold(route, r.wp);
+    const auto far = r.sim->add_agent(route, r.wp, Point{8, 10.3}, State{}, r.room);
+    const auto near = r.sim->add_agent(route, r.wp, Point{11.5, 9.7}, State{}, r.room);
+    iterate_until(*r.sim, [&] { return r.sim->agent(near).held; });
+    EXPECT_EQ(r.sim->held_agents(route, r.wp), std::vector<GenericAgent::ID>{near});
+    iterate_until(*r.sim, [&] { return r.sim->agent(far).held; });
+    ASSERT_EQ(r.sim->held_agents(route, r.wp), (std::vector<GenericAgent::ID>{near, far}));
+
+    r.sim->release(route, r.wp);
+
+    EXPECT_FALSE(r.sim->is_held(route, r.wp));
+    EXPECT_TRUE(r.sim->held_agents(route, r.wp).empty());
+    // The round robin gives its first slot to the agent that arrived first, not the lower id.
+    EXPECT_EQ(r.sim->agent(near).stage_id, r.exit1);
+    EXPECT_EQ(r.sim->agent(far).stage_id, r.exit2);
+    for(const auto id : {near, far}) {
+        EXPECT_FALSE(r.sim->agent(id).held);
+        EXPECT_EQ(r.sim->agent(id).decision_stage, r.wp);
+    }
+    EXPECT_TRUE(heads_for(r, near, exit1_centre));
+    EXPECT_TRUE(heads_for(r, far, exit2_centre));
+}
+
+TEST(Simulation, ReleaseWithoutOpenTargetStrandsInsideTheStage)
+{
+    auto r = a_closure_room();
+    const auto route = branch(r);
+    r.sim->hold(route, r.wp);
+    const auto id = add_at_waypoint(r, route);
+    ASSERT_TRUE(r.sim->agent(id).held);
+    EXPECT_TRUE(r.sim->close_exit(r.exit1, true).empty());
+    EXPECT_TRUE(r.sim->close_exit(r.exit2, true).empty());
+
+    r.sim->release(route, r.wp);
+
+    const auto& agent = r.sim->agent(id);
+    EXPECT_FALSE(agent.held);
+    EXPECT_TRUE(agent.stranded);
+    EXPECT_EQ(agent.stage_id, r.wp);
+    EXPECT_EQ(agent.decision_stage, r.wp);
+    EXPECT_TRUE(in_area(r, r.wp, stranded_at(r, id)));
+    EXPECT_EQ(r.sim->open_exit(r.exit2), std::vector<GenericAgent::ID>{id});
+    EXPECT_EQ(r.sim->agent(id).stage_id, r.exit2);
+}
+
+TEST(Simulation, HoldIsPerRoute)
+{
+    auto r = a_closure_room();
+    const auto held_route = branch(r);
+    const auto free_route = corridor(r);
+    r.sim->hold(held_route, r.wp);
+    // A repeated hold does nothing.
+    r.sim->hold(held_route, r.wp);
+    EXPECT_TRUE(r.sim->is_held(held_route, r.wp));
+    EXPECT_FALSE(r.sim->is_held(free_route, r.wp));
+
+    const auto held = add_at_waypoint(r, held_route, 9.7);
+    const auto free = add_at_waypoint(r, free_route, 10.3);
+    EXPECT_TRUE(r.sim->agent(held).held);
+    EXPECT_FALSE(r.sim->agent(free).held);
+    EXPECT_EQ(r.sim->agent(free).stage_id, r.exit2);
+    EXPECT_TRUE(r.sim->held_agents(free_route, r.wp).empty());
+
+    r.sim->release(held_route, r.wp);
+    EXPECT_FALSE(r.sim->is_held(held_route, r.wp));
+    EXPECT_THROW(r.sim->release(held_route, r.wp), SimulationError);
+}
+
+TEST(Simulation, SwitchRouteClearsHeld)
+{
+    auto r = a_closure_room();
+    const auto route = branch(r);
+    const auto other = corridor(r);
+    r.sim->hold(route, r.wp);
+    const auto id = add_at_waypoint(r, route);
+    ASSERT_TRUE(r.sim->agent(id).held);
+
+    r.sim->switch_agent_route(id, other, r.exit2);
+    EXPECT_FALSE(r.sim->agent(id).held);
+    EXPECT_TRUE(r.sim->held_agents(route, r.wp).empty());
+    for(int i = 0; i < 5; ++i) {
+        r.sim->iterate();
+    }
+
+    // Back onto the held start: held again once it completes the stage.
+    r.sim->switch_agent_route(id, route, r.wp);
+    EXPECT_FALSE(r.sim->agent(id).held);
+    r.sim->iterate();
+    EXPECT_TRUE(r.sim->agent(id).held);
+    EXPECT_EQ(r.sim->agent(id).held_since, 6u);
+}
+
+TEST(Simulation, HoldRejectsExitsAndForeignStages)
+{
+    auto r = a_closure_room();
+    const auto route = corridor(r);
+    EXPECT_THROW(r.sim->hold(route, r.exit2), SimulationError);
+    EXPECT_THROW(r.sim->hold(route, r.exit1), SimulationError);
+    EXPECT_THROW(r.sim->hold(Route::ID{12345}, r.wp), SimulationError);
+    EXPECT_THROW(r.sim->is_held(route, r.exit1), SimulationError);
+    EXPECT_THROW(r.sim->release(route, r.wp), SimulationError);
 }

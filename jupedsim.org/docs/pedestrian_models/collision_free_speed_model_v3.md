@@ -197,16 +197,14 @@ import jupedsim as jps
 sim = jps.Simulation(
     model=jps.CollisionFreeSpeedModelV3(), geometry=surface
 )
-agent_id = sim.add_agent(
-    journey_id=journey_id,
-    stage_id=stage_id,
-    position=(1.0, 1.0),
+agent = sim.add_agent(
+    region.at(1.0, 1.0),
+    route=route,
     state=jps.CollisionFreeSpeedModelV3State(),
-    region_id=region_id,
 )
 
 # modify at runtime
-sim.agent(agent_id).state.desired_speed = 1.0
+agent.state.desired_speed = 1.0
 ```
 
 | Symbol | Parameter (Python) | Default | Unit | Role |

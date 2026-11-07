@@ -113,10 +113,7 @@ Each :class:`~jupedsim.agent.Agent` exposes:
       - Unique numeric ID
 
     * - ``agent.position``
-      - ``(x, y)`` tuple of the agent's position
-
-    * - ``agent.orientation``
-      - ``(x, y)`` tuple of the agent's orientation vector
+      - a :class:`~jupedsim.Location` with ``.x`` and ``.y``
 
     * - ``agent.state``
       - Model-specific state (speed, radius, etc.)
@@ -152,7 +149,7 @@ Here is a complete example that writes trajectory data to a CSV file:
             self._file = open(self._output_file, "w", newline="")
             self._csv_writer = csv.writer(self._file)
             self._csv_writer.writerow(
-                ["frame", "id", "pos_x", "pos_y", "ori_x", "ori_y"]
+                ["frame", "id", "pos_x", "pos_y"]
             )
 
         def write_iteration_state(self, simulation: Simulation) -> None:
@@ -165,10 +162,8 @@ Here is a complete example that writes trajectory data to a CSV file:
                 self._csv_writer.writerow([
                     frame,
                     agent.id,
-                    agent.position[0],
-                    agent.position[1],
-                    agent.orientation[0],
-                    agent.orientation[1],
+                    agent.position.x,
+                    agent.position.y,
                 ])
 
         def every_nth_frame(self) -> int:

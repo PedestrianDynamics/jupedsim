@@ -5,6 +5,7 @@ import pathlib
 import sys
 
 import jupedsim as jps
+import shapely
 
 
 def main():
@@ -15,7 +16,7 @@ def main():
 
     surface = jps.WalkableSurface()
     region = surface.add_region(
-        boundary=[(0, 0), (100, 0), (100, 100), (0, 100)]
+        polygon=shapely.Polygon([(0, 0), (100, 0), (100, 100), (0, 100)])
     )
 
     simulation = jps.Simulation(
@@ -25,67 +26,28 @@ def main():
             output_file=pathlib.Path("example2_out.h5"),
         ),
     )
-    stage_id = simulation.add_waypoint_stage(
-        [(jps.circle_to_polygon(center=(60, 50), radius=1), region)]
-    )
+    stage = simulation.add_waypoint((60, 50), radius=1, region=region)
     exits = [
-        simulation.add_exit_stage(
-            [([(99, 40), (99, 60), (100, 60), (100, 40)], region)]
+        simulation.add_exit(
+            [(99, 40), (99, 60), (100, 60), (100, 40)], region=region
         ),
-        simulation.add_exit_stage(
-            [([(99, 50), (99, 70), (100, 70), (100, 50)], region)]
+        simulation.add_exit(
+            [(99, 50), (99, 70), (100, 70), (100, 50)], region=region
         ),
     ]
     waypoints = [
-        simulation.add_waypoint_stage(
-            [(jps.circle_to_polygon(center=(50, 50), radius=1), region)]
-        ),
-        simulation.add_waypoint_stage(
-            [(jps.circle_to_polygon(center=(60, 40), radius=1), region)]
-        ),
-        simulation.add_waypoint_stage(
-            [(jps.circle_to_polygon(center=(40, 40), radius=1), region)]
-        ),
-        simulation.add_waypoint_stage(
-            [(jps.circle_to_polygon(center=(40, 60), radius=1), region)]
-        ),
-        simulation.add_waypoint_stage(
-            [(jps.circle_to_polygon(center=(60, 60), radius=1), region)]
-        ),
+        simulation.add_waypoint(center, radius=1, region=region)
+        for center in [(50, 50), (60, 40), (40, 40), (40, 60), (60, 60)]
     ]
 
-    short_journey = jps.JourneyDescription([waypoints[0], stage_id, exits[0]])
-    long_journey = jps.JourneyDescription([*waypoints[1:], exits[1]])
-
-    short_journey.set_transition_for_stage(
-        waypoints[0], jps.Transition.create_fixed_transition(stage_id)
-    )
-    short_journey.set_transition_for_stage(
-        stage_id, jps.Transition.create_fixed_transition(exits[0])
-    )
-
-    for waypoint_start, waypoint_end in zip(waypoints[1:-1], waypoints[2:]):
-        long_journey.set_transition_for_stage(
-            waypoint_start,
-            jps.Transition.create_fixed_transition(waypoint_end),
-        )
-    long_journey.set_transition_for_stage(
-        waypoints[-1],
-        jps.Transition.create_fixed_transition(exits[1]),
-    )
-
-    journeys = [
-        simulation.add_journey(short_journey),
-        simulation.add_journey(long_journey),
-    ]
+    short_route = jps.Route([waypoints[0], stage, exits[0]])
+    long_route = jps.Route([*waypoints[1:], exits[1]])
 
     for position in [(10, 50), (8, 50), (6, 50)]:
         simulation.add_agent(
-            journey_id=journeys[0],
-            stage_id=waypoints[0],
-            position=position,
+            region.at(*position),
+            route=short_route,
             state=jps.CollisionFreeSpeedModelState(radius=0.3),
-            region_id=region,
         )
 
     redirect_once = True
@@ -93,24 +55,20 @@ def main():
         try:
             agents_at_waypoint = simulation.agents_in_range((60, 50), 1)
             if redirect_once and len(agents_at_waypoint) == 1:
-                simulation.switch_agent_journey(
-                    agent_id=agents_at_waypoint[0].id,
-                    journey_id=journeys[1],
-                    stage_id=waypoints[1],
-                )
+                agents_at_waypoint[0].follow(long_route, start=waypoints[1])
                 redirect_once = False
                 print(
-                    f"Switched journey for agent {agents_at_waypoint[0].id} @{simulation.iteration_count()}"
+                    f"Switched route for agent {agents_at_waypoint[0].id} @{simulation.iteration_count()}"
                 )
             simulation.iterate()
         except KeyboardInterrupt:
             print("CTRL-C Recieved! Shuting down")
-            simulation._writer.close()
+            simulation.close()
             sys.exit(1)
     print(
         f"Simulation completed after {simulation.iteration_count()} iterations"
     )
-    simulation._writer.close()
+    simulation.close()
 
 
 if __name__ == "__main__":

@@ -27,17 +27,15 @@ def square_simulation(tmp_path: pathlib.Path):
         trajectory_writer=writer,
         dt=0.01,
     )
-    exit_id = sim.add_exit_stage(
+    exit = sim.add_exit(
         [(shapely.Polygon([(9, 0), (10, 0), (10, 10), (9, 10)]), room)]
     )
-    journey_id = sim.add_journey(jps.JourneyDescription([exit_id]))
+    route = jps.Route([exit])
     for x, y in [(2, 5), (3, 4), (3, 6)]:
         sim.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=(x, y),
+            room.at(x, y),
+            route=route,
             state=jps.CollisionFreeSpeedModelV2State(),
-            region_id=room,
         )
     for _ in range(50):
         sim.iterate()
@@ -139,10 +137,10 @@ def test_regions_round_trip(tmp_path):
 
     surface = jps.WalkableSurface()
     ground_floor = surface.add_region(
-        boundary=rectangle((0, 0), (5, 5)), height=0.0
+        polygon=shapely.Polygon(rectangle((0, 0), (5, 5))), height=0.0
     )
     upper_floor = surface.add_region(
-        boundary=rectangle((10, 0), (15, 5)), height=3.0
+        polygon=shapely.Polygon(rectangle((10, 0), (15, 5))), height=3.0
     )
     stairs = surface.connect_regions(
         from_region=ground_floor,
@@ -151,9 +149,9 @@ def test_regions_round_trip(tmp_path):
         to_edge=((10, 0), (10, 5)),
     )
     expected = {
-        ground_floor: shapely.box(0, 0, 5, 5),
-        upper_floor: shapely.box(10, 0, 15, 5),
-        stairs: shapely.box(5, 0, 10, 5),
+        ground_floor.id: shapely.box(0, 0, 5, 5),
+        upper_floor.id: shapely.box(10, 0, 15, 5),
+        stairs.id: shapely.box(5, 0, 10, 5),
     }
 
     out = tmp_path / "regions.h5"
@@ -185,22 +183,23 @@ def test_regions_round_trip(tmp_path):
 
 def _square_simulation(writer):
     surface = jps.WalkableSurface()
-    surface.add_region(
+    room = surface.add_region(
         polygon=shapely.Polygon([(0, 0), (5, 0), (5, 5), (0, 5)])
     )
-    return jps.Simulation(
+    sim = jps.Simulation(
         model=jps.CollisionFreeSpeedModelV2(),
         geometry=surface,
         trajectory_writer=writer,
         dt=0.01,
     )
+    return sim, room
 
 
 def test_with_block_closes_writer(tmp_path):
     out = tmp_path / "with.h5"
     with jps.Hdf5TrajectoryWriter(output_file=out, every_nth_frame=1) as writer:
         assert isinstance(writer, jps.Hdf5TrajectoryWriter)
-        sim = _square_simulation(writer)
+        sim, _ = _square_simulation(writer)
         for _ in range(3):
             sim.iterate()
 
@@ -216,7 +215,7 @@ def test_with_block_closes_writer_on_exception(tmp_path):
         with jps.Hdf5TrajectoryWriter(
             output_file=out, every_nth_frame=1
         ) as writer:
-            sim = _square_simulation(writer)
+            sim, _ = _square_simulation(writer)
             sim.iterate()
             raise RuntimeError("boom")
 
@@ -232,10 +231,10 @@ def test_travel_times_round_trip(tmp_path):
 
     surface = jps.WalkableSurface()
     ground_floor = surface.add_region(
-        boundary=rectangle((0, 0), (5, 5)), height=0.0
+        polygon=shapely.Polygon(rectangle((0, 0), (5, 5))), height=0.0
     )
     upper_floor = surface.add_region(
-        boundary=rectangle((10, 0), (15, 5)), height=3.0
+        polygon=shapely.Polygon(rectangle((10, 0), (15, 5))), height=3.0
     )
     surface.connect_regions(
         from_region=ground_floor,
@@ -254,13 +253,15 @@ def test_travel_times_round_trip(tmp_path):
         trajectory_writer=writer,
         dt=0.01,
     )
-    exit_id = sim.add_exit_stage([(rectangle((14, 0), (15, 5)), upper_floor)])
-    sim.add_direct_steering_stage()
+    exit = sim.add_exit([(rectangle((14, 0), (15, 5)), upper_floor)])
+    sim.add_agent(
+        ground_floor.at(3, 3),
+        target=ground_floor.at(4, 3),
+        state=jps.CollisionFreeSpeedModelV2State(),
+    )
     sim.iterate()
     # Added after writing began, still written on close.
-    waypoint_id = sim.add_waypoint_stage(
-        [(rectangle((1, 1), (2, 2)), ground_floor)]
-    )
+    waypoint = sim.add_waypoint([(rectangle((1, 1), (2, 2)), ground_floor)])
     writer.close()
 
     with h5py.File(out, "r") as hf:
@@ -281,7 +282,7 @@ def test_travel_times_round_trip(tmp_path):
     region_count = sim.get_geometry().region_count()
     assert [(int(g["stage_id"]), int(g["region_id"])) for g in grids] == [
         (stage, region)
-        for stage in sorted([exit_id, waypoint_id])
+        for stage in sorted([exit.id, waypoint.id])
         for region in range(region_count)
     ]
     assert values.dtype.str == "<f4"
@@ -290,7 +291,9 @@ def test_travel_times_round_trip(tmp_path):
     assert directions.shape == (values.shape[0], 2)
 
     for g in grids:
-        expected = sim.travel_times(int(g["stage_id"]))[int(g["region_id"])]
+        expected = sim.travel_times(sim.stage(id=int(g["stage_id"])))[
+            surface.region(id=int(g["region_id"]))
+        ]
         assert (g["origin_x"], g["origin_y"]) == expected.origin
         assert (g["width"], g["height"]) == (expected.width, expected.height)
         assert g["cell_size"] == expected.cell_size
@@ -318,7 +321,7 @@ def test_travel_times_without_stages(tmp_path):
     writer = jps.Hdf5TrajectoryWriter(
         output_file=out, every_nth_frame=1, write_travel_times=True
     )
-    sim = _square_simulation(writer)
+    sim, _ = _square_simulation(writer)
     sim.iterate()
     writer.close()
 
@@ -329,8 +332,8 @@ def test_travel_times_without_stages(tmp_path):
 
 
 def _travel_time_simulation(writer):
-    sim = _square_simulation(writer)
-    sim.add_exit_stage([([(4, 0), (5, 0), (5, 5), (4, 5)], 0)])
+    sim, room = _square_simulation(writer)
+    sim.add_exit([([(4, 0), (5, 0), (5, 5), (4, 5)], room)])
     return sim
 
 
@@ -386,18 +389,19 @@ def test_travel_times_are_written_all_or_nothing(tmp_path, monkeypatch):
     writer = jps.Hdf5TrajectoryWriter(
         output_file=out, every_nth_frame=1, write_travel_times=True
     )
-    sim = _travel_time_simulation(writer)
-    sim.add_exit_stage([([(0, 0), (1, 0), (1, 5), (0, 5)], 0)])
+    sim, room = _square_simulation(writer)
+    sim.add_exit([([(4, 0), (5, 0), (5, 5), (4, 5)], room)])
+    sim.add_exit([([(0, 0), (1, 0), (1, 5), (0, 5)], room)])
     sim.iterate()
 
     real = jps.Simulation.travel_times
     calls = []
 
-    def fail_on_second_stage(self, stage_id):
-        calls.append(stage_id)
+    def fail_on_second_stage(self, stage):
+        calls.append(stage)
         if len(calls) == 2:
             raise jps.SimulationError("solver failed")
-        return real(self, stage_id)
+        return real(self, stage)
 
     monkeypatch.setattr(jps.Simulation, "travel_times", fail_on_second_stage)
     with pytest.raises(jps.SimulationError, match="solver failed"):

@@ -26,6 +26,10 @@ public:
     /// Whether @p where lies in the destination, to the engine's resolution.
     bool contains(const Location& where) const;
 
+    /// Travel time in seconds from @p where to the destination, see
+    /// FloorfieldRoutingEngine::travel_time.
+    double travel_time(const Location& where) const;
+
     /// Unit vector from @p from along the route to the destination. Zero once inside it.
     Vector orientation(const Location& from) const;
 

@@ -4,10 +4,20 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from jupedsim.pyjupedsim import Location, _CustomModelState
+from jupedsim.internal.agents import (
+    check_reachable,
+    check_target_reachable,
+    direct_steering,
+    first_stage,
+    native_location,
+)
+from jupedsim.pyjupedsim import SimulationError, _CustomModelState
+from jupedsim.surface import Location as _SurfaceLocation
 
 if TYPE_CHECKING:
+    from jupedsim.route import Route
     from jupedsim.simulation import Simulation
+    from jupedsim.stages import Exit, Waypoint
 
 
 class _ModelStateHandle:
@@ -33,7 +43,13 @@ class _ModelStateHandle:
     def __resolve(self):
         # Transient reference: only valid for the duration of one attribute
         # access, never stored.
-        return self.__simulation._obj.agent(self.__id).state
+        try:
+            return self.__simulation._obj.agent(self.__id).state
+        except SimulationError as error:
+            raise RuntimeError(
+                f"Agent(id={self.__id}) has left the simulation "
+                "(agent.alive is False)"
+            ) from error
 
     def __getattr__(self, name: str) -> Any:
         if name.startswith("_"):
@@ -59,44 +75,14 @@ class _ModelStateHandle:
 
 
 class Agent:
-    """Handle to an agent in a :class:`~jupedsim.simulation.Simulation`.
+    """Handle to an agent of a simulation built from a ``WalkableSurface``.
 
-    Agent handles are always retrieved from the simulation and never created
-    directly:
-
-    .. code:: python
-
-        # a specific agent
-        sim.agent(id)
-
-        # all agents as iterator
-        sim.agents()
-
-        # agents in a specific distance to a point
-        sim.agents_in_range(position, distance)
-
-        # agents in a polygon
-        sim.agents_in_polygon(polygon)
-
-    A handle stores only the simulation and the agent id. Every attribute
-    read or write resolves the agent freshly through the simulation, so
-    handles remain valid across calls to
-    :meth:`~jupedsim.simulation.Simulation.iterate`. Accessing a handle whose
-    agent no longer exists raises :class:`~jupedsim.SimulationError`.
-
-    Mutation through properties is supported, e.g.:
-
-    .. code:: python
-
-        agent.final_target = (1.0, 2.0)
-        agent.state.desired_speed = 1.5
-
-    .. note ::
-
-        You need to be aware that currently there are no checks done when
-        setting properties on an Agent instance. For example it is possible to
-        set an Agent position outside the walkable area of the Simulation
-        resulting in a crash.
+    Handles come from :meth:`~jupedsim.simulation.Simulation.add_agent`,
+    :meth:`~jupedsim.simulation.Simulation.agent` and
+    :meth:`~jupedsim.simulation.Simulation.agents`. A handle stores only the
+    simulation and the id; every attribute is resolved freshly. Once the
+    agent has left the simulation, ``id`` and ``alive`` stay readable and
+    everything else raises :class:`RuntimeError`.
     """
 
     def __init__(self, simulation: Simulation, agent_id: int) -> None:
@@ -104,101 +90,162 @@ class Agent:
 
         Retrieve agent handles from the simulation.
         """
-        self.__simulation = simulation
-        self.__id = agent_id
+        self._simulation = simulation
+        self._id = agent_id
 
-    def __resolve(self):
-        # Transient reference: only valid for the duration of one property
-        # call, never stored.
-        return self.__simulation._obj.agent(self.__id)
+    def _resolve(self):
+        # Transient reference: only valid for the duration of one access.
+        try:
+            return self._simulation._obj.agent(self._id)
+        except SimulationError as error:
+            raise RuntimeError(
+                f"Agent(id={self._id}) has left the simulation "
+                "(agent.alive is False)"
+            ) from error
+
+    def _to_location(self, native: Any) -> _SurfaceLocation:
+        region = self._simulation._surface.region(id=native.region_id)
+        return _SurfaceLocation(native.x, native.y, region)
 
     @property
     def id(self) -> int:
         """Numeric id of the agent in this simulation."""
-        return self.__resolve().id
+        return self._id
 
     @property
-    def journey_id(self) -> int:
-        """Id of the :class:`~jupedsim.JourneyDescription` the agent is currently following."""
-        return self.__resolve().journey_id
+    def alive(self) -> bool:
+        """False once the agent has left the simulation."""
+        try:
+            self._simulation._obj.agent(self._id)
+        except SimulationError:
+            return False
+        return True
 
     @property
-    def stage_id(self) -> int:
-        """Id of the :class:`Stage` the Agent is currently targeting."""
-        return self.__resolve().stage_id
+    def position(self) -> _SurfaceLocation:
+        """Current location of the agent, a snapshot."""
+        return self._to_location(self._resolve().location)
 
     @property
-    def position(self) -> tuple[float, float]:
-        """Position of the agent."""
-        return self.__resolve().position
+    def route(self) -> Route | None:
+        """The route the agent follows, None in direct steering."""
+        return self._simulation._routes.get(self._resolve().route_id)
+
+    @route.setter
+    def route(self, value: Any) -> None:
+        raise AttributeError("use agent.follow(route, start=...)")
 
     @property
-    def location(self) -> Location:
-        """Current location of the agent.
-
-        Same as :attr:`position`, plus the region and the height of the surface.
-        Can be used wherever the simulation accepts a location, e.g. to set
-        another agent's :attr:`final_target`.
-        """
-        return self.__resolve().location
+    def stage(self) -> Waypoint | Exit | None:
+        """The stage the agent is heading for, None in direct steering."""
+        native = self._resolve()
+        if native.route_id not in self._simulation._routes:
+            return None
+        return self._simulation.stage(id=native.stage_id)
 
     @property
-    def final_target(self) -> Location | None:
-        """Current final target of the agent.
+    def stranded(self) -> bool:
+        """True once the agent cannot continue, e.g. its exit is closed."""
+        return self._resolve().stranded
 
-        Can be used to directly steer an agent towards the given coordinate.
-        This will bypass the strategical and tactical level, but the
-        operational level will still be active.
+    @property
+    def held(self) -> bool:
+        """True while the agent waits at a held stage, see Route.hold()."""
+        return self._resolve().held
 
-        .. important::
+    @property
+    def arrived(self) -> bool:
+        """True once the agent has completed a stage followed by STAY, or
+        reached its steer_to() point, until follow() or steer_to().
 
-            If the agent is not in a Journey with a DirectSteering stage, any
-            change will be ignored.
+        A point counts as reached when the agent's last step passed within
+        0.05 m of it (horizontal distance, same region), whatever the step
+        length, so fast agents and large dt arrive too. Arrived agents keep
+        steering to the stage or the point, so they stay there, and are not
+        removed."""
+        return self._resolve().arrived
 
-        .. important::
+    @property
+    def target(self) -> _SurfaceLocation | None:
+        """The point the agent steers to, None while it follows a route."""
+        native = self._resolve()
+        if native.route_id in self._simulation._routes:
+            return None
+        target = native.final_target
+        return None if target is None else self._to_location(target)
 
-            When setting the target, the given coordinates must lie within the
-            walkable area. Otherwise, an error will be thrown immediately.
-
-        Accepts a :class:`~jupedsim.Location` or an ``(x, y)`` tuple. A
-        tuple is placed on the surface closest to the agent's own height; to
-        target another floor, pass a location from
-        :meth:`~jupedsim.simulation.Simulation.get_location`.
-
-        Returns:
-            Current final target of the agent, or ``None`` while it heads
-            for an area such as an exit.
-        """
-        return self.__resolve().final_target
-
-    @final_target.setter
-    def final_target(
-        self, final_target: Location | tuple[float, float]
-    ) -> None:
-        self.__simulation._obj.set_agent_target(self.__id, final_target)
+    @target.setter
+    def target(self, value: Any) -> None:
+        raise AttributeError("use agent.steer_to(location)")
 
     @property
     def route_orientation(self) -> tuple[float, float]:
-        """Unit vector along the route to the agent's final target.
+        """Unit vector toward the current target.
 
-        It is used by the operational model to compute the next state of the agent.
-        Zero when the agent has already reached its final target.
-        """
-        return self.__resolve().route_orientation
+        (0, 0) inside the area of the stage the agent heads for, and at a
+        steer_to() point only where the agent stands exactly on it; agents
+        steering to a point oscillate around it instead. Use ``arrived`` to
+        tell arrival.
+
+        It is computed in iterate(). follow() sets it for the new stage at
+        once; after steer_to() it refers to the previous target until the
+        next iterate()."""
+        return self._resolve().route_orientation
 
     @property
     def state(self) -> Any:
-        """Access model specific state of this agent.
-
-        For built-in models this returns a state handle that resolves the
-        agent on every attribute access, e.g.
-        ``agent.state.desired_speed = 1.5``. For custom Python models this
-        returns the user supplied state object.
-        """
-        raw_state = self.__resolve().state
+        """Model specific state of this agent."""
+        raw_state = self._resolve().state
         if isinstance(raw_state, _CustomModelState):
             return raw_state.model
-        return _ModelStateHandle(self.__simulation, self.__id)
+        return _ModelStateHandle(self._simulation, self._id)
+
+    def follow(self, route: Route, *, start: Waypoint | Exit | None = None):
+        """Follow ``route`` from ``start`` or the route's default start.
+
+        Raises:
+            ValueError: If the start stage cannot be reached from the
+                agent's position.
+        """
+        self._resolve()
+        stage = first_stage(self._simulation, route, start)
+        check_reachable(self._simulation, stage, self.position)
+        self._simulation._obj.switch_agent_route(
+            agent_id=self._id, route_id=route._native_id, stage_id=stage.id
+        )
+
+    def steer_to(self, location: _SurfaceLocation) -> None:
+        """Leave the route and walk to ``location`` along the shortest path.
+
+        The agent follows the shortest path over the navigation mesh,
+        connectors included; it does not walk straight toward the point.
+        Speed fields do not apply.
+
+        Raises:
+            ValueError: If ``location`` cannot be reached from the agent's
+                position.
+        """
+        self._resolve()
+        native = native_location(self._simulation, location, "target")
+        check_target_reachable(self._simulation, location, self.position)
+        route_id, stage_id = direct_steering(self._simulation)
+        self._simulation._obj.switch_agent_route(
+            agent_id=self._id, route_id=route_id, stage_id=stage_id
+        )
+        self._simulation._obj.set_agent_target(self._id, native)
+
+    def remove(self) -> None:
+        """Remove the agent at the start of the next iteration."""
+        self._resolve()
+        self._simulation._obj.mark_agent_for_removal(self._id)
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Agent):
+            return NotImplemented
+        return self._simulation is other._simulation and self._id == other._id
+
+    def __hash__(self) -> int:
+        return hash((id(self._simulation), self._id))
 
     def __repr__(self) -> str:
-        return f"Agent(id={self.__id})"
+        return f"Agent(id={self._id})"

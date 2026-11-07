@@ -3,9 +3,12 @@
 
 #include "destination.hpp"
 #include "generic_agent.hpp"
+#include "geometry/location.hpp"
 #include "routing_target.hpp"
+#include "simulation_clock.hpp"
 
 #include <cassert>
+#include <variant>
 #include <vector>
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -28,16 +31,19 @@ RoutingTarget Waypoint::target(const GenericAgent&)
 ////////////////////////////////////////////////////////////////////////////////
 /// Exit
 ////////////////////////////////////////////////////////////////////////////////
-Exit::Exit(Destination destination, std::vector<GenericAgent::ID>& to_remove)
-    : _destination(destination), _to_remove(to_remove)
+Exit::Exit(
+    Destination destination,
+    std::vector<RemovalRecord>& to_remove,
+    const SimulationClock& clock)
+    : _destination(destination), _to_remove(to_remove), _clock(clock)
 {
 }
 
 bool Exit::is_completed(const GenericAgent& agent)
 {
     const bool has_reached_exit = _destination.contains(agent.location);
-    if(has_reached_exit) {
-        _to_remove.push_back(agent.id);
+    if(has_reached_exit && !_closed) {
+        _to_remove.push_back({agent.id, id(), _clock.elapsed_time()});
     }
     return has_reached_exit;
 }
@@ -50,6 +56,12 @@ RoutingTarget Exit::target(const GenericAgent&)
 ////////////////////////////////////////////////////////////////////////////////
 /// DirectSteering
 ////////////////////////////////////////////////////////////////////////////////
+bool DirectSteering::is_completed(const GenericAgent& agent)
+{
+    const auto* point = std::get_if<Location>(&agent.final_target);
+    return point != nullptr && has_reached(agent.location, agent.last_step, *point);
+}
+
 RoutingTarget DirectSteering::target(const GenericAgent& agent)
 {
     return agent.final_target;

@@ -52,5 +52,6 @@ void init_walkable_surface(py::module_& m)
             py::arg("from_edge"),
             py::arg("to_region"),
             py::arg("to_edge"))
+        .def("connector_corners", &WalkableSurface::connector_corners, py::arg("connector_id"))
         .def("create_geometry", &WalkableSurface::create_geometry);
 }

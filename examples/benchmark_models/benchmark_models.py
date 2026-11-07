@@ -110,16 +110,16 @@ def _setup_bidirectional(model, writer, dt, length=50.0, width=4.0):
     exit_right = shapely.Polygon(
         [(length - 1, 0), (length, 0), (length, width), (length - 1, width)]
     )
-    eid_l = sim.add_exit_stage([(exit_left, region)])
-    eid_r = sim.add_exit_stage([(exit_right, region)])
-    jid_r = sim.add_journey(jps.JourneyDescription([eid_r]))
-    jid_l = sim.add_journey(jps.JourneyDescription([eid_l]))
-    return sim, area, region, {"right": (jid_r, eid_r), "left": (jid_l, eid_l)}
+    exit_l = sim.add_exit(exit_left, region=region)
+    exit_r = sim.add_exit(exit_right, region=region)
+    route_r = jps.Route([exit_r])
+    route_l = jps.Route([exit_l])
+    return sim, area, region, {"right": route_r, "left": route_l}
 
 
 def _add_bidirectional(sim, region, state_cls, routes, n=50, state_kwargs=None):
-    jid_r, eid_r = routes["right"]
-    jid_l, eid_l = routes["left"]
+    route_r = routes["right"]
+    route_l = routes["left"]
     spawn_left = shapely.Polygon([(2, 0.3), (8, 0.3), (8, 3.7), (2, 3.7)])
     spawn_right = shapely.Polygon([(42, 0.3), (48, 0.3), (48, 3.7), (42, 3.7)])
     streams = {"right": [], "left": []}
@@ -132,16 +132,14 @@ def _add_bidirectional(sim, region, state_cls, routes, n=50, state_kwargs=None):
     )
     for pos in pos_r:
         aid = sim.add_agent(
-            journey_id=jid_r,
-            stage_id=eid_r,
-            position=pos,
+            region.at(*pos),
+            route=route_r,
             state=_make_state(
                 state_cls,
                 orientation=(1, 0),
                 state_kwargs=state_kwargs,
             ),
-            region_id=region,
-        )
+        ).id
         streams["right"].append(aid)
     pos_l = jps.distributions.distribute_by_number(
         polygon=spawn_right,
@@ -152,16 +150,14 @@ def _add_bidirectional(sim, region, state_cls, routes, n=50, state_kwargs=None):
     )
     for pos in pos_l:
         aid = sim.add_agent(
-            journey_id=jid_l,
-            stage_id=eid_l,
-            position=pos,
+            region.at(*pos),
+            route=route_l,
             state=_make_state(
                 state_cls,
                 orientation=(-1, 0),
                 state_kwargs=state_kwargs,
             ),
-            region_id=region,
-        )
+        ).id
         streams["left"].append(aid)
     return streams
 
@@ -182,15 +178,14 @@ def _setup_bottleneck(model, writer, dt):
         model=model, geometry=surface, dt=dt, trajectory_writer=writer
     )
     exit_area = geometry.intersection(shapely.box(13, -5, 15, 5))
-    eid = sim.add_exit_stage([(exit_area, region)])
-    jid = sim.add_journey(jps.JourneyDescription([eid]))
-    return sim, geometry, region, {"exit": (jid, eid)}
+    exit_stage = sim.add_exit(exit_area, region=region)
+    return sim, geometry, region, {"exit": jps.Route([exit_stage])}
 
 
 def _add_bottleneck(
     sim, region, state_cls, routes, geometry, n=100, state_kwargs=None
 ):
-    jid, eid = routes["exit"]
+    route = routes["exit"]
     spawn = geometry.intersection(shapely.box(-14, -4, -6, 4))
     positions = jps.distributions.distribute_by_number(
         polygon=spawn,
@@ -201,15 +196,13 @@ def _add_bottleneck(
     )
     for pos in positions:
         sim.add_agent(
-            journey_id=jid,
-            stage_id=eid,
-            position=pos,
+            region.at(*pos),
+            route=route,
             state=_make_state(
                 state_cls,
                 orientation=(1, 0),
                 state_kwargs=state_kwargs,
             ),
-            region_id=region,
         )
     return None  # single stream, no color splitting
 
@@ -240,9 +233,8 @@ def _setup_crossing(model, writer, dt):
     }
     routes = {}
     for name, poly in exits.items():
-        eid = sim.add_exit_stage([(poly, region)])
-        jid = sim.add_journey(jps.JourneyDescription([eid]))
-        routes[name] = (jid, eid)
+        exit_stage = sim.add_exit(poly, region=region)
+        routes[name] = jps.Route([exit_stage])
     return sim, geometry, region, routes
 
 
@@ -275,7 +267,7 @@ def _add_crossing(sim, region, state_cls, routes, n=15, state_kwargs=None):
     }
     streams = {}
     for stream_name, (spawn_poly, dest, orient) in sources.items():
-        jid, eid = routes[dest]
+        route = routes[dest]
         positions = jps.distributions.distribute_by_number(
             polygon=spawn_poly,
             number_of_agents=n,
@@ -286,16 +278,14 @@ def _add_crossing(sim, region, state_cls, routes, n=15, state_kwargs=None):
         ids = []
         for pos in positions:
             aid = sim.add_agent(
-                journey_id=jid,
-                stage_id=eid,
-                position=pos,
+                region.at(*pos),
+                route=route,
                 state=_make_state(
                     state_cls,
                     orientation=orient,
                     state_kwargs=state_kwargs,
                 ),
-                region_id=region,
-            )
+            ).id
             ids.append(aid)
         streams[stream_name] = ids
     return streams

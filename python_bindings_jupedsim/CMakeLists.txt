@@ -20,11 +20,10 @@ add_library(pyjupedsim MODULE
     routing.cpp
     simulation.cpp
     social_force_model.cpp
-    stage.cpp
     temporary/boundary_index.cpp
     trace.cpp
-    transition.cpp
-    transition.hpp
+    rule.cpp
+    rule.hpp
     type_casters.hpp
     walkable_surface.cpp
     warp_driver_model.cpp

@@ -75,6 +75,9 @@ public:
     Destination register_destination(const std::vector<AreaPiece>& pieces);
 
     bool contains(const Location& where, std::size_t id);
+    /// Travel time in seconds from @p where to destination @p id: the value of the grid cell
+    /// nearest to it, zero inside the destination, infinite if it cannot be reached from there.
+    double travel_time(const Location& where, std::size_t id);
     Vector get_orientation(const Location& from, std::size_t id);
     /// Travel times and directions to destination @p id over the grid of @p region. Solves the
     /// destination on first use.

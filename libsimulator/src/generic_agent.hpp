@@ -18,24 +18,41 @@
 
 #include <fmt/core.h>
 
+#include <cstdint>
 #include <deque>
+#include <optional>
 #include <utility>
 #include <variant>
-class Journey;
+class Route;
 class BaseStage;
 
 struct GenericAgent {
     using ID = jps::UniqueID<GenericAgent>;
     ID id{};
 
-    jps::UniqueID<Journey> journey_id{jps::UniqueID<Journey>::invalid};
+    jps::UniqueID<Route> route_id{jps::UniqueID<Route>::invalid};
     jps::UniqueID<BaseStage> stage_id{jps::UniqueID<BaseStage>::invalid};
+    /// The stage whose rule assigned the current stage; the start stage until a rule decides.
+    /// Empty in direct steering.
+    std::optional<jps::UniqueID<BaseStage>> decision_stage{};
+    /// True once the agent cannot continue because of closed exits; it then stands still.
+    bool stranded{false};
+    /// True while the agent waits at a held stage of its route; it then stands still.
+    bool held{false};
+    /// The iteration in which the agent stopped at its held stage.
+    uint64_t held_since{0};
+    /// True once the agent completed a stage whose rule is Stay, or reached its point target in
+    /// direct steering; it then stays there.
+    bool arrived{false};
 
     /// Where the agent stands. Only the geometry can say that, so only it can build one.
     Location location;
+    /// Horizontal displacement of the agent's most recent step; zero before its first.
+    Vector last_step{};
 
     // This is evaluated by the "operational level"
-    /// Unit vector along the route to the final target. Zero if the agent has reached it.
+    /// Unit vector along the route to the final target. Zero inside a stage's area, and at a point
+    /// target only exactly on the point; `arrived` tells arrival.
     Vector route_orientation{};
     RoutingTarget final_target;
 
@@ -43,12 +60,12 @@ struct GenericAgent {
 
     GenericAgent(
         ID id,
-        jps::UniqueID<Journey> journey_id,
+        jps::UniqueID<Route> route_id,
         jps::UniqueID<BaseStage> stage_id,
         Location location,
         OperationalModelState state)
         : id(id != ID::invalid ? id : ID{})
-        , journey_id(journey_id)
+        , route_id(route_id)
         , stage_id(stage_id)
         , location(location)
         , final_target(location)
@@ -99,10 +116,10 @@ struct fmt::formatter<GenericAgent> {
             [&ctx, &agent](const auto& m) {
                 return fmt::format_to(
                     ctx.out(),
-                    "Agent[id={}, journey={}, stage={}, route_orientation={}, target={}, pos={}, "
+                    "Agent[id={}, route={}, stage={}, route_orientation={}, target={}, pos={}, "
                     "state={})",
                     agent.id,
-                    agent.journey_id,
+                    agent.route_id,
                     agent.stage_id,
                     agent.route_orientation,
                     agent.final_target,

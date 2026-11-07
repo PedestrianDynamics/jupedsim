@@ -35,6 +35,17 @@ public:
     /// has reached @p to.
     Vector get_orientation(const Location& from, const RoutingTarget& to);
 
+    /// Travel time in seconds from @p from to @p to, see FloorfieldRoutingEngine::travel_time.
+    double travel_time(const Location& from, const Destination& to) const;
+
+    /// Length of the shortest path from @p from to @p to on the surface, infinite if there is
+    /// none, see SurfaceMeshShortestPathRoutingEngine::path_length.
+    double path_length(const Location& from, const Location& to);
+
+    /// Sequence trees built for shortest paths, see
+    /// SurfaceMeshShortestPathRoutingEngine::trees_built.
+    std::size_t trees_built() const { return _shortest_path.trees_built(); }
+
     /// Placement of the floor field grid of @p region, see FloorfieldRoutingEngine::grid_info.
     GridInfo grid_info(std::size_t region) const;
     /// The default speed field of @p region, see FloorfieldRoutingEngine::default_speed.

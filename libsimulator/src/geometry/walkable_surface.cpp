@@ -313,6 +313,20 @@ size_t WalkableSurface::connect_regions(
     return connector_region;
 }
 
+WalkableSurface::Ring WalkableSurface::connector_corners(size_t connector_id) const
+{
+    if(connector_id >= boost::num_vertices(_region_graph) ||
+       _region_graph[connector_id].is_connectable()) {
+        throw SimulationError("Region {} is no connector.", connector_id);
+    }
+    Ring corners{};
+    for(const auto vertex_id : _region_graph[connector_id].polygons.front()) {
+        const Point3D& v = _global_vertices[vertex_id];
+        corners.emplace_back(v[0], v[1]);
+    }
+    return corners;
+}
+
 std::unique_ptr<WalkableSurface::RegionGraph2D> WalkableSurface::create_region_graph_2d() const
 {
     const auto as_point_2d = [this](size_t vertex_id) {

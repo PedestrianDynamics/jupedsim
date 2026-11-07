@@ -10,15 +10,15 @@ The four changes you will encounter in every script:
    instance* carrying its model-level parameters (e.g.
    `jps.SocialForceModel(body_force=..., friction=...)`). The
    `ModelType` enum has been removed.
-2. **Adding agents** — `add_agent` now takes the keyword-only arguments
-   `journey_id`, `stage_id` and `state`, where `state` is a directly
+2. **Adding agents** — `add_agent` now takes a `Location`, a `route` (or a
+   `target` location) and `state`, where `state` is a directly
    instantiated per-model state object such as
    {class}`~jupedsim.CollisionFreeSpeedModelState`.
 3. **Agent access** — {class}`~jupedsim.Agent` objects are lightweight
    *handles by id* that resolve the agent freshly on every attribute access.
 4. **Regions** — everything placed in the walkable area (agents and stages)
-   takes a required `region_id`. A walkable area given as a polygon is a
-   single region with id `0`.
+   takes a required region handle. The walkable area is a
+   {class}`~jupedsim.WalkableSurface` made of regions.
 
 ## Constructing a Simulation
 
@@ -92,9 +92,9 @@ Passing a wrong `model` argument raises `TypeError`.
 
 ## Adding agents
 
-`add_agent` takes the journey id, the stage id and a per-model state object —
-**all three as keyword-only arguments**; positional calls raise `TypeError`.
-The agent spawns at `state.position`. All state constructors are
+`add_agent` takes a location (`region.at(x, y)`), a `route` or a `target`
+location, and a per-model state object. The agent spawns at the location.
+All state constructors are
 keyword-only and expose the per-agent fields of the model, with defaults
 taken from the C++ implementation. Model-level parameters (see above) live on
 the model instance and are *not* part of the state.
@@ -111,12 +111,10 @@ agent_id = sim.add_agent(
 )
 
 # 2.0
-agent_id = sim.add_agent(
-    journey_id=journey_id,
-    stage_id=stage_id,
-    position=(1.0, 1.0),
+agent = sim.add_agent(
+    region.at(1.0, 1.0),
+    route=route,
     state=jps.CollisionFreeSpeedModelState(desired_speed=1.4),
-    region_id=0,
 )
 ```
 
@@ -128,50 +126,36 @@ For custom models the state is your own object, of whatever type your
 recommended):
 
 ```python
-sim.add_agent(
-    journey_id=journey_id,
-    stage_id=stage_id,
-    position=(1.0, 1.0),
-    state=MyState(),
-    region_id=0,
-)
+sim.add_agent(region.at(1.0, 1.0), route=route, state=MyState())
 ```
 
 ## Regions
 
 The walkable area consists of regions, and regions may lie on top of each
 other, e.g. the floors of a building. An `(x, y)` alone therefore does not
-say where a place is: `add_agent`, `add_waypoint_stage`, `add_exit_stage`
-and `get_location` take a **required keyword argument `region_id`**.
+say where a place is: `add_agent`, `add_waypoint` and `add_exit` take a
+region handle, and locations are built with `region.at(x, y)`.
 
-A walkable area given as a polygon (WKT, shapely or a list of points) is a
-single region with id `0`:
+A walkable area is a {class}`~jupedsim.WalkableSurface`; `add_region` and
+`connect_regions` return region handles:
 
 ```python
 # 1.x
 exit_id = sim.add_exit_stage(exit_polygon)
 
 # 2.0
-exit_id = sim.add_exit_stage(exit_polygon, region_id=0)
-```
-
-With a {class}`~jupedsim.WalkableSurface`, `add_region` and `connect_regions`
-return the region ids:
-
-```python
 surface = jps.WalkableSurface()
-ground = surface.add_region(exterior=ground_outline, height=0.0)
-upper = surface.add_region(exterior=upper_outline, height=3.0)
+ground = surface.add_region(polygon=ground_outline, height=0.0)
+upper = surface.add_region(polygon=upper_outline, height=3.0)
 surface.connect_regions(
     from_region=ground, from_edge=foot_of_stairs,
     to_region=upper, to_edge=head_of_stairs,
 )
 sim = jps.Simulation(model=jps.CollisionFreeSpeedModel(), geometry=surface)
-exit_id = sim.add_exit_stage(exit_polygon, region_id=upper)
+exit_stage = sim.add_exit(exit_polygon, region=upper)
 ```
 
-An unknown region id, or a point outside the given region, raises
-{class}`~jupedsim.SimulationError`.
+A location outside its region raises `ValueError`.
 
 ## Old → new mapping per model
 
@@ -206,12 +190,12 @@ and write resolves the agent freshly through the simulation:
   never points at reallocated memory. You can keep a handle for the whole
   simulation.
 - **Removed agents raise.** Accessing any attribute of a handle whose agent
-  has left the simulation raises {class}`~jupedsim.SimulationError`.
+  has left the simulation raises `RuntimeError`; check `agent.alive`.
 - **Property syntax keeps working, including mutation:**
 
 ```python
 agent = sim.agent(agent_id)
-agent.final_target = (10.0, 5.0)
+agent.steer_to(region.at(10.0, 5.0))
 agent.state.desired_speed = 0.8   # takes effect in the next iterate()
 
 for _ in range(1000):
@@ -223,19 +207,27 @@ print(agent.position)             # still valid, freshly resolved
 `agent.state` returns a per-model state handle with the same semantics: it
 resolves per access and raises once the agent is gone.
 
-`agent.target` is now `agent.final_target`. Reading it returns a
-{class}`~jupedsim.Location` instead of an `(x, y)` tuple, and `None` while the
-agent heads for an area such as an exit or a waypoint. Setting it accepts a `Location` or an `(x, y)` tuple. Setting a target
-outside the walkable area now raises immediately, not at the next `iterate()`.
+`agent.target` returns a {class}`~jupedsim.Location` instead of an `(x, y)`
+tuple, and `None` while the agent follows a route; use `agent.stage` then.
+It is read-only: set it with `agent.steer_to(location)`. A location outside
+its region raises immediately, not at the next `iterate()`.
 
 ## Mutation during iterate() is now an error
 
 Calling mutating simulation methods — `add_agent`,
-`mark_agent_for_removal`, journey or stage mutation — while `iterate()` is
+`agent.remove()`, route or stage mutation — while `iterate()` is
 running (e.g. from a custom-model callback or a trajectory writer invoked
 during iteration) now raises {class}`~jupedsim.SimulationError` instead of
 causing undefined behavior. Perform such mutations between `iterate()`
 calls.
+
+## Round-robin order
+
+`jps.RoundRobin` splits agents by smooth weighted round-robin: with the
+weights 3 and 2 the agents take e1 e2 e1 e2 e1, where 1.x sent them in
+blocks (e1 e1 e1 e2 e2). Each cycle has the same shares, but the order
+differs, so 1.x scenarios with round-robin transitions give different
+results.
 
 ## Removed APIs at a glance
 
@@ -250,9 +242,8 @@ calls.
 - The wrapper modules `jupedsim.location`, `jupedsim.stages`,
   `jupedsim.library` and `jupedsim.agent_view`, and
   `jupedsim.journey.Transition`. Their types and functions are the native
-  ones now; import them as `jupedsim.<Name>` (e.g. `jps.Location`,
-  `jps.WaypointStage`, `jps.get_build_info`, `jps.AgentView`,
-  `jps.Transition`).
+  ones now; import them as `jupedsim.<Name>` (e.g. `jps.get_build_info`,
+  `jps.AgentView`).
 - `CustomOperationalModel._compute_next_state` and
   `CustomOperationalModel._check_model_constraint`.
 - Keeping the {class}`~jupedsim.AgentView` or

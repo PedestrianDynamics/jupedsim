@@ -74,7 +74,7 @@ class SimulationViewer:
     """Native Play/Pause viewer around a live JuPedSim ``Simulation``.
 
     Args:
-        sim: A prepared ``jupedsim.Simulation`` (geometry, journeys, agents already set up).
+        sim: A prepared ``jupedsim.Simulation`` (geometry, routes, agents already set up).
         on_step: Optional callback run on *every* ``sim.iterate()`` step, receiving ``sim``.
             Use it to add/retarget agents or record state. It is registered up front and stays
             for the life of the viewer.
@@ -184,7 +184,7 @@ class SimulationViewer:
     def _agent_points(self) -> np.ndarray:
         pts = [
             (ag.location.x, ag.location.y, ag.location.z)
-            for ag in self._sim.agents()
+            for ag in self._sim._obj.agents()
         ]
         return (
             np.asarray(pts, dtype=float)

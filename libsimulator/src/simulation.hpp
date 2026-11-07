@@ -7,13 +7,13 @@
 #include "generic_agent.hpp"
 #include "geometry/geometry.hpp"
 #include "geometry/location.hpp"
-#include "journey.hpp"
 #include "kernel.hpp"
 #include "neighborhood_search.hpp"
 #include "operational_decision_system.hpp"
 #include "operational_model.hpp"
 #include "operational_model_state.hpp"
 #include "operational_model_type.hpp"
+#include "route.hpp"
 #include "routing_engine.hpp"
 #include "simulation_clock.hpp"
 #include "stage.hpp"
@@ -68,8 +68,10 @@ private:
     std::unique_ptr<Geometry> _geometry{};
     std::unique_ptr<RoutingEngine> _routing_engine{};
     AgentContainer<GenericAgent> _agents;
-    std::vector<GenericAgent::ID> _removed_agents_in_last_iteration;
-    std::unordered_map<Journey::ID, std::unique_ptr<Journey>> _journeys;
+    std::vector<RemovalRecord> _removed_agents_in_last_iteration;
+    /// Records of agents marked for removal, reported once the next iteration removes them.
+    std::vector<RemovalRecord> _marked_for_removal;
+    std::unordered_map<Route::ID, std::unique_ptr<Route>> _routes;
     Timer _timer{};
     State _state{State::Ready};
     enum LogLevel { General = 1, Detailed = 2, Debug = 3 };
@@ -78,6 +80,18 @@ private:
     void throw_if_state(State forbidden, const char* operation) const;
     /// The destination of stage @p stage_id; throws for a stage without an area.
     const Destination& destination_of(BaseStage::ID stage_id) const;
+    /// The exit @p stage_id; throws for any other stage.
+    Exit& exit_of(BaseStage::ID stage_id);
+    /// Whether @p id has a removal record, so it leaves at the start of the next iteration.
+    bool is_leaving(GenericAgent::ID id) const;
+    /// The stage the rule at the agent's decision stage picks now, nullptr if none is open.
+    BaseStage* decide_again(const GenericAgent& agent) const;
+    /// Whether the rule at the decision stage of @p agent targets @p stage.
+    bool decides_for(const GenericAgent& agent, const BaseStage& stage) const;
+    /// Route @p route_id; throws if it is unknown or does not contain @p stage_id.
+    Route& route_with(Route::ID route_id, BaseStage::ID stage_id) const;
+    /// The agents on route @p route_id held at @p stage_id, in arrival order (ties by id).
+    std::vector<GenericAgent*> held_at(Route::ID route_id, BaseStage::ID stage_id);
 
 public:
     /// Takes the geometry over: after this the caller no longer owns it. `geo()` hands out a
@@ -98,15 +112,37 @@ public:
     void iterate();
     /// Closes the simulation freeing memory. Every entry point (except timer's) throws afterwards.
     void close();
-    Journey::ID add_journey(const std::map<BaseStage::ID, TransitionDescription>& stages);
+    Route::ID add_route(const std::map<BaseStage::ID, RuleDescription>& stages);
     BaseStage::ID add_stage(const StageDescription& stage_description);
     void mark_agent_for_removal(GenericAgent::ID id);
-    const std::vector<GenericAgent::ID>& removed_agents() const;
+    const std::vector<RemovalRecord>& removed_agents() const;
     size_t agent_count() const;
     double elapsed_time() const;
     double dt() const;
-    void
-    switch_agent_journey(GenericAgent::ID agent_id, Journey::ID journey_id, BaseStage::ID stage_id);
+    void switch_agent_route(GenericAgent::ID agent_id, Route::ID route_id, BaseStage::ID stage_id);
+    /// Closes exit @p exit_id for all routes. With @p informed, agents heading for it are sent on
+    /// by the rule that sent them there, or stranded where they are. Returns the agents stranded
+    /// now. Does nothing on a closed exit.
+    std::vector<GenericAgent::ID> close_exit(BaseStage::ID exit_id, bool informed);
+    /// Opens exit @p exit_id again. Stranded agents whose decision-stage rule targets it decide
+    /// again; those that find an open target resume. Returns them. Does nothing on an open exit.
+    std::vector<GenericAgent::ID> open_exit(BaseStage::ID exit_id);
+    /// Sets the weights of the round-robin rule at @p stage_id in route @p route_id and starts its
+    /// sequence afresh, see RoundRobin::set_weights. Agents already assigned keep their target.
+    void set_round_robin_weights(
+        Route::ID route_id,
+        BaseStage::ID stage_id,
+        const std::map<BaseStage::ID, uint64_t>& weights);
+    /// Agents on route @p route_id that complete @p stage_id stop where they enter it until
+    /// release(). Throws for an exit. Does nothing on a held stage.
+    void hold(Route::ID route_id, BaseStage::ID stage_id);
+    /// Lifts the hold of @p stage_id on route @p route_id. The held agents go on in arrival order
+    /// (ties by id), each decided by the current rule at the stage; an agent whose rule has no
+    /// open target is stranded inside the stage. Throws if the stage is not held.
+    void release(Route::ID route_id, BaseStage::ID stage_id);
+    bool is_held(Route::ID route_id, BaseStage::ID stage_id) const;
+    /// The agents on route @p route_id stopped at @p stage_id, in arrival order (ties by id).
+    std::vector<GenericAgent::ID> held_agents(Route::ID route_id, BaseStage::ID stage_id);
     uint64_t iteration() const;
     std::vector<GenericAgent::ID> agents_in_range(Point p, double distance);
     /// Returns IDs of all agents inside the defined polygon
@@ -114,7 +150,7 @@ public:
     std::vector<GenericAgent::ID> agents_in_polygon(const std::vector<Point>& polygon);
     /// @param region_id Region @p position lies in, see `Geometry::get_location`.
     GenericAgent::ID add_agent(
-        Journey::ID journey_id,
+        Route::ID route_id,
         BaseStage::ID stage_id,
         Point position,
         OperationalModelState model,
@@ -134,6 +170,12 @@ public:
     /// Travel times to the area of stage @p stage_id over the grid of every region, by region id.
     /// Empty for a stage without an area, such as direct steering.
     std::map<std::size_t, TravelTimeGrid> travel_times(BaseStage::ID stage_id);
+    /// Travel time in seconds from @p where to the area of stage @p stage_id, see
+    /// FloorfieldRoutingEngine::travel_time. Throws for a stage without an area.
+    double travel_time(BaseStage::ID stage_id, const Location& where);
+    /// Length of the shortest path over the surface from @p from to @p to, as direct steering
+    /// walks it; infinite if @p to cannot be reached from @p from.
+    double path_length(const Location& from, const Location& to);
     /// Speed fields every stage without an override is routed with, by region id.
     std::map<std::size_t, SpeedGrid> default_speed_fields() const;
     /// Placement of the floor field grid of @p region_id, which its travel times and speed

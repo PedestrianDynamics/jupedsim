@@ -2,6 +2,7 @@ import time
 
 import jupedsim as jps
 import pytest
+import shapely
 
 TRACING_FUNCTIONS = [
     "enable_tracing",
@@ -84,7 +85,9 @@ def test_timer_integration_small_simulation(tmp_path):
     # Minimal geometry: small square
     surface = jps.WalkableSurface()
     surface.add_region(
-        boundary=[(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)]
+        polygon=shapely.Polygon(
+            [(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)]
+        )
     )
     sim = Simulation(
         model=jps.CollisionFreeSpeedModel(), geometry=surface, dt=0.01
