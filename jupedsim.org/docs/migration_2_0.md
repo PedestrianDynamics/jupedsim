@@ -229,6 +229,21 @@ blocks (e1 e1 e1 e2 e2). Each cycle has the same shares, but the order
 differs, so 1.x scenarios with round-robin transitions give different
 results.
 
+## Stage completion at insertion
+
+In 1.x, `add_agent` already completed a stage the agent was placed
+inside. In 2.0 that happens in the first `iterate()`:
+
+- Right after `add_agent`, `agent.stage` is the stage the agent starts
+  inside, not the next one.
+- A `hold()` or `close()` set up between adding agents and the first
+  `iterate()` now applies to agents placed inside that stage.
+- An agent placed inside an exit takes one step and is then removed,
+  with a removal record. 1.x removed it without a record, so exit
+  counts can be higher than in 1.x (for example 500 instead of 497
+  exits in `avm-sharp-corners.py`), and the motion of the other agents
+  can differ from that step on.
+
 ## Removed APIs at a glance
 
 - All model builder classes (C++ and Python).

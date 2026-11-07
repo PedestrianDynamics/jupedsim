@@ -444,14 +444,13 @@ void Simulation::switch_agent_route(
     agent.stage_id = stage_id;
     auto& stage = *_stage_manager.stage(stage_id);
     start_at(agent, stage);
-    // A stage's target is cheap to read, a point target is not: steering agents get their
-    // orientation in the next iterate().
+    // A stage's target is cheap to read, a point target is not: set_agent_target orients
+    // steering agents.
     if(dynamic_cast<const DirectSteering*>(&stage) == nullptr) {
         if(!agent.stranded) {
             agent.final_target = stage.target(agent);
         }
-        agent.route_orientation =
-            _routing_engine->get_orientation(agent.location, agent.final_target);
+        TacticalDecisionSystem::orient(*_routing_engine, agent);
     }
 }
 

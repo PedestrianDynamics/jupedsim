@@ -268,7 +268,9 @@ class Simulation:
         follows ``route`` from ``start`` (default: the route's start) or
         steers straight to ``target``; give one of them. ``state`` is the
         agent's model state; built-in models default it, custom models must
-        pass it. Returns the agent handle.
+        pass it. Returns the agent handle. A stage the agent starts inside
+        is completed in the next iterate(), so right after add_agent()
+        ``agent.stage`` is still that stage.
 
         Raises:
             TypeError: If ``position`` or ``target`` is not a Location.

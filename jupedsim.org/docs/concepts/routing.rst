@@ -73,7 +73,7 @@ A Waypoint at :math:`(0.6, -1.4)` with an accepted distance of 2m can be added t
 
 .. code:: python
 
-    waypoint = simulation.add_waypoint(jps.circle_to_polygon(center=(0.6, -1.4), radius=2), region=region)
+    waypoint = simulation.add_waypoint((0.6, -1.4), radius=2, region=region)
 
 Exit
 ^^^^

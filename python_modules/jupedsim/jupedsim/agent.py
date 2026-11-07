@@ -187,9 +187,9 @@ class Agent:
         steering to a point oscillate around it instead. Use ``arrived`` to
         tell arrival.
 
-        It is computed in iterate(). follow() sets it for the new stage at
-        once; after steer_to() it refers to the previous target until the
-        next iterate()."""
+        It is computed in iterate(), and set at once by add_agent(),
+        follow() and steer_to(), and by close(informed=True), open() and
+        release() for the agents they reassign."""
         return self._resolve().route_orientation
 
     @property
