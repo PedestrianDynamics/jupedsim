@@ -4,6 +4,13 @@ import jupedsim as jps
 import pytest
 import shapely
 
+
+def stay_at(sim, room, centre):
+    """A route to a waypoint at ``centre``, where the agent stays."""
+    wp = sim.add_waypoint(centre, radius=0.5, region=room)
+    return jps.Route([wp, jps.STAY])
+
+
 model_params = [
     (
         jps.SocialForceModel,
@@ -62,7 +69,7 @@ def test_desired_speed_can_be_set_via_state(
 
     agent_id = sim.add_agent(
         room.at(1, 1),
-        target=room.at(9, 1),
+        route=stay_at(sim, room, (10, 1)),
         state=state_class(desired_speed=1.5, **extra_state_kwargs),
     ).id
 
@@ -84,7 +91,7 @@ def test_desired_speed_can_be_mutated_via_agent_handle(
 
     agent_id = sim.add_agent(
         room.at(1, 1),
-        target=room.at(9, 1),
+        route=stay_at(sim, room, (10, 1)),
         state=state_class(**extra_state_kwargs),
     ).id
 
@@ -116,7 +123,7 @@ def test_removed_parameter_names_raise(
 
     agent_id = sim.add_agent(
         room.at(1, 1),
-        target=room.at(9, 1),
+        route=stay_at(sim, room, (10, 1)),
         state=state_class(**extra_state_kwargs),
     ).id
 

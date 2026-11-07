@@ -7,6 +7,13 @@ import shapely
 
 _UNIT_SQUARE_10 = [(0, 0), (10, 0), (10, 10), (0, 10)]
 
+
+def stay_at(sim, room, centre):
+    """A route to a waypoint at ``centre``, where the agent stays."""
+    wp = sim.add_waypoint(centre, radius=0.5, region=room)
+    return jps.Route([wp, jps.STAY])
+
+
 # Each built-in model is constructed as a configured instance. Extra state
 # kwargs cover cases where the raw C++ struct defaults do not satisfy the
 # model's add_agent constraints (GCFM requires a unit-length orientation, V3
@@ -49,7 +56,9 @@ def test_simulation_from_model_instance(model, state_cls, state_kwargs):
     sim = jps.Simulation(model=model, geometry=surface)
 
     agent_id = sim.add_agent(
-        room.at(1, 1), target=room.at(9, 9), state=state_cls(**state_kwargs)
+        room.at(1, 1),
+        route=stay_at(sim, room, (9, 9)),
+        state=state_cls(**state_kwargs),
     ).id
 
     for _ in range(10):
@@ -80,7 +89,7 @@ def test_set_desired_speed(corridor):
 
     agent_id = sim.add_agent(
         room.at(1, 1),
-        target=room.at(9, 1),
+        route=stay_at(sim, room, (10, 1)),
         state=jps.CollisionFreeSpeedModelV2State(desired_speed=1),
     ).id
     assert math.isclose(sim.agent(agent_id).position.x, 1)
@@ -126,7 +135,7 @@ def test_initial_parameters_collision_free_speed_model_v2(
         range_geometry_repulsion=0.17,
     )
     agent_id = sim.add_agent(
-        room.at(1, 1), target=room.at(9, 1), state=state
+        room.at(1, 1), route=stay_at(sim, room, (10, 1)), state=state
     ).id
 
     agent_state = sim.agent(agent_id).state
@@ -160,7 +169,7 @@ def test_set_model_parameters_collision_free_speed_model_v2(
 
     agent_id = sim.add_agent(
         room.at(1, 1),
-        target=room.at(9, 1),
+        route=stay_at(sim, room, (10, 1)),
         state=jps.CollisionFreeSpeedModelV2State(),
     ).id
 
@@ -207,7 +216,7 @@ def test_set_model_parameters_anticipation_velocity_model(
 
     agent_id = sim.add_agent(
         room.at(1, 1),
-        target=room.at(9, 1),
+        route=stay_at(sim, room, (10, 1)),
         state=jps.AnticipationVelocityModelState(),
     ).id
 
@@ -257,7 +266,7 @@ def test_set_model_parameters_collision_free_speed_model(
 
     agent_id = sim.add_agent(
         room.at(1, 1),
-        target=room.at(9, 1),
+        route=stay_at(sim, room, (10, 1)),
         state=jps.CollisionFreeSpeedModelState(),
     ).id
 
@@ -290,7 +299,7 @@ def test_collision_free_speed_model_repulsion_parameters_are_model_level():
 
     agent_id = sim.add_agent(
         room.at(1, 1),
-        target=room.at(9, 1),
+        route=stay_at(sim, room, (10, 1)),
         state=jps.CollisionFreeSpeedModelState(),
     ).id
 
@@ -325,15 +334,16 @@ def test_set_model_parameters_generalized_centrifugal_force_model(
     simulation_with_generalized_centrifugal_force_model,
 ):
     sim, room = simulation_with_generalized_centrifugal_force_model
+    route = stay_at(sim, room, (10, 1))
 
     agent_id = sim.add_agent(
         room.at(1, 1),
-        target=room.at(9, 1),
+        route=route,
         state=jps.GeneralizedCentrifugalForceModelState(orientation=(1.0, 0.0)),
     ).id
     sim.add_agent(
         room.at(3, 1),
-        target=room.at(9, 1),
+        route=route,
         state=jps.GeneralizedCentrifugalForceModelState(orientation=(1.0, 0.0)),
     )
 
@@ -382,7 +392,9 @@ def test_set_model_parameters_social_force_model(
     sim, room = simulation_with_social_force_model
 
     agent_id = sim.add_agent(
-        room.at(1, 1), target=room.at(9, 1), state=jps.SocialForceModelState()
+        room.at(1, 1),
+        route=stay_at(sim, room, (10, 1)),
+        state=jps.SocialForceModelState(),
     ).id
 
     sim.agent(agent_id).state.velocity = (2.0, -2.0)
@@ -420,7 +432,9 @@ def test_social_force_model_body_force_and_friction_are_model_level():
     )
 
     agent_id = sim.add_agent(
-        room.at(1, 1), target=room.at(9, 1), state=jps.SocialForceModelState()
+        room.at(1, 1),
+        route=stay_at(sim, room, (10, 1)),
+        state=jps.SocialForceModelState(),
     ).id
 
     # body_force and friction no longer appear on the per-agent state.
@@ -487,7 +501,9 @@ def test_agent_handle_raises_after_removal(
     sim, room = simulation_with_social_force_model
 
     agent_id = sim.add_agent(
-        room.at(1, 1), target=room.at(9, 1), state=jps.SocialForceModelState()
+        room.at(1, 1),
+        route=stay_at(sim, room, (10, 1)),
+        state=jps.SocialForceModelState(),
     ).id
     agent = sim.agent(agent_id)
     state = agent.state
@@ -538,7 +554,7 @@ def test_initial_parameters_collision_free_speed_model_v3(
         agent_buffer=0.4,
     )
     agent_id = sim.add_agent(
-        room.at(1, 1), target=room.at(9, 1), state=state
+        room.at(1, 1), route=stay_at(sim, room, (10, 1)), state=state
     ).id
 
     agent_state = sim.agent(agent_id).state
@@ -562,7 +578,7 @@ def test_set_model_parameters_collision_free_speed_model_v3(
 
     agent_id = sim.add_agent(
         room.at(1, 1),
-        target=room.at(9, 1),
+        route=stay_at(sim, room, (10, 1)),
         state=jps.CollisionFreeSpeedModelV3State(
             strength_neighbor_repulsion=8.0,
             range_neighbor_repulsion=0.1,

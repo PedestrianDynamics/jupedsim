@@ -6,6 +6,12 @@ import pytest
 import shapely
 
 
+def stay_at(sim, room, centre):
+    """A route to a waypoint at ``centre``, where the agent stays."""
+    wp = sim.add_waypoint(centre, radius=0.5, region=room)
+    return jps.Route([wp, jps.STAY])
+
+
 @pytest.fixture
 def warp_driver_corridor():
     """20m x 4m corridor with WarpDriver model."""
@@ -65,7 +71,7 @@ def test_single_agent_straight_path(warp_driver_corridor):
 
     aid = sim.add_agent(
         room.at(2, 2),
-        target=room.at(10, 2),
+        route=stay_at(sim, room, (10, 2)),
         state=jps.WarpDriverModelState(desired_speed=1.0, radius=0.15),
     ).id
 
@@ -128,7 +134,7 @@ def test_agent_parameters():
 
     aid = sim.add_agent(
         room.at(1, 2),
-        target=room.at(5, 2),
+        route=stay_at(sim, room, (5, 2)),
         state=jps.WarpDriverModelState(desired_speed=1.0, radius=0.2),
     ).id
 
@@ -150,17 +156,18 @@ def test_invalid_agent_state():
         polygon=shapely.Polygon([(0, 0), (10, 0), (10, 4), (0, 4)])
     )
     sim = jps.Simulation(model=jps.WarpDriverModel(), geometry=surface, dt=0.01)
+    route = stay_at(sim, room, (5, 2))
 
     with pytest.raises(jps.SimulationError, match="radius"):
         sim.add_agent(
             room.at(1, 2),
-            target=room.at(5, 2),
+            route=route,
             state=jps.WarpDriverModelState(radius=-1.0),
         )
 
     with pytest.raises(jps.SimulationError, match="v0"):
         sim.add_agent(
             room.at(1, 2),
-            target=room.at(5, 2),
+            route=route,
             state=jps.WarpDriverModelState(desired_speed=-1.0),
         )
