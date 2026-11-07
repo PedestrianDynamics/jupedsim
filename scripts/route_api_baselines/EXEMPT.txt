@@ -1,0 +1,1 @@
+# Lines: <script> <metric> <reason>. Whole-script exemptions are not allowed.
