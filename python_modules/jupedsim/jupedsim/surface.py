@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from typing import Any
 
@@ -131,12 +132,27 @@ class WalkableSurface:
         for region in (from_region, to_region):
             if region._surface is not self:
                 raise ValueError(f"{region.label} belongs to another surface")
-        connector_id = self._obj.connect_regions(
-            from_region=from_region.id,
-            from_edge=from_edge,
-            to_region=to_region.id,
-            to_edge=to_edge,
-        )
+            if region.height is None:
+                raise ValueError(
+                    f"{region.label} is a connector and cannot be connected "
+                    "again; add a landing region between two connectors"
+                )
+        try:
+            connector_id = self._obj.connect_regions(
+                from_region=from_region.id,
+                from_edge=from_edge,
+                to_region=to_region.id,
+                to_edge=to_edge,
+            )
+        except SimulationError as error:
+            match = re.search(r"is not an edge of region (\d+)", str(error))
+            if match is None:
+                raise
+            region = self._region_by_id(int(match.group(1)))
+            edge = "from_edge" if region == from_region else "to_edge"
+            raise ValueError(
+                f"{edge} is not an edge of {region.label}'s boundary"
+            ) from error
         return self._register(connector_id, name, None)
 
     @property

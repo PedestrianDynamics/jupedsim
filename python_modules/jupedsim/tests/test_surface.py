@@ -135,3 +135,47 @@ def test_connect_rejects_foreign_region():
             to_region=other1,
             to_edge=((18, 6), (18, 8)),
         )
+
+
+def test_connect_rejects_edge_off_the_boundary():
+    surface, floor0, floor1 = two_floor_surface(with_surface=True)
+    with pytest.raises(
+        ValueError,
+        match="^from_edge is not an edge of floor0's boundary$",
+    ):
+        surface.connect_regions(
+            from_region=floor0,
+            from_edge=((5, 10), (5, 0)),
+            to_region=floor1,
+            to_edge=((18, 6), (18, 8)),
+        )
+    with pytest.raises(
+        ValueError, match="^to_edge is not an edge of floor1's boundary$"
+    ):
+        surface.connect_regions(
+            from_region=floor0,
+            from_edge=((12, 6), (12, 8)),
+            to_region=floor1,
+            to_edge=((5, 10), (5, 0)),
+        )
+
+
+def test_connect_rejects_connector():
+    surface, floor0, _ = two_floor_surface(with_surface=True)
+    floor2 = surface.add_region(
+        polygon=shapely.Polygon(FOOTPRINT, holes=[STAIRWELL]),
+        height=6.0,
+        name="floor2",
+    )
+    staircase = surface.region("staircase")
+    with pytest.raises(ValueError) as info:
+        surface.connect_regions(
+            from_region=staircase,
+            from_edge=((12, 6), (12, 8)),
+            to_region=floor2,
+            to_edge=((18, 6), (18, 8)),
+        )
+    assert str(info.value) == (
+        "staircase is a connector and cannot be connected again; add a "
+        "landing region between two connectors"
+    )
