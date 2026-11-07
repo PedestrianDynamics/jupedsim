@@ -156,11 +156,11 @@ def test_the_models_see_each_other():
         sim.iterate()
     with_neighbor = sim.agent(blocked).position.xy
 
-    free_sim, free_exit, free_journey, free_room = _make_sim(MultiModel())
+    free_sim, free_exit, free_route, free_room = _make_sim(MultiModel())
     alone = _add(
         free_sim,
         free_room,
-        free_journey,
+        free_route,
         free_exit,
         (2.0, 4.0),
         _collision_free_agent(),

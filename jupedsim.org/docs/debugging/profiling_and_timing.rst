@@ -76,7 +76,7 @@ The C++ core automatically times these regions during every call to
 * ``"Tactical Decision System"``
 * ``"Operational Decision System"``
 * ``"Add Agent"``
-* ``"Add Journey"``
+* ``"Add Route"``
 
 Python timer API
 ================
