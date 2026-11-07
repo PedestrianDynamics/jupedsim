@@ -516,9 +516,9 @@ def test_agent_handle_raises_after_removal(
         agent.position.xy
     with pytest.raises(RuntimeError):
         agent.state.desired_speed
-    with pytest.raises(jps.SimulationError):
+    with pytest.raises(RuntimeError, match="has left the simulation"):
         state.desired_speed
-    with pytest.raises(jps.SimulationError):
+    with pytest.raises(RuntimeError, match="has left the simulation"):
         state.desired_speed = 1.0
     with pytest.raises(jps.SimulationError):
         sim.agent(agent_id)

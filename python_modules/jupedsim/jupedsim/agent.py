@@ -43,7 +43,13 @@ class _ModelStateHandle:
     def __resolve(self):
         # Transient reference: only valid for the duration of one attribute
         # access, never stored.
-        return self.__simulation._obj.agent(self.__id).state
+        try:
+            return self.__simulation._obj.agent(self.__id).state
+        except SimulationError as error:
+            raise RuntimeError(
+                f"Agent(id={self.__id}) has left the simulation "
+                "(agent.alive is False)"
+            ) from error
 
     def __getattr__(self, name: str) -> Any:
         if name.startswith("_"):
@@ -209,7 +215,11 @@ class Agent:
         )
 
     def steer_to(self, location: _SurfaceLocation) -> None:
-        """Leave the route and walk straight to ``location``.
+        """Leave the route and walk to ``location`` along the shortest path.
+
+        The agent follows the shortest path over the navigation mesh,
+        connectors included; it does not walk straight toward the point.
+        Speed fields do not apply.
 
         Raises:
             ValueError: If ``location`` cannot be reached from the agent's
