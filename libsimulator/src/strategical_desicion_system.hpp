@@ -32,9 +32,10 @@ public:
             if(agent.stranded || agent.held) {
                 continue;
             }
-            const auto [next, decision_stage, held] =
+            const auto [next, decision_stage, held, arrived] =
                 routes.at(agent.route_id)->step(agent, routing_engine);
             agent.decision_stage = decision_stage;
+            agent.arrived = agent.arrived || arrived;
             if(held) {
                 hold(agent, iteration);
                 continue;

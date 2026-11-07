@@ -143,6 +143,19 @@ void init_rule(py::module_& m)
             )")
                 .c_str())
         .def_static(
+            "create_stay_transition",
+            [] { return PyRule{StayDescription{}}; },
+            clean_doc(R"(
+            Create a transition that keeps agents at the stage.
+
+            Agents completing the stage have arrived: they keep the stage as their
+            target and stay there.
+
+            Returns:
+                The transition.
+            )")
+                .c_str())
+        .def_static(
             "create_none_transition",
             [] { return PyRule{NoRuleDescription{}}; },
             clean_doc(R"(

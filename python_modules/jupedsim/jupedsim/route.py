@@ -305,16 +305,12 @@ def _check_ending(
         )
 
 
-def _check_supported(transitions: Mapping[_Stage, Any]) -> None:
-    for target in transitions.values():
-        if target is STAY:
-            raise NotImplementedError("STAY is not supported yet")
-
-
 def _native_rule(stage: _Stage, transitions: Mapping[_Stage, Any]) -> Any:
     if stage not in transitions:
         return _NativeRule.create_none_transition()
     target = transitions[stage]
+    if target is STAY:
+        return _NativeRule.create_stay_transition()
     if isinstance(target, _Stage):
         return _NativeRule.create_fixed_transition(target.id)
     return target._native()
@@ -366,7 +362,6 @@ class Route:
         if start is not None and start not in order:
             raise ValueError(f"{_label(start)} is not part of this route")
         _check_ending(order, transitions, endless)
-        _check_supported(transitions)
         self._simulation = simulation
         self._stages = tuple(order)
         self._transitions = transitions

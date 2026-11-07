@@ -148,6 +148,16 @@ class Agent:
         return self._resolve().held
 
     @property
+    def arrived(self) -> bool:
+        """True once the agent has completed a stage followed by STAY, or
+        reached its steer_to() point, until follow() or steer_to().
+
+        A point counts as reached within 0.05 m (horizontal distance, same
+        region). Arrived agents keep steering to the stage or the point, so
+        they stay there, and are not removed."""
+        return self._resolve().arrived
+
+    @property
     def target(self) -> _SurfaceLocation | None:
         """The point the agent steers to, None while it follows a route."""
         native = self._resolve()
@@ -162,7 +172,11 @@ class Agent:
 
     @property
     def route_orientation(self) -> tuple[float, float]:
-        """Unit vector toward the current target, or (0, 0) at the destination."""
+        """Unit vector toward the current target, or (0, 0) at the destination.
+
+        It is computed in iterate(). follow() sets it for the new stage at
+        once; after steer_to() it refers to the previous target until the
+        next iterate()."""
         return self._resolve().route_orientation
 
     @property

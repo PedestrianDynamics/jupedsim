@@ -26,6 +26,11 @@ class NoRuleDescription
 {
 };
 
+/// The agent stays at the stage: completing it arrives there.
+class StayDescription
+{
+};
+
 class FixedRuleDescription
 {
     BaseStage::ID _next{};
@@ -103,6 +108,7 @@ public:
 
 using RuleDescription = std::variant<
     NoRuleDescription,
+    StayDescription,
     FixedRuleDescription,
     RoundRobinDescription,
     LeastTargetedDescription,
@@ -139,6 +145,21 @@ public:
     }
 
     bool targets(const BaseStage& stage) const override { return _next == &stage; }
+};
+
+/// Keeps the agent at its stage: the next stage is the stage itself, so the agent goes on
+/// steering to it, and completing the stage arrives there (see Route::step).
+class Stay : public Rule
+{
+private:
+    BaseStage* _stage;
+
+public:
+    Stay(BaseStage* stage) : _stage(stage) {};
+
+    BaseStage* next_stage([[maybe_unused]] const RuleContext& ctx) override { return _stage; }
+
+    bool targets(const BaseStage& stage) const override { return _stage == &stage; }
 };
 
 /// Smooth weighted round-robin: each decision adds every target's weight to its current weight,
@@ -335,11 +356,13 @@ private:
 };
 
 /// One decision step of an agent: the stage to go to, nullptr if the agent is stranded, and the
-/// stage whose rule decided. With @p held the agent completed a held stage and stops there.
+/// stage whose rule decided. With @p held the agent completed a held stage and stops there; with
+/// @p arrived it completed a stage whose rule is Stay.
 struct RouteStep {
     BaseStage* stage;
     std::optional<BaseStage::ID> decision_stage;
     bool held{false};
+    bool arrived{false};
 };
 
 struct RouteNode {
@@ -366,15 +389,20 @@ public:
 
     /// The agent keeps its stage until it completes it; then the stage's rule decides. An agent
     /// reaching a closed exit is not removed: the rule that sent it there decides again. An agent
-    /// completing a held stage stops there.
+    /// completing a held stage stops there. An agent completing a stage whose rule is Stay has
+    /// arrived; it keeps the stage and the decision stage.
     RouteStep step(const GenericAgent& agent, const RoutingEngine& routing) const
     {
-        auto* stage = _stages.at(agent.stage_id).stage;
+        const auto& node = _stages.at(agent.stage_id);
+        auto* stage = node.stage;
         if(!stage->is_completed(agent)) {
             return {stage, agent.decision_stage};
         }
         if(holds(stage->id())) {
             return {stage, stage->id(), true};
+        }
+        if(dynamic_cast<const Stay*>(node.rule.get()) != nullptr) {
+            return {stage, agent.decision_stage, false, true};
         }
         const auto at = stage->closed() ? agent.decision_stage.value_or(stage->id()) : stage->id();
         return {decide(agent, at, routing), at};

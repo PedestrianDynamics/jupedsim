@@ -442,10 +442,10 @@ def test_all_zero_weights(stages):
         RoundRobin({s["exit1"]: 0, s["exit2"]: 0})
 
 
-def test_unsupported_features_are_not_implemented(stages):
+def test_stay_is_accepted(stages):
     _, s = stages
-    with pytest.raises(NotImplementedError):
-        Route([s["wp1"], STAY])
+    route = Route([s["wp1"], STAY])
+    assert route.stages == (s["wp1"],)
 
 
 def test_zero_weights_and_least_travel_time_are_accepted(stages):

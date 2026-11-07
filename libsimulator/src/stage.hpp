@@ -101,6 +101,7 @@ class DirectSteering : public BaseStage
 public:
     DirectSteering() = default;
     ~DirectSteering() override = default;
-    bool is_completed(const GenericAgent&) override { return false; };
+    /// True once the agent has reached its point target, see has_reached().
+    bool is_completed(const GenericAgent& agent) override;
     RoutingTarget target(const GenericAgent& agent) override;
 };

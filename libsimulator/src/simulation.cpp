@@ -59,6 +59,7 @@ void start_at(GenericAgent& agent, const BaseStage& stage)
 {
     agent.stranded = false;
     agent.held = false;
+    agent.arrived = false;
     agent.decision_stage = stage.id();
     if(dynamic_cast<const DirectSteering*>(&stage) != nullptr) {
         agent.decision_stage = std::nullopt;
@@ -180,6 +181,9 @@ Route::ID Simulation::add_route(const std::map<BaseStage::ID, RuleDescription>& 
                         Overloaded{
                             [stage](const NoRuleDescription&) -> std::unique_ptr<Rule> {
                                 return std::make_unique<FixedRule>(stage);
+                            },
+                            [stage](const StayDescription&) -> std::unique_ptr<Rule> {
+                                return std::make_unique<Stay>(stage);
                             },
                             [this](const FixedRuleDescription& d) -> std::unique_ptr<Rule> {
                                 return std::make_unique<FixedRule>(
@@ -320,12 +324,15 @@ void Simulation::set_agent_target(GenericAgent::ID id, Point target)
         throw SimulationError("Point {} is outside of accessible area", target);
     }
     agent.final_target = *located;
+    agent.arrived = false;
 }
 
 void Simulation::set_agent_target(GenericAgent::ID id, const Location& target)
 {
     throw_if_state(State::Closed, "set_agent_target");
-    agent(id).final_target = target;
+    auto& steered = agent(id);
+    steered.final_target = target;
+    steered.arrived = false;
 }
 
 void Simulation::mark_agent_for_removal(GenericAgent::ID id)
@@ -427,7 +434,17 @@ void Simulation::switch_agent_route(
     agent.route_id = route_id;
     _stage_manager.migrate_agent(agent.stage_id, stage_id);
     agent.stage_id = stage_id;
-    start_at(agent, *_stage_manager.stage(stage_id));
+    auto& stage = *_stage_manager.stage(stage_id);
+    start_at(agent, stage);
+    // A stage's target is cheap to read, a point target is not: steering agents get their
+    // orientation in the next iterate().
+    if(dynamic_cast<const DirectSteering*>(&stage) == nullptr) {
+        if(!agent.stranded) {
+            agent.final_target = stage.target(agent);
+        }
+        agent.route_orientation =
+            _routing_engine->get_orientation(agent.location, agent.final_target);
+    }
 }
 
 std::vector<GenericAgent::ID> Simulation::close_exit(BaseStage::ID exit_id, bool informed)

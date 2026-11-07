@@ -144,7 +144,7 @@ def direct_steering(simulation: Any) -> tuple[int, int]:
     if simulation._direct is None:
         stage_id = simulation._obj.create_direct_steering_stage()
         route_id = simulation._obj.add_route(
-            {stage_id: _NativeRule.create_none_transition()}
+            {stage_id: _NativeRule.create_stay_transition()}
         )
         simulation._direct = (route_id, stage_id)
     return simulation._direct

@@ -41,6 +41,9 @@ struct GenericAgent {
     bool held{false};
     /// The iteration in which the agent stopped at its held stage.
     uint64_t held_since{0};
+    /// True once the agent completed a stage whose rule is Stay, or reached its point target in
+    /// direct steering; it then stays there.
+    bool arrived{false};
 
     /// Where the agent stands. Only the geometry can say that, so only it can build one.
     Location location;
