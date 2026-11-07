@@ -74,7 +74,9 @@ class Region:
         ValueError
             If the point is not inside this region.
         """
-        if not self._surface._covers(self, x, y):
+        if not self._surface._covers(
+            self, x, y, f"place ({x}, {y}) in {self.label}"
+        ):
             raise ValueError(f"({x}, {y}) is not in {self.label}")
         return Location(float(x), float(y), self)
 
@@ -124,6 +126,9 @@ class WalkableSurface:
         name: str | None = None,
     ) -> Region:
         """Join an edge of ``from_region`` to an edge of ``to_region``."""
+        for region in (from_region, to_region):
+            if region._surface is not self:
+                raise ValueError(f"{region.label} belongs to another surface")
         connector_id = self._obj.connect_regions(
             from_region=from_region.id,
             from_edge=from_edge,
@@ -140,6 +145,8 @@ class WalkableSurface:
         self, name: str | None = None, *, id: int | None = None
     ) -> Region:
         """Look a region up by name or by id."""
+        if (name is None) == (id is None):
+            raise TypeError("give a name or an id, not both or neither")
         if id is not None:
             return self._region_by_id(id)
         for region in self._regions:
@@ -151,7 +158,8 @@ class WalkableSurface:
     def regions_at(self, point: tuple[float, float]) -> tuple[Region, ...]:
         """Return every region covering ``point``, by ascending id."""
         x, y = point
-        return tuple(r for r in self._regions if self._covers(r, x, y))
+        action = f"look up regions at ({x}, {y})"
+        return tuple(r for r in self._regions if self._covers(r, x, y, action))
 
     def _region_by_id(self, id: int) -> Region:
         if not 0 <= id < len(self._regions):
@@ -166,11 +174,22 @@ class WalkableSurface:
         self._geometry = None
         return region
 
-    def _covers(self, region: Region, x: float, y: float) -> bool:
-        if self._geometry is None:
-            self._geometry = self._obj.create_geometry()
+    def _covers(self, region: Region, x: float, y: float, action: str) -> bool:
+        geometry = self._native_geometry(action)
         try:
-            self._geometry.get_location(x, y, region_id=region.id)
+            geometry.get_location(x, y, region_id=region.id)
         except SimulationError:
             return False
         return True
+
+    def _native_geometry(self, action: str) -> Geometry:
+        if self._geometry is not None:
+            return self._geometry
+        try:
+            self._geometry = self._obj.create_geometry()
+        except SimulationError as error:
+            raise ValueError(
+                f"cannot {action}: the surface is not connected yet "
+                "(connect its regions first)"
+            ) from error
+        return self._geometry

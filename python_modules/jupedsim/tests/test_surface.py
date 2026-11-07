@@ -81,7 +81,7 @@ def test_regions_and_connector():
 
 def test_region_identity_is_per_surface():
     _, floor0, _ = two_floor_surface(with_surface=True)
-    other_surface, other_floor0, _ = two_floor_surface(with_surface=True)
+    _, other_floor0, _ = two_floor_surface(with_surface=True)
     assert floor0 != other_floor0
 
 
@@ -98,3 +98,40 @@ def test_lookup_after_adding_region():
     )
     assert b.at(3.5, 0.5).xy == (3.5, 0.5)
     assert connector.at(2.0, 0.5).xy == (2.0, 0.5)
+
+
+def test_region_requires_exactly_one_key():
+    surface, floor0, _ = two_floor_surface(with_surface=True)
+    with pytest.raises(TypeError, match="name or an id"):
+        surface.region()
+    with pytest.raises(TypeError, match="name or an id"):
+        surface.region("floor0", id=floor0.id)
+
+
+def test_region_id_not_found():
+    surface, _, _ = two_floor_surface(with_surface=True)
+    with pytest.raises(KeyError, match="no region with id 7"):
+        surface.region(id=7)
+
+
+def test_lookup_on_unconnected_surface():
+    surface = WalkableSurface()
+    floor0 = surface.add_region(polygon=shapely.box(0, 0, 1, 1), name="floor0")
+    surface.add_region(polygon=shapely.box(3, 0, 4, 1), name="floor1")
+    with pytest.raises(ValueError, match="not connected yet") as info:
+        floor0.at(0.5, 0.5)
+    assert info.value.__cause__ is not None
+    with pytest.raises(ValueError, match="not connected yet"):
+        surface.regions_at((0.5, 0.5))
+
+
+def test_connect_rejects_foreign_region():
+    surface, floor0, _ = two_floor_surface(with_surface=True)
+    _, other0, other1 = two_floor_surface(with_surface=True)
+    with pytest.raises(ValueError, match="belongs to another surface"):
+        surface.connect_regions(
+            from_region=floor0,
+            from_edge=((12, 6), (12, 8)),
+            to_region=other1,
+            to_edge=((18, 6), (18, 8)),
+        )
