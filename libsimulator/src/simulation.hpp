@@ -78,6 +78,12 @@ private:
     void throw_if_state(State forbidden, const char* operation) const;
     /// The destination of stage @p stage_id; throws for a stage without an area.
     const Destination& destination_of(BaseStage::ID stage_id) const;
+    /// The exit @p stage_id; throws for any other stage.
+    Exit& exit_of(BaseStage::ID stage_id);
+    /// Whether @p id has a removal record, so it leaves at the start of the next iteration.
+    bool is_leaving(GenericAgent::ID id) const;
+    /// The stage the rule at the agent's decision stage picks now, nullptr if none is open.
+    BaseStage* decide_again(const GenericAgent& agent) const;
 
 public:
     /// Takes the geometry over: after this the caller no longer owns it. `geo()` hands out a
@@ -106,6 +112,13 @@ public:
     double elapsed_time() const;
     double dt() const;
     void switch_agent_route(GenericAgent::ID agent_id, Route::ID route_id, BaseStage::ID stage_id);
+    /// Closes exit @p exit_id for all routes. With @p informed, agents heading for it are sent on
+    /// by the rule that sent them there, or stranded where they are. Returns the agents stranded
+    /// now. Does nothing on a closed exit.
+    std::vector<GenericAgent::ID> close_exit(BaseStage::ID exit_id, bool informed);
+    /// Opens exit @p exit_id again. Stranded agents whose decision stage can now send them on
+    /// resume. Returns them. Does nothing on an open exit.
+    std::vector<GenericAgent::ID> open_exit(BaseStage::ID exit_id);
     uint64_t iteration() const;
     std::vector<GenericAgent::ID> agents_in_range(Point p, double distance);
     /// Returns IDs of all agents inside the defined polygon

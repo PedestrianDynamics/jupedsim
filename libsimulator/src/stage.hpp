@@ -29,6 +29,8 @@ public:
     virtual RoutingTarget target(const GenericAgent& agent) = 0;
     /// The area this stage routes to, or nullptr if it has none.
     virtual const Destination* destination() const { return nullptr; }
+    /// A closed stage is no valid target: rules pass over it.
+    virtual bool closed() const { return false; }
     ID id() const { return _id; }
     size_t count_targeting() const { return _targeting; }
     void increase_targeting() { _targeting = _targeting + 1; }
@@ -72,11 +74,13 @@ public:
 };
 
 /// Notifies simulation of all agents that need to be removed at the beginning of the next iteration
+/// While closed, agents reaching it stay in the simulation.
 class Exit : public BaseStage
 {
     Destination _destination;
     std::vector<RemovalRecord>& _to_remove;
     const SimulationClock& _clock;
+    bool _closed{false};
 
 public:
     Exit(
@@ -87,6 +91,9 @@ public:
     bool is_completed(const GenericAgent& agent) override;
     RoutingTarget target(const GenericAgent& agent) override;
     const Destination* destination() const override { return &_destination; }
+    bool closed() const override { return _closed; }
+    void close() { _closed = true; }
+    void open() { _closed = false; }
 };
 
 class DirectSteering : public BaseStage

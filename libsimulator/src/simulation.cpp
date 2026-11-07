@@ -18,6 +18,7 @@
 #include "simulation_error.hpp"
 #include "stage.hpp"
 #include "stage_description.hpp"
+#include "strategical_desicion_system.hpp"
 #include "timing.hpp"
 #include "tracing.hpp"
 #include "visitor.hpp"
@@ -50,6 +51,20 @@ std::vector<AreaPiece> pieces_of(const Geometry& geometry, const std::vector<Sta
         pieces.insert(pieces.end(), clipped.begin(), clipped.end());
     }
     return pieces;
+}
+
+/// Starts @p agent at @p stage, which is its decision stage until a rule decides. A closed exit
+/// strands it at once.
+void start_at(GenericAgent& agent, const BaseStage& stage)
+{
+    agent.stranded = false;
+    agent.decision_stage = stage.id();
+    if(dynamic_cast<const DirectSteering*>(&stage) != nullptr) {
+        agent.decision_stage = std::nullopt;
+    }
+    if(stage.closed()) {
+        StrategicalDecisionSystem::strand(agent);
+    }
 }
 } // namespace
 
@@ -260,6 +275,7 @@ GenericAgent::ID Simulation::add_agent(
     GenericAgent agent{GenericAgent::ID::invalid, route_id, stage_id, location, std::move(model)};
 
     _operational_decision_system.validate_agent(agent, _neighborhood_search, *_geometry);
+    start_at(agent, *_stage_manager.stage(stage_id));
 
     _stage_manager.handle_new_agent(agent.stage_id);
     _agents.emplace_back(std::move(agent));
@@ -394,6 +410,83 @@ void Simulation::switch_agent_route(
     agent.route_id = route_id;
     _stage_manager.migrate_agent(agent.stage_id, stage_id);
     agent.stage_id = stage_id;
+    start_at(agent, *_stage_manager.stage(stage_id));
+}
+
+std::vector<GenericAgent::ID> Simulation::close_exit(BaseStage::ID exit_id, bool informed)
+{
+    throw_if_state(State::Iterating | State::Closed, "close_exit");
+    auto& exit = exit_of(exit_id);
+    if(exit.closed()) {
+        return {};
+    }
+    exit.close();
+    if(!informed) {
+        return {};
+    }
+    std::vector<GenericAgent::ID> stranded{};
+    for(auto& agent : _agents) {
+        if(agent.stranded || agent.stage_id != exit_id || is_leaving(agent.id)) {
+            continue;
+        }
+        auto* next = decide_again(agent);
+        if(next == nullptr) {
+            StrategicalDecisionSystem::strand(agent);
+            stranded.push_back(agent.id);
+            continue;
+        }
+        StrategicalDecisionSystem::assign(agent, *next, _stage_manager);
+    }
+    return stranded;
+}
+
+std::vector<GenericAgent::ID> Simulation::open_exit(BaseStage::ID exit_id)
+{
+    throw_if_state(State::Iterating | State::Closed, "open_exit");
+    auto& exit = exit_of(exit_id);
+    if(!exit.closed()) {
+        return {};
+    }
+    exit.open();
+    // Only the opened exit can have become a target again, so an agent whose rule now finds an
+    // open target was stranded by it.
+    std::vector<GenericAgent::ID> resumed{};
+    for(auto& agent : _agents) {
+        if(!agent.stranded) {
+            continue;
+        }
+        auto* next = decide_again(agent);
+        if(next == nullptr) {
+            continue;
+        }
+        agent.stranded = false;
+        StrategicalDecisionSystem::assign(agent, *next, _stage_manager);
+        resumed.push_back(agent.id);
+    }
+    return resumed;
+}
+
+Exit& Simulation::exit_of(BaseStage::ID stage_id)
+{
+    auto* exit = dynamic_cast<Exit*>(_stage_manager.stage(stage_id));
+    if(exit == nullptr) {
+        throw SimulationError("Stage {} is not an exit.", stage_id);
+    }
+    return *exit;
+}
+
+bool Simulation::is_leaving(GenericAgent::ID id) const
+{
+    return std::any_of(
+        std::begin(_removed_agents_in_last_iteration),
+        std::end(_removed_agents_in_last_iteration),
+        [id](const auto& record) { return record.id == id; });
+}
+
+BaseStage* Simulation::decide_again(const GenericAgent& agent) const
+{
+    const auto at = agent.decision_stage.value_or(agent.stage_id);
+    return _routes.at(agent.route_id)->decide(agent, at, *_routing_engine);
 }
 
 std::vector<GenericAgent::ID> Simulation::agents_in_range(Point p, double distance)

@@ -19,6 +19,7 @@
 #include <fmt/core.h>
 
 #include <deque>
+#include <optional>
 #include <utility>
 #include <variant>
 class Route;
@@ -30,6 +31,11 @@ struct GenericAgent {
 
     jps::UniqueID<Route> route_id{jps::UniqueID<Route>::invalid};
     jps::UniqueID<BaseStage> stage_id{jps::UniqueID<BaseStage>::invalid};
+    /// The stage whose rule assigned the current stage; the start stage until a rule decides.
+    /// Empty in direct steering.
+    std::optional<jps::UniqueID<BaseStage>> decision_stage{};
+    /// True once the agent cannot continue because of closed exits; it then stands still.
+    bool stranded{false};
 
     /// Where the agent stands. Only the geometry can say that, so only it can build one.
     Location location;

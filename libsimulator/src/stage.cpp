@@ -39,7 +39,7 @@ Exit::Exit(
 bool Exit::is_completed(const GenericAgent& agent)
 {
     const bool has_reached_exit = _destination.contains(agent.location);
-    if(has_reached_exit) {
+    if(has_reached_exit && !_closed) {
         _to_remove.push_back({agent.id, id(), _clock.elapsed_time()});
     }
     return has_reached_exit;

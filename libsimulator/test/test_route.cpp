@@ -34,31 +34,39 @@ struct RuleContextFixture {
         CollisionFreeSpeedModel::State{}};
     RuleContext ctx{agent, routing};
 };
+
+/// A stage that is never completed and is closed when told so.
+class StubStage : public BaseStage
+{
+public:
+    bool is_closed{false};
+    bool is_completed(const GenericAgent&) override { return false; }
+    RoutingTarget target(const GenericAgent& agent) override { return agent.location; }
+    bool closed() const override { return is_closed; }
+};
 } // namespace
 
 TEST(FixedRule, NextIsCorrect)
 {
     RuleContextFixture fx;
-    int stage;
+    StubStage stage;
 
-    FixedRule sut(reinterpret_cast<BaseStage*>(&stage));
+    FixedRule sut(&stage);
 
     for(auto i = 0; i < 20; ++i) {
-        ASSERT_EQ(reinterpret_cast<BaseStage*>(&stage), sut.next_stage(fx.ctx));
+        ASSERT_EQ(&stage, sut.next_stage(fx.ctx));
     }
 }
 
 TEST(RoundRobin, SimpleNextIsCorrect)
 {
     RuleContextFixture fx;
-    int stage1;
-    int stage2;
-    int stage3;
+    StubStage stage1;
+    StubStage stage2;
+    StubStage stage3;
 
     std::vector<std::tuple<BaseStage*, uint64_t>> weighted_stages = {
-        {reinterpret_cast<BaseStage*>(&stage1), 1},
-        {reinterpret_cast<BaseStage*>(&stage2), 1},
-        {reinterpret_cast<BaseStage*>(&stage3), 1}};
+        {&stage1, 1}, {&stage2, 1}, {&stage3, 1}};
 
     RoundRobin sut(weighted_stages);
 
@@ -72,14 +80,12 @@ TEST(RoundRobin, SimpleNextIsCorrect)
 TEST(RoundRobin, WeightedRoundRobin)
 {
     RuleContextFixture fx;
-    int stage1;
-    int stage2;
-    int stage3;
+    StubStage stage1;
+    StubStage stage2;
+    StubStage stage3;
 
     std::vector<std::tuple<BaseStage*, uint64_t>> weighted_stages = {
-        {reinterpret_cast<BaseStage*>(&stage1), 1},
-        {reinterpret_cast<BaseStage*>(&stage2), 2},
-        {reinterpret_cast<BaseStage*>(&stage3), 3}};
+        {&stage1, 1}, {&stage2, 2}, {&stage3, 3}};
 
     RoundRobin sut(weighted_stages);
 
@@ -146,4 +152,42 @@ TEST(LeastTargeted, NextIsCorrect)
     mockstage2.set_targeting(5);
     mockstage3.set_targeting(2);
     ASSERT_EQ(&mockstage3, sut.next_stage(fx.ctx));
+}
+
+TEST(Route, RuleSkipsClosedTarget)
+{
+    RuleContextFixture fx;
+    StubStage a;
+    StubStage b;
+    StubStage c;
+
+    b.is_closed = true;
+    FixedRule fixed(&b);
+    EXPECT_EQ(nullptr, fixed.next_stage(fx.ctx));
+
+    // A closed target's slots are passed over; the others keep their order.
+    RoundRobin round_robin({{&a, 1}, {&b, 1}, {&c, 1}});
+    EXPECT_EQ(&a, round_robin.next_stage(fx.ctx));
+    EXPECT_EQ(&c, round_robin.next_stage(fx.ctx));
+    EXPECT_EQ(&a, round_robin.next_stage(fx.ctx));
+
+    // With every target closed there is none, and the counter is where it was.
+    a.is_closed = true;
+    c.is_closed = true;
+    EXPECT_EQ(nullptr, round_robin.next_stage(fx.ctx));
+    a.is_closed = false;
+    b.is_closed = false;
+    c.is_closed = false;
+    EXPECT_EQ(&b, round_robin.next_stage(fx.ctx));
+
+    a.increase_targeting();
+    b.increase_targeting();
+    b.increase_targeting();
+    c.is_closed = true;
+    LeastTargeted least_targeted({&a, &b, &c});
+    EXPECT_EQ(&a, least_targeted.next_stage(fx.ctx));
+    a.is_closed = true;
+    EXPECT_EQ(&b, least_targeted.next_stage(fx.ctx));
+    b.is_closed = true;
+    EXPECT_EQ(nullptr, least_targeted.next_stage(fx.ctx));
 }

@@ -8,11 +8,11 @@
 #include "stage.hpp"
 #include "unique_id.hpp"
 
-#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <map>
 #include <memory>
+#include <optional>
 #include <tuple>
 #include <utility>
 #include <variant>
@@ -94,6 +94,7 @@ class Rule
 {
 public:
     virtual ~Rule() = default;
+    /// The stage to go to next, or nullptr if every target is closed.
     virtual BaseStage* next_stage(const RuleContext& ctx) = 0;
 };
 
@@ -105,7 +106,10 @@ private:
 public:
     FixedRule(BaseStage* next) : _next(next) {};
 
-    BaseStage* next_stage([[maybe_unused]] const RuleContext& ctx) override { return _next; }
+    BaseStage* next_stage([[maybe_unused]] const RuleContext& ctx) override
+    {
+        return _next->closed() ? nullptr : _next;
+    }
 };
 
 class RoundRobin : public Rule
@@ -127,19 +131,33 @@ public:
         }
     }
 
+    /// Slots of closed targets are passed over. With every target closed, all slots are passed
+    /// over once, which leaves the counter where it was.
     BaseStage* next_stage([[maybe_unused]] const RuleContext& ctx) override
+    {
+        for(uint64_t tried = 0; tried < _sum_weights; ++tried) {
+            auto* candidate = slot(_next_called);
+            _next_called = (_next_called + 1) % _sum_weights;
+            if(!candidate->closed()) {
+                return candidate;
+            }
+        }
+        return nullptr;
+    }
+
+private:
+    BaseStage* slot(uint64_t index) const
     {
         uint64_t sum_weights_so_far = 0;
         BaseStage* candidate{};
         for(const auto& [stage, weight] : _weighted_stages) {
-            if(sum_weights_so_far <= _next_called) {
+            if(sum_weights_so_far <= index) {
                 candidate = stage;
             } else {
                 break;
             }
             sum_weights_so_far += weight;
         }
-        _next_called = (_next_called + 1) % _sum_weights;
         return candidate;
     }
 };
@@ -155,16 +173,28 @@ public:
     {
     }
 
+    /// Ties go to the first candidate.
     BaseStage* next_stage([[maybe_unused]] const RuleContext& ctx) override
     {
-        auto least_targeted = std::min_element(
-            std::begin(_target_candidates),
-            std::end(_target_candidates),
-            [](auto const& a, auto const& b) {
-                return a->count_targeting() < b->count_targeting();
-            });
-        return *least_targeted;
+        BaseStage* least_targeted{};
+        for(auto* candidate : _target_candidates) {
+            if(candidate->closed()) {
+                continue;
+            }
+            if(least_targeted == nullptr ||
+               candidate->count_targeting() < least_targeted->count_targeting()) {
+                least_targeted = candidate;
+            }
+        }
+        return least_targeted;
     }
+};
+
+/// One decision step of an agent: the stage to go to, nullptr if the agent is stranded, and the
+/// stage whose rule decided.
+struct RouteStep {
+    BaseStage* stage;
+    std::optional<BaseStage::ID> decision_stage;
 };
 
 struct RouteNode {
@@ -188,18 +218,23 @@ public:
 
     ID id() const { return _id; }
 
-    std::tuple<RoutingTarget, BaseStage::ID>
-    target(const GenericAgent& agent, const RoutingEngine& routing) const
+    /// The agent keeps its stage until it completes it; then the stage's rule decides. An agent
+    /// reaching a closed exit is not removed: the rule that sent it there decides again.
+    RouteStep step(const GenericAgent& agent, const RoutingEngine& routing) const
     {
-        auto& node = _stages.at(agent.stage_id);
-        auto stage = node.stage;
-        const auto& rule = node.rule;
-
-        if(stage->is_completed(agent)) {
-            stage = rule->next_stage(RuleContext{agent, routing});
+        auto* stage = _stages.at(agent.stage_id).stage;
+        if(!stage->is_completed(agent)) {
+            return {stage, agent.decision_stage};
         }
+        const auto at = stage->closed() ? agent.decision_stage.value_or(stage->id()) : stage->id();
+        return {decide(agent, at, routing), at};
+    }
 
-        return std::make_tuple(stage->target(agent), stage->id());
+    /// The stage the rule of stage @p at picks for @p agent, nullptr if all its targets are closed.
+    BaseStage*
+    decide(const GenericAgent& agent, BaseStage::ID at, const RoutingEngine& routing) const
+    {
+        return _stages.at(at).rule->next_stage(RuleContext{agent, routing});
     }
 
     size_t count_stages() const { return _stages.size(); }
