@@ -407,6 +407,10 @@ class Simulation:
     def _native_location(self, value: Any, name: str) -> Location:
         if not isinstance(value, _SurfaceLocation):
             raise TypeError(f"{name} must be a Location, e.g. floor0.at(x, y)")
+        if self._surface is None:
+            raise ValueError(
+                "build the simulation from a WalkableSurface to use Location"
+            )
         _check_region(value.region, name, self._surface, self._region_count)
         return self._obj.get_location(value.x, value.y, value.region.id)
 

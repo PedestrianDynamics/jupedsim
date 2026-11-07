@@ -291,11 +291,11 @@ class Agent:
 
     @property
     def route_orientation(self) -> tuple[float, float]:
-        """Unit vector along the route to the agent's final target."""
+        """Unit vector toward the current target, or (0, 0) at the destination."""
         return self._resolve().route_orientation
 
     @property
-    def model(self) -> Any:
+    def state(self) -> Any:
         """Model specific state of this agent, see :attr:`_AgentV1.state`."""
         raw_state = self._resolve().state
         if isinstance(raw_state, _CustomModelState):

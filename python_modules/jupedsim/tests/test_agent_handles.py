@@ -133,13 +133,17 @@ def test_agents_targeting(world):
 
 def test_agents_targeting_is_snapshot(world):
     sim, _, room, wps, _, route_a, route_b = world
-    for i in range(3):
-        sim.add_agent(room.at(1, 1 + i), route=route_a, start=wps[1])
+    original = [
+        sim.add_agent(room.at(1, 1 + i), route=route_a, start=wps[1]).id
+        for i in range(3)
+    ]
     visited = []
     for agent in sim.agents_targeting(wps[1]):
         visited.append(agent.id)
-        agent.follow(route_b, start=wps[1])
-    assert len(visited) == len(set(visited)) == 3
+        agent.follow(route_b, start=wps[2])
+    assert visited == original
+    assert sim.agents_targeting(wps[1]) == ()
+    assert len(sim.agents_targeting(wps[2])) == 3
 
 
 def test_removed_agent_handle(world):
@@ -157,7 +161,7 @@ def test_removed_agent_handle(world):
         "stage",
         "target",
         "route_orientation",
-        "model",
+        "state",
     ):
         with pytest.raises(RuntimeError, match=r"has left the simulation"):
             getattr(agent, name)
@@ -300,7 +304,7 @@ def test_explicit_state(world):
         route=route_a,
         state=jps.CollisionFreeSpeedModelState(desired_speed=1.2),
     )
-    assert agent.model.desired_speed == pytest.approx(1.2)
+    assert agent.state.desired_speed == pytest.approx(1.2)
 
 
 def test_attribute_assignment_points_to_methods(world):
@@ -327,3 +331,25 @@ def test_native_surface_keeps_id_based_agents():
     )
     assert isinstance(agent_id, int)
     assert sim.agent(agent_id).journey_id == journey
+
+
+def test_location_needs_python_surface():
+    surface = jps.WalkableSurface()
+    surface.add_region(boundary=[(0, 0), (10, 0), (10, 10), (0, 10)])
+    sim = jps.Simulation(model=jps.CollisionFreeSpeedModel(), geometry=surface)
+    other, _, room, _, _ = make_sim()
+    with pytest.raises(
+        ValueError, match=r"build the simulation from a WalkableSurface"
+    ):
+        sim.add_agent(room.at(1, 1), target=room.at(2, 2))
+
+
+def test_remove_twice_before_iterate(world):
+    sim, _, room, _, _, route_a, _ = world
+    agent = sim.add_agent(room.at(1, 8), route=route_a)
+    agent.remove()
+    agent.remove()
+    assert agent.alive
+    sim.iterate()
+    assert not agent.alive
+    assert sim.agent_count() == 0
