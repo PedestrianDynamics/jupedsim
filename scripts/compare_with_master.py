@@ -87,6 +87,49 @@ class _Api1x:
         """Id of the stage the agent currently targets."""
         return agent.stage_id
 
+    @staticmethod
+    def xy(agent):
+        return agent.position[0], agent.position[1]
+
+
+class _Api2x:
+    """Stage creation hooks and agent target lookup for the 2.0 API.
+
+    Stages are handles. Direct steering has no stage: an agent without a
+    stage counts as steering directly.
+    """
+
+    name = "2.0"
+    DIRECT = "direct"
+
+    def __init__(self, jps):
+        self.jps = jps
+
+    @staticmethod
+    def detect(jps):
+        return hasattr(jps, "Route")
+
+    def install(self, on_stage):
+        sim_cls = self.jps.Simulation
+        for method, kind in (
+            ("add_exit", "exit"),
+            ("add_waypoint", "waypoint"),
+        ):
+            setattr(
+                sim_cls,
+                method,
+                _Api1x._hook(getattr(sim_cls, method), kind, on_stage),
+            )
+
+    def target(self, agent):
+        """Handle of the stage the agent targets, DIRECT without one."""
+        stage = agent.stage
+        return self.DIRECT if stage is None else stage
+
+    @staticmethod
+    def xy(agent):
+        return agent.position.xy
+
 
 class _SimRecord:
     def __init__(self):
@@ -158,12 +201,12 @@ class _Recorder:
             str(a.id): self.assignment(rec, rec.targets[a.id]) for a in agents
         }
         rec.positions[str(it)] = {
-            str(a.id): [a.position[0], a.position[1]] for a in agents
+            str(a.id): list(self.api.xy(a)) for a in agents
         }
 
     @staticmethod
     def assignment(rec, stage):
-        if stage in rec.direct:
+        if stage == _Api2x.DIRECT or stage in rec.direct:
             return "direct"
         if stage in rec.stages:
             return rec.stages.index(stage)
@@ -254,6 +297,8 @@ def _run_in_child(script, workdir):
 
     if _Api1x.detect(jps):
         api = _Api1x(jps)
+    elif _Api2x.detect(jps):
+        api = _Api2x(jps)
     else:
         raise SystemExit("No adapter for this jupedsim API")
     recorder = _Recorder(jps, api)
@@ -547,12 +592,39 @@ main(SHIFT)
 """
 
 
+_SELFTEST_2X = """
+import jupedsim as jps
+import shapely
+def main(shift):
+    surface = jps.WalkableSurface()
+    region = surface.add_region(
+        polygon=shapely.Polygon([(0, 0), (20, 0), (20, 10), (0, 10)]))
+    sim = jps.Simulation(jps.CollisionFreeSpeedModel(), surface)
+    wp = sim.add_waypoint([(8, 4), (8, 6), (9, 6), (9, 4)], region=region)
+    ex = sim.add_exit([(19, 4), (19, 6), (20, 6), (20, 4)], region=region)
+    route = jps.Route([wp, ex])
+    for i in range(3):
+        sim.add_agent(
+            region.at(2 + shift, 3 + 2 * i), route=route,
+            state=jps.CollisionFreeSpeedModelState(radius=0.3))
+    sim.iterate(150)
+main(SHIFT)
+"""
+
+
+def _selftest_source():
+    import jupedsim as jps
+
+    return _SELFTEST if _Api1x.detect(jps) else _SELFTEST_2X
+
+
 def cmd_selftest():
+    source = _selftest_source()
     with tempfile.TemporaryDirectory() as tmp:
         results = []
         for shift in (0.0, 0.0, 0.5):
             script = Path(tmp) / "selftest.py"
-            script.write_text(_SELFTEST.replace("SHIFT", repr(shift)))
+            script.write_text(source.replace("SHIFT", repr(shift)))
             results.append(_run_selftest(script))
     same = compare("selftest", results[0], results[1], set())
     diff = compare("selftest", results[0], results[2], set())
