@@ -47,7 +47,7 @@ def test_close_reroutes_rule_agents():
 
 
 def test_close_returns_stranded_agents_and_open_resumes_them():
-    sim, room, wp, exit1, exit2 = make_sim()
+    sim, room, _, exit1, exit2 = make_sim()
     agent = sim.add_agent(room.at(5, 2), route=jps.Route([exit1]))
     assert exit1.close(informed=True) == (agent,)
     assert agent.stranded
@@ -59,28 +59,71 @@ def test_close_returns_stranded_agents_and_open_resumes_them():
 
 
 def test_closed_is_read_only():
-    sim, room, wp, exit1, exit2 = make_sim()
+    sim, room, _, exit1, exit2 = make_sim()
     with pytest.raises(AttributeError, match=r"use exit1\.close\(\)"):
         exit1.closed = True
     with pytest.raises(TypeError):
         exit1.close()
 
 
-def test_close_during_decision_step():
+def decision_setup():
     sim, room, wp, exit1, exit2 = make_sim()
     route = rule_route(wp, exit1, exit2)
     agents = [
-        sim.add_agent(room.at(2.5, 3.0 + 0.8 * i), route=route)
+        sim.add_agent(room.at(1.5, 3.4 + 0.8 * i), route=route)
         for i in range(5)
     ]
-    exit1.close(informed=False)
-    iterate_until_decided(sim, agents, (exit1, exit2))
-    assert all(agent.stage == exit2 for agent in agents)
+    return sim, wp, exit1, exit2, agents
+
+
+def distance_to(agent, wp, centre=(3.0, 5.0)):
+    x, y = agent.position.xy
+    return ((x - centre[0]) ** 2 + (y - centre[1]) ** 2) ** 0.5
+
+
+def iterate_until_about_to_decide(sim, wp, agents):
+    for _ in range(2000):
+        if any(distance_to(a, wp) <= 0.5 + 0.05 for a in agents):
+            return
+        sim.iterate()
+        assert all(a.stage == wp for a in agents), "decided too early"
+    raise AssertionError("no agent came close to the waypoint")
+
+
+def iterate_and_collect_choices(sim, agents, exit1, exit2, closed=None):
+    chosen = set()
+    for _ in range(2000):
+        sim.iterate()
+        for agent in agents:
+            if closed is not None:
+                assert agent.stage != closed
+            if agent.stage in (exit1, exit2):
+                chosen.add(agent.stage)
+        if all(a.stage in (exit1, exit2) for a in agents):
+            return chosen
+    raise AssertionError("agents did not reach a decision")
+
+
+@pytest.mark.parametrize("informed", [True, False])
+def test_close_during_decision_step(informed):
+    sim, wp, exit1, exit2, agents = decision_setup()
+    iterate_until_about_to_decide(sim, wp, agents)
+    assert all(agent.stage == wp for agent in agents)
+    exit1.close(informed=informed)
+    chosen = iterate_and_collect_choices(sim, agents, exit1, exit2, exit1)
+    assert chosen == {exit2}
     assert not any(agent.stranded for agent in agents)
 
 
+def test_decision_step_without_close_uses_exit1():
+    sim, wp, exit1, exit2, agents = decision_setup()
+    iterate_until_about_to_decide(sim, wp, agents)
+    chosen = iterate_and_collect_choices(sim, agents, exit1, exit2)
+    assert exit1 in chosen
+
+
 def test_follow_onto_closed_start_strands():
-    sim, room, wp, exit1, exit2 = make_sim()
+    sim, room, _, exit1, exit2 = make_sim()
     agent = sim.add_agent(room.at(5, 5), route=jps.Route([exit2]))
     exit1.close(informed=True)
     agent.follow(jps.Route([exit1]))
@@ -88,7 +131,7 @@ def test_follow_onto_closed_start_strands():
 
 
 def test_follow_clears_stranded_and_decision():
-    sim, room, wp, exit1, exit2 = make_sim()
+    sim, room, _, exit1, exit2 = make_sim()
     agent = sim.add_agent(room.at(5, 2), route=jps.Route([exit1]))
     assert exit1.close(informed=True) == (agent,)
     agent.follow(jps.Route([exit2]))
@@ -99,7 +142,7 @@ def test_follow_clears_stranded_and_decision():
 
 
 def test_steer_to_clears_stranded():
-    sim, room, wp, exit1, exit2 = make_sim()
+    sim, room, _, exit1, exit2 = make_sim()
     agent = sim.add_agent(room.at(5, 2), route=jps.Route([exit1]))
     exit1.close(informed=True)
     agent.steer_to(room.at(4, 4))

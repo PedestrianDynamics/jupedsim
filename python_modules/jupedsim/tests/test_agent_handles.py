@@ -163,6 +163,7 @@ def test_removed_agent_handle(world):
         "target",
         "route_orientation",
         "state",
+        "stranded",
     ):
         with pytest.raises(RuntimeError, match=r"has left the simulation"):
             getattr(agent, name)
