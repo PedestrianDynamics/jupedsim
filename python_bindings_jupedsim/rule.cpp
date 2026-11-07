@@ -19,7 +19,7 @@ void init_rule(py::module_& m)
 {
     py::class_<PyRule> rule(m, "Rule");
     rule.doc() = clean_doc(R"(
-        Describes the Transition at a stage.
+        Describes the rule at a stage.
 
         This type describes how a agent will proceed after completing its stage.
         This effectively describes the set of outbound edges for a stage.

@@ -14,10 +14,12 @@ from jupedsim.surface import WalkableSurface
 def corridor():
     """A 10 x 4 corridor with an exit stage at either end."""
     surface = jps.WalkableSurface()
-    room = surface.add_region(boundary=[(0, 0), (10, 0), (10, 4), (0, 4)])
+    room = surface.add_region(
+        polygon=shapely.Polygon([(0, 0), (10, 0), (10, 4), (0, 4)])
+    )
     sim = jps.Simulation(model=jps.CollisionFreeSpeedModel(), geometry=surface)
-    left = sim.add_exit_stage([([(0, 0), (0.5, 0), (0.5, 4), (0, 4)], room)])
-    right = sim.add_exit_stage([([(9.5, 0), (10, 0), (10, 4), (9.5, 4)], room)])
+    left = sim.add_exit([([(0, 0), (0.5, 0), (0.5, 4), (0, 4)], room)])
+    right = sim.add_exit([([(9.5, 0), (10, 0), (10, 4), (9.5, 4)], room)])
     return sim, room, left, right
 
 
@@ -71,7 +73,6 @@ def test_invalid_speed_fields_are_rejected(corridor):
     sim, room, left, _ = corridor
     default = sim.default_speed_fields()[room].values
     assert default.shape[0] != default.shape[1]
-    steering = sim.add_direct_steering_stage()
 
     with pytest.raises(ValueError, match="shape"):
         sim.set_default_speed_field(room, default.T)
@@ -86,14 +87,6 @@ def test_invalid_speed_fields_are_rejected(corridor):
         sim.set_default_speed_field(room, zero)
     with pytest.raises(jps.SimulationError, match="at least"):
         sim.set_custom_speed_field(left, room, zero)
-
-    with pytest.raises(jps.SimulationError):
-        sim.set_default_speed_field(room + 1, default)
-    assert sim.custom_speed_fields(steering) == {}
-    with pytest.raises(jps.SimulationError, match="no area"):
-        sim.set_custom_speed_field(steering, room, default)
-    with pytest.raises(jps.SimulationError, match="no area"):
-        sim.clear_custom_speed_field(steering, room)
 
 
 def make_hall():

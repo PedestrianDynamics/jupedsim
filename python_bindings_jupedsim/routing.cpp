@@ -227,11 +227,11 @@ void init_routing(py::module_& m)
     location.doc() = clean_doc(R"(
         A point on the walkable surface, together with the region it lies in.
 
-        Locations cannot be created directly, get them from the simulation:
+        Locations cannot be created directly, get them from the surface or an agent:
 
         .. code:: python
 
-            sim.get_location(x, y, region_id=upper_floor)
+            upper_floor.at(x, y)
             sim.agent(agent_id).location
 
         A location is read-only and stays valid as long as its simulation exists.

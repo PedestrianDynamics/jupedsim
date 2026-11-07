@@ -24,7 +24,6 @@
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h> // IWYU pragma: keep
-#include <pybind11/typing.h>
 
 #include <cstddef>
 #include <cstdint>
@@ -114,19 +113,19 @@ void init_simulation(py::module_& m)
             py::arg("dt"),
             py::arg("floorfield_options"))
         .def(
-            "add_waypoint_stage",
+            "create_waypoint_stage",
             [](Simulation& sim, Areas areas) {
                 return sim.add_stage(WaypointDescription{stage_areas(std::move(areas))}).get_id();
             },
             py::arg("areas"))
         .def(
-            "add_exit_stage",
+            "create_exit_stage",
             [](Simulation& sim, Areas areas) {
                 return sim.add_stage(ExitDescription{stage_areas(std::move(areas))}).get_id();
             },
             py::arg("areas"))
         .def(
-            "add_direct_steering_stage",
+            "create_direct_steering_stage",
             [](Simulation& sim) { return sim.add_stage(DirectSteeringDescription{}).get_id(); })
         .def(
             "add_route",
@@ -292,15 +291,6 @@ void init_simulation(py::module_& m)
                 }
                 return agents;
             })
-        .def(
-            "get_stage",
-            [](py::object self, uint64_t id) -> py::typing::Union<Waypoint, Exit, DirectSteering> {
-                return py::cast(
-                    self.cast<Simulation&>().stage(id),
-                    py::return_value_policy::reference_internal,
-                    self);
-            },
-            py::arg("stage_id"))
         .def("set_tracing", [](Simulation& sim, bool status) { sim.set_tracing(status); })
         .def(
             "set_timer_log_level",

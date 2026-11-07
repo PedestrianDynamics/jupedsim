@@ -47,7 +47,7 @@ class CustomOperationalModel(ABC):
         :class:`~jupedsim.SimulationError`. The neighbor objects returned from
         neighborhood queries are transient as well; never store them. Calling
         mutating methods on the simulation (``add_agent``,
-        ``mark_agent_for_removal``, journey or stage mutation) from within a
+        ``mark_agent_for_removal``, route or stage mutation) from within a
         callback raises :class:`~jupedsim.SimulationError`.
     """
 

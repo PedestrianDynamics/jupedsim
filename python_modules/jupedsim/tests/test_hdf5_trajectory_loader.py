@@ -9,6 +9,7 @@ import jupedsim as jps
 import numpy as np
 import pandas as pd
 import pytest
+import shapely
 
 TRAJECTORY_DATA = np.array(
     [
@@ -310,10 +311,10 @@ def travel_time_file(tmp_path):
     simulation and the ids of the stages with an area."""
     surface = jps.WalkableSurface()
     ground_floor = surface.add_region(
-        boundary=_rectangle((0, 0), (5, 5)), height=0.0
+        polygon=shapely.Polygon(_rectangle((0, 0), (5, 5))), height=0.0
     )
     upper_floor = surface.add_region(
-        boundary=_rectangle((10, 0), (15, 5)), height=3.0
+        polygon=shapely.Polygon(_rectangle((10, 0), (15, 5))), height=3.0
     )
     surface.connect_regions(
         from_region=ground_floor,
@@ -331,14 +332,16 @@ def travel_time_file(tmp_path):
         trajectory_writer=writer,
         dt=0.01,
     )
-    exit_id = sim.add_exit_stage([(_rectangle((14, 0), (15, 5)), upper_floor)])
-    waypoint_id = sim.add_waypoint_stage(
-        [(_rectangle((1, 1), (2, 2)), ground_floor)]
+    exit = sim.add_exit([(_rectangle((14, 0), (15, 5)), upper_floor)])
+    waypoint = sim.add_waypoint([(_rectangle((1, 1), (2, 2)), ground_floor)])
+    sim.add_agent(
+        ground_floor.at(3, 3),
+        target=ground_floor.at(4, 3),
+        state=jps.CollisionFreeSpeedModelV2State(),
     )
-    sim.add_direct_steering_stage()
     sim.iterate()
     writer.close()
-    return out, sim, sorted([exit_id, waypoint_id])
+    return out, sim, sorted([exit.id, waypoint.id])
 
 
 def test_hdf5_trajectory_loading_travel_times_round_trip(
@@ -351,7 +354,10 @@ def test_hdf5_trajectory_loading_travel_times_round_trip(
         loaded = {stage: loader.load_travel_times(stage) for stage in stage_ids}
 
     for stage in stage_ids:
-        expected = sim.travel_times(stage)
+        expected = {
+            region.id: grid
+            for region, grid in sim.travel_times(sim.stage(id=stage)).items()
+        }
         assert list(loaded[stage]) == list(expected)
         for region, grid in loaded[stage].items():
             want = expected[region]

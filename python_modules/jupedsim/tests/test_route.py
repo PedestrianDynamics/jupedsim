@@ -2,6 +2,7 @@
 import jupedsim as jps
 import pytest
 import shapely
+from jupedsim.pyjupedsim import Rule as NativeRule
 from jupedsim.route import (
     STAY,
     LeastTargeted,
@@ -180,8 +181,7 @@ class _Recorder:
         return ("none",)
 
 
-def test_native_rules_match_journey_description(stages, monkeypatch):
-    import jupedsim.journey as journey_module
+def test_native_rules_follow_the_route(stages, monkeypatch):
     import jupedsim.route as route_module
 
     _, s = stages
@@ -194,28 +194,78 @@ def test_native_rules_match_journey_description(stages, monkeypatch):
         start=s["wp1"],
     )
     monkeypatch.setattr(route_module, "_NativeRule", _Recorder)
-    monkeypatch.setattr(journey_module, "Transition", _Recorder)
-    journey = jps.JourneyDescription([st.id for st in route.stages])
-    journey.set_transition_for_stage(
-        s["wp1"].id, _Recorder.create_fixed_transition(s["wp2"].id)
-    )
-    journey.set_transition_for_stage(
-        s["wp2"].id,
-        _Recorder.create_round_robin_transition(
+    expected = {
+        s["wp1"].id: _Recorder.create_fixed_transition(s["wp2"].id),
+        s["wp2"].id: _Recorder.create_round_robin_transition(
             [(s["wp3"].id, 1), (s["exit1"].id, 2)]
         ),
-    )
-    journey.set_transition_for_stage(
-        s["wp3"].id,
-        _Recorder.create_least_targeted_transition(
+        s["wp3"].id: _Recorder.create_least_targeted_transition(
             [s["exit1"].id, s["exit2"].id]
         ),
-    )
+        s["exit1"].id: _Recorder.create_none_transition(),
+        s["exit2"].id: _Recorder.create_none_transition(),
+    }
     built = {
         st.id: route_module._native_rule(st, route._transitions)
         for st in route.stages
     }
-    assert built == journey._transitions
+    assert built == expected
+
+
+def test_every_rule_kind_is_one_native_type():
+    rules = [
+        NativeRule.create_fixed_transition(1),
+        NativeRule.create_round_robin_transition([(1, 1), (2, 3)]),
+        NativeRule.create_least_targeted_transition([1, 2]),
+        NativeRule.create_none_transition(),
+    ]
+    assert all(type(rule) is NativeRule for rule in rules)
+    assert NativeRule.__module__ == "jupedsim.pyjupedsim"
+    assert "Describes the rule at a stage" in NativeRule.__doc__
+    assert (
+        "Create a fixed transition"
+        in NativeRule.create_fixed_transition.__doc__
+    )
+
+
+@pytest.mark.parametrize(
+    "create",
+    [
+        lambda: NativeRule.create_fixed_transition(0),
+        lambda: NativeRule.create_round_robin_transition([(0, 1)]),
+        lambda: NativeRule.create_least_targeted_transition([0]),
+    ],
+)
+def test_a_rule_to_the_invalid_stage_id_is_rejected(create):
+    with pytest.raises(jps.SimulationError, match="invalid stage id"):
+        create()
+
+
+def test_a_route_with_every_rule_kind_leads_to_the_exit():
+    sim, room = _simulation()
+    first = sim.add_waypoint((2, 5), radius=0.5, region=room)
+    upper = sim.add_waypoint((5, 7), radius=0.5, region=room)
+    lower = sim.add_waypoint((5, 3), radius=0.5, region=room)
+    last = sim.add_waypoint((8, 5), radius=0.5, region=room)
+    exit = sim.add_exit([(9, 4), (10, 4), (10, 6), (9, 6)], region=room)
+    route = Route(
+        [
+            (first, RoundRobin({upper: 1, lower: 1})),
+            (upper, LeastTargeted([last])),
+            (lower, LeastTargeted([last])),
+            (last, exit),
+        ],
+        start=first,
+    )
+    for y in (4.0, 6.0):
+        sim.add_agent(
+            room.at(1.0, y),
+            route=route,
+            state=jps.CollisionFreeSpeedModelState(),
+        )
+    while sim.agent_count() > 0 and sim.iteration_count() < 5000:
+        sim.iterate()
+    assert sim.agent_count() == 0
 
 
 def test_least_targeted_rule(stages):

@@ -316,34 +316,6 @@ def test_attribute_assignment_points_to_methods(world):
         agent.target = (1, 2)
 
 
-def test_native_surface_keeps_id_based_agents():
-    surface = jps.WalkableSurface()
-    region = surface.add_region(boundary=[(0, 0), (10, 0), (10, 10), (0, 10)])
-    sim = jps.Simulation(model=jps.CollisionFreeSpeedModel(), geometry=surface)
-    stage = sim.add_exit_stage([([(9, 4), (10, 4), (10, 6), (9, 6)], region)])
-    journey = sim.add_journey(jps.JourneyDescription([stage]))
-    agent_id = sim.add_agent(
-        journey_id=journey,
-        stage_id=stage,
-        position=(2, 5),
-        state=jps.CollisionFreeSpeedModelState(),
-        region_id=region,
-    )
-    assert isinstance(agent_id, int)
-    assert sim.agent(agent_id).journey_id == journey
-
-
-def test_location_needs_python_surface():
-    surface = jps.WalkableSurface()
-    surface.add_region(boundary=[(0, 0), (10, 0), (10, 10), (0, 10)])
-    sim = jps.Simulation(model=jps.CollisionFreeSpeedModel(), geometry=surface)
-    other, _, room, _, _ = make_sim()
-    with pytest.raises(
-        ValueError, match=r"build the simulation from a WalkableSurface"
-    ):
-        sim.add_agent(room.at(1, 1), target=room.at(2, 2))
-
-
 def test_remove_twice_before_iterate(world):
     sim, _, room, _, _, route_a, _ = world
     agent = sim.add_agent(room.at(1, 8), route=route_a)

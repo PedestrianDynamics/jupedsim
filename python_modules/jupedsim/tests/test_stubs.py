@@ -20,8 +20,6 @@ CLASSES = [
     "CollisionFreeSpeedModelV2State",
     "CollisionFreeSpeedModelV3",
     "CollisionFreeSpeedModelV3State",
-    "DirectSteeringStage",
-    "ExitStage",
     "FloorfieldOptions",
     "GeneralizedCentrifugalForceModel",
     "GeneralizedCentrifugalForceModelState",
@@ -40,7 +38,6 @@ CLASSES = [
     "WallView",
     "WarpDriverModel",
     "WarpDriverModelState",
-    "WaypointStage",
     "_Agent",
     "_CustomModelState",
     "_PythonModel",
@@ -53,8 +50,6 @@ CLASSES_WITHOUT_CONSTRUCTOR = [
     "AgentStep",
     "AgentView",
     "BoundaryIndex",
-    "DirectSteeringStage",
-    "ExitStage",
     "Geometry",
     "Location",
     "NeighborView",
@@ -64,7 +59,6 @@ CLASSES_WITHOUT_CONSTRUCTOR = [
     "Rule",
     "TravelTimeGrid",
     "WallView",
-    "WaypointStage",
     "_Agent",
 ]
 

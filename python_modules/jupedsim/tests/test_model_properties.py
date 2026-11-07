@@ -3,6 +3,7 @@ import math
 
 import jupedsim as jps
 import pytest
+import shapely
 
 _UNIT_SQUARE_10 = [(0, 0), (10, 0), (10, 10), (0, 10)]
 
@@ -44,24 +45,16 @@ MODEL_INSTANCE_STATE = [
 def test_simulation_from_model_instance(model, state_cls, state_kwargs):
     """Built-in models are constructed from a configured model instance."""
     surface = jps.WalkableSurface()
-    room = surface.add_region(boundary=_UNIT_SQUARE_10)
+    room = surface.add_region(polygon=shapely.Polygon(_UNIT_SQUARE_10))
     sim = jps.Simulation(model=model, geometry=surface)
-    wp = sim.add_waypoint_stage(
-        [(jps.circle_to_polygon(center=(9, 9), radius=0.5), room)]
-    )
-    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
     agent_id = sim.add_agent(
-        journey_id=journey_id,
-        stage_id=wp,
-        position=(1, 1),
-        state=state_cls(**state_kwargs),
-        region_id=room,
-    )
+        room.at(1, 1), target=room.at(9, 9), state=state_cls(**state_kwargs)
+    ).id
 
     for _ in range(10):
         sim.iterate()
-    assert sim.agent(agent_id).position != (1, 1)
+    assert sim.agent(agent_id).position.xy != (1, 1)
 
 
 def test_simulation_rejects_wrong_model_argument():
@@ -72,7 +65,9 @@ def test_simulation_rejects_wrong_model_argument():
 @pytest.fixture
 def corridor():
     surface = jps.WalkableSurface()
-    room = surface.add_region(boundary=[(0, 0), (10, 0), (10, 2), (0, 2)])
+    room = surface.add_region(
+        polygon=shapely.Polygon([(0, 0), (10, 0), (10, 2), (0, 2)])
+    )
     simulation = jps.Simulation(
         model=jps.CollisionFreeSpeedModelV2(),
         geometry=surface,
@@ -82,38 +77,32 @@ def corridor():
 
 def test_set_desired_speed(corridor):
     sim, room = corridor
-    wp = sim.add_waypoint_stage(
-        [(jps.circle_to_polygon(center=(10, 1), radius=0.5), room)]
-    )
-    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
     agent_id = sim.add_agent(
-        journey_id=journey_id,
-        stage_id=wp,
-        position=(1, 1),
+        room.at(1, 1),
+        target=room.at(10, 1),
         state=jps.CollisionFreeSpeedModelV2State(desired_speed=1),
-        region_id=room,
-    )
-    assert math.isclose(sim.agent(agent_id).position[0], 1)
+    ).id
+    assert math.isclose(sim.agent(agent_id).position.x, 1)
     for _ in range(0, 100):
         sim.iterate()
-    assert math.isclose(sim.agent(agent_id).position[0], 2)
+    assert math.isclose(sim.agent(agent_id).position.x, 2)
     for _ in range(0, 100):
         sim.iterate()
-    assert math.isclose(sim.agent(agent_id).position[0], 3)
+    assert math.isclose(sim.agent(agent_id).position.x, 3)
     sim.agent(agent_id).state.desired_speed = 2
     for _ in range(0, 100):
         sim.iterate()
-    assert math.isclose(sim.agent(agent_id).position[0], 5)
+    assert math.isclose(sim.agent(agent_id).position.x, 5)
     for _ in range(0, 100):
         sim.iterate()
-    assert math.isclose(sim.agent(agent_id).position[0], 7)
+    assert math.isclose(sim.agent(agent_id).position.x, 7)
 
 
 @pytest.fixture
 def simulation_with_collision_free_speed_model_v2():
     surface = jps.WalkableSurface()
-    room = surface.add_region(boundary=_UNIT_SQUARE_10)
+    room = surface.add_region(polygon=shapely.Polygon(_UNIT_SQUARE_10))
     simulation = jps.Simulation(
         model=jps.CollisionFreeSpeedModelV2(),
         geometry=surface,
@@ -125,10 +114,6 @@ def test_initial_parameters_collision_free_speed_model_v2(
     simulation_with_collision_free_speed_model_v2,
 ):
     sim, room = simulation_with_collision_free_speed_model_v2
-    wp = sim.add_waypoint_stage(
-        [(jps.circle_to_polygon(center=(10, 1), radius=0.5), room)]
-    )
-    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
     # Create an agent with distinct non-default values for each parameter.
     state = jps.CollisionFreeSpeedModelV2State(
@@ -141,12 +126,8 @@ def test_initial_parameters_collision_free_speed_model_v2(
         range_geometry_repulsion=0.17,
     )
     agent_id = sim.add_agent(
-        journey_id=journey_id,
-        stage_id=wp,
-        position=(1, 1),
-        state=state,
-        region_id=room,
-    )
+        room.at(1, 1), target=room.at(10, 1), state=state
+    ).id
 
     agent_state = sim.agent(agent_id).state
     assert agent_state.time_gap == 0.1, (
@@ -176,18 +157,12 @@ def test_set_model_parameters_collision_free_speed_model_v2(
     simulation_with_collision_free_speed_model_v2,
 ):
     sim, room = simulation_with_collision_free_speed_model_v2
-    wp = sim.add_waypoint_stage(
-        [(jps.circle_to_polygon(center=(10, 1), radius=0.5), room)]
-    )
-    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
     agent_id = sim.add_agent(
-        journey_id=journey_id,
-        stage_id=wp,
-        position=(1, 1),
+        room.at(1, 1),
+        target=room.at(10, 1),
         state=jps.CollisionFreeSpeedModelV2State(),
-        region_id=room,
-    )
+    ).id
 
     sim.agent(agent_id).state.desired_speed = 2.0
     assert sim.agent(agent_id).state.desired_speed == 2.0
@@ -217,7 +192,7 @@ def test_set_model_parameters_collision_free_speed_model_v2(
 @pytest.fixture
 def simulation_with_anticipation_velocity_model():
     surface = jps.WalkableSurface()
-    room = surface.add_region(boundary=_UNIT_SQUARE_10)
+    room = surface.add_region(polygon=shapely.Polygon(_UNIT_SQUARE_10))
     simulation = jps.Simulation(
         model=jps.AnticipationVelocityModel(rng_seed=1234),
         geometry=surface,
@@ -229,18 +204,12 @@ def test_set_model_parameters_anticipation_velocity_model(
     simulation_with_anticipation_velocity_model,
 ):
     sim, room = simulation_with_anticipation_velocity_model
-    wp = sim.add_waypoint_stage(
-        [(jps.circle_to_polygon(center=(10, 1), radius=0.5), room)]
-    )
-    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
     agent_id = sim.add_agent(
-        journey_id=journey_id,
-        stage_id=wp,
-        position=(1, 1),
+        room.at(1, 1),
+        target=room.at(10, 1),
         state=jps.AnticipationVelocityModelState(),
-        region_id=room,
-    )
+    ).id
 
     sim.agent(agent_id).state.desired_speed = 2.0
     assert sim.agent(agent_id).state.desired_speed == 2.0
@@ -273,7 +242,7 @@ def test_set_model_parameters_anticipation_velocity_model(
 @pytest.fixture
 def simulation_with_collision_free_speed_model():
     surface = jps.WalkableSurface()
-    room = surface.add_region(boundary=_UNIT_SQUARE_10)
+    room = surface.add_region(polygon=shapely.Polygon(_UNIT_SQUARE_10))
     simulation = jps.Simulation(
         model=jps.CollisionFreeSpeedModel(),
         geometry=surface,
@@ -285,18 +254,12 @@ def test_set_model_parameters_collision_free_speed_model(
     simulation_with_collision_free_speed_model,
 ):
     sim, room = simulation_with_collision_free_speed_model
-    wp = sim.add_waypoint_stage(
-        [(jps.circle_to_polygon(center=(10, 1), radius=0.5), room)]
-    )
-    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
     agent_id = sim.add_agent(
-        journey_id=journey_id,
-        stage_id=wp,
-        position=(1, 1),
+        room.at(1, 1),
+        target=room.at(10, 1),
         state=jps.CollisionFreeSpeedModelState(),
-        region_id=room,
-    )
+    ).id
 
     sim.agent(agent_id).state.desired_speed = 2.0
     assert sim.agent(agent_id).state.desired_speed == 2.0
@@ -314,7 +277,7 @@ def test_set_model_parameters_collision_free_speed_model(
 def test_collision_free_speed_model_repulsion_parameters_are_model_level():
     """The repulsion parameters are configured on the model instance."""
     surface = jps.WalkableSurface()
-    room = surface.add_region(boundary=_UNIT_SQUARE_10)
+    room = surface.add_region(polygon=shapely.Polygon(_UNIT_SQUARE_10))
     sim = jps.Simulation(
         model=jps.CollisionFreeSpeedModel(
             strength_neighbor_repulsion=7.5,
@@ -324,18 +287,12 @@ def test_collision_free_speed_model_repulsion_parameters_are_model_level():
         ),
         geometry=surface,
     )
-    wp = sim.add_waypoint_stage(
-        [(jps.circle_to_polygon(center=(10, 1), radius=0.5), room)]
-    )
-    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
     agent_id = sim.add_agent(
-        journey_id=journey_id,
-        stage_id=wp,
-        position=(1, 1),
+        room.at(1, 1),
+        target=room.at(10, 1),
         state=jps.CollisionFreeSpeedModelState(),
-        region_id=room,
-    )
+    ).id
 
     # The repulsion parameters no longer appear on the per-agent state.
     agent_state = sim.agent(agent_id).state
@@ -350,13 +307,13 @@ def test_collision_free_speed_model_repulsion_parameters_are_model_level():
     # The configured model drives the simulation.
     for _ in range(10):
         sim.iterate()
-    assert sim.agent(agent_id).position != (1, 1)
+    assert sim.agent(agent_id).position.xy != (1, 1)
 
 
 @pytest.fixture
 def simulation_with_generalized_centrifugal_force_model():
     surface = jps.WalkableSurface()
-    room = surface.add_region(boundary=_UNIT_SQUARE_10)
+    room = surface.add_region(polygon=shapely.Polygon(_UNIT_SQUARE_10))
     simulation = jps.Simulation(
         model=jps.GeneralizedCentrifugalForceModel(),
         geometry=surface,
@@ -368,24 +325,16 @@ def test_set_model_parameters_generalized_centrifugal_force_model(
     simulation_with_generalized_centrifugal_force_model,
 ):
     sim, room = simulation_with_generalized_centrifugal_force_model
-    wp = sim.add_waypoint_stage(
-        [(jps.circle_to_polygon(center=(10, 1), radius=0.5), room)]
-    )
-    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
     agent_id = sim.add_agent(
-        journey_id=journey_id,
-        stage_id=wp,
-        position=(1, 1),
+        room.at(1, 1),
+        target=room.at(10, 1),
         state=jps.GeneralizedCentrifugalForceModelState(orientation=(1.0, 0.0)),
-        region_id=room,
-    )
+    ).id
     sim.add_agent(
-        journey_id=journey_id,
-        stage_id=wp,
-        position=(3, 1),
+        room.at(3, 1),
+        target=room.at(10, 1),
         state=jps.GeneralizedCentrifugalForceModelState(orientation=(1.0, 0.0)),
-        region_id=room,
     )
 
     sim.agent(agent_id).state.speed = 2.0
@@ -419,7 +368,7 @@ def test_set_model_parameters_generalized_centrifugal_force_model(
 @pytest.fixture
 def simulation_with_social_force_model():
     surface = jps.WalkableSurface()
-    room = surface.add_region(boundary=_UNIT_SQUARE_10)
+    room = surface.add_region(polygon=shapely.Polygon(_UNIT_SQUARE_10))
     simulation = jps.Simulation(
         model=jps.SocialForceModel(),
         geometry=surface,
@@ -432,18 +381,9 @@ def test_set_model_parameters_social_force_model(
 ):
     sim, room = simulation_with_social_force_model
 
-    wp = sim.add_waypoint_stage(
-        [(jps.circle_to_polygon(center=(10, 1), radius=0.5), room)]
-    )
-    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
-
     agent_id = sim.add_agent(
-        journey_id=journey_id,
-        stage_id=wp,
-        position=(1, 1),
-        state=jps.SocialForceModelState(),
-        region_id=room,
-    )
+        room.at(1, 1), target=room.at(10, 1), state=jps.SocialForceModelState()
+    ).id
 
     sim.agent(agent_id).state.velocity = (2.0, -2.0)
     assert sim.agent(agent_id).state.velocity == (2.0, -2.0)
@@ -473,23 +413,15 @@ def test_set_model_parameters_social_force_model(
 def test_social_force_model_body_force_and_friction_are_model_level():
     """body_force and friction are configured on the model instance."""
     surface = jps.WalkableSurface()
-    room = surface.add_region(boundary=_UNIT_SQUARE_10)
+    room = surface.add_region(polygon=shapely.Polygon(_UNIT_SQUARE_10))
     sim = jps.Simulation(
         model=jps.SocialForceModel(body_force=100000.0, friction=200000.0),
         geometry=surface,
     )
-    wp = sim.add_waypoint_stage(
-        [(jps.circle_to_polygon(center=(10, 1), radius=0.5), room)]
-    )
-    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
     agent_id = sim.add_agent(
-        journey_id=journey_id,
-        stage_id=wp,
-        position=(1, 1),
-        state=jps.SocialForceModelState(),
-        region_id=room,
-    )
+        room.at(1, 1), target=room.at(10, 1), state=jps.SocialForceModelState()
+    ).id
 
     # body_force and friction no longer appear on the per-agent state.
     agent_state = sim.agent(agent_id).state
@@ -499,7 +431,7 @@ def test_social_force_model_body_force_and_friction_are_model_level():
     # The configured model drives the simulation.
     for _ in range(10):
         sim.iterate()
-    assert sim.agent(agent_id).position != (1, 1)
+    assert sim.agent(agent_id).position.xy != (1, 1)
 
 
 def _velocity_along_wall(friction, y):
@@ -508,27 +440,24 @@ def _velocity_along_wall(friction, y):
     1 m/s along +x, so without other forces its speed stays constant.
     Use DirectSteering as FF-engine would push it away from the wall."""
     surface = jps.WalkableSurface()
-    room = surface.add_region(boundary=[(0, 0), (60, 0), (60, 4), (0, 4)])
+    room = surface.add_region(
+        polygon=shapely.Polygon([(0, 0), (60, 0), (60, 4), (0, 4)])
+    )
     sim = jps.Simulation(
         model=jps.SocialForceModel(body_force=120000.0, friction=friction),
         geometry=surface,
         dt=0.001,
     )
-    stage_id = sim.add_direct_steering_stage()
-    journey_id = sim.add_journey(jps.JourneyDescription([stage_id]))
     agent_id = sim.add_agent(
-        journey_id=journey_id,
-        stage_id=stage_id,
-        position=(1, y),
+        room.at(1, y),
+        target=room.at(59, y),
         state=jps.SocialForceModelState(
             velocity=(1.0, 0.0),
             desired_speed=1.0,
             reaction_time=0.5,
             radius=0.3,
         ),
-        region_id=room,
-    )
-    sim.agent(agent_id).final_target = (59, y)
+    ).id
     for _ in range(20):
         sim.iterate()
     return sim.agent(agent_id).state.velocity[0]
@@ -556,28 +485,20 @@ def test_agent_handle_raises_after_removal(
     simulation_with_social_force_model,
 ):
     sim, room = simulation_with_social_force_model
-    wp = sim.add_waypoint_stage(
-        [(jps.circle_to_polygon(center=(10, 1), radius=0.5), room)]
-    )
-    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
     agent_id = sim.add_agent(
-        journey_id=journey_id,
-        stage_id=wp,
-        position=(1, 1),
-        state=jps.SocialForceModelState(),
-        region_id=room,
-    )
+        room.at(1, 1), target=room.at(10, 1), state=jps.SocialForceModelState()
+    ).id
     agent = sim.agent(agent_id)
     state = agent.state
-    assert agent.position == (1, 1)
+    assert agent.position.xy == (1, 1)
 
     sim.mark_agent_for_removal(agent_id)
     sim.iterate()
 
-    with pytest.raises(jps.SimulationError):
-        agent.position
-    with pytest.raises(jps.SimulationError):
+    with pytest.raises(RuntimeError):
+        agent.position.xy
+    with pytest.raises(RuntimeError):
         agent.state.desired_speed
     with pytest.raises(jps.SimulationError):
         state.desired_speed
@@ -590,7 +511,7 @@ def test_agent_handle_raises_after_removal(
 @pytest.fixture
 def simulation_with_collision_free_speed_model_v3():
     surface = jps.WalkableSurface()
-    room = surface.add_region(boundary=_UNIT_SQUARE_10)
+    room = surface.add_region(polygon=shapely.Polygon(_UNIT_SQUARE_10))
     simulation = jps.Simulation(
         model=jps.CollisionFreeSpeedModelV3(),
         geometry=surface,
@@ -602,10 +523,6 @@ def test_initial_parameters_collision_free_speed_model_v3(
     simulation_with_collision_free_speed_model_v3,
 ):
     sim, room = simulation_with_collision_free_speed_model_v3
-    wp = sim.add_waypoint_stage(
-        [(jps.circle_to_polygon(center=(10, 1), radius=0.5), room)]
-    )
-    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
     state = jps.CollisionFreeSpeedModelV3State(
         time_gap=0.11,
@@ -621,12 +538,8 @@ def test_initial_parameters_collision_free_speed_model_v3(
         agent_buffer=0.4,
     )
     agent_id = sim.add_agent(
-        journey_id=journey_id,
-        stage_id=wp,
-        position=(1, 1),
-        state=state,
-        region_id=room,
-    )
+        room.at(1, 1), target=room.at(10, 1), state=state
+    ).id
 
     agent_state = sim.agent(agent_id).state
     assert agent_state.time_gap == 0.11
@@ -646,23 +559,17 @@ def test_set_model_parameters_collision_free_speed_model_v3(
     simulation_with_collision_free_speed_model_v3,
 ):
     sim, room = simulation_with_collision_free_speed_model_v3
-    wp = sim.add_waypoint_stage(
-        [(jps.circle_to_polygon(center=(10, 1), radius=0.5), room)]
-    )
-    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
     agent_id = sim.add_agent(
-        journey_id=journey_id,
-        stage_id=wp,
-        position=(1, 1),
+        room.at(1, 1),
+        target=room.at(10, 1),
         state=jps.CollisionFreeSpeedModelV3State(
             strength_neighbor_repulsion=8.0,
             range_neighbor_repulsion=0.1,
             strength_geometry_repulsion=5.0,
             range_geometry_repulsion=0.02,
         ),
-        region_id=room,
-    )
+    ).id
     state = sim.agent(agent_id).state
 
     state.desired_speed = 2.0

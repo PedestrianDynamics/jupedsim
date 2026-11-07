@@ -140,13 +140,13 @@ class _Recorder:
         self._obj = obj
         self.calls = []
 
-    def add_waypoint_stage(self, areas):
+    def create_waypoint_stage(self, areas):
         self.calls.append(areas)
-        return self._obj.add_waypoint_stage(areas)
+        return self._obj.create_waypoint_stage(areas)
 
-    def add_exit_stage(self, areas):
+    def create_exit_stage(self, areas):
         self.calls.append(areas)
-        return self._obj.add_exit_stage(areas)
+        return self._obj.create_exit_stage(areas)
 
     def __getattr__(self, name):
         return getattr(self._obj, name)
@@ -200,16 +200,6 @@ def test_area_outside_connector_rejected():
     with pytest.raises(ValueError, match=r"area does not overlap staircase"):
         sim.add_waypoint((2, 2), radius=0.3, region=staircase)
     assert sim.stages == ()
-
-
-def test_region_rejected_without_python_surface():
-    surface = WalkableSurface()
-    region = surface.add_region(polygon=shapely.Polygon(FOOTPRINT))
-    sim = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=surface._obj
-    )
-    with pytest.raises(ValueError, match=r"belongs to another surface"):
-        sim.add_waypoint(DOOR, region=region)
 
 
 def test_exit_rejects_point():

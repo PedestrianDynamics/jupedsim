@@ -20,7 +20,6 @@ from jupedsim.hdf5_serialization import (
     Hdf5TrajectoryWriter,
 )
 from jupedsim.internal.tracing import Timer, trace_event
-from jupedsim.journey import JourneyDescription
 from jupedsim.pyjupedsim import (
     AgentStep,
     AgentView,
@@ -33,26 +32,20 @@ from jupedsim.pyjupedsim import (
     CollisionFreeSpeedModelV2State,
     CollisionFreeSpeedModelV3,
     CollisionFreeSpeedModelV3State,
-    DirectSteeringStage,
-    ExitStage,
     FloorfieldOptions,
     GeneralizedCentrifugalForceModel,
     GeneralizedCentrifugalForceModelState,
     Geometry,
-    Location,
     NeighborView,
     SimulationError,
     SocialForceModel,
     SocialForceModelState,
     SpeedGrid,
     SurfaceMeshShortestPathRoutingEngine,
-    Rule as Transition,
     TravelTimeGrid,
-    WalkableSurface,
     WallView,
     WarpDriverModel,
     WarpDriverModelState,
-    WaypointStage,
     disable_tracing,
     dump_traces,
     enable_tracing,
@@ -66,8 +59,17 @@ from jupedsim.pyjupedsim import (
     set_warning_callback,
     start_trace_event,
 )
+from jupedsim.route import (
+    STAY,
+    LeastTargeted,
+    LeastTravelTime,
+    RoundRobin,
+    Route,
+)
 from jupedsim.serialization import TrajectoryWriter
 from jupedsim.simulation import Simulation
+from jupedsim.stages import Exit, Waypoint
+from jupedsim.surface import Location, Region, WalkableSurface
 
 __version__ = get_build_info().library_version
 """
@@ -102,8 +104,7 @@ __all__ = [
     "CollisionFreeSpeedModelV3",
     "CollisionFreeSpeedModelV3State",
     "CustomOperationalModel",
-    "DirectSteeringStage",
-    "ExitStage",
+    "Exit",
     "FloorfieldOptions",
     "GeneralizedCentrifugalForceModel",
     "GeneralizedCentrifugalForceModelState",
@@ -111,11 +112,16 @@ __all__ = [
     "Hdf5TrajectoryLoader",
     "Hdf5TrajectoryWriter",
     "IncorrectParameterError",
-    "JourneyDescription",
+    "LeastTargeted",
+    "LeastTravelTime",
     "Location",
     "NegativeValueError",
     "NeighborView",
     "OverlappingCirclesError",
+    "Region",
+    "RoundRobin",
+    "Route",
+    "STAY",
     "Simulation",
     "SimulationError",
     "SocialForceModel",
@@ -124,13 +130,12 @@ __all__ = [
     "SurfaceMeshShortestPathRoutingEngine",
     "Timer",
     "TrajectoryWriter",
-    "Transition",
     "TravelTimeGrid",
     "WalkableSurface",
     "WallView",
     "WarpDriverModel",
     "WarpDriverModelState",
-    "WaypointStage",
+    "Waypoint",
     "__commit__",
     "__compiler__",
     "__version__",
