@@ -894,3 +894,34 @@ def test_set_model_parameters_collision_free_speed_model_v3(
 
     model.agent_buffer = 0.5
     assert model.agent_buffer == 0.5
+
+
+def test_collision_free_speed_model_v3_does_not_back_into_a_wall():
+    """An agent whose spacing to the neighbor ahead is below its
+    agent_buffer backs up, but stops at the wall behind it instead of
+    walking into it."""
+    sim = jps.Simulation(
+        model=jps.CollisionFreeSpeedModelV3(),
+        geometry=[(-0.5, -2), (20, -2), (20, 2), (-0.5, 2)],
+    )
+    exit_id = sim.add_exit_stage([(19, -1), (20, -1), (20, 1), (19, 1)])
+    journey_id = sim.add_journey(jps.JourneyDescription([exit_id]))
+
+    def add(position, desired_speed, agent_buffer):
+        return sim.add_agent(
+            jps.CollisionFreeSpeedModelV3AgentParameters(
+                journey_id=journey_id,
+                stage_id=exit_id,
+                position=position,
+                radius=0.15,
+                time_gap=1.0,
+                desired_speed=desired_speed,
+                agent_buffer=agent_buffer,
+            )
+        )
+
+    backing = add((-0.3, 0), desired_speed=0.5, agent_buffer=1.0)
+    add((0.1, 0), desired_speed=0.0, agent_buffer=0.0)
+    for _ in range(3000):
+        sim.iterate()
+    assert -0.5 + 0.15 <= sim.agent(backing).position[0] < -0.3

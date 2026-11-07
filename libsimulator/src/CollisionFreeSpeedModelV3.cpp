@@ -135,7 +135,19 @@ OperationalModelUpdate CollisionFreeSpeedModelV3::ComputeNewPosition(
     const auto spacing =
         spacing_move * (1.0 - SpacingBlendWeight) + spacing_goal * SpacingBlendWeight;
 
-    const auto optimal_speed = OptimalSpeed(ped, spacing, model.timeGap);
+    auto optimal_speed = OptimalSpeed(ped, spacing, model.timeGap);
+    if(optimal_speed < 0.0) {
+        // Backing up must not move the agent closer than its radius to a wall.
+        const auto next_pos = ped.pos + direction * optimal_speed * dT;
+        const auto backs_into_wall =
+            std::any_of(boundary.cbegin(), boundary.cend(), [&](const auto& segment) {
+                const auto dist = segment.DistTo(next_pos);
+                return dist <= model.radius && dist < segment.DistTo(ped.pos);
+            });
+        if(backs_into_wall) {
+            optimal_speed = 0.0;
+        }
+    }
     const auto velocity = direction * optimal_speed;
     return CollisionFreeSpeedModelV3Update{ped.pos + velocity * dT, direction, heading_angle};
 };
