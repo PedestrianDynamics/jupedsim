@@ -141,3 +141,30 @@ def test_agent_spawned_inside_its_exit_is_reported_once():
     assert [(r.id, r.exit) for r in seen] == [(agent.id, exit1)]
     assert seen[0].time == 0.0
     assert not agent.alive
+
+
+def test_every_agent_spawned_inside_an_exit_gets_one_record():
+    sim, room, exit1 = make_sim()
+    exit2 = sim.add_exit([(0, 4), (1, 4), (1, 6), (0, 6)], region=room)
+    spawned = {
+        sim.add_agent(room.at(9.5, y), route=jps.Route([exit1])): exit1
+        for y in (4.3, 5.0, 5.7)
+    } | {
+        sim.add_agent(room.at(0.5, y), route=jps.Route([exit2])): exit2
+        for y in (4.3, 5.7)
+    }
+    walker = sim.add_agent(room.at(5, 5), route=jps.Route([exit1]))
+    seen = []
+    for _ in range(5000):
+        if not sim.agent_count():
+            break
+        sim.iterate()
+        seen.extend(sim.removed_agents())
+    assert sim.agent_count() == 0
+    assert sorted(r.id for r in seen) == sorted(
+        [agent.id for agent in spawned] + [walker.id]
+    )
+    for agent, exit_stage in spawned.items():
+        (record,) = [r for r in seen if r.id == agent.id]
+        assert record.exit is exit_stage
+        assert record.time == 0.0
