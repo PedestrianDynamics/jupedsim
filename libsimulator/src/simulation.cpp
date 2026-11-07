@@ -332,6 +332,7 @@ void Simulation::set_agent_target(GenericAgent::ID id, Point target)
     agent.arrived = false;
     // A step taken toward the previous target does not reach the new one.
     agent.last_step = Vector{};
+    TacticalDecisionSystem::orient(*_routing_engine, agent);
 }
 
 void Simulation::set_agent_target(GenericAgent::ID id, const Location& target)
@@ -342,6 +343,7 @@ void Simulation::set_agent_target(GenericAgent::ID id, const Location& target)
     steered.arrived = false;
     // A step taken toward the previous target does not reach the new one.
     steered.last_step = Vector{};
+    TacticalDecisionSystem::orient(*_routing_engine, steered);
 }
 
 void Simulation::mark_agent_for_removal(GenericAgent::ID id)

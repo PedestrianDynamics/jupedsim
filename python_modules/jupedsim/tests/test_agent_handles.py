@@ -110,6 +110,16 @@ def test_steer_to_switches_to_direct(world):
     assert agent.target is None
 
 
+def test_steer_to_points_the_orientation_at_the_new_target(world):
+    sim, _, room, _, exit1, _, _ = world
+    agent = sim.add_agent(room.at(5, 5), route=Route([exit1]))
+    assert agent.route_orientation[0] > 0.9
+    agent.steer_to(room.at(1, 5))
+    assert agent.route_orientation[0] < -0.9
+    steered = sim.add_agent(room.at(5, 7), target=room.at(1, 7))
+    assert steered.route_orientation[0] < -0.9
+
+
 def test_agents_in_id_order(world):
     sim, _, room, _, _, route_a, _ = world
     made = [sim.add_agent(room.at(1, 1 + i), route=route_a) for i in range(4)]
