@@ -136,6 +136,86 @@ def test_loops(stages):
         ]
     )
     assert looped.stages == (s["wp1"], s["wp2"], s["exit1"])
+    assert looped.next(s["wp2"]) == RoundRobin({s["wp1"]: 1, s["exit1"]: 1})
+
+
+def test_endless_pairs(stages):
+    _, s = stages
+    tour = Route(
+        [
+            (s["wp1"], s["wp2"]),
+            (s["wp2"], RoundRobin({s["wp3"]: 1, s["wp4"]: 1})),
+            (s["wp3"], s["wp1"]),
+            (s["wp4"], s["wp1"]),
+        ],
+        start=s["wp1"],
+        endless=True,
+    )
+    assert tour.stages == (s["wp1"], s["wp2"], s["wp3"], s["wp4"])
+
+
+def test_stay_alone_is_rejected(stages):
+    for steps in ([STAY], [STAY, STAY]):
+        with pytest.raises(ValueError, match="STAY must"):
+            Route(steps)
+
+
+class _Recorder:
+    """Stands in for the native rule class and records how rules are made."""
+
+    @staticmethod
+    def create_fixed_transition(stage_id):
+        return ("fixed", stage_id)
+
+    @staticmethod
+    def create_round_robin_transition(pairs):
+        return ("round_robin", list(pairs))
+
+    @staticmethod
+    def create_least_targeted_transition(ids):
+        return ("least_targeted", list(ids))
+
+    @staticmethod
+    def create_none_transition():
+        return ("none",)
+
+
+def test_native_rules_match_journey_description(stages, monkeypatch):
+    import jupedsim.journey as journey_module
+    import jupedsim.route as route_module
+
+    _, s = stages
+    route = Route(
+        [
+            (s["wp1"], s["wp2"]),
+            (s["wp2"], RoundRobin({s["wp3"]: 1, s["exit1"]: 2})),
+            (s["wp3"], LeastTargeted([s["exit1"], s["exit2"]])),
+        ],
+        start=s["wp1"],
+    )
+    monkeypatch.setattr(route_module, "_NativeRule", _Recorder)
+    monkeypatch.setattr(journey_module, "Transition", _Recorder)
+    journey = jps.JourneyDescription([st.id for st in route.stages])
+    journey.set_transition_for_stage(
+        s["wp1"].id, _Recorder.create_fixed_transition(s["wp2"].id)
+    )
+    journey.set_transition_for_stage(
+        s["wp2"].id,
+        _Recorder.create_round_robin_transition(
+            [(s["wp3"].id, 1), (s["exit1"].id, 2)]
+        ),
+    )
+    journey.set_transition_for_stage(
+        s["wp3"].id,
+        _Recorder.create_least_targeted_transition(
+            [s["exit1"].id, s["exit2"].id]
+        ),
+    )
+    built = {
+        st.id: route_module._native_rule(st, route._transitions)
+        for st in route.stages
+    }
+    assert built == journey._transitions
 
 
 def test_least_targeted_rule(stages):

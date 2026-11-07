@@ -149,6 +149,8 @@ def _closes_loop(items: Sequence[Any], endless: bool) -> bool:
 
 
 def _linear_pairs(items: Sequence[Any], endless: bool) -> list[tuple]:
+    if items[0] is STAY:
+        raise ValueError("STAY must follow a stage")
     if STAY in items[:-1]:
         raise ValueError("STAY must be the last element")
     stages = [_require_stage(item) for item in items if item is not STAY]
