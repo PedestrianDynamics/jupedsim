@@ -1,5 +1,4 @@
 # Route API draft, example 4: phased release.
-# Sketch against examples/route_api_draft.py; the API does not exist yet.
 #
 # Two rooms open into a shared corridor that leads to one exit. Room A
 # evacuates at once; room B waits at its door and is released after 60 s.

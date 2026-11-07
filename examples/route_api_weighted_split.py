@@ -1,5 +1,4 @@
 # Route API draft, example 3: weighted split.
-# Sketch against examples/route_api_draft.py; the API does not exist yet.
 #
 # A hall with a decision point in the middle and two exits. Two of every
 # three agents take the left exit, one the right. Once half of the agents

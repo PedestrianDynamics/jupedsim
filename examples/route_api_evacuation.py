@@ -1,5 +1,4 @@
 # Route API draft, example 1: simple evacuation.
-# Sketch against examples/route_api_draft.py; the API does not exist yet.
 #
 # One room of 10 m x 10 m with a door on the right wall. 50 agents walk to
 # the exit and leave.

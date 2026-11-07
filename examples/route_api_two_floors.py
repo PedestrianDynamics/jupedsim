@@ -1,5 +1,4 @@
 # Route API draft, example 2: two floors.
-# Sketch against examples/route_api_draft.py; the API does not exist yet.
 #
 # Two floors over the same 20 m x 10 m footprint, the upper one at 3 m,
 # both with a stairwell 12..18 m x 6..8 m. A staircase in the stairwell

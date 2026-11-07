@@ -1,5 +1,4 @@
 # Route API draft, example 5: closure with rerouting.
-# Sketch against examples/route_api_draft.py; the API does not exist yet.
 #
 # A hall with two exits. Agents pick the exit with the least travel time.
 # When the first agent leaves through the east exit, smoke blocks it: it
