@@ -468,9 +468,10 @@ std::vector<GenericAgent::ID> Simulation::close_exit(BaseStage::ID exit_id, bool
         if(next == nullptr) {
             StrategicalDecisionSystem::strand(agent);
             stranded.push_back(agent.id);
-            continue;
+        } else {
+            StrategicalDecisionSystem::assign(agent, *next, _stage_manager);
         }
-        StrategicalDecisionSystem::assign(agent, *next, _stage_manager);
+        TacticalDecisionSystem::orient(*_routing_engine, agent);
     }
     return stranded;
 }
@@ -496,6 +497,7 @@ std::vector<GenericAgent::ID> Simulation::open_exit(BaseStage::ID exit_id)
         }
         agent.stranded = false;
         StrategicalDecisionSystem::assign(agent, *next, _stage_manager);
+        TacticalDecisionSystem::orient(*_routing_engine, agent);
         resumed.push_back(agent.id);
     }
     return resumed;
@@ -543,9 +545,10 @@ void Simulation::release(Route::ID route_id, BaseStage::ID stage_id)
         auto* next = route.decide(*agent, stage_id, *_routing_engine);
         if(next == nullptr) {
             StrategicalDecisionSystem::strand(*agent);
-            continue;
+        } else {
+            StrategicalDecisionSystem::assign(*agent, *next, _stage_manager);
         }
-        StrategicalDecisionSystem::assign(*agent, *next, _stage_manager);
+        TacticalDecisionSystem::orient(*_routing_engine, *agent);
     }
 }
 

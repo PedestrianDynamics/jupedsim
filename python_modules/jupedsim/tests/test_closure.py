@@ -46,6 +46,19 @@ def test_close_reroutes_rule_agents():
     assert not agent.stranded
 
 
+def test_close_points_the_orientation_at_the_new_target():
+    sim, room, wp, exit1, _ = make_sim()
+    west = sim.add_exit([(0, 4), (1, 4), (1, 6), (0, 6)], region=room)
+    route = jps.Route([(wp, jps.RoundRobin({exit1: 1, west: 1}))], start=wp)
+    agent = sim.add_agent(room.at(3, 5), route=route)
+    iterate_until_decided(sim, [agent], (exit1, west))
+    assert agent.stage == exit1
+    assert agent.route_orientation[0] > 0.5
+    exit1.close(informed=True)
+    assert agent.stage == west
+    assert agent.route_orientation[0] < -0.9
+
+
 def test_close_returns_stranded_agents_and_open_resumes_them():
     sim, room, _, exit1, exit2 = make_sim()
     agent = sim.add_agent(room.at(5, 2), route=jps.Route([exit1]))
