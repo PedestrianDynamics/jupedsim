@@ -125,12 +125,13 @@ def _is_point(area: Any) -> bool:
     )
 
 
-def _polygon(area: Any) -> shapely.Polygon:
+def _polygon(area: Any, method: str) -> shapely.Polygon:
     polygon = area if isinstance(area, shapely.Polygon) else None
     if polygon is None:
         polygon = shapely.Polygon(list(area))
     if polygon.interiors or not polygon.is_valid or polygon.is_empty:
-        raise ValueError("waypoint polygons must be simple and without holes")
+        kind = "exit" if method == "add_exit" else "waypoint"
+        raise ValueError(f"{kind} polygons must be simple and without holes")
     return polygon
 
 
@@ -175,7 +176,7 @@ def _single_area(
             raise ValueError("radius must be > 0")
         polygon = circle_to_polygon(center=tuple(area), radius=radius)
     else:
-        polygon = _polygon(area)
+        polygon = _polygon(area, method)
     _check_overlap(polygon, region)
     return [(polygon, region)]
 
@@ -201,7 +202,10 @@ def build_areas(
                 "carries its regions"
             )
         pairs = [
-            (_polygon(a), _check_region(r, method, surface, region_count))
+            (
+                _polygon(a, method),
+                _check_region(r, method, surface, region_count),
+            )
             for a, r in area
         ]
         for polygon, pair_region in pairs:

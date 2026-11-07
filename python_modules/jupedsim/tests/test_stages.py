@@ -56,7 +56,9 @@ def test_exception_on_exit_polygon_with_hole(square_room_5x5):
         [(-2, -2), (2, -2), (2, 2), (-2, 2)],
         [[(-1, -1), (1, -1), (1, 1), (-1, 1)]],
     )
-    with pytest.raises(ValueError, match="must be simple and without holes"):
+    with pytest.raises(
+        ValueError, match="^exit polygons must be simple and without holes$"
+    ):
         sim.add_exit([(exit_with_hole, room)])
 
 
