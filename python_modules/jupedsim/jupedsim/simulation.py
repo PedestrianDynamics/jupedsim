@@ -414,6 +414,29 @@ class Simulation:
         _check_region(value.region, name, self._surface, self._region_count)
         return self._obj.get_location(value.x, value.y, value.region.id)
 
+    def _stage_native_id(self, stage: Any) -> int:
+        _require_stage(stage)
+        if stage._simulation is not self:
+            raise ValueError("stage belongs to another simulation")
+        return stage.id
+
+    def _region_native_id(self, region: Any, method: str) -> int:
+        _check_region(region, method, self._surface, self._region_count)
+        return region.id
+
+    def _custom_ids(
+        self, stage: Any, region: Any, method: str
+    ) -> tuple[int, int]:
+        # Id branch: remove with the 1.x API.
+        if isinstance(stage, int) and isinstance(region, int):
+            return stage, region
+        return self._stage_native_id(stage), self._region_native_id(
+            region, method
+        )
+
+    def _by_region(self, grids: dict[int, Any]) -> dict[Region, Any]:
+        return {self._surface.region(id=i): grid for i, grid in grids.items()}
+
     def _first_stage(
         self, route: Route, start: Waypoint | Exit | None
     ) -> Waypoint | Exit:
@@ -522,46 +545,93 @@ class Simulation:
         """
         return self._obj.get_location(x, y, region_id)
 
-    def travel_times(self, stage_id: int) -> dict[int, TravelTimeGrid]:
+    def travel_time(self, stage: Waypoint | Exit, location: Location) -> float:
+        """Get the travel time in seconds from a location to a stage.
+
+        The value at the nearest walkable floor field cell, not interpolated, so
+        its resolution is the cell size. Solves the stage's floor field if no agent
+        has needed it yet.
+
+        Args:
+            stage: The waypoint or exit to walk to.
+            location: Where to start, e.g. ``floor0.at(x, y)``.
+
+        Returns:
+            0 inside the stage, ``inf`` if the stage cannot be reached from
+            ``location``.
+
+        Raises:
+            TypeError: if ``location`` is not a Location.
+            ValueError: if the stage belongs to another simulation, or the
+                simulation was not built from a WalkableSurface.
+            SimulationError: if the point is not on a routable cell.
+        """
+        stage_id = self._stage_native_id(stage)
+        native = self._native_location(location, "location")
+        return self._obj.travel_time(stage_id, native)
+
+    def travel_times(
+        self, stage: Waypoint | Exit | int
+    ) -> dict[Region, TravelTimeGrid] | dict[int, TravelTimeGrid]:
         """Get the travel times to a stage's area over the floor field grid of every region.
 
         Every region has its own grid. Solves the stage's floor field if no agent has
         needed it yet.
 
         Args:
-            stage_id: Id of the stage.
+            stage: The waypoint or exit. A stage id for a simulation not built
+                from a WalkableSurface.
 
         Returns:
-            The grid of every region by region id, in ascending order, each with its
-            placement, travel times in seconds and walking directions. Empty for a
-            stage without an area to route to, such as a direct steering stage.
+            The grid of every region by region handle (by region id for a stage id), in
+            ascending order, each with its placement, travel times in seconds and
+            walking directions. Empty for a stage without an area to route to, such
+            as a direct steering stage.
 
         Raises:
+            ValueError: if the stage belongs to another simulation.
             SimulationError: if the stage does not exist.
         """
-        return self._obj.travel_times(stage_id)
+        # Id branch: remove with the 1.x API.
+        if isinstance(stage, int):
+            return self._obj.travel_times(stage)
+        return self._by_region(
+            self._obj.travel_times(self._stage_native_id(stage))
+        )
 
-    def custom_speed_fields(self, stage_id: int) -> dict[int, SpeedGrid | None]:
+    def custom_speed_fields(
+        self, stage: Waypoint | Exit | int
+    ) -> dict[Region, SpeedGrid | None] | dict[int, SpeedGrid | None]:
         """Get the speed fields a stage has of its own, for every region.
 
         A stage can have its own speed field in a region instead of the default, see
         :func:`set_custom_speed_field`.
 
         Args:
-            stage_id: Id of the stage whose speed fields to get.
+            stage: The waypoint or exit whose speed fields to get. A stage id for a
+                simulation not built from a WalkableSurface.
 
         Returns:
-            The grid of every region by region id, in ascending order: ``None`` where
+            The grid of every region by region handle (by region id for a stage
+            id), in ascending order: ``None`` where
             the stage has no speed field of its own and uses the default, see
             :func:`default_speed_fields`. Empty for a stage without an area to route
             to, such as a direct steering stage.
 
         Raises:
+            ValueError: if the stage belongs to another simulation.
             SimulationError: if the stage does not exist.
         """
-        return self._obj.custom_speed_fields(stage_id)
+        # Id branch: remove with the 1.x API.
+        if isinstance(stage, int):
+            return self._obj.custom_speed_fields(stage)
+        return self._by_region(
+            self._obj.custom_speed_fields(self._stage_native_id(stage))
+        )
 
-    def default_speed_fields(self) -> dict[int, SpeedGrid]:
+    def default_speed_fields(
+        self,
+    ) -> dict[Region, SpeedGrid] | dict[int, SpeedGrid]:
         """Get the default walking speeds the floor fields are computed with, for every region.
 
         Every region has a default speed field, which starts out slowing agents down
@@ -570,12 +640,17 @@ class Simulation:
         :func:`custom_speed_fields`.
 
         Returns:
-            The grid of every region by region id, in ascending order.
+            The grid of every region by region handle (by region id if the
+            simulation was not built from a WalkableSurface), in ascending order.
         """
-        return self._obj.default_speed_fields()
+        grids = self._obj.default_speed_fields()
+        # Id branch: remove with the 1.x API.
+        if self._surface is None:
+            return grids
+        return self._by_region(grids)
 
     def set_default_speed_field(
-        self, region_id: int, values: npt.ArrayLike
+        self, region: Region | int, values: npt.ArrayLike
     ) -> None:
         """Set the default walking speeds a region's floor fields are computed with.
 
@@ -587,7 +662,8 @@ class Simulation:
         The speeds only change the routes, not how fast agents walk.
 
         Args:
-            region_id: Region whose default speed field to set.
+            region: Region whose default speed field to set. A region id for a
+                simulation not built from a WalkableSurface.
             values: Speeds in m/s in an array of shape ``(height, width)`` of the
                 region's grid, see :class:`~jupedsim.SpeedGrid`. Finite and at least
                 0.01 m/s on every walkable cell: slower cells would make travel times
@@ -595,13 +671,21 @@ class Simulation:
                 walkable is fixed by the geometry.
 
         Raises:
-            ValueError: if ``values`` has the wrong shape.
+            TypeError: if ``region`` is not a Region.
+            ValueError: if ``values`` has the wrong shape or the region belongs
+                to another surface.
             SimulationError: if a value is not allowed or the region does not exist.
         """
-        self._obj.set_default_speed_field(region_id, values)
+        # Id branch: remove with the 1.x API.
+        if not isinstance(region, int):
+            region = self._region_native_id(region, "set_default_speed_field")
+        self._obj.set_default_speed_field(region, values)
 
     def set_custom_speed_field(
-        self, stage_id: int, region_id: int, values: npt.ArrayLike
+        self,
+        stage: Waypoint | Exit | int,
+        region: Region | int,
+        values: npt.ArrayLike,
     ) -> None:
         """Set the walking speeds one stage's floor field is computed with in a region.
 
@@ -613,32 +697,47 @@ class Simulation:
         The speeds only change the routes, not how fast agents walk.
 
         Args:
-            stage_id: Stage whose speed field to set.
-            region_id: Region whose speed field to set.
+            stage: Stage whose speed field to set. A stage id for a simulation
+                not built from a WalkableSurface.
+            region: Region whose speed field to set. A region id likewise.
             values: Speeds in m/s, with the same rules as for
                 :func:`set_default_speed_field`.
 
         Raises:
-            ValueError: if ``values`` has the wrong shape.
+            TypeError: if ``region`` is not a Region.
+            ValueError: if ``values`` has the wrong shape, or the stage or region
+                belongs to another simulation or surface.
             SimulationError: if a value is not allowed, the region or stage does not
                 exist, or the stage has no area to route to.
         """
+        stage_id, region_id = self._custom_ids(
+            stage, region, "set_custom_speed_field"
+        )
         self._obj.set_custom_speed_field(stage_id, region_id, values)
 
-    def clear_custom_speed_field(self, stage_id: int, region_id: int) -> None:
+    def clear_custom_speed_field(
+        self, stage: Waypoint | Exit | int, region: Region | int
+    ) -> None:
         """Remove a stage's own speed field in a region, so it uses the default again.
 
         The stage's floor field is computed again when next needed. Nothing changes
         if the stage has no speed field of its own in this region.
 
         Args:
-            stage_id: Stage whose speed field to remove.
-            region_id: Region whose speed field to remove.
+            stage: Stage whose speed field to remove. A stage id for a simulation
+                not built from a WalkableSurface.
+            region: Region whose speed field to remove. A region id likewise.
 
         Raises:
+            TypeError: if ``region`` is not a Region.
+            ValueError: if the stage or region belongs to another simulation or
+                surface.
             SimulationError: if the region or stage does not exist, or the stage has
                 no area to route to.
         """
+        stage_id, region_id = self._custom_ids(
+            stage, region, "clear_custom_speed_field"
+        )
         self._obj.clear_custom_speed_field(stage_id, region_id)
 
     def mark_agent_for_removal(self, agent_id: int):

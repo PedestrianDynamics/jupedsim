@@ -133,6 +133,9 @@ public:
     /// Travel times to the area of stage @p stage_id over the grid of every region, by region id.
     /// Empty for a stage without an area, such as direct steering.
     std::map<std::size_t, TravelTimeGrid> travel_times(BaseStage::ID stage_id);
+    /// Travel time in seconds from @p where to the area of stage @p stage_id, see
+    /// FloorfieldRoutingEngine::travel_time. Throws for a stage without an area.
+    double travel_time(BaseStage::ID stage_id, const Location& where);
     /// Speed fields every stage without an override is routed with, by region id.
     std::map<std::size_t, SpeedGrid> default_speed_fields() const;
     /// Placement of the floor field grid of @p region_id, which its travel times and speed

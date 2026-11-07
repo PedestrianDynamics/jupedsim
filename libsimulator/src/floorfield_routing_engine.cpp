@@ -114,9 +114,13 @@ Destination FloorfieldRoutingEngine::register_destination(const std::vector<Area
 
 bool FloorfieldRoutingEngine::contains(const Location& where, std::size_t id)
 {
+    return travel_time(where, id) == 0.0;
+}
+
+double FloorfieldRoutingEngine::travel_time(const Location& where, std::size_t id)
+{
     const auto xy = where.xy();
-    return checked([&] { return _field->travel_time(where.region(), {xy.x(), xy.y()}, id); }) ==
-           0.0;
+    return checked([&] { return _field->travel_time(where.region(), {xy.x(), xy.y()}, id); });
 }
 
 Vector FloorfieldRoutingEngine::get_orientation(const Location& from, std::size_t id)

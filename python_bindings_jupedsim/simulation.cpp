@@ -249,6 +249,13 @@ void init_simulation(py::module_& m)
             [](Simulation& sim, uint64_t stage_id) { return sim.travel_times(stage_id); },
             py::arg("stage_id"))
         .def(
+            "travel_time",
+            [](Simulation& sim, uint64_t stage_id, const Location& where) {
+                return sim.travel_time(stage_id, where);
+            },
+            py::arg("stage_id"),
+            py::arg("where"))
+        .def(
             "set_agent_target",
             [](Simulation& sim, uint64_t agent_id, std::tuple<double, double> target) {
                 sim.set_agent_target(agent_id, into_point(target));
