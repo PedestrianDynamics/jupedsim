@@ -143,15 +143,25 @@ def test_lookup_survives_an_unconnected_region_added_later():
     assert sim.add_agent(floor0.at(3, 5), target=floor0.at(5, 5)).alive
 
 
-def test_connector_lookup_on_unconnected_surface():
-    surface, _, _ = two_floor_surface(with_surface=True)
-    connector = surface.region("staircase")
-    surface.add_region(polygon=shapely.box(30, 0, 40, 10), name="later")
-    with pytest.raises(ValueError, match="not connected yet") as info:
-        connector.at(15, 7)
-    assert info.value.__cause__ is not None
-    with pytest.raises(ValueError, match="not connected yet"):
-        surface.regions_at((3, 5))
+def test_connector_lookup_survives_an_unconnected_region_added_later():
+    surface, floor0, floor1 = two_floor_surface(with_surface=True)
+    staircase = surface.region("staircase")
+    sim = jps.Simulation(jps.CollisionFreeSpeedModel(), surface)
+    later = surface.add_region(polygon=shapely.box(30, 0, 40, 10), name="later")
+    assert staircase.at(15, 7).region == staircase
+    assert staircase.at(12, 6).xy == (12.0, 6.0)
+    with pytest.raises(ValueError, match=r"\(11, 7\) is not in staircase"):
+        staircase.at(11, 7)
+    assert surface.regions_at((15, 7)) == (staircase,)
+    assert surface.regions_at((3, 5)) == (floor0, floor1)
+    assert surface.regions_at((35, 5)) == (later,)
+    # The existing simulation takes locations of its own regions only.
+    for location in (staircase.at(15, 7), floor1.at(3, 5)):
+        assert sim.add_agent(location, target=floor0.at(5, 5)).alive
+    with pytest.raises(
+        ValueError, match="later is not part of this simulation's geometry"
+    ):
+        sim.add_agent(later.at(35, 5), target=floor0.at(5, 5))
 
 
 def test_connect_rejects_foreign_region():

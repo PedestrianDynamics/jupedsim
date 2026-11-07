@@ -8,7 +8,7 @@ from typing import Any
 
 import shapely
 
-from jupedsim.pyjupedsim import Geometry, SimulationError
+from jupedsim.pyjupedsim import SimulationError
 from jupedsim.pyjupedsim import WalkableSurface as _NativeWalkableSurface
 
 
@@ -45,9 +45,12 @@ class Region:
         name: str | None,
         height: float | None,
         polygon: shapely.Polygon | None = None,
+        footprint: shapely.Polygon | None = None,
     ) -> None:
         self._surface = surface
         self._polygon = polygon
+        # Where at() places points; a connector has a footprint only.
+        self._footprint = polygon if footprint is None else footprint
         self._id = id
         self._name = name
         self._height = height
@@ -77,9 +80,7 @@ class Region:
         ValueError
             If the point is not inside this region.
         """
-        if not self._surface._covers(
-            self, x, y, f"place ({x}, {y}) in {self.label}"
-        ):
+        if not self._surface._covers(self, x, y):
             raise ValueError(f"({x}, {y}) is not in {self.label}")
         return Location(float(x), float(y), self)
 
@@ -106,7 +107,6 @@ class WalkableSurface:
     def __init__(self) -> None:
         self._obj = _NativeWalkableSurface()
         self._regions: list[Region] = []
-        self._geometry: Geometry | None = None
 
     def add_region(
         self,
@@ -153,7 +153,8 @@ class WalkableSurface:
             raise ValueError(
                 f"{edge} is not an edge of {region.label}'s boundary"
             ) from error
-        return self._register(connector_id, name, None)
+        footprint = _connector_footprint(from_edge, to_edge)
+        return self._register(connector_id, name, None, footprint=footprint)
 
     @property
     def regions(self) -> tuple[Region, ...]:
@@ -176,8 +177,7 @@ class WalkableSurface:
     def regions_at(self, point: tuple[float, float]) -> tuple[Region, ...]:
         """Return every region covering ``point``, by ascending id."""
         x, y = point
-        action = f"look up regions at ({x}, {y})"
-        return tuple(r for r in self._regions if self._covers(r, x, y, action))
+        return tuple(r for r in self._regions if self._covers(r, x, y))
 
     def _region_by_id(self, id: int) -> Region:
         if not 0 <= id < len(self._regions):
@@ -190,32 +190,23 @@ class WalkableSurface:
         name: str | None,
         height: float | None,
         polygon: shapely.Polygon | None = None,
+        footprint: shapely.Polygon | None = None,
     ) -> Region:
-        region = Region(self, region_id, name, height, polygon)
+        region = Region(self, region_id, name, height, polygon, footprint)
         self._regions.append(region)
-        self._geometry = None
         return region
 
-    def _covers(self, region: Region, x: float, y: float, action: str) -> bool:
-        # A region's own polygon decides, so an unconnected surface does not
-        # matter; connectors have no polygon here and need the whole surface.
-        if region._polygon is not None:
-            return region._polygon.covers(shapely.Point(x, y))
-        geometry = self._native_geometry(action)
-        try:
-            geometry.get_location(x, y, region_id=region.id)
-        except SimulationError:
-            return False
-        return True
+    def _covers(self, region: Region, x: float, y: float) -> bool:
+        # A region's own geometry decides, so later, unconnected regions do
+        # not matter; the native surface checks connectivity in Simulation().
+        return region._footprint.covers(shapely.Point(x, y))
 
-    def _native_geometry(self, action: str) -> Geometry:
-        if self._geometry is not None:
-            return self._geometry
-        try:
-            self._geometry = self._obj.create_geometry()
-        except SimulationError as error:
-            raise ValueError(
-                f"cannot {action}: the surface is not connected yet "
-                "(connect its regions first)"
-            ) from error
-        return self._geometry
+
+def _connector_footprint(from_edge: Any, to_edge: Any) -> shapely.Polygon:
+    """The connector's polygon, its corners in the native surface's order."""
+    a, b = (tuple(map(float, p)) for p in from_edge)
+    c, d = (tuple(map(float, p)) for p in to_edge)
+    # As the native surface does: flip from_edge if the sides would cross.
+    if shapely.LineString([b, c]).intersects(shapely.LineString([d, a])):
+        a, b = b, a
+    return shapely.Polygon([a, b, c, d])
