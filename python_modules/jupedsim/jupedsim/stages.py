@@ -4,12 +4,15 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import shapely
 
 from jupedsim.convenience import circle_to_polygon
 from jupedsim.surface import Region
+
+if TYPE_CHECKING:
+    from jupedsim.agent import Agent
 
 
 class _Stage:
@@ -49,6 +52,40 @@ class Waypoint(_Stage):
 
 class Exit(_Stage):
     """An exit stage, created by :meth:`Simulation.add_exit`."""
+
+    @property
+    def closed(self) -> bool:
+        """Whether the exit is closed, read-only; change it with :meth:`close`."""
+        return self._simulation._obj.stage_closed(self._id)
+
+    @closed.setter
+    def closed(self, value: Any) -> None:
+        raise AttributeError(f"use {self._name or 'exit'}.close()")
+
+    def close(self, *, informed: bool) -> tuple[Agent, ...]:
+        """Close the exit for all routes; rules skip it as a target.
+
+        Args:
+            informed: If True, agents assigned to the exit by a rule are
+                reassigned by that rule now; if False, they walk to the exit
+                and are reassigned there.
+
+        Returns:
+            The agents stranded now, in the order the simulation reports
+            them. Closing a closed exit does nothing and returns ``()``.
+        """
+        ids = self._simulation._obj.close_exit(self._id, informed)
+        return tuple(self._simulation.agent(i) for i in ids)
+
+    def open(self) -> tuple[Agent, ...]:
+        """Open the exit again; stranded agents whose rule finds it resume.
+
+        Returns:
+            The agents that resumed. Opening an open exit does nothing and
+            returns ``()``.
+        """
+        ids = self._simulation._obj.open_exit(self._id)
+        return tuple(self._simulation.agent(i) for i in ids)
 
 
 @dataclass(frozen=True)

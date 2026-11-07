@@ -136,6 +136,11 @@ class Agent:
         return self._simulation.stage(id=native.stage_id)
 
     @property
+    def stranded(self) -> bool:
+        """True once the agent cannot continue, e.g. its exit is closed."""
+        return self._resolve().stranded
+
+    @property
     def target(self) -> _SurfaceLocation | None:
         """The point the agent steers to, None while it follows a route."""
         native = self._resolve()

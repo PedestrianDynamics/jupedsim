@@ -188,6 +188,37 @@ void init_simulation(py::module_& m)
             py::arg("agent_id"),
             py::arg("route_id"),
             py::arg("stage_id"))
+        .def(
+            "close_exit",
+            [](Simulation& sim, uint64_t stage_id, bool informed) {
+                std::vector<uint64_t> ids;
+                for(const auto id : sim.close_exit(stage_id, informed)) {
+                    ids.emplace_back(id.get_id());
+                }
+                return ids;
+            },
+            py::arg("stage_id"),
+            py::arg("informed"))
+        .def(
+            "open_exit",
+            [](Simulation& sim, uint64_t stage_id) {
+                std::vector<uint64_t> ids;
+                for(const auto id : sim.open_exit(stage_id)) {
+                    ids.emplace_back(id.get_id());
+                }
+                return ids;
+            },
+            py::arg("stage_id"))
+        .def(
+            "stage_closed",
+            [](const Simulation& sim, uint64_t stage_id) {
+                const auto* stage = sim.stage(stage_id);
+                if(stage == nullptr) {
+                    throw SimulationError("Unknown stage id {}", stage_id);
+                }
+                return stage->closed();
+            },
+            py::arg("stage_id"))
         .def("agent_count", [](const Simulation& sim) { return sim.agent_count(); })
         .def("elapsed_time", [](const Simulation& sim) { return sim.elapsed_time(); })
         .def("delta_time", [](const Simulation& sim) { return sim.dt(); })
