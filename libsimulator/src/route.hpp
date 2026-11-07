@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
+#include "destination.hpp"
 #include "generic_agent.hpp"
 #include "routing_engine.hpp"
-#include "routing_target.hpp"
 #include "simulation_error.hpp"
 #include "stage.hpp"
 #include "unique_id.hpp"

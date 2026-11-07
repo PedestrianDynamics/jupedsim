@@ -3,7 +3,9 @@
 
 #include "destination.hpp"
 #include "generic_agent.hpp"
+#include "geometry/location.hpp"
 #include "routing_target.hpp"
+#include "simulation_clock.hpp"
 
 #include <cassert>
 #include <variant>

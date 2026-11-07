@@ -13,6 +13,7 @@
 #include "polygon.hpp"
 #include "route.hpp"
 #include "rule.hpp"
+#include "simulation_error.hpp"
 #include "stage.hpp"
 #include "stage_description.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep

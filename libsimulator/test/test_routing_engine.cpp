@@ -5,6 +5,7 @@
 #include "geometry/area_piece.hpp"
 #include "geometry/location.hpp"
 #include "geometry_fixtures.hpp"
+#include "kernel.hpp"
 #include "polygon.hpp"
 #include "route.hpp"
 #include "routing_engine.hpp"
