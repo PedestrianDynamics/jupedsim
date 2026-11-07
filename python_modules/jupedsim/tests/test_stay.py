@@ -220,6 +220,19 @@ def test_held_stay_waypoint_arrives_on_release():
     assert agent.stage == s["wp1"]
 
 
+def test_hold_after_arrival_does_not_stop_the_agent():
+    sim, room, s = make_sim()
+    route = jps.Route([s["wp1"], jps.STAY])
+    agent = sim.add_agent(room.at(2, 5), route=route)
+    iterate_until(sim, lambda: agent.arrived)
+    route.hold(s["wp1"])
+    for _ in range(10):
+        sim.iterate()
+    assert agent.arrived
+    assert not agent.held
+    assert route.held_at(s["wp1"]) == ()
+
+
 def test_pushed_out_agent_stays_arrived_and_returns():
     surface = WalkableSurface()
     room = surface.add_region(polygon=ROOM, name="room")

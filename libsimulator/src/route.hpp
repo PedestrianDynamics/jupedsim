@@ -398,10 +398,12 @@ public:
         if(!stage->is_completed(agent)) {
             return {stage, agent.decision_stage};
         }
-        if(holds(stage->id())) {
+        const bool stays = dynamic_cast<const Stay*>(node.rule.get()) != nullptr;
+        // A hold placed after an agent has arrived does not stop it.
+        if(holds(stage->id()) && !(stays && agent.arrived)) {
             return {stage, stage->id(), true};
         }
-        if(dynamic_cast<const Stay*>(node.rule.get()) != nullptr) {
+        if(stays) {
             return {stage, agent.decision_stage, false, true};
         }
         const auto at = stage->closed() ? agent.decision_stage.value_or(stage->id()) : stage->id();
