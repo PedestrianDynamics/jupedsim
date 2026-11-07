@@ -76,3 +76,33 @@ def test_remove_has_no_exit():
     assert removal.id == agent.id
     assert removal.exit is None
     assert removal.time == pytest.approx(removal_time)
+
+
+def test_remove_after_exit_keeps_one_record():
+    sim, room, exit1 = make_sim()
+    agent = sim.add_agent(room.at(7, 5), route=jps.Route([exit1]))
+    iterate_until_removed(sim)
+    agent.remove()
+    (removal,) = sim.removed_agents()
+    assert removal.exit is exit1
+
+
+def test_remove_twice_keeps_one_record():
+    sim, room, exit1 = make_sim()
+    agent = sim.add_agent(room.at(2, 5), route=jps.Route([exit1]))
+    agent.remove()
+    agent.remove()
+    (removal,) = sim.removed_agents()
+    assert removal.id == agent.id
+    assert removal.exit is None
+
+
+def test_two_exits_in_one_step():
+    sim, room, exit1 = make_sim()
+    exit2 = sim.add_exit([(0, 4), (1, 4), (1, 6), (0, 6)], region=room)
+    a = sim.add_agent(room.at(7, 5), route=jps.Route([exit1]))
+    b = sim.add_agent(room.at(3, 5), route=jps.Route([exit2]))
+    iterate_until_removed(sim)
+    exits = {r.id: r.exit for r in sim.removed_agents()}
+    assert exits[a.id] is exit1
+    assert exits[b.id] is exit2

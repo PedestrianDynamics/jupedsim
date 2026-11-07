@@ -305,6 +305,13 @@ void Simulation::mark_agent_for_removal(GenericAgent::ID id)
         throw SimulationError("Unknown agent id {}", id);
     }
 
+    const bool has_record = std::any_of(
+        std::begin(_removed_agents_in_last_iteration),
+        std::end(_removed_agents_in_last_iteration),
+        [id](const auto& record) { return record.id == id; });
+    if(has_record) {
+        return;
+    }
     _removed_agents_in_last_iteration.push_back({id, std::nullopt, _clock.elapsed_time()});
 }
 

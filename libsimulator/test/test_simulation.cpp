@@ -188,6 +188,55 @@ TEST(Simulation, MarkingAnAgentForRemovalRecordsNoExit)
     EXPECT_DOUBLE_EQ(sim->removed_agents().front().time, sim->elapsed_time());
 }
 
+TEST(Simulation, AnAgentHasOneRemovalRecord)
+{
+    auto [sim, room] = on_a_flat_room();
+    const Polygon area{test_geometries::rectangle_points({9.5, 9.5}, {10.5, 10.5})};
+    const auto exit = sim->add_stage(ExitDescription{{{area, room}}});
+    const auto route = sim->add_route({{exit, NoRuleDescription{}}});
+    const auto id = sim->add_agent(route, exit, Point{7, 10}, State{}, room);
+    const auto other = sim->add_agent(route, exit, Point{7, 12}, State{}, room);
+    sim->mark_agent_for_removal(other);
+    sim->mark_agent_for_removal(other);
+    ASSERT_EQ(sim->removed_agents().size(), 1u);
+    EXPECT_FALSE(sim->removed_agents().front().exit.has_value());
+
+    sim->iterate();
+    while(sim->removed_agents().empty()) {
+        sim->iterate();
+        ASSERT_LT(sim->iteration(), 5000u) << "never reached the exit";
+    }
+    sim->mark_agent_for_removal(id);
+
+    // The exit record wins over the later removal.
+    ASSERT_EQ(sim->removed_agents().size(), 1u);
+    EXPECT_EQ(sim->removed_agents().front().id, id);
+    EXPECT_EQ(sim->removed_agents().front().exit, exit);
+}
+
+TEST(Simulation, TwoAgentsReachTheirOwnExits)
+{
+    auto [sim, room] = on_a_flat_room();
+    const Polygon left{test_geometries::rectangle_points({4.5, 9.5}, {5.5, 10.5})};
+    const Polygon right{test_geometries::rectangle_points({14.5, 9.5}, {15.5, 10.5})};
+    const auto exit_left = sim->add_stage(ExitDescription{{{left, room}}});
+    const auto exit_right = sim->add_stage(ExitDescription{{{right, room}}});
+    const auto route_left = sim->add_route({{exit_left, NoRuleDescription{}}});
+    const auto route_right = sim->add_route({{exit_right, NoRuleDescription{}}});
+    const auto a = sim->add_agent(route_left, exit_left, Point{3, 10}, State{}, room);
+    const auto b = sim->add_agent(route_right, exit_right, Point{17, 10}, State{}, room);
+
+    while(sim->removed_agents().empty()) {
+        sim->iterate();
+        ASSERT_LT(sim->iteration(), 5000u) << "never reached an exit";
+    }
+    ASSERT_EQ(sim->removed_agents().size(), 2u);
+    for(const auto& record : sim->removed_agents()) {
+        EXPECT_EQ(record.exit, record.id == a ? exit_left : exit_right);
+        EXPECT_TRUE(record.id == a || record.id == b);
+    }
+}
+
 TEST(Simulation, AnExitMayBeConcave)
 {
     const auto flat = on_a_flat_room();
