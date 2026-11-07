@@ -1,4 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
+import re
+
 import jupedsim as jps
 import pytest
 import shapely
@@ -6,6 +8,7 @@ from jupedsim.surface import WalkableSurface
 
 FOOTPRINT = [(0, 0), (20, 0), (20, 10), (0, 10)]
 DOOR = [(1, 1), (2, 1), (2, 2), (1, 2)]
+DOOR_NEAR = [(3, 3), (4, 3), (4, 4), (3, 4)]
 DOOR_FAR = [(13, 6.5), (14, 6.5), (14, 7.5), (13, 7.5)]
 
 
@@ -214,3 +217,45 @@ def test_empty_pair_list_rejected():
     sim, *_ = make_sim()
     with pytest.raises(ValueError, match=r"no areas given"):
         sim.add_waypoint([])
+
+
+def test_duplicate_exit_name_is_rejected():
+    sim, _, floor0, _ = make_sim()
+    first = sim.add_exit(DOOR, region=floor0, name="exit")
+    with pytest.raises(
+        ValueError,
+        match=rf"stage name 'exit' is already used by {re.escape(repr(first))}",
+    ):
+        sim.add_exit(DOOR_NEAR, region=floor0, name="exit")
+    assert sim.stages == (first,)
+    assert sim.add_exit(DOOR_NEAR, region=floor0).id == first.id + 1
+
+
+def test_duplicate_waypoint_name_is_rejected():
+    sim, _, floor0, _ = make_sim()
+    first = sim.add_waypoint((5, 5), radius=0.5, region=floor0, name="wp")
+    with pytest.raises(
+        ValueError,
+        match=rf"stage name 'wp' is already used by {re.escape(repr(first))}",
+    ):
+        sim.add_waypoint((7, 5), radius=0.5, region=floor0, name="wp")
+    exit_stage = sim.add_exit(DOOR, region=floor0, name="out")
+    with pytest.raises(
+        ValueError,
+        match=rf"stage name 'wp' is already used by {re.escape(repr(first))}",
+    ):
+        sim.add_exit(DOOR_NEAR, region=floor0, name="wp")
+    with pytest.raises(
+        ValueError,
+        match=rf"stage name 'out' is already used by "
+        rf"{re.escape(repr(exit_stage))}",
+    ):
+        sim.add_waypoint((7, 5), radius=0.5, region=floor0, name="out")
+    assert sim.stages == (first, exit_stage)
+
+
+def test_unnamed_stages_may_repeat():
+    sim, _, floor0, _ = make_sim()
+    sim.add_exit(DOOR, region=floor0)
+    sim.add_exit(DOOR_NEAR, region=floor0)
+    assert len(sim.stages) == 2

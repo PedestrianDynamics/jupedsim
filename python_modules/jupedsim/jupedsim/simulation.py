@@ -150,13 +150,15 @@ class Simulation:
                 a point ``(x, y)`` together with ``radius``.
             region: Region of a single area or point.
             radius: Radius of the disc around a point.
-            name: Optional name used in reprs and error messages.
+            name: Optional name used in reprs and error messages; unique
+                among the stages of this simulation.
 
         Raises:
             TypeError: If ``region`` is missing or not a Region handle.
             ValueError: If the area is invalid or does not overlap its
-                region.
+                region, or another stage already has ``name``.
         """
+        self._check_stage_name(name)
         areas = self._build_areas(area, region, radius, "add_waypoint")
         stage_id = self._native_stage(self._obj.create_waypoint_stage, areas)
         handle = Waypoint(self, stage_id, name)
@@ -175,13 +177,15 @@ class Simulation:
         Args:
             area: A list of ``(area, region)`` pairs or a single polygon.
             region: Region of a single area.
-            name: Optional name used in reprs and error messages.
+            name: Optional name used in reprs and error messages; unique
+                among the stages of this simulation.
 
         Raises:
             TypeError: If ``region`` is missing or not a Region handle.
             ValueError: If the area is invalid or does not overlap its
-                region.
+                region, or another stage already has ``name``.
         """
+        self._check_stage_name(name)
         areas = self._build_areas(area, region, None, "add_exit")
         stage_id = self._native_stage(self._obj.create_exit_stage, areas)
         handle = Exit(self, stage_id, name)
@@ -214,6 +218,15 @@ class Simulation:
             raise KeyError(f"no stage with id {id}")
         known = ", ".join(s.name or repr(s) for s in self._stages)
         raise KeyError(f"no stage named {name}; stages are {known}")
+
+    def _check_stage_name(self, name: str | None) -> None:
+        if name is None:
+            return
+        for stage in self._stages:
+            if stage.name == name:
+                raise ValueError(
+                    f"stage name '{name}' is already used by {stage!r}"
+                )
 
     def _native_stage(self, add: Any, areas: Any) -> int:
         regions = {r.id: r for r in self._surface.regions}
