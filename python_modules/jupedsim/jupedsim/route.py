@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import numbers
 from collections import Counter
 from collections.abc import Iterable, Mapping, Sequence
 from typing import TYPE_CHECKING, Any
@@ -44,7 +45,7 @@ MAX_WEIGHT = 1_000_000_000
 
 
 def _check_weight(weight: Any) -> None:
-    if isinstance(weight, bool) or not isinstance(weight, int):
+    if isinstance(weight, bool) or not isinstance(weight, numbers.Integral):
         raise ValueError("weights must be integers")
     if weight < 0:
         raise ValueError("weights must be >= 0")
@@ -68,7 +69,7 @@ class RoundRobin:
             _check_weight(weight)
         if not any(weight > 0 for weight in weights.values()):
             raise ValueError("at least one weight must be > 0")
-        self._weights = dict(weights)
+        self._weights = {stage: int(w) for stage, w in weights.items()}
 
     @property
     def weights(self) -> dict[_Stage, int]:
@@ -328,7 +329,7 @@ def _patched(
                 f"{_labels(current)} (see route.weights({label}))"
             )
         _check_weight(weight)
-    proposed = {**current, **patch}
+    proposed = {**current, **{target: int(w) for target, w in patch.items()}}
     if not any(weight > 0 for weight in proposed.values()):
         raise ValueError(
             f"at least one target at {label} needs weight > 0; "

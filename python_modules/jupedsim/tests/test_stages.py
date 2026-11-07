@@ -135,6 +135,14 @@ def test_can_add_waypoint(square_room_5x5_with_obstacle, waypoint_position):
     assert type(waypoint) is jps.Waypoint
 
 
+def test_a_waypoint_at_a_numpy_point(square_room_5x5):
+    simulation, room = square_room_5x5
+    waypoint = simulation.add_waypoint(
+        (np.int64(1), np.float32(1.5)), radius=0.5, region=room
+    )
+    assert type(waypoint) is jps.Waypoint
+
+
 def test_a_waypoint_given_by_its_area_is_reached(square_room_5x5):
     sim, room = square_room_5x5
     waypoint = sim.add_waypoint(

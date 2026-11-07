@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 import jupedsim as jps
+import numpy as np
 import pytest
 import shapely
 from jupedsim.pyjupedsim import Rule as NativeRule
@@ -431,6 +432,19 @@ def test_non_integer_weights(stages):
     _, s = stages
     with pytest.raises(ValueError, match="^weights must be integers$"):
         RoundRobin({s["exit1"]: 0.6, s["exit2"]: 0.4})
+
+
+def test_numpy_integer_weights(stages):
+    _, s = stages
+    rule = RoundRobin({s["exit1"]: np.int64(3), s["exit2"]: np.uint8(2)})
+    assert rule.weights == {s["exit1"]: 3, s["exit2"]: 2}
+    assert all(type(w) is int for w in rule.weights.values())
+
+
+def test_bool_weights_are_rejected(stages):
+    _, s = stages
+    with pytest.raises(ValueError, match="^weights must be integers$"):
+        RoundRobin({s["exit1"]: True, s["exit2"]: 1})
 
 
 def test_all_zero_weights(stages):

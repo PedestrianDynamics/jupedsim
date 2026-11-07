@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import numbers
 from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
@@ -121,7 +122,7 @@ def _is_point(area: Any) -> bool:
     return (
         isinstance(area, Sequence)
         and len(area) == 2
-        and all(isinstance(c, (int, float)) for c in area)
+        and all(isinstance(c, numbers.Real) for c in area)
     )
 
 
