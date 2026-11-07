@@ -29,6 +29,7 @@
 #include <cstdint>
 #include <map>
 #include <memory>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -162,13 +163,19 @@ void init_simulation(py::module_& m)
         .def(
             "removed_agents",
             [](const Simulation& sim) {
-                auto removed_agent_ids = sim.removed_agents();
-                auto agent_ids = std::vector<GenericAgent::ID::UnderlyingType>();
-                agent_ids.reserve(removed_agent_ids.size());
-                for(auto agent_id : removed_agent_ids) {
-                    agent_ids.emplace_back(agent_id.get_id());
+                using Record = std::tuple<
+                    GenericAgent::ID::UnderlyingType,
+                    std::optional<BaseStage::ID::UnderlyingType>,
+                    double>;
+                std::vector<Record> records;
+                for(const auto& record : sim.removed_agents()) {
+                    std::optional<BaseStage::ID::UnderlyingType> exit;
+                    if(record.exit) {
+                        exit = record.exit->get_id();
+                    }
+                    records.emplace_back(record.id.get_id(), exit, record.time);
                 }
-                return agent_ids;
+                return records;
             })
         .def("iterate", [](Simulation& sim) { sim.iterate(); })
         .def("close", [](Simulation& sim) { sim.close(); })

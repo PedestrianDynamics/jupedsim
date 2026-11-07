@@ -96,10 +96,11 @@ TEST_F(StagesOnTwoStoreys, WaypointIsReachedOnlyFromItsOwnFloor)
 
 TEST_F(StagesOnTwoStoreys, PassingOverOrUnderAnExitDoesNotTakeIt)
 {
-    std::vector<GenericAgent::ID> removed{};
+    std::vector<RemovalRecord> removed{};
+    const SimulationClock clock{0.01};
     const Polygon area{test_geometries::rectangle_points({2, 2}, {4, 4})};
-    Exit lower(destination_of(engine, *rooms.geometry, area, rooms.room_1), removed);
-    Exit upper_exit(destination_of(engine, *rooms.geometry, area, rooms.room_2), removed);
+    Exit lower(destination_of(engine, *rooms.geometry, area, rooms.room_1), removed, clock);
+    Exit upper_exit(destination_of(engine, *rooms.geometry, area, rooms.room_2), removed, clock);
 
     EXPECT_FALSE(lower.is_completed(agent_at({3, 3}, rooms.room_2, lower.id())));
     EXPECT_FALSE(upper_exit.is_completed(agent_at({3, 3}, rooms.room_1, upper_exit.id())));

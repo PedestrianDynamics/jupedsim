@@ -68,7 +68,7 @@ private:
     std::unique_ptr<Geometry> _geometry{};
     std::unique_ptr<RoutingEngine> _routing_engine{};
     AgentContainer<GenericAgent> _agents;
-    std::vector<GenericAgent::ID> _removed_agents_in_last_iteration;
+    std::vector<RemovalRecord> _removed_agents_in_last_iteration;
     std::unordered_map<Route::ID, std::unique_ptr<Route>> _routes;
     Timer _timer{};
     State _state{State::Ready};
@@ -101,7 +101,7 @@ public:
     Route::ID add_route(const std::map<BaseStage::ID, RuleDescription>& stages);
     BaseStage::ID add_stage(const StageDescription& stage_description);
     void mark_agent_for_removal(GenericAgent::ID id);
-    const std::vector<GenericAgent::ID>& removed_agents() const;
+    const std::vector<RemovalRecord>& removed_agents() const;
     size_t agent_count() const;
     double elapsed_time() const;
     double dt() const;

@@ -88,6 +88,11 @@ class _Api1x:
         return agent.stage_id
 
     @staticmethod
+    def removed_exit(rec, removed):
+        """Exit stage id the removed agent was targeting, or None."""
+        return rec.targets.get(removed)
+
+    @staticmethod
     def xy(agent):
         return agent.position[0], agent.position[1]
 
@@ -125,6 +130,11 @@ class _Api2x:
         """Handle of the stage the agent targets, DIRECT without one."""
         stage = agent.stage
         return self.DIRECT if stage is None else stage
+
+    @staticmethod
+    def removed_exit(rec, removed):
+        """Exit handle of the removal record, or None."""
+        return removed.exit
 
     @staticmethod
     def xy(agent):
@@ -212,10 +222,9 @@ class _Recorder:
             return rec.stages.index(stage)
         return "unknown"
 
-    @staticmethod
-    def note_removed(sim, rec, it):
-        for agent_id in sim.removed_agents():
-            stage = rec.targets.get(agent_id)
+    def note_removed(self, sim, rec, it):
+        for removed in sim.removed_agents():
+            stage = self.api.removed_exit(rec, removed)
             key = str(rec.exits.index(stage)) if stage in rec.exits else "other"
             rec.exit_counts.setdefault(key, []).append(it)
 

@@ -21,24 +21,25 @@ public:
 
     void
     run(AgentContainer<Agent>& agents,
-        std::vector<GenericAgent::ID>& removed_agent_ids,
+        std::vector<RemovalRecord>& removed_agents,
         StageManager& stage_manager) const;
 };
 
 template <typename Agent>
 void AgentRemovalSystem<Agent>::run(
     AgentContainer<Agent>& agents,
-    std::vector<GenericAgent::ID>& removed_agent_ids,
+    std::vector<RemovalRecord>& removed_agents,
     StageManager& stage_manager) const
 {
 
     auto iter = std::remove_if(
         std::begin(agents),
         std::end(agents),
-        [&removed_agent_ids, &stage_manager](const GenericAgent& agent) {
-            auto found =
-                std::find(std::begin(removed_agent_ids), std::end(removed_agent_ids), agent.id) !=
-                std::end(removed_agent_ids);
+        [&removed_agents, &stage_manager](const GenericAgent& agent) {
+            auto found = std::any_of(
+                std::begin(removed_agents), std::end(removed_agents), [&agent](const auto& record) {
+                    return record.id == agent.id;
+                });
             if(found) {
                 stage_manager.handle_remove_agent(agent.stage_id);
             }
@@ -46,5 +47,5 @@ void AgentRemovalSystem<Agent>::run(
         });
     agents.erase(iter, std::end(agents));
 
-    removed_agent_ids.clear();
+    removed_agents.clear();
 }

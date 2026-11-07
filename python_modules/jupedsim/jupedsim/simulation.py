@@ -37,7 +37,7 @@ from jupedsim.pyjupedsim import (
 )
 from jupedsim.route import Route, _require_stage
 from jupedsim.serialization import TrajectoryWriter
-from jupedsim.stages import Exit, Waypoint, _check_region, build_areas
+from jupedsim.stages import Exit, Removal, Waypoint, _check_region, build_areas
 from jupedsim.surface import Location, Region, WalkableSurface
 
 
@@ -484,16 +484,28 @@ class Simulation:
 
         self._obj.mark_agent_for_removal(agent_id)
 
-    def removed_agents(self) -> list[int]:
-        """All agents (given by Id) removed in the last iteration.
+    def removed_agents(self) -> tuple[Removal, ...]:
+        """Records of the agents removed by the most recent :func:`iterate`.
 
-        All agents removed from the simulation since the last call of :func:`iterate`. These agents
-        are can no longer be accessed.
+        An agent that reaches an exit during an iteration, or is removed with
+        :meth:`Agent.remove`, gets its record when that iteration ends. The
+        agent itself leaves at the start of the next :func:`iterate`, so a
+        record appears one iterate before ``agent.alive`` turns False. The
+        next :func:`iterate` replaces the records; calls in between return
+        equal tuples.
 
         Returns:
-            Ids of all removed agents since the last call of :func:`iterate`.
+            One :class:`Removal` per agent: its id, the exit it left through
+            (None for :meth:`Agent.remove`) and the time it reached that exit
+            (for :meth:`Agent.remove`, the time of removal).
         """
-        return self._obj.removed_agents()
+        by_id = {stage.id: stage for stage in self._stages}
+        return tuple(
+            Removal(
+                agent_id, None if stage_id is None else by_id[stage_id], time
+            )
+            for agent_id, stage_id, time in self._obj.removed_agents()
+        )
 
     def iterate(self, count: int = 1) -> None:
         """Advance the simulation by the given number of iterations.

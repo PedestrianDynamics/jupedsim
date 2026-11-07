@@ -4,12 +4,14 @@
 #include "destination.hpp"
 #include "generic_agent.hpp"
 #include "routing_target.hpp"
+#include "simulation_clock.hpp"
 #include "unique_id.hpp"
 
 #include <fmt/core.h>
 
 #include <cassert>
 #include <cstddef>
+#include <optional>
 #include <vector>
 
 class BaseStage
@@ -35,6 +37,14 @@ public:
         assert(_targeting >= 1);
         _targeting = _targeting - 1;
     }
+};
+
+/// An agent leaving the simulation: through @p exit, or without one when it was marked for
+/// removal. @p time is the elapsed time at which it reached the exit or was marked.
+struct RemovalRecord {
+    GenericAgent::ID id;
+    std::optional<BaseStage::ID> exit;
+    double time;
 };
 
 template <>
@@ -65,10 +75,14 @@ public:
 class Exit : public BaseStage
 {
     Destination _destination;
-    std::vector<GenericAgent::ID>& _to_remove;
+    std::vector<RemovalRecord>& _to_remove;
+    const SimulationClock& _clock;
 
 public:
-    Exit(Destination destination, std::vector<GenericAgent::ID>& to_remove);
+    Exit(
+        Destination destination,
+        std::vector<RemovalRecord>& to_remove,
+        const SimulationClock& clock);
     ~Exit() override = default;
     bool is_completed(const GenericAgent& agent) override;
     RoutingTarget target(const GenericAgent& agent) override;

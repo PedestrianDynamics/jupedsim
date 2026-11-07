@@ -68,7 +68,7 @@ from jupedsim.route import (
 )
 from jupedsim.serialization import TrajectoryWriter
 from jupedsim.simulation import Simulation
-from jupedsim.stages import Exit, Waypoint
+from jupedsim.stages import Exit, Removal, Waypoint
 from jupedsim.surface import Location, Region, WalkableSurface
 
 __version__ = get_build_info().library_version
@@ -119,6 +119,7 @@ __all__ = [
     "NeighborView",
     "OverlappingCirclesError",
     "Region",
+    "Removal",
     "RoundRobin",
     "Route",
     "STAY",

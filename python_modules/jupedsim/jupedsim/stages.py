@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
+from dataclasses import dataclass
 from typing import Any
 
 import shapely
@@ -48,6 +49,22 @@ class Waypoint(_Stage):
 
 class Exit(_Stage):
     """An exit stage, created by :meth:`Simulation.add_exit`."""
+
+
+@dataclass(frozen=True)
+class Removal:
+    """An agent's removal, see :meth:`Simulation.removed_agents`.
+
+    Attributes:
+        id: Id of the removed agent.
+        exit: The exit the agent left through, None for ``agent.remove()``.
+        time: Simulation time in seconds at which the agent reached the exit,
+            or at which ``agent.remove()`` was called.
+    """
+
+    id: int
+    exit: Exit | None
+    time: float
 
 
 def _is_pair_list(area: Any) -> bool:

@@ -220,7 +220,8 @@ BaseStage::ID Simulation::add_stage(const StageDescription& stage_description)
                 const auto pieces = pieces_of(*_geometry, d.areas);
                 return std::make_unique<Exit>(
                     _routing_engine->register_destination(pieces),
-                    _removed_agents_in_last_iteration);
+                    _removed_agents_in_last_iteration,
+                    _clock);
             },
             [](const DirectSteeringDescription&) -> std::unique_ptr<BaseStage> {
                 return std::make_unique<DirectSteering>();
@@ -304,7 +305,7 @@ void Simulation::mark_agent_for_removal(GenericAgent::ID id)
         throw SimulationError("Unknown agent id {}", id);
     }
 
-    _removed_agents_in_last_iteration.push_back(id);
+    _removed_agents_in_last_iteration.push_back({id, std::nullopt, _clock.elapsed_time()});
 }
 
 const GenericAgent& Simulation::agent(GenericAgent::ID id) const
@@ -331,7 +332,7 @@ GenericAgent& Simulation::agent(GenericAgent::ID id)
     return *iter;
 }
 
-const std::vector<GenericAgent::ID>& Simulation::removed_agents() const
+const std::vector<RemovalRecord>& Simulation::removed_agents() const
 {
     throw_if_state(State::Closed, "removed_agents");
     return _removed_agents_in_last_iteration;

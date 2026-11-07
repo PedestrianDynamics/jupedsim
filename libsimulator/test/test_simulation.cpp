@@ -144,6 +144,50 @@ TEST(MultiStoreySimulation, ATargetWrittenFromOutsideLandsOnTheAgentsOwnStorey)
     EXPECT_EQ(std::get<Location>(sim.agent(downstairs).final_target).region(), stair.room_1);
 }
 
+TEST(Simulation, RemovalRecordHoldsExitAndTime)
+{
+    auto [sim, room] = on_a_flat_room();
+    const Polygon area{test_geometries::rectangle_points({9.5, 9.5}, {10.5, 10.5})};
+    const auto exit = sim->add_stage(ExitDescription{{{area, room}}});
+    const auto route = sim->add_route({{exit, NoRuleDescription{}}});
+    const auto id = sim->add_agent(route, exit, Point{7, 10}, State{}, room);
+
+    // The record appears after the iteration in which the agent reached the exit, stamped with
+    // the elapsed time at which it did, while the agent is still in the simulation.
+    double reached_at = 0;
+    while(sim->removed_agents().empty()) {
+        reached_at = sim->elapsed_time();
+        sim->iterate();
+        ASSERT_LT(sim->iteration(), 5000u) << "never reached the exit";
+    }
+    ASSERT_EQ(sim->removed_agents().size(), 1u);
+    const auto& record = sim->removed_agents().front();
+    EXPECT_EQ(record.id, id);
+    EXPECT_EQ(record.exit, exit);
+    EXPECT_DOUBLE_EQ(record.time, reached_at);
+    EXPECT_EQ(sim->agent_count(), 1u);
+
+    // The next iteration removes the agent and replaces the records.
+    sim->iterate();
+    EXPECT_EQ(sim->agent_count(), 0u);
+    EXPECT_TRUE(sim->removed_agents().empty());
+}
+
+TEST(Simulation, MarkingAnAgentForRemovalRecordsNoExit)
+{
+    auto [sim, room] = on_a_flat_room();
+    const auto [route, stage] = route_to(*sim, {10, 10}, room);
+    const auto id = sim->add_agent(route, stage, Point{5, 5}, State{}, room);
+    sim->iterate();
+
+    sim->mark_agent_for_removal(id);
+
+    ASSERT_EQ(sim->removed_agents().size(), 1u);
+    EXPECT_EQ(sim->removed_agents().front().id, id);
+    EXPECT_FALSE(sim->removed_agents().front().exit.has_value());
+    EXPECT_DOUBLE_EQ(sim->removed_agents().front().time, sim->elapsed_time());
+}
+
 TEST(Simulation, AnExitMayBeConcave)
 {
     const auto flat = on_a_flat_room();
