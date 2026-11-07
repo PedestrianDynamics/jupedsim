@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
+#include "destination.hpp"
 #include "generic_agent.hpp"
 #include "geometry/geometry.hpp"
 #include "geometry_fixtures.hpp"
 #include "kernel.hpp"
 #include "operational_models/collision_free_speed_model/collision_free_speed_model.hpp"
+#include "polygon.hpp"
 #include "route.hpp"
 #include "routing_engine.hpp"
 #include "routing_target.hpp"
@@ -84,31 +86,139 @@ TEST(RoundRobin, WeightedRoundRobin)
     StubStage stage2;
     StubStage stage3;
 
-    std::vector<std::tuple<BaseStage*, uint64_t>> weighted_stages = {
-        {&stage1, 1}, {&stage2, 2}, {&stage3, 3}};
+    RoundRobin sut({{&stage1, 1}, {&stage2, 2}, {&stage3, 3}});
 
-    RoundRobin sut(weighted_stages);
-
+    // Smooth weighted round-robin: the heaviest target is spread over the cycle, ties go to the
+    // earlier target.
+    const std::vector<BaseStage*> cycle{&stage3, &stage2, &stage1, &stage3, &stage2, &stage3};
     for(auto i = 0; i < 5; ++i) {
-        ASSERT_EQ(std::get<0>(weighted_stages[0]), sut.next_stage(fx.ctx));
-
-        ASSERT_EQ(std::get<0>(weighted_stages[1]), sut.next_stage(fx.ctx));
-        ASSERT_EQ(std::get<0>(weighted_stages[1]), sut.next_stage(fx.ctx));
-
-        ASSERT_EQ(std::get<0>(weighted_stages[2]), sut.next_stage(fx.ctx));
-        ASSERT_EQ(std::get<0>(weighted_stages[2]), sut.next_stage(fx.ctx));
-        ASSERT_EQ(std::get<0>(weighted_stages[2]), sut.next_stage(fx.ctx));
+        for(auto* expected : cycle) {
+            ASSERT_EQ(expected, sut.next_stage(fx.ctx));
+        }
     }
 }
 
-TEST(RoundRobin, ZeroWeightGivesException)
+TEST(RoundRobin, AllZeroWeightsGiveException)
+{
+    StubStage stage1;
+    StubStage stage2;
+
+    ASSERT_THROW(RoundRobin sut({{&stage1, 0}, {&stage2, 0}}), SimulationError);
+}
+
+TEST(Route, SmoothRoundRobinSequence)
 {
     RuleContextFixture fx;
-    int stage1;
-    std::vector<std::tuple<BaseStage*, uint64_t>> weighted_stages = {
-        {reinterpret_cast<BaseStage*>(&stage1), 0}};
+    StubStage e1;
+    StubStage e2;
+    const std::vector<BaseStage*> cycle{&e1, &e2, &e1, &e2, &e1};
 
-    ASSERT_THROW(RoundRobin sut(weighted_stages), SimulationError);
+    // Only the ratio of the weights matters: 3:2 and 60:40 give the same sequence.
+    for(const uint64_t scale : {uint64_t{1}, uint64_t{20}}) {
+        RoundRobin sut({{&e1, 3 * scale}, {&e2, 2 * scale}});
+        for(auto i = 0; i < 4; ++i) {
+            for(auto* expected : cycle) {
+                ASSERT_EQ(expected, sut.next_stage(fx.ctx)) << "scale " << scale;
+            }
+        }
+    }
+}
+
+TEST(Route, ZeroWeightNeverChosen)
+{
+    RuleContextFixture fx;
+    StubStage a;
+    StubStage b;
+    StubStage c;
+
+    RoundRobin sut({{&a, 0}, {&b, 1}, {&c, 2}});
+
+    const std::vector<BaseStage*> cycle{&c, &b, &c};
+    for(auto i = 0; i < 10; ++i) {
+        for(auto* expected : cycle) {
+            ASSERT_EQ(expected, sut.next_stage(fx.ctx));
+        }
+    }
+}
+
+TEST(Route, SetWeightsResetsTheCounter)
+{
+    RuleContextFixture fx;
+    StubStage a;
+    StubStage b;
+
+    RoundRobin sut({{&a, 3}, {&b, 2}});
+    ASSERT_EQ(&a, sut.next_stage(fx.ctx));
+
+    // From the new weights on, the sequence starts afresh, as for a new rule.
+    sut.set_weights({{a.id(), 1}, {b.id(), 2}});
+    RoundRobin fresh({{&a, 1}, {&b, 2}});
+    for(auto i = 0; i < 9; ++i) {
+        ASSERT_EQ(fresh.next_stage(fx.ctx), sut.next_stage(fx.ctx));
+    }
+}
+
+TEST(Route, SmoothRoundRobinKeepsTheRatioOfOpenTargets)
+{
+    RuleContextFixture fx;
+    StubStage a;
+    StubStage b;
+    StubStage c;
+
+    RoundRobin sut({{&a, 3}, {&b, 2}, {&c, 1}});
+    b.is_closed = true;
+    std::size_t to_a = 0;
+    std::size_t to_c = 0;
+    for(auto i = 0; i < 40; ++i) {
+        auto* next = sut.next_stage(fx.ctx);
+        ASSERT_NE(&b, next);
+        to_a += next == &a ? 1 : 0;
+        to_c += next == &c ? 1 : 0;
+    }
+    EXPECT_EQ(30u, to_a);
+    EXPECT_EQ(10u, to_c);
+}
+
+TEST(Route, SmoothRoundRobinUnchangedWithoutOpenTarget)
+{
+    RuleContextFixture fx;
+    StubStage a;
+    StubStage b;
+
+    RoundRobin sut({{&a, 3}, {&b, 2}});
+    RoundRobin twin({{&a, 3}, {&b, 2}});
+    for(auto i = 0; i < 3; ++i) {
+        ASSERT_EQ(twin.next_stage(fx.ctx), sut.next_stage(fx.ctx));
+    }
+
+    // Failed decisions leave no trace: afterwards both rules go on alike.
+    a.is_closed = true;
+    b.is_closed = true;
+    for(auto i = 0; i < 4; ++i) {
+        ASSERT_EQ(nullptr, sut.next_stage(fx.ctx));
+    }
+    a.is_closed = false;
+    b.is_closed = false;
+    for(auto i = 0; i < 10; ++i) {
+        ASSERT_EQ(twin.next_stage(fx.ctx), sut.next_stage(fx.ctx));
+    }
+}
+
+TEST(Route, RulesKnowTheirTargets)
+{
+    StubStage a;
+    StubStage b;
+    StubStage c;
+
+    EXPECT_TRUE(FixedRule(&a).targets(a));
+    EXPECT_FALSE(FixedRule(&a).targets(b));
+    // A zero weight still names the target.
+    EXPECT_TRUE(RoundRobin({{&a, 0}, {&b, 1}}).targets(a));
+    EXPECT_FALSE(RoundRobin({{&a, 0}, {&b, 1}}).targets(c));
+    EXPECT_TRUE(LeastTargeted({&a, &b}).targets(b));
+    EXPECT_FALSE(LeastTargeted({&a, &b}).targets(c));
+    EXPECT_TRUE(LeastTravelTime({&a, &b}).targets(b));
+    EXPECT_FALSE(LeastTravelTime({&a, &b}).targets(c));
 }
 
 TEST(LeastTargeted, NextIsCorrect)
@@ -165,19 +275,21 @@ TEST(Route, RuleSkipsClosedTarget)
     FixedRule fixed(&b);
     EXPECT_EQ(nullptr, fixed.next_stage(fx.ctx));
 
-    // A closed target's slots are passed over; the others keep their order.
+    // A closed target is passed over; the others keep their order.
     RoundRobin round_robin({{&a, 1}, {&b, 1}, {&c, 1}});
     EXPECT_EQ(&a, round_robin.next_stage(fx.ctx));
     EXPECT_EQ(&c, round_robin.next_stage(fx.ctx));
     EXPECT_EQ(&a, round_robin.next_stage(fx.ctx));
 
-    // With every target closed there is none, and the counter is where it was.
+    // With every target closed there is none. Once all are open again, c and b, passed over
+    // while a was chosen, come first.
     a.is_closed = true;
     c.is_closed = true;
     EXPECT_EQ(nullptr, round_robin.next_stage(fx.ctx));
     a.is_closed = false;
     b.is_closed = false;
     c.is_closed = false;
+    EXPECT_EQ(&c, round_robin.next_stage(fx.ctx));
     EXPECT_EQ(&b, round_robin.next_stage(fx.ctx));
 
     a.increase_targeting();
@@ -190,4 +302,51 @@ TEST(Route, RuleSkipsClosedTarget)
     EXPECT_EQ(&b, least_targeted.next_stage(fx.ctx));
     b.is_closed = true;
     EXPECT_EQ(nullptr, least_targeted.next_stage(fx.ctx));
+}
+
+namespace
+{
+/// A stage with an area to route to, closed when told so.
+class AreaStage : public BaseStage
+{
+    Destination _destination;
+
+public:
+    bool is_closed{false};
+    explicit AreaStage(Destination destination) : _destination(destination) {}
+    bool is_completed(const GenericAgent&) override { return false; }
+    RoutingTarget target(const GenericAgent&) override { return _destination; }
+    const Destination* destination() const override { return &_destination; }
+    bool closed() const override { return is_closed; }
+};
+
+/// A stage with a 1 x 1 m area around @p centre in the fixture's room.
+AreaStage area_stage_at(RuleContextFixture& fx, Point centre)
+{
+    const Vector half{0.5, 0.5};
+    const Polygon square{test_geometries::rectangle_points(centre - half, centre + half)};
+    return AreaStage{fx.routing.register_destination(fx.geometry->clip_to_region(square, 0))};
+}
+} // namespace
+
+TEST(Route, LeastTravelTimePicksNearest)
+{
+    // The agent stands at (5, 5).
+    RuleContextFixture fx;
+    auto far = area_stage_at(fx, {1, 5});
+    auto near = area_stage_at(fx, {7, 5});
+    // The same area as far's, so exactly as far.
+    auto twin = area_stage_at(fx, {1, 5});
+
+    EXPECT_EQ(&near, LeastTravelTime({&far, &near}).next_stage(fx.ctx));
+    EXPECT_EQ(&near, LeastTravelTime({&near, &far}).next_stage(fx.ctx));
+
+    // Ties go to the earlier candidate.
+    EXPECT_EQ(&far, LeastTravelTime({&far, &twin}).next_stage(fx.ctx));
+    EXPECT_EQ(&twin, LeastTravelTime({&twin, &far}).next_stage(fx.ctx));
+
+    near.is_closed = true;
+    EXPECT_EQ(&far, LeastTravelTime({&near, &far}).next_stage(fx.ctx));
+    far.is_closed = true;
+    EXPECT_EQ(nullptr, LeastTravelTime({&near, &far}).next_stage(fx.ctx));
 }

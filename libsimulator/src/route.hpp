@@ -8,8 +8,11 @@
 #include "stage.hpp"
 #include "unique_id.hpp"
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
+#include <iterator>
+#include <limits>
 #include <map>
 #include <memory>
 #include <optional>
@@ -77,11 +80,32 @@ public:
     const std::vector<BaseStage::ID>& target_candidates() const { return _target_candidates; }
 };
 
+class LeastTravelTimeDescription
+{
+private:
+    std::vector<BaseStage::ID> _target_candidates;
+
+public:
+    LeastTravelTimeDescription(std::vector<BaseStage::ID> target_candidates)
+        : _target_candidates(std::move(target_candidates))
+    {
+        for(const auto& stage_id : _target_candidates) {
+            if(stage_id == BaseStage::ID::invalid.get_id()) {
+                throw SimulationError(
+                    "Can not create least travel time rule from invalid stage id.");
+            }
+        }
+    }
+
+    const std::vector<BaseStage::ID>& target_candidates() const { return _target_candidates; }
+};
+
 using RuleDescription = std::variant<
     NoRuleDescription,
     FixedRuleDescription,
     RoundRobinDescription,
-    LeastTargetedDescription>;
+    LeastTargetedDescription,
+    LeastTravelTimeDescription>;
 
 /// What a rule may consult when it decides: the agent deciding and the routing engine for
 /// travel-time queries.
@@ -96,6 +120,8 @@ public:
     virtual ~Rule() = default;
     /// The stage to go to next, or nullptr if every target is closed.
     virtual BaseStage* next_stage(const RuleContext& ctx) = 0;
+    /// Whether @p stage is one of the rule's targets, whatever its weight.
+    virtual bool targets(const BaseStage& stage) const = 0;
 };
 
 class FixedRule : public Rule
@@ -110,55 +136,76 @@ public:
     {
         return _next->closed() ? nullptr : _next;
     }
+
+    bool targets(const BaseStage& stage) const override { return _next == &stage; }
 };
 
+/// Smooth weighted round-robin: each decision adds every target's weight to its current weight,
+/// picks the target with the largest current weight (ties: the earlier one) and takes the sum of
+/// the weights off it. Only the ratio of the weights matters. Closed targets and targets of weight
+/// zero take no part: their current weights stay as they are, so the open targets keep their
+/// ratio, and with no target left the rule is unchanged.
 class RoundRobin : public Rule
 {
 private:
-    std::vector<std::tuple<BaseStage*, uint64_t>> _weighted_stages{};
-    uint64_t _next_called{};
-    uint64_t _sum_weights{};
+    struct Target {
+        BaseStage* stage;
+        uint64_t weight;
+        int64_t current;
+    };
+    std::vector<Target> _targets{};
 
 public:
-    RoundRobin(std::vector<std::tuple<BaseStage*, uint64_t>> weighted_stages)
-        : _weighted_stages(std::move(weighted_stages))
+    RoundRobin(const std::vector<std::tuple<BaseStage*, uint64_t>>& weighted_stages)
     {
-        for(auto const& [_, weight] : _weighted_stages) {
-            if(weight == 0) {
-                throw SimulationError("RoundRobin no weight may be zero.");
-            }
-            _sum_weights += weight;
+        _targets.reserve(weighted_stages.size());
+        uint64_t sum_weights = 0;
+        for(auto const& [stage, weight] : weighted_stages) {
+            _targets.push_back({stage, weight, 0});
+            sum_weights += weight;
+        }
+        if(sum_weights == 0) {
+            throw SimulationError("RoundRobin needs at least one weight > 0.");
         }
     }
 
-    /// Slots of closed targets are passed over. With every target closed, all slots are passed
-    /// over once, which leaves the counter where it was.
     BaseStage* next_stage([[maybe_unused]] const RuleContext& ctx) override
     {
-        for(uint64_t tried = 0; tried < _sum_weights; ++tried) {
-            auto* candidate = slot(_next_called);
-            _next_called = (_next_called + 1) % _sum_weights;
-            if(!candidate->closed()) {
-                return candidate;
+        Target* chosen{};
+        int64_t sum_weights = 0;
+        for(auto& target : _targets) {
+            if(target.weight == 0 || target.stage->closed()) {
+                continue;
+            }
+            const auto weight = static_cast<int64_t>(target.weight);
+            target.current += weight;
+            sum_weights += weight;
+            if(chosen == nullptr || target.current > chosen->current) {
+                chosen = &target;
             }
         }
-        return nullptr;
+        if(chosen == nullptr) {
+            return nullptr;
+        }
+        chosen->current -= sum_weights;
+        return chosen->stage;
     }
 
-private:
-    BaseStage* slot(uint64_t index) const
+    bool targets(const BaseStage& stage) const override
     {
-        uint64_t sum_weights_so_far = 0;
-        BaseStage* candidate{};
-        for(const auto& [stage, weight] : _weighted_stages) {
-            if(sum_weights_so_far <= index) {
-                candidate = stage;
-            } else {
-                break;
-            }
-            sum_weights_so_far += weight;
+        return std::any_of(std::begin(_targets), std::end(_targets), [&stage](const auto& t) {
+            return t.stage == &stage;
+        });
+    }
+
+    /// Sets the weight of every target from @p weights and starts the sequence afresh. The caller
+    /// gives a weight for each target, at least one of them > 0.
+    void set_weights(const std::map<BaseStage::ID, uint64_t>& weights)
+    {
+        for(auto& target : _targets) {
+            target.weight = weights.at(target.stage->id());
+            target.current = 0;
         }
-        return candidate;
     }
 };
 
@@ -187,6 +234,59 @@ public:
             }
         }
         return least_targeted;
+    }
+
+    bool targets(const BaseStage& stage) const override
+    {
+        return std::find(std::begin(_target_candidates), std::end(_target_candidates), &stage) !=
+               std::end(_target_candidates);
+    }
+};
+
+/// Picks the open candidate with the least travel time from the agent's position.
+class LeastTravelTime : public Rule
+{
+private:
+    std::vector<BaseStage*> _target_candidates;
+
+public:
+    LeastTravelTime(std::vector<BaseStage*> target_candidates)
+        : _target_candidates(std::move(target_candidates))
+    {
+    }
+
+    /// Ties go to the first candidate.
+    BaseStage* next_stage(const RuleContext& ctx) override
+    {
+        BaseStage* nearest{};
+        double least_time = std::numeric_limits<double>::infinity();
+        for(auto* candidate : _target_candidates) {
+            if(candidate->closed()) {
+                continue;
+            }
+            const auto time = travel_time(ctx, *candidate);
+            if(nearest == nullptr || time < least_time) {
+                nearest = candidate;
+                least_time = time;
+            }
+        }
+        return nearest;
+    }
+
+    bool targets(const BaseStage& stage) const override
+    {
+        return std::find(std::begin(_target_candidates), std::end(_target_candidates), &stage) !=
+               std::end(_target_candidates);
+    }
+
+private:
+    static double travel_time(const RuleContext& ctx, const BaseStage& stage)
+    {
+        const auto* destination = stage.destination();
+        if(destination == nullptr) {
+            return std::numeric_limits<double>::infinity();
+        }
+        return ctx.routing.travel_time(ctx.agent.location, *destination);
     }
 };
 
@@ -236,6 +336,9 @@ public:
     {
         return _stages.at(at).rule->next_stage(RuleContext{agent, routing});
     }
+
+    /// The rule at stage @p at.
+    Rule& rule(BaseStage::ID at) const { return *_stages.at(at).rule; }
 
     size_t count_stages() const { return _stages.size(); }
 

@@ -24,21 +24,24 @@ void init_rule(py::module_& m)
         This type describes how a agent will proceed after completing its stage.
         This effectively describes the set of outbound edges for a stage.
 
-        There are 3 types of rules currently available:
+        There are 4 types of rules currently available:
 
         * **Fixed transitions:** On completion of this transitions stage all agents
           will proceed to the specified next stage.
 
         * **Round robin transitions:** On completion of this transitions stage agents
-          will proceed in a weighted round-robin manner. A round-robin transitions
-          with 3 outgoing stages and the weights 5, 7, 11 the first 5 agents to make
-          a choice will take the first stage, the next 7 the second stage and the
-          next 11 the third stage. Next 5 will take the first stage, and so on...
+          will proceed by smooth weighted round-robin. With the weights 3 and 2 the
+          agents deciding take the first, second, first, second, first stage, and
+          so on. Only the ratio of the weights matters; ties go to the earlier stage.
 
         * **Least targeted transition:** On completion of this stage agents will
           proceed towards the currently least targeted amongst the specified choices.
           The number of "targeting" agents is the amount of agents currently moving
           towards this stage. This includes agents from different routes.
+
+        * **Least travel time transition:** On completion of this stage each agent
+          will proceed towards the choice with the least travel time from where it
+          stands.
     )");
     rule.def_static(
             "create_fixed_transition",
@@ -74,15 +77,16 @@ void init_rule(py::module_& m)
             clean_doc(R"(
             Create a round-robin transition.
 
-            Round-robin transitions: On completion of this transitions stage agents
-            will proceed in a weighted round-robin manner. A round-robin
-            transitions with 3 outgoing stages and the weights 5, 7, 11 the first 5
-            agents to make a choice will take the first stage, the next 7 the
-            second stage and the next 11 the third stage. Next 5 will take the
-            first stage, and so on...
+            On completion of this transitions stage agents will proceed by smooth
+            weighted round-robin: each decision adds every stage's weight to its
+            current weight, takes the stage with the largest current weight (ties:
+            the earlier one) and takes the sum of the weights off it. With the
+            weights 3 and 2 agents take the first, second, first, second, first
+            stage, and so on. Stages of weight 0 are never taken.
 
             Args:
-                stage_weights: ``(stage_id, weight)`` pairs, one per outgoing stage.
+                stage_weights: ``(stage_id, weight)`` pairs, one per outgoing stage;
+                    at least one weight > 0.
 
             Returns:
                 The transition.
@@ -104,6 +108,29 @@ void init_rule(py::module_& m)
             least targeted amongst the specified choices. The number of "targeting"
             agents is the amount of agents currently moving towards this stage.
             This includes agents from different routes.
+
+            Args:
+                stage_ids: Ids of the stages to choose the next target from.
+
+            Returns:
+                The transition.
+
+            Raises:
+                SimulationError: If a stage id is not a valid stage id.
+            )")
+                .c_str())
+        .def_static(
+            "create_least_travel_time_transition",
+            [](const std::vector<uint64_t>& stages) {
+                return PyRule{LeastTravelTimeDescription(into_vec_t<BaseStage::ID>(stages))};
+            },
+            py::arg("stage_ids"),
+            clean_doc(R"(
+            Create a least travel time transition.
+
+            On completion of this stage each agent proceeds towards the specified
+            choice with the least travel time from its position, read from the
+            floor fields. Ties go to the earlier choice.
 
             Args:
                 stage_ids: Ids of the stages to choose the next target from.

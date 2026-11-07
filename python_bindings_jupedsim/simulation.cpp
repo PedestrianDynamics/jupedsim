@@ -210,6 +210,21 @@ void init_simulation(py::module_& m)
             },
             py::arg("stage_id"))
         .def(
+            "set_round_robin_weights",
+            [](Simulation& sim,
+               uint64_t route_id,
+               uint64_t stage_id,
+               const std::map<uint64_t, uint64_t>& weights) {
+                std::map<BaseStage::ID, uint64_t> native{};
+                for(const auto& [id, weight] : weights) {
+                    native.emplace(id, weight);
+                }
+                sim.set_round_robin_weights(route_id, stage_id, native);
+            },
+            py::arg("route_id"),
+            py::arg("stage_id"),
+            py::arg("weights"))
+        .def(
             "stage_closed",
             [](const Simulation& sim, uint64_t stage_id) {
                 const auto* stage = sim.stage(stage_id);

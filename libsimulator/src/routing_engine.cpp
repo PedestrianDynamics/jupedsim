@@ -47,3 +47,8 @@ Vector RoutingEngine::get_orientation(const Location& from, const RoutingTarget&
             [&](const Destination& d) { return d.orientation(from); }},
         to);
 }
+
+double RoutingEngine::travel_time(const Location& from, const Destination& to) const
+{
+    return to.travel_time(from);
+}

@@ -211,6 +211,20 @@ Route::ID Simulation::add_route(const std::map<BaseStage::ID, RuleDescription>& 
                                     });
 
                                 return std::make_unique<LeastTargeted>(candidates);
+                            },
+                            [this](const LeastTravelTimeDescription& d) -> std::unique_ptr<Rule> {
+                                std::vector<BaseStage*> candidates{};
+                                candidates.reserve(d.target_candidates().size());
+
+                                std::transform(
+                                    std::begin(d.target_candidates()),
+                                    std::end(d.target_candidates()),
+                                    std::back_inserter(candidates),
+                                    [this](auto const& id) -> BaseStage* {
+                                        return _stage_manager.stage(id);
+                                    });
+
+                                return std::make_unique<LeastTravelTime>(candidates);
                             }},
                         desc)}};
         });
@@ -448,11 +462,11 @@ std::vector<GenericAgent::ID> Simulation::open_exit(BaseStage::ID exit_id)
         return {};
     }
     exit.open();
-    // Only the opened exit can have become a target again, so an agent whose rule now finds an
-    // open target was stranded by it.
+    // Only agents whose rule targets the opened exit decide again: weights may have changed
+    // since others were stranded, and those wait for an exit of their own rule.
     std::vector<GenericAgent::ID> resumed{};
     for(auto& agent : _agents) {
-        if(!agent.stranded) {
+        if(!agent.stranded || !decides_for(agent, exit)) {
             continue;
         }
         auto* next = decide_again(agent);
@@ -464,6 +478,23 @@ std::vector<GenericAgent::ID> Simulation::open_exit(BaseStage::ID exit_id)
         resumed.push_back(agent.id);
     }
     return resumed;
+}
+
+void Simulation::set_round_robin_weights(
+    Route::ID route_id,
+    BaseStage::ID stage_id,
+    const std::map<BaseStage::ID, uint64_t>& weights)
+{
+    throw_if_state(State::Iterating | State::Closed, "set_round_robin_weights");
+    const auto find_iter = _routes.find(route_id);
+    if(find_iter == std::end(_routes) || !find_iter->second->contains_stage(stage_id)) {
+        throw SimulationError("Stage {} not part of Route {}", stage_id, route_id);
+    }
+    auto* round_robin = dynamic_cast<RoundRobin*>(&find_iter->second->rule(stage_id));
+    if(round_robin == nullptr) {
+        throw SimulationError("Stage {} of Route {} has no round-robin rule.", stage_id, route_id);
+    }
+    round_robin->set_weights(weights);
 }
 
 Exit& Simulation::exit_of(BaseStage::ID stage_id)
@@ -487,6 +518,12 @@ BaseStage* Simulation::decide_again(const GenericAgent& agent) const
 {
     const auto at = agent.decision_stage.value_or(agent.stage_id);
     return _routes.at(agent.route_id)->decide(agent, at, *_routing_engine);
+}
+
+bool Simulation::decides_for(const GenericAgent& agent, const BaseStage& stage) const
+{
+    const auto at = agent.decision_stage.value_or(agent.stage_id);
+    return _routes.at(agent.route_id)->rule(at).targets(stage);
 }
 
 std::vector<GenericAgent::ID> Simulation::agents_in_range(Point p, double distance)

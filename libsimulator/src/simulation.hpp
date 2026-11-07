@@ -84,6 +84,8 @@ private:
     bool is_leaving(GenericAgent::ID id) const;
     /// The stage the rule at the agent's decision stage picks now, nullptr if none is open.
     BaseStage* decide_again(const GenericAgent& agent) const;
+    /// Whether the rule at the decision stage of @p agent targets @p stage.
+    bool decides_for(const GenericAgent& agent, const BaseStage& stage) const;
 
 public:
     /// Takes the geometry over: after this the caller no longer owns it. `geo()` hands out a
@@ -116,9 +118,15 @@ public:
     /// by the rule that sent them there, or stranded where they are. Returns the agents stranded
     /// now. Does nothing on a closed exit.
     std::vector<GenericAgent::ID> close_exit(BaseStage::ID exit_id, bool informed);
-    /// Opens exit @p exit_id again. Stranded agents whose decision stage can now send them on
-    /// resume. Returns them. Does nothing on an open exit.
+    /// Opens exit @p exit_id again. Stranded agents whose decision-stage rule targets it decide
+    /// again; those that find an open target resume. Returns them. Does nothing on an open exit.
     std::vector<GenericAgent::ID> open_exit(BaseStage::ID exit_id);
+    /// Sets the weights of the round-robin rule at @p stage_id in route @p route_id and starts its
+    /// sequence afresh, see RoundRobin::set_weights. Agents already assigned keep their target.
+    void set_round_robin_weights(
+        Route::ID route_id,
+        BaseStage::ID stage_id,
+        const std::map<BaseStage::ID, uint64_t>& weights);
     uint64_t iteration() const;
     std::vector<GenericAgent::ID> agents_in_range(Point p, double distance);
     /// Returns IDs of all agents inside the defined polygon

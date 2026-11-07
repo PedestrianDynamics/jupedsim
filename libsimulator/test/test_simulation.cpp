@@ -925,3 +925,86 @@ TEST(Simulation, CloseUninformedWithNoOpenTargetStrandsAtExit)
     }
     EXPECT_EQ(r.sim->agent_count(), 2u);
 }
+
+TEST(Route, SharedCounterSameStep)
+{
+    auto r = a_closure_room();
+    // wp0 lies on the waypoint: agents added in it go on to the waypoint at once and reach it in
+    // the same step.
+    const auto wp0 = r.sim->add_stage(WaypointDescription{{{square_at({14, 10}), r.room}}});
+    const auto route = r.sim->add_route(
+        {{wp0, FixedRuleDescription(r.wp)},
+         {r.wp, RoundRobinDescription({{r.exit1, 3}, {r.exit2, 2}})},
+         {r.exit1, NoRuleDescription{}},
+         {r.exit2, NoRuleDescription{}}});
+    std::vector<GenericAgent::ID> ids{};
+    for(const Point p : {Point{13.7, 9.8}, Point{14.3, 9.8}, Point{14, 10.2}}) {
+        ids.push_back(r.sim->add_agent(route, wp0, p, State{}, r.room));
+        ASSERT_EQ(r.sim->agent(ids.back()).stage_id, r.wp);
+    }
+
+    r.sim->iterate();
+
+    // In agent-id order, consecutive slots of 3:2: exit1, exit2, exit1.
+    EXPECT_EQ(r.sim->agent(ids[0]).stage_id, r.exit1);
+    EXPECT_EQ(r.sim->agent(ids[1]).stage_id, r.exit2);
+    EXPECT_EQ(r.sim->agent(ids[2]).stage_id, r.exit1);
+    // The next decision there takes the next slot.
+    const auto next = r.sim->add_agent(route, r.wp, Point{13.6, 10.4}, State{}, r.room);
+    iterate_until(*r.sim, [&] { return r.sim->agent(next).stage_id != r.wp; });
+    EXPECT_EQ(r.sim->agent(next).stage_id, r.exit2);
+}
+
+TEST(Simulation, SetRoundRobinWeightsTakesEffectAtTheNextDecision)
+{
+    auto r = a_closure_room();
+    const auto route = branch(r);
+    const auto first = add_at_waypoint(r, route, 9.7);
+    ASSERT_EQ(r.sim->agent(first).stage_id, r.exit1);
+
+    r.sim->set_round_robin_weights(route, r.wp, {{r.exit1, 0}, {r.exit2, 1}});
+
+    // Already assigned agents keep their target; the next decision uses the new weights.
+    EXPECT_EQ(r.sim->agent(first).stage_id, r.exit1);
+    const auto second = add_at_waypoint(r, route, 10.3);
+    EXPECT_EQ(r.sim->agent(second).stage_id, r.exit2);
+    const auto third = r.sim->add_agent(route, r.wp, Point{14.3, 10.0}, State{}, r.room);
+    EXPECT_EQ(r.sim->agent(third).stage_id, r.exit2);
+}
+
+TEST(Simulation, SetRoundRobinWeightsRejectsOtherRules)
+{
+    auto r = a_closure_room();
+    const auto route = corridor(r);
+    EXPECT_THROW(r.sim->set_round_robin_weights(route, r.wp, {{r.exit2, 1}}), SimulationError);
+    EXPECT_THROW(
+        r.sim->set_round_robin_weights(Route::ID{12345}, r.wp, {{r.exit2, 1}}), SimulationError);
+}
+
+TEST(Simulation, OpenResumesOnlyAgentsWhoseRuleTargetsTheExit)
+{
+    auto r = a_closure_room();
+    const auto exit3 = r.sim->add_stage(ExitDescription{{{square_at({10, 18}), r.room}}});
+    const auto route = r.sim->add_route(
+        {{r.wp, RoundRobinDescription({{r.exit1, 0}, {r.exit2, 1}})},
+         {r.exit1, NoRuleDescription{}},
+         {r.exit2, NoRuleDescription{}}});
+    r.sim->close_exit(r.exit2, true);
+    r.sim->close_exit(exit3, true);
+    const auto id = add_at_waypoint(r, route);
+    ASSERT_TRUE(r.sim->agent(id).stranded);
+
+    // New weights do not resume stranded agents: they decide again when an exit of their rule
+    // opens.
+    r.sim->set_round_robin_weights(route, r.wp, {{r.exit1, 1}, {r.exit2, 1}});
+    EXPECT_TRUE(r.sim->agent(id).stranded);
+
+    // exit3 is no target of the rule at the waypoint, although exit1 would now be open.
+    EXPECT_TRUE(r.sim->open_exit(exit3).empty());
+    EXPECT_TRUE(r.sim->agent(id).stranded);
+
+    EXPECT_EQ(r.sim->open_exit(r.exit2), std::vector<GenericAgent::ID>{id});
+    EXPECT_FALSE(r.sim->agent(id).stranded);
+    // Ties go to the earlier target: exit1, with the counter reset by the new weights.
+    EXPECT_EQ(r.sim->agent(id).stage_id, r.exit1);
+}
