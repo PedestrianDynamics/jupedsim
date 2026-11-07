@@ -109,8 +109,6 @@ while (
 ):
     simulation.iterate()
 
-simulation._writer.close()
-
 print(
     f"Simulation finished after {simulation.iteration_count()} iterations. ({simulation.elapsed_time()} seconds.)"
 )
@@ -120,3 +118,5 @@ if simulation.agent_count():
     )
 else:
     print("\033[32mAll agents have exited the simulation successfully.\033[0m")
+
+simulation.close()

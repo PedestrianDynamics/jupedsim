@@ -103,11 +103,10 @@ def main():
             print("CTRL-C Received! Shutting down")
             sys.exit(1)
 
-    simulation._writer.close()
-
     print(
         f"Simulation completed after {simulation.iteration_count()} iterations"
     )
+    simulation.close()
 
     # Read back CSV and plot trajectories over geometry
     import matplotlib.pyplot as plt
