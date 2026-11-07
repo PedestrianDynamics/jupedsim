@@ -53,6 +53,7 @@ SurfaceMeshShortestPathRoutingEngine::tree_for(const Point3D& target)
         tree->build_sequence_tree();
         _last_tree = std::move(tree);
         _last_target = target;
+        ++_trees_built;
     }
     return *_last_tree;
 }

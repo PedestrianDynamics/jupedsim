@@ -42,6 +42,10 @@ public:
     /// none, see SurfaceMeshShortestPathRoutingEngine::path_length.
     double path_length(const Location& from, const Location& to);
 
+    /// Sequence trees built for shortest paths, see
+    /// SurfaceMeshShortestPathRoutingEngine::trees_built.
+    std::size_t trees_built() const { return _shortest_path.trees_built(); }
+
     /// Placement of the floor field grid of @p region, see FloorfieldRoutingEngine::grid_info.
     GridInfo grid_info(std::size_t region) const;
     /// The default speed field of @p region, see FloorfieldRoutingEngine::default_speed.

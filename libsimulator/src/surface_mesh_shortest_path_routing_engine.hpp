@@ -8,6 +8,7 @@
 
 #include <CGAL/Surface_mesh_shortest_path.h>
 
+#include <cstddef>
 #include <memory>
 #include <vector>
 
@@ -51,6 +52,9 @@ public:
 
     double wall_clearance() const { return _wall_clearance; }
 
+    /// How many sequence trees the engine has built, one per change of target.
+    std::size_t trees_built() const { return _trees_built; }
+
 private:
     using Traits = CGAL::Surface_mesh_shortest_path_traits<K, SurfaceMesh>;
     using ShortestPath = CGAL::Surface_mesh_shortest_path<Traits>;
@@ -85,4 +89,5 @@ private:
     /// `GetOrientation` non-reentrant.
     Point3D _last_target{};
     std::unique_ptr<ShortestPath> _last_tree{};
+    std::size_t _trees_built{0};
 };

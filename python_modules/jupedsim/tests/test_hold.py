@@ -105,7 +105,9 @@ def test_release_in_arrival_order():
     sim, room, s = make_sim()
     route = split(s)
     route.hold(s["wp2"])
-    far = sim.add_agent(room.at(3, 5), route=route)
+    # Off the line through near: held agents stand still, so far has to walk
+    # past near to reach the stage.
+    far = sim.add_agent(room.at(3, 5.6), route=route)
     near = sim.add_agent(room.at(6.5, 5), route=route)
     iterate_until(sim, lambda: near.held)
     # Agents still walking to the held stage are not listed.
