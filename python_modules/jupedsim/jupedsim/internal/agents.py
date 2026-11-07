@@ -86,8 +86,8 @@ def first_stage(
     return stage
 
 
-# The native travel time query raises this while iterating or once closed.
-_NOT_ALLOWED = re.compile(r"travel_time is not allowed in state ")
+# The native path queries raise this while iterating or once closed.
+_NOT_ALLOWED = re.compile(r"(travel_time|path_length) is not allowed in state ")
 
 
 def check_reachable(
@@ -98,14 +98,32 @@ def check_reachable(
     While the simulation iterates or after it is closed nothing is checked:
     the native call that follows raises for its own operation.
     """
+    _raise_if_infinite(
+        lambda: simulation.travel_time(stage, location), _label(stage), location
+    )
+
+
+def check_target_reachable(
+    simulation: Any, target: Location, location: Location
+) -> None:
+    """Raise if the direct steering target ``target`` cannot be reached from
+    ``location``; nothing is checked while iterating or after closing."""
+    _raise_if_infinite(
+        lambda: simulation._path_length(location, target),
+        repr(target),
+        location,
+    )
+
+
+def _raise_if_infinite(query: Any, what: str, location: Location) -> None:
     try:
-        time = simulation.travel_time(stage, location)
+        cost = query()
     except SimulationError as error:
         if _NOT_ALLOWED.match(str(error)):
             return
         raise
-    if math.isinf(time):
-        raise ValueError(f"{_label(stage)} cannot be reached from {location!r}")
+    if math.isinf(cost):
+        raise ValueError(f"{what} cannot be reached from {location!r}")
 
 
 def agent_state(simulation: Any, state: Any) -> Any:

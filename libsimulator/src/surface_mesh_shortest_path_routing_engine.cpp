@@ -8,6 +8,7 @@
 #include "simulation_error.hpp"
 
 #include <algorithm>
+#include <limits>
 #include <memory>
 #include <utility>
 #include <vector>
@@ -185,4 +186,15 @@ SurfaceMeshShortestPathRoutingEngine::get_orientation(const Location& from, cons
 {
     // Zero when the way heads for where it already is: nowhere left to go.
     return (next_waypoint(from.position_3d(), to.position_3d()) - from.xy()).normalized();
+}
+
+double SurfaceMeshShortestPathRoutingEngine::path_length(const Location& from, const Location& to)
+{
+    const auto from_below = on_surface(from.position_3d(), "source");
+    auto& tree = tree_for(to.position_3d());
+    const auto from_loc = tree.locate(from_below.point, _geometry.aabb_tree());
+    // CGAL reports a negative distance when no source point can be reached.
+    const auto distance = CGAL::to_double(
+        tree.shortest_distance_to_source_points(from_loc.first, from_loc.second).first);
+    return distance < 0.0 ? std::numeric_limits<double>::infinity() : distance;
 }

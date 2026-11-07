@@ -36,11 +36,17 @@ class _Stay:
 STAY = _Stay()
 
 
+# The native rule's limit; keeps its running sums far from overflow.
+MAX_WEIGHT = 1_000_000_000
+
+
 def _check_weight(weight: Any) -> None:
     if isinstance(weight, bool) or not isinstance(weight, int):
         raise ValueError("weights must be integers")
     if weight < 0:
         raise ValueError("weights must be >= 0")
+    if weight > MAX_WEIGHT:
+        raise ValueError(f"weights must be <= {MAX_WEIGHT}")
 
 
 class RoundRobin:
@@ -50,7 +56,7 @@ class RoundRobin:
     the target with the largest current weight (ties: the earlier one) and
     takes the sum of the weights off it. Only the ratio matters: weights
     3 and 2 give the same sequence as 60 and 40. Targets of weight 0 are
-    never chosen.
+    never chosen. Weights are integers from 0 to 1000000000.
     """
 
     def __init__(self, weights: Mapping[_Stage, int]) -> None:

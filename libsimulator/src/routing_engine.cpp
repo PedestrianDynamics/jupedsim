@@ -52,3 +52,8 @@ double RoutingEngine::travel_time(const Location& from, const Destination& to) c
 {
     return to.travel_time(from);
 }
+
+double RoutingEngine::path_length(const Location& from, const Location& to)
+{
+    return _shortest_path.path_length(from, to);
+}

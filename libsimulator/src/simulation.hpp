@@ -157,6 +157,9 @@ public:
     /// Travel time in seconds from @p where to the area of stage @p stage_id, see
     /// FloorfieldRoutingEngine::travel_time. Throws for a stage without an area.
     double travel_time(BaseStage::ID stage_id, const Location& where);
+    /// Length of the shortest path over the surface from @p from to @p to, as direct steering
+    /// walks it; infinite if @p to cannot be reached from @p from.
+    double path_length(const Location& from, const Location& to);
     /// Speed fields every stage without an override is routed with, by region id.
     std::map<std::size_t, SpeedGrid> default_speed_fields() const;
     /// Placement of the floor field grid of @p region_id, which its travel times and speed

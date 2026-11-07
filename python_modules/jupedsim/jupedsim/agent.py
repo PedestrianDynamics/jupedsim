@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Any
 
 from jupedsim.internal.agents import (
     check_reachable,
+    check_target_reachable,
     direct_steering,
     first_stage,
     native_location,
@@ -182,9 +183,15 @@ class Agent:
         )
 
     def steer_to(self, location: _SurfaceLocation) -> None:
-        """Leave the route and walk straight to ``location``."""
+        """Leave the route and walk straight to ``location``.
+
+        Raises:
+            ValueError: If ``location`` cannot be reached from the agent's
+                position.
+        """
         self._resolve()
         native = native_location(self._simulation, location, "target")
+        check_target_reachable(self._simulation, location, self.position)
         route_id, stage_id = direct_steering(self._simulation)
         self._simulation._obj.switch_agent_route(
             agent_id=self._id, route_id=route_id, stage_id=stage_id

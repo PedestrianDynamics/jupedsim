@@ -13,6 +13,7 @@ from jupedsim.custom_model import CustomOperationalModel
 from jupedsim.internal.agents import (
     agent_state,
     check_reachable,
+    check_target_reachable,
     default_state_factory,
     direct_steering,
     first_stage,
@@ -260,8 +261,8 @@ class Simulation:
             TypeError: If ``position`` or ``target`` is not a Location.
             ValueError: If the arguments are inconsistent, a location or
                 route belongs to another surface or simulation, a
-                custom model gets no ``state``, or the first stage cannot
-                be reached from ``position``.
+                custom model gets no ``state``, or the first stage or
+                ``target`` cannot be reached from ``position``.
         """
         native_location(self, position, "position")
         if route is not None and target is not None:
@@ -276,6 +277,8 @@ class Simulation:
         stage = first_stage(self, route, start) if route is not None else None
         if stage is not None:
             check_reachable(self, stage, position)
+        if target is not None:
+            check_target_reachable(self, target, position)
         native_state = agent_state(self, state)
         native_route, native_stage = (
             (route._native_id, stage.id)
@@ -330,6 +333,14 @@ class Simulation:
         stage_id = self._stage_native_id(stage)
         native = native_location(self, location, "location")
         return self._obj.travel_time(stage_id, native)
+
+    def _path_length(self, start: Location, end: Location) -> float:
+        """Length of the shortest path over the surface, as direct steering
+        walks it; ``inf`` if ``end`` cannot be reached from ``start``."""
+        return self._obj.path_length(
+            native_location(self, start, "position"),
+            native_location(self, end, "target"),
+        )
 
     def travel_times(
         self, stage: Waypoint | Exit

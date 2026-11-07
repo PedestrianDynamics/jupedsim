@@ -308,6 +308,13 @@ void init_simulation(py::module_& m)
             py::arg("stage_id"),
             py::arg("where"))
         .def(
+            "path_length",
+            [](Simulation& sim, const Location& from, const Location& to) {
+                return sim.path_length(from, to);
+            },
+            py::arg("from_"),
+            py::arg("to"))
+        .def(
             "set_agent_target",
             [](Simulation& sim, uint64_t agent_id, std::tuple<double, double> target) {
                 sim.set_agent_target(agent_id, into_point(target));

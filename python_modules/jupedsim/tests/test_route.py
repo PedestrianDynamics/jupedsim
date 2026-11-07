@@ -722,3 +722,63 @@ def test_follow_rejects_an_unreachable_first_target(stages, monkeypatch):
         agent.follow(other)
     assert agent.route is route
     assert agent.stage == s["wp1"]
+
+
+def _unreachable_target(sim, monkeypatch, target):
+    """Make the steering target ``target`` unreachable, see _unreachable."""
+    real = sim._path_length
+
+    def path_length(start, end):
+        if end == target:
+            return float("inf")
+        return real(start, end)
+
+    monkeypatch.setattr(sim, "_path_length", path_length)
+
+
+def test_add_agent_rejects_an_unreachable_target(stages, monkeypatch):
+    sim, _ = stages
+    room = sim._surface.region(id=0)
+    target = room.at(8, 8)
+    _unreachable_target(sim, monkeypatch, target)
+    with pytest.raises(
+        ValueError,
+        match=r"^Location\(8(\.0)?, 8(\.0)?, region=.*\) cannot be reached "
+        r"from Location\(5(\.0)?, 2(\.0)?, region=.*\)$",
+    ):
+        sim.add_agent(room.at(5, 2), target=target)
+    assert sim.agent_count() == 0
+    sim.add_agent(room.at(5, 2), target=room.at(7, 7))
+    assert sim.agent_count() == 1
+
+
+def test_steer_to_rejects_an_unreachable_target(stages, monkeypatch):
+    sim, s = stages
+    room = sim._surface.region(id=0)
+    route = Route([s["wp1"], s["exit1"]])
+    agent = sim.add_agent(room.at(5, 2), route=route)
+    target = room.at(8, 8)
+    _unreachable_target(sim, monkeypatch, target)
+    with pytest.raises(ValueError, match=r"^Location\(8(\.0)?, 8(\.0)?, "):
+        agent.steer_to(target)
+    assert agent.route is route
+    assert agent.stage == s["wp1"]
+    agent.steer_to(room.at(7, 7))
+    assert agent.route is None
+
+
+def test_path_length_over_the_surface(stages):
+    sim, _ = stages
+    room = sim._surface.region(id=0)
+    assert sim._path_length(room.at(2, 2), room.at(5, 6)) == pytest.approx(5.0)
+
+
+def test_weights_are_bounded(stages):
+    _, s = stages
+    with pytest.raises(ValueError, match="^weights must be <= 1000000000$"):
+        RoundRobin({s["exit1"]: 1_000_000_001, s["exit2"]: 1})
+    route = route_c(s)
+    with pytest.raises(ValueError, match="^weights must be <= 1000000000$"):
+        route.update_weights(s["wp2"], {s["exit1"]: 10**12})
+    route.update_weights(s["wp2"], {s["exit1"]: 1_000_000_000})
+    assert route.weights(s["wp2"])[s["exit1"]] == 1_000_000_000

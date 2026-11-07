@@ -18,6 +18,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <map>
 #include <memory>
 #include <tuple>
 #include <vector>
@@ -349,4 +350,78 @@ TEST(Route, LeastTravelTimePicksNearest)
     EXPECT_EQ(&far, LeastTravelTime({&near, &far}).next_stage(fx.ctx));
     far.is_closed = true;
     EXPECT_EQ(nullptr, LeastTravelTime({&near, &far}).next_stage(fx.ctx));
+}
+
+TEST(Route, SetWeightsRejectsInvalidWeightsAndKeepsTheRule)
+{
+    RuleContextFixture fx;
+    StubStage a;
+    StubStage b;
+    StubStage other;
+
+    RoundRobin sut({{&a, 3}, {&b, 2}});
+    RoundRobin twin({{&a, 3}, {&b, 2}});
+    ASSERT_EQ(twin.next_stage(fx.ctx), sut.next_stage(fx.ctx));
+
+    const auto too_heavy = RoundRobin::max_weight + 1;
+    EXPECT_THROW(sut.set_weights({{a.id(), 1}}), SimulationError);
+    EXPECT_THROW(sut.set_weights({{a.id(), 1}, {b.id(), 1}, {other.id(), 1}}), SimulationError);
+    EXPECT_THROW(sut.set_weights({{a.id(), 1}, {other.id(), 1}}), SimulationError);
+    EXPECT_THROW(sut.set_weights({{a.id(), 0}, {b.id(), 0}}), SimulationError);
+    EXPECT_THROW(sut.set_weights({{a.id(), too_heavy}, {b.id(), 1}}), SimulationError);
+
+    // Neither weights nor current weights changed: both rules go on alike.
+    for(auto i = 0; i < 10; ++i) {
+        ASSERT_EQ(twin.next_stage(fx.ctx), sut.next_stage(fx.ctx));
+    }
+}
+
+TEST(Route, RoundRobinWeightsAreBounded)
+{
+    RuleContextFixture fx;
+    StubStage a;
+    StubStage b;
+
+    EXPECT_THROW(RoundRobin({{&a, RoundRobin::max_weight + 1}, {&b, 1}}), SimulationError);
+
+    // At the limit the current weights stay in range: the ratio still holds.
+    RoundRobin sut({{&a, RoundRobin::max_weight}, {&b, RoundRobin::max_weight}});
+    for(auto i = 0; i < 10; ++i) {
+        ASSERT_EQ(&a, sut.next_stage(fx.ctx));
+        ASSERT_EQ(&b, sut.next_stage(fx.ctx));
+    }
+}
+
+TEST(Route, ClosingATargetMidSequenceKeepsTheRatioOfOpenTargets)
+{
+    RuleContextFixture fx;
+    StubStage a;
+    StubStage b;
+    StubStage c;
+
+    RoundRobin sut({{&a, 3}, {&b, 2}, {&c, 1}});
+    // Stop mid-cycle, so that every target carries a nonzero current weight.
+    for(auto i = 0; i < 4; ++i) {
+        sut.next_stage(fx.ctx);
+    }
+
+    const auto count = [&sut, &fx](int picks) {
+        std::map<const BaseStage*, int> counts{};
+        for(auto i = 0; i < picks; ++i) {
+            ++counts[sut.next_stage(fx.ctx)];
+        }
+        return counts;
+    };
+
+    b.is_closed = true;
+    auto counts = count(400);
+    EXPECT_EQ(0, counts[&b]);
+    EXPECT_NEAR(300, counts[&a], 2);
+    EXPECT_NEAR(100, counts[&c], 2);
+
+    b.is_closed = false;
+    counts = count(600);
+    EXPECT_NEAR(300, counts[&a], 2);
+    EXPECT_NEAR(200, counts[&b], 2);
+    EXPECT_NEAR(100, counts[&c], 2);
 }

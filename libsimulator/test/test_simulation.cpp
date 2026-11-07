@@ -1008,3 +1008,12 @@ TEST(Simulation, OpenResumesOnlyAgentsWhoseRuleTargetsTheExit)
     // Ties go to the earlier target: exit1, with the counter reset by the new weights.
     EXPECT_EQ(r.sim->agent(id).stage_id, r.exit1);
 }
+
+TEST(Simulation, ReportsThePathLengthOverTheSurface)
+{
+    auto [sim, room] = on_a_flat_room();
+    const auto from = sim->get_location(2, 2, room);
+    const auto to = sim->get_location(5, 6, room);
+    EXPECT_NEAR(sim->path_length(from, to), 5.0, 1e-9);
+    EXPECT_NEAR(sim->path_length(from, from), 0.0, 1e-9);
+}

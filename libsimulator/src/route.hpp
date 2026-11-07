@@ -145,8 +145,12 @@ public:
 /// the weights off it. Only the ratio of the weights matters. Closed targets and targets of weight
 /// zero take no part: their current weights stay as they are, so the open targets keep their
 /// ratio, and with no target left the rule is unchanged.
+/// Weights are at most max_weight, so the current weights cannot overflow.
 class RoundRobin : public Rule
 {
+public:
+    static constexpr uint64_t max_weight = 1'000'000'000;
+
 private:
     struct Target {
         BaseStage* stage;
@@ -159,14 +163,11 @@ public:
     RoundRobin(const std::vector<std::tuple<BaseStage*, uint64_t>>& weighted_stages)
     {
         _targets.reserve(weighted_stages.size());
-        uint64_t sum_weights = 0;
         for(auto const& [stage, weight] : weighted_stages) {
+            check_weight(weight);
             _targets.push_back({stage, weight, 0});
-            sum_weights += weight;
         }
-        if(sum_weights == 0) {
-            throw SimulationError("RoundRobin needs at least one weight > 0.");
-        }
+        check_some_positive();
     }
 
     BaseStage* next_stage([[maybe_unused]] const RuleContext& ctx) override
@@ -198,13 +199,55 @@ public:
         });
     }
 
-    /// Sets the weight of every target from @p weights and starts the sequence afresh. The caller
-    /// gives a weight for each target, at least one of them > 0.
+    /// Sets the weight of every target from @p weights and starts the sequence afresh. @p weights
+    /// names exactly the targets, each at most max_weight, at least one > 0; otherwise throws and
+    /// changes nothing.
     void set_weights(const std::map<BaseStage::ID, uint64_t>& weights)
     {
+        check_keys(weights);
+        uint64_t sum_weights = 0;
+        for(const auto& [_, weight] : weights) {
+            check_weight(weight);
+            sum_weights += weight;
+        }
+        if(sum_weights == 0) {
+            throw SimulationError("RoundRobin needs at least one weight > 0.");
+        }
         for(auto& target : _targets) {
             target.weight = weights.at(target.stage->id());
             target.current = 0;
+        }
+    }
+
+private:
+    static void check_weight(uint64_t weight)
+    {
+        if(weight > max_weight) {
+            throw SimulationError("RoundRobin weights must be at most {}.", max_weight);
+        }
+    }
+
+    void check_some_positive() const
+    {
+        if(std::none_of(std::begin(_targets), std::end(_targets), [](const auto& t) {
+               return t.weight > 0;
+           })) {
+            throw SimulationError("RoundRobin needs at least one weight > 0.");
+        }
+    }
+
+    /// Throws unless @p weights has a key for every target and no other key.
+    void check_keys(const std::map<BaseStage::ID, uint64_t>& weights) const
+    {
+        const auto named = [&weights](const auto& t) { return weights.count(t.stage->id()) == 1; };
+        const auto is_target = [this](const auto& entry) {
+            return std::any_of(std::begin(_targets), std::end(_targets), [&entry](const auto& t) {
+                return t.stage->id() == entry.first;
+            });
+        };
+        if(!std::all_of(std::begin(_targets), std::end(_targets), named) ||
+           !std::all_of(std::begin(weights), std::end(weights), is_target)) {
+            throw SimulationError("RoundRobin weights must name exactly the rule's targets.");
         }
     }
 };

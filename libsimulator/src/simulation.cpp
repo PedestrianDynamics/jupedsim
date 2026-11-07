@@ -603,6 +603,12 @@ double Simulation::travel_time(BaseStage::ID stage_id, const Location& where)
     return destination->travel_time(where);
 }
 
+double Simulation::path_length(const Location& from, const Location& to)
+{
+    throw_if_state(State::Iterating | State::Closed, "path_length");
+    return _routing_engine->path_length(from, to);
+}
+
 std::map<std::size_t, SpeedGrid> Simulation::default_speed_fields() const
 {
     throw_if_state(State::Closed, "default_speed_fields");

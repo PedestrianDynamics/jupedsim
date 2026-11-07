@@ -45,6 +45,10 @@ public:
     /// has reached @p to.
     Vector get_orientation(const Location& from, const Location& to);
 
+    /// Length of the geodesic from @p from to @p to over the surface, infinite if @p to cannot
+    /// be reached from @p from.
+    double path_length(const Location& from, const Location& to);
+
     double wall_clearance() const { return _wall_clearance; }
 
 private:
