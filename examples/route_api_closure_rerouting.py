@@ -31,7 +31,8 @@ west = sim.add_exit(
     [(0, 9), (0.5, 9), (0.5, 11), (0, 11)], region=hall, name="west"
 )
 
-# One route per exit; each agent takes the exit it reaches fastest.
+# One route per exit; each agent chooses the exit with the lowest direct
+# travel-time estimate.
 via_east = jps.Route([east_corridor, east])
 via_west = jps.Route([west_corridor, west])
 routes = {east: via_east, west: via_west}

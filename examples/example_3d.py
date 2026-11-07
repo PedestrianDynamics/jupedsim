@@ -66,7 +66,10 @@ north_waypoint = sim.add_waypoint(
 south_waypoint = sim.add_waypoint(
     jps.circle_to_polygon(center=(11, 2), radius=1), region=ground
 )
-# One exit in the north-west corner and one in the south-east corner.
+# One exit in the north-west corner and one in the south-east corner. The
+# two areas form one exit stage: they share closure and exit records. Use
+# separate exit handles when doors need independent closure or separate
+# exit counts.
 exit_stage = sim.add_exit(
     [(rect(0.5, 17, 1.5, 19), ground), (rect(18.5, 1, 19.5, 3), ground)]
 )

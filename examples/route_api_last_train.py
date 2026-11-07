@@ -22,9 +22,9 @@ platform = surface.add_region(
 
 sim = jps.Simulation(jps.CollisionFreeSpeedModel(), surface)
 
-# 1.x waiting set -> a waypoint over the waiting area plus a hold. Where
-# held agents stand inside the area is not specified by the draft; the
-# 1.x version had 40 fixed spots at y = 3 and y = 4.
+# 1.x waiting set -> a waypoint over the waiting area plus a hold: agents
+# are waiting in an area and stop where they enter it. This does not
+# reproduce the 1.x waiting set's 40 assigned spots at y = 3 and y = 4.
 waiting = sim.add_waypoint(
     shapely.box(5.5, 2.5, 25.5, 4.5), region=platform, name="waiting"
 )
@@ -69,6 +69,7 @@ while sim.agent_count() > 0 and sim.elapsed_time() < 120:
         # are reassigned to door 2 now (informed=True). None is stranded,
         # since door 2 stays open.
         heading = sim.agents_targeting(door1)
+        assert len(heading) > 0, "no passenger was heading for door 1"
         door1.close(informed=True)
         print(
             f"t={sim.elapsed_time():.1f} s: door 1 jammed, "
