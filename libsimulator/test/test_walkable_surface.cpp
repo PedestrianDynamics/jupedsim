@@ -130,3 +130,21 @@ TEST(WalkableSurface, SeamOnHoleEdge)
     expect_seam(*graph, ground, stairs, {2, 3}, {2, 7}, {1, 5});
     expect_seam(*graph, stairs, ground, {2, 7}, {2, 3}, {7, 5});
 }
+
+TEST(WalkableSurface, ConnectorCornersAreTheRegionVertices)
+{
+    WalkableSurface surface{};
+    const auto ground = surface.add_region({{{0, 0}, {2, 0}, {2, 4}, {0, 4}}, {}}, 0.0);
+    const auto upper = surface.add_region({{{12, 0}, {14, 0}, {14, 4}, {12, 4}}, {}}, 1.0);
+    // Endpoints within the matching tolerance are taken from the regions.
+    const auto stairs = surface.connect_regions(
+        ground, {{2.0000005, 0}, {2.0000005, 4}}, upper, {{11.9999995, 0}, {11.9999995, 4}});
+
+    const auto corners = surface.connector_corners(stairs);
+    ASSERT_EQ(corners.size(), 4u);
+    for(const auto& corner : corners) {
+        EXPECT_TRUE(corner.x() == 2.0 || corner.x() == 12.0);
+    }
+    EXPECT_THROW(surface.connector_corners(ground), SimulationError);
+    EXPECT_THROW(surface.connector_corners(stairs + 1), SimulationError);
+}

@@ -153,7 +153,8 @@ class WalkableSurface:
             raise ValueError(
                 f"{edge} is not an edge of {region.label}'s boundary"
             ) from error
-        footprint = _connector_footprint(from_edge, to_edge)
+        # The corners native built from the regions' vertices, not the input.
+        footprint = shapely.Polygon(self._obj.connector_corners(connector_id))
         return self._register(connector_id, name, None, footprint=footprint)
 
     @property
@@ -200,13 +201,3 @@ class WalkableSurface:
         # A region's own geometry decides, so later, unconnected regions do
         # not matter; the native surface checks connectivity in Simulation().
         return region._footprint.covers(shapely.Point(x, y))
-
-
-def _connector_footprint(from_edge: Any, to_edge: Any) -> shapely.Polygon:
-    """The connector's polygon, its corners in the native surface's order."""
-    a, b = (tuple(map(float, p)) for p in from_edge)
-    c, d = (tuple(map(float, p)) for p in to_edge)
-    # As the native surface does: flip from_edge if the sides would cross.
-    if shapely.LineString([b, c]).intersects(shapely.LineString([d, a])):
-        a, b = b, a
-    return shapely.Polygon([a, b, c, d])

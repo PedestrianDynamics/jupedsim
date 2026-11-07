@@ -218,3 +218,30 @@ def test_connect_rejects_connector():
         "staircase is a connector and cannot be connected again; add a "
         "landing region between two connectors"
     )
+
+
+@pytest.mark.parametrize("offset", [1e-6, -1e-6])
+def test_connector_lookup_uses_the_canonical_vertices(offset):
+    surface = WalkableSurface()
+    floor0 = surface.add_region(
+        polygon=shapely.Polygon(FOOTPRINT, holes=[STAIRWELL]), height=0.0
+    )
+    floor1 = surface.add_region(
+        polygon=shapely.Polygon(FOOTPRINT, holes=[STAIRWELL]), height=3.0
+    )
+    # The native surface takes the corners from the regions' vertices, so
+    # the seam lies at x = 12 for both offsets.
+    staircase = surface.connect_regions(
+        from_region=floor0,
+        from_edge=((12 + offset, 6), (12 + offset, 8)),
+        to_region=floor1,
+        to_edge=((18, 6), (18, 8)),
+        name="staircase",
+    )
+    sim = jps.Simulation(jps.CollisionFreeSpeedModel(), surface)
+    seam = staircase.at(12, 7)
+    assert sim.add_agent(floor0.at(5, 5), target=seam).alive
+    assert staircase in surface.regions_at((12, 7))
+    with pytest.raises(ValueError, match="is not in staircase"):
+        staircase.at(11.9999995, 7)
+    assert staircase not in surface.regions_at((11.9999995, 7))
