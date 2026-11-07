@@ -8,7 +8,7 @@ from typing import Any, Iterator, Self
 import numpy.typing as npt
 import shapely
 
-from jupedsim.agent import Agent
+from jupedsim.agent import Agent, _AgentV1
 from jupedsim.custom_model import CustomOperationalModel
 from jupedsim.internal.tracing import Timer
 from jupedsim.journey import JourneyDescription
@@ -42,8 +42,11 @@ from jupedsim.pyjupedsim import (
     _PythonModel,
     _Simulation,
 )
+from jupedsim.pyjupedsim import Rule as _NativeRule
+from jupedsim.route import Route, _require_stage
 from jupedsim.serialization import TrajectoryWriter
-from jupedsim.stages import Exit, Waypoint, build_areas
+from jupedsim.stages import Exit, Waypoint, _check_region, build_areas
+from jupedsim.surface import Location as _SurfaceLocation
 from jupedsim.surface import Region
 from jupedsim.surface import WalkableSurface as _SurfaceHandle
 
@@ -57,6 +60,24 @@ _STATE_TYPES = (
     WarpDriverModelState,
 )
 
+_DEFAULT_STATES = {
+    CollisionFreeSpeedModel: CollisionFreeSpeedModelState,
+    CollisionFreeSpeedModelV2: CollisionFreeSpeedModelV2State,
+    CollisionFreeSpeedModelV3: CollisionFreeSpeedModelV3State,
+    AnticipationVelocityModel: AnticipationVelocityModelState,
+    SocialForceModel: SocialForceModelState,
+    WarpDriverModel: WarpDriverModelState,
+    GeneralizedCentrifugalForceModel: lambda: (
+        GeneralizedCentrifugalForceModelState(orientation=(1.0, 0.0))
+    ),
+}
+
+
+def _default_state_factory(model: Any) -> Any:
+    """Return the callable that builds the model's default agent state, or
+    None for custom models."""
+    return _DEFAULT_STATES.get(type(model))
+
 
 class Simulation:
     """Defines a simulation of pedestrian movement over a continuous walkable area.
@@ -69,7 +90,6 @@ class Simulation:
 
     def __init__(
         self,
-        *,
         model: (
             CollisionFreeSpeedModel
             | CollisionFreeSpeedModelV2
@@ -81,6 +101,7 @@ class Simulation:
             | CustomOperationalModel
         ),
         geometry: WalkableSurface | Geometry,
+        *,
         dt: float = 0.01,
         floorfield_options: FloorfieldOptions | None = None,
         trajectory_writer: TrajectoryWriter | None = None,
@@ -129,6 +150,9 @@ class Simulation:
         self._surface: _SurfaceHandle | None = None
         self._region_count = 0
         self._stages: list[Waypoint | Exit] = []
+        self._routes: dict[int, Route] = {}
+        self._direct: tuple[int, int] | None = None
+        self._default_state = _default_state_factory(model)
         if isinstance(geometry, _SurfaceHandle):
             self._surface = geometry
             self._region_count = len(geometry.regions)
@@ -315,6 +339,115 @@ class Simulation:
         return self._obj.add_route(dict(journey._transitions))
 
     def add_agent(
+        self,
+        position: _SurfaceLocation | None = None,
+        *,
+        route: Route | None = None,
+        target: _SurfaceLocation | None = None,
+        start: Waypoint | Exit | None = None,
+        state: Any = None,
+        journey_id: int | None = None,
+        stage_id: int | None = None,
+        region_id: int | None = None,
+    ) -> Agent | int:
+        """Add an agent to the simulation.
+
+        With a :class:`~jupedsim.surface.Location` as ``position`` the agent
+        follows ``route`` from ``start`` (default: the route's start) or
+        steers straight to ``target``; give one of them. ``state`` is the
+        agent's model state; built-in models default it, custom models must
+        pass it. Returns the agent handle.
+
+        With ``journey_id``, ``stage_id``, ``position`` as ``(x, y)``,
+        ``region_id`` and ``state`` as keywords, the agent is added by id
+        and its id is returned, see :meth:`_add_agent_by_id`.
+
+        Raises:
+            TypeError: If ``position`` or ``target`` is not a Location.
+            ValueError: If the arguments are inconsistent, a location or
+                route belongs to another surface or simulation, or a
+                custom model gets no ``state``.
+        """
+        if any(v is not None for v in (journey_id, stage_id, region_id)):
+            return self._add_agent_by_id(
+                journey_id=journey_id,
+                stage_id=stage_id,
+                position=position,
+                state=state,
+                region_id=region_id,
+            )
+        self._native_location(position, "position")
+        if route is not None and target is not None:
+            raise ValueError("use route= or target=, not both")
+        if route is None and target is None:
+            raise ValueError("give route= or target=")
+        if target is not None and start is not None:
+            raise ValueError("start= applies to route=, not target=")
+        native_target = None
+        if target is not None:
+            native_target = self._native_location(target, "target")
+        stage = self._first_stage(route, start) if route is not None else None
+        agent_state = self._agent_state(state)
+        native_route, native_stage = (
+            (route._native_id, stage.id)
+            if route is not None
+            else self._direct_steering()
+        )
+        agent_id = self._obj.add_agent(
+            route_id=native_route,
+            stage_id=native_stage,
+            position=position.xy,
+            state=agent_state,
+            region_id=position.region.id,
+        )
+        if native_target is not None:
+            self._obj.set_agent_target(agent_id, native_target)
+        return Agent(self, agent_id)
+
+    def _native_location(self, value: Any, name: str) -> Location:
+        if not isinstance(value, _SurfaceLocation):
+            raise TypeError(f"{name} must be a Location, e.g. floor0.at(x, y)")
+        _check_region(value.region, name, self._surface, self._region_count)
+        return self._obj.get_location(value.x, value.y, value.region.id)
+
+    def _first_stage(
+        self, route: Route, start: Waypoint | Exit | None
+    ) -> Waypoint | Exit:
+        if not isinstance(route, Route):
+            raise TypeError("route must be a Route, e.g. jps.Route([wp, exit])")
+        route._check_simulation(self)
+        stage = route.start if start is None else _require_stage(start)
+        if stage is None:
+            raise ValueError(
+                "route given as pairs has no default start; "
+                "pass start= here or to Route"
+            )
+        route._check_member(stage)
+        return stage
+
+    def _agent_state(self, state: Any) -> Any:
+        if isinstance(state, _STATE_TYPES):
+            return state
+        if state is not None:
+            return _CustomModelState(state)
+        if self._default_state is None:
+            raise ValueError(
+                "custom models need state=; pass your model's agent state"
+            )
+        return self._default_state()
+
+    def _direct_steering(self) -> tuple[int, int]:
+        """Return the route and stage ids of the hidden direct steering
+        route, creating them on first use."""
+        if self._direct is None:
+            stage_id = self._obj.add_direct_steering_stage()
+            route_id = self._obj.add_route(
+                {stage_id: _NativeRule.create_none_transition()}
+            )
+            self._direct = (route_id, stage_id)
+        return self._direct
+
+    def _add_agent_by_id(
         self,
         *,
         journey_id: int,
@@ -616,21 +749,57 @@ class Simulation:
         """
         return self._obj.iteration_count()
 
-    def agents(self) -> Iterator[Agent]:
+    def _handle(self, agent_id: int) -> Agent | _AgentV1:
+        if self._surface is None:
+            return _AgentV1(self, agent_id)
+        return Agent(self, agent_id)
+
+    def agents(self) -> Iterator[_AgentV1] | tuple[Agent, ...]:
         """Agents in the simulation.
 
         The set of agents is snapshot when this method is called; agents added or removed afterwards
-        are not reflected by the returned iterator.
+        are not reflected by the result.
 
         Returns:
-            Iterator over handles to all agents in the simulation. The handles resolve the agent on
-            every attribute access and stay valid across :func:`iterate` as long as the agent
+            For a simulation built from a :class:`~jupedsim.surface.WalkableSurface`, a tuple of
+            handles in id order. Otherwise an iterator over handles. The handles resolve the agent
+            on every attribute access and stay valid across :func:`iterate` as long as the agent
             exists.
         """
         ids = [agent.id for agent in self._obj.agents()]
-        return iter(Agent(self, agent_id) for agent_id in ids)
+        if self._surface is not None:
+            return tuple(self._handle(agent_id) for agent_id in sorted(ids))
+        return iter(self._handle(agent_id) for agent_id in ids)
 
-    def agent(self, agent_id) -> Agent:
+    def agents_targeting(
+        self, stage: Waypoint | Exit, *, route: Route | None = None
+    ) -> tuple[Agent, ...]:
+        """Agents whose current target is ``stage``, in id order.
+
+        With ``route``, only agents following that route. The result is a
+        snapshot: calling :meth:`Agent.follow` while iterating over it does
+        not change which agents are visited.
+
+        Raises:
+            ValueError: If the stage or route belongs to another simulation,
+                or the stage is not part of the route.
+        """
+        _require_stage(stage)
+        if stage._simulation is not self:
+            raise ValueError("stage belongs to another simulation")
+        if route is not None:
+            route._check_simulation(self)
+            route._check_member(stage)
+        # Copy plain values: native agent wrappers must not outlive a loop step.
+        found = [(a.id, a.route_id, a.stage_id) for a in self._obj.agents()]
+        return tuple(
+            Agent(self, agent_id)
+            for agent_id, route_id, stage_id in sorted(found)
+            if stage_id == stage.id
+            and (route is None or route_id == route._native_id)
+        )
+
+    def agent(self, agent_id) -> Agent | _AgentV1:
         """Access specific agent in the simulation.
 
         Args:
@@ -645,11 +814,11 @@ class Simulation:
         """
         # Resolve once to fail fast on unknown ids.
         self._obj.agent(agent_id)
-        return Agent(self, agent_id)
+        return self._handle(agent_id)
 
     def agents_in_range(
         self, pos: tuple[float, float], distance: float
-    ) -> list[Agent]:
+    ) -> list[Agent | _AgentV1]:
         """Handles to all agents within the given distance to the given position.
 
         Args:
@@ -660,14 +829,14 @@ class Simulation:
             List of handles to all agents within the given distance to the given position.
         """
         return [
-            Agent(self, agent_id)
+            self._handle(agent_id)
             for agent_id in self._obj.agents_in_range(pos, distance)
         ]
 
     def agents_in_polygon(
         self,
         poly: shapely.Polygon | Sequence[tuple[float, float]],
-    ) -> list[Agent]:
+    ) -> list[Agent | _AgentV1]:
         """Handles to all agents inside the given polygon.
 
         Args:
@@ -682,7 +851,7 @@ class Simulation:
             ValueError: If the polygon has holes.
         """
         return [
-            Agent(self, agent_id)
+            self._handle(agent_id)
             for agent_id in self._obj.agents_in_polygon(poly)
         ]
 

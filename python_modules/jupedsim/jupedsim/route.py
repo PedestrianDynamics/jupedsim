@@ -336,6 +336,7 @@ class Route:
         self._start = start
         native = {s.id: _native_rule(s, transitions) for s in order}
         self._native_id = simulation._obj.add_route(native)
+        simulation._routes[self._native_id] = self
 
     @property
     def stages(self) -> tuple[_Stage, ...]:
