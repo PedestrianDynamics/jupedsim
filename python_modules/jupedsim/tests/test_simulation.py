@@ -102,13 +102,6 @@ def test_a_location_off_the_given_region_is_refused():
         ground.at(10.0, 7.5)
 
 
-def test_a_location_keeps_its_region_alive():
-    sim, _, upper = u_stair()
-    location = upper.at(*STACKED_XY)
-    del sim
-    assert location.region.height == pytest.approx(UPPER_Z)
-
-
 def test_a_location_reads_only_a_place():
     sim, _, upper = u_stair()
     location = upper.at(*STACKED_XY)
@@ -245,12 +238,14 @@ def test_agents_walk_up_the_u_stair_to_an_exit_on_the_floor_above(model, state):
     ]
     watched, watched_id = agents[0], agents[0].id
     regions = [watched.position.region]
+    heights = [sim._obj.agent(watched_id).location.z]
     for _ in range(6000):
         sim.iterate()
         if watched_id in sim.removed_agents():
             watched = None
         if watched is not None:
             regions.append(watched.position.region)
+            heights.append(sim._obj.agent(watched_id).location.z)
         if sim.agent_count() == 0:
             break
 
@@ -260,6 +255,9 @@ def test_agents_walk_up_the_u_stair_to_an_exit_on_the_floor_above(model, state):
     # and it went up the stair rather than straight there: it crossed regions
     # that are neither of the two floors
     assert any(r not in (ground, upper) for r in regions)
+    landing = sim._surface.regions[2]
+    assert landing in regions
+    assert any(1.0 < z < 2.0 for z in heights)
 
 
 def test_one_exit_with_an_area_on_each_floor_is_reached_from_both():

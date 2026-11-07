@@ -240,10 +240,17 @@ def test_a_stage_keeps_its_simulation_alive():
     assert len(stage._simulation.agents_targeting(stage)) == 0
 
 
-@pytest.mark.parametrize("bad_id", [-1, 1.5, "3", 2**64])
+@pytest.mark.parametrize("bad_id", [-1, 2**64])
 def test_stage_lookup_rejects_unknown_ids(square_room_5x5, bad_id):
     sim, _ = square_room_5x5
     with pytest.raises(KeyError):
+        sim.stage(id=bad_id)
+
+
+@pytest.mark.parametrize("bad_id", [1.5, "3", True, 1.0])
+def test_stage_lookup_rejects_ids_that_are_not_ints(square_room_5x5, bad_id):
+    sim, _ = square_room_5x5
+    with pytest.raises(TypeError, match="id must be an int"):
         sim.stage(id=bad_id)
 
 

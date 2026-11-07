@@ -22,11 +22,11 @@ def corridor_simulation():
     return sim, exit, route, room
 
 
-def _add_agent(sim, room, route, stage_id, position, velocity=(0.0, 0.0)):
+def _add_agent(sim, room, route, stage, position, velocity=(0.0, 0.0)):
     return sim.add_agent(
         room.at(*position),
         route=route,
-        start=stage_id,
+        start=stage,
         state=PythonSocialForceModelState(velocity=velocity),
     ).id
 

@@ -53,9 +53,9 @@ def _make_sim(model):
     return sim, exit, route, room
 
 
-def _run(sim, room, route, stage_id, state, steps=40):
+def _run(sim, room, route, stage, state, steps=40):
     agent_id = sim.add_agent(
-        room.at(1.0, 10.0), route=route, start=stage_id, state=state
+        room.at(1.0, 10.0), route=route, start=stage, state=state
     ).id
     trajectory = [sim.agent(agent_id).position.xy]
     for _ in range(steps):
@@ -139,13 +139,13 @@ def test_wrong_state_type_is_reported_with_both_names():
         sim.iterate()
 
 
-def _run_pair(sim, room, route, stage_id, state_of, steps=40):
+def _run_pair(sim, room, route, stage, state_of, steps=40):
     """Two agents on a collision course, so that neighbor states are read."""
     left = sim.add_agent(
-        room.at(1.0, 10.0), route=route, start=stage_id, state=state_of()
+        room.at(1.0, 10.0), route=route, start=stage, state=state_of()
     ).id
     ahead = sim.add_agent(
-        room.at(2.2, 10.0), route=route, start=stage_id, state=state_of()
+        room.at(2.2, 10.0), route=route, start=stage, state=state_of()
     ).id
     trajectory = []
     for _ in range(steps):

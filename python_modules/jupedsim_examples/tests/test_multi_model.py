@@ -113,9 +113,9 @@ def _collision_free_agent():
     )
 
 
-def _add(sim, room, route, stage_id, position, state):
+def _add(sim, room, route, stage, position, state):
     return sim.add_agent(
-        room.at(*position), route=route, start=stage_id, state=state
+        room.at(*position), route=route, start=stage, state=state
     ).id
 
 

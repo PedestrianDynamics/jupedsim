@@ -41,6 +41,10 @@ from jupedsim.stages import Exit, Waypoint, _check_region, build_areas
 from jupedsim.surface import Location, Region, WalkableSurface
 
 
+def _is_int(value: Any) -> bool:
+    return isinstance(value, int) and not isinstance(value, bool)
+
+
 class Simulation:
     """Defines a simulation of pedestrian movement over a continuous walkable area.
 
@@ -190,9 +194,17 @@ class Simulation:
     def stage(
         self, name: str | None = None, *, id: int | None = None
     ) -> Waypoint | Exit:
-        """Look a stage up by name or by id."""
+        """Look a stage up by name or by id.
+
+        Raises:
+            TypeError: If neither or both of name and id are given, or id
+                is not an int.
+            KeyError: If no stage has this name or id.
+        """
         if (name is None) == (id is None):
             raise TypeError("give a name or an id, not both or neither")
+        if id is not None and not _is_int(id):
+            raise TypeError("id must be an int, e.g. sim.stage(id=wp.id)")
         for stage in self._stages:
             if (stage.id == id) if id is not None else (stage.name == name):
                 return stage
@@ -287,13 +299,6 @@ class Simulation:
         _check_region(region, method, self._surface, self._region_count)
         return region.id
 
-    def _custom_ids(
-        self, stage: Any, region: Any, method: str
-    ) -> tuple[int, int]:
-        return self._stage_native_id(stage), self._region_native_id(
-            region, method
-        )
-
     def _by_region(self, grids: dict[int, Any]) -> dict[Region, Any]:
         return {self._surface.region(id=i): grid for i, grid in grids.items()}
 
@@ -315,7 +320,7 @@ class Simulation:
         Raises:
             TypeError: if ``location`` is not a Location.
             ValueError: if the stage belongs to another simulation, or the
-                simulation was not built from a WalkableSurface.
+                location to another surface.
             SimulationError: if the point is not on a routable cell.
         """
         stage_id = self._stage_native_id(stage)
@@ -439,9 +444,8 @@ class Simulation:
             SimulationError: if a value is not allowed, the region or stage does not
                 exist, or the stage has no area to route to.
         """
-        stage_id, region_id = self._custom_ids(
-            stage, region, "set_custom_speed_field"
-        )
+        stage_id = self._stage_native_id(stage)
+        region_id = self._region_native_id(region, "set_custom_speed_field")
         self._obj.set_custom_speed_field(stage_id, region_id, values)
 
     def clear_custom_speed_field(
@@ -463,9 +467,8 @@ class Simulation:
             SimulationError: if the region or stage does not exist, or the stage has
                 no area to route to.
         """
-        stage_id, region_id = self._custom_ids(
-            stage, region, "clear_custom_speed_field"
-        )
+        stage_id = self._stage_native_id(stage)
+        region_id = self._region_native_id(region, "clear_custom_speed_field")
         self._obj.clear_custom_speed_field(stage_id, region_id)
 
     def mark_agent_for_removal(self, agent_id: int):
@@ -618,8 +621,11 @@ class Simulation:
             valid across :func:`iterate` as long as the agent exists.
 
         Raises:
+            TypeError: if ``agent_id`` is not an int.
             SimulationError: if no agent with this id exists.
         """
+        if not _is_int(agent_id):
+            raise TypeError("agent_id must be an int, e.g. sim.agent(agent.id)")
         # Resolve once to fail fast on unknown ids.
         self._obj.agent(agent_id)
         return Agent(self, agent_id)

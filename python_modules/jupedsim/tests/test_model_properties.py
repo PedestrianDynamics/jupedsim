@@ -80,7 +80,7 @@ def test_set_desired_speed(corridor):
 
     agent_id = sim.add_agent(
         room.at(1, 1),
-        target=room.at(10, 1),
+        target=room.at(9, 1),
         state=jps.CollisionFreeSpeedModelV2State(desired_speed=1),
     ).id
     assert math.isclose(sim.agent(agent_id).position.x, 1)
@@ -126,7 +126,7 @@ def test_initial_parameters_collision_free_speed_model_v2(
         range_geometry_repulsion=0.17,
     )
     agent_id = sim.add_agent(
-        room.at(1, 1), target=room.at(10, 1), state=state
+        room.at(1, 1), target=room.at(9, 1), state=state
     ).id
 
     agent_state = sim.agent(agent_id).state
@@ -160,7 +160,7 @@ def test_set_model_parameters_collision_free_speed_model_v2(
 
     agent_id = sim.add_agent(
         room.at(1, 1),
-        target=room.at(10, 1),
+        target=room.at(9, 1),
         state=jps.CollisionFreeSpeedModelV2State(),
     ).id
 
@@ -207,7 +207,7 @@ def test_set_model_parameters_anticipation_velocity_model(
 
     agent_id = sim.add_agent(
         room.at(1, 1),
-        target=room.at(10, 1),
+        target=room.at(9, 1),
         state=jps.AnticipationVelocityModelState(),
     ).id
 
@@ -257,7 +257,7 @@ def test_set_model_parameters_collision_free_speed_model(
 
     agent_id = sim.add_agent(
         room.at(1, 1),
-        target=room.at(10, 1),
+        target=room.at(9, 1),
         state=jps.CollisionFreeSpeedModelState(),
     ).id
 
@@ -290,7 +290,7 @@ def test_collision_free_speed_model_repulsion_parameters_are_model_level():
 
     agent_id = sim.add_agent(
         room.at(1, 1),
-        target=room.at(10, 1),
+        target=room.at(9, 1),
         state=jps.CollisionFreeSpeedModelState(),
     ).id
 
@@ -328,12 +328,12 @@ def test_set_model_parameters_generalized_centrifugal_force_model(
 
     agent_id = sim.add_agent(
         room.at(1, 1),
-        target=room.at(10, 1),
+        target=room.at(9, 1),
         state=jps.GeneralizedCentrifugalForceModelState(orientation=(1.0, 0.0)),
     ).id
     sim.add_agent(
         room.at(3, 1),
-        target=room.at(10, 1),
+        target=room.at(9, 1),
         state=jps.GeneralizedCentrifugalForceModelState(orientation=(1.0, 0.0)),
     )
 
@@ -382,7 +382,7 @@ def test_set_model_parameters_social_force_model(
     sim, room = simulation_with_social_force_model
 
     agent_id = sim.add_agent(
-        room.at(1, 1), target=room.at(10, 1), state=jps.SocialForceModelState()
+        room.at(1, 1), target=room.at(9, 1), state=jps.SocialForceModelState()
     ).id
 
     sim.agent(agent_id).state.velocity = (2.0, -2.0)
@@ -420,7 +420,7 @@ def test_social_force_model_body_force_and_friction_are_model_level():
     )
 
     agent_id = sim.add_agent(
-        room.at(1, 1), target=room.at(10, 1), state=jps.SocialForceModelState()
+        room.at(1, 1), target=room.at(9, 1), state=jps.SocialForceModelState()
     ).id
 
     # body_force and friction no longer appear on the per-agent state.
@@ -487,7 +487,7 @@ def test_agent_handle_raises_after_removal(
     sim, room = simulation_with_social_force_model
 
     agent_id = sim.add_agent(
-        room.at(1, 1), target=room.at(10, 1), state=jps.SocialForceModelState()
+        room.at(1, 1), target=room.at(9, 1), state=jps.SocialForceModelState()
     ).id
     agent = sim.agent(agent_id)
     state = agent.state
@@ -538,7 +538,7 @@ def test_initial_parameters_collision_free_speed_model_v3(
         agent_buffer=0.4,
     )
     agent_id = sim.add_agent(
-        room.at(1, 1), target=room.at(10, 1), state=state
+        room.at(1, 1), target=room.at(9, 1), state=state
     ).id
 
     agent_state = sim.agent(agent_id).state
@@ -562,7 +562,7 @@ def test_set_model_parameters_collision_free_speed_model_v3(
 
     agent_id = sim.add_agent(
         room.at(1, 1),
-        target=room.at(10, 1),
+        target=room.at(9, 1),
         state=jps.CollisionFreeSpeedModelV3State(
             strength_neighbor_repulsion=8.0,
             range_neighbor_repulsion=0.1,

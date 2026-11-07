@@ -62,7 +62,7 @@ def test_desired_speed_can_be_set_via_state(
 
     agent_id = sim.add_agent(
         room.at(1, 1),
-        target=room.at(10, 1),
+        target=room.at(9, 1),
         state=state_class(desired_speed=1.5, **extra_state_kwargs),
     ).id
 
@@ -84,7 +84,7 @@ def test_desired_speed_can_be_mutated_via_agent_handle(
 
     agent_id = sim.add_agent(
         room.at(1, 1),
-        target=room.at(10, 1),
+        target=room.at(9, 1),
         state=state_class(**extra_state_kwargs),
     ).id
 
@@ -116,7 +116,7 @@ def test_removed_parameter_names_raise(
 
     agent_id = sim.add_agent(
         room.at(1, 1),
-        target=room.at(10, 1),
+        target=room.at(9, 1),
         state=state_class(**extra_state_kwargs),
     ).id
 

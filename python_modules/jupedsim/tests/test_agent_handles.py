@@ -3,6 +3,7 @@ import jupedsim as jps
 import pytest
 import shapely
 from jupedsim.agent import Agent
+from jupedsim.pyjupedsim import WalkableSurface as NativeSurface
 from jupedsim.route import Route
 from jupedsim.surface import Location, WalkableSurface
 
@@ -325,3 +326,30 @@ def test_remove_twice_before_iterate(world):
     sim.iterate()
     assert not agent.alive
     assert sim.agent_count() == 0
+
+
+@pytest.mark.parametrize("bad_id", ["1", 1.0, True, None])
+def test_agent_lookup_rejects_ids_that_are_not_ints(world, bad_id):
+    sim, _, room, _, _, route_a, _ = world
+    with pytest.raises(TypeError, match="agent_id must be an int"):
+        sim.agent(bad_id)
+
+
+def test_agent_lookup_rejects_a_handle(world):
+    sim, _, room, _, _, route_a, _ = world
+    agent = sim.add_agent(room.at(1, 8), route=route_a)
+    with pytest.raises(TypeError, match=r"sim.agent\(agent.id\)"):
+        sim.agent(agent)
+    assert sim.agent(agent.id) == agent
+
+
+def test_simulation_rejects_native_surfaces():
+    native = NativeSurface()
+    native.add_region(boundary=[(0, 0), (10, 0), (10, 10), (0, 10)])
+    for geometry in (native, native.create_geometry()):
+        with pytest.raises(
+            TypeError, match="geometry must be a WalkableSurface"
+        ):
+            jps.Simulation(
+                model=jps.CollisionFreeSpeedModel(), geometry=geometry
+            )

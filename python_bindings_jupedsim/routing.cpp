@@ -227,17 +227,11 @@ void init_routing(py::module_& m)
     location.doc() = clean_doc(R"(
         A point on the walkable surface, together with the region it lies in.
 
-        Locations cannot be created directly, get them from the surface or an agent:
-
-        .. code:: python
-
-            upper_floor.at(x, y)
-            sim.agent(agent_id).location
+        Internal token for a point on the walkable surface, together with the
+        region it lies in. Use :class:`jupedsim.Location`, created with
+        ``region.at(x, y)``, in the public API.
 
         A location is read-only and stays valid as long as its simulation exists.
-        It does not move with an agent: read
-        :attr:`~jupedsim.Agent.location` again to get the agent's current
-        location.
     )");
     location
         .def_property_readonly(

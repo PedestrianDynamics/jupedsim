@@ -154,6 +154,8 @@ def test_invalid_speed_fields_are_rejected_with_handles(hall):
         sim.set_default_speed_field(foreign, default)
     with pytest.raises(TypeError, match="region must be a Region handle"):
         sim.set_custom_speed_field(left, "room", default)
+    with pytest.raises(TypeError, match="region must be a Region handle"):
+        sim.set_default_speed_field(1, default)
 
     message = "stage belongs to another simulation"
     with pytest.raises(ValueError, match=message):

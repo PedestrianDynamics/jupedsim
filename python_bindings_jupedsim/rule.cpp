@@ -24,7 +24,7 @@ void init_rule(py::module_& m)
         This type describes how a agent will proceed after completing its stage.
         This effectively describes the set of outbound edges for a stage.
 
-        There are 3 types of transitions currently available:
+        There are 3 types of rules currently available:
 
         * **Fixed transitions:** On completion of this transitions stage all agents
           will proceed to the specified next stage.
