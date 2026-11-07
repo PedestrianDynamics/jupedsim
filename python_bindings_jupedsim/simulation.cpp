@@ -12,9 +12,9 @@
 #include "operational_model_state.hpp"
 #include "polygon.hpp"
 #include "route.hpp"
+#include "rule.hpp"
 #include "stage.hpp"
 #include "stage_description.hpp"
-#include "transition.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep
 
 #include <fmt/format.h>
@@ -130,10 +130,10 @@ void init_simulation(py::module_& m)
             [](Simulation& sim) { return sim.add_stage(DirectSteeringDescription{}).get_id(); })
         .def(
             "add_route",
-            [](Simulation& sim, const std::map<uint64_t, PyTransition>& route) {
-                auto native_route = std::map<BaseStage::ID, TransitionDescription>{};
-                for(const auto& [stage_id, transition] : route) {
-                    native_route.emplace(stage_id, transition.description);
+            [](Simulation& sim, const std::map<uint64_t, PyRule>& route) {
+                auto native_route = std::map<BaseStage::ID, RuleDescription>{};
+                for(const auto& [stage_id, rule] : route) {
+                    native_route.emplace(stage_id, rule.description);
                 }
                 return sim.add_route(native_route).get_id();
             },

@@ -69,7 +69,7 @@ std::pair<Route::ID, BaseStage::ID> route_to(Simulation& sim, Point position, st
     const Vector half{0.5, 0.5};
     const Polygon area{test_geometries::rectangle_points(position - half, position + half)};
     const auto stage = sim.add_stage(WaypointDescription{{{area, region_id}}});
-    const auto route = sim.add_route({{stage, NonTransitionDescription{}}});
+    const auto route = sim.add_route({{stage, NoRuleDescription{}}});
     return {route, stage};
 }
 
@@ -410,7 +410,7 @@ TEST(MultiStoreySimulation, WalkingUpTheUStairToTheExitAbove)
     // flights, and back west on the upper floor.
     const Polygon outline{{{0, 4}, {3, 4}, {3, 8}, {0, 8}}};
     const auto exit = sim.add_stage(ExitDescription{{{outline, stair.room_2}}});
-    const auto route = sim.add_route({{exit, NonTransitionDescription{}}});
+    const auto route = sim.add_route({{exit, NoRuleDescription{}}});
     const auto id = sim.add_agent(route, exit, Point{2, 6}, State{}, stair.room_1);
 
     const auto walked = climb(sim, id, [&sim] { return sim.agent_count() == 0; });
@@ -428,7 +428,7 @@ TEST(MultiStoreySimulation, SteeredUpTheUStairToTheFloorAbove)
 
     // The same way as to the exit above, steered towards a single place.
     const auto steering = sim.add_stage(DirectSteeringDescription{});
-    const auto route = sim.add_route({{steering, NonTransitionDescription{}}});
+    const auto route = sim.add_route({{steering, NoRuleDescription{}}});
     const auto id = sim.add_agent(route, steering, Point{2, 6}, State{}, stair.room_1);
     const auto target = sim.get_location(2, 6, stair.room_2);
     sim.set_agent_target(id, target);

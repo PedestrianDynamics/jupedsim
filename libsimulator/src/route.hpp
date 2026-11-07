@@ -2,6 +2,7 @@
 #pragma once
 
 #include "generic_agent.hpp"
+#include "routing_engine.hpp"
 #include "routing_target.hpp"
 #include "simulation_error.hpp"
 #include "stage.hpp"
@@ -17,38 +18,36 @@
 #include <variant>
 #include <vector>
 
-class NonTransitionDescription
+class NoRuleDescription
 {
 };
 
-class FixedTransitionDescription
+class FixedRuleDescription
 {
     BaseStage::ID _next{};
 
 public:
-    FixedTransitionDescription(BaseStage::ID next) : _next(next)
+    FixedRuleDescription(BaseStage::ID next) : _next(next)
     {
         if(next == BaseStage::ID::invalid.get_id()) {
-            throw SimulationError("Can not create fixed transition from invalid stage id.");
+            throw SimulationError("Can not create fixed rule from invalid stage id.");
         }
     };
 
     BaseStage::ID next_id() const { return _next; }
 };
 
-class RoundRobinTransitionDescription
+class RoundRobinDescription
 {
     std::vector<std::tuple<BaseStage::ID, uint64_t>> _weighted_stages{};
 
 public:
-    RoundRobinTransitionDescription(
-        const std::vector<std::tuple<BaseStage::ID, uint64_t>>& weighted_stages)
+    RoundRobinDescription(const std::vector<std::tuple<BaseStage::ID, uint64_t>>& weighted_stages)
         : _weighted_stages(weighted_stages)
     {
         for(const auto& [stage_id, _] : _weighted_stages) {
             if(stage_id == BaseStage::ID::invalid.get_id()) {
-                throw SimulationError(
-                    "Can not create round robin transition from invalid stage id.");
+                throw SimulationError("Can not create round robin rule from invalid stage id.");
             }
         }
     };
@@ -59,19 +58,18 @@ public:
     }
 };
 
-class LeastTargetedTransitionDescription
+class LeastTargetedDescription
 {
 private:
     std::vector<BaseStage::ID> _target_candidates;
 
 public:
-    LeastTargetedTransitionDescription(std::vector<BaseStage::ID> target_candidates)
+    LeastTargetedDescription(std::vector<BaseStage::ID> target_candidates)
         : _target_candidates(std::move(target_candidates))
     {
         for(const auto& stage_id : _target_candidates) {
             if(stage_id == BaseStage::ID::invalid.get_id()) {
-                throw SimulationError(
-                    "Can not create least targeted transition from invalid stage id.");
+                throw SimulationError("Can not create least targeted rule from invalid stage id.");
             }
         }
     }
@@ -79,31 +77,38 @@ public:
     const std::vector<BaseStage::ID>& target_candidates() const { return _target_candidates; }
 };
 
-using TransitionDescription = std::variant<
-    NonTransitionDescription,
-    FixedTransitionDescription,
-    RoundRobinTransitionDescription,
-    LeastTargetedTransitionDescription>;
+using RuleDescription = std::variant<
+    NoRuleDescription,
+    FixedRuleDescription,
+    RoundRobinDescription,
+    LeastTargetedDescription>;
 
-class Transition
-{
-public:
-    virtual ~Transition() = default;
-    virtual BaseStage* next_stage() = 0;
+/// What a rule may consult when it decides: the agent deciding and the routing engine for
+/// travel-time queries.
+struct RuleContext {
+    const GenericAgent& agent;
+    const RoutingEngine& routing;
 };
 
-class FixedTransition : public Transition
+class Rule
+{
+public:
+    virtual ~Rule() = default;
+    virtual BaseStage* next_stage(const RuleContext& ctx) = 0;
+};
+
+class FixedRule : public Rule
 {
 private:
     BaseStage* _next;
 
 public:
-    FixedTransition(BaseStage* next) : _next(next) {};
+    FixedRule(BaseStage* next) : _next(next) {};
 
-    BaseStage* next_stage() override { return _next; }
+    BaseStage* next_stage([[maybe_unused]] const RuleContext& ctx) override { return _next; }
 };
 
-class RoundRobinTransition : public Transition
+class RoundRobin : public Rule
 {
 private:
     std::vector<std::tuple<BaseStage*, uint64_t>> _weighted_stages{};
@@ -111,18 +116,18 @@ private:
     uint64_t _sum_weights{};
 
 public:
-    RoundRobinTransition(std::vector<std::tuple<BaseStage*, uint64_t>> weighted_stages)
+    RoundRobin(std::vector<std::tuple<BaseStage*, uint64_t>> weighted_stages)
         : _weighted_stages(std::move(weighted_stages))
     {
         for(auto const& [_, weight] : _weighted_stages) {
             if(weight == 0) {
-                throw SimulationError("RoundRobinTransition no weight may be zero.");
+                throw SimulationError("RoundRobin no weight may be zero.");
             }
             _sum_weights += weight;
         }
     }
 
-    BaseStage* next_stage() override
+    BaseStage* next_stage([[maybe_unused]] const RuleContext& ctx) override
     {
         uint64_t sum_weights_so_far = 0;
         BaseStage* candidate{};
@@ -139,18 +144,18 @@ public:
     }
 };
 
-class LeastTargetedTransition : public Transition
+class LeastTargeted : public Rule
 {
 private:
     std::vector<BaseStage*> _target_candidates;
 
 public:
-    LeastTargetedTransition(std::vector<BaseStage*> target_candidates)
+    LeastTargeted(std::vector<BaseStage*> target_candidates)
         : _target_candidates(std::move(target_candidates))
     {
     }
 
-    BaseStage* next_stage() override
+    BaseStage* next_stage([[maybe_unused]] const RuleContext& ctx) override
     {
         auto least_targeted = std::min_element(
             std::begin(_target_candidates),
@@ -164,7 +169,7 @@ public:
 
 struct RouteNode {
     BaseStage* stage;
-    std::unique_ptr<Transition> transition;
+    std::unique_ptr<Rule> rule;
 };
 
 class Route
@@ -183,14 +188,15 @@ public:
 
     ID id() const { return _id; }
 
-    std::tuple<RoutingTarget, BaseStage::ID> target(const GenericAgent& agent) const
+    std::tuple<RoutingTarget, BaseStage::ID>
+    target(const GenericAgent& agent, const RoutingEngine& routing) const
     {
         auto& node = _stages.at(agent.stage_id);
         auto stage = node.stage;
-        const auto& transition = node.transition;
+        const auto& rule = node.rule;
 
         if(stage->is_completed(agent)) {
-            stage = transition->next_stage();
+            stage = rule->next_stage(RuleContext{agent, routing});
         }
 
         return std::make_tuple(stage->target(agent), stage->id());

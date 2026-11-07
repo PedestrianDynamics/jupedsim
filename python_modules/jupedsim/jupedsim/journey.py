@@ -2,7 +2,7 @@
 
 from typing import Optional
 
-from jupedsim.pyjupedsim import Transition
+from jupedsim.pyjupedsim import Rule as Transition
 
 
 class JourneyDescription:

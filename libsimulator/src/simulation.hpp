@@ -98,7 +98,7 @@ public:
     void iterate();
     /// Closes the simulation freeing memory. Every entry point (except timer's) throws afterwards.
     void close();
-    Route::ID add_route(const std::map<BaseStage::ID, TransitionDescription>& stages);
+    Route::ID add_route(const std::map<BaseStage::ID, RuleDescription>& stages);
     BaseStage::ID add_stage(const StageDescription& stage_description);
     void mark_agent_for_removal(GenericAgent::ID id);
     const std::vector<GenericAgent::ID>& removed_agents() const;

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "transition.hpp"
+#include "rule.hpp"
 
 #include "conversion.hpp"
 #include "route.hpp"
@@ -15,10 +15,10 @@
 
 namespace py = pybind11;
 
-void init_transition(py::module_& m)
+void init_rule(py::module_& m)
 {
-    py::class_<PyTransition> transition(m, "Transition");
-    transition.doc() = clean_doc(R"(
+    py::class_<PyRule> rule(m, "Rule");
+    rule.doc() = clean_doc(R"(
         Describes the Transition at a stage.
 
         This type describes how a agent will proceed after completing its stage.
@@ -40,10 +40,9 @@ void init_transition(py::module_& m)
           The number of "targeting" agents is the amount of agents currently moving
           towards this stage. This includes agents from different routes.
     )");
-    transition
-        .def_static(
+    rule.def_static(
             "create_fixed_transition",
-            [](uint64_t stage_id) { return PyTransition{FixedTransitionDescription(stage_id)}; },
+            [](uint64_t stage_id) { return PyRule{FixedRuleDescription(stage_id)}; },
             py::arg("stage_id"),
             clean_doc(R"(
             Create a fixed transition.
@@ -69,7 +68,7 @@ void init_transition(py::module_& m)
                 for(const auto& [stage_id, weight] : stage_weights) {
                     weights.emplace_back(stage_id, weight);
                 }
-                return PyTransition{RoundRobinTransitionDescription(weights)};
+                return PyRule{RoundRobinDescription(weights)};
             },
             py::arg("stage_weights"),
             clean_doc(R"(
@@ -95,8 +94,7 @@ void init_transition(py::module_& m)
         .def_static(
             "create_least_targeted_transition",
             [](const std::vector<uint64_t>& stages) {
-                return PyTransition{
-                    LeastTargetedTransitionDescription(into_vec_t<BaseStage::ID>(stages))};
+                return PyRule{LeastTargetedDescription(into_vec_t<BaseStage::ID>(stages))};
             },
             py::arg("stage_ids"),
             clean_doc(R"(
@@ -119,7 +117,7 @@ void init_transition(py::module_& m)
                 .c_str())
         .def_static(
             "create_none_transition",
-            [] { return PyTransition{NonTransitionDescription{}}; },
+            [] { return PyRule{NoRuleDescription{}}; },
             clean_doc(R"(
             Create a transition that leads nowhere.
 

@@ -106,7 +106,7 @@ void Simulation::iterate()
 
     {
         JPS_SCOPED_TIMER_AND_TRACE(_timer, "Strategical Decision System", General);
-        _stategical_decision_system.run(_routes, _agents, _stage_manager);
+        _stategical_decision_system.run(_routes, _agents, _stage_manager, *_routing_engine);
     }
 
     {
@@ -133,7 +133,7 @@ void Simulation::close()
     _routing_engine.reset();
 }
 
-Route::ID Simulation::add_route(const std::map<BaseStage::ID, TransitionDescription>& stages)
+Route::ID Simulation::add_route(const std::map<BaseStage::ID, RuleDescription>& stages)
 {
     throw_if_state(State::Iterating | State::Closed, "add_route");
     JPS_SCOPED_TIMER_AND_TRACE(_timer, "Add Route", Detailed);
@@ -161,17 +161,14 @@ Route::ID Simulation::add_route(const std::map<BaseStage::ID, TransitionDescript
                     stage,
                     std::visit(
                         Overloaded{
-                            [stage](
-                                const NonTransitionDescription&) -> std::unique_ptr<Transition> {
-                                return std::make_unique<FixedTransition>(stage);
+                            [stage](const NoRuleDescription&) -> std::unique_ptr<Rule> {
+                                return std::make_unique<FixedRule>(stage);
                             },
-                            [this](const FixedTransitionDescription& d)
-                                -> std::unique_ptr<Transition> {
-                                return std::make_unique<FixedTransition>(
+                            [this](const FixedRuleDescription& d) -> std::unique_ptr<Rule> {
+                                return std::make_unique<FixedRule>(
                                     _stage_manager.stage(d.next_id()));
                             },
-                            [this](const RoundRobinTransitionDescription& d)
-                                -> std::unique_ptr<Transition> {
+                            [this](const RoundRobinDescription& d) -> std::unique_ptr<Rule> {
                                 std::vector<std::tuple<BaseStage*, uint64_t>> weighted_stages{};
                                 weighted_stages.reserve(d.weighted_stages().size());
 
@@ -184,10 +181,9 @@ Route::ID Simulation::add_route(const std::map<BaseStage::ID, TransitionDescript
                                         return {_stage_manager.stage(id), weight};
                                     });
 
-                                return std::make_unique<RoundRobinTransition>(weighted_stages);
+                                return std::make_unique<RoundRobin>(weighted_stages);
                             },
-                            [this](const LeastTargetedTransitionDescription& d)
-                                -> std::unique_ptr<Transition> {
+                            [this](const LeastTargetedDescription& d) -> std::unique_ptr<Rule> {
                                 std::vector<BaseStage*> candidates{};
                                 candidates.reserve(d.target_candidates().size());
 
@@ -199,7 +195,7 @@ Route::ID Simulation::add_route(const std::map<BaseStage::ID, TransitionDescript
                                         return _stage_manager.stage(id);
                                     });
 
-                                return std::make_unique<LeastTargetedTransition>(candidates);
+                                return std::make_unique<LeastTargeted>(candidates);
                             }},
                         desc)}};
         });
@@ -269,7 +265,7 @@ GenericAgent::ID Simulation::add_agent(
     _neighborhood_search.add_agent(_agents.back());
 
     auto v = IteratorPair(std::prev(std::end(_agents)), std::end(_agents));
-    _stategical_decision_system.run(_routes, v, _stage_manager);
+    _stategical_decision_system.run(_routes, v, _stage_manager, *_routing_engine);
     _tactical_decision_system.run(*_routing_engine, v);
     return _agents.back().id.get_id();
 }

@@ -46,7 +46,7 @@ from jupedsim.pyjupedsim import (
     SocialForceModelState,
     SpeedGrid,
     SurfaceMeshShortestPathRoutingEngine,
-    Transition,
+    Rule as Transition,
     TravelTimeGrid,
     WalkableSurface,
     WallView,
