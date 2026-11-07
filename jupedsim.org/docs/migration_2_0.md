@@ -215,7 +215,7 @@ its region raises immediately, not at the next `iterate()`.
 ## Mutation during iterate() is now an error
 
 Calling mutating simulation methods — `add_agent`,
-`mark_agent_for_removal`, route or stage mutation — while `iterate()` is
+`agent.remove()`, route or stage mutation — while `iterate()` is
 running (e.g. from a custom-model callback or a trajectory writer invoked
 during iteration) now raises {class}`~jupedsim.SimulationError` instead of
 causing undefined behavior. Perform such mutations between `iterate()`

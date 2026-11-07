@@ -62,7 +62,7 @@ def main():
                 agents_at_waypoint[0].follow(long_route, start=waypoints[1])
                 redirect_once = False
                 print(
-                    f"Switched journey for agent {agents_at_waypoint[0].id} @{simulation.iteration_count()}"
+                    f"Switched route for agent {agents_at_waypoint[0].id} @{simulation.iteration_count()}"
                 )
             simulation.iterate()
         except KeyboardInterrupt:

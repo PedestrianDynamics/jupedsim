@@ -579,7 +579,11 @@ def main(shift):
     region = surface.add_region(boundary=[(0, 0), (20, 0), (20, 10), (0, 10)])
     sim = jps.Simulation(model=jps.CollisionFreeSpeedModel(), geometry=surface)
     wp = sim.add_waypoint_stage([([(8, 4), (8, 6), (9, 6), (9, 4)], region)])
-    ex = sim.add_exit_stage([([(19, 4), (19, 6), (20, 6), (20, 4)], region)])
+    exits = [
+        sim.add_exit_stage([([(19, 4), (19, 6), (20, 6), (20, 4)], region)]),
+        sim.add_exit_stage([([(19, 6), (19, 8), (20, 8), (20, 6)], region)]),
+    ]
+    ex = exits[EXIT_INDEX]
     journey = jps.JourneyDescription([wp, ex])
     journey.set_transition_for_stage(wp, jps.Transition.create_fixed_transition(ex))
     jid = sim.add_journey(journey)
@@ -587,7 +591,7 @@ def main(shift):
         sim.add_agent(
             journey_id=jid, stage_id=wp, position=(2 + shift, 3 + 2 * i),
             state=jps.CollisionFreeSpeedModelState(radius=0.3), region_id=region)
-    sim.iterate(150)
+    sim.iterate(1800)
 main(SHIFT)
 """
 
@@ -601,13 +605,17 @@ def main(shift):
         polygon=shapely.Polygon([(0, 0), (20, 0), (20, 10), (0, 10)]))
     sim = jps.Simulation(jps.CollisionFreeSpeedModel(), surface)
     wp = sim.add_waypoint([(8, 4), (8, 6), (9, 6), (9, 4)], region=region)
-    ex = sim.add_exit([(19, 4), (19, 6), (20, 6), (20, 4)], region=region)
+    exits = [
+        sim.add_exit([(19, 4), (19, 6), (20, 6), (20, 4)], region=region),
+        sim.add_exit([(19, 6), (19, 8), (20, 8), (20, 6)], region=region),
+    ]
+    ex = exits[EXIT_INDEX]
     route = jps.Route([wp, ex])
     for i in range(3):
         sim.add_agent(
             region.at(2 + shift, 3 + 2 * i), route=route,
             state=jps.CollisionFreeSpeedModelState(radius=0.3))
-    sim.iterate(150)
+    sim.iterate(1800)
 main(SHIFT)
 """
 
@@ -622,16 +630,27 @@ def cmd_selftest():
     source = _selftest_source()
     with tempfile.TemporaryDirectory() as tmp:
         results = []
-        for shift in (0.0, 0.0, 0.5):
+        for shift, exit_index in ((0.0, 0), (0.0, 0), (0.5, 0), (0.0, 1)):
             script = Path(tmp) / "selftest.py"
-            script.write_text(source.replace("SHIFT", repr(shift)))
+            script.write_text(
+                source.replace("SHIFT", repr(shift)).replace(
+                    "EXIT_INDEX", str(exit_index)
+                )
+            )
             results.append(_run_selftest(script))
     same = compare("selftest", results[0], results[1], set())
-    diff = compare("selftest", results[0], results[2], set())
-    if same or not diff:
-        print("selftest FAILED", same, diff)
+    moved = compare("selftest", results[0], results[2], set())
+    rerouted = compare("selftest", results[0], results[3], set())
+    detected = [
+        metric
+        for metric in ("assignments", "exit_counts")
+        if any(f" {metric}:" in line for line in rerouted)
+    ]
+    if same or not moved or detected != ["assignments", "exit_counts"]:
+        print("selftest FAILED", same, moved, rerouted)
         return 1
-    print("selftest ok:", diff[0])
+    print("selftest ok:", moved[0])
+    print("selftest ok:", rerouted[0])
     return 0
 
 
