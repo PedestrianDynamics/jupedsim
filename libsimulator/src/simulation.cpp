@@ -19,6 +19,7 @@
 #include "stage.hpp"
 #include "stage_description.hpp"
 #include "strategical_desicion_system.hpp"
+#include "tactical_decision_system.hpp"
 #include "timing.hpp"
 #include "tracing.hpp"
 #include "visitor.hpp"

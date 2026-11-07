@@ -9,6 +9,7 @@
 #include "kernel.hpp"
 #include "polygon.hpp"
 #include "route.hpp"
+#include "simulation_clock.hpp"
 #include "stage.hpp"
 #include "test_common.hpp"
 

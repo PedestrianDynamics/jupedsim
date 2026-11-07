@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "destination.hpp"
+#include "floorfield_routing_engine.hpp"
 #include "generic_agent.hpp"
 #include "geometry/geometry.hpp"
 #include "geometry_fixtures.hpp"
@@ -12,6 +13,7 @@
 #include "simulation_error.hpp"
 #include "stage.hpp"
 #include "test_common.hpp"
+#include "unique_id.hpp"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
