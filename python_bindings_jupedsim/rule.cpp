@@ -159,11 +159,10 @@ void init_rule(py::module_& m)
             "create_none_transition",
             [] { return PyRule{NoRuleDescription{}}; },
             clean_doc(R"(
-            Create a transition that leads nowhere.
+            Create a transition that leads nowhere, for exits.
 
-            The next stage of a stage with this transition is the stage itself:
-            agents completing it keep it as their target and stay there. It is the
-            default for every stage of a :class:`~jupedsim.RouteDescription`.
+            The next stage of a stage with this transition is the stage itself.
+            Exits use it: agents completing an exit leave the simulation.
 
             Returns:
                 The transition.

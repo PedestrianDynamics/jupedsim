@@ -154,8 +154,9 @@ class Agent:
 
         A point counts as reached when the agent's last step passed within
         0.05 m of it (horizontal distance, same region), whatever the step
-        length, so fast agents and large dt arrive too. Arrived agents keep steering to the stage or the point, so
-        they stay there, and are not removed."""
+        length, so fast agents and large dt arrive too. Arrived agents keep
+        steering to the stage or the point, so they stay there, and are not
+        removed."""
         return self._resolve().arrived
 
     @property
@@ -173,7 +174,12 @@ class Agent:
 
     @property
     def route_orientation(self) -> tuple[float, float]:
-        """Unit vector toward the current target, or (0, 0) at the destination.
+        """Unit vector toward the current target.
+
+        (0, 0) inside the area of the stage the agent heads for, and at a
+        steer_to() point only where the agent stands exactly on it; agents
+        steering to a point oscillate around it instead. Use ``arrived`` to
+        tell arrival.
 
         It is computed in iterate(). follow() sets it for the new stage at
         once; after steer_to() it refers to the previous target until the

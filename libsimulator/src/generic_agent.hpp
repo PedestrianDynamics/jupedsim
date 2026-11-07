@@ -51,7 +51,8 @@ struct GenericAgent {
     Vector last_step{};
 
     // This is evaluated by the "operational level"
-    /// Unit vector along the route to the final target. Zero if the agent has reached it.
+    /// Unit vector along the route to the final target. Zero inside a stage's area, and at a point
+    /// target only exactly on the point; `arrived` tells arrival.
     Vector route_orientation{};
     RoutingTarget final_target;
 

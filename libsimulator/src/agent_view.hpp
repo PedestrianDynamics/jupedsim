@@ -191,8 +191,8 @@ public:
 
     double dt() const { return _dt; }
 
-    /// Unit vector along the route to the final target. Zero when the agent has already
-    /// reached it.
+    /// Unit vector along the route to the final target. Zero inside a stage's area, and at a point
+    /// target only exactly on the point.
     Vector route_orientation() const { return _agent.route_orientation; }
 
 private:

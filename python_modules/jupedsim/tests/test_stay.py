@@ -194,5 +194,78 @@ def test_fast_agent_with_large_dt_arrives(target):
         target=room.at(*target),
         state=jps.CollisionFreeSpeedModelState(desired_speed=4.0),
     )
-    iterate_until(sim, lambda: agent.arrived, limit=200)
-    assert math.dist(agent.position.xy, target) <= 0.4
+    before = agent.position.xy
+    for _ in range(200):
+        if agent.arrived:
+            break
+        before = agent.position.xy
+        sim.iterate()
+    assert agent.arrived
+    # The last step passed within 0.05 m of the point.
+    step = shapely.LineString([before, agent.position.xy])
+    assert step.distance(shapely.Point(target)) <= 0.05
+
+
+def test_held_stay_waypoint_arrives_on_release():
+    sim, room, s = make_sim()
+    route = jps.Route([s["wp1"], jps.STAY])
+    route.hold(s["wp1"])
+    agent = sim.add_agent(room.at(2, 5), route=route)
+    iterate_until(sim, lambda: agent.held)
+    assert not agent.arrived
+    route.release(s["wp1"])
+    assert not agent.held
+    sim.iterate()
+    assert agent.arrived
+    assert agent.stage == s["wp1"]
+
+
+def test_pushed_out_agent_stays_arrived_and_returns():
+    surface = WalkableSurface()
+    room = surface.add_region(polygon=ROOM, name="room")
+    sim = jps.Simulation(jps.SocialForceModel(), surface)
+    wp = sim.add_waypoint((9, 5), radius=0.5, region=room)
+    wp2 = sim.add_waypoint((13, 5), radius=0.6, region=room)
+    exit1 = sim.add_exit([(19, 4), (20, 4), (20, 6), (19, 6)], region=room)
+    agent = sim.add_agent(room.at(2, 5), route=jps.Route([wp, jps.STAY]))
+    iterate_until(sim, lambda: agent.arrived)
+    # A second agent walks through the waypoint and pushes it out.
+    sim.add_agent(room.at(4, 5.05), route=jps.Route([wp2, exit1]))
+    farthest = 0.0
+    for _ in range(3000):
+        sim.iterate()
+        farthest = max(farthest, math.dist(agent.position.xy, (9, 5)))
+        assert agent.arrived
+    assert farthest > 0.5
+    assert inside((9, 5), 0.5, agent)
+
+
+def test_agents_targeting_includes_arrived_agents():
+    sim, room, s = make_sim()
+    agent = sim.add_agent(room.at(2, 5), route=jps.Route([s["wp1"], jps.STAY]))
+    iterate_until(sim, lambda: agent.arrived)
+    sim.iterate()
+    assert sim.agents_targeting(s["wp1"]) == (agent,)
+    assert agent in sim.agents()
+
+
+def test_new_point_is_not_reached_by_the_previous_step():
+    surface = WalkableSurface()
+    room = surface.add_region(polygon=ROOM, name="room")
+    sim = jps.Simulation(jps.CollisionFreeSpeedModel(), surface, dt=0.1)
+    agent = sim.add_agent(
+        room.at(2, 5),
+        target=room.at(8, 5),
+        state=jps.CollisionFreeSpeedModelState(desired_speed=4.0),
+    )
+    for _ in range(5):
+        sim.iterate()
+    # The point lies on the 0.4 m step just taken, 0.2 m behind the agent.
+    x, y = agent.position.xy
+    agent.steer_to(room.at(x - 0.2, y))
+    # Arrival is decided before the agent moves, so the old step must not
+    # count: the agent arrives only once its next step has passed the point.
+    sim.iterate()
+    assert not agent.arrived
+    sim.iterate()
+    assert agent.arrived

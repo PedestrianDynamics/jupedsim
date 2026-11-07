@@ -325,6 +325,8 @@ void Simulation::set_agent_target(GenericAgent::ID id, Point target)
     }
     agent.final_target = *located;
     agent.arrived = false;
+    // A step taken toward the previous target does not reach the new one.
+    agent.last_step = Vector{};
 }
 
 void Simulation::set_agent_target(GenericAgent::ID id, const Location& target)
@@ -333,6 +335,8 @@ void Simulation::set_agent_target(GenericAgent::ID id, const Location& target)
     auto& steered = agent(id);
     steered.final_target = target;
     steered.arrived = false;
+    // A step taken toward the previous target does not reach the new one.
+    steered.last_step = Vector{};
 }
 
 void Simulation::mark_agent_for_removal(GenericAgent::ID id)
