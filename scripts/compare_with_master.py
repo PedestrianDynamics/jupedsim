@@ -441,7 +441,8 @@ def _scenarios(selected):
 
 
 def _exemptions():
-    exempt = set()
+    """{(script, metric): first exempt iteration, None for all of it}."""
+    exempt = {}
     for line in (BASE_DIR / "EXEMPT.txt").read_text().splitlines():
         line = line.strip()
         if not line or line.startswith("#"):
@@ -451,8 +452,30 @@ def _exemptions():
             raise SystemExit(
                 f"Bad EXEMPT.txt line (need script metric reason): {line}"
             )
-        exempt.add((parts[0], parts[1]))
+        exempt[(parts[0], parts[1])] = _bound(parts[1], parts[2], line)
     return exempt
+
+
+def _bound(metric, rest, line):
+    """The iteration of a leading ``from=<iteration>``, else None."""
+    match = re.match(r"from=(\d+)\s", rest)
+    if match is None:
+        return None
+    if metric == "end_time":
+        raise SystemExit(
+            f"Bad EXEMPT.txt line (end_time has no iterations): {line}"
+        )
+    return int(match.group(1))
+
+
+def _before(metric, value, bound):
+    """The part of a metric recorded before iteration ``bound``."""
+    if metric == "agent_count":
+        return [change for change in value if change[0] < bound]
+    if metric == "exit_counts":
+        kept = {k: [it for it in its if it < bound] for k, its in value.items()}
+        return {k: its for k, its in kept.items() if its}
+    return {it: v for it, v in value.items() if int(it) < bound}
 
 
 def _side(key, old, new):
@@ -554,9 +577,13 @@ def compare(script, baseline, current, exempt):
     problems = []
     for index, (old, new) in enumerate(zip(baseline, current)):
         for metric in METRICS:
+            a, b = old[metric], new[metric]
             if (script, metric) in exempt:
-                continue
-            diff = first_difference(metric, old[metric], new[metric])
+                bound = exempt[(script, metric)]
+                if bound is None:
+                    continue
+                a, b = _before(metric, a, bound), _before(metric, b, bound)
+            diff = first_difference(metric, a, b)
             if diff:
                 problems.append(f"{script} sim#{index} {metric}: {diff}")
     return problems
@@ -681,9 +708,9 @@ def cmd_selftest():
                 )
             )
             results.append(_run_selftest(script))
-    same = compare("selftest", results[0], results[1], set())
-    moved = compare("selftest", results[0], results[2], set())
-    rerouted = compare("selftest", results[0], results[3], set())
+    same = compare("selftest", results[0], results[1], {})
+    moved = compare("selftest", results[0], results[2], {})
+    rerouted = compare("selftest", results[0], results[3], {})
     detected = [
         metric
         for metric in ("assignments", "exit_counts")
@@ -692,9 +719,29 @@ def cmd_selftest():
     if same or not moved or detected != ["assignments", "exit_counts"]:
         print("selftest FAILED", same, moved, rerouted)
         return 1
+    if not _bounds_hold(results[0][0], results[3][0]):
+        return 1
     print("selftest ok:", moved[0])
     print("selftest ok:", rerouted[0])
     return 0
+
+
+def _bounds_hold(old, new):
+    """A from= bound exempts differences from it on, and only those."""
+    a, b = old["assignments"], new["assignments"]
+    first = min((int(it) for it in a if a[it] != b.get(it)))
+    after = {("selftest", "assignments"): first}
+    late = {("selftest", "assignments"): first + SAMPLE_EVERY}
+    passes = compare("selftest", [old], [new], after)
+    fails = compare("selftest", [old], [new], late)
+    if any(" assignments:" in p for p in passes) or not any(
+        " assignments:" in p for p in fails
+    ):
+        print("selftest FAILED: from= bound", passes, fails)
+        return False
+    late_diff = next(p for p in fails if " assignments:" in p)
+    print(f"selftest ok: from={late[('selftest', 'assignments')]}:", late_diff)
+    return True
 
 
 def _run_selftest(script):
