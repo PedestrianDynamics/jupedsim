@@ -26,9 +26,7 @@ def main():
             output_file=pathlib.Path("example2_out.h5"),
         ),
     )
-    stage = simulation.add_waypoint(
-        jps.circle_to_polygon(center=(60, 50), radius=1), region=region
-    )
+    stage = simulation.add_waypoint((60, 50), radius=1, region=region)
     exits = [
         simulation.add_exit(
             [(99, 40), (99, 60), (100, 60), (100, 40)], region=region
@@ -38,9 +36,7 @@ def main():
         ),
     ]
     waypoints = [
-        simulation.add_waypoint(
-            jps.circle_to_polygon(center=center, radius=1), region=region
-        )
+        simulation.add_waypoint(center, radius=1, region=region)
         for center in [(50, 50), (60, 40), (40, 40), (40, 60), (60, 60)]
     ]
 

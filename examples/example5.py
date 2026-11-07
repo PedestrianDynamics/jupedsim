@@ -51,9 +51,7 @@ def main():
         [(-2, -24), (2, -24), (2, -25), (-2, -25)], region=region
     )
 
-    waypoint_middle = simulation.add_waypoint(
-        jps.circle_to_polygon(center=(0, 0), radius=1), region=region
-    )
+    waypoint_middle = simulation.add_waypoint((0, 0), radius=1, region=region)
 
     route = jps.Route(
         [

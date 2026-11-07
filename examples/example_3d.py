@@ -60,12 +60,8 @@ sim = jps.Simulation(model=jps.CollisionFreeSpeedModel(), geometry=surface)
 upper_waypoint = sim.add_waypoint(
     [(rect(10, 0.5, 12, 1.5), upper), (rect(10, 18.5, 12, 19.5), upper)]
 )
-north_waypoint = sim.add_waypoint(
-    jps.circle_to_polygon(center=(11, 16), radius=1), region=ground
-)
-south_waypoint = sim.add_waypoint(
-    jps.circle_to_polygon(center=(11, 2), radius=1), region=ground
-)
+north_waypoint = sim.add_waypoint((11, 16), radius=1, region=ground)
+south_waypoint = sim.add_waypoint((11, 2), radius=1, region=ground)
 # One exit in the north-west corner and one in the south-east corner. The
 # two areas form one exit stage: they share closure and exit records. Use
 # separate exit handles when doors need independent closure or separate
