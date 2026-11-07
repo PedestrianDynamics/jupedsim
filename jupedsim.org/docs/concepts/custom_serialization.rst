@@ -165,8 +165,8 @@ Here is a complete example that writes trajectory data to a CSV file:
                 self._csv_writer.writerow([
                     frame,
                     agent.id,
-                    agent.position[0],
-                    agent.position[1],
+                    agent.position.x,
+                    agent.position.y,
                     agent.orientation[0],
                     agent.orientation[1],
                 ])

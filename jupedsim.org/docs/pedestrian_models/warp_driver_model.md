@@ -201,18 +201,16 @@ model = jps.WarpDriverModel(
 sim = jps.Simulation(model=model, geometry=surface, dt=0.01)
 
 # Agent-level parameters: pass a state object to add_agent
-agent_id = sim.add_agent(
-    journey_id=journey_id,
-    stage_id=stage_id,
-    position=(2.0, 2.0), 
+agent = sim.add_agent(
+    region.at(2.0, 2.0),
+    route=route,
     state=jps.WarpDriverModelState(orientation=(1.0, 0.0), desired_speed=1.2, radius=0.15),
-    region_id=region_id,
 )
 
 # Runtime state access through the agent handle. The handle resolves the
 # agent freshly on every access, so it stays valid across iterate() calls
 # and mutations take effect immediately.
-state = sim.agent(agent_id).state
+state = agent.state
 print(state.desired_speed)   # 1.2
 print(state.radius)          # 0.15
 
