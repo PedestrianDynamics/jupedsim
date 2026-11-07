@@ -73,20 +73,17 @@ goal_1_area = [
     (113.022, 103.660),
     (114.308, 103.700),
 ]
-goal_1 = simulation.add_exit_stage([(goal_1_area, region)])
+goal_1 = simulation.add_exit(goal_1_area, region=region)
 goal_2_area = [
     (109.723, 69.131),
     (110.907, 68.319),
     (109.883, 65.822),
     (108.334, 67.112),
 ]
-goal_2 = simulation.add_exit_stage([(goal_2_area, region)])
+goal_2 = simulation.add_exit(goal_2_area, region=region)
 
-journey1 = jps.JourneyDescription([goal_1])
-journey2 = jps.JourneyDescription([goal_2])
-
-journey1id = simulation.add_journey(journey1)
-journey2id = simulation.add_journey(journey2)
+route1 = jps.Route([goal_1])
+route2 = jps.Route([goal_2])
 
 spawning_area = walkable_area
 
@@ -100,14 +97,11 @@ pos_in_spawning_area = jps.distribute_by_number(
 
 # distribute agents evenly between two goals
 for i, pos in enumerate(pos_in_spawning_area):
-    goal_id = goal_1 if i % 2 == 0 else goal_2
-    journey_id = journey1id if i % 2 == 0 else journey2id
+    route = route1 if i % 2 == 0 else route2
     simulation.add_agent(
-        journey_id=journey_id,
-        stage_id=goal_id,
-        position=pos,
+        region.at(*pos),
+        route=route,
         state=jps.AnticipationVelocityModelState(radius=0.15, desired_speed=1),
-        region_id=region,
     )
 
 while (
