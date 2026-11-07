@@ -82,7 +82,7 @@ class RoundRobin:
 
     def _native(self) -> _NativeRule:
         pairs = [(s.id, w) for s, w in self._weights.items()]
-        return _NativeRule.create_round_robin_transition(pairs)
+        return _NativeRule.create_round_robin_rule(pairs)
 
     def _describe(self) -> str:
         items = ", ".join(f"{_label(s)}: {w}" for s, w in self._weights.items())
@@ -139,7 +139,7 @@ class LeastTargeted(_ChoiceRule):
 
     def _native(self) -> _NativeRule:
         ids = [stage.id for stage in self._stages]
-        return _NativeRule.create_least_targeted_transition(ids)
+        return _NativeRule.create_least_targeted_rule(ids)
 
 
 class LeastTravelTime(_ChoiceRule):
@@ -151,7 +151,7 @@ class LeastTravelTime(_ChoiceRule):
 
     def _native(self) -> _NativeRule:
         ids = [stage.id for stage in self._stages]
-        return _NativeRule.create_least_travel_time_transition(ids)
+        return _NativeRule.create_least_travel_time_rule(ids)
 
 
 _RULES = (RoundRobin, LeastTargeted, LeastTravelTime)
@@ -307,12 +307,12 @@ def _check_ending(
 
 def _native_rule(stage: _Stage, transitions: Mapping[_Stage, Any]) -> Any:
     if stage not in transitions:
-        return _NativeRule.create_none_transition()
+        return _NativeRule.create_none_rule()
     target = transitions[stage]
     if target is STAY:
-        return _NativeRule.create_stay_transition()
+        return _NativeRule.create_stay_rule()
     if isinstance(target, _Stage):
-        return _NativeRule.create_fixed_transition(target.id)
+        return _NativeRule.create_fixed_rule(target.id)
     return target._native()
 
 

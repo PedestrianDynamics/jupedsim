@@ -165,23 +165,23 @@ class _Recorder:
     """Stands in for the native rule class and records how rules are made."""
 
     @staticmethod
-    def create_fixed_transition(stage_id):
+    def create_fixed_rule(stage_id):
         return ("fixed", stage_id)
 
     @staticmethod
-    def create_round_robin_transition(pairs):
+    def create_round_robin_rule(pairs):
         return ("round_robin", list(pairs))
 
     @staticmethod
-    def create_least_targeted_transition(ids):
+    def create_least_targeted_rule(ids):
         return ("least_targeted", list(ids))
 
     @staticmethod
-    def create_least_travel_time_transition(ids):
+    def create_least_travel_time_rule(ids):
         return ("least_travel_time", list(ids))
 
     @staticmethod
-    def create_none_transition():
+    def create_none_rule():
         return ("none",)
 
 
@@ -199,15 +199,15 @@ def test_native_rules_follow_the_route(stages, monkeypatch):
     )
     monkeypatch.setattr(route_module, "_NativeRule", _Recorder)
     expected = {
-        s["wp1"].id: _Recorder.create_fixed_transition(s["wp2"].id),
-        s["wp2"].id: _Recorder.create_round_robin_transition(
+        s["wp1"].id: _Recorder.create_fixed_rule(s["wp2"].id),
+        s["wp2"].id: _Recorder.create_round_robin_rule(
             [(s["wp3"].id, 1), (s["exit1"].id, 2)]
         ),
-        s["wp3"].id: _Recorder.create_least_targeted_transition(
+        s["wp3"].id: _Recorder.create_least_targeted_rule(
             [s["exit1"].id, s["exit2"].id]
         ),
-        s["exit1"].id: _Recorder.create_none_transition(),
-        s["exit2"].id: _Recorder.create_none_transition(),
+        s["exit1"].id: _Recorder.create_none_rule(),
+        s["exit2"].id: _Recorder.create_none_rule(),
     }
     built = {
         st.id: route_module._native_rule(st, route._transitions)
@@ -230,28 +230,25 @@ def test_least_travel_time_native_rule(stages, monkeypatch):
 
 def test_every_rule_kind_is_one_native_type():
     rules = [
-        NativeRule.create_fixed_transition(1),
-        NativeRule.create_round_robin_transition([(1, 1), (2, 3)]),
-        NativeRule.create_least_targeted_transition([1, 2]),
-        NativeRule.create_least_travel_time_transition([1, 2]),
-        NativeRule.create_none_transition(),
+        NativeRule.create_fixed_rule(1),
+        NativeRule.create_round_robin_rule([(1, 1), (2, 3)]),
+        NativeRule.create_least_targeted_rule([1, 2]),
+        NativeRule.create_least_travel_time_rule([1, 2]),
+        NativeRule.create_none_rule(),
     ]
     assert all(type(rule) is NativeRule for rule in rules)
     assert NativeRule.__module__ == "jupedsim.pyjupedsim"
     assert "Describes the rule at a stage" in NativeRule.__doc__
-    assert (
-        "Create a fixed transition"
-        in NativeRule.create_fixed_transition.__doc__
-    )
+    assert "Create a fixed rule" in NativeRule.create_fixed_rule.__doc__
 
 
 @pytest.mark.parametrize(
     "create",
     [
-        lambda: NativeRule.create_fixed_transition(0),
-        lambda: NativeRule.create_round_robin_transition([(0, 1)]),
-        lambda: NativeRule.create_least_targeted_transition([0]),
-        lambda: NativeRule.create_least_travel_time_transition([0]),
+        lambda: NativeRule.create_fixed_rule(0),
+        lambda: NativeRule.create_round_robin_rule([(0, 1)]),
+        lambda: NativeRule.create_least_targeted_rule([0]),
+        lambda: NativeRule.create_least_travel_time_rule([0]),
     ],
 )
 def test_a_rule_to_the_invalid_stage_id_is_rejected(create):

@@ -24,47 +24,51 @@ void init_rule(py::module_& m)
         This type describes how a agent will proceed after completing its stage.
         This effectively describes the set of outbound edges for a stage.
 
-        There are 4 types of rules currently available:
+        There are 6 types of rules currently available:
 
-        * **Fixed transitions:** On completion of this transitions stage all agents
+        * **Fixed rule:** On completion of this rule's stage all agents
           will proceed to the specified next stage.
 
-        * **Round robin transitions:** On completion of this transitions stage agents
+        * **Round robin rule:** On completion of this rule's stage agents
           will proceed by smooth weighted round-robin. With the weights 3 and 2 the
           agents deciding take the first, second, first, second, first stage, and
           so on. Only the ratio of the weights matters; ties go to the earlier stage.
 
-        * **Least targeted transition:** On completion of this stage agents will
+        * **Least targeted rule:** On completion of this stage agents will
           proceed towards the currently least targeted amongst the specified choices.
           The number of "targeting" agents is the amount of agents currently moving
           towards this stage. This includes agents from different routes.
 
-        * **Least travel time transition:** On completion of this stage each agent
+        * **Least travel time rule:** On completion of this stage each agent
           will proceed towards the choice with the least travel time from where it
           stands.
+
+        * **Stay rule:** Agents completing the stage have arrived and stay there.
+
+        * **None rule:** Leads nowhere; exits use it.
     )");
     rule.def_static(
-            "create_fixed_transition",
+            "create_fixed_rule",
             [](uint64_t stage_id) { return PyRule{FixedRuleDescription(stage_id)}; },
             py::arg("stage_id"),
             clean_doc(R"(
-            Create a fixed transition.
+            Create a fixed rule.
 
-            On completion of this transitions stage all agents will proceed to the
+            On completion of this rule's stage all agents will proceed to the
             specified next stage.
 
             Args:
                 stage_id: Id of the stage to move to next.
 
             Returns:
-                The transition.
+                The rule.
 
             Raises:
                 SimulationError: If ``stage_id`` is not a valid stage id.
             )")
                 .c_str())
         .def_static(
-            "create_round_robin_transition",
+            "create_round_robin_rule",
             [](const std::vector<std::tuple<uint64_t, uint64_t>>& stage_weights) {
                 auto weights = std::vector<std::tuple<BaseStage::ID, uint64_t>>{};
                 weights.reserve(stage_weights.size());
@@ -75,9 +79,9 @@ void init_rule(py::module_& m)
             },
             py::arg("stage_weights"),
             clean_doc(R"(
-            Create a round-robin transition.
+            Create a round-robin rule.
 
-            On completion of this transitions stage agents will proceed by smooth
+            On completion of this rule's stage agents will proceed by smooth
             weighted round-robin: each decision adds every stage's weight to its
             current weight, takes the stage with the largest current weight (ties:
             the earlier one) and takes the sum of the weights off it. With the
@@ -89,20 +93,20 @@ void init_rule(py::module_& m)
                     at least one weight > 0.
 
             Returns:
-                The transition.
+                The rule.
 
             Raises:
                 SimulationError: If a stage id is not a valid stage id.
             )")
                 .c_str())
         .def_static(
-            "create_least_targeted_transition",
+            "create_least_targeted_rule",
             [](const std::vector<uint64_t>& stages) {
                 return PyRule{LeastTargetedDescription(into_vec_t<BaseStage::ID>(stages))};
             },
             py::arg("stage_ids"),
             clean_doc(R"(
-            Create a least targeted transition.
+            Create a least targeted rule.
 
             On completion of this stage agents will proceed towards the currently
             least targeted amongst the specified choices. The number of "targeting"
@@ -113,20 +117,20 @@ void init_rule(py::module_& m)
                 stage_ids: Ids of the stages to choose the next target from.
 
             Returns:
-                The transition.
+                The rule.
 
             Raises:
                 SimulationError: If a stage id is not a valid stage id.
             )")
                 .c_str())
         .def_static(
-            "create_least_travel_time_transition",
+            "create_least_travel_time_rule",
             [](const std::vector<uint64_t>& stages) {
                 return PyRule{LeastTravelTimeDescription(into_vec_t<BaseStage::ID>(stages))};
             },
             py::arg("stage_ids"),
             clean_doc(R"(
-            Create a least travel time transition.
+            Create a least travel time rule.
 
             On completion of this stage each agent proceeds towards the specified
             choice with the least travel time from its position, read from the
@@ -136,36 +140,36 @@ void init_rule(py::module_& m)
                 stage_ids: Ids of the stages to choose the next target from.
 
             Returns:
-                The transition.
+                The rule.
 
             Raises:
                 SimulationError: If a stage id is not a valid stage id.
             )")
                 .c_str())
         .def_static(
-            "create_stay_transition",
+            "create_stay_rule",
             [] { return PyRule{StayDescription{}}; },
             clean_doc(R"(
-            Create a transition that keeps agents at the stage.
+            Create a rule that keeps agents at the stage.
 
             Agents completing the stage have arrived: they keep the stage as their
             target and stay there.
 
             Returns:
-                The transition.
+                The rule.
             )")
                 .c_str())
         .def_static(
-            "create_none_transition",
+            "create_none_rule",
             [] { return PyRule{NoRuleDescription{}}; },
             clean_doc(R"(
-            Create a transition that leads nowhere, for exits.
+            Create a rule that leads nowhere, for exits.
 
-            The next stage of a stage with this transition is the stage itself.
+            The next stage of a stage with this rule is the stage itself.
             Exits use it: agents completing an exit leave the simulation.
 
             Returns:
-                The transition.
+                The rule.
             )")
                 .c_str());
 }
