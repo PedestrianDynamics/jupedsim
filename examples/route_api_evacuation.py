@@ -3,6 +3,8 @@
 # One room of 10 m x 10 m with a door on the right wall. 50 agents walk to
 # the exit and leave.
 
+import sys
+
 import jupedsim as jps
 import shapely
 
@@ -37,3 +39,4 @@ if sim.agent_count() == 0:
     print(f"evacuated after {sim.elapsed_time():.1f} s")
 else:
     print(f"time limit reached; {sim.agent_count()} agents remain")
+    sys.exit(1)

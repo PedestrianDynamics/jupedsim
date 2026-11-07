@@ -5,6 +5,7 @@
 # have decided, the split is changed to 1:1. The change is triggered by
 # state, not by time: the agents reach the decision point within seconds.
 
+import sys
 from collections import Counter
 
 import jupedsim as jps
@@ -59,3 +60,10 @@ while sim.agent_count() > 0 and sim.elapsed_time() < 300:
         changed = True
 
 print({exit_.name: counts[exit_] for exit_ in (left, right)})
+if sim.agent_count() > 0:
+    print(f"time limit reached; {sim.agent_count()} agents remain")
+    sys.exit(1)
+# The change happened and agents decided under the new weights: with 2:1
+# throughout, exactly 20 of 60 would take the right exit.
+assert changed, "the weight change never happened"
+assert counts[right] > 20, "no agent decided under the changed weights"

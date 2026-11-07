@@ -3,6 +3,8 @@
 # Two rooms open into a shared corridor that leads to one exit. Room A
 # evacuates at once; room B waits at its door and is released after 60 s.
 
+import sys
+
 import jupedsim as jps
 import shapely
 
@@ -49,7 +51,9 @@ while sim.agent_count() > 0 and sim.elapsed_time() < 600:
     if not released and sim.elapsed_time() >= 60:
         # held_at() lists agents stopped at door_b; release() also frees
         # room B agents still walking there.
-        print(f"{len(route_b.held_at(door_b))} agents waiting at door_b")
+        waiting_now = len(route_b.held_at(door_b))
+        print(f"{waiting_now} agents waiting at door_b")
+        assert waiting_now > 0, "room B was not held at door_b"
         route_b.release(door_b)
         released = True
 
@@ -57,3 +61,5 @@ if sim.agent_count() == 0:
     print(f"evacuated after {sim.elapsed_time():.1f} s")
 else:
     print(f"time limit reached; {sim.agent_count()} agents remain")
+    sys.exit(1)
+assert released, "room B was never released"

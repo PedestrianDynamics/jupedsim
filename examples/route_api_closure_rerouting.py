@@ -6,6 +6,8 @@
 # switch to a route via the west corridor. The closure is triggered by
 # state, not by time, so east-bound agents are still in the hall.
 
+import sys
+
 import jupedsim as jps
 import shapely
 
@@ -47,6 +49,7 @@ for x, y in positions:
     sim.add_agent(location, route=routes[best])
 
 smoke = False
+affected = 0
 while sim.agent_count() > 0 and sim.elapsed_time() < 600:
     sim.iterate()
     left_east = any(r.exit == east for r in sim.removed_agents())
@@ -74,3 +77,7 @@ if sim.agent_count() == 0:
     print(f"evacuated after {sim.elapsed_time():.1f} s")
 else:
     print(f"time limit reached; {sim.agent_count()} agents remain")
+    sys.exit(1)
+# The closure happened and affected agents.
+assert smoke, "the east exit never closed"
+assert affected > 0, "the closure affected no agent"

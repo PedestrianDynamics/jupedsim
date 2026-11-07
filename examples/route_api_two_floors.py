@@ -8,6 +8,8 @@
 # staircase, so the surfaces join without folding back. Agents start
 # upstairs and leave through an exit on the ground floor's left wall.
 
+import sys
+
 import jupedsim as jps
 import numpy as np
 import shapely
@@ -58,3 +60,8 @@ while sim.agent_count() > 0 and sim.elapsed_time() < 300:
     for agent in upstairs:
         if agent.alive and agent.position.region == staircase:
             print(f"t={sim.elapsed_time():.1f} s: {agent} on the staircase")
+
+if sim.agent_count() > 0:
+    print(f"time limit reached; {sim.agent_count()} agents remain")
+    sys.exit(1)
+print(f"evacuated after {sim.elapsed_time():.1f} s")

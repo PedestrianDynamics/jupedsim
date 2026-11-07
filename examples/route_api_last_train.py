@@ -7,6 +7,7 @@
 # the platform edge and board through two doors, 1:1. At t = 35 s door 1
 # jams: passengers heading for it board through door 2 instead.
 
+import sys
 from collections import Counter
 
 import jupedsim as jps
@@ -80,3 +81,5 @@ if sim.agent_count() == 0:
     print(f"all aboard after {sim.elapsed_time():.1f} s")
 else:
     print(f"train left; {sim.agent_count()} passengers remain")
+    sys.exit(1)
+assert released and jammed, "the train event never happened"
