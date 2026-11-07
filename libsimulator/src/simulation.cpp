@@ -302,11 +302,15 @@ GenericAgent::ID Simulation::add_agent(
     _agents.emplace_back(std::move(agent));
     _neighborhood_search.add_agent(_agents.back());
 
+    // Stages are completed in iterate(): an agent added inside its first stage targets it until
+    // then, so holds placed before the first iterate() apply and exit records are not lost.
+    auto& added = _agents.back();
+    if(!added.stranded) {
+        added.final_target = _stage_manager.stage(added.stage_id)->target(added);
+    }
     auto v = IteratorPair(std::prev(std::end(_agents)), std::end(_agents));
-    _stategical_decision_system.run(
-        _routes, v, _stage_manager, *_routing_engine, _clock.iteration());
     _tactical_decision_system.run(*_routing_engine, v);
-    return _agents.back().id.get_id();
+    return added.id.get_id();
 }
 
 Location Simulation::get_location(double x, double y, std::size_t region_id) const

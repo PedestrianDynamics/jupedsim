@@ -309,6 +309,7 @@ def test_route_bound_at_construction(stages):
     route = _split(decision, exits, 1, 1)
     route.update_weights(decision, {exits["exit1"]: 0})
     agent = sim.add_agent(room.at(5, 5), route=route)
+    sim.iterate()
     assert agent.stage == exits["exit2"]
     # hold works before any agent is added and applies to the first agent
     # added afterwards; without it that agent would go to exit1.
@@ -316,6 +317,7 @@ def test_route_bound_at_construction(stages):
     route = _split(decision, exits, 1, 1)
     route.hold(decision)
     agent = sim.add_agent(room.at(5, 5), route=route)
+    sim.iterate()
     assert agent.held
     assert agent.stage == decision
 
@@ -492,8 +494,10 @@ SPOTS = [(4.5, 5), (5.5, 5), (5, 4.5), (5, 5.5), (5, 5)]
 
 
 def _decide(sim, room, route, spot):
-    """Add an agent in the decision waypoint; it decides at once."""
-    return sim.add_agent(room.at(*SPOTS[spot]), route=route).stage
+    """Add an agent in the decision waypoint; it decides in the next step."""
+    agent = sim.add_agent(room.at(*SPOTS[spot]), route=route)
+    sim.iterate()
+    return agent.stage
 
 
 def test_update_weights_patch(stages):
@@ -523,6 +527,7 @@ def test_update_weights_takes_effect_at_the_next_decision():
     sim, room, decision, exits = _decision_room()
     route = _split(decision, exits, 2, 1)
     first = sim.add_agent(room.at(*SPOTS[0]), route=route)
+    sim.iterate()
     assert first.stage == exits["exit1"]
     route.update_weights(decision, {exits["exit1"]: 1, exits["exit2"]: 2})
     # Assigned agents keep their target; the counter starts afresh: 1:2
@@ -686,6 +691,7 @@ def test_update_weights_does_not_resume_stranded_agents():
     exits["exit2"].close(informed=True)
     exits["exit3"].close(informed=True)
     agent = sim.add_agent(room.at(5, 5), route=route)
+    sim.iterate()
     assert agent.stranded
     route.update_weights(decision, {exits["exit1"]: 1})
     assert agent.stranded
@@ -708,6 +714,7 @@ def test_least_travel_time_picks_nearest():
     )
     lower = sim.add_agent(room.at(5, 4.4), route=route)
     upper = sim.add_agent(room.at(5, 5.6), route=route)
+    sim.iterate()
     assert lower.stage == exits["exit1"]
     assert upper.stage == exits["exit2"]
 

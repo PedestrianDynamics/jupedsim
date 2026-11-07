@@ -116,10 +116,13 @@ Route::ID corridor(ClosureRoom& r)
         {{r.wp, FixedRuleDescription(r.exit2)}, {r.exit2, NoRuleDescription{}}});
 }
 
-/// An agent standing in the waypoint, which decides on its next stage as it is added.
+/// An agent standing in the waypoint, which decides on its next stage in the iteration that
+/// follows its addition.
 GenericAgent::ID add_at_waypoint(ClosureRoom& r, Route::ID route, double y = 10)
 {
-    return r.sim->add_agent(route, r.wp, Point{14, y}, State{}, r.room);
+    const auto id = r.sim->add_agent(route, r.wp, Point{14, y}, State{}, r.room);
+    r.sim->iterate();
+    return id;
 }
 
 /// Iterates until @p done holds; fails after 5000 iterations.
@@ -850,6 +853,9 @@ TEST(Simulation, CloseInformedSkipsAgentsAlreadyLeaving)
     auto r = a_closure_room();
     const auto route = r.sim->add_route({{r.exit2, NoRuleDescription{}}});
     const auto id = r.sim->add_agent(route, r.exit2, Point{17, 10}, State{}, r.room);
+    // The exit is completed in iterate(), not in add_agent().
+    ASSERT_TRUE(r.sim->removed_agents().empty());
+    r.sim->iterate();
     ASSERT_EQ(r.sim->removed_agents().size(), 1u);
 
     EXPECT_TRUE(r.sim->close_exit(r.exit2, true).empty());
@@ -937,8 +943,8 @@ TEST(Simulation, CloseUninformedWithNoOpenTargetStrandsAtExit)
 TEST(Route, SharedCounterSameStep)
 {
     auto r = a_closure_room();
-    // wp0 lies on the waypoint: agents added in it go on to the waypoint at once and reach it in
-    // the same step.
+    // wp0 lies on the waypoint: agents added in it go on to the waypoint in the first step and
+    // reach it together in the second.
     const auto wp0 = r.sim->add_stage(WaypointDescription{{{square_at({14, 10}), r.room}}});
     const auto route = r.sim->add_route(
         {{wp0, FixedRuleDescription(r.wp)},
@@ -948,9 +954,13 @@ TEST(Route, SharedCounterSameStep)
     std::vector<GenericAgent::ID> ids{};
     for(const Point p : {Point{13.7, 9.8}, Point{14.3, 9.8}, Point{14, 10.2}}) {
         ids.push_back(r.sim->add_agent(route, wp0, p, State{}, r.room));
-        ASSERT_EQ(r.sim->agent(ids.back()).stage_id, r.wp);
+        ASSERT_EQ(r.sim->agent(ids.back()).stage_id, wp0);
     }
 
+    r.sim->iterate();
+    for(const auto id : ids) {
+        ASSERT_EQ(r.sim->agent(id).stage_id, r.wp);
+    }
     r.sim->iterate();
 
     // In agent-id order, consecutive slots of 3:2: exit1, exit2, exit1.
@@ -977,6 +987,7 @@ TEST(Simulation, SetRoundRobinWeightsTakesEffectAtTheNextDecision)
     const auto second = add_at_waypoint(r, route, 10.3);
     EXPECT_EQ(r.sim->agent(second).stage_id, r.exit2);
     const auto third = r.sim->add_agent(route, r.wp, Point{14.3, 10.0}, State{}, r.room);
+    r.sim->iterate();
     EXPECT_EQ(r.sim->agent(third).stage_id, r.exit2);
 }
 
@@ -1141,7 +1152,7 @@ TEST(Simulation, SwitchRouteClearsHeld)
     EXPECT_FALSE(r.sim->agent(id).held);
     r.sim->iterate();
     EXPECT_TRUE(r.sim->agent(id).held);
-    EXPECT_EQ(r.sim->agent(id).held_since, 5u);
+    EXPECT_EQ(r.sim->agent(id).held_since, 6u);
 }
 
 TEST(Simulation, HoldRejectsExitsAndForeignStages)

@@ -128,3 +128,16 @@ def test_two_exits_in_one_step():
     exits = {r.id: r.exit for r in sim.removed_agents()}
     assert exits[a.id] is exit1
     assert exits[b.id] is exit2
+
+
+def test_agent_spawned_inside_its_exit_is_reported_once():
+    sim, room, exit1 = make_sim()
+    agent = sim.add_agent(room.at(9.5, 5), route=jps.Route([exit1]))
+    assert sim.removed_agents() == ()
+    seen = []
+    for _ in range(3):
+        sim.iterate()
+        seen.extend(sim.removed_agents())
+    assert [(r.id, r.exit) for r in seen] == [(agent.id, exit1)]
+    assert seen[0].time == 0.0
+    assert not agent.alive

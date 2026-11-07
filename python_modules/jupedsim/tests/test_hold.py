@@ -68,6 +68,7 @@ def test_hold_scoped_to_route():
     other = jps.Route([s["wp2"], s["exit1"]])
     # Completed wp2 before the hold: not affected.
     passed = sim.add_agent(room.at(9, 5), route=route, start=s["wp2"])
+    sim.iterate()
     assert passed.stage != s["wp2"]
     route.hold(s["wp2"])
     assert route.is_held(s["wp2"])
@@ -142,6 +143,7 @@ def test_follow_clears_held():
     route = split(s)
     route.hold(s["wp2"])
     agent = sim.add_agent(room.at(9, 5), route=route)
+    sim.iterate()
     assert agent.held
     agent.follow(jps.Route([s["exit1"]]))
     assert not agent.held
@@ -163,6 +165,7 @@ def test_follow_onto_held_start_holds_again():
     route = split(s)
     route.hold(s["wp2"])
     agent = sim.add_agent(room.at(9, 5), route=route)
+    sim.iterate()
     assert agent.held
     for _ in range(5):
         sim.iterate()
@@ -179,6 +182,7 @@ def test_repeated_hold_noop():
     route = split(s)
     route.hold(s["wp2"])
     agent = sim.add_agent(room.at(9, 5), route=route)
+    sim.iterate()
     route.hold(s["wp2"])
     assert route.is_held(s["wp2"])
     assert agent.held
@@ -197,6 +201,7 @@ def test_hold_close_release():
     agents = [
         sim.add_agent(room.at(*xy), route=route, start=s["wp2"]) for xy in spots
     ]
+    sim.iterate()
     assert all(agent.held for agent in agents)
     assert s["exit2"].close(informed=True) == ()
     assert all(agent.held for agent in agents)
@@ -221,6 +226,7 @@ def test_hold_close_release_without_open_target_strands_inside():
     route = split(s)
     route.hold(s["wp2"])
     agent = sim.add_agent(room.at(9, 5), route=route)
+    sim.iterate()
     s["exit1"].close(informed=True)
     s["exit2"].close(informed=True)
     route.release(s["wp2"])
@@ -258,6 +264,7 @@ def test_update_weights_while_held_applies_on_release():
     route = split(s)
     route.hold(s["wp2"])
     agent = sim.add_agent(room.at(9, 5), route=route)
+    sim.iterate()
     assert agent.held
     # Without the change the first slot of 1:1 would be exit1.
     route.update_weights(s["wp2"], {s["exit1"]: 0})
@@ -272,6 +279,7 @@ def test_open_exit_leaves_held_agents_held():
     route.hold(s["wp2"])
     s["exit2"].close(informed=True)
     agent = sim.add_agent(room.at(9, 5), route=route)
+    sim.iterate()
     assert agent.held
     assert s["exit2"].open() == ()
     assert agent.held
@@ -309,3 +317,16 @@ def test_held_is_read_only():
     assert agent.held is False
     with pytest.raises(AttributeError):
         agent.held = True
+
+
+def test_hold_after_add_agent_catches_an_agent_spawned_inside_the_stage():
+    sim, room, s = make_sim()
+    route = jps.Route([s["wp1"], s["exit1"]])
+    agent = sim.add_agent(room.at(4, 5), route=route)
+    # The stage is completed in iterate(), not in add_agent().
+    assert agent.stage == s["wp1"]
+    route.hold(s["wp1"])
+    sim.iterate()
+    assert agent.held
+    assert agent.stage == s["wp1"]
+    assert route.held_at(s["wp1"]) == (agent,)
