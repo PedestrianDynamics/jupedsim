@@ -305,12 +305,10 @@ def test_route_bound_at_construction(stages):
     route._check_simulation(sim)
     with pytest.raises(ValueError, match="route belongs to another simulation"):
         route._check_simulation(other_sim)
-
-
-def test_update_weights_before_any_agent():
+    # update_weights works before any agent is added and applies to the
+    # first agent added afterwards; without it that agent would go to exit1.
     sim, room, decision, exits = _decision_room()
     route = _split(decision, exits, 1, 1)
-    # Without the update the first agent would go to exit1.
     route.update_weights(decision, {exits["exit1"]: 0})
     agent = sim.add_agent(room.at(5, 5), route=route)
     assert agent.stage == exits["exit2"]
