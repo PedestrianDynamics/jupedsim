@@ -486,19 +486,6 @@ class Simulation:
         region_id = self._region_native_id(region, "clear_custom_speed_field")
         self._obj.clear_custom_speed_field(stage_id, region_id)
 
-    def mark_agent_for_removal(self, agent_id: int):
-        """Marks an agent for removal.
-
-        Marks the given agent for removal in the simulation. The agent will be removed from the
-        simulation in the start of the next :func:`iterate` call. The removal will take place before
-        any interaction between agents will be computed.
-
-        Args:
-            agent_id: Id of the agent marked for removal
-        """
-
-        self._obj.mark_agent_for_removal(agent_id)
-
     def removed_agents(self) -> tuple[Removal, ...]:
         """Records of the agents removed by the most recent :func:`iterate`.
 

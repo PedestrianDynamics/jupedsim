@@ -114,18 +114,18 @@ def test_can_run_simulation():
 
     assert actual_agent_ids == expected_agent_ids
 
-    agent_id = simulation.add_agent(
+    agent = simulation.add_agent(
         room.at(6, 6), route=route, state=jps.CollisionFreeSpeedModelState()
-    ).id
+    )
 
     for actual, expected in zip(simulation.agents(), initial_agent_positions):
         assert actual.position.xy == expected
 
-    simulation.mark_agent_for_removal(agent_id)
+    agent.remove()
     simulation.iterate()
 
-    with pytest.raises(jps.SimulationError, match=r"Unknown agent id \d+"):
-        simulation.mark_agent_for_removal(agent_id)
+    with pytest.raises(RuntimeError, match="has left the simulation"):
+        agent.remove()
 
     while simulation.agent_count() > 0:
         simulation.iterate()
@@ -249,20 +249,21 @@ def test_agent_can_be_removed_from_simulation():
     agent_removed_id = actual_agent_ids.pop()
     expected_agent_ids.remove(agent_removed_id)
 
-    simulation.mark_agent_for_removal(agent_removed_id)
+    removed = simulation.agent(agent_removed_id)
+    removed.remove()
     simulation.iterate()
     actual_agent_ids = {agent.id for agent in simulation.agents()}
     assert actual_agent_ids == expected_agent_ids
 
     # try removing the same agent will raise an error
-    with pytest.raises(jps.SimulationError, match=r"Unknown agent id \d+"):
-        simulation.mark_agent_for_removal(agent_removed_id)
+    with pytest.raises(RuntimeError, match="has left the simulation"):
+        removed.remove()
 
     # remove second agent form simulation
     second_agent_removed_id = actual_agent_ids.pop()
     expected_agent_ids.remove(second_agent_removed_id)
 
-    simulation.mark_agent_for_removal(second_agent_removed_id)
+    simulation.agent(second_agent_removed_id).remove()
     simulation.iterate()
     actual_agent_ids = {agent.id for agent in simulation.agents()}
     assert actual_agent_ids == expected_agent_ids

@@ -509,7 +509,7 @@ def test_agent_handle_raises_after_removal(
     state = agent.state
     assert agent.position.xy == (1, 1)
 
-    sim.mark_agent_for_removal(agent_id)
+    agent.remove()
     sim.iterate()
 
     with pytest.raises(RuntimeError):
