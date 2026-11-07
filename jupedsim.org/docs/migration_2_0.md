@@ -244,6 +244,72 @@ inside. In 2.0 that happens in the first `iterate()`:
   exits in `avm-sharp-corners.py`), and the motion of the other agents
   can differ from that step on.
 
+## Pitfalls
+
+Most of these do not raise an error: the simulation runs and gives
+numbers that look plausible.
+
+**Routes and rules**
+
+- Route validation is structural. It checks that an exit or `STAY` can
+  be reached along the transitions, not that agents get there.
+  `LeastTravelTime` and `LeastTargeted` are deterministic, so in a
+  cycle they can send agents round forever. A rule that lists its own
+  stage as a candidate warns. An agent stuck in such a loop is neither
+  `stranded` nor `arrived`, so check that `agent_count()` reaches zero.
+- A weight of 0 is allowed. A route whose only exit has weight 0 is
+  valid, and nobody leaves through it.
+- `update_weights()` with changed weights starts the round-robin
+  sequence afresh. Changing them at every step favours the target with
+  the highest weight. Applying unchanged weights keeps the sequence.
+- `update_weights()` does not resume stranded agents; they decide again
+  when an exit of their rule opens.
+- One exit stage made of several areas is one exit: the areas close
+  together and share one count in the removal records. Use one exit
+  per door when doors must be closed or counted separately.
+
+**Timing**
+
+- `removed_agents()` holds the records of the most recent `iterate()`
+  only. Read it after every `iterate()`, or removals are lost.
+- An agent's removal record appears one `iterate()` before its `alive`
+  turns False. Records of `agent.remove()` appear after the next
+  `iterate()`.
+- A stage an agent starts inside completes in the first `iterate()`
+  (see above), so holds and closures set up before it apply.
+
+**Holds and closures**
+
+- Held agents stop where they first enter the waypoint area; they are
+  not spread over it. They can block the entrance, so `held_at()` can
+  count fewer agents than are queueing.
+- With `close(informed=False)`, agents keep walking to the closed exit
+  and are stranded there. `close(informed=True)` reassigns agents at
+  once but leaves those already leaving through the exit alone.
+
+**Steering to a point**
+
+- `route_orientation` is (0, 0) at a `steer_to()` point only when the
+  agent stands exactly on it; agents oscillate around the point. Use
+  `agent.arrived`: the last step passed within 0.05 m of the point.
+- When no candidate of `LeastTravelTime` can be reached, it picks the
+  first open candidate.
+
+**Geometry and handles**
+
+- The simulation keeps the surface as it was at `Simulation()`.
+  Regions added later are rejected by that simulation.
+- A connector's edges snap to the corners of the regions it joins;
+  its area is the snapped one, not the coordinates passed in.
+- Stage names and region names must be unique; a repeated name raises
+  `ValueError`.
+- A handle to a removed agent raises `RuntimeError` for everything but
+  `id` and `alive`. Handles from another simulation are rejected.
+  `sim.agents()` is a snapshot.
+- `Simulation.close()` closes the trajectory writer and frees the
+  simulation; it cannot be used afterwards. In notebooks, call it in
+  the last cell that uses the simulation.
+
 ## Removed APIs at a glance
 
 - All model builder classes (C++ and Python).
