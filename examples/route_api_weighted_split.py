@@ -44,12 +44,26 @@ positions = jps.distribute_by_number(
 for x, y in positions:
     sim.add_agent(hall.at(x, y), route=split)
 
-# Count the exits agents actually left through (None: agent.remove()).
+# Count the exits agents actually left through (None: agent.remove()),
+# and the decisions taken after the weight change.
 counts = Counter()
+decided = set()
+after_change = Counter()
 changed = False
+
+
+def record_decisions():
+    for agent in sim.agents():
+        if agent.id not in decided and agent.stage in (left, right):
+            decided.add(agent.id)
+            if changed:
+                after_change[agent.stage] += 1
+
+
 while sim.agent_count() > 0 and sim.elapsed_time() < 300:
     sim.iterate()
     counts.update(removal.exit for removal in sim.removed_agents())
+    record_decisions()
     # Agents whose stage is still decision have not decided yet.
     pending = sim.agents_targeting(decision, route=split)
     if not changed and len(pending) <= 30:
@@ -60,10 +74,15 @@ while sim.agent_count() > 0 and sim.elapsed_time() < 300:
         changed = True
 
 print({exit_.name: counts[exit_] for exit_ in (left, right)})
+print("after the change:", {e.name: after_change[e] for e in (left, right)})
 if sim.agent_count() > 0:
     print(f"time limit reached; {sim.agent_count()} agents remain")
     sys.exit(1)
-# The change happened and agents decided under the new weights: with 2:1
-# throughout, exactly 20 of 60 would take the right exit.
+# The change happened and agents decided under the new weights: 1:1
+# round-robin alternates, so those decisions differ by at most one.
 assert changed, "the weight change never happened"
-assert counts[right] > 20, "no agent decided under the changed weights"
+assert after_change, "no agent decided under the changed weights"
+assert abs(after_change[left] - after_change[right]) <= 1, (
+    f"1:1 split not kept after the change: {dict(after_change)}"
+)
+assert sum(counts[e] for e in (left, right)) == 60, "not all agents exited"
