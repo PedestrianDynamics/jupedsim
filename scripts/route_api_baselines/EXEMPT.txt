@@ -1,1 +1,6 @@
 # Lines: <script> <metric> <reason>. Whole-script exemptions are not allowed.
+examples/example4.py assignments smooth round-robin 5:1:3 (L R L T L R L R L) vs master block order (L L L L L T R R R): first difference at sample 1100, agent 45 takes exit 2 (right) instead of 0 (left) as the second round-robin decision; all samples before 1100 identical
+examples/example4.py positions follows the changed round-robin decision of agent 45 between samples 1000 and 1100: first difference at sample 1100, all earlier samples identical
+examples/example4.py agent_count follows the changed round-robin assignments from iteration 1100 on: first difference at iteration 2902
+examples/example4.py exit_counts follows the changed round-robin assignments from iteration 1100 on: first differing removal at iteration 2900 (exit 2), exit totals 27/5/16 vs master 28/5/15
+examples/example4.py end_time follows the changed round-robin assignments from iteration 1100 on: 77.51 vs master 74.32
