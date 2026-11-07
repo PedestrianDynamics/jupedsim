@@ -829,3 +829,26 @@ def test_weights_are_bounded(stages):
         route.update_weights(s["wp2"], {s["exit1"]: 10**12})
     route.update_weights(s["wp2"], {s["exit1"]: 1_000_000_000})
     assert route.weights(s["wp2"])[s["exit1"]] == 1_000_000_000
+
+
+@pytest.mark.parametrize("kind", [LeastTravelTime, LeastTargeted])
+def test_rule_listing_its_own_stage_warns(stages, kind):
+    _, s = stages
+    with pytest.warns(
+        UserWarning,
+        match="^rule at wp1 lists its own stage as a candidate; agents may "
+        "never leave it$",
+    ):
+        Route([(s["wp1"], kind([s["wp1"], s["exit1"]]))], start=s["wp1"])
+
+
+def test_rule_without_its_own_stage_does_not_warn(stages, recwarn):
+    _, s = stages
+    Route(
+        [
+            (s["wp1"], LeastTravelTime([s["wp2"], s["exit1"]])),
+            (s["wp2"], LeastTargeted([s["wp1"], s["exit2"]])),
+        ],
+        start=s["wp1"],
+    )
+    assert not [w for w in recwarn if issubclass(w.category, UserWarning)]

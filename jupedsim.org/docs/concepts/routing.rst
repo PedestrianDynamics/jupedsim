@@ -233,6 +233,30 @@ A least-targeted transition can be added to a route with:
         start=start_stage,
     )
 
+Rules in cycles
+^^^^^^^^^^^^^^^
+
+Route validation is structural: it checks that an exit or ``STAY`` can be reached from every stage along the transitions.
+It does not check that agents reach it.
+Least-travel-time and least-targeted rules are deterministic, so in a cycle they can send agents around it forever.
+Two examples:
+
+.. code-block:: python
+
+    # The waypoint itself has zero travel time and wins every decision.
+    # Route() warns about a rule that lists its own stage.
+    jps.Route([(wp, jps.LeastTravelTime([wp, exit_stage]))], start=wp)
+
+    # A single agent finds both candidates untargeted when it decides; the
+    # tie goes to other_wp, which leads back to wp.
+    jps.Route(
+        [
+            (wp, jps.LeastTargeted([other_wp, exit_stage])),
+            (other_wp, wp),
+        ],
+        start=wp,
+    )
+
 Direct Steering
 ---------------
 

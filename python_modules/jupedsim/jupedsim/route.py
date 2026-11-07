@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import numbers
+import warnings
 from collections import Counter
 from collections.abc import Iterable, Mapping, Sequence
 from typing import TYPE_CHECKING, Any
@@ -306,6 +307,17 @@ def _check_ending(
         )
 
 
+def _warn_self_candidates(transitions: Mapping[_Stage, Any]) -> None:
+    for stage, target in transitions.items():
+        if isinstance(target, _ChoiceRule) and stage in target.stages:
+            warnings.warn(
+                f"rule at {_label(stage)} lists its own stage as a candidate; "
+                "agents may never leave it",
+                UserWarning,
+                stacklevel=3,
+            )
+
+
 def _native_rule(stage: _Stage, transitions: Mapping[_Stage, Any]) -> Any:
     if stage not in transitions:
         return _NativeRule.create_none_rule()
@@ -363,6 +375,7 @@ class Route:
         if start is not None and start not in order:
             raise ValueError(f"{_label(start)} is not part of this route")
         _check_ending(order, transitions, endless)
+        _warn_self_candidates(transitions)
         self._simulation = simulation
         self._stages = tuple(order)
         self._transitions = transitions
