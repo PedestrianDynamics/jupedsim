@@ -175,7 +175,8 @@ def test_travel_time_matches_grid(hall):
     sim, room, left, right = hall
     for stage in (left, right):
         grid = sim.travel_times(stage)[room]
-        for x, y in [(3.3, 1.7), (7.1, 3.2), (0.2, 0.2), (9.8, 2.0)]:
+        # Interior points off cell boundaries, so the nearest cell is unambiguous.
+        for x, y in [(3.3, 1.7), (7.1, 2.2), (2.03, 2.07), (8.03, 1.93)]:
             row, col = cell_of(grid, x, y)
             assert (
                 sim.travel_time(stage, room.at(x, y)) == grid.values[row, col]
@@ -197,3 +198,16 @@ def test_travel_time_rejects_bad_arguments(hall):
         sim.travel_time(other_exit, room.at(3, 2))
     with pytest.raises(ValueError, match="belongs to another surface"):
         sim.travel_time(left, other_surface.regions[0].at(3, 2))
+
+
+def test_travel_time_follows_the_speed_field(hall):
+    sim, room, left, _ = hall
+    # Interior points, away from the walls and the exit, where the speed
+    # field is uniform and the path is a straight line.
+    points = [room.at(x, 2.0) for x in (3.0, 5.0, 8.0)]
+    before = [sim.travel_time(left, p) for p in points]
+    default = sim.default_speed_fields()[room].values
+    sim.set_default_speed_field(room, default * 0.5)
+    after = [sim.travel_time(left, p) for p in points]
+    for b, a in zip(before, after):
+        assert a == pytest.approx(2 * b, rel=0.1)
