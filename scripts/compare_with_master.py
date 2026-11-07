@@ -35,6 +35,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 BASE_DIR = Path(__file__).resolve().parent / "route_api_baselines"
+# Where the build tree puts jupedsim and the example helpers.
+BUILD_PATHS = (
+    ROOT / "build" / "stage",
+    ROOT / "python_modules" / "jupedsim_examples",
+)
 SAMPLE_EVERY = 100
 DEFAULT_SEED = 1
 METRICS = (
@@ -365,6 +370,28 @@ def _environment():
     }
 
 
+def _child_env():
+    """The environment of a child run: the build tree's jupedsim comes first."""
+    inherited = os.environ.get("PYTHONPATH")
+    pythonpath = os.pathsep.join(
+        [str(p) for p in BUILD_PATHS] + ([inherited] if inherited else [])
+    )
+    return dict(os.environ, MPLBACKEND="Agg", PYTHONPATH=pythonpath)
+
+
+def _jupedsim_file():
+    """The file of the jupedsim module that child runs import."""
+    proc = subprocess.run(
+        [sys.executable, "-c", "import jupedsim; print(jupedsim.__file__)"],
+        env=_child_env(),
+        capture_output=True,
+        text=True,
+    )
+    if proc.returncode != 0:
+        return "not importable"
+    return proc.stdout.strip()
+
+
 class ScenarioCrashError(Exception):
     """A scenario exited with an error; the message is its stderr tail."""
 
@@ -377,7 +404,7 @@ def run_scenario(script):
         work = Path(tmp) / src_dir.name
         shutil.copytree(src_dir, work)
         out = Path(tmp) / "metrics.json"
-        env = dict(os.environ, MPLBACKEND="Agg")
+        env = _child_env()
         proc = subprocess.run(
             [
                 sys.executable,
@@ -533,6 +560,7 @@ def compare(script, baseline, current, exempt):
 
 def cmd_record(selected):
     env = _environment()
+    print(f"jupedsim: {_jupedsim_file()}")
     BASE_DIR.mkdir(exist_ok=True)
     failed = False
     for script in _scenarios(selected):
@@ -554,6 +582,7 @@ def cmd_record(selected):
 def cmd_check(selected):
     exempt = _exemptions()
     current_env = _environment()
+    print(f"jupedsim: {_jupedsim_file()}")
     failed = False
     for script in _scenarios(selected):
         start = time.time()
@@ -630,6 +659,7 @@ main(SHIFT)
 
 
 def _selftest_source():
+    sys.path[:0] = [str(p) for p in BUILD_PATHS]
     import jupedsim as jps
 
     return _SELFTEST if _Api1x.detect(jps) else _SELFTEST_2X
@@ -674,6 +704,7 @@ def _run_selftest(script):
             str(out),
         ],
         cwd=script.parent,
+        env=_child_env(),
         check=True,
     )
     return json.loads(out.read_text())
