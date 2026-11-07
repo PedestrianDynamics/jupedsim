@@ -225,6 +225,38 @@ void init_simulation(py::module_& m)
             py::arg("stage_id"),
             py::arg("weights"))
         .def(
+            "hold",
+            [](Simulation& sim, uint64_t route_id, uint64_t stage_id) {
+                sim.hold(route_id, stage_id);
+            },
+            py::arg("route_id"),
+            py::arg("stage_id"))
+        .def(
+            "release",
+            [](Simulation& sim, uint64_t route_id, uint64_t stage_id) {
+                sim.release(route_id, stage_id);
+            },
+            py::arg("route_id"),
+            py::arg("stage_id"))
+        .def(
+            "is_held",
+            [](const Simulation& sim, uint64_t route_id, uint64_t stage_id) {
+                return sim.is_held(route_id, stage_id);
+            },
+            py::arg("route_id"),
+            py::arg("stage_id"))
+        .def(
+            "held_agents",
+            [](Simulation& sim, uint64_t route_id, uint64_t stage_id) {
+                std::vector<uint64_t> ids;
+                for(const auto id : sim.held_agents(route_id, stage_id)) {
+                    ids.emplace_back(id.get_id());
+                }
+                return ids;
+            },
+            py::arg("route_id"),
+            py::arg("stage_id"))
+        .def(
             "stage_closed",
             [](const Simulation& sim, uint64_t stage_id) {
                 const auto* stage = sim.stage(stage_id);

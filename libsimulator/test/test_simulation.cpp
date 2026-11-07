@@ -1017,3 +1017,132 @@ TEST(Simulation, ReportsThePathLengthOverTheSurface)
     EXPECT_NEAR(sim->path_length(from, to), 5.0, 1e-9);
     EXPECT_NEAR(sim->path_length(from, from), 0.0, 1e-9);
 }
+
+TEST(Simulation, HoldStopsAgentsWhereTheyEnter)
+{
+    auto r = a_closure_room();
+    const auto route = branch(r);
+    r.sim->hold(route, r.wp);
+    const auto id = r.sim->add_agent(route, r.wp, Point{11, 10}, State{}, r.room);
+    EXPECT_FALSE(r.sim->agent(id).held);
+    iterate_until(*r.sim, [&] { return r.sim->agent(id).held; });
+
+    const auto& agent = r.sim->agent(id);
+    EXPECT_EQ(agent.stage_id, r.wp);
+    EXPECT_FALSE(agent.stranded);
+    // Stopped in the iteration just run.
+    EXPECT_EQ(agent.held_since, r.sim->iteration() - 1);
+    EXPECT_TRUE(in_area(r, r.wp, stranded_at(r, id)));
+    for(int i = 0; i < 100; ++i) {
+        r.sim->iterate();
+    }
+    EXPECT_TRUE(r.sim->agent(id).held);
+    EXPECT_TRUE(in_area(r, r.wp, r.sim->agent(id).location));
+}
+
+TEST(Simulation, ReleaseServesHeldAgentsInArrivalOrder)
+{
+    auto r = a_closure_room();
+    const auto route = branch(r);
+    r.sim->hold(route, r.wp);
+    const auto far = r.sim->add_agent(route, r.wp, Point{8, 10.3}, State{}, r.room);
+    const auto near = r.sim->add_agent(route, r.wp, Point{11.5, 9.7}, State{}, r.room);
+    iterate_until(*r.sim, [&] { return r.sim->agent(near).held; });
+    EXPECT_EQ(r.sim->held_agents(route, r.wp), std::vector<GenericAgent::ID>{near});
+    iterate_until(*r.sim, [&] { return r.sim->agent(far).held; });
+    ASSERT_EQ(r.sim->held_agents(route, r.wp), (std::vector<GenericAgent::ID>{near, far}));
+
+    r.sim->release(route, r.wp);
+
+    EXPECT_FALSE(r.sim->is_held(route, r.wp));
+    EXPECT_TRUE(r.sim->held_agents(route, r.wp).empty());
+    // The round robin gives its first slot to the agent that arrived first, not the lower id.
+    EXPECT_EQ(r.sim->agent(near).stage_id, r.exit1);
+    EXPECT_EQ(r.sim->agent(far).stage_id, r.exit2);
+    for(const auto id : {near, far}) {
+        EXPECT_FALSE(r.sim->agent(id).held);
+        EXPECT_EQ(r.sim->agent(id).decision_stage, r.wp);
+    }
+    EXPECT_TRUE(heads_for(r, near, exit1_centre));
+    EXPECT_TRUE(heads_for(r, far, exit2_centre));
+}
+
+TEST(Simulation, ReleaseWithoutOpenTargetStrandsInsideTheStage)
+{
+    auto r = a_closure_room();
+    const auto route = branch(r);
+    r.sim->hold(route, r.wp);
+    const auto id = add_at_waypoint(r, route);
+    ASSERT_TRUE(r.sim->agent(id).held);
+    EXPECT_TRUE(r.sim->close_exit(r.exit1, true).empty());
+    EXPECT_TRUE(r.sim->close_exit(r.exit2, true).empty());
+
+    r.sim->release(route, r.wp);
+
+    const auto& agent = r.sim->agent(id);
+    EXPECT_FALSE(agent.held);
+    EXPECT_TRUE(agent.stranded);
+    EXPECT_EQ(agent.stage_id, r.wp);
+    EXPECT_EQ(agent.decision_stage, r.wp);
+    EXPECT_TRUE(in_area(r, r.wp, stranded_at(r, id)));
+    EXPECT_EQ(r.sim->open_exit(r.exit2), std::vector<GenericAgent::ID>{id});
+    EXPECT_EQ(r.sim->agent(id).stage_id, r.exit2);
+}
+
+TEST(Simulation, HoldIsPerRoute)
+{
+    auto r = a_closure_room();
+    const auto held_route = branch(r);
+    const auto free_route = corridor(r);
+    r.sim->hold(held_route, r.wp);
+    // A repeated hold does nothing.
+    r.sim->hold(held_route, r.wp);
+    EXPECT_TRUE(r.sim->is_held(held_route, r.wp));
+    EXPECT_FALSE(r.sim->is_held(free_route, r.wp));
+
+    const auto held = add_at_waypoint(r, held_route, 9.7);
+    const auto free = add_at_waypoint(r, free_route, 10.3);
+    EXPECT_TRUE(r.sim->agent(held).held);
+    EXPECT_FALSE(r.sim->agent(free).held);
+    EXPECT_EQ(r.sim->agent(free).stage_id, r.exit2);
+    EXPECT_TRUE(r.sim->held_agents(free_route, r.wp).empty());
+
+    r.sim->release(held_route, r.wp);
+    EXPECT_FALSE(r.sim->is_held(held_route, r.wp));
+    EXPECT_THROW(r.sim->release(held_route, r.wp), SimulationError);
+}
+
+TEST(Simulation, SwitchRouteClearsHeld)
+{
+    auto r = a_closure_room();
+    const auto route = branch(r);
+    const auto other = corridor(r);
+    r.sim->hold(route, r.wp);
+    const auto id = add_at_waypoint(r, route);
+    ASSERT_TRUE(r.sim->agent(id).held);
+
+    r.sim->switch_agent_route(id, other, r.exit2);
+    EXPECT_FALSE(r.sim->agent(id).held);
+    EXPECT_TRUE(r.sim->held_agents(route, r.wp).empty());
+    for(int i = 0; i < 5; ++i) {
+        r.sim->iterate();
+    }
+
+    // Back onto the held start: held again once it completes the stage.
+    r.sim->switch_agent_route(id, route, r.wp);
+    EXPECT_FALSE(r.sim->agent(id).held);
+    r.sim->iterate();
+    EXPECT_TRUE(r.sim->agent(id).held);
+    EXPECT_EQ(r.sim->agent(id).held_since, 5u);
+}
+
+TEST(Simulation, HoldRejectsExitsAndForeignStages)
+{
+    auto r = a_closure_room();
+    const auto route = corridor(r);
+    EXPECT_THROW(r.sim->hold(route, r.exit2), SimulationError);
+    EXPECT_THROW(r.sim->hold(route, r.exit1), SimulationError);
+    EXPECT_THROW(r.sim->hold(Route::ID{12345}, r.wp), SimulationError);
+    EXPECT_THROW(r.sim->is_held(route, r.exit1), SimulationError);
+    EXPECT_THROW(r.sim->release(route, r.wp), SimulationError);
+}

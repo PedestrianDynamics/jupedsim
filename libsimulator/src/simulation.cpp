@@ -58,6 +58,7 @@ std::vector<AreaPiece> pieces_of(const Geometry& geometry, const std::vector<Sta
 void start_at(GenericAgent& agent, const BaseStage& stage)
 {
     agent.stranded = false;
+    agent.held = false;
     agent.decision_stage = stage.id();
     if(dynamic_cast<const DirectSteering*>(&stage) != nullptr) {
         agent.decision_stage = std::nullopt;
@@ -121,7 +122,8 @@ void Simulation::iterate()
 
     {
         JPS_SCOPED_TIMER_AND_TRACE(_timer, "Strategical Decision System", General);
-        _stategical_decision_system.run(_routes, _agents, _stage_manager, *_routing_engine);
+        _stategical_decision_system.run(
+            _routes, _agents, _stage_manager, *_routing_engine, _clock.iteration());
     }
 
     {
@@ -296,7 +298,8 @@ GenericAgent::ID Simulation::add_agent(
     _neighborhood_search.add_agent(_agents.back());
 
     auto v = IteratorPair(std::prev(std::end(_agents)), std::end(_agents));
-    _stategical_decision_system.run(_routes, v, _stage_manager, *_routing_engine);
+    _stategical_decision_system.run(
+        _routes, v, _stage_manager, *_routing_engine, _clock.iteration());
     _tactical_decision_system.run(*_routing_engine, v);
     return _agents.back().id.get_id();
 }
@@ -495,6 +498,77 @@ void Simulation::set_round_robin_weights(
         throw SimulationError("Stage {} of Route {} has no round-robin rule.", stage_id, route_id);
     }
     round_robin->set_weights(weights);
+}
+
+void Simulation::hold(Route::ID route_id, BaseStage::ID stage_id)
+{
+    throw_if_state(State::Iterating | State::Closed, "hold");
+    auto& route = route_with(route_id, stage_id);
+    if(dynamic_cast<const Exit*>(_stage_manager.stage(stage_id)) != nullptr) {
+        throw SimulationError("Stage {} is an exit; exits cannot be held.", stage_id);
+    }
+    route.hold(stage_id);
+}
+
+void Simulation::release(Route::ID route_id, BaseStage::ID stage_id)
+{
+    throw_if_state(State::Iterating | State::Closed, "release");
+    auto& route = route_with(route_id, stage_id);
+    if(!route.holds(stage_id)) {
+        throw SimulationError("Stage {} of Route {} is not held.", stage_id, route_id);
+    }
+    route.release(stage_id);
+    // One agent at a time, so each decision sees the ones before it (counters, targeted counts).
+    for(auto* agent : held_at(route_id, stage_id)) {
+        agent->held = false;
+        agent->decision_stage = stage_id;
+        auto* next = route.decide(*agent, stage_id, *_routing_engine);
+        if(next == nullptr) {
+            StrategicalDecisionSystem::strand(*agent);
+            continue;
+        }
+        StrategicalDecisionSystem::assign(*agent, *next, _stage_manager);
+    }
+}
+
+bool Simulation::is_held(Route::ID route_id, BaseStage::ID stage_id) const
+{
+    throw_if_state(State::Closed, "is_held");
+    return route_with(route_id, stage_id).holds(stage_id);
+}
+
+std::vector<GenericAgent::ID> Simulation::held_agents(Route::ID route_id, BaseStage::ID stage_id)
+{
+    throw_if_state(State::Closed, "held_agents");
+    route_with(route_id, stage_id);
+    std::vector<GenericAgent::ID> ids{};
+    for(const auto* agent : held_at(route_id, stage_id)) {
+        ids.push_back(agent->id);
+    }
+    return ids;
+}
+
+Route& Simulation::route_with(Route::ID route_id, BaseStage::ID stage_id) const
+{
+    const auto find_iter = _routes.find(route_id);
+    if(find_iter == std::end(_routes) || !find_iter->second->contains_stage(stage_id)) {
+        throw SimulationError("Stage {} not part of Route {}", stage_id, route_id);
+    }
+    return *find_iter->second;
+}
+
+std::vector<GenericAgent*> Simulation::held_at(Route::ID route_id, BaseStage::ID stage_id)
+{
+    std::vector<GenericAgent*> held{};
+    for(auto& agent : _agents) {
+        if(agent.held && agent.route_id == route_id && agent.stage_id == stage_id) {
+            held.push_back(&agent);
+        }
+    }
+    std::sort(std::begin(held), std::end(held), [](const auto* lhs, const auto* rhs) {
+        return std::tie(lhs->held_since, lhs->id) < std::tie(rhs->held_since, rhs->id);
+    });
+    return held;
 }
 
 Exit& Simulation::exit_of(BaseStage::ID stage_id)

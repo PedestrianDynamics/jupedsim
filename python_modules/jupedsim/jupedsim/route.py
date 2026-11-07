@@ -4,10 +4,13 @@ from __future__ import annotations
 
 from collections import Counter
 from collections.abc import Iterable, Mapping, Sequence
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from jupedsim.pyjupedsim import Rule as _NativeRule
 from jupedsim.stages import Exit, _Stage
+
+if TYPE_CHECKING:
+    from jupedsim.agent import Agent
 
 
 def _label(stage: _Stage) -> str:
@@ -424,6 +427,61 @@ class Route:
             weights={target.id: weight for target, weight in proposed.items()},
         )
         self._transitions = transitions
+
+    def hold(self, stage: _Stage) -> None:
+        """Stop agents of this route at ``stage`` until :meth:`release`.
+
+        Every agent on this route whose target is ``stage``, now or later,
+        walks on to it and stops where it enters it (``agent.held``).
+        Agents on other routes and agents that completed ``stage`` before
+        the call are not affected. Weights are kept. A repeated call does
+        nothing.
+
+        Raises:
+            ValueError: If ``stage`` is not part of this route or is an
+                exit.
+        """
+        self._check_member(stage)
+        if isinstance(stage, Exit):
+            raise ValueError(
+                f"exits cannot be held; use {_label(stage)}.close()"
+            )
+        self._simulation._obj.hold(route_id=self._native_id, stage_id=stage.id)
+
+    def release(self, stage: _Stage) -> None:
+        """Lift the hold at ``stage``.
+
+        The held agents go on in arrival order (ties by agent id), each
+        sent on by the current rule at ``stage``; an agent whose rule has
+        no open target is stranded inside ``stage``. Agents still walking
+        to ``stage`` pass it without stopping.
+
+        Raises:
+            ValueError: If ``stage`` is not part of this route or not held.
+        """
+        if not self.is_held(stage):
+            raise ValueError(f"{_label(stage)} is not held")
+        self._simulation._obj.release(
+            route_id=self._native_id, stage_id=stage.id
+        )
+
+    def is_held(self, stage: _Stage) -> bool:
+        """True between :meth:`hold` and :meth:`release` of ``stage``."""
+        self._check_member(stage)
+        return self._simulation._obj.is_held(
+            route_id=self._native_id, stage_id=stage.id
+        )
+
+    def held_at(self, stage: _Stage) -> tuple[Agent, ...]:
+        """The agents of this route stopped at ``stage``, in arrival order.
+
+        Agents still walking to a held ``stage`` are not included.
+        """
+        self._check_member(stage)
+        ids = self._simulation._obj.held_agents(
+            route_id=self._native_id, stage_id=stage.id
+        )
+        return tuple(self._simulation.agent(i) for i in ids)
 
     def _round_robin(self, stage: _Stage, fixed: str) -> RoundRobin:
         """Return the round-robin rule at ``stage``; raise with ``fixed`` for

@@ -16,6 +16,7 @@
 #include <map>
 #include <memory>
 #include <optional>
+#include <set>
 #include <tuple>
 #include <utility>
 #include <variant>
@@ -334,10 +335,11 @@ private:
 };
 
 /// One decision step of an agent: the stage to go to, nullptr if the agent is stranded, and the
-/// stage whose rule decided.
+/// stage whose rule decided. With @p held the agent completed a held stage and stops there.
 struct RouteStep {
     BaseStage* stage;
     std::optional<BaseStage::ID> decision_stage;
+    bool held{false};
 };
 
 struct RouteNode {
@@ -353,6 +355,7 @@ public:
 private:
     ID _id{};
     std::map<BaseStage::ID, RouteNode> _stages{};
+    std::set<BaseStage::ID> _holds{};
 
 public:
     ~Route() = default;
@@ -362,12 +365,16 @@ public:
     ID id() const { return _id; }
 
     /// The agent keeps its stage until it completes it; then the stage's rule decides. An agent
-    /// reaching a closed exit is not removed: the rule that sent it there decides again.
+    /// reaching a closed exit is not removed: the rule that sent it there decides again. An agent
+    /// completing a held stage stops there.
     RouteStep step(const GenericAgent& agent, const RoutingEngine& routing) const
     {
         auto* stage = _stages.at(agent.stage_id).stage;
         if(!stage->is_completed(agent)) {
             return {stage, agent.decision_stage};
+        }
+        if(holds(stage->id())) {
+            return {stage, stage->id(), true};
         }
         const auto at = stage->closed() ? agent.decision_stage.value_or(stage->id()) : stage->id();
         return {decide(agent, at, routing), at};
@@ -382,6 +389,13 @@ public:
 
     /// The rule at stage @p at.
     Rule& rule(BaseStage::ID at) const { return *_stages.at(at).rule; }
+
+    /// Agents completing stage @p at stop there until release().
+    void hold(BaseStage::ID at) { _holds.insert(at); }
+
+    void release(BaseStage::ID at) { _holds.erase(at); }
+
+    bool holds(BaseStage::ID at) const { return _holds.contains(at); }
 
     size_t count_stages() const { return _stages.size(); }
 

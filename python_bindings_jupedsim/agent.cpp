@@ -30,6 +30,7 @@ void init_agent(py::module_& m)
         .def_property_readonly(
             "stage_id", [](const GenericAgent& agent) { return agent.stage_id.get_id(); })
         .def_property_readonly("stranded", [](const GenericAgent& agent) { return agent.stranded; })
+        .def_property_readonly("held", [](const GenericAgent& agent) { return agent.held; })
         .def_property_readonly(
             "position", [](const GenericAgent& agent) { return into_tuple(agent.location.xy()); })
         .def_property_readonly(

@@ -18,6 +18,7 @@
 
 #include <fmt/core.h>
 
+#include <cstdint>
 #include <deque>
 #include <optional>
 #include <utility>
@@ -36,6 +37,10 @@ struct GenericAgent {
     std::optional<jps::UniqueID<BaseStage>> decision_stage{};
     /// True once the agent cannot continue because of closed exits; it then stands still.
     bool stranded{false};
+    /// True while the agent waits at a held stage of its route; it then stands still.
+    bool held{false};
+    /// The iteration in which the agent stopped at its held stage.
+    uint64_t held_since{0};
 
     /// Where the agent stands. Only the geometry can say that, so only it can build one.
     Location location;

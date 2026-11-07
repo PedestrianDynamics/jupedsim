@@ -86,6 +86,10 @@ private:
     BaseStage* decide_again(const GenericAgent& agent) const;
     /// Whether the rule at the decision stage of @p agent targets @p stage.
     bool decides_for(const GenericAgent& agent, const BaseStage& stage) const;
+    /// Route @p route_id; throws if it is unknown or does not contain @p stage_id.
+    Route& route_with(Route::ID route_id, BaseStage::ID stage_id) const;
+    /// The agents on route @p route_id held at @p stage_id, in arrival order (ties by id).
+    std::vector<GenericAgent*> held_at(Route::ID route_id, BaseStage::ID stage_id);
 
 public:
     /// Takes the geometry over: after this the caller no longer owns it. `geo()` hands out a
@@ -127,6 +131,16 @@ public:
         Route::ID route_id,
         BaseStage::ID stage_id,
         const std::map<BaseStage::ID, uint64_t>& weights);
+    /// Agents on route @p route_id that complete @p stage_id stop where they enter it until
+    /// release(). Throws for an exit. Does nothing on a held stage.
+    void hold(Route::ID route_id, BaseStage::ID stage_id);
+    /// Lifts the hold of @p stage_id on route @p route_id. The held agents go on in arrival order
+    /// (ties by id), each decided by the current rule at the stage; an agent whose rule has no
+    /// open target is stranded inside the stage. Throws if the stage is not held.
+    void release(Route::ID route_id, BaseStage::ID stage_id);
+    bool is_held(Route::ID route_id, BaseStage::ID stage_id) const;
+    /// The agents on route @p route_id stopped at @p stage_id, in arrival order (ties by id).
+    std::vector<GenericAgent::ID> held_agents(Route::ID route_id, BaseStage::ID stage_id);
     uint64_t iteration() const;
     std::vector<GenericAgent::ID> agents_in_range(Point p, double distance);
     /// Returns IDs of all agents inside the defined polygon

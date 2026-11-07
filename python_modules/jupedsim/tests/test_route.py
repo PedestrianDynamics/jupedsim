@@ -312,6 +312,14 @@ def test_route_bound_at_construction(stages):
     route.update_weights(decision, {exits["exit1"]: 0})
     agent = sim.add_agent(room.at(5, 5), route=route)
     assert agent.stage == exits["exit2"]
+    # hold works before any agent is added and applies to the first agent
+    # added afterwards; without it that agent would go to exit1.
+    sim, room, decision, exits = _decision_room()
+    route = _split(decision, exits, 1, 1)
+    route.hold(decision)
+    agent = sim.add_agent(room.at(5, 5), route=route)
+    assert agent.held
+    assert agent.stage == decision
 
 
 def test_each_route_gets_its_own_native_route(stages):

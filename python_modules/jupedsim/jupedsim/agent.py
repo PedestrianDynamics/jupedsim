@@ -143,6 +143,11 @@ class Agent:
         return self._resolve().stranded
 
     @property
+    def held(self) -> bool:
+        """True while the agent waits at a held stage, see Route.hold()."""
+        return self._resolve().held
+
+    @property
     def target(self) -> _SurfaceLocation | None:
         """The point the agent steers to, None while it follows a route."""
         native = self._resolve()
