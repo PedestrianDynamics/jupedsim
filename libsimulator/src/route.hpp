@@ -221,9 +221,9 @@ public:
         });
     }
 
-    /// Sets the weight of every target from @p weights and starts the sequence afresh. @p weights
-    /// names exactly the targets, each at most max_weight, at least one > 0; otherwise throws and
-    /// changes nothing.
+    /// Sets the weight of every target from @p weights and starts the sequence afresh; the
+    /// current weights keep the sequence going. @p weights names exactly the targets, each at most
+    /// max_weight, at least one > 0; otherwise throws and changes nothing.
     void set_weights(const std::map<BaseStage::ID, uint64_t>& weights)
     {
         check_keys(weights);
@@ -234,6 +234,11 @@ public:
         }
         if(sum_weights == 0) {
             throw SimulationError("RoundRobin needs at least one weight > 0.");
+        }
+        if(std::all_of(std::begin(_targets), std::end(_targets), [&weights](const auto& t) {
+               return t.weight == weights.at(t.stage->id());
+           })) {
+            return;
         }
         for(auto& target : _targets) {
             target.weight = weights.at(target.stage->id());

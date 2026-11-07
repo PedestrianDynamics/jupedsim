@@ -400,10 +400,11 @@ class Route:
 
         A patch, like ``dict.update``: targets not named keep their weight.
         The new weights are checked against the whole route first; on error
-        nothing changes. On success the rule's sequence starts afresh. Takes
-        effect at the next decision: agents already assigned keep their
-        target, and stranded agents decide again when an exit of their rule
-        opens.
+        nothing changes. If any weight changes, the rule's sequence starts
+        afresh; the current weights keep it going, so a controller may apply
+        its weights at every step. Takes effect at the next decision: agents
+        already assigned keep their target, and stranded agents decide again
+        when an exit of their rule opens.
 
         Raises:
             ValueError: If ``stage`` has no round-robin rule, a key is not

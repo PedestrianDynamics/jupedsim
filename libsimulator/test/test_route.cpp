@@ -159,6 +159,23 @@ TEST(Route, SetWeightsResetsTheCounter)
     }
 }
 
+TEST(Route, SetWeightsWithTheCurrentWeightsKeepsTheCounter)
+{
+    RuleContextFixture fx;
+    StubStage a;
+    StubStage b;
+
+    RoundRobin sut({{&a, 2}, {&b, 1}});
+    RoundRobin untouched({{&a, 2}, {&b, 1}});
+    ASSERT_EQ(untouched.next_stage(fx.ctx), sut.next_stage(fx.ctx));
+
+    for(auto i = 0; i < 9; ++i) {
+        sut.set_weights({{a.id(), 2}, {b.id(), 1}});
+        ASSERT_EQ(untouched.next_stage(fx.ctx), sut.next_stage(fx.ctx));
+    }
+    EXPECT_THROW(sut.set_weights({{a.id(), 2}}), SimulationError);
+}
+
 TEST(Route, SmoothRoundRobinKeepsTheRatioOfOpenTargets)
 {
     RuleContextFixture fx;

@@ -532,6 +532,34 @@ def test_update_weights_takes_effect_at_the_next_decision():
     assert decided == [exits["exit2"], exits["exit1"], exits["exit2"]]
 
 
+def test_update_weights_with_unchanged_weights_keeps_the_counter():
+    sim, room, decision, exits = _decision_room()
+    route = _split(decision, exits, 2, 1)
+    # 2:1 gives exit1, exit2, exit1.
+    assert _decide(sim, room, route, 0) == exits["exit1"]
+    route.update_weights(decision, {exits["exit1"]: 2, exits["exit2"]: 1})
+    route.update_weights(decision, {exits["exit2"]: 1})
+    # A reset counter would give exit1 again.
+    assert _decide(sim, room, route, 1) == exits["exit2"]
+    assert _decide(sim, room, route, 2) == exits["exit1"]
+
+
+def test_reapplying_the_weights_every_iteration_lets_agents_leave():
+    sim, room, decision, exits = _decision_room()
+    back = sim.add_waypoint((2, 5), radius=0.5, region=room, name="back")
+    weights = {back: 2, exits["exit1"]: 1}
+    route = Route(
+        [(decision, RoundRobin(weights)), (back, decision)], start=decision
+    )
+    agent = sim.add_agent(room.at(5, 5), route=route)
+    for _ in range(3000):
+        if not agent.alive:
+            break
+        route.update_weights(decision, weights)
+        sim.iterate()
+    assert not agent.alive
+
+
 def test_update_weights_invalid_keeps_state():
     sim, room, decision, exits = _decision_room()
     route = _split(decision, exits, 2, 1)
