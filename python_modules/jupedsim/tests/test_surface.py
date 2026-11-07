@@ -245,3 +245,24 @@ def test_connector_lookup_uses_the_canonical_vertices(offset):
     with pytest.raises(ValueError, match="is not in staircase"):
         staircase.at(11.9999995, 7)
     assert staircase not in surface.regions_at((11.9999995, 7))
+
+
+def test_duplicate_region_name_is_rejected():
+    surface = WalkableSurface()
+    surface.add_region(polygon=shapely.box(0, 0, 1, 1), name="floor")
+    with pytest.raises(ValueError, match="region name 'floor' is already"):
+        surface.add_region(polygon=shapely.box(2, 0, 3, 1), name="floor")
+    assert len(surface.regions) == 1
+
+
+def test_duplicate_connector_name_is_rejected():
+    surface, floor0, floor1 = two_floor_surface(with_surface=True)
+    with pytest.raises(ValueError, match="region name 'staircase' is already"):
+        surface.connect_regions(
+            from_region=floor0,
+            from_edge=((18, 6), (18, 8)),
+            to_region=floor1,
+            to_edge=((12, 6), (12, 8)),
+            name="staircase",
+        )
+    assert len(surface.regions) == 3

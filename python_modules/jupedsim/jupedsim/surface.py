@@ -116,6 +116,7 @@ class WalkableSurface:
         name: str | None = None,
     ) -> Region:
         """Add a region at ``height`` and return its handle."""
+        self._check_region_name(name)
         region_id = self._obj.add_region(polygon=polygon, height=height)
         return self._register(region_id, name, height, polygon)
 
@@ -137,6 +138,7 @@ class WalkableSurface:
                     f"{region.label} is a connector and cannot be connected "
                     "again; add a landing region between two connectors"
                 )
+        self._check_region_name(name)
         try:
             connector_id = self._obj.connect_regions(
                 from_region=from_region.id,
@@ -184,6 +186,15 @@ class WalkableSurface:
         if not 0 <= id < len(self._regions):
             raise KeyError(f"no region with id {id}")
         return self._regions[id]
+
+    def _check_region_name(self, name: str | None) -> None:
+        if name is None:
+            return
+        for region in self._regions:
+            if region.name == name:
+                raise ValueError(
+                    f"region name '{name}' is already used by {region.label}"
+                )
 
     def _register(
         self,
