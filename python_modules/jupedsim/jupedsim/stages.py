@@ -91,9 +91,9 @@ def _check_region(
         raise TypeError(
             'region must be a Region handle, e.g. surface.region("floor1")'
         )
-    if surface is not None and region._surface is not surface:
+    if surface is None or region._surface is not surface:
         raise ValueError(f"{region!r} belongs to another surface")
-    if surface is not None and region.id >= region_count:
+    if region.id >= region_count:
         raise ValueError(
             f"{region.label} is not part of this simulation's geometry"
         )
@@ -108,11 +108,13 @@ def _check_overlap(polygon: shapely.Polygon, region: Region) -> None:
 
 
 def _single_area(
-    area: Any, region: Region, radius: float | None
+    area: Any, region: Region, radius: float | None, method: str
 ) -> list[tuple[shapely.Polygon, Region]]:
     if radius is not None and not _is_point(area):
         raise ValueError("radius applies to point waypoints only")
     if _is_point(area):
+        if method == "add_exit":
+            raise ValueError("add_exit takes an area, not a point")
         if radius is None:
             raise ValueError("a point waypoint needs radius=")
         if radius <= 0:
@@ -134,6 +136,8 @@ def build_areas(
     region_count: int,
 ) -> list[tuple[shapely.Polygon, int]]:
     """Return the ``(polygon, region id)`` pairs of a stage, validated."""
+    if isinstance(area, Sequence) and len(area) == 0:
+        raise ValueError("no areas given")
     if _is_pair_list(area):
         if radius is not None:
             raise ValueError("radius applies to point waypoints only")
@@ -150,4 +154,4 @@ def build_areas(
             _check_overlap(polygon, pair_region)
         return [(p, r.id) for p, r in pairs]
     checked = _check_region(region, method, surface, region_count)
-    return [(p, r.id) for p, r in _single_area(area, checked, radius)]
+    return [(p, r.id) for p, r in _single_area(area, checked, radius, method)]

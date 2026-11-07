@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
+import re
 import types
 from collections.abc import Sequence
 from typing import Any, Iterator, Self
@@ -28,6 +29,7 @@ from jupedsim.pyjupedsim import (
     Geometry,
     Location,
     OperationalModel,
+    SimulationError,
     SocialForceModel,
     SocialForceModelState,
     SpeedGrid,
@@ -210,7 +212,8 @@ class Simulation:
                 region.
         """
         areas = self._build_areas(area, region, radius, "add_waypoint")
-        handle = Waypoint(self, self._obj.add_waypoint_stage(areas), name)
+        stage_id = self._native_stage(self._obj.add_waypoint_stage, areas)
+        handle = Waypoint(self, stage_id, name)
         self._stages.append(handle)
         return handle
 
@@ -234,7 +237,8 @@ class Simulation:
                 region.
         """
         areas = self._build_areas(area, region, None, "add_exit")
-        handle = Exit(self, self._obj.add_exit_stage(areas), name)
+        stage_id = self._native_stage(self._obj.add_exit_stage, areas)
+        handle = Exit(self, stage_id, name)
         self._stages.append(handle)
         return handle
 
@@ -256,6 +260,19 @@ class Simulation:
             raise KeyError(f"no stage with id {id}")
         known = ", ".join(s.name or repr(s) for s in self._stages)
         raise KeyError(f"no stage named {name}; stages are {known}")
+
+    def _native_stage(self, add: Any, areas: Any) -> int:
+        regions = {r.id: r for r in self._surface.regions}
+        try:
+            return add(areas)
+        except SimulationError as error:
+            match = re.search(
+                r"Area does not intersect region (\d+)", str(error)
+            )
+            if match is None:
+                raise
+            label = regions[int(match.group(1))].label
+            raise ValueError(f"area does not overlap {label}") from error
 
     def _build_areas(
         self, area: Any, region: Any, radius: float | None, method: str
