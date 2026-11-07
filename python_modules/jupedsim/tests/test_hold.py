@@ -251,10 +251,36 @@ def test_holds_per_route():
     assert held.held
 
 
-def test_hold_errors():
+def test_update_weights_while_held_applies_on_release():
     sim, room, s = make_sim()
+    route = split(s)
+    route.hold(s["wp2"])
+    agent = sim.add_agent(room.at(9, 5), route=route)
+    assert agent.held
+    # Without the change the first slot of 1:1 would be exit1.
+    route.update_weights(s["wp2"], {s["exit1"]: 0})
+    assert agent.held and agent.stage == s["wp2"]
+    route.release(s["wp2"])
+    assert agent.stage == s["exit2"]
+
+
+def test_open_exit_leaves_held_agents_held():
+    sim, room, s = make_sim()
+    route = split(s)
+    route.hold(s["wp2"])
+    s["exit2"].close(informed=True)
+    agent = sim.add_agent(room.at(9, 5), route=route)
+    assert agent.held
+    assert s["exit2"].open() == ()
+    assert agent.held
+    assert not agent.stranded
+    assert agent.stage == s["wp2"]
+
+
+def test_hold_errors():
+    _, _, s = make_sim()
     route = route_c(s)
-    other_sim, _, other = make_sim()
+    _, _, other = make_sim()
     with pytest.raises(
         ValueError, match=r"^exits cannot be held; use exit1\.close\(\)$"
     ):
