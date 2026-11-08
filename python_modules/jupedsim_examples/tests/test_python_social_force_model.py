@@ -45,7 +45,7 @@ def test_agent_can_be_added_with_default_parameters(corridor_simulation):
     sim, exit, route, room = corridor_simulation
     agent_id = _add_agent(sim, room, route, exit, (2.0, 10.0))
     assert sim.agent_count() == 1
-    assert sim.agent(agent_id).position.xy == pytest.approx((2.0, 10.0))
+    assert sim.agent(agent_id).position == pytest.approx((2.0, 10.0))
 
 
 def test_agent_moves_toward_exit(corridor_simulation):
@@ -56,7 +56,7 @@ def test_agent_moves_toward_exit(corridor_simulation):
     for _ in range(50):
         sim.iterate()
 
-    pos = sim.agent(agent_id).position.xy
+    pos = sim.agent(agent_id).position
     assert pos[0] > start[0], "Agent should move in +x direction toward exit"
 
 
@@ -110,8 +110,8 @@ def test_social_force_prevents_agent_collapse():
     min_dist = float("inf")
     for _ in range(100):
         sim.iterate()
-        p1 = sim.agent(id1).position.xy
-        p2 = sim.agent(id2).position.xy
+        p1 = sim.agent(id1).position
+        p2 = sim.agent(id2).position
         d = ((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2) ** 0.5
         if d < min_dist:
             min_dist = d
@@ -154,8 +154,8 @@ def test_custom_desired_speed_affects_movement():
     for _ in range(100):
         sim.iterate()
 
-    slow_x = sim.agent(slow_id).position.x
-    fast_x = sim.agent(fast_id).position.x
+    slow_x = sim.agent(slow_id).location.x
+    fast_x = sim.agent(fast_id).location.x
     assert fast_x > slow_x, "Fast agent should travel further than slow agent"
 
 
@@ -177,7 +177,7 @@ def test_obstacle_force_keeps_agents_from_walls():
             break
         sim.iterate()
         if sim.agent_count() > 0:
-            pos = sim.agent(agent_id).position.xy
+            pos = sim.agent(agent_id).position
             assert 0 < pos[0] < 20, f"Agent x={pos[0]} went outside geometry"
             assert 0 < pos[1] < 20, f"Agent y={pos[1]} went outside geometry"
 

@@ -143,7 +143,7 @@ class _Api2x:
 
     @staticmethod
     def xy(agent):
-        return agent.position.xy
+        return agent.position
 
 
 class _SimRecord:
