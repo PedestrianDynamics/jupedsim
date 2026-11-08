@@ -257,8 +257,9 @@ numbers that look plausible.
   cycle they can send agents round forever. A rule that lists its own
   stage as a candidate warns. An agent stuck in such a loop is neither
   `stranded` nor `arrived`, so check that `agent_count()` reaches zero.
-- A weight of 0 is allowed. A route whose only exit has weight 0 is
-  valid, and nobody leaves through it.
+- A weight of 0 is allowed; nobody is sent along it. A route whose only
+  exit has weight 0 is valid only if `STAY` or another exit can still be
+  reached through positive weights; otherwise `Route()` raises.
 - `update_weights()` with changed weights starts the round-robin
   sequence afresh. Changing them at every step favours the target with
   the highest weight. Applying unchanged weights keeps the sequence.
