@@ -57,7 +57,7 @@ def iterate_until(sim, done, limit=5000):
 def inside(stage_centre, radius, agent):
     """Whether the agent stands in a disc stage; the stage area is read on
     the floor field grid, so allow a cell's slack."""
-    x, y = agent.position.xy
+    x, y = agent.position
     cx, cy = stage_centre
     return (x - cx) ** 2 + (y - cy) ** 2 <= (radius + 0.2) ** 2
 
@@ -90,7 +90,7 @@ def test_hold_applies_to_later_agents():
     route.hold(s["wp2"])
     later = sim.add_agent(room.at(2, 3), route=route)
     iterate_until(sim, lambda: first.held and later.held)
-    stops = [agent.position.xy for agent in (first, later)]
+    stops = [agent.position for agent in (first, later)]
     for agent in (first, later):
         assert agent.stage == s["wp2"]
         assert inside((9, 5), 1.0, agent)
@@ -98,7 +98,7 @@ def test_hold_applies_to_later_agents():
         sim.iterate()
     for agent, stop in zip((first, later), stops):
         assert agent.held
-        assert agent.position.xy == pytest.approx(stop, abs=0.05)
+        assert agent.position == pytest.approx(stop, abs=0.05)
     assert route.held_at(s["wp2"]) == (first, later)
 
 
@@ -279,10 +279,10 @@ def test_holds_per_route():
     assert not free.held
     assert free_route.held_at(s["wp2"]) == ()
     assert held_route.held_at(s["wp2"]) == (held,)
-    x = free.position.xy[0]
+    x = free.position[0]
     for _ in range(50):
         sim.iterate()
-    assert free.position.xy[0] > x
+    assert free.position[0] > x
     assert held.held
 
 

@@ -50,8 +50,8 @@ class CsvTrajectoryWriter(TrajectoryWriter):
                 [
                     frame,
                     agent.id,
-                    agent.position.x,
-                    agent.position.y,
+                    agent.location.x,
+                    agent.location.y,
                 ]
             )
 

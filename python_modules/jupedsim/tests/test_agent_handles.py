@@ -47,7 +47,7 @@ def test_add_agent_on_route(world):
     assert agent.stage == wps[0]
     assert agent.route is route_a
     assert agent.target is None
-    assert agent.position == room.at(1, 8)
+    assert agent.location == room.at(1, 8)
     assert agent.alive
     assert repr(agent) == f"Agent(id={agent.id})"
 
@@ -80,7 +80,7 @@ def test_agent_walks_to_steer_target(world):
     sim, _, room, _, _, _, _ = world
     agent = sim.add_agent(room.at(1, 8), target=room.at(3, 8))
     sim.iterate(1500)
-    assert agent.position.x == pytest.approx(3, abs=0.3)
+    assert agent.location.x == pytest.approx(3, abs=0.3)
 
 
 def test_follow_restarts(world):

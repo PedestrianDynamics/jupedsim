@@ -63,7 +63,7 @@ def test_simulation_from_model_instance(model, state_cls, state_kwargs):
 
     for _ in range(10):
         sim.iterate()
-    assert sim.agent(agent_id).position.xy != (1, 1)
+    assert sim.agent(agent_id).position != (1, 1)
 
 
 def test_simulation_rejects_wrong_model_argument():
@@ -92,20 +92,20 @@ def test_set_desired_speed(corridor):
         route=stay_at(sim, room, (10, 1)),
         state=jps.CollisionFreeSpeedModelV2State(desired_speed=1),
     ).id
-    assert math.isclose(sim.agent(agent_id).position.x, 1)
+    assert math.isclose(sim.agent(agent_id).location.x, 1)
     for _ in range(0, 100):
         sim.iterate()
-    assert math.isclose(sim.agent(agent_id).position.x, 2)
+    assert math.isclose(sim.agent(agent_id).location.x, 2)
     for _ in range(0, 100):
         sim.iterate()
-    assert math.isclose(sim.agent(agent_id).position.x, 3)
+    assert math.isclose(sim.agent(agent_id).location.x, 3)
     sim.agent(agent_id).state.desired_speed = 2
     for _ in range(0, 100):
         sim.iterate()
-    assert math.isclose(sim.agent(agent_id).position.x, 5)
+    assert math.isclose(sim.agent(agent_id).location.x, 5)
     for _ in range(0, 100):
         sim.iterate()
-    assert math.isclose(sim.agent(agent_id).position.x, 7)
+    assert math.isclose(sim.agent(agent_id).location.x, 7)
 
 
 @pytest.fixture
@@ -316,7 +316,7 @@ def test_collision_free_speed_model_repulsion_parameters_are_model_level():
     # The configured model drives the simulation.
     for _ in range(10):
         sim.iterate()
-    assert sim.agent(agent_id).position.xy != (1, 1)
+    assert sim.agent(agent_id).position != (1, 1)
 
 
 @pytest.fixture
@@ -445,7 +445,7 @@ def test_social_force_model_body_force_and_friction_are_model_level():
     # The configured model drives the simulation.
     for _ in range(10):
         sim.iterate()
-    assert sim.agent(agent_id).position.xy != (1, 1)
+    assert sim.agent(agent_id).position != (1, 1)
 
 
 def _velocity_along_wall(friction, y):
@@ -507,13 +507,13 @@ def test_agent_handle_raises_after_removal(
     ).id
     agent = sim.agent(agent_id)
     state = agent.state
-    assert agent.position.xy == (1, 1)
+    assert agent.position == (1, 1)
 
     agent.remove()
     sim.iterate()
 
     with pytest.raises(RuntimeError):
-        agent.position.xy
+        agent.position
     with pytest.raises(RuntimeError):
         agent.state.desired_speed
     with pytest.raises(RuntimeError, match="has left the simulation"):

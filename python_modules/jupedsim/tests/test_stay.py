@@ -35,7 +35,7 @@ def iterate_until(sim, done, limit=5000):
 def inside(stage_centre, radius, agent):
     """Whether the agent stands in a disc stage; the stage area is read on
     the floor field grid, so allow a cell's slack."""
-    x, y = agent.position.xy
+    x, y = agent.position
     cx, cy = stage_centre
     return (x - cx) ** 2 + (y - cy) ** 2 <= (radius + 0.2) ** 2
 
@@ -94,14 +94,14 @@ def test_steer_to_point_arrives(model):
     agent = sim.add_agent(room.at(2, 5), target=room.at(*point))
     assert not agent.arrived
     iterate_until(sim, lambda: agent.arrived)
-    x, y = agent.position.xy
+    x, y = agent.position
     assert math.dist((x, y), point) <= 0.05
     for _ in range(100):
         sim.iterate()
     assert agent.alive
     assert agent.arrived
     # Force based models overshoot by their inertia and steer back.
-    x, y = agent.position.xy
+    x, y = agent.position
     assert math.dist((x, y), point) <= 0.25
     assert agent.target.xy == pytest.approx(point)
 
@@ -150,7 +150,7 @@ def test_steer_to_clears_arrived():
     # It moves again, toward the point.
     assert not inside((9, 5), 1.0, agent)
     iterate_until(sim, lambda: agent.arrived)
-    assert math.dist(agent.position.xy, (4, 8)) <= 0.05
+    assert math.dist(agent.position, (4, 8)) <= 0.05
 
 
 def test_steer_to_clears_arrived_at_a_point():
@@ -194,15 +194,15 @@ def test_fast_agent_with_large_dt_arrives(target):
         target=room.at(*target),
         state=jps.CollisionFreeSpeedModelState(desired_speed=4.0),
     )
-    before = agent.position.xy
+    before = agent.position
     for _ in range(200):
         if agent.arrived:
             break
-        before = agent.position.xy
+        before = agent.position
         sim.iterate()
     assert agent.arrived
     # The last step passed within 0.05 m of the point.
-    step = shapely.LineString([before, agent.position.xy])
+    step = shapely.LineString([before, agent.position])
     assert step.distance(shapely.Point(target)) <= 0.05
 
 
@@ -247,7 +247,7 @@ def test_pushed_out_agent_stays_arrived_and_returns():
     farthest = 0.0
     for _ in range(3000):
         sim.iterate()
-        farthest = max(farthest, math.dist(agent.position.xy, (9, 5)))
+        farthest = max(farthest, math.dist(agent.position, (9, 5)))
         assert agent.arrived
     assert farthest > 0.5
     assert inside((9, 5), 0.5, agent)
@@ -274,7 +274,7 @@ def test_new_point_is_not_reached_by_the_previous_step():
     for _ in range(5):
         sim.iterate()
     # The point lies on the 0.4 m step just taken, 0.2 m behind the agent.
-    x, y = agent.position.xy
+    x, y = agent.position
     agent.steer_to(room.at(x - 0.2, y))
     # Arrival is decided before the agent moves, so the old step must not
     # count: the agent arrives only once its next step has passed the point.

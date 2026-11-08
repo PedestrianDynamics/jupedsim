@@ -57,10 +57,10 @@ def _run(sim, room, route, stage, state, steps=40):
     agent_id = sim.add_agent(
         room.at(1.0, 10.0), route=route, start=stage, state=state
     ).id
-    trajectory = [sim.agent(agent_id).position.xy]
+    trajectory = [sim.agent(agent_id).position]
     for _ in range(steps):
         sim.iterate()
-        trajectory.append(sim.agent(agent_id).position.xy)
+        trajectory.append(sim.agent(agent_id).position)
     return trajectory
 
 
@@ -150,9 +150,7 @@ def _run_pair(sim, room, route, stage, state_of, steps=40):
     trajectory = []
     for _ in range(steps):
         sim.iterate()
-        trajectory.append(
-            (sim.agent(left).position.xy, sim.agent(ahead).position.xy)
-        )
+        trajectory.append((sim.agent(left).position, sim.agent(ahead).position))
     return trajectory
 
 

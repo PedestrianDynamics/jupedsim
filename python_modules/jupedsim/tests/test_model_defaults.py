@@ -134,7 +134,7 @@ def _trajectory(model, state_cls):
     positions = []
     for _ in range(20):
         simulation.iterate()
-        positions.append(simulation.agent(agent_id).position.xy)
+        positions.append(simulation.agent(agent_id).position)
     return positions
 
 

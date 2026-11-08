@@ -90,7 +90,7 @@ def decision_setup():
 
 
 def distance_to(agent, wp, centre=(3.0, 5.0)):
-    x, y = agent.position.xy
+    x, y = agent.position
     return ((x - centre[0]) ** 2 + (y - centre[1]) ** 2) ** 0.5
 
 

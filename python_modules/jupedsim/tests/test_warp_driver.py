@@ -56,11 +56,11 @@ def test_simulation_runs(warp_driver_corridor):
         state=jps.WarpDriverModelState(desired_speed=1.2, radius=0.15),
     ).id
 
-    initial_x = sim.agent(aid).position.x
+    initial_x = sim.agent(aid).location.x
     for _ in range(50):
         sim.iterate()
     assert sim.agent_count() == 1
-    assert sim.agent(aid).position.x > initial_x, (
+    assert sim.agent(aid).location.x > initial_x, (
         "Agent should have moved forward"
     )
 
@@ -78,7 +78,7 @@ def test_single_agent_straight_path(warp_driver_corridor):
     for _ in range(100):
         sim.iterate()
 
-    pos = sim.agent(aid).position.xy
+    pos = sim.agent(aid).position
     # Agent should have moved towards x=10, staying near y=2
     assert pos[0] > 2.5, f"Agent should have moved forward, got x={pos[0]}"
     assert abs(pos[1] - 2.0) < 0.5, (

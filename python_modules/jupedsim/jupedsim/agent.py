@@ -122,8 +122,16 @@ class Agent:
         return True
 
     @property
-    def position(self) -> _SurfaceLocation:
-        """Current location of the agent, a snapshot."""
+    def position(self) -> tuple[float, float]:
+        """Position of the agent as ``(x, y)``."""
+        return self._resolve().position
+
+    @property
+    def location(self) -> _SurfaceLocation:
+        """Current location of the agent, a snapshot.
+
+        Same as :attr:`position`, plus the region the agent is on.
+        """
         return self._to_location(self._resolve().location)
 
     @property
@@ -209,7 +217,7 @@ class Agent:
         """
         self._resolve()
         stage = first_stage(self._simulation, route, start)
-        check_reachable(self._simulation, stage, self.position)
+        check_reachable(self._simulation, stage, self.location)
         self._simulation._obj.switch_agent_route(
             agent_id=self._id, route_id=route._native_id, stage_id=stage.id
         )
@@ -227,7 +235,7 @@ class Agent:
         """
         self._resolve()
         native = native_location(self._simulation, location, "target")
-        check_target_reachable(self._simulation, location, self.position)
+        check_target_reachable(self._simulation, location, self.location)
         route_id, stage_id = direct_steering(self._simulation)
         self._simulation._obj.switch_agent_route(
             agent_id=self._id, route_id=route_id, stage_id=stage_id

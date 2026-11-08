@@ -125,7 +125,7 @@ def test_locations_are_the_surface_type():
     )
     location = upper.at(*STACKED_XY)
     assert type(location) is jps.Location
-    assert type(agent.position) is jps.Location
+    assert type(agent.location) is jps.Location
     assert jps.Location.__module__ == "jupedsim.surface"
     assert "A point on a region" in jps.Location.__doc__
 
@@ -143,9 +143,9 @@ def test_an_agent_reports_the_floor_it_stands_on():
     }
     for region, z in ((ground, GROUND_Z), (upper, UPPER_Z)):
         agent = agents[region]
-        assert agent.position.xy == STACKED_XY
-        assert agent.position.region == region
-        assert agent.position.region.height == pytest.approx(z)
+        assert agent.position == STACKED_XY
+        assert agent.location.region == region
+        assert agent.location.region.height == pytest.approx(z)
 
 
 def test_a_location_does_not_follow_the_agent_it_came_from():
@@ -156,9 +156,9 @@ def test_a_location_does_not_follow_the_agent_it_came_from():
         route=route,
         state=jps.CollisionFreeSpeedModelState(),
     )
-    where_it_started = agent.position
+    where_it_started = agent.location
     sim.iterate(50)
-    assert agent.position.xy != pytest.approx(STACKED_XY)
+    assert agent.position != pytest.approx(STACKED_XY)
     assert (where_it_started.x, where_it_started.y) == STACKED_XY
 
 
@@ -173,8 +173,8 @@ def test_a_direct_steering_target_can_be_given_as_a_location():
     assert agent.target == target
     sim.iterate(100)
     # it walks along its own floor towards the target, and stays up there
-    assert agent.position.x > STACKED_XY[0]
-    assert agent.position.region == upper
+    assert agent.location.x > STACKED_XY[0]
+    assert agent.location.region == upper
 
 
 def test_an_agent_heading_for_an_exit_has_no_target_location():
@@ -237,14 +237,14 @@ def test_agents_walk_up_the_u_stair_to_an_exit_on_the_floor_above(model, state):
         ]
     ]
     watched, watched_id = agents[0], agents[0].id
-    regions = [watched.position.region]
+    regions = [watched.location.region]
     heights = [sim._obj.agent(watched_id).location.z]
     for _ in range(6000):
         sim.iterate()
         if any(r.id == watched_id for r in sim.removed_agents()):
             watched = None
         if watched is not None:
-            regions.append(watched.position.region)
+            regions.append(watched.location.region)
             heights.append(sim._obj.agent(watched_id).location.z)
         if sim.agent_count() == 0:
             break
@@ -278,7 +278,7 @@ def test_one_exit_with_an_area_on_each_floor_is_reached_from_both():
         if sim.agent_count() == 0:
             break
         for agent in sim.agents():
-            assert agent.position.region.height == pytest.approx(
+            assert agent.location.region.height == pytest.approx(
                 floor_z[agent.id]
             )
     assert sim.agent_count() == 0
@@ -328,7 +328,7 @@ def test_the_exit_an_agent_walks_towards_is_the_one_on_its_own_floor():
         sim.iterate()
         if sim.agent_count() == 0:
             break
-        assert agent.position.region.height == pytest.approx(GROUND_Z)
+        assert agent.location.region.height == pytest.approx(GROUND_Z)
     assert sim.agent_count() == 0
 
 

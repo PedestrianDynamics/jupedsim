@@ -119,7 +119,7 @@ def test_can_run_simulation():
     )
 
     for actual, expected in zip(simulation.agents(), initial_agent_positions):
-        assert actual.position.xy == expected
+        assert actual.position == expected
 
     agent.remove()
     simulation.iterate()

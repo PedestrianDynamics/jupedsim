@@ -1070,7 +1070,7 @@ def test_add_agent_spawns_the_agent_where_add_agent_says():
         room.at(5.0, 5.0), route=route, state=_MinimalCustomState()
     ).id
 
-    assert simulation.agent(agent_id).position.xy == (5.0, 5.0)
+    assert simulation.agent(agent_id).position == (5.0, 5.0)
 
 
 def test_custom_model_update_without_movement_names_source():
@@ -1119,7 +1119,7 @@ def test_custom_model_movement_is_applied_as_given():
 
     simulation.iterate()
 
-    assert simulation.agent(agent_id).position.xy == (0.25, -0.5)
+    assert simulation.agent(agent_id).position == (0.25, -0.5)
 
 
 class _AddAgentDuringIterateModel(jps.CustomOperationalModel):

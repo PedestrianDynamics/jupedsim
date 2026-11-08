@@ -39,7 +39,7 @@ def test_position_accepts_any_two_element_sequence(position):
         position,
         jps.CollisionFreeSpeedModelV2State(),
     )
-    assert agent.position.xy == (5.0, 5.0)
+    assert agent.position == (5.0, 5.0)
 
 
 def test_position_rejects_wrong_length():
@@ -108,7 +108,7 @@ def test_zero_orientation_still_moves():
         jps.CollisionFreeSpeedModelV2State(orientation=(0.0, 0.0)),
     )
     sim.iterate(3)
-    assert agent.position.x > 5.0
+    assert agent.location.x > 5.0
 
 
 @pytest.mark.parametrize(
@@ -120,4 +120,4 @@ def test_social_force_zero_divisor_stays_finite(state):
         sim, room, exit, journey, (5, 5), jps.SocialForceModelState(**state)
     )
     sim.iterate(3)
-    assert all(math.isfinite(c) for c in agent.position.xy)
+    assert all(math.isfinite(c) for c in agent.position)
