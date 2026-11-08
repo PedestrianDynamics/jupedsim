@@ -345,9 +345,12 @@ impl MultiRegionFloorfield {
 
     /// Replace the default speed field of `region`, see `checked_speed` for
     /// what `values` must hold. Destinations using it are solved again on
-    /// their next query.
+    /// their next query, unless the field is unchanged.
     pub fn set_default_speed(&mut self, region: usize, values: &[f32]) -> Result<()> {
         let speed = self.checked_speed(region, values)?;
+        if speed == self.regions[region].default_speed {
+            return Ok(());
+        }
         self.regions[region].default_speed = speed;
         for d in &mut self.destinations {
             if d.speed_override[region].is_none() {
@@ -372,13 +375,17 @@ impl MultiRegionFloorfield {
 
     /// Solve `dest` with `values` in `region` instead of the default speed
     /// field, see `checked_speed` for what `values` must hold. Other
-    /// destinations are not affected; `dest` is solved again on its next query.
+    /// destinations are not affected; `dest` is solved again on its next query,
+    /// unless it was solved with these values already.
     pub fn set_speed_override(&mut self, region: usize, dest: usize, values: &[f32]) -> Result<()> {
         self.destination(dest)?;
         let speed = self.checked_speed(region, values)?;
+        let unchanged = self.speed_of(&self.destinations[dest], region) == &speed[..];
         let d = &mut self.destinations[dest];
         d.speed_override[region] = Some(speed);
-        d.solution = None;
+        if !unchanged {
+            d.solution = None;
+        }
         Ok(())
     }
 
@@ -2116,8 +2123,28 @@ mod tests {
             let same = ff.default_speed(r).unwrap().to_vec();
             ff.set_default_speed(r, &same).unwrap();
         }
-        assert!(ff.destinations[dest].solution.is_none(), "not invalidated");
+        assert!(ff.destinations[dest].solution.is_some(), "solved again");
         assert_fields_close(&before, &all_travel_times(&mut ff, dest), 1.0);
+    }
+
+    #[test]
+    fn setting_the_speed_override_it_solves_with_changes_nothing() {
+        let mut ff = split_corridor();
+        let dest = ff.add_point_destination(1, 19.0, 2.0).unwrap();
+        let before = all_travel_times(&mut ff, dest);
+        // An override equal to the default it replaces.
+        let same = ff.default_speed(0).unwrap().to_vec();
+        ff.set_speed_override(0, dest, &same).unwrap();
+        assert!(ff.has_speed_override(0, dest).unwrap());
+        assert!(ff.destinations[dest].solution.is_some(), "solved again");
+        // The same override once more.
+        let half = mapped_default(&ff, 0, |_, _, v| 0.5 * v);
+        ff.set_speed_override(0, dest, &half).unwrap();
+        let slowed = all_travel_times(&mut ff, dest);
+        ff.set_speed_override(0, dest, &half).unwrap();
+        assert!(ff.destinations[dest].solution.is_some(), "solved again");
+        assert_fields_close(&slowed, &all_travel_times(&mut ff, dest), 1.0);
+        assert!(slowed[0] != before[0]);
     }
 
     #[test]
