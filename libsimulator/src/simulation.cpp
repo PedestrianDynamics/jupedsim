@@ -494,7 +494,7 @@ std::vector<GenericAgent::ID> Simulation::open_exit(BaseStage::ID exit_id)
     // since others were stranded, and those wait for an exit of their own rule.
     std::vector<GenericAgent::ID> resumed{};
     for(auto& agent : _agents) {
-        if(!agent.stranded || !decides_for(agent, exit)) {
+        if(!agent.stranded || !decides_for(agent, exit) || is_leaving(agent.id)) {
             continue;
         }
         auto* next = decide_again(agent);
@@ -547,6 +547,10 @@ void Simulation::release(Route::ID route_id, BaseStage::ID stage_id)
     // One agent at a time, so each decision sees the ones before it (counters, targeted counts).
     for(auto* agent : held_at(route_id, stage_id)) {
         agent->held = false;
+        // An agent marked for removal leaves next iterate(): it takes no slot.
+        if(is_leaving(agent->id)) {
+            continue;
+        }
         agent->decision_stage = stage_id;
         auto* next = route.decide(*agent, stage_id, *_routing_engine);
         if(next == nullptr) {

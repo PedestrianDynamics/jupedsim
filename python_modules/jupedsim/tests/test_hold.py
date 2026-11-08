@@ -124,6 +124,19 @@ def test_release_in_arrival_order():
     assert route.held_at(s["wp2"]) == ()
 
 
+def test_release_skips_agents_being_removed():
+    sim, room, s = make_sim()
+    route = split(s)
+    route.hold(s["wp2"])
+    first = sim.add_agent(room.at(9, 5), route=route)
+    second = sim.add_agent(room.at(9.5, 5.5), route=route)
+    iterate_until(sim, lambda: first.held and second.held)
+    first.remove()
+    route.release(s["wp2"])
+    # The leaving agent does not take the first slot.
+    assert second.stage == s["exit1"]
+
+
 def test_release_frees_walking_agents():
     sim, room, s = make_sim()
     route = split(s)
@@ -238,6 +251,20 @@ def test_hold_close_release_without_open_target_strands_inside():
     assert inside((9, 5), 1.0, agent)
     assert s["exit2"].open() == (agent,)
     assert agent.stage == s["exit2"]
+
+
+def test_open_does_not_resume_agents_being_removed():
+    sim, room, s = make_sim()
+    route = split(s)
+    route.hold(s["wp2"])
+    agent = sim.add_agent(room.at(9, 5), route=route)
+    sim.iterate()
+    s["exit1"].close(informed=True)
+    s["exit2"].close(informed=True)
+    route.release(s["wp2"])
+    assert agent.stranded
+    agent.remove()
+    assert s["exit2"].open() == ()
 
 
 def test_holds_per_route():
