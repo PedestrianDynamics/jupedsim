@@ -441,7 +441,8 @@ def _scenarios(selected):
 
 
 def _exemptions():
-    """{(script, metric): first exempt iteration, None for all of it}."""
+    """{(script, metric): (first exempt iteration, first checked again or
+    None), None for all of it}."""
     exempt = {}
     for line in (BASE_DIR / "EXEMPT.txt").read_text().splitlines():
         line = line.strip()
@@ -457,25 +458,37 @@ def _exemptions():
 
 
 def _bound(metric, rest, line):
-    """The iteration of a leading ``from=<iteration>``, else None."""
-    match = re.match(r"from=(\d+)\s", rest)
+    """The iterations of a leading ``from=<iteration>``, optionally followed
+    by ``until=<iteration>``, else None."""
+    match = re.match(r"from=(\d+)\s+(?:until=(\d+)\s)?", rest)
     if match is None:
         return None
     if metric == "end_time":
         raise SystemExit(
             f"Bad EXEMPT.txt line (end_time has no iterations): {line}"
         )
-    return int(match.group(1))
+    start = int(match.group(1))
+    stop = None if match.group(2) is None else int(match.group(2))
+    if stop is not None and stop <= start:
+        raise SystemExit(
+            f"Bad EXEMPT.txt line (until= must exceed from=): {line}"
+        )
+    return start, stop
 
 
-def _before(metric, value, bound):
-    """The part of a metric recorded before iteration ``bound``."""
+def _outside(metric, value, bound):
+    """The part of a metric recorded outside the exempt iterations."""
+    start, stop = bound
+
+    def kept(it):
+        return it < start or (stop is not None and it >= stop)
+
     if metric == "agent_count":
-        return [change for change in value if change[0] < bound]
+        return [change for change in value if kept(change[0])]
     if metric == "exit_counts":
-        kept = {k: [it for it in its if it < bound] for k, its in value.items()}
-        return {k: its for k, its in kept.items() if its}
-    return {it: v for it, v in value.items() if int(it) < bound}
+        left = {k: [it for it in its if kept(it)] for k, its in value.items()}
+        return {k: its for k, its in left.items() if its}
+    return {it: v for it, v in value.items() if kept(int(it))}
 
 
 def _side(key, old, new):
@@ -582,7 +595,7 @@ def compare(script, baseline, current, exempt):
                 bound = exempt[(script, metric)]
                 if bound is None:
                     continue
-                a, b = _before(metric, a, bound), _before(metric, b, bound)
+                a, b = _outside(metric, a, bound), _outside(metric, b, bound)
             diff = first_difference(metric, a, b)
             if diff:
                 problems.append(f"{script} sim#{index} {metric}: {diff}")
@@ -727,11 +740,13 @@ def cmd_selftest():
 
 
 def _bounds_hold(old, new):
-    """A from= bound exempts differences from it on, and only those."""
+    """A from= bound exempts differences from it on, and only those; an
+    until= bound ends the exemption."""
     a, b = old["assignments"], new["assignments"]
     first = min((int(it) for it in a if a[it] != b.get(it)))
-    after = {("selftest", "assignments"): first}
-    late = {("selftest", "assignments"): first + SAMPLE_EVERY}
+    after = {("selftest", "assignments"): (first, None)}
+    late = {("selftest", "assignments"): (first + SAMPLE_EVERY, None)}
+    window = {("selftest", "assignments"): (first, first + SAMPLE_EVERY)}
     passes = compare("selftest", [old], [new], after)
     fails = compare("selftest", [old], [new], late)
     if any(" assignments:" in p for p in passes) or not any(
@@ -740,7 +755,16 @@ def _bounds_hold(old, new):
         print("selftest FAILED: from= bound", passes, fails)
         return False
     late_diff = next(p for p in fails if " assignments:" in p)
-    print(f"selftest ok: from={late[('selftest', 'assignments')]}:", late_diff)
+    print(f"selftest ok: from={first + SAMPLE_EVERY}:", late_diff)
+    ended = [
+        p
+        for p in compare("selftest", [old], [new], window)
+        if " assignments:" in p
+    ]
+    if not ended or f"iteration {first}," in ended[0]:
+        print("selftest FAILED: until= bound", ended)
+        return False
+    print(f"selftest ok: from={first} until={first + SAMPLE_EVERY}:", ended[0])
     return True
 
 
