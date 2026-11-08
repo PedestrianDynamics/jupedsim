@@ -111,11 +111,21 @@ class WalkableSurface:
     def add_region(
         self,
         *,
-        polygon: shapely.Polygon,
+        polygon: shapely.Polygon | None = None,
+        boundary: Any = None,
+        holes: Any = (),
         height: float = 0.0,
         name: str | None = None,
     ) -> Region:
-        """Add a region at ``height`` and return its handle."""
+        """Add a region at ``height`` and return its handle.
+
+        Give either ``polygon`` or ``boundary`` (a sequence of points) with
+        optional ``holes`` (sequences of points).
+        """
+        if (polygon is None) == (boundary is None):
+            raise TypeError("give polygon or boundary, not both or neither")
+        if polygon is None:
+            polygon = shapely.Polygon(boundary, holes=holes)
         self._check_region_name(name)
         region_id = self._obj.add_region(polygon=polygon, height=height)
         return self._register(region_id, name, height, polygon)

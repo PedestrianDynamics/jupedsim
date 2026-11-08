@@ -266,3 +266,21 @@ def test_duplicate_connector_name_is_rejected():
             name="staircase",
         )
     assert len(surface.regions) == 3
+
+
+def test_add_region_from_boundary_and_holes():
+    surface = WalkableSurface()
+    floor0 = surface.add_region(
+        boundary=FOOTPRINT, holes=[STAIRWELL], name="floor0"
+    )
+    assert floor0.at(12, 7).xy == (12.0, 7.0)
+    with pytest.raises(ValueError, match=r"\(15, 7\) is not in floor0"):
+        floor0.at(15, 7)
+
+
+def test_add_region_requires_polygon_or_boundary():
+    surface = WalkableSurface()
+    with pytest.raises(TypeError, match="polygon or boundary"):
+        surface.add_region()
+    with pytest.raises(TypeError, match="polygon or boundary"):
+        surface.add_region(polygon=shapely.box(0, 0, 1, 1), boundary=FOOTPRINT)
