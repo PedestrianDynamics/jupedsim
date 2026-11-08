@@ -279,6 +279,22 @@ numbers that look plausible.
 - A stage an agent starts inside completes in the first `iterate()`
   (see above), so holds and closures set up before it apply.
 
+**Stage areas**
+
+- A waypoint or exit is reached on the floor field grid (0.2 m cells),
+  not on its polygon: an agent arrives once it stands in a cell whose
+  centre lies inside the area. Arrival can therefore happen up to half
+  a cell outside the polygon, or only half a cell inside it.
+- An area too thin to contain a cell centre is replaced by the cell
+  nearest to its interior, so arrival can happen up to a whole cell
+  away. Make areas at least one cell wide where exact counts or
+  boundaries matter.
+- Every stage can be reached from every walkable point: `Simulation()`
+  rejects a surface with walkable parts that cannot be reached from the
+  others, and speed fields cannot drop below a minimum speed. Later
+  targets are therefore always reachable; agents are stranded only by
+  closed exits.
+
 **Holds and closures**
 
 - Held agents stop where they first enter the waypoint area; they are
@@ -293,11 +309,6 @@ numbers that look plausible.
 - `route_orientation` is (0, 0) at a `steer_to()` point only when the
   agent stands exactly on it; agents oscillate around the point. Use
   `agent.arrived`: the last step passed within 0.05 m of the point.
-- Every stage can be reached from every walkable point: `Simulation()`
-  rejects a surface with walkable parts that cannot be reached from the
-  others, and speed fields cannot drop below a minimum speed. Later
-  targets are therefore always reachable; agents are stranded only by
-  closed exits.
 
 **Geometry and handles**
 
