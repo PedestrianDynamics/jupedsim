@@ -41,6 +41,20 @@
 
 namespace
 {
+/// Binary search by id: agents are appended with increasing ids and removal keeps their order.
+template <typename Container>
+auto find_agent(Container& agents, GenericAgent::ID id)
+{
+    const auto iter = std::lower_bound(
+        std::begin(agents), std::end(agents), id, [](const auto& agent, GenericAgent::ID value) {
+            return agent.id < value;
+        });
+    if(iter == std::end(agents) || iter->id != id) {
+        return std::end(agents);
+    }
+    return iter;
+}
+
 std::vector<AreaPiece> pieces_of(const Geometry& geometry, const std::vector<StageArea>& areas)
 {
     if(areas.empty()) {
@@ -351,8 +365,7 @@ void Simulation::mark_agent_for_removal(GenericAgent::ID id)
 {
     throw_if_state(State::Iterating | State::Closed, "mark_agent_for_removal");
     JPS_TRACE_FUNC;
-    const auto iter = std::find_if(
-        std::begin(_agents), std::end(_agents), [id](auto& agent) { return agent.id == id; });
+    const auto iter = find_agent(_agents, id);
     if(iter == std::end(_agents)) {
         throw SimulationError("Unknown agent id {}", id);
     }
@@ -367,8 +380,7 @@ const GenericAgent& Simulation::agent(GenericAgent::ID id) const
 {
     throw_if_state(State::Closed, "agent");
     JPS_TRACE_FUNC;
-    const auto iter =
-        std::find_if(_agents.begin(), _agents.end(), [id](auto& ped) { return id == ped.id; });
+    const auto iter = find_agent(_agents, id);
     if(iter == _agents.end()) {
         throw SimulationError("Trying to access unknown Agent {}", id);
     }
@@ -379,8 +391,7 @@ GenericAgent& Simulation::agent(GenericAgent::ID id)
 {
     throw_if_state(State::Closed, "agent");
     JPS_TRACE_FUNC;
-    const auto iter =
-        std::find_if(_agents.begin(), _agents.end(), [id](auto& ped) { return id == ped.id; });
+    const auto iter = find_agent(_agents, id);
     if(iter == _agents.end()) {
         throw SimulationError("Trying to access unknown Agent {}", id);
     }
