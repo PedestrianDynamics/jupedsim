@@ -293,8 +293,11 @@ numbers that look plausible.
 - `route_orientation` is (0, 0) at a `steer_to()` point only when the
   agent stands exactly on it; agents oscillate around the point. Use
   `agent.arrived`: the last step passed within 0.05 m of the point.
-- When no candidate of `LeastTravelTime` can be reached, it picks the
-  first open candidate.
+- Every stage can be reached from every walkable point: `Simulation()`
+  rejects a surface with walkable parts that cannot be reached from the
+  others, and speed fields cannot drop below a minimum speed. Later
+  targets are therefore always reachable; agents are stranded only by
+  closed exits.
 
 **Geometry and handles**
 
