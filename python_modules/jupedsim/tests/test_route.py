@@ -515,6 +515,17 @@ def test_update_weights_patch(stages):
     )
 
 
+def test_round_robin_equality_follows_order(stages):
+    _, s = stages
+    ab = RoundRobin({s["exit1"]: 1, s["exit2"]: 1})
+    ba = RoundRobin({s["exit2"]: 1, s["exit1"]: 1})
+    # Order breaks ties, so it changes the sequence of decisions.
+    assert ab != ba
+    assert ab == RoundRobin({s["exit1"]: 1, s["exit2"]: 1})
+    assert hash(ab) == hash(RoundRobin({s["exit1"]: 1, s["exit2"]: 1}))
+    assert len({ab, ba}) == 2
+
+
 def test_update_weights_keeps_rules_returned_earlier(stages):
     _, s = stages
     route = route_c(s)

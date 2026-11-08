@@ -93,7 +93,8 @@ class RoundRobin:
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, RoundRobin):
             return NotImplemented
-        return self._weights == other._weights
+        # Order breaks ties, so two rules are equal only in the same order.
+        return tuple(self._weights.items()) == tuple(other._weights.items())
 
     def __hash__(self) -> int:
         return hash(tuple(self._weights.items()))
