@@ -380,10 +380,41 @@ def test_exit_unreachable_through_zero_weight(stages):
 
 def test_endless_with_exit(stages):
     _, s = stages
-    with pytest.raises(
-        ValueError, match="route can end at exit1; drop endless=True"
-    ):
-        Route([s["wp1"], s["wp2"], s["exit1"]], endless=True)
+    # endless=True waives the need for an end; it does not forbid one.
+    route = Route([s["wp1"], s["wp2"], s["exit1"]], endless=True)
+    assert route.stages[-1] == s["exit1"]
+    loop = Route(
+        [
+            (s["wp1"], RoundRobin({s["wp2"]: 1, s["exit1"]: 1})),
+            (s["wp2"], s["wp1"]),
+        ],
+        start=s["wp1"],
+        endless=True,
+    )
+    assert loop.weights(s["wp1"]) == {s["wp2"]: 1, s["exit1"]: 1}
+
+
+def test_endless_route_evacuates_once_its_exit_is_weighted():
+    sim, room = _simulation()
+    wp1 = sim.add_waypoint((2, 5), radius=0.4, region=room, name="wp1")
+    wp2 = sim.add_waypoint((6, 5), radius=0.4, region=room, name="wp2")
+    exit1 = sim.add_exit(EXIT_AREAS["exit1"], region=room, name="exit1")
+    tour = Route(
+        [(wp1, RoundRobin({wp2: 1, exit1: 0})), (wp2, wp1)],
+        start=wp1,
+        endless=True,
+    )
+    agents = [sim.add_agent(room.at(4, y), route=tour) for y in (4, 6)]
+    for _ in range(1000):
+        sim.iterate()
+    assert all(agent.alive for agent in agents)
+    # A positive loop weight keeps some agents circulating: switch it off.
+    tour.update_weights(wp1, {wp2: 0, exit1: 1})
+    for _ in range(3000):
+        if sim.agent_count() == 0:
+            break
+        sim.iterate()
+    assert sim.agent_count() == 0
 
 
 def test_stage_twice(stages):

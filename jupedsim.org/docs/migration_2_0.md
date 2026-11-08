@@ -259,7 +259,14 @@ numbers that look plausible.
   `stranded` nor `arrived`, so check that `agent_count()` reaches zero.
 - A weight of 0 is allowed; nobody is sent along it. A route whose only
   exit has weight 0 is valid only if `STAY` or another exit can still be
-  reached through positive weights; otherwise `Route()` raises.
+  reached through positive weights; otherwise `Route()` raises, unless
+  `endless=True`.
+- `endless=True` lets a route run indefinitely; exits and `STAY` stay
+  allowed. To evacuate a circulating crowd later, give the exit a weight
+  and set the loop target to 0, e.g.
+  `route.update_weights(decision, {loop_target: 0, exit: 1})`: while the
+  loop target keeps a weight, some agents keep circulating. Agents
+  already assigned a target keep it until their next decision.
 - `update_weights()` with changed weights starts the round-robin
   sequence afresh. Changing them at every step favours the target with
   the highest weight. Applying unchanged weights keeps the sequence.

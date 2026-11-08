@@ -295,11 +295,6 @@ def _stuck_stages(
 def _check_ending(
     order: Sequence[_Stage], transitions: Mapping[_Stage, Any], endless: bool
 ) -> None:
-    terminals = [s for s in order if _is_terminal(s, transitions)]
-    if endless and terminals:
-        raise ValueError(
-            f"route can end at {_label(terminals[0])}; drop endless=True"
-        )
     if endless:
         return
     if _stuck_stages(order, transitions):
@@ -357,6 +352,11 @@ class Route:
     A route is validated at construction and bound to the simulation that
     owns its stages. ``steps`` is a list of stages, walked in order, or a
     list of ``(from, to)`` pairs where ``to`` is a stage or a rule.
+
+    Every stage must be able to reach an exit or ``STAY`` through weights
+    > 0. ``endless=True`` waives that: the route may run indefinitely.
+    Exits and ``STAY`` remain allowed, and agents leave or stay if the
+    route sends them there.
     """
 
     def __init__(
