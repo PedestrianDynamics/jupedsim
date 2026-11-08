@@ -13,21 +13,15 @@ def _room(model):
         polygon=shapely.Polygon([(0, 0), (20, 0), (20, 20), (0, 20)])
     )
     sim = jps.Simulation(model=model, geometry=surface, dt=0.01)
-    exit_id = sim.add_exit_stage(
+    exit = sim.add_exit(
         [(shapely.Polygon([(18, 0), (20, 0), (20, 20), (18, 20)]), room)]
     )
-    journey = sim.add_journey(jps.JourneyDescription([exit_id]))
-    return sim, room, exit_id, journey
+    journey = jps.Route([exit])
+    return sim, room, exit, journey
 
 
-def _add(sim, room, exit_id, journey, position, state):
-    return sim.add_agent(
-        journey_id=journey,
-        stage_id=exit_id,
-        position=position,
-        state=state,
-        region_id=room,
-    )
+def _add(sim, room, exit, journey, position, state):
+    return sim.add_agent(room.at(*position), route=journey, state=state)
 
 
 @pytest.mark.parametrize(
@@ -36,25 +30,25 @@ def _add(sim, room, exit_id, journey, position, state):
     ids=["ints", "floats", "list", "numpy"],
 )
 def test_position_accepts_any_two_element_sequence(position):
-    sim, room, exit_id, journey = _room(jps.CollisionFreeSpeedModelV2())
+    sim, room, exit, journey = _room(jps.CollisionFreeSpeedModelV2())
     agent = _add(
         sim,
         room,
-        exit_id,
+        exit,
         journey,
         position,
         jps.CollisionFreeSpeedModelV2State(),
     )
-    assert sim.agent(agent).position == (5.0, 5.0)
+    assert agent.position == (5.0, 5.0)
 
 
 def test_position_rejects_wrong_length():
-    sim, room, exit_id, journey = _room(jps.CollisionFreeSpeedModelV2())
+    sim, room, exit, journey = _room(jps.CollisionFreeSpeedModelV2())
     with pytest.raises(TypeError):
         _add(
             sim,
             room,
-            exit_id,
+            exit,
             journey,
             (1, 2, 3),
             jps.CollisionFreeSpeedModelV2State(),
@@ -67,16 +61,16 @@ def test_position_rejects_wrong_length():
     ids=["ints", "floats", "list", "numpy"],
 )
 def test_orientation_accepts_any_two_element_sequence(orientation):
-    sim, room, exit_id, journey = _room(jps.CollisionFreeSpeedModelV2())
+    sim, room, exit, journey = _room(jps.CollisionFreeSpeedModelV2())
     agent = _add(
         sim,
         room,
-        exit_id,
+        exit,
         journey,
         (5, 5),
         jps.CollisionFreeSpeedModelV2State(orientation=orientation),
     )
-    assert sim.agent(agent).state.orientation == (1.0, 0.0)
+    assert agent.state.orientation == (1.0, 0.0)
 
 
 def test_orientation_rejects_wrong_length():
@@ -86,12 +80,12 @@ def test_orientation_rejects_wrong_length():
 
 @pytest.mark.parametrize("bad", [math.nan, math.inf])
 def test_non_finite_position_is_not_in_region(bad):
-    sim, room, exit_id, journey = _room(jps.CollisionFreeSpeedModelV2())
-    with pytest.raises(jps.SimulationError, match="is not in region"):
+    sim, room, exit, journey = _room(jps.CollisionFreeSpeedModelV2())
+    with pytest.raises(ValueError, match="is not in"):
         _add(
             sim,
             room,
-            exit_id,
+            exit,
             journey,
             (bad, 5.0),
             jps.CollisionFreeSpeedModelV2State(),
@@ -104,26 +98,26 @@ def test_agents_in_range_of_nan_is_empty():
 
 
 def test_zero_orientation_still_moves():
-    sim, room, exit_id, journey = _room(jps.CollisionFreeSpeedModelV2())
+    sim, room, exit, journey = _room(jps.CollisionFreeSpeedModelV2())
     agent = _add(
         sim,
         room,
-        exit_id,
+        exit,
         journey,
         (5, 5),
         jps.CollisionFreeSpeedModelV2State(orientation=(0.0, 0.0)),
     )
     sim.iterate(3)
-    assert sim.agent(agent).position[0] > 5.0
+    assert agent.location.x > 5.0
 
 
 @pytest.mark.parametrize(
     "state", [{"mass": 0.0}, {"reaction_time": 0.0}], ids=["mass", "reaction"]
 )
 def test_social_force_zero_divisor_stays_finite(state):
-    sim, room, exit_id, journey = _room(jps.SocialForceModel())
+    sim, room, exit, journey = _room(jps.SocialForceModel())
     agent = _add(
-        sim, room, exit_id, journey, (5, 5), jps.SocialForceModelState(**state)
+        sim, room, exit, journey, (5, 5), jps.SocialForceModelState(**state)
     )
     sim.iterate(3)
-    assert all(math.isfinite(c) for c in sim.agent(agent).position)
+    assert all(math.isfinite(c) for c in agent.position)

@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 import jupedsim as jps
 import pytest
+import shapely
 
 # Expected defaults are pinned to the C++ Agent struct initializers of each
 # operational model. Constructing a state with no arguments must yield
@@ -123,19 +124,13 @@ def _default_state(state_cls):
 def _trajectory(model, state_cls):
     """Run a short simulation and collect the agent's positions."""
     surface = jps.WalkableSurface()
-    room = surface.add_region(boundary=_GEOMETRY)
+    room = surface.add_region(polygon=shapely.Polygon(_GEOMETRY))
     simulation = jps.Simulation(model=model, geometry=surface)
-    exit_id = simulation.add_exit_stage(
-        [([(49, -3), (49, 3), (50, 3), (50, -3)], room)]
-    )
-    journey_id = simulation.add_journey(jps.JourneyDescription([exit_id]))
+    exit = simulation.add_exit([([(49, -3), (49, 3), (50, 3), (50, -3)], room)])
+    route = jps.Route([exit])
     agent_id = simulation.add_agent(
-        journey_id=journey_id,
-        stage_id=exit_id,
-        position=(0, 0),
-        state=_default_state(state_cls),
-        region_id=room,
-    )
+        room.at(0, 0), route=route, state=_default_state(state_cls)
+    ).id
     positions = []
     for _ in range(20):
         simulation.iterate()

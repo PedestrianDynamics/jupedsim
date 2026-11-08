@@ -1,0 +1,13 @@
+# Lines: <script> <metric> [from=<iteration> [until=<iteration>]] <reason>. Whole-script exemptions are not allowed.
+# With from=, the metric must still match before that iteration; with until=, also from that iteration on.
+examples/example4.py assignments from=1100 smooth round-robin 5:1:3 (L R L T L R L R L) vs master block order (L L L L L T R R R): first difference at sample 1100, agent 45 takes exit 2 (right) instead of 0 (left) as the second round-robin decision; all samples before 1100 identical
+examples/example4.py positions from=1100 follows the changed round-robin decision of agent 45 between samples 1000 and 1100: first difference at sample 1100, all earlier samples identical
+examples/example4.py agent_count from=2902 follows the changed round-robin assignments from iteration 1100 on: first difference at iteration 2902
+examples/example4.py exit_counts from=2900 follows the changed round-robin assignments from iteration 1100 on: first differing removal at iteration 2900 (exit 2), exit totals 27/5/16 vs master 28/5/15
+examples/example4.py end_time follows the changed round-robin assignments from iteration 1100 on: 77.51 vs master 74.32
+notebooks/single-file.ipynb assignments from=0 until=1 F1: stages complete in iterate(), not add_agent(); draft 584-586 — one agent per simulation spawned inside its first waypoint reports it (29) instead of the next stage (30) at the pre-iterate sample; all later samples and the other metrics match in full
+examples/avm-sharp-corners.py agent_count from=1 F1: stages complete in iterate(), not add_agent(); draft 584-586 — the 3 agents spawned inside goal_2 leave after iteration 2 instead of 1: first difference at iteration 1
+examples/avm-sharp-corners.py exit_counts from=0 F1: stages complete in iterate(), not add_agent(); draft 584-586 — master drops the removal records of agents spawned inside an exit (497); the branch counts all 500: the 3 agents spawned inside goal_2 are reported at iteration 0; later removals follow the divergence
+examples/avm-sharp-corners.py positions from=100 F1: stages complete in iterate(), not add_agent(); draft 584-586 — the 3 agents spawned inside goal_2 take part in iteration 1; first difference at sample 100 (1 ulp), chaotic divergence after
+examples/avm-sharp-corners.py assignments from=200 F1: stages complete in iterate(), not add_agent(); draft 584-586 — follows the divergence of positions: first difference at sample 200
+examples/avm-sharp-corners.py end_time F1: stages complete in iterate(), not add_agent(); draft 584-586 — follows the divergence: 265.55 vs master 262.6

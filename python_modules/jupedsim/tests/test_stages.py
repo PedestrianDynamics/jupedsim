@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 import gc
+import re
 import weakref
 
 import jupedsim as jps
@@ -12,7 +13,9 @@ import shapely
 def square_room_5x5():
     surface = jps.WalkableSurface()
     room = surface.add_region(
-        boundary=[(-2.5, -2.5), (2.5, -2.5), (2.5, 2.5), (-2.5, 2.5)]
+        polygon=shapely.Polygon(
+            [(-2.5, -2.5), (2.5, -2.5), (2.5, 2.5), (-2.5, 2.5)]
+        )
     )
     simulation = jps.Simulation(
         model=jps.CollisionFreeSpeedModel(), geometry=surface
@@ -37,16 +40,14 @@ def square_room_5x5_with_obstacle():
 
 def test_exception_on_empty_polygon_in_exit_stage(square_room_5x5):
     sim, room = square_room_5x5
-    with pytest.raises(Exception, match=r"Polygon must have at least 3 points"):
-        sim.add_exit_stage([([], room)])
+    with pytest.raises(ValueError, match="must be simple and without holes"):
+        sim.add_exit([([], room)])
 
 
 def test_exception_on_exit_without_areas(square_room_5x5):
     sim, _ = square_room_5x5
-    with pytest.raises(
-        jps.SimulationError, match="A stage needs at least one area"
-    ):
-        sim.add_exit_stage([])
+    with pytest.raises(ValueError, match="no areas given"):
+        sim.add_exit([])
 
 
 def test_exception_on_exit_polygon_with_hole(square_room_5x5):
@@ -55,11 +56,13 @@ def test_exception_on_exit_polygon_with_hole(square_room_5x5):
         [(-2, -2), (2, -2), (2, 2), (-2, 2)],
         [[(-1, -1), (1, -1), (1, 1), (-1, 1)]],
     )
-    with pytest.raises(ValueError, match="Polygon must not have holes"):
-        sim.add_exit_stage([(exit_with_hole, room)])
+    with pytest.raises(
+        ValueError, match="^exit polygons must be simple and without holes$"
+    ):
+        sim.add_exit([(exit_with_hole, room)])
 
 
-def test_can_use_stage_proxy():
+def test_can_count_the_agents_targeting_a_stage():
     messages = []
 
     def log_msg_handler(msg):
@@ -80,63 +83,43 @@ def test_can_use_stage_proxy():
         model=jps.CollisionFreeSpeedModel(), geometry=surface
     )
 
-    exit_id = simulation.add_exit_stage(
+    exit = simulation.add_exit(
         [([(-2.5, -9.5), (-2.5, -10), (2.5, -10), (2.5, -9.5)], room)]
     )
 
-    waypoint_id = simulation.add_waypoint_stage(
+    waypoint = simulation.add_waypoint(
         [(jps.circle_to_polygon(center=(9.5, 0), radius=1), room)]
     )
 
-    exit_journey_id = simulation.add_journey(
-        jps.JourneyDescription(
-            [
-                exit_id,
-            ]
-        )
-    )
+    exit_route = jps.Route([exit])
+    entry_route = jps.Route([waypoint, exit])
 
-    entry_journey_id = simulation.add_journey(
-        jps.JourneyDescription(
-            [
-                waypoint_id,
-            ]
-        )
-    )
+    assert len(simulation.agents_targeting(exit)) == 0
+    assert len(simulation.agents_targeting(waypoint)) == 0
 
-    exit = simulation.get_stage(exit_id)
-    waypoint = simulation.get_stage(waypoint_id)
-
-    assert exit.count_targeting() == 0
-    assert waypoint.count_targeting() == 0
-
-    agent_id = simulation.add_agent(
-        journey_id=exit_journey_id,
-        stage_id=exit_id,
-        position=(-9.5, 0),
+    agent = simulation.add_agent(
+        room.at(-9.5, 0),
+        route=exit_route,
         state=jps.CollisionFreeSpeedModelState(),
-        region_id=room,
     )
 
-    assert exit.count_targeting() == 1
-    assert waypoint.count_targeting() == 0
+    assert len(simulation.agents_targeting(exit)) == 1
+    assert len(simulation.agents_targeting(waypoint)) == 0
 
     simulation.iterate()
 
-    assert exit.count_targeting() == 1
-    assert waypoint.count_targeting() == 0
+    assert len(simulation.agents_targeting(exit)) == 1
+    assert len(simulation.agents_targeting(waypoint)) == 0
 
-    simulation.switch_agent_journey(
-        agent_id=agent_id, journey_id=entry_journey_id, stage_id=waypoint_id
-    )
+    agent.follow(entry_route)
 
-    assert exit.count_targeting() == 0
-    assert waypoint.count_targeting() == 1
+    assert len(simulation.agents_targeting(exit)) == 0
+    assert len(simulation.agents_targeting(waypoint)) == 1
 
     simulation.iterate()
 
-    assert exit.count_targeting() == 0
-    assert waypoint.count_targeting() == 1
+    assert len(simulation.agents_targeting(exit)) == 0
+    assert len(simulation.agents_targeting(waypoint)) == 1
 
 
 @pytest.mark.parametrize(
@@ -145,45 +128,44 @@ def test_can_use_stage_proxy():
 )
 def test_can_add_waypoint(square_room_5x5_with_obstacle, waypoint_position):
     simulation, room = square_room_5x5_with_obstacle
-    waypoint_id = simulation.add_waypoint_stage(
+    waypoint = simulation.add_waypoint(
         [(jps.circle_to_polygon(center=waypoint_position, radius=1), room)]
     )
-    waypoint_stage = simulation.get_stage(waypoint_id)
 
-    assert type(waypoint_stage) is jps.WaypointStage
+    assert type(waypoint) is jps.Waypoint
+
+
+def test_a_waypoint_at_a_numpy_point(square_room_5x5):
+    simulation, room = square_room_5x5
+    waypoint = simulation.add_waypoint(
+        (np.int64(1), np.float32(1.5)), radius=0.5, region=room
+    )
+    assert type(waypoint) is jps.Waypoint
 
 
 def test_a_waypoint_given_by_its_area_is_reached(square_room_5x5):
     sim, room = square_room_5x5
-    waypoint_id = sim.add_waypoint_stage(
+    waypoint = sim.add_waypoint(
         [([(1, -0.5), (2, -0.5), (2, 0.5), (1, 0.5)], room)]
     )
-    exit_id = sim.add_exit_stage(
-        [([(-2.5, -1), (-2, -1), (-2, 1), (-2.5, 1)], room)]
-    )
-    journey = jps.JourneyDescription([waypoint_id, exit_id])
-    journey.set_transition_for_stage(
-        waypoint_id, jps.Transition.create_fixed_transition(exit_id)
-    )
-    agent_id = sim.add_agent(
-        journey_id=sim.add_journey(journey),
-        stage_id=waypoint_id,
-        position=(1.5, 0),
+    exit = sim.add_exit([([(-2.5, -1), (-2, -1), (-2, 1), (-2.5, 1)], room)])
+    agent = sim.add_agent(
+        room.at(1.5, 0),
+        route=jps.Route([waypoint, exit]),
         state=jps.CollisionFreeSpeedModelState(),
-        region_id=room,
     )
     # It starts inside the waypoint, so the first step moves it on to the exit.
     sim.iterate()
-    assert sim.agent(agent_id).stage_id == exit_id
+    assert agent.stage == exit
 
 
 def test_can_not_add_waypoint_outside_geometry(square_room_5x5):
     simulation, room = square_room_5x5
 
     with pytest.raises(
-        jps.SimulationError, match=f"Area does not intersect region {room}"
+        ValueError, match=f"area does not overlap {re.escape(room.label)}"
     ):
-        simulation.add_waypoint_stage(
+        simulation.add_waypoint(
             [(jps.circle_to_polygon(center=(10, 10), radius=1), room)]
         )
 
@@ -192,9 +174,9 @@ def test_can_not_add_exit_completely_outside_geometry(square_room_5x5):
     simulation, room = square_room_5x5
 
     with pytest.raises(
-        jps.SimulationError, match=f"Area does not intersect region {room}"
+        ValueError, match=f"area does not overlap {re.escape(room.label)}"
     ):
-        simulation.add_exit_stage(
+        simulation.add_exit(
             [([(-10, -10), (-8, -10), (-8, -8), (-10, -8)], room)]
         )
 
@@ -208,26 +190,26 @@ def test_can_not_add_exit_completely_outside_geometry(square_room_5x5):
 )
 def test_can_add_exit_partly_outside_geometry(square_room_5x5, polygon):
     sim, room = square_room_5x5
-    sim.add_exit_stage([(polygon, room)])
+    sim.add_exit([(polygon, room)])
 
 
 def test_an_agent_standing_at_the_edge_of_an_exit_leaves():
     # The exit's edge lies off the routing grid.
     surface = jps.WalkableSurface()
-    room = surface.add_region(boundary=[(0, 0), (10, 0), (10, 10), (0, 10)])
+    room = surface.add_region(
+        polygon=shapely.Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
+    )
     simulation = jps.Simulation(
         model=jps.CollisionFreeSpeedModel(), geometry=surface
     )
-    exit_id = simulation.add_exit_stage(
+    exit = simulation.add_exit(
         [([(8.05, 4), (9.5, 4), (9.5, 6), (8.05, 6)], room)]
     )
-    journey_id = simulation.add_journey(jps.JourneyDescription([exit_id]))
+    route = jps.Route([exit])
     simulation.add_agent(
-        journey_id=journey_id,
-        stage_id=exit_id,
-        position=(8.02, 5),
+        room.at(8.02, 5),
+        route=route,
         state=jps.CollisionFreeSpeedModelState(),
-        region_id=room,
     )
     expected_iterations_to_finish = 10
     simulation.iterate(expected_iterations_to_finish)
@@ -236,63 +218,59 @@ def test_an_agent_standing_at_the_edge_of_an_exit_leaves():
     )
 
 
-def test_get_stage_returns_the_native_stage_types(square_room_5x5):
+def test_stages_are_handles_of_their_kind(square_room_5x5):
     sim, room = square_room_5x5
-    waypoint_id = sim.add_waypoint_stage(
+    waypoint = sim.add_waypoint(
         [(jps.circle_to_polygon(center=(0, 0), radius=1), room)]
     )
-    exit_id = sim.add_exit_stage(
-        [([(2, -1), (2.5, -1), (2.5, 1), (2, 1)], room)]
-    )
-    steering_id = sim.add_direct_steering_stage()
+    exit = sim.add_exit([([(2, -1), (2.5, -1), (2.5, 1), (2, 1)], room)])
 
-    waypoint = sim.get_stage(waypoint_id)
-    exit = sim.get_stage(exit_id)
-    steering = sim.get_stage(steering_id)
-
-    assert type(waypoint) is jps.WaypointStage
-    assert type(exit) is jps.ExitStage
-    assert type(steering) is jps.DirectSteeringStage
-    assert jps.WaypointStage.__module__ == "jupedsim.pyjupedsim"
-    assert "Models a waypoint" in jps.WaypointStage.__doc__
-    assert "Models an exit" in jps.ExitStage.__doc__
-    assert "direct control of the target" in jps.DirectSteeringStage.__doc__
-    assert steering.count_targeting() == 0
+    assert type(waypoint) is jps.Waypoint
+    assert type(exit) is jps.Exit
+    assert jps.Waypoint.__module__ == "jupedsim.stages"
+    assert len(sim.agents_targeting(waypoint)) == 0
+    assert len(sim.agents_targeting(exit)) == 0
 
 
 def test_a_stage_keeps_its_simulation_alive():
     surface = jps.WalkableSurface()
     room = surface.add_region(
-        boundary=[(-2.5, -2.5), (2.5, -2.5), (2.5, 2.5), (-2.5, 2.5)]
+        polygon=shapely.Polygon(
+            [(-2.5, -2.5), (2.5, -2.5), (2.5, 2.5), (-2.5, 2.5)]
+        )
     )
     sim = jps.Simulation(model=jps.CollisionFreeSpeedModel(), geometry=surface)
-    stage = sim.get_stage(
-        sim.add_waypoint_stage(
-            [(jps.circle_to_polygon(center=(0, 0), radius=1), room)]
-        )
+    stage = sim.add_waypoint(
+        [(jps.circle_to_polygon(center=(0, 0), radius=1), room)]
     )
     native = weakref.ref(sim._obj)
     del sim
     gc.collect()
     assert native() is not None
-    assert stage.count_targeting() == 0
+    assert len(stage._simulation.agents_targeting(stage)) == 0
 
 
-@pytest.mark.parametrize("bad_id", [-1, 1.5, "3", 2**64])
-def test_get_stage_rejects_ids_of_the_wrong_type(square_room_5x5, bad_id):
+@pytest.mark.parametrize("bad_id", [-1, 2**64])
+def test_stage_lookup_rejects_unknown_ids(square_room_5x5, bad_id):
     sim, _ = square_room_5x5
-    with pytest.raises(TypeError):
-        sim.get_stage(bad_id)
+    with pytest.raises(KeyError):
+        sim.stage(id=bad_id)
+
+
+@pytest.mark.parametrize("bad_id", [1.5, "3", True, 1.0])
+def test_stage_lookup_rejects_ids_that_are_not_ints(square_room_5x5, bad_id):
+    sim, _ = square_room_5x5
+    with pytest.raises(TypeError, match="id must be an int"):
+        sim.stage(id=bad_id)
 
 
 def test_travel_times_to_an_exit(square_room_5x5):
     sim, room = square_room_5x5
-    exit_id = sim.add_exit_stage(
+    exit = sim.add_exit(
         [([(-2.5, -2.5), (-2, -2.5), (-2, 2.5), (-2.5, 2.5)], room)]
     )
 
-    grid = sim.travel_times(exit_id)[room]
-
+    grid = sim.travel_times(exit)[room]
     assert grid.values.shape == (grid.height, grid.width)
     x_min, x_max, y_min, y_max = grid.extent
     assert (x_min, y_min) == grid.origin
@@ -322,42 +300,38 @@ def test_travel_times_to_an_exit(square_room_5x5):
 def test_travel_times_follow_the_floorfield_options():
     surface = jps.WalkableSurface()
     room = surface.add_region(
-        boundary=[(-2.5, -2.5), (2.5, -2.5), (2.5, 2.5), (-2.5, 2.5)]
+        polygon=shapely.Polygon(
+            [(-2.5, -2.5), (2.5, -2.5), (2.5, 2.5), (-2.5, 2.5)]
+        )
     )
     sim = jps.Simulation(
         model=jps.CollisionFreeSpeedModel(),
         geometry=surface,
         floorfield_options=jps.FloorfieldOptions(cell_size=0.1),
     )
-    exit_id = sim.add_exit_stage(
+    exit = sim.add_exit(
         [([(-2.5, -2.5), (-2, -2.5), (-2, 2.5), (-2.5, 2.5)], room)]
     )
-    assert sim.travel_times(exit_id)[room].cell_size == 0.1
+    assert sim.travel_times(exit)[room].cell_size == 0.1
 
 
 def test_travel_times_of_every_region(square_room_5x5):
     sim, room = square_room_5x5
-    exit_id = sim.add_exit_stage(
+    exit = sim.add_exit(
         [([(-2.5, -2.5), (-2, -2.5), (-2, 2.5), (-2.5, 2.5)], room)]
     )
 
-    grids = sim.travel_times(exit_id)
+    grids = sim.travel_times(exit)
 
     assert list(grids) == [room]
     assert isinstance(grids[room], jps.TravelTimeGrid)
 
 
-def test_a_direct_steering_stage_has_no_travel_times(square_room_5x5):
-    sim, room = square_room_5x5
-    steering_id = sim.add_direct_steering_stage()
-    assert sim.travel_times(steering_id) == {}
-
-
-def test_stage_ids(square_room_5x5):
+def test_stages_are_listed_in_creation_order(square_room_5x5):
     sim, room = square_room_5x5
     area = [(-2.5, -2.5), (-2, -2.5), (-2, 2.5), (-2.5, 2.5)]
-    exit_id = sim.add_exit_stage([(area, room)])
-    steering_id = sim.add_direct_steering_stage()
-    waypoint_id = sim.add_waypoint_stage([(area, room)])
+    exit = sim.add_exit([(area, room)])
+    waypoint = sim.add_waypoint([(area, room)])
 
-    assert sim.stage_ids() == [exit_id, steering_id, waypoint_id]
+    assert sim.stages == (exit, waypoint)
+    assert [stage.id for stage in sim.stages] == sorted([exit.id, waypoint.id])

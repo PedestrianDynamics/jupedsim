@@ -94,9 +94,9 @@ def _make_sim(model):
     surface = jps.WalkableSurface()
     room = surface.add_region(polygon=_corridor())
     sim = jps.Simulation(model=model, geometry=surface, dt=0.01)
-    exit_id = sim.add_exit_stage([([(29, 3), (29, 5), (30, 5), (30, 3)], room)])
-    journey_id = sim.add_journey(jps.JourneyDescription([exit_id]))
-    return sim, exit_id, journey_id, room
+    exit = sim.add_exit([([(29, 3), (29, 5), (30, 5), (30, 3)], room)])
+    route = jps.Route([exit])
+    return sim, exit, route, room
 
 
 def _social_force_agent():
@@ -113,24 +113,16 @@ def _collision_free_agent():
     )
 
 
-def _add(sim, room, journey_id, stage_id, position, state):
+def _add(sim, room, route, stage, position, state):
     return sim.add_agent(
-        journey_id=journey_id,
-        stage_id=stage_id,
-        position=position,
-        state=state,
-        region_id=room,
-    )
+        room.at(*position), route=route, start=stage, state=state
+    ).id
 
 
 def test_both_models_advance_in_one_simulation():
-    sim, exit_id, journey_id, room = _make_sim(MultiModel())
-    left = _add(
-        sim, room, journey_id, exit_id, (2.0, 3.0), _social_force_agent()
-    )
-    right = _add(
-        sim, room, journey_id, exit_id, (2.0, 5.0), _collision_free_agent()
-    )
+    sim, exit, route, room = _make_sim(MultiModel())
+    left = _add(sim, room, route, exit, (2.0, 3.0), _social_force_agent())
+    right = _add(sim, room, route, exit, (2.0, 5.0), _collision_free_agent())
 
     start = (sim.agent(left).position, sim.agent(right).position)
     for _ in range(200):
@@ -142,13 +134,9 @@ def test_both_models_advance_in_one_simulation():
 
 
 def test_each_agent_keeps_its_own_state_type():
-    sim, exit_id, journey_id, room = _make_sim(MultiModel())
-    left = _add(
-        sim, room, journey_id, exit_id, (2.0, 3.0), _social_force_agent()
-    )
-    right = _add(
-        sim, room, journey_id, exit_id, (2.0, 5.0), _collision_free_agent()
-    )
+    sim, exit, route, room = _make_sim(MultiModel())
+    left = _add(sim, room, route, exit, (2.0, 3.0), _social_force_agent())
+    right = _add(sim, room, route, exit, (2.0, 5.0), _collision_free_agent())
 
     for _ in range(10):
         sim.iterate()
@@ -161,20 +149,18 @@ def test_each_agent_keeps_its_own_state_type():
 
 def test_the_models_see_each_other():
     """A collision free agent must react to a social force agent in its way."""
-    sim, exit_id, journey_id, room = _make_sim(MultiModel())
-    blocked = _add(
-        sim, room, journey_id, exit_id, (2.0, 4.0), _collision_free_agent()
-    )
-    _add(sim, room, journey_id, exit_id, (2.6, 4.0), _social_force_agent())
+    sim, exit, route, room = _make_sim(MultiModel())
+    blocked = _add(sim, room, route, exit, (2.0, 4.0), _collision_free_agent())
+    _add(sim, room, route, exit, (2.6, 4.0), _social_force_agent())
     for _ in range(50):
         sim.iterate()
     with_neighbor = sim.agent(blocked).position
 
-    free_sim, free_exit, free_journey, free_room = _make_sim(MultiModel())
+    free_sim, free_exit, free_route, free_room = _make_sim(MultiModel())
     alone = _add(
         free_sim,
         free_room,
-        free_journey,
+        free_route,
         free_exit,
         (2.0, 4.0),
         _collision_free_agent(),
@@ -199,9 +185,9 @@ def test_an_unmapped_neighbor_is_reported():
             )
             return replace(state, sub=sub), movement
 
-    sim, exit_id, journey_id, room = _make_sim(_Forgetful())
-    _add(sim, room, journey_id, exit_id, (2.0, 4.0), _collision_free_agent())
-    _add(sim, room, journey_id, exit_id, (2.6, 4.0), _social_force_agent())
+    sim, exit, route, room = _make_sim(_Forgetful())
+    _add(sim, room, route, exit, (2.0, 4.0), _collision_free_agent())
+    _add(sim, room, route, exit, (2.6, 4.0), _social_force_agent())
 
     with pytest.raises(
         jps.SimulationError, match="with_neighbor_state_mapping"

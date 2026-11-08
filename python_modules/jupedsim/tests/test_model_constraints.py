@@ -4,48 +4,43 @@ import dataclasses
 import jupedsim as jps
 import numpy as np
 import pytest
+import shapely
 
 
 @pytest.fixture
 def square_room_100x100_cfsm():
     surface = jps.WalkableSurface()
     room = surface.add_region(
-        boundary=[(-50, -50), (50, -50), (50, 50), (-50, 50)]
+        polygon=shapely.Polygon([(-50, -50), (50, -50), (50, 50), (-50, 50)])
     )
     simulation = jps.Simulation(
         model=jps.CollisionFreeSpeedModel(), geometry=surface
     )
 
-    exit_id = simulation.add_exit_stage(
-        [([(49, -3), (49, 3), (50, 3), (50, -3)], room)]
-    )
+    exit = simulation.add_exit([([(49, -3), (49, 3), (50, 3), (50, -3)], room)])
 
-    journey = jps.JourneyDescription([exit_id])
-    journey_id = simulation.add_journey(journey)
+    route = jps.Route([exit])
     agent_position = (0, 0)
 
-    return simulation, journey_id, exit_id, agent_position, room
+    return simulation, route, exit, agent_position, room
 
 
 @pytest.fixture
 def square_room_100x100_gcfm():
     surface = jps.WalkableSurface()
     room = surface.add_region(
-        boundary=[(-50, -50), (50, -50), (50, 50), (-50, 50)]
+        polygon=shapely.Polygon([(-50, -50), (50, -50), (50, 50), (-50, 50)])
     )
     simulation = jps.Simulation(
         model=jps.GeneralizedCentrifugalForceModel(), geometry=surface
     )
 
-    exit_id = simulation.add_exit_stage(
-        [([(49, -3), (49, 3), (50, 3), (50, -3)], room)]
-    )
+    exit = simulation.add_exit([([(49, -3), (49, 3), (50, 3), (50, -3)], room)])
 
-    journey = jps.JourneyDescription([exit_id])
-    journey_id = simulation.add_journey(journey)
+    route = jps.Route([exit])
     agent_position = (0, 0)
 
-    return simulation, journey_id, exit_id, agent_position, room
+    return simulation, route, exit, agent_position, room
 
 
 @pytest.mark.parametrize(
@@ -55,73 +50,57 @@ def square_room_100x100_gcfm():
 def test_collision_free_speed_model_can_set_radius(
     square_room_100x100_cfsm, radius
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_cfsm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_cfsm
 
     simulation.add_agent(
-        journey_id=journey_id,
-        stage_id=exit_id,
-        position=agent_position,
+        room.at(*agent_position),
+        route=route,
         state=jps.CollisionFreeSpeedModelState(radius=radius),
-        region_id=room,
     )
 
 
 def test_collision_free_speed_model_can_not_set_radius_too_small(
     square_room_100x100_cfsm,
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_cfsm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_cfsm
 
     with pytest.raises(
         jps.SimulationError, match=r"Model constraint violation: radius -1 .*"
     ):
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=agent_position,
+            room.at(*agent_position),
+            route=route,
             state=jps.CollisionFreeSpeedModelState(radius=-1),
-            region_id=room,
         )
 
 
 def test_collision_free_speed_model_can_not_set_radius_zero(
     square_room_100x100_cfsm,
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_cfsm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_cfsm
 
     with pytest.raises(
         jps.SimulationError, match=r"Model constraint violation: radius 0 .*"
     ):
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=agent_position,
+            room.at(*agent_position),
+            route=route,
             state=jps.CollisionFreeSpeedModelState(radius=0),
-            region_id=room,
         )
 
 
 def test_collision_free_speed_model_can_not_set_radius_too_large(
     square_room_100x100_cfsm,
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_cfsm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_cfsm
 
     with pytest.raises(
         jps.SimulationError, match=r"Model constraint violation: radius 2.1 .*"
     ):
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=agent_position,
+            room.at(*agent_position),
+            route=route,
             state=jps.CollisionFreeSpeedModelState(radius=2.1),
-            region_id=room,
         )
 
 
@@ -129,54 +108,42 @@ def test_collision_free_speed_model_can_not_set_radius_too_large(
 def test_collision_free_speed_model_can_set_desired_speed(
     square_room_100x100_cfsm, desired_speed
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_cfsm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_cfsm
 
     simulation.add_agent(
-        journey_id=journey_id,
-        stage_id=exit_id,
-        position=agent_position,
+        room.at(*agent_position),
+        route=route,
         state=jps.CollisionFreeSpeedModelState(desired_speed=desired_speed),
-        region_id=room,
     )
 
 
 def test_collision_free_speed_model_can_not_set_desired_speed_too_small(
     square_room_100x100_cfsm,
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_cfsm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_cfsm
 
     with pytest.raises(
         jps.SimulationError, match=r"Model constraint violation: v0 -1 .*"
     ):
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=agent_position,
+            room.at(*agent_position),
+            route=route,
             state=jps.CollisionFreeSpeedModelState(desired_speed=-1),
-            region_id=room,
         )
 
 
 def test_collision_free_speed_model_can_not_set_desired_speed_too_large(
     square_room_100x100_cfsm,
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_cfsm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_cfsm
 
     with pytest.raises(
         jps.SimulationError, match=r"Model constraint violation: v0 10.1 .*"
     ):
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=agent_position,
+            room.at(*agent_position),
+            route=route,
             state=jps.CollisionFreeSpeedModelState(desired_speed=10.1),
-            region_id=room,
         )
 
 
@@ -184,55 +151,43 @@ def test_collision_free_speed_model_can_not_set_desired_speed_too_large(
 def test_collision_free_speed_model_can_set_time_gap(
     square_room_100x100_cfsm, time_gap
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_cfsm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_cfsm
 
     simulation.add_agent(
-        journey_id=journey_id,
-        stage_id=exit_id,
-        position=agent_position,
+        room.at(*agent_position),
+        route=route,
         state=jps.CollisionFreeSpeedModelState(time_gap=time_gap),
-        region_id=room,
     )
 
 
 def test_collision_free_speed_model_can_not_set_time_gap_too_small(
     square_room_100x100_cfsm,
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_cfsm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_cfsm
 
     with pytest.raises(
         jps.SimulationError, match=r"Model constraint violation: timeGap -1 .*"
     ):
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=agent_position,
+            room.at(*agent_position),
+            route=route,
             state=jps.CollisionFreeSpeedModelState(time_gap=-1),
-            region_id=room,
         )
 
 
 def test_collision_free_speed_model_can_not_set_time_too_large(
     square_room_100x100_cfsm,
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_cfsm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_cfsm
 
     with pytest.raises(
         jps.SimulationError,
         match=r"Model constraint violation: timeGap 10.1 .*",
     ):
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=agent_position,
+            room.at(*agent_position),
+            route=route,
             state=jps.CollisionFreeSpeedModelState(time_gap=10.1),
-            region_id=room,
         )
 
 
@@ -241,20 +196,16 @@ def test_collision_free_speed_model_can_not_add_agent_too_close_to_wall(
     square_room_100x100_cfsm,
     radius,
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_cfsm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_cfsm
 
     with pytest.raises(
         jps.SimulationError,
         match=r"Model constraint violation: Agent (.+) too close to geometry boundaries, distance .*",
     ):
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=(50 - (0.99 * radius), 0),
+            room.at(50 - (0.99 * radius), 0),
+            route=route,
             state=jps.CollisionFreeSpeedModelState(radius=radius),
-            region_id=room,
         )
 
 
@@ -262,58 +213,46 @@ def test_collision_free_speed_model_can_not_add_agent_too_close_to_wall(
 def test_generalized_centrifugal_force_model_can_set_mass(
     square_room_100x100_gcfm, mass
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_gcfm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_gcfm
 
     simulation.add_agent(
-        journey_id=journey_id,
-        stage_id=exit_id,
-        position=agent_position,
+        room.at(*agent_position),
+        route=route,
         state=jps.GeneralizedCentrifugalForceModelState(
             orientation=(1.0, 0.0), mass=mass
         ),
-        region_id=room,
     )
 
 
 def test_generalized_centrifugal_force_model_can_not_set_mass_too_small(
     square_room_100x100_gcfm,
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_gcfm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_gcfm
     with pytest.raises(
         jps.SimulationError, match=r"Model constraint violation: mass 0 .*"
     ):
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=agent_position,
+            room.at(*agent_position),
+            route=route,
             state=jps.GeneralizedCentrifugalForceModelState(
                 orientation=(1.0, 0.0), mass=0
             ),
-            region_id=room,
         )
 
 
 def test_generalized_centrifugal_force_model_can_not_set_mass_too_large(
     square_room_100x100_gcfm,
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_gcfm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_gcfm
     with pytest.raises(
         jps.SimulationError, match=r"Model constraint violation: mass 100.1 .*"
     ):
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=agent_position,
+            room.at(*agent_position),
+            route=route,
             state=jps.GeneralizedCentrifugalForceModelState(
                 orientation=(1.0, 0.0), mass=100.1
             ),
-            region_id=room,
         )
 
 
@@ -321,58 +260,46 @@ def test_generalized_centrifugal_force_model_can_not_set_mass_too_large(
 def test_generalized_centrifugal_force_model_can_set_tau(
     square_room_100x100_gcfm, tau
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_gcfm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_gcfm
 
     simulation.add_agent(
-        journey_id=journey_id,
-        stage_id=exit_id,
-        position=agent_position,
+        room.at(*agent_position),
+        route=route,
         state=jps.GeneralizedCentrifugalForceModelState(
             orientation=(1.0, 0.0), tau=tau
         ),
-        region_id=room,
     )
 
 
 def test_generalized_centrifugal_force_model_can_not_set_tau_too_small(
     square_room_100x100_gcfm,
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_gcfm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_gcfm
     with pytest.raises(
         jps.SimulationError, match=r"Model constraint violation: tau 0 .*"
     ):
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=agent_position,
+            room.at(*agent_position),
+            route=route,
             state=jps.GeneralizedCentrifugalForceModelState(
                 orientation=(1.0, 0.0), tau=0
             ),
-            region_id=room,
         )
 
 
 def test_generalized_centrifugal_force_model_can_not_set_tau_too_large(
     square_room_100x100_gcfm,
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_gcfm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_gcfm
     with pytest.raises(
         jps.SimulationError, match=r"Model constraint violation: tau 10.1 .*"
     ):
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=agent_position,
+            room.at(*agent_position),
+            route=route,
             state=jps.GeneralizedCentrifugalForceModelState(
                 orientation=(1.0, 0.0), tau=10.1
             ),
-            region_id=room,
         )
 
 
@@ -380,58 +307,46 @@ def test_generalized_centrifugal_force_model_can_not_set_tau_too_large(
 def test_generalized_centrifugal_force_model_can_set_desired_speed(
     square_room_100x100_gcfm, desired_speed
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_gcfm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_gcfm
 
     simulation.add_agent(
-        journey_id=journey_id,
-        stage_id=exit_id,
-        position=agent_position,
+        room.at(*agent_position),
+        route=route,
         state=jps.GeneralizedCentrifugalForceModelState(
             orientation=(1.0, 0.0), desired_speed=desired_speed
         ),
-        region_id=room,
     )
 
 
 def test_generalized_centrifugal_force_model_can_not_set_desired_speed_too_small(
     square_room_100x100_gcfm,
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_gcfm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_gcfm
     with pytest.raises(
         jps.SimulationError, match=r"Model constraint violation: v0 -0.1 .*"
     ):
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=agent_position,
+            room.at(*agent_position),
+            route=route,
             state=jps.GeneralizedCentrifugalForceModelState(
                 orientation=(1.0, 0.0), desired_speed=-0.1
             ),
-            region_id=room,
         )
 
 
 def test_generalized_centrifugal_force_model_can_not_set_desired_speed_too_large(
     square_room_100x100_gcfm,
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_gcfm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_gcfm
     with pytest.raises(
         jps.SimulationError, match=r"Model constraint violation: v0 10.1 .*"
     ):
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=agent_position,
+            room.at(*agent_position),
+            route=route,
             state=jps.GeneralizedCentrifugalForceModelState(
                 orientation=(1.0, 0.0), desired_speed=10.1
             ),
-            region_id=room,
         )
 
 
@@ -439,58 +354,46 @@ def test_generalized_centrifugal_force_model_can_not_set_desired_speed_too_large
 def test_generalized_centrifugal_force_model_can_set_a_v(
     square_room_100x100_gcfm, a_v
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_gcfm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_gcfm
 
     simulation.add_agent(
-        journey_id=journey_id,
-        stage_id=exit_id,
-        position=agent_position,
+        room.at(*agent_position),
+        route=route,
         state=jps.GeneralizedCentrifugalForceModelState(
             orientation=(1.0, 0.0), a_v=a_v
         ),
-        region_id=room,
     )
 
 
 def test_generalized_centrifugal_force_model_can_not_set_a_v_too_small(
     square_room_100x100_gcfm,
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_gcfm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_gcfm
     with pytest.raises(
         jps.SimulationError, match=r"Model constraint violation: Av -0.1 .*"
     ):
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=agent_position,
+            room.at(*agent_position),
+            route=route,
             state=jps.GeneralizedCentrifugalForceModelState(
                 orientation=(1.0, 0.0), a_v=-0.1
             ),
-            region_id=room,
         )
 
 
 def test_generalized_centrifugal_force_model_can_not_set_a_v_too_large(
     square_room_100x100_gcfm,
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_gcfm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_gcfm
     with pytest.raises(
         jps.SimulationError, match=r"Model constraint violation: Av 10.1 .*"
     ):
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=agent_position,
+            room.at(*agent_position),
+            route=route,
             state=jps.GeneralizedCentrifugalForceModelState(
                 orientation=(1.0, 0.0), a_v=10.1
             ),
-            region_id=room,
         )
 
 
@@ -498,59 +401,47 @@ def test_generalized_centrifugal_force_model_can_not_set_a_v_too_large(
 def test_generalized_centrifugal_force_model_can_set_a_min(
     square_room_100x100_gcfm, a_min
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_gcfm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_gcfm
 
     simulation.add_agent(
-        journey_id=journey_id,
-        stage_id=exit_id,
-        position=agent_position,
+        room.at(*agent_position),
+        route=route,
         state=jps.GeneralizedCentrifugalForceModelState(
             orientation=(1.0, 0.0), a_min=a_min
         ),
-        region_id=room,
     )
 
 
 def test_generalized_centrifugal_force_model_can_not_set_a_min_too_small(
     square_room_100x100_gcfm,
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_gcfm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_gcfm
     with pytest.raises(
         jps.SimulationError,
         match=r"Model constraint violation: AMin 0.099 .*",
     ):
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=agent_position,
+            room.at(*agent_position),
+            route=route,
             state=jps.GeneralizedCentrifugalForceModelState(
                 orientation=(1.0, 0.0), a_min=0.099
             ),
-            region_id=room,
         )
 
 
 def test_generalized_centrifugal_force_model_can_not_set_a_min_too_large(
     square_room_100x100_gcfm,
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_gcfm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_gcfm
     with pytest.raises(
         jps.SimulationError, match=r"Model constraint violation: AMin 1.1 .*"
     ):
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=agent_position,
+            room.at(*agent_position),
+            route=route,
             state=jps.GeneralizedCentrifugalForceModelState(
                 orientation=(1.0, 0.0), a_min=1.1
             ),
-            region_id=room,
         )
 
 
@@ -558,59 +449,47 @@ def test_generalized_centrifugal_force_model_can_not_set_a_min_too_large(
 def test_generalized_centrifugal_force_model_can_set_b_min(
     square_room_100x100_gcfm, b_min
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_gcfm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_gcfm
 
     simulation.add_agent(
-        journey_id=journey_id,
-        stage_id=exit_id,
-        position=agent_position,
+        room.at(*agent_position),
+        route=route,
         state=jps.GeneralizedCentrifugalForceModelState(
             orientation=(1.0, 0.0), b_min=b_min, b_max=b_min
         ),
-        region_id=room,
     )
 
 
 def test_generalized_centrifugal_force_model_can_not_set_b_min_too_small(
     square_room_100x100_gcfm,
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_gcfm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_gcfm
     with pytest.raises(
         jps.SimulationError,
         match=r"Model constraint violation: BMin 0.099 .*",
     ):
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=agent_position,
+            room.at(*agent_position),
+            route=route,
             state=jps.GeneralizedCentrifugalForceModelState(
                 orientation=(1.0, 0.0), b_min=0.099
             ),
-            region_id=room,
         )
 
 
 def test_generalized_centrifugal_force_model_can_not_set_b_min_too_large(
     square_room_100x100_gcfm,
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_gcfm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_gcfm
     with pytest.raises(
         jps.SimulationError, match=r"Model constraint violation: BMin 1.1 .*"
     ):
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=agent_position,
+            room.at(*agent_position),
+            route=route,
             state=jps.GeneralizedCentrifugalForceModelState(
                 orientation=(1.0, 0.0), b_min=1.1
             ),
-            region_id=room,
         )
 
 
@@ -618,58 +497,46 @@ def test_generalized_centrifugal_force_model_can_not_set_b_min_too_large(
 def test_generalized_centrifugal_force_model_can_set_b_max(
     square_room_100x100_gcfm, b_max
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_gcfm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_gcfm
 
     simulation.add_agent(
-        journey_id=journey_id,
-        stage_id=exit_id,
-        position=agent_position,
+        room.at(*agent_position),
+        route=route,
         state=jps.GeneralizedCentrifugalForceModelState(
             orientation=(1.0, 0.0), b_max=b_max
         ),
-        region_id=room,
     )
 
 
 def test_generalized_centrifugal_force_model_can_not_set_b_max_too_small(
     square_room_100x100_gcfm,
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_gcfm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_gcfm
     with pytest.raises(
         jps.SimulationError, match=r"Model constraint violation: BMax 0.39 .*"
     ):
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=agent_position,
+            room.at(*agent_position),
+            route=route,
             state=jps.GeneralizedCentrifugalForceModelState(
                 orientation=(1.0, 0.0), b_min=0.4, b_max=0.39
             ),
-            region_id=room,
         )
 
 
 def test_generalized_centrifugal_force_model_can_not_set_b_max_too_large(
     square_room_100x100_gcfm,
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_gcfm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_gcfm
     with pytest.raises(
         jps.SimulationError, match=r"Model constraint violation: BMax 2.1 .*"
     ):
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=agent_position,
+            room.at(*agent_position),
+            route=route,
             state=jps.GeneralizedCentrifugalForceModelState(
                 orientation=(1.0, 0.0), b_max=2.1
             ),
-            region_id=room,
         )
 
 
@@ -678,9 +545,7 @@ def test_generalized_centrifugal_force_model_can_not_add_agent_too_close_to_wall
     square_room_100x100_gcfm,
     b_max,
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_gcfm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_gcfm
     a_min = 0.2
     margin = 0.5 * max(a_min, b_max)
     with pytest.raises(
@@ -688,13 +553,11 @@ def test_generalized_centrifugal_force_model_can_not_add_agent_too_close_to_wall
         match=r"Model constraint violation: Agent (.+) too close to geometry boundaries, distance < \d+\.?\d*",
     ):
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=(-50 + 0.99 * margin, 10),
+            room.at(-50 + 0.99 * margin, 10),
+            route=route,
             state=jps.GeneralizedCentrifugalForceModelState(
                 orientation=(1.0, 0.0), a_min=a_min, b_max=b_max
             ),
-            region_id=room,
         )
 
 
@@ -708,19 +571,15 @@ def test_generalized_centrifugal_force_model_can_add_agent_just_outside_the_marg
     Together with the test above this pins the margin from both sides, with
     neither of them standing on it.
     """
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_gcfm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_gcfm
     a_min = 0.2
     margin = 0.5 * max(a_min, b_max)
     simulation.add_agent(
-        journey_id=journey_id,
-        stage_id=exit_id,
-        position=(-50 + 1.01 * margin, 10),
+        room.at(-50 + 1.01 * margin, 10),
+        route=route,
         state=jps.GeneralizedCentrifugalForceModelState(
             orientation=(1.0, 0.0), a_min=a_min, b_max=b_max
         ),
-        region_id=room,
     )
 
 
@@ -728,81 +587,66 @@ def test_generalized_centrifugal_force_model_can_add_agent_just_outside_the_marg
 def square_room_100x100_avm():
     surface = jps.WalkableSurface()
     room = surface.add_region(
-        boundary=[(-50, -50), (50, -50), (50, 50), (-50, 50)]
+        polygon=shapely.Polygon([(-50, -50), (50, -50), (50, 50), (-50, 50)])
     )
     simulation = jps.Simulation(
         model=jps.AnticipationVelocityModel(rng_seed=1234), geometry=surface
     )
 
-    exit_id = simulation.add_exit_stage(
-        [([(49, -3), (49, 3), (50, 3), (50, -3)], room)]
-    )
+    exit = simulation.add_exit([([(49, -3), (49, 3), (50, 3), (50, -3)], room)])
 
-    journey = jps.JourneyDescription([exit_id])
-    journey_id = simulation.add_journey(journey)
+    route = jps.Route([exit])
     agent_position = (0, 0)
 
-    return simulation, journey_id, exit_id, agent_position, room
+    return simulation, route, exit, agent_position, room
 
 
 @pytest.mark.parametrize("strength", [*np.arange(0.1, 10, 1)])
 def test_anticipation_velocity_model_can_set_strength_neighbor_repulsion(
     square_room_100x100_avm, strength
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_avm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_avm
 
     simulation.add_agent(
-        journey_id=journey_id,
-        stage_id=exit_id,
-        position=agent_position,
+        room.at(*agent_position),
+        route=route,
         state=jps.AnticipationVelocityModelState(
             strength_neighbor_repulsion=strength
         ),
-        region_id=room,
     )
 
 
 def test_anticipation_velocity_model_can_not_set_strength_neighbor_repulsion_too_small(
     square_room_100x100_avm,
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_avm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_avm
     with pytest.raises(
         jps.SimulationError,
         match=r"Model constraint violation: strengthNeighborRepulsion -0.1 .*",
     ):
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=agent_position,
+            room.at(*agent_position),
+            route=route,
             state=jps.AnticipationVelocityModelState(
                 strength_neighbor_repulsion=-0.1
             ),
-            region_id=room,
         )
 
 
 def test_anticipation_velocity_model_can_not_set_strength_neighbor_repulsion_too_large(
     square_room_100x100_avm,
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_avm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_avm
     with pytest.raises(
         jps.SimulationError,
         match=r"Model constraint violation: strengthNeighborRepulsion 20.1 .*",
     ):
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=agent_position,
+            room.at(*agent_position),
+            route=route,
             state=jps.AnticipationVelocityModelState(
                 strength_neighbor_repulsion=20.1
             ),
-            region_id=room,
         )
 
 
@@ -810,60 +654,48 @@ def test_anticipation_velocity_model_can_not_set_strength_neighbor_repulsion_too
 def test_anticipation_velocity_model_can_set_range_neighbor_repulsion(
     square_room_100x100_avm, range_repulsion
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_avm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_avm
 
     simulation.add_agent(
-        journey_id=journey_id,
-        stage_id=exit_id,
-        position=agent_position,
+        room.at(*agent_position),
+        route=route,
         state=jps.AnticipationVelocityModelState(
             range_neighbor_repulsion=range_repulsion
         ),
-        region_id=room,
     )
 
 
 def test_anticipation_velocity_model_can_not_set_range_neighbor_repulsion_too_small(
     square_room_100x100_avm,
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_avm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_avm
     with pytest.raises(
         jps.SimulationError,
         match=r"Model constraint violation: rangeNeighborRepulsion 0 .*",
     ):
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=agent_position,
+            room.at(*agent_position),
+            route=route,
             state=jps.AnticipationVelocityModelState(
                 range_neighbor_repulsion=0
             ),
-            region_id=room,
         )
 
 
 def test_anticipation_velocity_model_can_not_set_range_neighbor_repulsion_too_large(
     square_room_100x100_avm,
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_avm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_avm
     with pytest.raises(
         jps.SimulationError,
         match=r"Model constraint violation: rangeNeighborRepulsion 5.1 .*",
     ):
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=agent_position,
+            room.at(*agent_position),
+            route=route,
             state=jps.AnticipationVelocityModelState(
                 range_neighbor_repulsion=5.1
             ),
-            region_id=room,
         )
 
 
@@ -871,56 +703,44 @@ def test_anticipation_velocity_model_can_not_set_range_neighbor_repulsion_too_la
 def test_anticipation_velocity_model_can_set_wall_buffer_distance(
     square_room_100x100_avm, wall_buffer
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_avm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_avm
 
     simulation.add_agent(
-        journey_id=journey_id,
-        stage_id=exit_id,
-        position=agent_position,
+        room.at(*agent_position),
+        route=route,
         state=jps.AnticipationVelocityModelState(
             wall_buffer_distance=wall_buffer
         ),
-        region_id=room,
     )
 
 
 def test_anticipation_velocity_model_can_not_set_wall_buffer_distance_too_small(
     square_room_100x100_avm,
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_avm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_avm
     with pytest.raises(
         jps.SimulationError,
         match=r"Model constraint violation: wallBufferDistance -0.1 .*",
     ):
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=agent_position,
+            room.at(*agent_position),
+            route=route,
             state=jps.AnticipationVelocityModelState(wall_buffer_distance=-0.1),
-            region_id=room,
         )
 
 
 def test_anticipation_velocity_model_can_not_set_wall_buffer_distance_too_large(
     square_room_100x100_avm,
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_avm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_avm
     with pytest.raises(
         jps.SimulationError,
         match=r"Model constraint violation: wallBufferDistance 2.1 .*",
     ):
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=agent_position,
+            room.at(*agent_position),
+            route=route,
             state=jps.AnticipationVelocityModelState(wall_buffer_distance=2.1),
-            region_id=room,
         )
 
 
@@ -928,56 +748,44 @@ def test_anticipation_velocity_model_can_not_set_wall_buffer_distance_too_large(
 def test_anticipation_velocity_model_can_set_anticipation_time(
     square_room_100x100_avm, anticipation_time
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_avm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_avm
 
     simulation.add_agent(
-        journey_id=journey_id,
-        stage_id=exit_id,
-        position=agent_position,
+        room.at(*agent_position),
+        route=route,
         state=jps.AnticipationVelocityModelState(
             anticipation_time=anticipation_time
         ),
-        region_id=room,
     )
 
 
 def test_anticipation_velocity_model_can_not_set_anticipation_time_too_small(
     square_room_100x100_avm,
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_avm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_avm
     with pytest.raises(
         jps.SimulationError,
         match=r"Model constraint violation: anticipationTime -0.1 .*",
     ):
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=agent_position,
+            room.at(*agent_position),
+            route=route,
             state=jps.AnticipationVelocityModelState(anticipation_time=-0.1),
-            region_id=room,
         )
 
 
 def test_anticipation_velocity_model_can_not_set_anticipation_time_too_large(
     square_room_100x100_avm,
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_avm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_avm
     with pytest.raises(
         jps.SimulationError,
         match=r"Model constraint violation: anticipationTime 5.1 .*",
     ):
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=agent_position,
+            room.at(*agent_position),
+            route=route,
             state=jps.AnticipationVelocityModelState(anticipation_time=5.1),
-            region_id=room,
         )
 
 
@@ -985,54 +793,42 @@ def test_anticipation_velocity_model_can_not_set_anticipation_time_too_large(
 def test_anticipation_velocity_model_can_set_reaction_time(
     square_room_100x100_avm, reaction_time
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_avm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_avm
 
     simulation.add_agent(
-        journey_id=journey_id,
-        stage_id=exit_id,
-        position=agent_position,
+        room.at(*agent_position),
+        route=route,
         state=jps.AnticipationVelocityModelState(reaction_time=reaction_time),
-        region_id=room,
     )
 
 
 def test_anticipation_velocity_model_can_not_set_reaction_time_too_small(
     square_room_100x100_avm,
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_avm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_avm
     with pytest.raises(
         jps.SimulationError,
         match=r"Model constraint violation: reactionTime 0 .*",
     ):
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=agent_position,
+            room.at(*agent_position),
+            route=route,
             state=jps.AnticipationVelocityModelState(reaction_time=0),
-            region_id=room,
         )
 
 
 def test_anticipation_velocity_model_can_not_set_reaction_time_too_large(
     square_room_100x100_avm,
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_avm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_avm
     with pytest.raises(
         jps.SimulationError,
         match=r"Model constraint violation: reactionTime 2.1 .*",
     ):
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=agent_position,
+            room.at(*agent_position),
+            route=route,
             state=jps.AnticipationVelocityModelState(reaction_time=2.1),
-            region_id=room,
         )
 
 
@@ -1040,53 +836,41 @@ def test_anticipation_velocity_model_can_not_set_reaction_time_too_large(
 def test_anticipation_velocity_model_can_set_time_gap(
     square_room_100x100_avm, time_gap
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_avm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_avm
 
     simulation.add_agent(
-        journey_id=journey_id,
-        stage_id=exit_id,
-        position=agent_position,
+        room.at(*agent_position),
+        route=route,
         state=jps.AnticipationVelocityModelState(time_gap=time_gap),
-        region_id=room,
     )
 
 
 def test_anticipation_velocity_model_can_not_set_time_gap_too_small(
     square_room_100x100_avm,
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_avm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_avm
     with pytest.raises(
         jps.SimulationError, match=r"Model constraint violation: timeGap 0 .*"
     ):
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=agent_position,
+            room.at(*agent_position),
+            route=route,
             state=jps.AnticipationVelocityModelState(time_gap=0),
-            region_id=room,
         )
 
 
 def test_anticipation_velocity_model_can_not_set_time_gap_too_large(
     square_room_100x100_avm,
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_avm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_avm
     with pytest.raises(
         jps.SimulationError,
         match=r"Model constraint violation: timeGap 10.1 .*",
     ):
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=agent_position,
+            room.at(*agent_position),
+            route=route,
             state=jps.AnticipationVelocityModelState(time_gap=10.1),
-            region_id=room,
         )
 
 
@@ -1094,52 +878,40 @@ def test_anticipation_velocity_model_can_not_set_time_gap_too_large(
 def test_anticipation_velocity_model_can_set_desired_speed(
     square_room_100x100_avm, desired_speed
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_avm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_avm
 
     simulation.add_agent(
-        journey_id=journey_id,
-        stage_id=exit_id,
-        position=agent_position,
+        room.at(*agent_position),
+        route=route,
         state=jps.AnticipationVelocityModelState(desired_speed=desired_speed),
-        region_id=room,
     )
 
 
 def test_anticipation_velocity_model_can_not_set_desired_speed_too_small(
     square_room_100x100_avm,
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_avm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_avm
     with pytest.raises(
         jps.SimulationError, match=r"Model constraint violation: v0 -0.1 .*"
     ):
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=agent_position,
+            room.at(*agent_position),
+            route=route,
             state=jps.AnticipationVelocityModelState(desired_speed=-0.1),
-            region_id=room,
         )
 
 
 def test_anticipation_velocity_model_can_not_set_desired_speed_too_large(
     square_room_100x100_avm,
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_avm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_avm
     with pytest.raises(
         jps.SimulationError, match=r"Model constraint violation: v0 10.1 .*"
     ):
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=agent_position,
+            room.at(*agent_position),
+            route=route,
             state=jps.AnticipationVelocityModelState(desired_speed=10.1),
-            region_id=room,
         )
 
 
@@ -1147,52 +919,40 @@ def test_anticipation_velocity_model_can_not_set_desired_speed_too_large(
 def test_anticipation_velocity_model_can_set_radius(
     square_room_100x100_avm, radius
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_avm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_avm
 
     simulation.add_agent(
-        journey_id=journey_id,
-        stage_id=exit_id,
-        position=agent_position,
+        room.at(*agent_position),
+        route=route,
         state=jps.AnticipationVelocityModelState(radius=radius),
-        region_id=room,
     )
 
 
 def test_anticipation_velocity_model_can_not_set_radius_too_small(
     square_room_100x100_avm,
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_avm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_avm
     with pytest.raises(
         jps.SimulationError, match=r"Model constraint violation: radius 0 .*"
     ):
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=agent_position,
+            room.at(*agent_position),
+            route=route,
             state=jps.AnticipationVelocityModelState(radius=0),
-            region_id=room,
         )
 
 
 def test_anticipation_velocity_model_can_not_set_radius_too_large(
     square_room_100x100_avm,
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_avm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_avm
     with pytest.raises(
         jps.SimulationError, match=r"Model constraint violation: radius 2.1 .*"
     ):
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=agent_position,
+            room.at(*agent_position),
+            route=route,
             state=jps.AnticipationVelocityModelState(radius=2.1),
-            region_id=room,
         )
 
 
@@ -1201,20 +961,16 @@ def test_anticipation_velocity_model_can_not_add_agent_too_close_to_wall(
     square_room_100x100_avm,
     radius,
 ):
-    simulation, journey_id, exit_id, agent_position, room = (
-        square_room_100x100_avm
-    )
+    simulation, route, exit, agent_position, room = square_room_100x100_avm
 
     with pytest.raises(
         jps.SimulationError,
         match=r"Model constraint violation: Agent (.+) too close to geometry boundaries, distance .*",
     ):
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=(50 - (0.99 * radius), 0),
+            room.at(50 - (0.99 * radius), 0),
+            route=route,
             state=jps.AnticipationVelocityModelState(radius=radius),
-            region_id=room,
         )
 
 
@@ -1231,48 +987,36 @@ class _MinimalCustomModel(jps.CustomOperationalModel):
 def test_add_agent_rejects_state_of_different_model_on_custom_simulation():
     surface = jps.WalkableSurface()
     room = surface.add_region(
-        boundary=[(-50, -50), (50, -50), (50, 50), (-50, 50)]
+        polygon=shapely.Polygon([(-50, -50), (50, -50), (50, 50), (-50, 50)])
     )
     simulation = jps.Simulation(model=_MinimalCustomModel(), geometry=surface)
-    exit_id = simulation.add_exit_stage(
-        [([(49, -3), (49, 3), (50, 3), (50, -3)], room)]
-    )
-    journey_id = simulation.add_journey(jps.JourneyDescription([exit_id]))
+    exit = simulation.add_exit([([(49, -3), (49, 3), (50, 3), (50, -3)], room)])
+    route = jps.Route([exit])
 
     with pytest.raises(
         jps.SimulationError,
         match="does not match the simulation's operational model",
     ):
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=(0, 0),
-            state=jps.SocialForceModelState(),
-            region_id=room,
+            room.at(0, 0), route=route, state=jps.SocialForceModelState()
         )
 
 
 def test_add_agent_rejects_custom_state_on_builtin_model_simulation():
     surface = jps.WalkableSurface()
     room = surface.add_region(
-        boundary=[(-50, -50), (50, -50), (50, 50), (-50, 50)]
+        polygon=shapely.Polygon([(-50, -50), (50, -50), (50, 50), (-50, 50)])
     )
     simulation = jps.Simulation(model=jps.SocialForceModel(), geometry=surface)
-    exit_id = simulation.add_exit_stage(
-        [([(49, -3), (49, 3), (50, 3), (50, -3)], room)]
-    )
-    journey_id = simulation.add_journey(jps.JourneyDescription([exit_id]))
+    exit = simulation.add_exit([([(49, -3), (49, 3), (50, 3), (50, -3)], room)])
+    route = jps.Route([exit])
 
     with pytest.raises(
         jps.SimulationError,
         match="does not match the simulation's operational model",
     ):
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=(0, 0),
-            state=_MinimalCustomState(),
-            region_id=room,
+            room.at(0, 0), route=route, state=_MinimalCustomState()
         )
 
 
@@ -1302,19 +1046,13 @@ class _ConstantMovementModel(jps.CustomOperationalModel):
 def _custom_model_simulation_with_agent(model):
     surface = jps.WalkableSurface()
     room = surface.add_region(
-        boundary=[(-50, -50), (50, -50), (50, 50), (-50, 50)]
+        polygon=shapely.Polygon([(-50, -50), (50, -50), (50, 50), (-50, 50)])
     )
     simulation = jps.Simulation(model=model, geometry=surface)
-    exit_id = simulation.add_exit_stage(
-        [([(49, -3), (49, 3), (50, 3), (50, -3)], room)]
-    )
-    journey_id = simulation.add_journey(jps.JourneyDescription([exit_id]))
+    exit = simulation.add_exit([([(49, -3), (49, 3), (50, 3), (50, -3)], room)])
+    route = jps.Route([exit])
     simulation.add_agent(
-        journey_id=journey_id,
-        stage_id=exit_id,
-        position=(0, 0),
-        state=_MinimalCustomState(),
-        region_id=room,
+        room.at(0, 0), route=route, state=_MinimalCustomState()
     )
     return simulation
 
@@ -1322,21 +1060,15 @@ def _custom_model_simulation_with_agent(model):
 def test_add_agent_spawns_the_agent_where_add_agent_says():
     surface = jps.WalkableSurface()
     room = surface.add_region(
-        boundary=[(-50, -50), (50, -50), (50, 50), (-50, 50)]
+        polygon=shapely.Polygon([(-50, -50), (50, -50), (50, 50), (-50, 50)])
     )
     simulation = jps.Simulation(model=_MinimalCustomModel(), geometry=surface)
-    exit_id = simulation.add_exit_stage(
-        [([(49, -3), (49, 3), (50, 3), (50, -3)], room)]
-    )
-    journey_id = simulation.add_journey(jps.JourneyDescription([exit_id]))
+    exit = simulation.add_exit([([(49, -3), (49, 3), (50, 3), (50, -3)], room)])
+    route = jps.Route([exit])
 
     agent_id = simulation.add_agent(
-        journey_id=journey_id,
-        stage_id=exit_id,
-        position=(5.0, 5.0),
-        state=_MinimalCustomState(),
-        region_id=room,
-    )
+        room.at(5.0, 5.0), route=route, state=_MinimalCustomState()
+    ).id
 
     assert simulation.agent(agent_id).position == (5.0, 5.0)
 
@@ -1374,22 +1106,16 @@ def test_custom_model_update_returning_the_current_state_is_rejected():
 def test_custom_model_movement_is_applied_as_given():
     surface = jps.WalkableSurface()
     room = surface.add_region(
-        boundary=[(-50, -50), (50, -50), (50, 50), (-50, 50)]
+        polygon=shapely.Polygon([(-50, -50), (50, -50), (50, 50), (-50, 50)])
     )
     simulation = jps.Simulation(
         model=_ConstantMovementModel((0.25, -0.5)), geometry=surface
     )
-    exit_id = simulation.add_exit_stage(
-        [([(49, -3), (49, 3), (50, 3), (50, -3)], room)]
-    )
-    journey_id = simulation.add_journey(jps.JourneyDescription([exit_id]))
+    exit = simulation.add_exit([([(49, -3), (49, 3), (50, 3), (50, -3)], room)])
+    route = jps.Route([exit])
     agent_id = simulation.add_agent(
-        journey_id=journey_id,
-        stage_id=exit_id,
-        position=(0.0, 0.0),
-        state=_MinimalCustomState(),
-        region_id=room,
-    )
+        room.at(0.0, 0.0), route=route, state=_MinimalCustomState()
+    ).id
 
     simulation.iterate()
 
@@ -1401,7 +1127,7 @@ class _AddAgentDuringIterateModel(jps.CustomOperationalModel):
 
     def __init__(self):
         self.simulation = None
-        self.journey_id = None
+        self.route = None
         self.stage_id = None
         self.region_id = None
         self.error = None
@@ -1409,11 +1135,10 @@ class _AddAgentDuringIterateModel(jps.CustomOperationalModel):
     def compute_next_state(self, state, step):
         try:
             self.simulation.add_agent(
-                journey_id=self.journey_id,
-                stage_id=self.stage_id,
-                position=(5, 5),
+                self.region_id.at(5, 5),
+                route=self.route,
+                start=self.stage_id,
                 state=_MinimalCustomState(),
-                region_id=self.region_id,
             )
         except Exception as e:
             self.error = e
@@ -1424,23 +1149,17 @@ def test_add_agent_during_iterate_raises_simulation_error():
     model = _AddAgentDuringIterateModel()
     surface = jps.WalkableSurface()
     room = surface.add_region(
-        boundary=[(-50, -50), (50, -50), (50, 50), (-50, 50)]
+        polygon=shapely.Polygon([(-50, -50), (50, -50), (50, 50), (-50, 50)])
     )
     simulation = jps.Simulation(model=model, geometry=surface)
-    exit_id = simulation.add_exit_stage(
-        [([(49, -3), (49, 3), (50, 3), (50, -3)], room)]
-    )
-    journey_id = simulation.add_journey(jps.JourneyDescription([exit_id]))
+    exit = simulation.add_exit([([(49, -3), (49, 3), (50, 3), (50, -3)], room)])
+    route = jps.Route([exit])
     model.simulation = simulation
-    model.journey_id = journey_id
-    model.stage_id = exit_id
+    model.route = route
+    model.stage_id = exit
     model.region_id = room
     simulation.add_agent(
-        journey_id=journey_id,
-        stage_id=exit_id,
-        position=(0, 0),
-        state=_MinimalCustomState(),
-        region_id=room,
+        room.at(0, 0), route=route, state=_MinimalCustomState()
     )
 
     simulation.iterate()

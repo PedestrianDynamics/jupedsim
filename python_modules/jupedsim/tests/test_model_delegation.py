@@ -48,21 +48,15 @@ def _make_sim(model):
     surface = jps.WalkableSurface()
     room = surface.add_region(polygon=_open_room())
     sim = jps.Simulation(model=model, geometry=surface, dt=0.05)
-    exit_id = sim.add_exit_stage(
-        [([(19, 9), (19, 11), (20, 11), (20, 9)], room)]
-    )
-    journey_id = sim.add_journey(jps.JourneyDescription([exit_id]))
-    return sim, exit_id, journey_id, room
+    exit = sim.add_exit([([(19, 9), (19, 11), (20, 11), (20, 9)], room)])
+    route = jps.Route([exit])
+    return sim, exit, route, room
 
 
-def _run(sim, room, journey_id, stage_id, state, steps=40):
+def _run(sim, room, route, stage, state, steps=40):
     agent_id = sim.add_agent(
-        journey_id=journey_id,
-        stage_id=stage_id,
-        position=(1.0, 10.0),
-        state=state,
-        region_id=room,
-    )
+        room.at(1.0, 10.0), route=route, start=stage, state=state
+    ).id
     trajectory = [sim.agent(agent_id).position]
     for _ in range(steps):
         sim.iterate()
@@ -71,14 +65,14 @@ def _run(sim, room, journey_id, stage_id, state, steps=40):
 
 
 def test_delegated_model_walks_towards_the_exit():
-    sim, exit_id, journey_id, room = _make_sim(
+    sim, exit, route, room = _make_sim(
         _DelegatingModel(jps.CollisionFreeSpeedModelV3())
     )
     trajectory = _run(
         sim,
         room,
-        journey_id,
-        exit_id,
+        route,
+        exit,
         _Wrapped(sub=jps.CollisionFreeSpeedModelV3State()),
     )
 
@@ -115,17 +109,13 @@ def test_delegation_matches_the_native_model_exactly():
 def test_delegated_state_is_advanced():
     """The sub-state returned by the built-in model is a new, updated object."""
     initial = jps.CollisionFreeSpeedModelV3State()
-    sim, exit_id, journey_id, room = _make_sim(
+    sim, exit, route, room = _make_sim(
         _DelegatingModel(jps.CollisionFreeSpeedModelV3())
     )
     # Off the exit axis, so that the model has to turn and the change is visible.
     agent_id = sim.add_agent(
-        journey_id=journey_id,
-        stage_id=exit_id,
-        position=(1.0, 3.0),
-        state=_Wrapped(sub=initial),
-        region_id=room,
-    )
+        room.at(1.0, 3.0), route=route, state=_Wrapped(sub=initial)
+    ).id
     sim.iterate()
 
     sub = sim.agent(agent_id).state.sub
@@ -134,15 +124,13 @@ def test_delegated_state_is_advanced():
 
 
 def test_wrong_state_type_is_reported_with_both_names():
-    sim, exit_id, journey_id, room = _make_sim(
+    sim, exit, route, room = _make_sim(
         _DelegatingModel(jps.SocialForceModel(body_force=0.0, friction=0.0))
     )
     sim.add_agent(
-        journey_id=journey_id,
-        stage_id=exit_id,
-        position=(1.0, 10.0),
+        room.at(1.0, 10.0),
+        route=route,
         state=_Wrapped(sub=jps.CollisionFreeSpeedModelV3State()),
-        region_id=room,
     )
 
     with pytest.raises(
@@ -151,22 +139,14 @@ def test_wrong_state_type_is_reported_with_both_names():
         sim.iterate()
 
 
-def _run_pair(sim, room, journey_id, stage_id, state_of, steps=40):
+def _run_pair(sim, room, route, stage, state_of, steps=40):
     """Two agents on a collision course, so that neighbor states are read."""
     left = sim.add_agent(
-        journey_id=journey_id,
-        stage_id=stage_id,
-        position=(1.0, 10.0),
-        state=state_of(),
-        region_id=room,
-    )
+        room.at(1.0, 10.0), route=route, start=stage, state=state_of()
+    ).id
     ahead = sim.add_agent(
-        journey_id=journey_id,
-        stage_id=stage_id,
-        position=(2.2, 10.0),
-        state=state_of(),
-        region_id=room,
-    )
+        room.at(2.2, 10.0), route=route, start=stage, state=state_of()
+    ).id
     trajectory = []
     for _ in range(steps):
         sim.iterate()
@@ -176,7 +156,7 @@ def _run_pair(sim, room, journey_id, stage_id, state_of, steps=40):
 
 def test_neighbors_are_unreadable_without_the_hook():
     """The failure the hook exists for, and the message that points at it."""
-    sim, exit_id, journey_id, room = _make_sim(
+    sim, exit, route, room = _make_sim(
         _DelegatingModel(jps.CollisionFreeSpeedModelV3())
     )
     with pytest.raises(
@@ -185,8 +165,8 @@ def test_neighbors_are_unreadable_without_the_hook():
         _run_pair(
             sim,
             room,
-            journey_id,
-            exit_id,
+            route,
+            exit,
             lambda: _Wrapped(sub=jps.CollisionFreeSpeedModelV3State()),
             steps=1,
         )
@@ -205,14 +185,14 @@ def test_repacked_neighbors_match_the_native_model_exactly():
         jps.CollisionFreeSpeedModelV3State,
     )
 
-    sim, exit_id, journey_id, room = _make_sim(
+    sim, exit, route, room = _make_sim(
         _DelegatingModel(jps.CollisionFreeSpeedModelV3(), repack_neighbors=True)
     )
     delegated = _run_pair(
         sim,
         room,
-        journey_id,
-        exit_id,
+        route,
+        exit,
         lambda: _Wrapped(sub=jps.CollisionFreeSpeedModelV3State()),
     )
 
@@ -225,14 +205,14 @@ def test_repacked_neighbors_are_actually_seen():
     def _fat(_):
         return jps.CollisionFreeSpeedModelV3State(radius=0.5)
 
-    sim, exit_id, journey_id, room = _make_sim(
+    sim, exit, route, room = _make_sim(
         _DelegatingModel(jps.CollisionFreeSpeedModelV3(), repack_neighbors=True)
     )
     lean = _run_pair(
         sim,
         room,
-        journey_id,
-        exit_id,
+        route,
+        exit,
         lambda: _Wrapped(sub=jps.CollisionFreeSpeedModelV3State()),
     )
 
@@ -265,9 +245,7 @@ def test_a_wrong_mapping_blames_the_mapping():
             sub, movement = self._inner.compute_next_state(state.sub, step)
             return replace(state, sub=sub), movement
 
-    sim, exit_id, journey_id, room = _make_sim(
-        _Broken(jps.CollisionFreeSpeedModelV3())
-    )
+    sim, exit, route, room = _make_sim(_Broken(jps.CollisionFreeSpeedModelV3()))
     with pytest.raises(
         jps.SimulationError,
         match="mapping passed to with_neighbor_state_mapping.. has to return",
@@ -275,8 +253,8 @@ def test_a_wrong_mapping_blames_the_mapping():
         _run_pair(
             sim,
             room,
-            journey_id,
-            exit_id,
+            route,
+            exit,
             lambda: _Wrapped(sub=jps.CollisionFreeSpeedModelV3State()),
             steps=1,
         )

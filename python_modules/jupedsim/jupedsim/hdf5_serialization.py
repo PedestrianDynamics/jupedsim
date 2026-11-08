@@ -378,13 +378,12 @@ class Hdf5TrajectoryWriter(TrajectoryWriter):
 
         rows = []
         offset = 0
-        # A stage without an area, such as direct steering, has no grids.
-        for stage_id in simulation.stage_ids():
-            for region_id, grid in simulation.travel_times(stage_id).items():
+        for stage in simulation.stages:
+            for region, grid in simulation.travel_times(stage).items():
                 rows.append(
                     (
-                        stage_id,
-                        region_id,
+                        stage.id,
+                        region.id,
                         *grid.origin,
                         grid.width,
                         grid.height,

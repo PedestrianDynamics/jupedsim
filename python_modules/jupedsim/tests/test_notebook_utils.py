@@ -30,17 +30,15 @@ def single_region_file(tmp_path: pathlib.Path) -> pathlib.Path:
             trajectory_writer=writer,
             dt=DT,
         )
-        exit_id = sim.add_exit_stage(
+        exit = sim.add_exit(
             [(shapely.Polygon([(9, 0), (10, 0), (10, 10), (9, 10)]), room)]
         )
-        journey_id = sim.add_journey(jps.JourneyDescription([exit_id]))
+        route = jps.Route([exit])
         for position in AGENT_POSITIONS:
             sim.add_agent(
-                journey_id=journey_id,
-                stage_id=exit_id,
-                position=position,
+                room.at(*position),
+                route=route,
                 state=jps.CollisionFreeSpeedModelV2State(),
-                region_id=room,
             )
         for _ in range(ITERATIONS):
             sim.iterate()
@@ -54,10 +52,10 @@ def two_region_file(tmp_path: pathlib.Path) -> tuple[pathlib.Path, int, int]:
 
     surface = jps.WalkableSurface()
     ground_floor = surface.add_region(
-        boundary=rectangle((0, 0), (5, 5)), height=0.0
+        polygon=shapely.Polygon(rectangle((0, 0), (5, 5))), height=0.0
     )
     upper_floor = surface.add_region(
-        boundary=rectangle((10, 0), (15, 5)), height=3.0
+        polygon=shapely.Polygon(rectangle((10, 0), (15, 5))), height=3.0
     )
     surface.connect_regions(
         from_region=ground_floor,
@@ -74,7 +72,7 @@ def two_region_file(tmp_path: pathlib.Path) -> tuple[pathlib.Path, int, int]:
             dt=DT,
         )
         sim.iterate()
-    return out, ground_floor, upper_floor
+    return out, ground_floor.id, upper_floor.id
 
 
 def test_read_hdf5_file_single_region(single_region_file):

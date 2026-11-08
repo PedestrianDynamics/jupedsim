@@ -29,6 +29,9 @@ public:
     size_t add_region(Polygon polygon, double height);
     size_t add_region(const PolyWithHoles& polygon, double height);
     size_t connect_regions(size_t from_region, LineSegment from, size_t to_region, LineSegment to);
+    /// Corners of connector @p connector_id in x/y, as connect_regions built it from the vertices
+    /// of the connected regions. Throws for unknown ids and ordinary regions.
+    Ring connector_corners(size_t connector_id) const;
 
     using RegionGraph2D = Geometry::RegionGraph2D;
     std::unique_ptr<RegionGraph2D> create_region_graph_2d() const;

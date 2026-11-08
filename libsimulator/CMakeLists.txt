@@ -42,8 +42,8 @@ target_sources(simulator PRIVATE
     src/geometry_builder.hpp
     src/hash_combine.hpp
     src/iterator_pair.hpp
-    src/journey.cpp
-    src/journey.hpp
+    src/route.cpp
+    src/route.hpp
     src/line_segment.cpp
     src/line_segment.hpp
     src/logger.cpp
@@ -118,7 +118,7 @@ if (BUILD_TESTS)
         test/test_floorfield.cpp
         test/test_generic_agent_formatter.cpp
         test/test_geometry.cpp
-        test/test_journey.cpp
+        test/test_route.cpp
         test/test_line_segment.cpp
         test/test_location.cpp
         test/test_neighborhood_search.cpp

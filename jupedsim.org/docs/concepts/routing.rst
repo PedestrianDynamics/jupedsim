@@ -21,7 +21,7 @@ Route planning
 ==============
 
 For modeling complex scenarios in which the agents will move through different specific targets on their way, it is possible to define routes.
-These routes are modeled as a network (so called :ref:`Journeys`), consisting of:
+These routes are modeled as a network (so called :ref:`Routes`), consisting of:
 
 - targets as nodes (so called :ref:`Stages`) ,
 - directed connections between these targets, indicating the next target, as edges (so called :ref:`Transitions`),
@@ -36,7 +36,7 @@ The illustration of such a network can be seen below:
     Graphical representation of the underlying routing network of a more complex simulation.
     Each circle represents an intermediate stage, while the arrows the corresponding transitions.
 
-In the following sections, we will explain how to set-up such Journeys in *JuPedSim*.
+In the following sections, we will explain how to set-up such Routes in *JuPedSim*.
 
 Stages
 ------
@@ -50,13 +50,14 @@ The various types of stages will be explained below.
     All stages added to the simulation need to be inside the walkable area.
     This needs to be uphold when the geometry is changed.
 
-Each stage lies in one region of the walkable area. Its ``region_id`` is the id
+Each stage lies in one region of the walkable area. Its ``region`` is the handle
 :meth:`~jupedsim.WalkableSurface.add_region` returned for that region, see :doc:`geometry`.
+Stages are owned by the simulation and returned as handles.
 
 Waypoint
 ^^^^^^^^
 
-The most fundamental kind of stage is a :class:`Waypoint <jupedsim.WaypointStage>`. It represents a target the agent needs to reach.
+The most fundamental kind of stage is a :class:`Waypoint <jupedsim.Waypoint>`. It represents a target the agent needs to reach.
 For the way finding, the agent always targets the Waypoint directly.
 A Waypoint is considered completed once agents arrive within a designated distance from the defined Waypoint.
 The figure below shows how a Waypoint is used in the simulation. Here the center (colored orange) represents the Waypoint, and the surrounding blue area indicates the zone an agent must enter to complete the stage.
@@ -66,19 +67,19 @@ The figure below shows how a Waypoint is used in the simulation. Here the center
     :align: center
     :alt: A dot representing the Waypoint, with an circle around it, depicting the area an agent needs to enter to complete the stage.
 
-    Representation of a :class:`Waypoint <jupedsim.WaypointStage>` (colored orange) with the given distance (orange line).
+    Representation of a :class:`Waypoint <jupedsim.Waypoint>` (colored orange) with the given distance (orange line).
 
 A Waypoint at :math:`(0.6, -1.4)` with an accepted distance of 2m can be added to the simulation via:
 
 .. code:: python
 
-    waypoint_id = simulation.add_waypoint_stage([(jps.circle_to_polygon(center=(0.6, -1.4), radius=2), region_id)])
+    waypoint = simulation.add_waypoint((0.6, -1.4), radius=2, region=region)
 
 Exit
 ^^^^
 
-An other stage type is the :class:`Exit <jupedsim.ExitStage>`. As the name suggests, this stage models the exits within the simulation.
-The `ExitStage` designates an area where agents are marked for removal from the simulation upon their arrival.
+An other stage type is the :class:`Exit <jupedsim.Exit>`. As the name suggests, this stage models the exits within the simulation.
+The :class:`~jupedsim.Exit` designates an area where agents are marked for removal from the simulation upon their arrival.
 The removal itself is done at the beginning of the next iteration step.
 As a target the agents will aim for the center of the exit polygon.
 
@@ -91,18 +92,18 @@ As a target the agents will aim for the center of the exit polygon.
     :align: center
     :alt: A polygon representing the exit area is shown in blue, with the center highlighted in orange.
 
-    Representation of an :class:`Exit <jupedsim.ExitStage>` (colored blue). The agents will aim for the center (colored orange).
+    Representation of an :class:`Exit <jupedsim.Exit>` (colored blue). The agents will aim for the center (colored orange).
 
 An exit located in the polygon :math:`(-0.2, -1.9), (0.2, -1.9), (0.2, -1.7), (-0.2, -1.7)` can be added to the simulation via:
 
 .. code:: python
 
     # create exit from coordinates
-    exit_id = simulation.add_exit_stage([([(-0.2, -1.9), (0.2, -1.9), (0.2, -1.7), (-0.2, -1.7)], region_id)])
+    exit_stage = simulation.add_exit([(-0.2, -1.9), (0.2, -1.9), (0.2, -1.7), (-0.2, -1.7)], region=region)
 
     # create exit from shapely.Polygon
     exit_polygon = shapely.Polygon([(-0.2, -1.9), (0.2, -1.9), (0.2, -1.7), (-0.2, -1.7)])
-    exit_id = simulation.add_exit_stage([(exit_polygon, region_id)])
+    exit_stage = simulation.add_exit(exit_polygon, region=region)
 
 .. note::
 
@@ -115,44 +116,37 @@ An exit located in the polygon :math:`(-0.2, -1.9), (0.2, -1.9), (0.2, -1.7), (-
     Therefore, creating wide exits could potentially lead to unpredictable behavior.
     In certain situations, it may be more appropriate to establish multiple exits rather than a single wide one.
 
-Journeys
---------
+Routes
+------
 
-Now that we have added the nodes in the network, we need to combine them to a so called Journey in *JuPedSim*.
-An agent will always continue to move along the transitions of a journey after completing its current stage.
-But before we can add transitions we have to create Journeys:
+Now that we have added the nodes in the network, we need to combine them to a so called Route in *JuPedSim*.
+An agent will always continue to move along the transitions of a route after completing its current stage.
+A route is built and validated in one call, either as a list of stages that are walked in order, or as a list of ``(from, to)`` pairs that define the transitions:
 
 .. code-block:: python
 
     # create stages
     ...
 
-    # define a journey
-    journey = jps.JourneyDescription(
-        [
-            waypoint_id,
-            exit_id
-        ]
-    )
+    # define a route that walks the stages in order
+    route = jps.Route([waypoint, exit_stage])
 
 Transitions
 -----------
 
-We currently have a Journey composed of various stages that are not interconnected.
-To establish a comprehensive routing setup, we need to define the connections between these stages, known as Transitions.
-
-Transitions specify which stage an agent will target next after completing its current stage.
+The pair form of a route defines for each stage which stage an agent will target next after completing its current stage.
+These connections are known as Transitions.
 *JuPedSim* offers different types of connections to directly model certain decision making processes.
 
 .. note::
 
-    When adding the transitions to your journeys make sure, that :ref:`Exits <Exit>` are only added at the end of a trip.
+    When adding the transitions to your routes make sure, that :ref:`Exits <Exit>` are only added at the end of a trip.
     Otherwise the agents will be removed from the simulation when they reach the exit and will not advance to the next stage.
 
 Fixed transition
 ^^^^^^^^^^^^^^^^
 
-The most basic form of transition is to define that the agent will proceed on its journey with one specific subsequent stage.
+The most basic form of transition is to define that the agent will proceed on its route with one specific subsequent stage.
 
 
 .. figure:: /_static/transitions/fixed.svg
@@ -161,21 +155,22 @@ The most basic form of transition is to define that the agent will proceed on it
 
 .. code-block:: python
 
-
-    journey.set_transition_for_stage(
-        start_stage_id,
-        jps.Transition.create_fixed_transition(next_stage_id)
+    route = jps.Route(
+        [(start_stage, next_stage), (next_stage, exit_stage)],
+        start=start_stage,
     )
 
 Round-robin transition
 ^^^^^^^^^^^^^^^^^^^^^^
 
 It is also possible to model a decision making process and split the agents at a stage, with a round-robin transition.
-Here, the agents will proceed in a weighted round-robin manner.
-E.g., when defining a round-robin transition with three outgoing stages and the corresponding weights 10, 5, 1, the first 10 agents to make a choice will continue with the first given stage.
-The next 5 with the second one, and the next agent will continue with the third stage.
-
+Here, the agents proceed by smooth weighted round-robin.
+Each decision adds every stage's weight to its running total, picks the stage with the largest total (ties go to the earlier stage) and takes the sum of all weights off it.
+E.g., with two outgoing stages and the weights 3 and 2, the agents making a choice continue with the first, second, first, second and first stage.
 After this, the cycle restarts with the first stage.
+
+Only the ratio of the weights matters: 60 and 40 give the same sequence as 3 and 2.
+With the weights 10, 5, 1 of the example below, the three stages are interleaved over a cycle of 16 agents rather than served in blocks.
 
 .. figure:: /_static/transitions/round_robin.svg
     :width: 40%
@@ -185,15 +180,23 @@ To create a round-robin transition as described above, you can follow these step
 
 .. code-block:: python
 
-    journey.set_transition_for_stage(
-        start_stage_id,
-        jps.Transition.create_round_robin_transition(
-            [
-                (first_candidate_stage_id, 10),
-                (second_candidate_stage_id, 5),
-                (third_candidate_stage_id, 1),
-            ]
-        )
+    route = jps.Route(
+        [
+            (
+                start_stage,
+                jps.RoundRobin(
+                    {
+                        first_candidate_stage: 10,
+                        second_candidate_stage: 5,
+                        third_candidate_stage: 1,
+                    }
+                ),
+            ),
+            (first_candidate_stage, exit_stage),
+            (second_candidate_stage, exit_stage),
+            (third_candidate_stage, exit_stage),
+        ],
+        start=start_stage,
     )
 
 Least-targeted transition
@@ -207,43 +210,71 @@ When multiple stages have the same number of agent targeting the first defined w
     :width: 40%
     :align: center
 
-A least-targeted transition can be added to a journey with:
+A least-targeted transition can be added to a route with:
 
 .. code-block:: python
 
-    journey.set_transition_for_stage(
-        start_stage_id,
-        jps.Transition.create_least_targeted_transition(
-            [
-                first_candidate_stage_id,
-                second_candidate_stage_id,
-                third_candidate_stage_id,
-            ]
-        )
+    route = jps.Route(
+        [
+            (
+                start_stage,
+                jps.LeastTargeted(
+                    [
+                        first_candidate_stage,
+                        second_candidate_stage,
+                        third_candidate_stage,
+                    ]
+                ),
+            ),
+            (first_candidate_stage, exit_stage),
+            (second_candidate_stage, exit_stage),
+            (third_candidate_stage, exit_stage),
+        ],
+        start=start_stage,
+    )
+
+Rules in cycles
+^^^^^^^^^^^^^^^
+
+Route validation is structural: it checks that an exit or ``STAY`` can be reached from every stage along the transitions.
+It does not check that agents reach it.
+Least-travel-time and least-targeted rules are deterministic, so in a cycle they can send agents around it forever.
+Two examples:
+
+.. code-block:: python
+
+    # The waypoint itself has zero travel time and wins every decision.
+    # Route() warns about a rule that lists its own stage.
+    jps.Route([(wp, jps.LeastTravelTime([wp, exit_stage]))], start=wp)
+
+    # A single agent finds both candidates untargeted when it decides; the
+    # tie goes to other_wp, which leads back to wp.
+    jps.Route(
+        [
+            (wp, jps.LeastTargeted([other_wp, exit_stage])),
+            (other_wp, wp),
+        ],
+        start=wp,
     )
 
 Direct Steering
 ---------------
 
-In certain scenarios, e.g., developing a specific behavior model, you may want to bypass the decision-making process modeled by the journeys.
-For this purpose, *JuPedSim* offers a method called "direct steering", it moves an agent to a specific position in the walkable area on the shortest path (see :ref:`Way finding <Way finding>`).
-To use direct steering in your simulation, you need to add a direct steering stage and a journey consisting only of the stage to the simulation:
+In certain scenarios, e.g., developing a specific behavior model, you may want to bypass the decision-making process modeled by the routes.
+For this purpose, *JuPedSim* offers a method called "direct steering", it moves an agent to a specific location in the walkable area on the shortest path (see :ref:`Way finding <Way finding>`).
+To use direct steering in your simulation, add the agent with a ``target`` location instead of a route:
 
 .. code:: python
 
-    direct_steering_stage = simulation.add_direct_steering_stage()
-    direct_steering_journey = jps.JourneyDescription([direct_steering_stage])
-    direct_steering_journey_id = simulation.add_journey(direct_steering_journey)
+    agent = simulation.add_agent(region.at(0, 0), target=region.at(-10, -10), state=state)
 
-Afterwards, an agent or agents can be added, targeting this journey and stage.
-The agent with the ID `direct_steering_agent_id` is using the direct steering journey.
-We now can directly set the target of this specific agent.
-It will move towards the specified point and if the point is reached, it will come to a halt there:
+The target of an agent that is already in the simulation is changed with :meth:`~jupedsim.Agent.steer_to`.
+This also switches an agent that follows a route to direct steering.
+It will move towards the specified location and if the location is reached, it will come to a halt there:
 
 .. code:: python
 
-    agent = simulation.agent(direct_steering_agent_id)
-    agent.final_target = (-10, -10)
+    agent.steer_to(region.at(-10, -10))
 
 .. note::
 
@@ -252,24 +283,20 @@ It will move towards the specified point and if the point is reached, it will co
 
     .. code:: python
 
-        simulation.mark_agent_for_removal(direct_steering_agent_id)
+        agent.remove()
 
-    Alternatively, the journey of an agent can be switched to some other journey, see :ref:`Switch journey`.
+    Alternatively, the agent can be switched to some route, see :ref:`Switch route`.
 
-Switch journey
---------------
+Switch route
+------------
 
-In complex scenarios it might be necessary to work with multiple journeys to model the movement of the agents.
-At some point or at some time agents might need to switch between these journeys depending on some conditions.
-After the following code, the agent with the ID `agent_id` will continue in the journey `new_journey_id` targeting `new_stage_id`:
+In complex scenarios it might be necessary to work with multiple routes to model the movement of the agents.
+At some point or at some time agents might need to switch between these routes depending on some conditions.
+After the following code, the agent `agent` will continue on the route `new_route` targeting `new_stage`:
 
 .. code::
 
-        simulation.switch_agent_journey(
-            agent_id,
-            new_journey_id,
-            new_stage_id
-        )
+        agent.follow(new_route, start=new_stage)
 
 Way finding
 ===========

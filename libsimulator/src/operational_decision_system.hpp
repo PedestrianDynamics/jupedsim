@@ -49,6 +49,7 @@ public:
             const AgentStep step{env_query, current, dt};
             const Vector movement = _model->compute_next_state(current.state, next.state, step);
             next.location.move_on_surface(movement);
+            next.last_step = movement;
         }
         // Swap in the computed generation. This is safe because no caller retains
         // pointers/references across an iteration (Python-side agent handles resolve per

@@ -8,6 +8,7 @@
 
 #include <CGAL/Surface_mesh_shortest_path.h>
 
+#include <cstddef>
 #include <memory>
 #include <vector>
 
@@ -45,7 +46,14 @@ public:
     /// has reached @p to.
     Vector get_orientation(const Location& from, const Location& to);
 
+    /// Length of the geodesic from @p from to @p to over the surface, infinite if @p to cannot
+    /// be reached from @p from.
+    double path_length(const Location& from, const Location& to);
+
     double wall_clearance() const { return _wall_clearance; }
+
+    /// How many sequence trees the engine has built, one per change of target.
+    std::size_t trees_built() const { return _trees_built; }
 
 private:
     using Traits = CGAL::Surface_mesh_shortest_path_traits<K, SurfaceMesh>;
@@ -81,4 +89,5 @@ private:
     /// `GetOrientation` non-reentrant.
     Point3D _last_target{};
     std::unique_ptr<ShortestPath> _last_tree{};
+    std::size_t _trees_built{0};
 };

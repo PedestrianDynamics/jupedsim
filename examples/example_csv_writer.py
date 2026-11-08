@@ -50,8 +50,7 @@ class CsvTrajectoryWriter(TrajectoryWriter):
                 [
                     frame,
                     agent.id,
-                    agent.position[0],
-                    agent.position[1],
+                    *agent.position,
                 ]
             )
 
@@ -82,19 +81,16 @@ def main():
         ),
     )
 
-    exit_id = simulation.add_exit_stage(
-        [([(18, 4), (20, 4), (20, 6), (18, 6)], region)]
+    exit_stage = simulation.add_exit(
+        [(18, 4), (20, 4), (20, 6), (18, 6)], region=region
     )
-    journey = jps.JourneyDescription([exit_id])
-    journey_id = simulation.add_journey(journey)
+    route = jps.Route([exit_stage])
 
     for pos in [(1, 2), (3, 8), (5, 5)]:
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=pos,
+            region.at(*pos),
+            route=route,
             state=jps.CollisionFreeSpeedModelState(radius=0.3),
-            region_id=region,
         )
 
     print(f"Running simulation with CsvTrajectoryWriter -> {output_file}")
@@ -106,11 +102,10 @@ def main():
             print("CTRL-C Received! Shutting down")
             sys.exit(1)
 
-    simulation._writer.close()
-
     print(
         f"Simulation completed after {simulation.iteration_count()} iterations"
     )
+    simulation.close()
 
     # Read back CSV and plot trajectories over geometry
     import matplotlib.pyplot as plt

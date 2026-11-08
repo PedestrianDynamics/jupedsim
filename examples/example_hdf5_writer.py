@@ -38,8 +38,8 @@ def main() -> None:
             dt=0.01,
         )
         exit_area = Polygon([(27, 4.5), (28, 4.5), (28, 5.5), (27, 5.5)])
-        exit_id = sim.add_exit_stage([(exit_area, region)])
-        journey_id = sim.add_journey(jps.JourneyDescription([exit_id]))
+        exit_stage = sim.add_exit(exit_area, region=region)
+        route = jps.Route([exit_stage])
         spawning_area = Polygon([(0, 0), (5, 0), (5, 10), (0, 10)])
         num_agents = 150
         pos_in_spawning_area = jps.distributions.distribute_by_number(
@@ -51,11 +51,9 @@ def main() -> None:
         )
         for position in pos_in_spawning_area:
             sim.add_agent(
-                journey_id=journey_id,
-                stage_id=exit_id,
-                position=position,
+                region.at(*position),
+                route=route,
                 state=jps.CollisionFreeSpeedModelV2State(),
-                region_id=region,
             )
 
         while sim.agent_count() > 0 and sim.iteration_count() < 2000:

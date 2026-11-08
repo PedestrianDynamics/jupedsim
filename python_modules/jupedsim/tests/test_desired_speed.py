@@ -2,6 +2,14 @@
 
 import jupedsim as jps
 import pytest
+import shapely
+
+
+def stay_at(sim, room, centre):
+    """A route to a waypoint at ``centre``, where the agent stays."""
+    wp = sim.add_waypoint(centre, radius=0.5, region=room)
+    return jps.Route([wp, jps.STAY])
+
 
 model_params = [
     (
@@ -37,7 +45,9 @@ def create_simulation():
 
     def _create(model_class):
         surface = jps.WalkableSurface()
-        room = surface.add_region(boundary=[(0, 0), (10, 0), (10, 10), (0, 10)])
+        room = surface.add_region(
+            polygon=shapely.Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
+        )
         simulation = jps.Simulation(model=model_class(), geometry=surface)
         return simulation, room
 
@@ -56,18 +66,12 @@ def test_desired_speed_can_be_set_via_state(
 ):
     """Test that desired_speed passed to the state constructor is applied."""
     sim, room = create_simulation(model_class)
-    wp = sim.add_waypoint_stage(
-        [(jps.circle_to_polygon(center=(10, 1), radius=0.5), room)]
-    )
-    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
     agent_id = sim.add_agent(
-        journey_id=journey_id,
-        stage_id=wp,
-        position=(1, 1),
+        room.at(1, 1),
+        route=stay_at(sim, room, (10, 1)),
         state=state_class(desired_speed=1.5, **extra_state_kwargs),
-        region_id=room,
-    )
+    ).id
 
     assert sim.agent(agent_id).state.desired_speed == 1.5
 
@@ -84,18 +88,12 @@ def test_desired_speed_can_be_mutated_via_agent_handle(
 ):
     """Test that desired_speed can be changed through the agent handle."""
     sim, room = create_simulation(model_class)
-    wp = sim.add_waypoint_stage(
-        [(jps.circle_to_polygon(center=(10, 1), radius=0.5), room)]
-    )
-    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
     agent_id = sim.add_agent(
-        journey_id=journey_id,
-        stage_id=wp,
-        position=(1, 1),
+        room.at(1, 1),
+        route=stay_at(sim, room, (10, 1)),
         state=state_class(**extra_state_kwargs),
-        region_id=room,
-    )
+    ).id
 
     sim.agent(agent_id).state.desired_speed = 1.5
 
@@ -114,10 +112,6 @@ def test_removed_parameter_names_raise(
 ):
     """Test that pre-2.0 parameter names are gone without replacement."""
     sim, room = create_simulation(model_class)
-    wp = sim.add_waypoint_stage(
-        [(jps.circle_to_polygon(center=(10, 1), radius=0.5), room)]
-    )
-    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
     for removed_attr in removed_attrs:
         with pytest.raises(TypeError):
@@ -128,12 +122,10 @@ def test_removed_parameter_names_raise(
             )
 
     agent_id = sim.add_agent(
-        journey_id=journey_id,
-        stage_id=wp,
-        position=(1, 1),
+        room.at(1, 1),
+        route=stay_at(sim, room, (10, 1)),
         state=state_class(**extra_state_kwargs),
-        region_id=room,
-    )
+    ).id
 
     for removed_attr in removed_attrs:
         with pytest.raises(AttributeError):

@@ -6,6 +6,7 @@ from dataclasses import dataclass
 import jupedsim as jps
 import pytest
 import shapely
+from jupedsim.pyjupedsim import WalkableSurface
 
 
 ########### Helper functions and fixtures ###########
@@ -15,7 +16,7 @@ def rectangle(p1: tuple[float, float], p2: tuple[float, float]):
 
 @dataclass
 class TwoFloors:
-    surface: jps.WalkableSurface
+    surface: WalkableSurface
     ground_floor: int
     upper_floor: int
     ground_conn_edge = ((5, 0), (5, 5))
@@ -32,7 +33,7 @@ class TwoFloors:
 
 @pytest.fixture
 def two_floors():
-    walkable_surface = jps.WalkableSurface()
+    walkable_surface = WalkableSurface()
     ground_floor = walkable_surface.add_region(
         boundary=rectangle((0, 0), (5, 5)), height=0.0
     )
@@ -51,7 +52,7 @@ def two_floors():
     ],
 )
 def test_add_region_too_few_points(boundary, holes):
-    walkable_surface = jps.WalkableSurface()
+    walkable_surface = WalkableSurface()
     with pytest.raises(
         jps.SimulationError, match="needs at least 3 different points"
     ):
@@ -86,13 +87,13 @@ def test_add_region_too_few_points(boundary, holes):
     ],
 )
 def test_add_region_not_simple(boundary, holes):
-    walkable_surface = jps.WalkableSurface()
+    walkable_surface = WalkableSurface()
     with pytest.raises(jps.SimulationError, match="is not simple"):
         walkable_surface.add_region(boundary=boundary, holes=holes)
 
 
 def test_overlapping_geometry():
-    walkable_surface = jps.WalkableSurface()
+    walkable_surface = WalkableSurface()
     id_0 = walkable_surface.add_region(
         boundary=rectangle((0, 0), (10, 10)), height=0.0
     )
@@ -105,7 +106,7 @@ def test_overlapping_geometry():
 
 
 def test_touching_polygons():
-    walkable_surface = jps.WalkableSurface()
+    walkable_surface = WalkableSurface()
     id_0 = walkable_surface.add_region(
         boundary=rectangle((0, 0), (1, 1)), height=0.0
     )
@@ -167,7 +168,7 @@ def test_touching_polygons():
     ],
 )
 def test_add_region_invalid_holes(boundary, holes):
-    walkable_surface = jps.WalkableSurface()
+    walkable_surface = WalkableSurface()
     with pytest.raises(
         jps.SimulationError, match="Holes must lie strictly inside the boundary"
     ):
@@ -175,7 +176,7 @@ def test_add_region_invalid_holes(boundary, holes):
 
 
 def test_gets_region_after_error_and_can_create_geometry():
-    walkable_surface = jps.WalkableSurface()
+    walkable_surface = WalkableSurface()
     polygon = [(0, 0), (1, 1), (0, 1), (1, 0)]
     with pytest.raises(jps.SimulationError, match="is not simple"):
         walkable_surface.add_region(boundary=polygon, height=0.0)
@@ -247,7 +248,7 @@ def test_connect_points_but_no_edge(two_floors):
 
 
 def test_connect_too_steep_stairs():
-    walkable_surface = jps.WalkableSurface()
+    walkable_surface = WalkableSurface()
     id_0 = walkable_surface.add_region(
         boundary=rectangle((0, 0), (5, 5)), height=0.0
     )
@@ -264,7 +265,7 @@ def test_connect_too_steep_stairs():
 
 
 def test_connect_not_planar():
-    walkable_surface = jps.WalkableSurface()
+    walkable_surface = WalkableSurface()
     id_0 = walkable_surface.add_region(
         boundary=rectangle((0, 0), (5, 5)), height=0.0
     )
@@ -282,7 +283,7 @@ def test_connect_not_planar():
 
 
 def test_connector_not_simple_in_2d():
-    walkable_surface = jps.WalkableSurface()
+    walkable_surface = WalkableSurface()
     id_0 = walkable_surface.add_region(
         boundary=rectangle((0, 0), (4, 4)), height=0.0
     )
@@ -348,13 +349,13 @@ def test_connect_to_connector(two_floors):
 
 ########### Error cases: Create Geometry ###########
 def test_empty_mesh():
-    walkable_surface = jps.WalkableSurface()
+    walkable_surface = WalkableSurface()
     with pytest.raises(jps.SimulationError, match="No Geometry"):
         walkable_surface.create_geometry()
 
 
 def test_unconnected_geometry():
-    walkable_surface = jps.WalkableSurface()
+    walkable_surface = WalkableSurface()
     polygon = rectangle((0, 0), (1, 1))
     walkable_surface.add_region(boundary=polygon, height=0.0)
     walkable_surface.add_region(boundary=polygon, height=3.0)
@@ -363,7 +364,7 @@ def test_unconnected_geometry():
 
 
 def test_stairs_through_other_floor():
-    walkable_surface = jps.WalkableSurface()
+    walkable_surface = WalkableSurface()
     floor = rectangle((0, 0), (100, 100))
     ground_floor = walkable_surface.add_region(
         boundary=floor, holes=[rectangle((20, 20), (24, 22))], height=0.0
@@ -434,7 +435,7 @@ def test_region_ids(two_floors):
 
 
 def test_add_region_from_shapely_polygon():
-    walkable_surface = jps.WalkableSurface()
+    walkable_surface = WalkableSurface()
     floor = rectangle((0, 0), (10, 10))
     ground_floor = shapely.Polygon(
         floor, holes=[[(2, 2), (6, 2), (6, 2.2), (6, 3.8), (6, 4), (2, 4)]]
@@ -456,7 +457,7 @@ def test_add_region_from_shapely_polygon():
 
 
 def test_striped_floor():
-    walkable_surface = jps.WalkableSurface()
+    walkable_surface = WalkableSurface()
     num = 10
     prev_id = -1
     for x in range(num):

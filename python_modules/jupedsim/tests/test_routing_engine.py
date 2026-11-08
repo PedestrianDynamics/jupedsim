@@ -5,6 +5,7 @@ from pathlib import Path
 import jupedsim as jps
 import pytest
 import shapely
+from jupedsim.pyjupedsim import WalkableSurface
 
 OBJ = Path(__file__).parents[3] / "examples/geometry/multi_level_u_stair.obj"
 
@@ -73,7 +74,7 @@ def test_orientation_is_unit_vector():
 
 
 def test_a_route_on_a_flat_region_keeps_clear_of_a_hole():
-    surface = jps.WalkableSurface()
+    surface = WalkableSurface()
     surface.add_region(
         polygon=shapely.Polygon(
             [(0, 0), (10, 0), (10, 10), (0, 10)],
@@ -128,7 +129,7 @@ def _path_length(path):
 
 
 def test_simple_path():
-    surface = jps.WalkableSurface()
+    surface = WalkableSurface()
     surface.add_region(boundary=[(0, 0), (0, 10), (10, 10), (10, 0)])
     engine = jps.SurfaceMeshShortestPathRoutingEngine(surface.create_geometry())
 
@@ -143,7 +144,7 @@ def _load_geometry_from_wkt(filename: str) -> jps.Geometry:
     """Load a WKT file given relative to the repository root."""
     repo_root = Path(__file__).parents[3]
     wkt = shapely.from_wkt((repo_root / filename).read_text(encoding="utf-8"))
-    surface = jps.WalkableSurface()
+    surface = WalkableSurface()
     surface.add_region(polygon=shapely.union_all(shapely.get_parts(wkt)))
     return surface.create_geometry()
 

@@ -258,7 +258,8 @@ void init_agent_view(py::module_& m)
             clean_doc(R"(
             Unit vector along the route to the agent's final target.
 
-            Zero when the agent has already reached it.
+            Zero inside the area of the stage the agent heads for, and at a point
+            target only where the agent stands exactly on it.
             )")
                 .c_str());
 }

@@ -7,14 +7,15 @@
 #include "geometry/geometry.hpp"
 #include "geometry/location.hpp"
 #include "geometry/walkable_surface.hpp"
-#include "journey.hpp"
 #include "kernel.hpp"
 #include "operational_model.hpp"
 #include "operational_model_state.hpp"
 #include "polygon.hpp"
+#include "route.hpp"
+#include "rule.hpp"
+#include "simulation_error.hpp"
 #include "stage.hpp"
 #include "stage_description.hpp"
-#include "transition.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep
 
 #include <fmt/format.h>
@@ -24,12 +25,12 @@
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h> // IWYU pragma: keep
-#include <pybind11/typing.h>
 
 #include <cstddef>
 #include <cstdint>
 #include <map>
 #include <memory>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -114,45 +115,45 @@ void init_simulation(py::module_& m)
             py::arg("dt"),
             py::arg("floorfield_options"))
         .def(
-            "add_waypoint_stage",
+            "create_waypoint_stage",
             [](Simulation& sim, Areas areas) {
                 return sim.add_stage(WaypointDescription{stage_areas(std::move(areas))}).get_id();
             },
             py::arg("areas"))
         .def(
-            "add_exit_stage",
+            "create_exit_stage",
             [](Simulation& sim, Areas areas) {
                 return sim.add_stage(ExitDescription{stage_areas(std::move(areas))}).get_id();
             },
             py::arg("areas"))
         .def(
-            "add_direct_steering_stage",
+            "create_direct_steering_stage",
             [](Simulation& sim) { return sim.add_stage(DirectSteeringDescription{}).get_id(); })
         .def(
-            "add_journey",
-            [](Simulation& sim, const std::map<uint64_t, PyTransition>& journey) {
-                auto native_journey = std::map<BaseStage::ID, TransitionDescription>{};
-                for(const auto& [stage_id, transition] : journey) {
-                    native_journey.emplace(stage_id, transition.description);
+            "add_route",
+            [](Simulation& sim, const std::map<uint64_t, PyRule>& route) {
+                auto native_route = std::map<BaseStage::ID, RuleDescription>{};
+                for(const auto& [stage_id, rule] : route) {
+                    native_route.emplace(stage_id, rule.description);
                 }
-                return sim.add_journey(native_journey).get_id();
+                return sim.add_route(native_route).get_id();
             },
-            py::arg("journey"))
+            py::arg("route"))
         .def(
             "add_agent",
             [](Simulation& sim,
-               uint64_t journey_id,
+               uint64_t route_id,
                uint64_t stage_id,
                std::tuple<double, double> position,
                OperationalModelState state,
                std::size_t region_id) {
                 return sim
                     .add_agent(
-                        journey_id, stage_id, into_point(position), std::move(state), region_id)
+                        route_id, stage_id, into_point(position), std::move(state), region_id)
                     .get_id();
             },
             py::kw_only(),
-            py::arg("journey_id"),
+            py::arg("route_id"),
             py::arg("stage_id"),
             py::arg("position"),
             py::arg("state"),
@@ -163,24 +164,108 @@ void init_simulation(py::module_& m)
         .def(
             "removed_agents",
             [](const Simulation& sim) {
-                auto removed_agent_ids = sim.removed_agents();
-                auto agent_ids = std::vector<GenericAgent::ID::UnderlyingType>();
-                agent_ids.reserve(removed_agent_ids.size());
-                for(auto agent_id : removed_agent_ids) {
-                    agent_ids.emplace_back(agent_id.get_id());
+                using Record = std::tuple<
+                    GenericAgent::ID::UnderlyingType,
+                    std::optional<BaseStage::ID::UnderlyingType>,
+                    double>;
+                std::vector<Record> records;
+                for(const auto& record : sim.removed_agents()) {
+                    std::optional<BaseStage::ID::UnderlyingType> exit;
+                    if(record.exit) {
+                        exit = record.exit->get_id();
+                    }
+                    records.emplace_back(record.id.get_id(), exit, record.time);
                 }
-                return agent_ids;
+                return records;
             })
         .def("iterate", [](Simulation& sim) { sim.iterate(); })
         .def("close", [](Simulation& sim) { sim.close(); })
         .def(
-            "switch_agent_journey",
-            [](Simulation& sim, uint64_t agent_id, uint64_t journey_id, uint64_t stage_id) {
-                sim.switch_agent_journey(agent_id, journey_id, stage_id);
+            "switch_agent_route",
+            [](Simulation& sim, uint64_t agent_id, uint64_t route_id, uint64_t stage_id) {
+                sim.switch_agent_route(agent_id, route_id, stage_id);
             },
             py::kw_only(),
             py::arg("agent_id"),
-            py::arg("journey_id"),
+            py::arg("route_id"),
+            py::arg("stage_id"))
+        .def(
+            "close_exit",
+            [](Simulation& sim, uint64_t stage_id, bool informed) {
+                std::vector<uint64_t> ids;
+                for(const auto id : sim.close_exit(stage_id, informed)) {
+                    ids.emplace_back(id.get_id());
+                }
+                return ids;
+            },
+            py::arg("stage_id"),
+            py::arg("informed"))
+        .def(
+            "open_exit",
+            [](Simulation& sim, uint64_t stage_id) {
+                std::vector<uint64_t> ids;
+                for(const auto id : sim.open_exit(stage_id)) {
+                    ids.emplace_back(id.get_id());
+                }
+                return ids;
+            },
+            py::arg("stage_id"))
+        .def(
+            "set_round_robin_weights",
+            [](Simulation& sim,
+               uint64_t route_id,
+               uint64_t stage_id,
+               const std::map<uint64_t, uint64_t>& weights) {
+                std::map<BaseStage::ID, uint64_t> native{};
+                for(const auto& [id, weight] : weights) {
+                    native.emplace(id, weight);
+                }
+                sim.set_round_robin_weights(route_id, stage_id, native);
+            },
+            py::arg("route_id"),
+            py::arg("stage_id"),
+            py::arg("weights"))
+        .def(
+            "hold",
+            [](Simulation& sim, uint64_t route_id, uint64_t stage_id) {
+                sim.hold(route_id, stage_id);
+            },
+            py::arg("route_id"),
+            py::arg("stage_id"))
+        .def(
+            "release",
+            [](Simulation& sim, uint64_t route_id, uint64_t stage_id) {
+                sim.release(route_id, stage_id);
+            },
+            py::arg("route_id"),
+            py::arg("stage_id"))
+        .def(
+            "is_held",
+            [](const Simulation& sim, uint64_t route_id, uint64_t stage_id) {
+                return sim.is_held(route_id, stage_id);
+            },
+            py::arg("route_id"),
+            py::arg("stage_id"))
+        .def(
+            "held_agents",
+            [](Simulation& sim, uint64_t route_id, uint64_t stage_id) {
+                std::vector<uint64_t> ids;
+                for(const auto id : sim.held_agents(route_id, stage_id)) {
+                    ids.emplace_back(id.get_id());
+                }
+                return ids;
+            },
+            py::arg("route_id"),
+            py::arg("stage_id"))
+        .def(
+            "stage_closed",
+            [](const Simulation& sim, uint64_t stage_id) {
+                const auto* stage = sim.stage(stage_id);
+                if(stage == nullptr) {
+                    throw SimulationError("Unknown stage id {}", stage_id);
+                }
+                return stage->closed();
+            },
             py::arg("stage_id"))
         .def("agent_count", [](const Simulation& sim) { return sim.agent_count(); })
         .def("elapsed_time", [](const Simulation& sim) { return sim.elapsed_time(); })
@@ -249,6 +334,20 @@ void init_simulation(py::module_& m)
             [](Simulation& sim, uint64_t stage_id) { return sim.travel_times(stage_id); },
             py::arg("stage_id"))
         .def(
+            "travel_time",
+            [](Simulation& sim, uint64_t stage_id, const Location& where) {
+                return sim.travel_time(stage_id, where);
+            },
+            py::arg("stage_id"),
+            py::arg("where"))
+        .def(
+            "path_length",
+            [](Simulation& sim, const Location& from, const Location& to) {
+                return sim.path_length(from, to);
+            },
+            py::arg("from_"),
+            py::arg("to"))
+        .def(
             "set_agent_target",
             [](Simulation& sim, uint64_t agent_id, std::tuple<double, double> target) {
                 sim.set_agent_target(agent_id, into_point(target));
@@ -285,15 +384,6 @@ void init_simulation(py::module_& m)
                 }
                 return agents;
             })
-        .def(
-            "get_stage",
-            [](py::object self, uint64_t id) -> py::typing::Union<Waypoint, Exit, DirectSteering> {
-                return py::cast(
-                    self.cast<Simulation&>().stage(id),
-                    py::return_value_policy::reference_internal,
-                    self);
-            },
-            py::arg("stage_id"))
         .def("set_tracing", [](Simulation& sim, bool status) { sim.set_tracing(status); })
         .def(
             "set_timer_log_level",
