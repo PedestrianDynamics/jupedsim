@@ -204,6 +204,11 @@ for _ in range(1000):
 print(agent.position)             # still valid, freshly resolved
 ```
 
+`agent.position` is still the `(x, y)` tuple. `agent.location` is new and
+returns a {class}`~jupedsim.Location`, the same point plus the region the
+agent is on; it can be passed wherever a location is accepted, for example
+to another agent's `steer_to`.
+
 `agent.state` returns a per-model state handle with the same semantics: it
 resolves per access and raises once the agent is gone.
 

@@ -37,6 +37,12 @@ Such a region can be added like:
     surface = jps.WalkableSurface()
     room = surface.add_region(polygon=shapely.Polygon([(0, 0), (10, 0), (10, 10), (0, 10)]))
 
+or, equivalently, from the boundary points:
+
+.. code:: python
+
+    room = surface.add_region(boundary=[(0, 0), (10, 0), (10, 10), (0, 10)])
+
 :meth:`~jupedsim.WalkableSurface.add_region` returns a :class:`~jupedsim.Region` handle.
 Agents and stages are placed in a region through this handle, see :doc:`routing`.
 
@@ -108,6 +114,18 @@ For creating walkable areas with holes you can use:
         ],
     )
     room = surface.add_region(polygon=walkable_area)
+
+or pass the rings directly:
+
+.. code:: python
+
+    room = surface.add_region(
+        boundary=[(0, 0), (20, 0), (20, 20), (0, 20)],
+        holes=[
+            [(1, 1), (1, 2), (2, 2), (2, 1)],
+            [(10, 1), (10, 2), (11, 2), (11, 1)],
+        ],
+    )
 
 Holes have to lie strictly inside the boundary.
 An obstacle that touches the boundary is instead "subtracted" from the walkable area:
