@@ -62,8 +62,8 @@ TEST(Polygon, RepeatedClosingPointIsDropped)
 {
     const std::vector<Point> open{{0, 0}, {1, 0}, {0, 1}};
     const std::vector<Point> closed{{0, 0}, {1, 0}, {0, 1}, {0, 0}};
-    const Poly from_open = Polygon(open);
-    const Poly from_closed = Polygon(closed);
+    const epick::Poly from_open = Polygon(open);
+    const epick::Poly from_closed = Polygon(closed);
     EXPECT_EQ(from_closed, from_open);
 }
 

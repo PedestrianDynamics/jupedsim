@@ -83,23 +83,23 @@ std::tuple<Point, double> Polygon::containing_circle() const
     return {center, distance};
 }
 
-std::string as_wkt(const PolyWithHoles& polygon)
+std::string as_wkt(const epick::PolyWithHoles& polygon)
 {
     if(polygon.is_unbounded()) {
         throw SimulationError("Empty polygon.");
     }
     // fmt's "{}" is the shortest decimal that reads back to the same double.
     std::string wkt{"POLYGON ("};
-    const auto append_ring = [&wkt](const Poly& ring) {
+    const auto append_ring = [&wkt](const epick::Poly& ring) {
         wkt += '(';
-        for(const Point2D& q : ring.container()) {
+        for(const epick::Point2D& q : ring.container()) {
             fmt::format_to(std::back_inserter(wkt), "{} {}, ", q.x(), q.y());
         }
-        const Point2D& first = ring.container().front();
+        const epick::Point2D& first = ring.container().front();
         fmt::format_to(std::back_inserter(wkt), "{} {})", first.x(), first.y());
     };
     append_ring(polygon.outer_boundary());
-    for(const Poly& hole : polygon.holes()) {
+    for(const epick::Poly& hole : polygon.holes()) {
         wkt += ", ";
         append_ring(hole);
     }

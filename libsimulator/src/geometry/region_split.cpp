@@ -37,16 +37,16 @@ constexpr double plane_normal_min_cos = 0.99996192306417; // cos(0.5 deg), fixed
 namespace pmp = CGAL::Polygon_mesh_processing;
 
 struct SeedPlane {
-    Vector3D unit_normal;
-    Point3D base;
+    epick::Vector3D unit_normal;
+    epick::Point3D base;
 };
 
 /// One planar patch (phase 1), later a merged region (phase 2). Only union-find roots
 /// remain live; an absorbed patch's data is left behind and never read again.
 struct Patch {
-    SurfaceMesh::Face_index seed{}; // smallest face index, total tie-break of the height key
+    epick::Mesh::Face_index seed{}; // smallest face index, total tie-break of the height key
     double min_z = std::numeric_limits<double>::infinity();
-    std::vector<SurfaceMesh::Halfedge_index> boundary{};
+    std::vector<epick::Mesh::Halfedge_index> boundary{};
     std::vector<std::size_t> neighbors{}; // patch ids, possibly stale; re-rooted on use
     std::uint64_t version = 0; // bumped on every absorb, keys the failed-pair cache
     bool alive = true;
@@ -62,9 +62,9 @@ bool patch_key_less(const Patch& a, const Patch& b)
 }
 
 bool fits_seed_plane(
-    const SurfaceMesh& mesh,
-    SurfaceMesh::Face_index f,
-    const Vector3D& face_normal,
+    const epick::Mesh& mesh,
+    epick::Mesh::Face_index f,
+    const epick::Vector3D& face_normal,
     const SeedPlane& plane)
 {
     if(CGAL::to_double(face_normal * plane.unit_normal) < plane_normal_min_cos) {
@@ -80,13 +80,13 @@ bool fits_seed_plane(
 }
 
 /// Boundary halfedges of the faces with patch_of[f] == id, walking only @p patch_faces.
-std::vector<SurfaceMesh::Halfedge_index> patch_boundary(
-    const SurfaceMesh& mesh,
-    const std::vector<SurfaceMesh::Face_index>& patch_faces,
+std::vector<epick::Mesh::Halfedge_index> patch_boundary(
+    const epick::Mesh& mesh,
+    const std::vector<epick::Mesh::Face_index>& patch_faces,
     const std::vector<std::size_t>& patch_of,
     std::size_t id)
 {
-    std::vector<SurfaceMesh::Halfedge_index> boundary{};
+    std::vector<epick::Mesh::Halfedge_index> boundary{};
     for(const auto f : patch_faces) {
         for(const auto h : CGAL::halfedges_around_face(mesh.halfedge(f), mesh)) {
             const auto opp = mesh.opposite(h);
@@ -98,7 +98,7 @@ std::vector<SurfaceMesh::Halfedge_index> patch_boundary(
     return boundary;
 }
 
-double min_face_z(const SurfaceMesh& mesh, SurfaceMesh::Face_index f)
+double min_face_z(const epick::Mesh& mesh, epick::Mesh::Face_index f)
 {
     double z = std::numeric_limits<double>::infinity();
     for(const auto v : CGAL::vertices_around_face(mesh.halfedge(f), mesh)) {
@@ -109,8 +109,8 @@ double min_face_z(const SurfaceMesh& mesh, SurfaceMesh::Face_index f)
 
 /// Register a finished patch: fill its metadata and boundary.
 void finish_patch(
-    const SurfaceMesh& mesh,
-    const std::vector<SurfaceMesh::Face_index>& patch_faces,
+    const epick::Mesh& mesh,
+    const std::vector<epick::Mesh::Face_index>& patch_faces,
     const std::vector<std::size_t>& patch_of,
     Patch& patch)
 {
@@ -127,8 +127,8 @@ void finish_patch(
 /// normals projects by the restriction of an affine bijection, hence injectively -- the
 /// result needs no certificate and the recursion needs no further fallback.
 void resplit_exactly_coplanar(
-    const SurfaceMesh& mesh,
-    const std::vector<SurfaceMesh::Face_index>& faces_to_split,
+    const epick::Mesh& mesh,
+    const std::vector<epick::Mesh::Face_index>& faces_to_split,
     std::vector<std::size_t>& patch_of,
     std::vector<Patch>& patches,
     std::vector<std::uint8_t>& in_set)
@@ -137,19 +137,19 @@ void resplit_exactly_coplanar(
         patch_of[f] = unassigned;
         in_set[f] = 1;
     }
-    std::vector<SurfaceMesh::Face_index> patch_faces{};
+    std::vector<epick::Mesh::Face_index> patch_faces{};
     for(const auto seed : faces_to_split) {
         if(patch_of[seed] != unassigned) {
             continue;
         }
         const auto id = patches.size();
-        std::array<Point3D, 3> p{};
+        std::array<epick::Point3D, 3> p{};
         int i = 0;
         for(const auto v : CGAL::vertices_around_face(mesh.halfedge(seed), mesh)) {
             p[i++] = mesh.point(v);
         }
         patch_faces.clear();
-        std::queue<SurfaceMesh::Face_index> frontier{};
+        std::queue<epick::Mesh::Face_index> frontier{};
         patch_of[seed] = id;
         patch_faces.emplace_back(seed);
         frontier.push(seed);
@@ -187,16 +187,16 @@ void resplit_exactly_coplanar(
 /// Phase 1: epsilon-tolerant planar floodfill. Seeds in ascending face-index order; a
 /// neighbor joins while it fits the seed's plane. Every patch is certified; failures are
 /// re-split exactly.
-std::vector<std::size_t> grow_planar_patches(const SurfaceMesh& mesh, std::vector<Patch>& patches)
+std::vector<std::size_t> grow_planar_patches(const epick::Mesh& mesh, std::vector<Patch>& patches)
 {
     std::vector<std::size_t> patch_of(mesh.number_of_faces(), unassigned);
-    std::vector<Vector3D> normal_of(mesh.number_of_faces());
+    std::vector<epick::Vector3D> normal_of(mesh.number_of_faces());
     for(const auto f : faces(mesh)) {
         normal_of[f] = pmp::compute_face_normal(f, mesh);
     }
 
     std::vector<std::uint8_t> in_set(mesh.number_of_faces(), 0);
-    std::vector<SurfaceMesh::Face_index> patch_faces{};
+    std::vector<epick::Mesh::Face_index> patch_faces{};
     for(const auto seed : faces(mesh)) {
         if(patch_of[seed] != unassigned) {
             continue;
@@ -206,7 +206,7 @@ std::vector<std::size_t> grow_planar_patches(const SurfaceMesh& mesh, std::vecto
             normal_of[seed],
             mesh.point(*std::begin(CGAL::vertices_around_face(mesh.halfedge(seed), mesh)))};
         patch_faces.clear();
-        std::queue<SurfaceMesh::Face_index> frontier{};
+        std::queue<epick::Mesh::Face_index> frontier{};
         patch_of[seed] = id;
         patch_faces.emplace_back(seed);
         frontier.push(seed);
@@ -250,8 +250,8 @@ std::size_t find_root(std::vector<std::size_t>& parent, std::size_t id)
 
 /// The boundary a merge of roots @p a and @p b would have: both boundaries minus their
 /// shared seam. Pure -- failed merge attempts must not mutate anything.
-std::vector<SurfaceMesh::Halfedge_index> merged_boundary(
-    const SurfaceMesh& mesh,
+std::vector<epick::Mesh::Halfedge_index> merged_boundary(
+    const epick::Mesh& mesh,
     const Patch& a,
     const Patch& b,
     const std::vector<std::size_t>& patch_of,
@@ -259,9 +259,9 @@ std::vector<SurfaceMesh::Halfedge_index> merged_boundary(
     std::size_t root_a,
     std::size_t root_b)
 {
-    std::vector<SurfaceMesh::Halfedge_index> result{};
+    std::vector<epick::Mesh::Halfedge_index> result{};
     result.reserve(a.boundary.size() + b.boundary.size());
-    const auto keep = [&](SurfaceMesh::Halfedge_index h) {
+    const auto keep = [&](epick::Mesh::Halfedge_index h) {
         const auto opp = mesh.opposite(h);
         if(mesh.is_border(opp)) {
             return true;
@@ -278,7 +278,7 @@ std::vector<SurfaceMesh::Halfedge_index> merged_boundary(
 /// adjacent regions whenever the merged projected boundary stays strictly simple. Repeats
 /// until a full sweep merges nothing.
 void merge_to_fixpoint(
-    const SurfaceMesh& mesh,
+    const epick::Mesh& mesh,
     const std::vector<std::size_t>& patch_of,
     std::vector<Patch>& patches,
     std::vector<std::size_t>& parent)
@@ -382,7 +382,7 @@ void merge_to_fixpoint(
 }
 } // namespace
 
-RegionSplit split_into_regions(const SurfaceMesh& mesh)
+RegionSplit split_into_regions(const epick::Mesh& mesh)
 {
     // number_of_faces() counts live faces only; with garbage, face indices exceed it
     // and the vector would be indexed out of bounds.

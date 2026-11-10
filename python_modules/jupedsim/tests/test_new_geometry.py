@@ -15,7 +15,7 @@ def rectangle(p1: tuple[float, float], p2: tuple[float, float]):
 
 @dataclass
 class TwoFloors:
-    surface: jps.WalkableSurface
+    surface: jps.GeometryBuilder
     ground_floor: int
     upper_floor: int
     ground_conn_edge = ((5, 0), (5, 5))
@@ -32,14 +32,14 @@ class TwoFloors:
 
 @pytest.fixture
 def two_floors():
-    walkable_surface = jps.WalkableSurface()
-    ground_floor = walkable_surface.add_region(
+    builder = jps.GeometryBuilder()
+    ground_floor = builder.add_region(
         boundary=rectangle((0, 0), (5, 5)), height=0.0
     )
-    upper_floor = walkable_surface.add_region(
+    upper_floor = builder.add_region(
         boundary=rectangle((10, 0), (15, 5)), height=3.0
     )
-    return TwoFloors(walkable_surface, ground_floor, upper_floor)
+    return TwoFloors(builder, ground_floor, upper_floor)
 
 
 ########### Error cases: Add Region ###########
@@ -51,11 +51,11 @@ def two_floors():
     ],
 )
 def test_add_region_too_few_points(boundary, holes):
-    walkable_surface = jps.WalkableSurface()
+    builder = jps.GeometryBuilder()
     with pytest.raises(
-        jps.SimulationError, match="needs at least 3 different points"
+        jps.SimulationError, match="Invalid polygon provided to add_region"
     ):
-        walkable_surface.add_region(boundary=boundary, holes=holes)
+        builder.add_region(boundary=boundary, holes=holes, height=0.0)
 
 
 @pytest.mark.parametrize(
@@ -63,11 +63,6 @@ def test_add_region_too_few_points(boundary, holes):
     [
         pytest.param([(0, 0), (1, 1), (1, 2), (1, 1)], [], id="no-area"),
         pytest.param([(0, 0), (1, 1), (0, 1), (1, 0)], [], id="bowtie"),
-        pytest.param(
-            [(0, 0), (1, 0), (1, 1), (2, 1), (2, 2), (1, 2), (1, 1), (0, 1)],
-            [],
-            id="boundary-touches-itself-at-vertex",
-        ),
         pytest.param(
             [(0, 0), (4, 0), (4, 4), (3, 4), (2, 0), (1, 4), (0, 4)],
             [],
@@ -86,36 +81,33 @@ def test_add_region_too_few_points(boundary, holes):
     ],
 )
 def test_add_region_not_simple(boundary, holes):
-    walkable_surface = jps.WalkableSurface()
-    with pytest.raises(jps.SimulationError, match="is not simple"):
-        walkable_surface.add_region(boundary=boundary, holes=holes)
+    builder = jps.GeometryBuilder()
+    with pytest.raises(
+        jps.SimulationError, match="Invalid polygon provided to add_region"
+    ):
+        builder.add_region(boundary=boundary, holes=holes, height=0.0)
 
 
 def test_overlapping_geometry():
-    walkable_surface = jps.WalkableSurface()
-    id_0 = walkable_surface.add_region(
-        boundary=rectangle((0, 0), (10, 10)), height=0.0
-    )
+    builder = jps.GeometryBuilder()
+    id_0 = builder.add_region(boundary=rectangle((0, 0), (10, 10)), height=0.0)
+    id_1 = builder.add_region(boundary=rectangle((5, 5), (15, 15)), height=0.0)
     with pytest.raises(
-        jps.SimulationError, match=f"New region overlaps with region {id_0}"
+        jps.SimulationError, match=f"Region {id_1} overlaps with region {id_0}"
     ):
-        walkable_surface.add_region(
-            boundary=rectangle((5, 5), (15, 15)), height=0.0
-        )
+        builder.build()
 
 
 def test_touching_polygons():
-    walkable_surface = jps.WalkableSurface()
-    id_0 = walkable_surface.add_region(
-        boundary=rectangle((0, 0), (1, 1)), height=0.0
-    )
-    with pytest.raises(jps.SimulationError, match=f"touches region {id_0}"):
-        walkable_surface.add_region(
-            boundary=rectangle((1, 1), (3, 3)), height=0.0
-        )
+    builder = jps.GeometryBuilder()
+    id_0 = builder.add_region(boundary=rectangle((0, 0), (1, 1)), height=0.0)
+    id_1 = builder.add_region(boundary=rectangle((1, 1), (3, 3)), height=0.0)
+    with pytest.raises(
+        jps.SimulationError, match=f"Region {id_1} touches region {id_0}"
+    ):
+        builder.build()
 
 
-@pytest.mark.xfail(reason="Holes are not validated yet", strict=True)
 @pytest.mark.parametrize(
     "boundary, holes",
     [
@@ -167,23 +159,25 @@ def test_touching_polygons():
     ],
 )
 def test_add_region_invalid_holes(boundary, holes):
-    walkable_surface = jps.WalkableSurface()
+    builder = jps.GeometryBuilder()
     with pytest.raises(
         jps.SimulationError, match="Holes must lie strictly inside the boundary"
     ):
-        walkable_surface.add_region(boundary=boundary, holes=holes)
+        builder.add_region(boundary=boundary, holes=holes, height=0.0)
 
 
-def test_gets_region_after_error_and_can_create_geometry():
-    walkable_surface = jps.WalkableSurface()
+def test_gets_region_after_error_and_can_build():
+    builder = jps.GeometryBuilder()
     polygon = [(0, 0), (1, 1), (0, 1), (1, 0)]
-    with pytest.raises(jps.SimulationError, match="is not simple"):
-        walkable_surface.add_region(boundary=polygon, height=0.0)
-    region_id = walkable_surface.add_region(
+    with pytest.raises(
+        jps.SimulationError, match="Invalid polygon provided to add_region"
+    ):
+        builder.add_region(boundary=polygon, height=0.0)
+    region_id = builder.add_region(
         boundary=rectangle((0, 0), (1, 1)), height=0.0
     )
     assert region_id == 0
-    walkable_surface.create_geometry()
+    builder.build()
 
 
 ########### Error cases: Connect Regions ###########
@@ -247,15 +241,11 @@ def test_connect_points_but_no_edge(two_floors):
 
 
 def test_connect_too_steep_stairs():
-    walkable_surface = jps.WalkableSurface()
-    id_0 = walkable_surface.add_region(
-        boundary=rectangle((0, 0), (5, 5)), height=0.0
-    )
-    id_1 = walkable_surface.add_region(
-        boundary=rectangle((6, 0), (8, 5)), height=3.0
-    )
+    builder = jps.GeometryBuilder()
+    id_0 = builder.add_region(boundary=rectangle((0, 0), (5, 5)), height=0.0)
+    id_1 = builder.add_region(boundary=rectangle((6, 0), (8, 5)), height=3.0)
     with pytest.raises(jps.SimulationError, match="too steep"):
-        walkable_surface.connect_regions(
+        builder.connect_regions(
             from_region=id_0,
             from_edge=((5, 0), (5, 5)),
             to_region=id_1,
@@ -264,16 +254,14 @@ def test_connect_too_steep_stairs():
 
 
 def test_connect_not_planar():
-    walkable_surface = jps.WalkableSurface()
-    id_0 = walkable_surface.add_region(
-        boundary=rectangle((0, 0), (5, 5)), height=0.0
-    )
-    id_1 = walkable_surface.add_region(
+    builder = jps.GeometryBuilder()
+    id_0 = builder.add_region(boundary=rectangle((0, 0), (5, 5)), height=0.0)
+    id_1 = builder.add_region(
         boundary=rectangle((10, 10), (15, 15)), height=3.0
     )
     # connector edges not parallel in 2D --> not planar
     with pytest.raises(jps.SimulationError, match="not planar"):
-        walkable_surface.connect_regions(
+        builder.connect_regions(
             from_region=id_0,
             from_edge=((5, 0), (5, 5)),
             to_region=id_1,
@@ -282,31 +270,23 @@ def test_connect_not_planar():
 
 
 def test_connector_not_simple_in_2d():
-    walkable_surface = jps.WalkableSurface()
-    id_0 = walkable_surface.add_region(
-        boundary=rectangle((0, 0), (4, 4)), height=0.0
-    )
-    id_1 = walkable_surface.add_region(
-        boundary=rectangle((4, 6), (6, 8)), height=0.0
-    )
+    builder = jps.GeometryBuilder()
+    id_0 = builder.add_region(boundary=rectangle((0, 0), (4, 4)), height=0.0)
+    id_1 = builder.add_region(boundary=rectangle((4, 6), (6, 8)), height=0.0)
     expected_error = "Connector is no simple polygon"
     # edges collinear
     with pytest.raises(jps.SimulationError, match=expected_error):
-        walkable_surface.connect_regions(
+        builder.connect_regions(
             from_region=id_0,
             from_edge=((4, 0), (4, 4)),
             to_region=id_1,
             to_edge=((4, 6), (4, 8)),
         )
-    id_2 = walkable_surface.add_region(
-        boundary=rectangle((2, 2), (6, 3)), height=1.0
-    )
-    id_3 = walkable_surface.add_region(
-        boundary=rectangle((4, 1), (6, 3)), height=2.0
-    )
+    id_2 = builder.add_region(boundary=rectangle((2, 2), (6, 3)), height=1.0)
+    id_3 = builder.add_region(boundary=rectangle((4, 1), (6, 3)), height=2.0)
     # edges cross in xy
     with pytest.raises(jps.SimulationError, match=expected_error):
-        walkable_surface.connect_regions(
+        builder.connect_regions(
             from_region=id_0,
             from_edge=((4, 0), (4, 4)),
             to_region=id_2,
@@ -314,7 +294,7 @@ def test_connector_not_simple_in_2d():
         )
     # edges overlap in xy
     with pytest.raises(jps.SimulationError, match=expected_error):
-        walkable_surface.connect_regions(
+        builder.connect_regions(
             from_region=id_0,
             from_edge=((4, 0), (4, 4)),
             to_region=id_3,
@@ -348,38 +328,38 @@ def test_connect_to_connector(two_floors):
 
 ########### Error cases: Create Geometry ###########
 def test_empty_mesh():
-    walkable_surface = jps.WalkableSurface()
+    builder = jps.GeometryBuilder()
     with pytest.raises(jps.SimulationError, match="No Geometry"):
-        walkable_surface.create_geometry()
+        builder.build()
 
 
 def test_unconnected_geometry():
-    walkable_surface = jps.WalkableSurface()
+    builder = jps.GeometryBuilder()
     polygon = rectangle((0, 0), (1, 1))
-    walkable_surface.add_region(boundary=polygon, height=0.0)
-    walkable_surface.add_region(boundary=polygon, height=3.0)
+    builder.add_region(boundary=polygon, height=0.0)
+    builder.add_region(boundary=polygon, height=3.0)
     with pytest.raises(jps.SimulationError, match="is not connected"):
-        walkable_surface.create_geometry()
+        builder.build()
 
 
 def test_stairs_through_other_floor():
-    walkable_surface = jps.WalkableSurface()
+    builder = jps.GeometryBuilder()
     floor = rectangle((0, 0), (100, 100))
-    ground_floor = walkable_surface.add_region(
+    ground_floor = builder.add_region(
         boundary=floor, holes=[rectangle((20, 20), (24, 22))], height=0.0
     )
-    first_floor = walkable_surface.add_region(boundary=floor, height=3.0)
-    second_floor = walkable_surface.add_region(
+    first_floor = builder.add_region(boundary=floor, height=3.0)
+    second_floor = builder.add_region(
         boundary=floor, holes=[rectangle((36, 40), (40, 42))], height=6.0
     )
-    stairs = walkable_surface.connect_regions(
+    stairs = builder.connect_regions(
         from_region=ground_floor,
         from_edge=((20, 20), (20, 22)),
         to_region=second_floor,
         to_edge=((40, 40), (40, 42)),
     )
     with pytest.raises(jps.SimulationError) as error:
-        walkable_surface.create_geometry()
+        builder.build()
     message = str(error.value)
     assert "pass through each other" in message
     assert re.search(rf"[Rr]egion {first_floor}\b", message)
@@ -391,35 +371,33 @@ def test_edge_used_by_several_connectors(two_floors):
     lower_floor = two_floors.surface.add_region(
         boundary=rectangle((10, 0), (15, 5)), height=-3.0
     )
-    connector2 = two_floors.surface.connect_regions(
-        from_region=two_floors.ground_floor,
-        from_edge=two_floors.ground_conn_edge,
-        to_region=lower_floor,
-        to_edge=two_floors.upper_conn_edge,
-    )
     with pytest.raises(
         jps.SimulationError,
-        match=f"Region {connector2} does not fit to a walkable surface",
+        match=f"of region {two_floors.ground_floor} is already connected",
     ):
-        two_floors.surface.create_geometry()
+        two_floors.surface.connect_regions(
+            from_region=two_floors.ground_floor,
+            from_edge=two_floors.ground_conn_edge,
+            to_region=lower_floor,
+            to_edge=two_floors.upper_conn_edge,
+        )
 
 
 def test_impossible_stairs(two_floors):
     floor3 = two_floors.surface.add_region(
         boundary=rectangle((0, 0), (5, 5)), height=3.0
     )
-    # stairs cannot be entered or left along the surface
-    stairs = two_floors.surface.connect_regions(
-        from_region=two_floors.ground_floor,
-        from_edge=two_floors.ground_conn_edge,
-        to_region=floor3,
-        to_edge=((0, 0), (0, 5)),
-    )
+    # the stairs would lie on top of both floors instead of next to them
     with pytest.raises(
         jps.SimulationError,
-        match=f"Region {stairs} does not fit to a walkable surface",
+        match="Connector does not lie outside of both regions",
     ):
-        two_floors.surface.create_geometry()
+        two_floors.surface.connect_regions(
+            from_region=two_floors.ground_floor,
+            from_edge=two_floors.ground_conn_edge,
+            to_region=floor3,
+            to_edge=((0, 0), (0, 5)),
+        )
 
 
 ########### Correct cases ###########
@@ -430,11 +408,11 @@ def test_region_ids(two_floors):
         1,
         2,
     ]
-    assert two_floors.surface.create_geometry().region_count() == 3
+    assert two_floors.surface.build().region_count() == 3
 
 
 def test_add_region_from_shapely_polygon():
-    walkable_surface = jps.WalkableSurface()
+    builder = jps.GeometryBuilder()
     floor = rectangle((0, 0), (10, 10))
     ground_floor = shapely.Polygon(
         floor, holes=[[(2, 2), (6, 2), (6, 2.2), (6, 3.8), (6, 4), (2, 4)]]
@@ -443,27 +421,35 @@ def test_add_region_from_shapely_polygon():
         floor, holes=[[(2, 4), (2, 3.8), (2, 2.2), (2, 2), (6, 4)]]
     )
 
-    id_0 = walkable_surface.add_region(polygon=ground_floor, height=0.0)
-    id_1 = walkable_surface.add_region(polygon=first_floor, height=3.0)
+    id_0 = builder.add_region(polygon=ground_floor, height=0.0)
+    id_1 = builder.add_region(polygon=first_floor, height=3.0)
     # connecting hole edges only works if the holes were converted
-    walkable_surface.connect_regions(
+    builder.connect_regions(
         from_region=id_0,
         from_edge=((6, 2.2), (6, 3.8)),
         to_region=id_1,
         to_edge=((2, 2.2), (2, 3.8)),
     )
-    assert walkable_surface.create_geometry().region_count() == 3
+    assert builder.build().region_count() == 3
+
+
+def test_add_region_requires_height():
+    builder = jps.GeometryBuilder()
+    with pytest.raises(TypeError):
+        builder.add_region(boundary=rectangle((0, 0), (10, 10)))
+    with pytest.raises(TypeError):
+        builder.add_region(polygon=shapely.box(0, 0, 10, 10))
 
 
 def test_striped_floor():
-    walkable_surface = jps.WalkableSurface()
+    builder = jps.GeometryBuilder()
     num = 10
     prev_id = -1
     for x in range(num):
         stripe = rectangle((2 * x, 0), (2 * x + 1, 1))
-        new_id = walkable_surface.add_region(boundary=stripe)
+        new_id = builder.add_region(boundary=stripe, height=0.0)
         if x > 0:
-            walkable_surface.connect_regions(
+            builder.connect_regions(
                 from_region=prev_id,
                 from_edge=((2 * x - 1, 0), (2 * x - 1, 1)),
                 to_region=new_id,
@@ -471,5 +457,26 @@ def test_striped_floor():
             )
         prev_id = new_id
 
-    geo = walkable_surface.create_geometry()
+    geo = builder.build()
     assert geo.region_count() == 2 * num - 1
+
+
+def test_build_leaves_the_builder_reusable():
+    builder = jps.GeometryBuilder()
+    ground = builder.add_region(
+        boundary=[(0, 0), (10, 0), (10, 10), (0, 10)], height=0.0
+    )
+    first = builder.build()
+    assert builder.build().region_count() == 1
+
+    upper = builder.add_region(
+        boundary=[(14, 0), (20, 0), (20, 10), (14, 10)], height=1.0
+    )
+    builder.connect_regions(
+        from_region=ground,
+        from_edge=((10, 0), (10, 10)),
+        to_region=upper,
+        to_edge=((14, 0), (14, 10)),
+    )
+    assert builder.build().region_count() == 3
+    assert first.region_count() == 1

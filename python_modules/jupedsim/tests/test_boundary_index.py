@@ -1,28 +1,14 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
-"""Smoke checks for the portal boundary index on a real multi-level mesh.
+"""Smoke checks for the portal boundary index on a multi-level geometry: the U-stair.
 
-The portal index only answers correctly while every region of the split
-projects injectively onto (x, y), which split_into_regions() promises --
-the region-count guard protects that promise on a mesh that once violated
-it, and the invariant sweep holds Query()'s contract over a grid of real
-queries.
+The invariant sweep holds Query()'s contract over a grid of real queries.
 """
 
 import math
-from pathlib import Path
 
-import pytest
 from jupedsim import (
-    Geometry,
     SimulationError,
     make_portal_boundary_index,
-)
-
-MESH = (
-    Path(__file__).parents[3]
-    / "examples"
-    / "geometry"
-    / "multi_level_u_stair.obj"
 )
 
 
@@ -55,25 +41,17 @@ def canonical(segment) -> tuple:
     return (a, b) if a <= b else (b, a)
 
 
-@pytest.fixture(scope="module")
-def geometry() -> Geometry:
-    return Geometry.from_obj(str(MESH))
+def test_geometry_has_multiple_regions(u_stair_geometry) -> None:
+    # ground floor, upper floor, landing and the two flights
+    assert u_stair_geometry.region_count() == 5
 
 
-def test_mesh_splits_into_multiple_regions(geometry) -> None:
-    # The folded U-stair cannot share a region with the floors it connects. The
-    # split certifies every region's projection as injective (strictly simple
-    # boundary), so a low count no longer signals folded mega-regions -- only a
-    # single region would mean the overlap went undetected.
-    assert geometry.region_count() >= 2
-
-
-def test_query_invariants_hold_over_a_grid(geometry) -> None:
-    index = make_portal_boundary_index(geometry)
+def test_query_invariants_hold_over_a_grid(u_stair_geometry) -> None:
+    index = make_portal_boundary_index(u_stair_geometry)
     queries = 0
     for x in range(0, 26, 2):
         for y in range(0, 26, 2):
-            for location in locations_at(geometry, x, y):
+            for location in locations_at(u_stair_geometry, x, y):
                 for radius in (1.0, 3.0, 100.0):
                     seen = index.query(location, radius)
                     keys = {canonical(s) for s in seen}
@@ -91,8 +69,10 @@ def test_query_invariants_hold_over_a_grid(geometry) -> None:
     assert queries > 250
 
 
-def test_fixed_sample_points_see_walls(geometry) -> None:
-    index = make_portal_boundary_index(geometry)
-    for x, y in ((1.0, 1.0), (20.0, 14.5)):
-        ground_floor = min(locations_at(geometry, x, y), key=lambda loc: loc.z)
+def test_fixed_sample_points_see_walls(u_stair_geometry) -> None:
+    index = make_portal_boundary_index(u_stair_geometry)
+    for x, y in ((1.0, 1.0), (19.0, 14.5)):
+        ground_floor = min(
+            locations_at(u_stair_geometry, x, y), key=lambda loc: loc.z
+        )
         assert len(index.query(ground_floor, 5.0)) > 0

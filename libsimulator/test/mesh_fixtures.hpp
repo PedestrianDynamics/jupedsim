@@ -21,14 +21,14 @@ namespace fixtures
 
 /// Sweep a profile given in (x, z) along y, producing a strip of quads: enough for a floor,
 /// a stair run, or a level folding back over another.
-inline SurfaceMesh extrude_profile(const std::vector<std::array<double, 2>>& profile, double width)
+inline epick::Mesh extrude_profile(const std::vector<std::array<double, 2>>& profile, double width)
 {
-    SurfaceMesh mesh{};
-    std::vector<SurfaceMesh::Vertex_index> near{};
-    std::vector<SurfaceMesh::Vertex_index> far{};
+    epick::Mesh mesh{};
+    std::vector<epick::Mesh::Vertex_index> near{};
+    std::vector<epick::Mesh::Vertex_index> far{};
     for(const auto& [x, z] : profile) {
-        near.push_back(mesh.add_vertex(Point3D{x, 0.0, z}));
-        far.push_back(mesh.add_vertex(Point3D{x, width, z}));
+        near.push_back(mesh.add_vertex(epick::Point3D{x, 0.0, z}));
+        far.push_back(mesh.add_vertex(epick::Point3D{x, width, z}));
     }
     for(std::size_t i = 0; i + 1 < profile.size(); ++i) {
         mesh.add_face(near[i], near[i + 1], far[i + 1]);
@@ -38,7 +38,7 @@ inline SurfaceMesh extrude_profile(const std::vector<std::array<double, 2>>& pro
 }
 
 /// A flat 10x10 rectangle whose sides are subdivided by a collinear mid vertex.
-inline SurfaceMesh flat_rectangle()
+inline epick::Mesh flat_rectangle()
 {
     return extrude_profile({{0, 0}, {5, 0}, {10, 0}}, 10.0);
 }
@@ -48,7 +48,7 @@ inline SurfaceMesh flat_rectangle()
 ///
 /// The overhang makes the surface two-valued over x in [5, 10], so the region overlay
 /// splits: lower corridor plus stair in one region, the upper corridor in the other.
-inline SurfaceMesh two_levels_with_stair()
+inline epick::Mesh two_levels_with_stair()
 {
     return extrude_profile({{0, 0}, {10, 0}, {15, 3}, {5, 3}}, 4.0);
 }
@@ -56,17 +56,17 @@ inline SurfaceMesh two_levels_with_stair()
 /// The two-level fold again, but meshed across the sweep as well as along it, so the seam
 /// where the levels meet runs over @p strips edges instead of the single one
 /// `extrude_profile` lays across the whole width.
-inline SurfaceMesh two_levels_with_wide_seam(std::size_t strips = 4)
+inline epick::Mesh two_levels_with_wide_seam(std::size_t strips = 4)
 {
     const std::vector<std::array<double, 2>> profile{{0, 0}, {10, 0}, {15, 3}, {5, 3}};
     constexpr double width = 4.0;
 
-    SurfaceMesh mesh{};
-    std::vector<std::vector<SurfaceMesh::Vertex_index>> rows(strips + 1);
+    epick::Mesh mesh{};
+    std::vector<std::vector<epick::Mesh::Vertex_index>> rows(strips + 1);
     for(std::size_t s = 0; s <= strips; ++s) {
         const double y = width * static_cast<double>(s) / static_cast<double>(strips);
         for(const auto& [x, z] : profile) {
-            rows[s].push_back(mesh.add_vertex(Point3D{x, y, z}));
+            rows[s].push_back(mesh.add_vertex(epick::Point3D{x, y, z}));
         }
     }
     for(std::size_t s = 0; s < strips; ++s) {
@@ -80,14 +80,14 @@ inline SurfaceMesh two_levels_with_wide_seam(std::size_t strips = 4)
 
 /// Two floors sharing a footprint with nothing joining them. Non-realistic, but does
 /// not matter for the testing purpose.
-inline SurfaceMesh stacked_floors(Point lower_left, Point upper_right, double floor_height)
+inline epick::Mesh stacked_floors(Point lower_left, Point upper_right, double floor_height)
 {
-    SurfaceMesh mesh{};
+    epick::Mesh mesh{};
     const auto quad = [&](double z) {
-        const auto a = mesh.add_vertex(Point3D{lower_left.x(), lower_left.y(), z});
-        const auto b = mesh.add_vertex(Point3D{upper_right.x(), lower_left.y(), z});
-        const auto c = mesh.add_vertex(Point3D{upper_right.x(), upper_right.y(), z});
-        const auto d = mesh.add_vertex(Point3D{lower_left.x(), upper_right.y(), z});
+        const auto a = mesh.add_vertex(epick::Point3D{lower_left.x(), lower_left.y(), z});
+        const auto b = mesh.add_vertex(epick::Point3D{upper_right.x(), lower_left.y(), z});
+        const auto c = mesh.add_vertex(epick::Point3D{upper_right.x(), upper_right.y(), z});
+        const auto d = mesh.add_vertex(epick::Point3D{lower_left.x(), upper_right.y(), z});
         mesh.add_face(a, b, c);
         mesh.add_face(a, c, d);
     };
@@ -99,13 +99,13 @@ inline SurfaceMesh stacked_floors(Point lower_left, Point upper_right, double fl
 /// A flat 10x10 square at z = 0, split into two triangles: the coarsest walkable surface
 /// there is, with one border edge per side. `flat_rectangle` covers the same ground but
 /// carries a mid vertex, so tests that count border edges need this one.
-inline SurfaceMesh flat_square()
+inline epick::Mesh flat_square()
 {
-    SurfaceMesh mesh{};
-    const auto a = mesh.add_vertex(Point3D{0, 0, 0});
-    const auto b = mesh.add_vertex(Point3D{10, 0, 0});
-    const auto c = mesh.add_vertex(Point3D{10, 10, 0});
-    const auto d = mesh.add_vertex(Point3D{0, 10, 0});
+    epick::Mesh mesh{};
+    const auto a = mesh.add_vertex(epick::Point3D{0, 0, 0});
+    const auto b = mesh.add_vertex(epick::Point3D{10, 0, 0});
+    const auto c = mesh.add_vertex(epick::Point3D{10, 10, 0});
+    const auto d = mesh.add_vertex(epick::Point3D{0, 10, 0});
     mesh.add_face(a, b, c);
     mesh.add_face(a, c, d);
     return mesh;
@@ -114,15 +114,15 @@ inline SurfaceMesh flat_square()
 /// A flat floor (y in [0,10]) welded at y = 10 to a ramp rising away from it (y in [10,15],
 /// z up to 5). The ramp reaches beyond the floor rather than back over it, so the surface
 /// bends without folding: one region, and a seam to carry a path across.
-inline SurfaceMesh floor_with_ramp()
+inline epick::Mesh floor_with_ramp()
 {
-    SurfaceMesh mesh{};
-    const auto v0 = mesh.add_vertex(Point3D{0, 0, 0});
-    const auto v1 = mesh.add_vertex(Point3D{10, 0, 0});
-    const auto v2 = mesh.add_vertex(Point3D{10, 10, 0});
-    const auto v3 = mesh.add_vertex(Point3D{0, 10, 0});
-    const auto v4 = mesh.add_vertex(Point3D{10, 15, 5});
-    const auto v5 = mesh.add_vertex(Point3D{0, 15, 5});
+    epick::Mesh mesh{};
+    const auto v0 = mesh.add_vertex(epick::Point3D{0, 0, 0});
+    const auto v1 = mesh.add_vertex(epick::Point3D{10, 0, 0});
+    const auto v2 = mesh.add_vertex(epick::Point3D{10, 10, 0});
+    const auto v3 = mesh.add_vertex(epick::Point3D{0, 10, 0});
+    const auto v4 = mesh.add_vertex(epick::Point3D{10, 15, 5});
+    const auto v5 = mesh.add_vertex(epick::Point3D{0, 15, 5});
     mesh.add_face(v0, v1, v2);
     mesh.add_face(v0, v2, v3);
     mesh.add_face(v3, v2, v4);
@@ -135,16 +135,16 @@ inline SurfaceMesh floor_with_ramp()
 /// topologically apart and neither the border walk nor the region flood would cross.
 class QuadMesh
 {
-    SurfaceMesh _mesh{};
-    std::map<std::array<double, 3>, SurfaceMesh::Vertex_index> _vertices{};
+    epick::Mesh _mesh{};
+    std::map<std::array<double, 3>, epick::Mesh::Vertex_index> _vertices{};
 
-    SurfaceMesh::Vertex_index at(const std::array<double, 3>& c)
+    epick::Mesh::Vertex_index at(const std::array<double, 3>& c)
     {
         const auto it = _vertices.find(c);
         if(it != _vertices.end()) {
             return it->second;
         }
-        return _vertices[c] = _mesh.add_vertex(Point3D{c[0], c[1], c[2]});
+        return _vertices[c] = _mesh.add_vertex(epick::Point3D{c[0], c[1], c[2]});
     }
 
 public:
@@ -152,7 +152,7 @@ public:
 
     void add(const Quad& corners)
     {
-        std::array<SurfaceMesh::Vertex_index, 4> v{};
+        std::array<epick::Mesh::Vertex_index, 4> v{};
         for(std::size_t i = 0; i < 4; ++i) {
             v[i] = at(corners[i]);
         }
@@ -160,7 +160,7 @@ public:
         _mesh.add_face(v[0], v[2], v[3]);
     }
 
-    SurfaceMesh take() { return std::move(_mesh); }
+    epick::Mesh take() { return std::move(_mesh); }
 };
 
 /// A switchback stair, the ordinary kind: ground floor, a flight climbing away from it, a
@@ -187,7 +187,7 @@ inline std::vector<QuadMesh::Quad> switchback_stair_quads()
         {{{0, 4, 3}, {14, 4, 3}, {14, 8, 3}, {0, 8, 3}}}}; // upper floor, back over the ground
 }
 
-inline SurfaceMesh switchback_stair(bool upper_first = false)
+inline epick::Mesh switchback_stair(bool upper_first = false)
 {
     auto quads = switchback_stair_quads();
     if(upper_first) {
@@ -206,7 +206,7 @@ inline SurfaceMesh switchback_stair(bool upper_first = false)
 /// The plain climb, and the one a whole simulation can walk end to end: the way up is straight
 /// in plan, so it passes no wall corner -- which a route that keeps no distance from walls
 /// cannot get an agent around: That requires "wall clearance".
-inline SurfaceMesh straight_stair_to_a_landing()
+inline epick::Mesh straight_stair_to_a_landing()
 {
     QuadMesh builder{};
     builder.add({{{0, 0, 0}, {10, 0, 0}, {10, 8, 0}, {0, 8, 0}}}); // ground floor
@@ -225,7 +225,7 @@ inline SurfaceMesh straight_stair_to_a_landing()
 ///
 /// The landing is cut into strips matching the flights: sharing a vertex is not sharing an
 /// edge, and a T-junction would leave the flights topologically apart.
-inline SurfaceMesh stair_turning_on_a_landing()
+inline epick::Mesh stair_turning_on_a_landing()
 {
     QuadMesh builder{};
     builder.add({{{0, 0, 0}, {6, 0, 3}, {6, 2, 3}, {0, 2, 0}}}); // first flight, climbing
@@ -239,7 +239,7 @@ inline SurfaceMesh stair_turning_on_a_landing()
 /// A rectangular field, 20 x 10, meshed on a 2 m grid, whose height gently undulates. The
 /// commonest 3D input there is, and the one a piecewise-planar fixture cannot stand in for:
 /// its outline is straight in plan but no two consecutive border edges are collinear in 3D.
-inline SurfaceMesh wavy_terrain()
+inline epick::Mesh wavy_terrain()
 {
     QuadMesh builder{};
     const auto height = [](double x, double y) {
@@ -268,7 +268,7 @@ inline SurfaceMesh wavy_terrain()
 /// locating a point on one of those loses three orders of magnitude more than the coordinates
 /// themselves carry. Every hand-meshed fixture here is small and well shaped, and neither is a
 /// property of real input.
-inline SurfaceMesh corridor_with_door_recesses()
+inline epick::Mesh corridor_with_door_recesses()
 {
     constexpr double length = 45.0;
     constexpr double width = 2.0;
@@ -286,10 +286,10 @@ inline SurfaceMesh corridor_with_door_recesses()
     }
     ring.push_back({0, width});
 
-    SurfaceMesh mesh{};
-    std::vector<SurfaceMesh::Vertex_index> corners{};
+    epick::Mesh mesh{};
+    std::vector<epick::Mesh::Vertex_index> corners{};
     for(const auto& [x, y] : ring) {
-        corners.push_back(mesh.add_vertex(Point3D{x, y, 0.0}));
+        corners.push_back(mesh.add_vertex(epick::Point3D{x, y, 0.0}));
     }
     mesh.add_face(corners);
     CGAL::Polygon_mesh_processing::triangulate_faces(mesh);

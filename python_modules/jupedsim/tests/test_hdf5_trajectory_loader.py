@@ -308,7 +308,7 @@ def travel_time_file(tmp_path):
     """Two floors joined by a seam, an exit upstairs, a waypoint downstairs and a
     direct steering stage, written with travel times. Returns the file, the
     simulation and the ids of the stages with an area."""
-    surface = jps.WalkableSurface()
+    surface = jps.GeometryBuilder()
     ground_floor = surface.add_region(
         boundary=_rectangle((0, 0), (5, 5)), height=0.0
     )
@@ -327,7 +327,7 @@ def travel_time_file(tmp_path):
     )
     sim = jps.Simulation(
         model=jps.CollisionFreeSpeedModelV2(),
-        geometry=surface,
+        geometry=surface.build(),
         trajectory_writer=writer,
         dt=0.01,
     )

@@ -65,7 +65,7 @@ private:
     AgentRemovalSystem<GenericAgent> _agent_removal_system{};
     StageManager _stage_manager{};
     NeighborhoodSearch<GenericAgent> _neighborhood_search{2.2};
-    std::unique_ptr<Geometry> _geometry{};
+    std::shared_ptr<const Geometry> _geometry{};
     std::unique_ptr<RoutingEngine> _routing_engine{};
     AgentContainer<GenericAgent> _agents;
     std::vector<GenericAgent::ID> _removed_agents_in_last_iteration;
@@ -80,11 +80,12 @@ private:
     const Destination& destination_of(BaseStage::ID stage_id) const;
 
 public:
-    /// Takes the geometry over: after this the caller no longer owns it. `geo()` hands out a
-    /// borrowed reference for as long as the simulation lives.
+    /// Shares ownership of the geometry, which is never modified: several simulations, or a
+    /// simulation and a routing engine, may use the same geometry. `geo()` hands out a reference
+    /// that stays valid for as long as the simulation lives.
     Simulation(
         std::unique_ptr<OperationalModel>&& operational_model,
-        std::unique_ptr<Geometry>&& geometry,
+        std::shared_ptr<const Geometry> geometry,
         double dt,
         FloorfieldOptions floorfield_options);
 

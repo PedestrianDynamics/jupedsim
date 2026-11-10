@@ -89,16 +89,16 @@ std::optional<Options> parse_args(int argc, char** argv)
 
 /// Refine #mesh so that no edge is longer than #max_edge_length, keeping borders and
 /// creases (stair noses, floor/ramp transitions) in place.
-void remesh_with_max_edge_length(SurfaceMesh& mesh, double max_edge_length, unsigned int iterations)
+void remesh_with_max_edge_length(epick::Mesh& mesh, double max_edge_length, unsigned int iterations)
 {
     // isotropic_remeshing only splits edges longer than 4/3 x target, so aim below the cap.
     const double target_edge_length = max_edge_length * 3. / 4.;
 
     auto ecm =
-        mesh.add_property_map<EdgeDescriptor<SurfaceMesh>, bool>("e:constrained", false).first;
+        mesh.add_property_map<EdgeDescriptor<epick::Mesh>, bool>("e:constrained", false).first;
     pmp::detect_sharp_edges(mesh, sharp_edge_angle_deg, ecm);
 
-    std::vector<EdgeDescriptor<SurfaceMesh>> constrained{};
+    std::vector<EdgeDescriptor<epick::Mesh>> constrained{};
     for(auto e : CGAL::edges(mesh)) {
         if(get(ecm, e)) {
             constrained.emplace_back(e);
@@ -119,7 +119,7 @@ void remesh_with_max_edge_length(SurfaceMesh& mesh, double max_edge_length, unsi
 
     // The remesher's smoothing step can stretch edges slightly past 4/3 x target, so the
     // target alone does not bound edge lengths; a final split pass makes the cap strict.
-    std::vector<EdgeDescriptor<SurfaceMesh>> all_edges{};
+    std::vector<EdgeDescriptor<epick::Mesh>> all_edges{};
     all_edges.reserve(mesh.number_of_edges());
     for(auto e : CGAL::edges(mesh)) {
         all_edges.emplace_back(e);
@@ -130,7 +130,7 @@ void remesh_with_max_edge_length(SurfaceMesh& mesh, double max_edge_length, unsi
     mesh.remove_property_map(ecm);
 }
 
-double max_edge_length(const SurfaceMesh& mesh)
+double max_edge_length(const epick::Mesh& mesh)
 {
     double max_length = 0.0;
     for(auto e : CGAL::edges(mesh)) {
@@ -148,7 +148,7 @@ int main(int argc, char** argv)
         return EXIT_FAILURE;
     }
 
-    SurfaceMesh mesh{};
+    epick::Mesh mesh{};
     if(!pmp::IO::read_polygon_mesh(opts->input.string(), mesh) || mesh.is_empty()) {
         std::cerr << "Could not read a mesh from OBJ file '" << opts->input.string() << "'\n";
         return EXIT_FAILURE;

@@ -18,15 +18,15 @@ AGENT_POSITIONS = [(2, 5), (3, 4), (3, 6)]
 
 @pytest.fixture
 def single_region_file(tmp_path: pathlib.Path) -> pathlib.Path:
-    surface = jps.WalkableSurface()
-    room = surface.add_region(polygon=ROOM)
+    surface = jps.GeometryBuilder()
+    room = surface.add_region(polygon=ROOM, height=0.0)
     out = tmp_path / "traj.h5"
     with jps.Hdf5TrajectoryWriter(
         output_file=out, every_nth_frame=EVERY_NTH_FRAME
     ) as writer:
         sim = jps.Simulation(
             model=jps.CollisionFreeSpeedModelV2(),
-            geometry=surface,
+            geometry=surface.build(),
             trajectory_writer=writer,
             dt=DT,
         )
@@ -52,7 +52,7 @@ def two_region_file(tmp_path: pathlib.Path) -> tuple[pathlib.Path, int, int]:
     def rectangle(p1, p2):
         return [p1, (p1[0], p2[1]), p2, (p2[0], p1[1])]
 
-    surface = jps.WalkableSurface()
+    surface = jps.GeometryBuilder()
     ground_floor = surface.add_region(
         boundary=rectangle((0, 0), (5, 5)), height=0.0
     )
@@ -69,7 +69,7 @@ def two_region_file(tmp_path: pathlib.Path) -> tuple[pathlib.Path, int, int]:
     with jps.Hdf5TrajectoryWriter(output_file=out) as writer:
         sim = jps.Simulation(
             model=jps.CollisionFreeSpeedModelV2(),
-            geometry=surface,
+            geometry=surface.build(),
             trajectory_writer=writer,
             dt=DT,
         )

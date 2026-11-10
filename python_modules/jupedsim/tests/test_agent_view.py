@@ -22,9 +22,9 @@ def _open_room():
 def _make_sim(model, geometry=None):
     if geometry is None:
         geometry = _open_room()
-    surface = jps.WalkableSurface()
-    room = surface.add_region(polygon=geometry)
-    sim = jps.Simulation(model=model, geometry=surface, dt=0.05)
+    surface = jps.GeometryBuilder()
+    room = surface.add_region(polygon=geometry, height=0.0)
+    sim = jps.Simulation(model=model, geometry=surface.build(), dt=0.05)
     exit_id = sim.add_exit_stage(
         [([(19, 9), (19, 11), (20, 11), (20, 9)], room)]
     )

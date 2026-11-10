@@ -9,12 +9,12 @@ import shapely
 @pytest.fixture
 def warp_driver_corridor():
     """20m x 4m corridor with WarpDriver model."""
-    surface = jps.WalkableSurface()
+    surface = jps.GeometryBuilder()
     room = surface.add_region(
-        polygon=shapely.Polygon([(0, 0), (20, 0), (20, 4), (0, 4)])
+        polygon=shapely.Polygon([(0, 0), (20, 0), (20, 4), (0, 4)]), height=0.0
     )
     simulation = jps.Simulation(
-        model=jps.WarpDriverModel(), geometry=surface, dt=0.01
+        model=jps.WarpDriverModel(), geometry=surface.build(), dt=0.01
     )
     return simulation, room
 
@@ -132,11 +132,13 @@ def test_two_agents_head_on_avoid(warp_driver_corridor):
 
 def test_agent_parameters():
     """Test per-agent parameter access and mutation."""
-    surface = jps.WalkableSurface()
+    surface = jps.GeometryBuilder()
     room = surface.add_region(
-        polygon=shapely.Polygon([(0, 0), (10, 0), (10, 4), (0, 4)])
+        polygon=shapely.Polygon([(0, 0), (10, 0), (10, 4), (0, 4)]), height=0.0
     )
-    sim = jps.Simulation(model=jps.WarpDriverModel(), geometry=surface, dt=0.01)
+    sim = jps.Simulation(
+        model=jps.WarpDriverModel(), geometry=surface.build(), dt=0.01
+    )
 
     wp = sim.add_waypoint_stage(
         [(jps.circle_to_polygon(center=(5, 2), radius=0.5), room)]
@@ -164,11 +166,13 @@ def test_agent_parameters():
 
 def test_invalid_agent_state():
     """Invalid per-agent state raises errors when adding the agent."""
-    surface = jps.WalkableSurface()
+    surface = jps.GeometryBuilder()
     room = surface.add_region(
-        polygon=shapely.Polygon([(0, 0), (10, 0), (10, 4), (0, 4)])
+        polygon=shapely.Polygon([(0, 0), (10, 0), (10, 4), (0, 4)]), height=0.0
     )
-    sim = jps.Simulation(model=jps.WarpDriverModel(), geometry=surface, dt=0.01)
+    sim = jps.Simulation(
+        model=jps.WarpDriverModel(), geometry=surface.build(), dt=0.01
+    )
 
     wp = sim.add_waypoint_stage(
         [(jps.circle_to_polygon(center=(5, 2), radius=0.5), room)]

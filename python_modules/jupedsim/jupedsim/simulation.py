@@ -32,7 +32,6 @@ from jupedsim.pyjupedsim import (
     SocialForceModelState,
     SpeedGrid,
     TravelTimeGrid,
-    WalkableSurface,
     WarpDriverModel,
     WarpDriverModelState,
     WaypointStage,
@@ -75,7 +74,7 @@ class Simulation:
             | WarpDriverModel
             | CustomOperationalModel
         ),
-        geometry: WalkableSurface | Geometry,
+        geometry: Geometry,
         dt: float = 0.01,
         floorfield_options: FloorfieldOptions | None = None,
         trajectory_writer: TrajectoryWriter | None = None,
@@ -96,9 +95,11 @@ class Simulation:
                     Model instances are consumed by this constructor and must not be reused
                     afterwards.
             geometry:
-                The walkable area: a :class:`~jupedsim.WalkableSurface` made of regions, which
-                may be stacked into floors and joined by stairs or ramps, or a
-                :class:`~jupedsim.Geometry` created from one.
+                The walkable area, created with :meth:`~jupedsim.GeometryBuilder.build` from
+                regions which may be stacked into floors and joined by stairs or ramps.
+
+                The geometry is not modified and may be shared, e.g. by several simulations
+                or with a :class:`~jupedsim.SurfaceMeshShortestPathRoutingEngine`.
 
             dt: Iteration step size in seconds. It is recommended to leave this at its default
                 value.
@@ -121,8 +122,6 @@ class Simulation:
                 f"{type(model).__name__}"
             )
         self._writer = trajectory_writer
-        if isinstance(geometry, WalkableSurface):
-            geometry = geometry.create_geometry()
         if floorfield_options is None:
             floorfield_options = FloorfieldOptions()
         self._obj = _Simulation(
@@ -230,8 +229,8 @@ class Simulation:
             stage_id: Id of the stage the agent initially targets.
             position: Position to spawn the agent at, as ``(x, y)`` in metres.
             region_id: Region the agent stands in, as returned by
-                :meth:`~jupedsim.WalkableSurface.add_region` or
-                :meth:`~jupedsim.WalkableSurface.connect_regions`.
+                :meth:`~jupedsim.GeometryBuilder.add_region` or
+                :meth:`~jupedsim.GeometryBuilder.connect_regions`.
             state: Initial per-agent model state. For built-in models this is the matching
                 ``XModelState`` instance, e.g. :class:`~jupedsim.CollisionFreeSpeedModelState`. For
                 custom models this is your own object, of whatever type your

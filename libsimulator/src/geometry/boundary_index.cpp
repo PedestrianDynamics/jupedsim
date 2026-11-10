@@ -5,6 +5,7 @@
 #include "geometry/location.hpp"
 #include "geometry/region_split.hpp"
 #include "geometry/segment_grid.hpp"
+#include "into.hpp"
 #include "kernel.hpp"
 #include "line_segment.hpp"
 #include "simulation_error.hpp"
@@ -237,10 +238,7 @@ namespace
 /// as new segment endpoints one region later. With inexact constructions the second round
 /// would not find the points of the first again; with EPECK everything stays consistent, and
 /// the one rounding step is the conversion of the finished answer back to doubles.
-using VisKernel = CGAL::Exact_predicates_exact_constructions_kernel;
-using VisPoint = VisKernel::Point_2;
-using VisSegment = VisKernel::Segment_2;
-using VisArrangement = CGAL::Arrangement_2<CGAL::Arr_segment_traits_2<VisKernel>>;
+using VisArrangement = CGAL::Arrangement_2<CGAL::Arr_segment_traits_2<epeck::Kernel>>;
 
 /// Triangular_expansion_visibility_2, and the choice is made on its source rather than its
 /// advertising: its query triangulates EVERY edge of the attached arrangement as a constraint
@@ -259,23 +257,13 @@ using VisEngine = CGAL::Triangular_expansion_visibility_2<VisArrangement, CGAL::
 /// disc; no building does that, but a cycle in the window bookkeeping would.
 constexpr int max_window_depth = 128;
 
-VisPoint to_exact(Point p)
-{
-    return {p.x(), p.y()};
-}
-
-Point from_exact(const VisPoint& p)
-{
-    return {CGAL::to_double(p.x()), CGAL::to_double(p.y())};
-}
-
 /// One pending look into a region: through which piece of which seam, and how many windows
 /// deep. The agent's own region is the one job without a window.
 struct WindowJob {
     std::size_t region{};
     int depth{};
     /// The stretch of seam the look passes through, exact because it was constructed.
-    std::optional<VisSegment> window{};
+    std::optional<epeck::Segment2D> window{};
     /// The seam the window lies on, as the region it was seen from stores it.
     LineSegment seam_of_parent{};
     /// The region the window was seen from.
@@ -285,7 +273,7 @@ struct WindowJob {
 /// An opaque segment of one job's arrangement, kept together with what it means, so pieces of
 /// the visibility boundary can be traced back to the wall or seam they lie on.
 struct JobSegment {
-    VisSegment segment{}; ///< the whole wall or seam, for containment tests
+    epeck::Segment2D segment{}; ///< the whole wall or seam, for containment tests
     bool is_seam{};
     std::size_t wall_id{}; ///< into Candidates::walls, when a wall
     const SeamCandidate* seam{}; ///< when a seam
@@ -301,13 +289,15 @@ struct JobSegment {
 /// The clip is exact: the wedge's edges run through constructed window endpoints, and
 /// deciding just-inside against just-outside in doubles would tear pieces at exactly the
 /// places the recursion has to agree with itself about.
-std::optional<VisSegment>
-clip_to_window_wedge(const VisPoint& q, const VisSegment& window, VisSegment piece)
+std::optional<epeck::Segment2D> clip_to_window_wedge(
+    const epeck::Point2D& q,
+    const epeck::Segment2D& window,
+    epeck::Segment2D piece)
 {
     for(int i = 0; i < 2; ++i) {
-        const VisPoint through = i == 0 ? window.source() : window.target();
-        const VisPoint other = i == 0 ? window.target() : window.source();
-        const VisKernel::Line_2 edge{q, through};
+        const epeck::Point2D through = i == 0 ? window.source() : window.target();
+        const epeck::Point2D other = i == 0 ? window.target() : window.source();
+        const epeck::Line2D edge{q, through};
         // Never on the line: the window lies on a seam that does not run through the agent.
         const auto inside = edge.oriented_side(other);
         const auto side_a = edge.oriented_side(piece.source());
@@ -321,11 +311,11 @@ clip_to_window_wedge(const VisPoint& q, const VisSegment& window, VisSegment pie
             continue;
         }
         const auto cut = CGAL::intersection(edge, piece);
-        const auto* at = cut ? std::get_if<VisPoint>(&*cut) : nullptr;
+        const auto* at = cut ? std::get_if<epeck::Point2D>(&*cut) : nullptr;
         if(at == nullptr) {
             return std::nullopt; // grazing contact only
         }
-        piece = VisSegment{out_a ? *at : piece.source(), out_b ? *at : piece.target()};
+        piece = epeck::Segment2D{out_a ? *at : piece.source(), out_b ? *at : piece.target()};
     }
     if(piece.source() == piece.target()) {
         return std::nullopt;
@@ -339,7 +329,7 @@ clip_to_window_wedge(const VisPoint& q, const VisSegment& window, VisSegment pie
 void process_window_job(
     const Candidates& candidates,
     Point p,
-    const VisPoint& q,
+    const epeck::Point2D& q,
     double maximum_distance,
     const WindowJob& job,
     std::vector<std::vector<std::pair<double, double>>>& parts_of_wall,
@@ -352,13 +342,13 @@ void process_window_job(
     // line itself, a set of measure zero. Leaving it out changes nothing else, keeps the
     // query point off the arrangement's edges.
     std::vector<JobSegment> segments{};
-    const auto keep = [&](const LineSegment& ls) -> std::optional<VisSegment> {
-        const VisPoint a = to_exact(ls.p1);
-        const VisPoint b = to_exact(ls.p2);
+    const auto keep = [&](const LineSegment& ls) -> std::optional<epeck::Segment2D> {
+        const epeck::Point2D a = into<epeck::Point2D>(ls.p1);
+        const epeck::Point2D b = into<epeck::Point2D>(ls.p2);
         if(CGAL::orientation(a, b, q) == CGAL::COLLINEAR) {
             return std::nullopt;
         }
-        return VisSegment{a, b};
+        return epeck::Segment2D{a, b};
     };
     for(const auto id : candidates.wall_ids_of[job.region]) {
         if(const auto segment = keep(candidates.walls[id])) {
@@ -390,15 +380,17 @@ void process_window_job(
     // the candidates lies wholly beyond the radius, so the false gap it leaves can only be
     // reached by sight lines already longer than the radius -- visibility within the disc is
     // unaffected, and everything is disc-clipped at the end anyway.
-    std::optional<VisKernel::Line_2> window_line{};
+    std::optional<epeck::Line2D> window_line{};
     CGAL::Oriented_side agent_side{CGAL::ON_ORIENTED_BOUNDARY};
     if(job.window) {
-        window_line =
-            VisKernel::Line_2{to_exact(job.seam_of_parent.p1), to_exact(job.seam_of_parent.p2)};
+        window_line = epeck::Line2D{
+            into<epeck::Point2D>(job.seam_of_parent.p1),
+            into<epeck::Point2D>(job.seam_of_parent.p2)};
         // Strictly off the line: a seam collinear with the agent never gets a window.
         agent_side = window_line->oriented_side(q);
     }
-    const auto beyond_window = [&](const VisSegment& segment) -> std::optional<VisSegment> {
+    const auto beyond_window =
+        [&](const epeck::Segment2D& segment) -> std::optional<epeck::Segment2D> {
         if(!window_line) {
             return segment; // the agent's own region is walked whole
         }
@@ -416,7 +408,7 @@ void process_window_job(
             return std::nullopt; // reaches the line from the near side and no further
         }
         const auto cut = CGAL::intersection(*window_line, segment);
-        const auto* at = cut ? std::get_if<VisPoint>(&*cut) : nullptr;
+        const auto* at = cut ? std::get_if<epeck::Point2D>(&*cut) : nullptr;
         // Unreachable: endpoints strictly on opposite sides always meet the line in a point.
         // Failing SAFE still matters -- an un-cut segment here is precisely the phantom
         // shadow this clip exists to prevent.
@@ -424,9 +416,9 @@ void process_window_job(
         if(at == nullptr) {
             return std::nullopt;
         }
-        return VisSegment{*at, near_a ? segment.target() : segment.source()};
+        return epeck::Segment2D{*at, near_a ? segment.target() : segment.source()};
     };
-    std::vector<VisSegment> curves{};
+    std::vector<epeck::Segment2D> curves{};
     curves.reserve(segments.size() + 4);
     [[maybe_unused]] int entering_found = 0;
     for(const auto& js : segments) {
@@ -449,19 +441,19 @@ void process_window_job(
         }
         // Cut the window out: order its endpoints along the seam and keep what is left of the
         // seam on either side.
-        const VisPoint a = js.segment.source();
-        const VisPoint b = js.segment.target();
-        const auto along = [&](const VisPoint& x) { return (x - a) * (b - a); };
-        VisPoint first = job.window->source();
-        VisPoint last = job.window->target();
+        const epeck::Point2D a = js.segment.source();
+        const epeck::Point2D b = js.segment.target();
+        const auto along = [&](const epeck::Point2D& x) { return (x - a) * (b - a); };
+        epeck::Point2D first = job.window->source();
+        epeck::Point2D last = job.window->target();
         if(along(first) > along(last)) {
             std::swap(first, last);
         }
         if(a != first) {
-            curves.push_back(VisSegment{a, first});
+            curves.push_back(epeck::Segment2D{a, first});
         }
         if(last != b) {
-            curves.push_back(VisSegment{last, b});
+            curves.push_back(epeck::Segment2D{last, b});
         }
     }
     assert((!job.window || entering_found == 1) && "the window's seam was not found again");
@@ -470,13 +462,13 @@ void process_window_job(
     // boundary does not provide one. Every point of the box lies beyond the radius, so
     // whatever the box hides is nothing the disc clip would have kept.
     const double half = maximum_distance + 1.0;
-    const VisPoint corners[4] = {
+    const epeck::Point2D corners[4] = {
         {p.x() - half, p.y() - half},
         {p.x() + half, p.y() - half},
         {p.x() + half, p.y() + half},
         {p.x() - half, p.y() + half}};
     for(int i = 0; i < 4; ++i) {
-        curves.push_back(VisSegment{corners[i], corners[(i + 1) % 4]});
+        curves.push_back(epeck::Segment2D{corners[i], corners[(i + 1) % 4]});
     }
 
     VisArrangement arrangement{};
@@ -502,8 +494,8 @@ void process_window_job(
     auto circulator = seen->outer_ccb();
     auto edge = circulator;
     do {
-        const VisPoint& source = edge->source()->point();
-        const VisPoint& target = edge->target()->point();
+        const epeck::Point2D& source = edge->source()->point();
+        const epeck::Point2D& target = edge->target()->point();
         if(CGAL::orientation(q, source, target) == CGAL::COLLINEAR) {
             continue; // runs along a sight ray: free space, not something seen
         }
@@ -543,7 +535,7 @@ void process_window_job(
         // far as the straight lines from the agent to it pass through the window -- the wedge
         // clip. The agent's own region needs no such repair: there the agent is inside, and
         // its face reaches nothing its own sight lines do not reach.
-        VisSegment piece{source, target};
+        epeck::Segment2D piece{source, target};
         if(job.window) {
             const auto through = clip_to_window_wedge(q, *job.window, piece);
             if(!through) {
@@ -553,8 +545,8 @@ void process_window_job(
         }
         if(!on->is_seam) {
             const auto& wall = candidates.walls[on->wall_id];
-            const VisPoint a = to_exact(wall.p1);
-            const VisPoint b = to_exact(wall.p2);
+            const epeck::Point2D a = into<epeck::Point2D>(wall.p1);
+            const epeck::Point2D b = into<epeck::Point2D>(wall.p2);
             const auto length2 = (b - a) * (b - a);
             const double from = CGAL::to_double(((piece.source() - a) * (b - a)) / length2);
             const double to = CGAL::to_double(((piece.target() - a) * (b - a)) / length2);
@@ -566,7 +558,7 @@ void process_window_job(
         // every sight line onward passes through it first -- so a window already out of reach
         // opens on nothing the disc clip would keep, and this prune is what ends the
         // recursion.
-        const LineSegment window{from_exact(piece.source()), from_exact(piece.target())};
+        const LineSegment window{into<Point>(piece.source()), into<Point>(piece.target())};
         if(window.dist_to(p) > maximum_distance) {
             continue;
         }
@@ -590,7 +582,7 @@ PortalBoundaryIndex::PortalBoundaryIndex(std::unique_ptr<RegionGraph> graph) : _
 std::vector<LineSegment> PortalBoundaryIndex::query(const Location& loc, double maximum_distance)
 {
     const Point p = loc.xy();
-    const VisPoint q = to_exact(p);
+    const epeck::Point2D q = into<epeck::Point2D>(p);
     const auto candidates = collect_candidates(*_g, p, maximum_distance);
     // The answer only ever holds pieces of candidate walls; seams alone open onto nothing that
     // could be reported. With no wall in the disc the visibility work has nothing to find.
@@ -617,14 +609,14 @@ std::vector<LineSegment> PortalBoundaryIndex::query(const Location& loc, double 
 // Factories
 //==================================================================================================
 std::unique_ptr<BoundaryIndex>
-make_naive_boundary_index(const SurfaceMesh& mesh, const RegionSplit& region_split)
+make_naive_boundary_index(const epick::Mesh& mesh, const RegionSplit& region_split)
 {
     auto boundaries = create_per_region_segment_grids(mesh, region_split);
     return std::make_unique<NaiveBoundaryIndex>(std::move(boundaries));
 }
 
 std::unique_ptr<BoundaryIndex>
-make_portal_boundary_index(const SurfaceMesh& mesh, const RegionSplit& region_split)
+make_portal_boundary_index(const epick::Mesh& mesh, const RegionSplit& region_split)
 {
     auto g = create_region_graph(mesh, region_split);
     return std::make_unique<PortalBoundaryIndex>(std::move(g));
@@ -633,8 +625,8 @@ make_portal_boundary_index(const SurfaceMesh& mesh, const RegionSplit& region_sp
 //==================================================================================================
 // Supporting code
 //==================================================================================================
-std::tuple<SurfaceMesh::Face_index, SurfaceMesh::Halfedge_index>
-incident_face_and_halfedge(const SurfaceMesh& mesh, SurfaceMesh::Edge_index e)
+std::tuple<epick::Mesh::Face_index, epick::Mesh::Halfedge_index>
+incident_face_and_halfedge(const epick::Mesh& mesh, epick::Mesh::Edge_index e)
 {
     auto h = mesh.halfedge(e, 0);
     if(mesh.is_border(h)) {
@@ -647,7 +639,7 @@ incident_face_and_halfedge(const SurfaceMesh& mesh, SurfaceMesh::Edge_index e)
 }
 
 std::vector<SegmentGrid>
-create_per_region_segment_grids(const SurfaceMesh& mesh, const RegionSplit& region_split)
+create_per_region_segment_grids(const epick::Mesh& mesh, const RegionSplit& region_split)
 {
     std::vector<std::vector<LineSegment>> elements{};
     elements.resize(region_split.count);
@@ -673,7 +665,7 @@ create_per_region_segment_grids(const SurfaceMesh& mesh, const RegionSplit& regi
 }
 
 std::unique_ptr<RegionGraph>
-create_region_graph(const SurfaceMesh& mesh, const RegionSplit& region_split)
+create_region_graph(const epick::Mesh& mesh, const RegionSplit& region_split)
 {
     std::vector<std::vector<LineSegment>> elements{};
     elements.resize(region_split.count);

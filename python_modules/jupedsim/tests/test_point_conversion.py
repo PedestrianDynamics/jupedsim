@@ -8,11 +8,12 @@ import shapely
 
 
 def _room(model):
-    surface = jps.WalkableSurface()
+    surface = jps.GeometryBuilder()
     room = surface.add_region(
-        polygon=shapely.Polygon([(0, 0), (20, 0), (20, 20), (0, 20)])
+        polygon=shapely.Polygon([(0, 0), (20, 0), (20, 20), (0, 20)]),
+        height=0.0,
     )
-    sim = jps.Simulation(model=model, geometry=surface, dt=0.01)
+    sim = jps.Simulation(model=model, geometry=surface.build(), dt=0.01)
     exit_id = sim.add_exit_stage(
         [(shapely.Polygon([(18, 0), (20, 0), (20, 20), (18, 20)]), room)]
     )

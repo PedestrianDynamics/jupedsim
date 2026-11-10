@@ -17,9 +17,10 @@ namespace
 /// f's (x,y) projection. z is the barycentric blend of the vertices' heights:
 /// find q's weights in the projected triangle, then interpolate z.
 /// Basically: (FaceId f, Point2D q) --> Point3D
-Point3D point_on_face(const SurfaceMesh& mesh, SurfaceMesh::Face_index f, const Point2D& q)
+epick::Point3D
+point_on_face(const epick::Mesh& mesh, epick::Mesh::Face_index f, const epick::Point2D& q)
 {
-    std::array<Point3D, 3> v{};
+    std::array<epick::Point3D, 3> v{};
     for(int i = 0; const auto vh : CGAL::vertices_around_face(mesh.halfedge(f), mesh)) {
         v[i++] = mesh.point(vh);
     }
@@ -34,14 +35,14 @@ Point3D point_on_face(const SurfaceMesh& mesh, SurfaceMesh::Face_index f, const 
     const double b1 = (qx * e2y - e2x * qy) / denom;
     const double b2 = (e1x * qy - qx * e1y) / denom;
     const double z = (1.0 - b1 - b2) * v[0].z() + b1 * v[1].z() + b2 * v[2].z();
-    return Point3D{q.x(), q.y(), z};
+    return epick::Point3D{q.x(), q.y(), z};
 }
 
 /// (x,y) projection of vertex @p v.
-Point2D xy_of(const SurfaceMesh& mesh, SurfaceMesh::Vertex_index v)
+epick::Point2D xy_of(const epick::Mesh& mesh, epick::Mesh::Vertex_index v)
 {
     const auto& p = mesh.point(v);
-    return Point2D{p.x(), p.y()};
+    return epick::Point2D{p.x(), p.y()};
 }
 
 /// The face incident to @p v whose xy angular sector contains @p direction.
@@ -49,18 +50,18 @@ Point2D xy_of(const SurfaceMesh& mesh, SurfaceMesh::Vertex_index v)
 /// exactly along an edge) resolve to the first match. Returns `null_face()` when
 /// no incident face's sector contains @p direction, i.e. the walkable area is
 /// left crossing the vertex @p v.
-SurfaceMesh::Face_index
-fan_face(const SurfaceMesh& mesh, SurfaceMesh::Vertex_index v, const K::Vector_2& direction)
+epick::Mesh::Face_index
+fan_face(const epick::Mesh& mesh, epick::Mesh::Vertex_index v, const epick::Vector2D& direction)
 {
     const auto vp = xy_of(mesh, v);
     const auto x = vp + direction; // a point along the direction starting at v
     for(const auto f : CGAL::faces_around_target(mesh.halfedge(v), mesh)) {
-        if(f == SurfaceMesh::null_face()) {
+        if(f == epick::Mesh::null_face()) {
             continue;
         }
         // For CCW triangle: The face is the one we need if `x` is left (or equal) to
         // the edges touching vertex v.
-        SurfaceMesh::Halfedge_index into_v{};
+        epick::Mesh::Halfedge_index into_v{};
         for(const auto h : CGAL::halfedges_around_face(mesh.halfedge(f), mesh)) {
             if(mesh.target(h) == v) {
                 into_v = h;
@@ -74,7 +75,7 @@ fan_face(const SurfaceMesh& mesh, SurfaceMesh::Vertex_index v, const K::Vector_2
             return f;
         }
     }
-    return SurfaceMesh::null_face();
+    return epick::Mesh::null_face();
 }
 
 /// Exact straight walk from @p from along @p direction across @p mesh to the
@@ -83,18 +84,18 @@ fan_face(const SurfaceMesh& mesh, SurfaceMesh::Vertex_index v, const K::Vector_2
 /// O(crossed faces)). Requires that faces are CCW in the xy projection.
 /// Returns `nullopt` if the walkable area is left.
 std::optional<Geometry::FaceLocation> straight_walk(
-    const SurfaceMesh& mesh,
-    SurfaceMesh::Face_index start_face,
-    const Point2D& from,
-    const K::Vector_2& direction)
+    const epick::Mesh& mesh,
+    epick::Mesh::Face_index start_face,
+    const epick::Point2D& from,
+    const epick::Vector2D& direction)
 {
-    assert(start_face != SurfaceMesh::null_face());
+    assert(start_face != epick::Mesh::null_face());
 
-    const Point2D to = from + direction; // the fixed target, formed once
+    const epick::Point2D to = from + direction; // the fixed target, formed once
 
     // 'to' is covered by face f (interior or on its boundary) iff it is not
     // strictly to the RIGHT of any of f's CCW directed edges.
-    const auto covers = [&](SurfaceMesh::Face_index f) {
+    const auto covers = [&](epick::Mesh::Face_index f) {
         for(const auto h : CGAL::halfedges_around_face(mesh.halfedge(f), mesh)) {
             if(CGAL::orientation(xy_of(mesh, mesh.source(h)), xy_of(mesh, mesh.target(h)), to) ==
                CGAL::RIGHT_TURN) {
@@ -104,7 +105,7 @@ std::optional<Geometry::FaceLocation> straight_walk(
         return true;
     };
 
-    SurfaceMesh::Face_index f = start_face;
+    epick::Mesh::Face_index f = start_face;
 
     // A straight segment visits each face at most once, plus one possible
     // non-advancing iteration when starting on a vertex (fanning back to the
@@ -115,7 +116,7 @@ std::optional<Geometry::FaceLocation> straight_walk(
     // excluded from the next "hits vertex" test to avoid a potential infinite loop.
     // Note: We never need to reset this as the vertex is bound to the current triangle
     //       so that we never skip a "vertex of interest".
-    SurfaceMesh::Vertex_index last_crossed_vertex = SurfaceMesh::null_vertex();
+    epick::Mesh::Vertex_index last_crossed_vertex = epick::Mesh::null_vertex();
     for(std::size_t step = 0; step < max_steps; ++step) {
         if(covers(f)) {
             // Done: target is inside the triangle
@@ -134,7 +135,7 @@ std::optional<Geometry::FaceLocation> straight_walk(
             const auto vp = xy_of(mesh, v);
             if(CGAL::orientation(from, to, vp) == CGAL::COLLINEAR && (vp - from) * direction >= 0) {
                 const auto g = fan_face(mesh, v, direction);
-                if(g == SurfaceMesh::null_face()) {
+                if(g == epick::Mesh::null_face()) {
                     // Left the walkable area crossing this vertex.
                     return std::nullopt;
                 }
@@ -150,7 +151,7 @@ std::optional<Geometry::FaceLocation> straight_walk(
 
         // (2) Edge crossing: the forward exit edge has its source strictly RIGHT
         //     and its target strictly LEFT of the directed line from->to.
-        SurfaceMesh::Halfedge_index exit = SurfaceMesh::null_halfedge();
+        epick::Mesh::Halfedge_index exit = epick::Mesh::null_halfedge();
         for(const auto h : CGAL::halfedges_around_face(mesh.halfedge(f), mesh)) {
             const auto s = CGAL::orientation(from, to, xy_of(mesh, mesh.source(h)));
             const auto t = CGAL::orientation(from, to, xy_of(mesh, mesh.target(h)));
@@ -159,14 +160,14 @@ std::optional<Geometry::FaceLocation> straight_walk(
                 break;
             }
         }
-        if(exit == SurfaceMesh::null_halfedge()) {
+        if(exit == epick::Mesh::null_halfedge()) {
             // [RL] Purely defensive safeguard - should not be possible by mesh
             // construction/validation.
             throw SimulationError(
                 "straight_walk(): no forward exit found (mesh/predicate inconsistency)");
         }
         const auto neighbor = mesh.face(mesh.opposite(exit));
-        if(neighbor == SurfaceMesh::null_face()) {
+        if(neighbor == epick::Mesh::null_face()) {
             // Exit edge is a border edge: the path leaves the walkable area.
             return std::nullopt;
         }
