@@ -109,6 +109,7 @@ if (BUILD_TESTS)
     add_executable(libsimulator-tests
         test/geometry_fixtures.hpp
         test/test_aabb.cpp
+        test/test_agent_rng.cpp
         test/test_agent_view.cpp
         test/test_basic_primitive_tests.cpp
         test/test_boundary_index.cpp

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "anticipation_velocity_model.hpp"
 
+#include "agent_rng.hpp"
 #include "agent_view.hpp"
 #include "generic_agent.hpp"
 #include "kernel.hpp"
@@ -17,7 +18,7 @@
 #include <limits>
 
 AnticipationVelocityModel::AnticipationVelocityModel(double pushout_strength, uint64_t rng_seed)
-    : _pushout_strength(pushout_strength), _gen(rng_seed)
+    : _pushout_strength(pushout_strength), _rng_seeder(rng_seed)
 {
 }
 
@@ -32,6 +33,7 @@ Vector AnticipationVelocityModel::compute_next_state(
     const AgentStep& step) const
 {
     const auto& current_state = std::get<State>(current);
+    auto& next_model = std::get<State>(next);
     // Exclude occluded and self agents
     auto neighborhood = step.other_agents_in_range(
         _cut_off_radius, [&step](const NeighborView& n) { return step.no_geometry_between(n); });
@@ -39,7 +41,8 @@ Vector AnticipationVelocityModel::compute_next_state(
     const auto desired_direction = step.route_orientation();
     Vector neighbor_repulsion{};
     for(const auto& neighbor : neighborhood) {
-        neighbor_repulsion += this->neighbor_repulsion(current_state, desired_direction, neighbor);
+        neighbor_repulsion +=
+            this->neighbor_repulsion(current_state, desired_direction, neighbor, next_model.rng);
     }
 
     auto direction = (desired_direction + neighbor_repulsion).normalized();
@@ -54,12 +57,12 @@ Vector AnticipationVelocityModel::compute_next_state(
         spacing = std::min(spacing, get_spacing(current_state, neighbor, direction));
     }
 
-    const auto optimal_speed = this->optimal_speed(current_state, spacing, current_state.time_gap);
+    const auto optimal_speed =
+        this->optimal_speed(current_state, spacing, current_state.time_gap, next_model.rng);
     // Wall sliding behavior
     direction = handle_wall_avoidance(direction, current_state, step, _pushout_strength);
 
     const auto velocity = direction * optimal_speed;
-    auto& next_model = std::get<State>(next);
     next_model.orientation = direction;
     next_model.velocity = velocity;
     return velocity * step.dt();
@@ -86,6 +89,11 @@ Vector AnticipationVelocityModel::update_direction(
     }
 
     return updated_direction.normalized();
+}
+
+void AnticipationVelocityModel::seed_agent_state(OperationalModelState& state)
+{
+    std::get<State>(state).rng = _rng_seeder.next();
 }
 
 void AnticipationVelocityModel::check_model_constraint(
@@ -161,7 +169,8 @@ void AnticipationVelocityModel::check_model_constraint(
 double AnticipationVelocityModel::optimal_speed(
     const State& current_state,
     double spacing,
-    double time_gap) const
+    double time_gap,
+    AgentRng& rng) const
 {
     constexpr double creep_speed = 0.01;
 
@@ -169,7 +178,7 @@ double AnticipationVelocityModel::optimal_speed(
 
     if(std::abs(speed) < creep_speed) {
         // Random shuffle: forward, backward, or stop
-        const auto r = _gen() % 3;
+        const auto r = rng() % 3;
         speed = (r == 0) ? creep_speed : (r == 1) ? -creep_speed : 0.0;
     }
 
@@ -199,7 +208,8 @@ double AnticipationVelocityModel::get_spacing(
 
 Vector AnticipationVelocityModel::calculate_influence_direction(
     const Vector& desired_direction,
-    const Vector& predicted_direction) const
+    const Vector& predicted_direction,
+    AgentRng& rng) const
 {
     // Eq. (5)
     const Vector orthogonal_direction =
@@ -208,7 +218,7 @@ Vector AnticipationVelocityModel::calculate_influence_direction(
     Vector influence_direction = orthogonal_direction;
     if(fabs(alignment) < j_eps) {
         // Choose a random direction (left or right)
-        if(_gen() % 2 == 0) {
+        if(rng() % 2 == 0) {
             influence_direction = -orthogonal_direction;
         }
     } else if(alignment > 0) {
@@ -220,7 +230,8 @@ Vector AnticipationVelocityModel::calculate_influence_direction(
 Vector AnticipationVelocityModel::neighbor_repulsion(
     const State& current_state,
     Vector desired_direction,
-    const NeighborView& neighbor) const
+    const NeighborView& neighbor,
+    AgentRng& rng) const
 {
     const auto& neighbor_state = std::get<State>(*neighbor.state);
 
@@ -255,7 +266,7 @@ Vector AnticipationVelocityModel::neighbor_repulsion(
         distp12 + neighbor_state.velocity * neighbor_state.anticipation_time; // e_ij(t+ta)
 
     // Compute adjusted influence direction
-    const auto influence_direction = calculate_influence_direction(d1, newep12);
+    const auto influence_direction = calculate_influence_direction(d1, newep12, rng);
     return influence_direction * interaction_strength;
 }
 

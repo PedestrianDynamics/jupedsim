@@ -24,9 +24,9 @@ void init_warp_driver_model(py::module_& m)
         avoidance using warped intrinsic fields.
 
         The model-level parameters (the precomputed intrinsic collision-probability
-        field controlled by ``sigma``, the sampling and look-ahead parameters and a
-        random number generator seeded by ``rng_seed``) are carried by the model
-        instance, which is passed to the simulation:
+        field controlled by ``sigma``, the sampling and look-ahead parameters and the
+        ``rng_seed`` each agent's random numbers derive from) are carried by the
+        model instance, which is passed to the simulation:
 
         .. code:: python
 
@@ -63,7 +63,7 @@ void init_warp_driver_model(py::module_& m)
                 collision field perpendicular to the direction of motion.
             num_samples: Number of evenly spaced sample points on the projected
                 trajectory.
-            rng_seed: Seed of the random number generator used for symmetry-breaking
+            rng_seed: Seed of the per-agent random numbers used for symmetry-breaking
                 perturbations and detour side selection. A fixed seed gives
                 reproducible runs.
     )");

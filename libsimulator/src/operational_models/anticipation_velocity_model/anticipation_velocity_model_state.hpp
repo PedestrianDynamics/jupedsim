@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
+#include "agent_rng.hpp"
 #include "kernel.hpp"
 
 #include <fmt/core.h>
@@ -15,6 +16,7 @@ struct AnticipationVelocityModelState {
     double time_gap{1.06};
     double v0{1.2};
     double radius{0.2};
+    AgentRng rng{};
 };
 
 template <>
