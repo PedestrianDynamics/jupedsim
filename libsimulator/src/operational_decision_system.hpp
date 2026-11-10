@@ -8,6 +8,7 @@
 #include "kernel.hpp"
 #include "neighborhood_search.hpp"
 #include "operational_model.hpp"
+#include "operational_model_state.hpp"
 #include "operational_model_type.hpp"
 
 #include <algorithm>
@@ -65,4 +66,6 @@ public:
         const EnvironmentQuery env_query{geometry, neighborhood_search};
         _model->check_model_constraint(agent, AgentView{env_query, agent});
     }
+
+    void seed_agent_state(OperationalModelState& state) { _model->seed_agent_state(state); }
 };

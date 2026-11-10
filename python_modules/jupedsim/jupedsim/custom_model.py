@@ -72,6 +72,36 @@ class CustomOperationalModel(ABC):
             to move by; the simulation applies it as given.
         """
 
+    def seed_agent_state(self, state: Any) -> Any:
+        """Prepare the state of an agent that is being added.
+
+        Called once for every agent added to the simulation, after
+        :meth:`check_model_constraint` accepted it, in the order the agents are
+        added. A model delegating to a built-in one that draws random numbers
+        (e.g. :class:`~jupedsim.AnticipationVelocityModel` or
+        :class:`~jupedsim.WarpDriverModel`) has to seed the delegated state
+        here with :meth:`~jupedsim.OperationalModel.seed_state`; otherwise the
+        built-in model raises on its first step.
+
+        .. code:: python
+
+            def seed_agent_state(self, state):
+                return replace(state, sub=self._inner.seed_state(state.sub))
+
+        Args:
+            state: The agent's model state, the object you handed to
+                :meth:`~jupedsim.simulation.Simulation.add_agent`.
+
+        Returns:
+            The state the agent starts with, of the same type as ``state``.
+            The default returns ``state`` unchanged.
+
+        Raises:
+            SimulationError: Raised by the simulation if the returned object
+                is not of the type of ``state``, e.g. ``None``.
+        """
+        return state
+
     def check_model_constraint(
         self,
         state: Any,

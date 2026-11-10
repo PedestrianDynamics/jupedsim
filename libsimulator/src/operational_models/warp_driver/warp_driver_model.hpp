@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
+#include "agent_rng.hpp"
 #include "operational_model.hpp"
 #include "operational_model_state.hpp"
 
@@ -12,7 +13,6 @@ class EnvironmentQuery;
 #include <fmt/core.h>
 
 #include <cstdint>
-#include <random>
 #include <utility>
 #include <vector>
 
@@ -62,7 +62,8 @@ private:
     double _cut_off_radius;
 
     IntrinsicField _intrinsic_field;
-    mutable std::mt19937 _rng;
+    /// Hands out the agents' random number streams.
+    AgentRngSeeder _rng_seeder;
 
 public:
     WarpDriverModel(
@@ -85,4 +86,5 @@ public:
         const AgentStep& step) const override;
 
     void check_model_constraint(const GenericAgent& agent, const AgentView& view) const override;
+    void seed_agent_state(OperationalModelState& state) override;
 };

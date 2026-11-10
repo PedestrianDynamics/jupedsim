@@ -3,6 +3,7 @@
 #include "generic_agent.hpp"
 #include "hash_combine.hpp"
 #include "kernel.hpp"
+#include "simulation_error.hpp"
 
 #include <algorithm>
 #include <cmath>

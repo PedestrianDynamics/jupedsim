@@ -1,4 +1,5 @@
 target_sources(simulator PRIVATE
+    agent_rng.hpp
     operational_model.hpp
     operational_model_state.hpp
     operational_model_type.hpp

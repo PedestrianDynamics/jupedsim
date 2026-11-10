@@ -7,6 +7,8 @@
 #include "journey.hpp"
 #include "kernel.hpp"
 #include "mesh_fixtures.hpp"
+#include "operational_models/agent_rng.hpp"
+#include "operational_models/anticipation_velocity_model/anticipation_velocity_model.hpp"
 #include "operational_models/collision_free_speed_model/collision_free_speed_model.hpp"
 #include "polygon.hpp"
 #include "simulation.hpp"
@@ -21,6 +23,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
+#include <cstdint>
 #include <iterator>
 #include <memory>
 #include <utility>
@@ -73,6 +76,36 @@ journey_to(Simulation& sim, Point position, std::size_t region_id)
     const auto journey = sim.add_journey({{stage, NonTransitionDescription{}}});
     return {journey, stage};
 }
+
+/// A simulation whose model gives every agent a random number stream, ready to take agents.
+struct SeededRoom {
+    static constexpr std::uint64_t seed = 1234;
+    using AgentState = AnticipationVelocityModel::State;
+
+    test_geometries::SingleRoom room = test_geometries::rectangle({0, 0}, {20, 20});
+    std::size_t room_id = room.room_id;
+    Simulation sim{
+        std::make_unique<AnticipationVelocityModel>(0.3, seed),
+        std::move(room.geometry),
+        0.01,
+        FloorfieldOptions{}};
+    std::pair<Journey::ID, BaseStage::ID> route = journey_to(sim, Point{18, 18}, room_id);
+
+    GenericAgent::ID add(Point position, AgentState state = {})
+    {
+        return sim.add_agent(route.first, route.second, position, state, room_id);
+    }
+
+    /// Whether agent `id` got the stream of the `index`-th agent taking one from the sequence.
+    bool has_stream(GenericAgent::ID id, std::uint64_t index) const
+    {
+        AgentRngSeeder sequence{seed};
+        for(std::uint64_t skipped = 0; skipped < index; ++skipped) {
+            sequence.next();
+        }
+        return std::get<AgentState>(sim.agent(id).state).rng == sequence.next();
+    }
+};
 
 } // namespace
 
@@ -477,4 +510,34 @@ TEST(SimulationClose, RejectsFurtherUse)
     EXPECT_THAT([&] { sim.grid_info(flat.room_id); }, closed);
     EXPECT_THAT([&] { sim.get_location(5, 5, flat.room_id); }, closed);
     EXPECT_THAT([&] { sim.geo(); }, closed);
+}
+
+TEST(AgentRngSeeding, AgentsAddedFromTheSameStateGetTheirOwnStreams)
+{
+    SeededRoom world;
+    const SeededRoom::AgentState shared{};
+    const auto first = world.add({2, 2}, shared);
+    const auto second = world.add({6, 2}, shared);
+    EXPECT_TRUE(world.has_stream(first, 0));
+    EXPECT_TRUE(world.has_stream(second, 1));
+}
+
+TEST(AgentRngSeeding, ARejectedAgentUsesUpNoStream)
+{
+    SeededRoom world;
+    SeededRoom::AgentState invalid{};
+    invalid.radius = -1.0;
+    EXPECT_THROW(world.add({2, 2}, invalid), SimulationError);
+    EXPECT_TRUE(world.has_stream(world.add({2, 2}), 0));
+}
+
+TEST(AgentRngSeeding, ARemovedAgentsStreamIsNotHandedOutAgain)
+{
+    SeededRoom world;
+    const auto removed = world.add({2, 2});
+    world.add({6, 2});
+    world.sim.mark_agent_for_removal(removed);
+    world.sim.iterate();
+    ASSERT_EQ(world.sim.agent_count(), 1u);
+    EXPECT_TRUE(world.has_stream(world.add({10, 2}), 2));
 }

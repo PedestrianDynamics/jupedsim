@@ -39,6 +39,16 @@ class _DelegatingModel(jps.CustomOperationalModel):
         sub, movement = self._inner.compute_next_state(state.sub, step)
         return replace(state, sub=sub), movement
 
+    def seed_agent_state(self, state):
+        return replace(state, sub=self._inner.seed_state(state.sub))
+
+
+class _NonSeedingDelegatingModel(_DelegatingModel):
+    """Forgets to forward the seeding to its inner model."""
+
+    def seed_agent_state(self, state):
+        return state
+
 
 def _open_room():
     return shapely.Polygon([(0, 0), (20, 0), (20, 20), (0, 20)])
@@ -135,7 +145,9 @@ def test_delegated_state_is_advanced():
 
 def test_wrong_state_type_is_reported_with_both_names():
     sim, exit_id, journey_id, room = _make_sim(
-        _DelegatingModel(jps.SocialForceModel(body_force=0.0, friction=0.0))
+        _NonSeedingDelegatingModel(
+            jps.SocialForceModel(body_force=0.0, friction=0.0)
+        )
     )
     sim.add_agent(
         journey_id=journey_id,
@@ -286,3 +298,104 @@ def test_step_argument_must_be_a_step():
     model = jps.CollisionFreeSpeedModelV3()
     with pytest.raises(jps.SimulationError, match="expects the step"):
         model.compute_next_state(jps.CollisionFreeSpeedModelV3State(), 42)
+
+
+def test_delegated_random_streams_match_the_native_model_exactly():
+    """WarpDriver draws every step, so any stream mixup shows in the trajectories."""
+    native_sim, native_exit, native_journey, native_room = _make_sim(
+        jps.WarpDriverModel(rng_seed=7)
+    )
+    native = _run_pair(
+        native_sim,
+        native_room,
+        native_journey,
+        native_exit,
+        jps.WarpDriverModelState,
+    )
+
+    sim, exit_id, journey_id, room = _make_sim(
+        _DelegatingModel(jps.WarpDriverModel(rng_seed=7), repack_neighbors=True)
+    )
+    delegated = _run_pair(
+        sim,
+        room,
+        journey_id,
+        exit_id,
+        lambda: _Wrapped(sub=jps.WarpDriverModelState()),
+    )
+
+    assert delegated == native
+
+
+def test_the_inner_seed_reaches_delegated_agents():
+    # That the same seed gives the same run follows from the exact match with the native model.
+    def run(seed):
+        sim, exit_id, journey_id, room = _make_sim(
+            _DelegatingModel(
+                jps.WarpDriverModel(rng_seed=seed), repack_neighbors=True
+            )
+        )
+        return _run_pair(
+            sim,
+            room,
+            journey_id,
+            exit_id,
+            lambda: _Wrapped(sub=jps.WarpDriverModelState()),
+        )
+
+    assert run(7) != run(8)
+
+
+@pytest.mark.parametrize(
+    "inner, state",
+    [
+        (jps.WarpDriverModel, jps.WarpDriverModelState),
+        (jps.AnticipationVelocityModel, jps.AnticipationVelocityModelState),
+    ],
+)
+def test_a_forgotten_seed_forward_is_reported(inner, state):
+    sim, exit_id, journey_id, room = _make_sim(
+        _NonSeedingDelegatingModel(inner())
+    )
+    with pytest.raises(jps.SimulationError, match="never seeded"):
+        _run(sim, room, journey_id, exit_id, _Wrapped(sub=state()), steps=1)
+
+
+def test_seed_state_rejects_a_foreign_state():
+    with pytest.raises(
+        jps.SimulationError, match="WarpDriverModel cannot seed a state"
+    ):
+        jps.WarpDriverModel().seed_state(jps.CollisionFreeSpeedModelV3State())
+
+
+@pytest.mark.parametrize(
+    "seed_agent_state, returned",
+    [
+        (lambda model, state: None, "None"),
+        (
+            lambda model, state: model._inner.seed_state(state.sub),
+            "WarpDriverModelState",
+        ),
+    ],
+    ids=["forgotten_return", "inner_state"],
+)
+def test_seed_agent_state_must_return_the_agents_state(
+    seed_agent_state, returned
+):
+    class _Broken(_DelegatingModel):
+        def seed_agent_state(self, state):
+            return seed_agent_state(self, state)
+
+    sim, exit_id, journey_id, room = _make_sim(_Broken(jps.WarpDriverModel()))
+    with pytest.raises(
+        jps.SimulationError,
+        match=f"must return a state of type _Wrapped, got .*{returned}",
+    ):
+        sim.add_agent(
+            journey_id=journey_id,
+            stage_id=exit_id,
+            position=(1.0, 10.0),
+            state=_Wrapped(sub=jps.WarpDriverModelState()),
+            region_id=room,
+        )
+    assert sim.agent_count() == 0

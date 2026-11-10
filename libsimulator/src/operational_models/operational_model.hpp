@@ -66,4 +66,9 @@ public:
         const AgentStep& step) const = 0;
 
     virtual void check_model_constraint(const GenericAgent& agent, const AgentView& view) const = 0;
+
+    /// Called once for every agent added to a simulation, after it passed validation. Models
+    /// drawing random numbers give the agent its own stream here, the next one of a sequence
+    /// seeded with the model's seed.
+    virtual void seed_agent_state(OperationalModelState& /*state*/) {}
 };

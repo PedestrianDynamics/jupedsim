@@ -88,7 +88,7 @@ PythonModel::PythonModel(py::object model) : _model(std::move(model))
         throw std::invalid_argument("_PythonModel requires a CustomOperationalModel instance");
     }
     if(!py::hasattr(_model, "compute_next_state") ||
-       !py::hasattr(_model, "check_model_constraint")) {
+       !py::hasattr(_model, "check_model_constraint") || !py::hasattr(_model, "seed_agent_state")) {
         throw std::invalid_argument("_PythonModel requires a CustomOperationalModel instance");
     }
 }
@@ -176,6 +176,24 @@ void PythonModel::check_model_constraint(const GenericAgent& agent, const AgentV
     _model.attr("check_model_constraint")(python_state, python_view);
 }
 
+void PythonModel::seed_agent_state(OperationalModelState& state)
+{
+    py::gil_scoped_acquire gil;
+
+    auto& python_state = std::get<CustomModel::State>(state).get<GilSafePyObject>();
+    py::object seeded_state = _model.attr("seed_agent_state")(python_state.get());
+    // Catches a forgotten return (None) and handing back the delegated state instead of the
+    // agent's own.
+    const py::type state_type = py::type::of(python_state.get());
+    if(!py::isinstance(seeded_state, state_type)) {
+        throw SimulationError(
+            "seed_agent_state() must return a state of type {}, got {}",
+            std::string(py::str(state_type.attr("__name__"))),
+            describe(seeded_state));
+    }
+    python_state.set(seeded_state);
+}
+
 /// A model that delegates hands on the step it was given (or one derived from it).
 static const AgentStep& as_agent_step(const py::object& step)
 {
@@ -260,8 +278,44 @@ void init_python_model(py::module_& m)
 
                 Raises:
                     SimulationError: If ``state`` is not of this model's type,
-                        ``step`` is not an :class:`~jupedsim.AgentStep`, or a
-                        neighbor carries a state this model cannot read.
+                        ``step`` is not an :class:`~jupedsim.AgentStep`, a
+                        neighbor carries a state this model cannot read, or
+                        ``state`` draws random numbers and was never passed
+                        through :meth:`seed_state`.
+            )")
+            .c_str());
+    operational_model.def(
+        "seed_state",
+        [](OperationalModel& self, OperationalModelState state) {
+            if(model_type_of(state) != self.type()) {
+                throw SimulationError(
+                    "{} cannot seed a state of type '{}'",
+                    to_string(self.type()),
+                    to_string(model_type_of(state)));
+            }
+            self.seed_agent_state(state);
+            return state;
+        },
+        py::arg("state"),
+        clean_doc(R"(
+                Give a new agent's state its random number stream.
+
+                Lets a custom model delegating to a built-in one seed the states
+                it delegates, from
+                :meth:`~jupedsim.CustomOperationalModel.seed_agent_state`. Every
+                call hands out the next stream of the sequence the model's seed
+                starts, so call it exactly once per agent, in the order the
+                agents are added. Models that draw no random numbers return the
+                state unchanged.
+
+                Args:
+                    state: Model state of this model's type to seed.
+
+                Returns:
+                    A seeded copy of ``state``.
+
+                Raises:
+                    SimulationError: If ``state`` is not of this model's type.
             )")
             .c_str());
 
