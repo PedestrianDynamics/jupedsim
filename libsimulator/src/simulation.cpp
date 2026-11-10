@@ -263,6 +263,8 @@ GenericAgent::ID Simulation::add_agent(
     GenericAgent agent{GenericAgent::ID::invalid, journey_id, stage_id, location, std::move(model)};
 
     _operational_decision_system.validate_agent(agent, _neighborhood_search, *_geometry);
+    // Only once validated, so that a rejected agent takes no stream from the sequence.
+    _operational_decision_system.seed_agent_state(agent.state);
 
     _stage_manager.handle_new_agent(agent.stage_id);
     _agents.emplace_back(std::move(agent));

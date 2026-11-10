@@ -385,3 +385,69 @@ def test_leaving_the_with_block_closes_the_simulation():
         sim.iterate()
     with pytest.raises(jps.SimulationError, match="in state Closed"):
         sim.iterate()
+
+
+@pytest.mark.parametrize(
+    "model, state",
+    [
+        (jps.WarpDriverModel, jps.WarpDriverModelState),
+        (jps.AnticipationVelocityModel, jps.AnticipationVelocityModelState),
+    ],
+    ids=["warp_driver", "avm"],
+)
+def test_identically_set_up_simulations_stay_identical(model, state):
+    # Agents walk head-on through a corridor, so that both models draw random numbers. Agent ids
+    # count across simulations, so each run keeps its own and its agents are compared in the
+    # order they were added. Any difference in the draws shows in the positions first.
+    class Run:
+        def __init__(self, seed):
+            surface = jps.WalkableSurface()
+            self.room = surface.add_region(boundary=rect(0, 0, 20, 4))
+            self.sim = jps.Simulation(
+                model=model(rng_seed=seed), geometry=surface, dt=0.05
+            )
+            self.routes = {}
+            for heading, area in [
+                (1, rect(19, 0, 20, 4)),
+                (-1, rect(0, 0, 1, 4)),
+            ]:
+                exit_id = self.sim.add_exit_stage([(area, self.room)])
+                journey_id = self.sim.add_journey(
+                    jps.JourneyDescription([exit_id])
+                )
+                self.routes[heading] = (journey_id, exit_id)
+            self.agent_ids = []
+
+        def add_agent(self, position, heading):
+            journey_id, exit_id = self.routes[heading]
+            self.agent_ids.append(
+                self.sim.add_agent(
+                    journey_id=journey_id,
+                    stage_id=exit_id,
+                    position=position,
+                    state=state(),
+                    region_id=self.room,
+                )
+            )
+
+        def positions(self):
+            return [
+                self.sim.agent(agent_id).position for agent_id in self.agent_ids
+            ]
+
+    runs = [Run(seed=7), Run(seed=7), Run(seed=8)]
+    first, second, reseeded = runs
+    for y in (1.0, 2.0, 3.0):
+        for position, heading in [((8.0, y), 1), ((12.0, y), -1)]:
+            for run in runs:
+                run.add_agent(position, heading)
+
+    diverged = False
+    for _ in range(100):
+        for run in runs:
+            run.sim.iterate()
+        # Compared without tolerance.
+        assert first.positions() == second.positions()
+        diverged = diverged or first.positions() != reseeded.positions()
+    # Otherwise no random number was drawn, and the comparison above shows nothing.
+    assert diverged

@@ -54,6 +54,8 @@ public:
 
     void check_model_constraint(const GenericAgent& agent, const AgentView& view) const override;
 
+    void seed_agent_state(OperationalModelState& state) override;
+
 private:
     py::object _model;
 };

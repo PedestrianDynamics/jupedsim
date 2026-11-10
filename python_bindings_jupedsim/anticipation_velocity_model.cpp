@@ -54,7 +54,7 @@ void init_anticipation_velocity_model(py::module_& m)
                 movement while it is within the critical wall distance. Combined with
                 the parallel component of the agent's direction this keeps agents at
                 a safe distance from walls and yields smooth gliding along them.
-            rng_seed: Seed of the internally used random number generator.
+            rng_seed: Seed of the per-agent random numbers.
     )");
     model.def(
         py::init<double, uint64_t>(),
