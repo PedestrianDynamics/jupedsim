@@ -432,7 +432,7 @@ route_c.stages  # (wp1, wp2, wp3, exit1, exit2)
 print(route_c)
 # Route(start=wp1)
 #   wp1 -> wp2
-#   wp2 -> RoundRobin(wp3: 0, exit1: 2, exit2: 1)
+#   wp2 -> RoundRobin({wp3: 0, exit1: 2, exit2: 1})
 #   wp3 -> exit2
 
 # --- Rerouting --------------------------------------------------------

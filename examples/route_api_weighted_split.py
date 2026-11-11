@@ -32,7 +32,7 @@ split = sim.add_route(
 )
 print(split)
 # Route(start=decision)
-#   decision -> RoundRobin(left: 2, right: 1)
+#   decision -> RoundRobin({left: 2, right: 1})
 
 positions = jps.distribute_by_number(
     polygon=shapely.Polygon([(10, 2), (20, 2), (20, 6), (10, 6)]),
