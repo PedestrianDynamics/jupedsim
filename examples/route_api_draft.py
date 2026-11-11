@@ -155,6 +155,7 @@ main_exits = sim.add_exit(
 # and the route cannot be used in another simulation.
 # `start`, `endless` and `name` are keyword-only. `name` is optional and
 # used in reprs and error messages; route names are unique in a simulation.
+# Route handles expose .name (None if unnamed).
 # Rules (jps.RoundRobin, jps.LeastTravelTime, jps.LeastTargeted) are
 # independent values: one rule object may be used in several routes. Their
 # runtime state, such as the round-robin counter, belongs to the route's
@@ -569,6 +570,8 @@ sim.add_route([wp1, other_sim_wp, exit1])
 # ValueError: other_sim_wp belongs to another simulation
 sim.add_route([wp2, exit1], name="route_a")
 # ValueError: route name 'route_a' is already used
+sim.route("route_z")
+# KeyError: no route named route_z
 jps.RoundRobin({exit1: 0.6, exit2: 0.4})
 # ValueError: weights must be integers
 jps.RoundRobin({exit1: 0, exit2: 0})
@@ -650,6 +653,8 @@ for removal in sim.removed_agents():
 sim.stages  # (Waypoint(id=0, name="wp1"), ..., Exit(id=8, name="exit_ground"))
 sim.stage("exit1")  # Exit(id=5, name="exit1")
 sim.stage(id=5)  # the same exit, by id
+sim.routes  # every route of the simulation, in creation order
+sim.route("route_a")  # by name
 sim.agent(17)  # Agent(id=17)
 # All agents still in the simulation, in id order: held, stranded and
 # arrived agents included. A snapshot (tuple of handles), like
@@ -762,6 +767,3 @@ sim.agents()  # (Agent(id=2), Agent(id=3), ...)
 #    removal record cannot tell which door was used. Doors that need their
 #    own closure and counts are separate exits. Area identity is added only
 #    if grouping and reporting per door are needed together.
-# 5. Lookup of routes. Stages and regions can be looked up by name
-#    (sim.stage("exit1")); sim.routes and sim.route("name") would follow
-#    the same pattern if named routes are used in scripts.
