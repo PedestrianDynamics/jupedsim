@@ -784,3 +784,21 @@ sim.agents()  # (Agent(id=2), Agent(id=3), ...)
 #    the Errors section promises, or as SimulationError; and how the
 #    statements on copying the surface and on regions added after the
 #    simulation was built change once the Geometry is immutable.
+# 6. Zero speeds as closures. Proposal: a speed field may be exactly 0 on
+#    a cell, which makes the cell unwalkable for routing, and a helper
+#    returns the cells of a region's grid covered by a polygon or by a
+#    point with a radius, e.g. as a boolean mask, so that
+#    values[mask] = 0 closes a door. This covers what close() cannot: a
+#    blocked corridor or a smoke barrier makes an exit unreachable for
+#    some agents only. With one exit of two doors, zeroing one door sends
+#    everybody to the other without rules or a second route.
+#    It does not cover informed=False (a floor field reroutes all agents
+#    at once), rules that ignore travel time (RoundRobin and fixed
+#    transitions would have to skip targets that cannot be reached), which
+#    door was used (question 4) and weighted splits.
+#    Open: what zero means for an agent standing on such a cell, for an
+#    agent already assigned to the exit and for removal in a zeroed exit
+#    area; that later targets are then no longer always reachable, so
+#    agents can be stranded by a speed field; the cost of solving floor
+#    fields again on every change; and whether exit.close() stays as the
+#    call that states the intent and is built on this mechanism.
