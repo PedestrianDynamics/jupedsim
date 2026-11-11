@@ -26,6 +26,9 @@ import jupedsim as jps
 surface = jps.WalkableSurface()
 floor0 = surface.add_region(polygon=floor0_polygon, height=0.0, name="floor0")
 floor1 = surface.add_region(polygon=floor1_polygon, height=3.0, name="floor1")
+# Instead of polygon=, a region can be given as boundary= (a sequence of
+# points) with optional holes= (sequences of points). Region names are
+# unique on a surface.
 # A connector (staircase, ramp) is a region of its own: connect_regions returns
 # its handle. edge0 must be an edge of floor0's boundary and edge1 an edge of
 # floor1's; each is lifted to its region's height. The four endpoints must
@@ -97,8 +100,9 @@ sim = jps.Simulation(model, surface)
 #
 # Routing to areas uses floor fields (see "Routing backend" below): agents
 # move toward the area along paths of least travel time, which need not be
-# the geometrically nearest part. The stage is reached once the agent is
-# inside an area.
+# the geometrically nearest part. A stage is reached on the floor field
+# grid (0.2 m cells by default), not on its polygon: arrival is off by up
+# to half a cell, and by up to a cell for areas thinner than one.
 # Direct steering (target= / steer_to) replaces the route with a single
 # point destination. Navigation to that point still follows the walkable
 # surface, including connectors (point-to-point shortest path over the
@@ -106,16 +110,20 @@ sim = jps.Simulation(model, surface)
 # point. Speed fields therefore do not apply: a route agent switched to
 # steer_to() no longer avoids areas made costly by speed fields (e.g.
 # smoke).
-# On reaching the point (route_orientation becomes (0, 0)) the agent is
-# arrived, as with STAY: arrived == True, it stays at the point (steers
-# back if pushed away) and is not removed, until follow() or steer_to().
+# The point counts as reached when the agent's last step passed within
+# 0.05 m of it (horizontal distance, same region), whatever the step
+# length. The agent is then arrived, as with STAY: arrived == True, it
+# stays at the point (steers back if pushed away) and is not removed, until
+# follow() or steer_to(). route_orientation is (0, 0) only exactly on the
+# point, so use arrived to tell arrival.
 # To pass a point and go on, make it a waypoint of the route instead, e.g.
 # Route([(wp_wait, wp_edge), (wp_edge, jps.RoundRobin({exit1: 1, exit2: 1}))],
 #       start=wp_wait).
 #
 # `region`, `radius` and `name` are keyword-only.
 # `name` is optional and used in reprs and error messages; unnamed stages
-# appear as Waypoint(id=3). The messages below assume named stages.
+# appear as Waypoint(id=3). The messages below assume named stages. Stage
+# names are unique in a simulation.
 # Stage handles expose .id and .name (None if unnamed).
 wp1 = sim.add_waypoint((x1, y1), radius=0.5, region=floor0, name="wp1")
 wp2 = sim.add_waypoint((x2, y2), radius=0.5, region=floor0, name="wp2")
@@ -144,8 +152,10 @@ main_exits = sim.add_exit(
 # Route validity is a property of the graph, not of the geometry: it does
 # not check that a stage can be reached from where an agent stands. That
 # is checked when a stage becomes an agent's target: add_agent(), follow()
-# and steer_to() raise if the first target cannot be reached; an agent
-# whose later target cannot be reached is stranded.
+# and steer_to() raise if the first target cannot be reached. Later targets
+# are always reachable: Simulation() rejects disconnected surfaces, regions
+# connect both ways and speeds have a minimum. Agents are stranded only
+# through closed exits.
 
 # Linear (shorthand): a DIRECTED list of stages, walked in order.
 # The last element must be an exit or jps.STAY, unless endless=True.
@@ -183,7 +193,9 @@ route_f = jps.Route(
 )
 
 # Endless loops (tours, single-file) must be explicit.
-# endless=True means the route never ends: a reachable exit or STAY is an error.
+# endless=True waives the need to reach an exit or STAY: the route may run
+# indefinitely. Exits and STAY remain allowed, so a crowd can circulate and
+# be sent out later with update_weights().
 # With endless=True, repeating the first stage at the end of a linear list
 # closes the loop; no other stage may appear twice.
 patrol = jps.Route([wp1, wp2, wp3, wp4, wp1], endless=True)
@@ -198,7 +210,7 @@ tour = jps.Route(
     endless=True,
 )
 
-# Weights: non-negative integers, at least one > 0.
+# Weights: integers from 0 to 1 000 000 000, at least one > 0.
 # RoundRobin uses smooth weighted round-robin; ties go to the earlier target
 # in insertion order. With this algorithm only the ratio matters:
 # {exit1: 3, exit2: 2} and {exit1: 60, exit2: 40} behave the same.
@@ -218,6 +230,11 @@ route_n = jps.Route(
     start=wp1,
 )
 
+# LeastTargeted: picks the target that the fewest agents are currently
+# heading for, as on master. No weights.
+# A LeastTravelTime or LeastTargeted rule that lists its own stage as a
+# candidate gives a UserWarning: agents may never leave it.
+
 # `start` is always a stage: rules fire only on completing a stage. To
 # choose the first target from where the agent stands, choose it in the
 # script and give each choice its own route. If no candidate is reachable,
@@ -230,8 +247,10 @@ agent9 = sim.add_agent(pos1, route=jps.Route([best]))
 
 # --- Agents -----------------------------------------------------------
 # `start` is the agent's first target; agent.stage is always the stage the
-# agent is heading for. An agent spawned inside its start stage's arrival
-# region reaches it in the first iteration and goes on to the next stage.
+# agent is heading for. Stages are completed in iterate(), not in
+# add_agent(): an agent spawned inside its start stage's arrival region
+# still has that stage right after add_agent(), reaches it in the first
+# iteration and goes on to the next stage.
 # `start` may be an exit: the agent walks to it and is removed on reaching it.
 # state=: the agent's model state. For built-in models it may be omitted;
 # the agent then gets the model's default state. Custom models must pass it.
@@ -281,8 +300,10 @@ while sim.agent_count() > 0 and sim.elapsed_time() < 600:
     # Weights: a patch, like dict.update; targets not named keep their weight.
     # Validated against the whole route and applied atomically: on error the
     # old weights and the old counter are kept. On success the counter of
-    # (route_c, wp2) resets. Takes effect at the next decision; agents
-    # already assigned keep their target.
+    # (route_c, wp2) resets if any weight changed; unchanged weights keep
+    # the sequence, so a controller may apply its weights at every step.
+    # Takes effect at the next decision; agents already assigned keep their
+    # target.
     route_c.update_weights(wp2, {wp3: 0})  # wp3: 0, exit1: 2, exit2: 1
     print(route_c.weights(wp2))  # {wp3: 0, exit1: 2, exit2: 1}
 
@@ -336,16 +357,20 @@ print(agent2.route, agent2.stage)  # None, None in direct steering
 # Route(start=wp1, ...), Waypoint(id=1, name="wp1")
 print(agent5.route, agent5.stage)
 print(agent2.target)  # Location(x_new, y_new, region=floor0) in direct steering
-# Locations read from an agent keep their region, so they can be passed on
-# directly, e.g. agent5.steer_to(agent2.position). They are snapshots: a
-# saved agent.position does not follow the agent. Location.region,
-# Stage.name and the other handle attributes are read-only.
-print(agent2.position)  # Location(..., region=floor0)
-print(agent2.position.xy)  # (x, y) only
+# agent.position is the (x, y) tuple, as on master. agent.location is the
+# same point with its region, so it can be passed on directly, e.g.
+# agent5.steer_to(agent2.location). Both are snapshots: a saved
+# agent.location does not follow the agent. Location.region, Stage.name
+# and the other handle attributes are read-only.
+print(agent2.position)  # (x, y)
+print(agent2.location)  # Location(..., region=floor0)
 print(agent5.target)  # None on a route: use agent5.stage
 # Navigation direction (unit vector toward the current target, or (0, 0)
-# at the destination), as on master. Not the velocity (model state) and
-# not the body orientation.
+# inside the area of the stage the agent heads for), as on master. Not the
+# velocity (model state) and not the body orientation. It is computed in
+# iterate(), and set at once by add_agent(), follow() and steer_to(), and
+# by close(informed=True), open() and release() for the agents they
+# reassign.
 print(agent5.route_orientation)
 print(agent3.held)  # True while held at a stage
 # True after completing a waypoint whose transition is STAY, or on
@@ -477,6 +502,10 @@ floor1.at(100, 100)
 # ValueError: (100, 100) is not in floor1
 sim.add_waypoint(polygon_with_hole, region=floor0)
 # ValueError: waypoint polygons must be simple and without holes
+sim.add_waypoint((x1, y1), radius=0.5, region=floor0, name="wp1")
+# ValueError: stage name 'wp1' is already used by Waypoint(id=0, name="wp1")
+surface.add_region(polygon=other_polygon, name="floor0")
+# ValueError: region name 'floor0' is already used by floor0
 jps.Route([])
 # ValueError: route is empty
 jps.Route([(wp1, wp2), (wp2, wp3)])
@@ -485,8 +514,6 @@ jps.Route([(wp1, wp2), (wp2, wp3), (wp2, jps.RoundRobin({exit1: 2, exit2: 1}))])
 # ValueError: wp2 has 2 outgoing transitions; combine them into one rule
 jps.Route([(wp1, wp2), (wp2, wp1)])
 # ValueError: no exit or STAY reachable; to loop on purpose, use endless=True
-jps.Route([wp1, wp2, exit1], endless=True)
-# ValueError: route can end at exit1; drop endless=True
 jps.Route([wp1, wp2, wp1, exit1])
 # ValueError: wp1 appears twice; only repeating the first stage at the end closes a loop
 jps.Route([exit1, wp1])
@@ -499,6 +526,8 @@ jps.RoundRobin({exit1: 0.6, exit2: 0.4})
 # ValueError: weights must be integers
 jps.RoundRobin({exit1: 0, exit2: 0})
 # ValueError: at least one weight must be > 0
+jps.RoundRobin({exit1: 2_000_000_000, exit2: 1})
+# ValueError: weights must be <= 1000000000
 route_c.update_weights(wp1, {wp2: 3})
 # ValueError: wp1 has a fixed transition, not a weighted rule
 route_n.update_weights(wp1, {exit1: 2})
@@ -558,11 +587,14 @@ custom_sim.add_agent(pos, route=route_a)  # simulation with a custom model
 # A removed agent's handle keeps .id and .alive readable; everything else
 # raises.
 agent1.remove()
-# removed_agents() returns the records of the agents removed by the most
-# recent iterate(), as on master. Calls do not consume them: repeated
-# calls return the same records until the next iterate().
+# removed_agents() returns the records of the most recent iterate(), as
+# on master. Calls do not consume them: repeated calls return the same
+# records until the next iterate().
 # As on master, removal runs at the start of iterate(): an agent that
 # reaches an exit in one iteration is removed at the start of the next.
+# Its record is written when it reaches the exit, so it appears one
+# iterate() before agent.alive turns False. An agent removed with
+# agent.remove() gets its record in the iterate() in which it leaves.
 # A record holds the agent's id, the exit it left through (None for
 # agent.remove()) and the time it reached that exit (for agent.remove(),
 # the time of removal), e.g. for exit counts and flow over time.
@@ -583,7 +615,8 @@ sim.agents()  # (Agent(id=2), Agent(id=3), ...)
 # --- Lifecycle of one agent -------------------------------------------
 # 1. Spawned inside its first waypoint:
 #    sim.add_agent(pos_in_wp1, route=route_c)
-#    stage == wp1 -> first iteration: wp1 reached -> stage == wp2.
+#    stage == wp1 right after add_agent() -> first iteration: wp1
+#    reached -> stage == wp2.
 # 2. Weighted branch:
 #    reaches wp2 -> counter of (route_c, wp2) picks the next slot, e.g.
 #    exit1 -> stage == exit1; the assignment is kept until exit1 or a
@@ -612,6 +645,16 @@ sim.agents()  # (Agent(id=2), Agent(id=3), ...)
 #    agent.steer_to(location) -> target == location, no route.
 #    Both clear held, stranded and arrived, so an agent leaves STAY this
 #    way; counters of route_c are not changed.
+
+# --- Unchanged from master --------------------------------------------
+# sim.iterate(count=1), sim.agent_count(), sim.elapsed_time(),
+# sim.delta_time(), sim.iteration_count(), sim.close()
+# sim.agents_in_range(pos, distance), sim.agents_in_polygon(polygon): take
+#   plain (x, y) coordinates and return agent handles
+# sim.get_geometry(), sim.set_tracing(), sim.timer
+# agent.id, agent.position, agent.location, agent.route_orientation,
+#   agent.state
+# Operational models, their agent states and the trajectory writers
 
 # --- From the current API on master to 2.0 ----------------------------
 # Handles are used for object references; IDs remain available for lookup

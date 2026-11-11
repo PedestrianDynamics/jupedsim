@@ -57,5 +57,5 @@ print(f"longest travel time upstairs: {finite.max():.1f} s")
 while sim.agent_count() > 0 and sim.elapsed_time() < 300:
     sim.iterate()
     for agent in upstairs:
-        if agent.alive and agent.position.region == staircase:
+        if agent.alive and agent.location.region == staircase:
             print(f"t={sim.elapsed_time():.1f} s: {agent} on the staircase")
