@@ -25,8 +25,8 @@ exit_ = sim.add_exit(
     [(0, 10), (0.5, 10), (0.5, 12), (0, 12)], region=floor, name="exit"
 )
 
-route_a = jps.Route([door_a, exit_])
-route_b = jps.Route([door_b, exit_])
+route_a = sim.add_route([door_a, exit_])
+route_b = sim.add_route([door_b, exit_])
 
 for polygon, route in ((room_a, route_a), (room_b, route_b)):
     positions = jps.distribute_by_number(

@@ -17,7 +17,7 @@ sim = jps.Simulation(jps.CollisionFreeSpeedModel(), surface)
 door = sim.add_exit(
     [(9.5, 4.5), (10, 4.5), (10, 5.5), (9.5, 5.5)], region=room, name="door"
 )
-evacuate = jps.Route([door])
+evacuate = sim.add_route([door])
 
 # distribute_by_number returns (x, y) pairs; room.at() turns each into a
 # location in room.

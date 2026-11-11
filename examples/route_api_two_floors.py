@@ -39,7 +39,7 @@ sim = jps.Simulation(jps.CollisionFreeSpeedModel(), surface)
 exit_ground = sim.add_exit(
     [(0, 4), (0.5, 4), (0.5, 6), (0, 6)], region=floor0, name="exit_ground"
 )
-evacuate = jps.Route([exit_ground])
+evacuate = sim.add_route([exit_ground])
 
 # The staircase is not a stage: the exit's floor field routes over it.
 upstairs = [

@@ -31,8 +31,8 @@ west = sim.add_exit(
 )
 
 # One route per exit; each agent takes the exit it reaches fastest.
-via_east = jps.Route([east_corridor, east])
-via_west = jps.Route([west_corridor, west])
+via_east = sim.add_route([east_corridor, east])
+via_west = sim.add_route([west_corridor, west])
 routes = {east: via_east, west: via_west}
 
 positions = jps.distribute_by_number(

@@ -26,7 +26,7 @@ right = sim.add_exit(
     [(29.5, 9), (30, 9), (30, 11), (29.5, 11)], region=hall, name="right"
 )
 
-split = jps.Route(
+split = sim.add_route(
     [(decision, jps.RoundRobin({left: 2, right: 1}))],
     start=decision,
 )
