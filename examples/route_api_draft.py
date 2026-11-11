@@ -111,7 +111,7 @@ sim = jps.Simulation(model, surface)
 # the geometrically nearest part. A stage is reached on the floor field
 # grid (0.2 m cells by default), not on its polygon: arrival is off by up
 # to half a cell, and by up to a cell for areas thinner than one.
-# Direct steering (target= / steer_to) replaces the route with a single
+# Direct steering (steer_to= / steer_to()) replaces the route with a single
 # point destination. Navigation to that point still follows the walkable
 # surface, including connectors (point-to-point shortest path over the
 # navigation mesh, no floor field); it is not a straight walk toward the
@@ -286,10 +286,10 @@ agent3 = sim.add_agent(
     pos3, route=route_c
 )  # starts at the route's default (wp1)
 agent4 = sim.add_agent(pos4, route=route_c, start=wp2)  # overrides the default
-agent5 = sim.add_agent(pos5, target=floor0.at(x, y))  # direct steering
+agent5 = sim.add_agent(pos5, steer_to=floor0.at(x, y))  # direct steering
 # Steering to a location on another floor walks there over the connecting
 # staircase.
-agent7 = sim.add_agent(floor0.at(x0, y0), target=floor1.at(x, y))
+agent7 = sim.add_agent(floor0.at(x0, y0), steer_to=floor1.at(x, y))
 agent6 = sim.add_agent(pos6, route=route_x)  # walks to exit1
 
 # --- Runtime changes --------------------------------------------------
@@ -538,8 +538,8 @@ sim.add_agent(new_region.at(x, y), route=route_a)  # region added after sim
 # ValueError: new_region is not part of this simulation's geometry
 sim.add_agent((x, y), route=route_a)
 # TypeError: location must be a Location, e.g. floor0.at(x, y)
-sim.add_agent(pos, target=(x, y))
-# TypeError: target must be a Location, e.g. floor0.at(x, y)
+sim.add_agent(pos, steer_to=(x, y))
+# TypeError: steer_to must be a Location, e.g. floor0.at(x, y)
 agent5.steer_to((x, y))
 # TypeError: location must be a Location, e.g. floor0.at(x, y)
 floor1.at(100, 100)
@@ -610,8 +610,8 @@ sim.agents_targeting(wp4, route=route_c)
 # ValueError: wp4 is not part of this route; stages are wp1, wp2, wp3, exit1, exit2
 sim.add_agent(floor0.at(x_closed_room, y_closed_room), route=route_a)
 # ValueError: wp1 cannot be reached from Location(..., region=floor0)
-sim.add_agent(pos, route=route_a, target=floor0.at(x, y))
-# ValueError: use route= or target=, not both
+sim.add_agent(pos, route=route_a, steer_to=floor0.at(x, y))
+# ValueError: use route= or steer_to=, not both
 sim.add_agent(pos, route=sim.add_route([(wp1, wp2), (wp2, exit1)]))
 # ValueError: route given as pairs has no default start; pass start= here or to add_route
 sim.add_agent(pos, route=route_c, start=wp4)
@@ -713,7 +713,7 @@ sim.agents()  # (Agent(id=2), Agent(id=3), ...)
 # Current API on master                     2.0
 # add_waypoint_stage(...) -> int            sim.add_waypoint(...) -> Waypoint
 # add_exit_stage(...) -> int                sim.add_exit(...) -> Exit
-# add_direct_steering_stage() -> int        removed: target= / agent.steer_to()
+# add_direct_steering_stage() -> int        removed: steer_to= / agent.steer_to()
 # add_journey(JourneyDescription) -> int    sim.add_route([...]) -> Route
 # add_agent(journey_id, stage_id, ...)      sim.add_agent(location, route=,
 #                                               start=)
