@@ -767,3 +767,20 @@ sim.agents()  # (Agent(id=2), Agent(id=3), ...)
 #    removal record cannot tell which door was used. Doors that need their
 #    own closure and counts are separate exits. Area identity is added only
 #    if grouping and reporting per door are needed together.
+# 5. Who owns the geometry. #1724 replaces the native WalkableSurface by a
+#    GeometryBuilder whose build() returns an immutable Geometry that
+#    simulations share, with all validation in C++. The Python layer of
+#    #1722 keeps its own copy of every region polygon and checks points and
+#    stage areas a second time; the two validators can disagree. Proposal:
+#    C++ owns the geometry and its validation, Python keeps identity only
+#    (owner, id, name) and asks C++: contains(region, x, y), the regions at
+#    a point, the height, whether a region is a connector. This needs
+#    region ids that stay the same across build(), and names passed to
+#    C++, so that an error is complete where it is raised.
+#    Open: whether the class is called WalkableSurface or GeometryBuilder;
+#    whether region.at() is checked on the builder or only on the built
+#    Geometry (handles are then usable for locations after build());
+#    whether errors raised in C++ arrive as ValueError and TypeError, as
+#    the Errors section promises, or as SimulationError; and how the
+#    statements on copying the surface and on regions added after the
+#    simulation was built change once the Geometry is immutable.
