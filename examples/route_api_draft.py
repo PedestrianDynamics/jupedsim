@@ -69,7 +69,9 @@ sim = jps.Simulation(model=model, geometry=geometry)
 # --- Targets ----------------------------------------------------------
 # sim.add_target() adds a waypoint or an exit and returns a handle, a
 # RouteTarget. jps.Waypoint and jps.Exit describe the target; the handle
-# is the target in the simulation.
+# is the target in the simulation. target.description returns the
+# jps.Waypoint or jps.Exit it was created from, so a script can tell a
+# waypoint from an exit and read the areas back.
 #
 # A target is a list of (area, region) pairs. Reaching any one of its
 # areas completes the target. Areas may lie in different regions.
@@ -108,21 +110,22 @@ main_exits = sim.add_target(
 #   jps.FixedTransition(source, target)
 #   jps.RoundRobinTransition(source, {target: weight, ...})
 #   jps.LeastTargetedTransition(source, [target, ...])
-# jps.START_TARGET is a virtual source: "from where the agent currently
-# is". The transition leaving it chooses an agent's first target, once,
-# when the agent joins the route (add_agent, reroute(route=)).
+# jps.AGENT_LOCATION is a virtual source: the location of the agent when
+# it joins the route (add_agent, reroute(route=)). It is not a target and
+# not a start of the simulation. The transition leaving it chooses the
+# agent's first target, once, on joining.
 #
 # The list of transitions is the only positional parameter; `name` is
 # keyword-only. sim.add_route() returns a Route handle. A route belongs to
 # its simulation.
 #
 # add_route checks:
-# - Exactly one transition leaves START_TARGET.
+# - Exactly one transition leaves AGENT_LOCATION.
 # - At most one transition leaves each target.
-# - START_TARGET is never what a transition leads to.
-# - The graph, START_TARGET included, is connected when the directions of
-#   the transitions are ignored. Separate parts belong in a route of their
-#   own. A target that cannot be reached from START_TARGET but is
+# - AGENT_LOCATION is never what a transition leads to.
+# - The graph, AGENT_LOCATION included, is connected when the directions
+#   of the transitions are ignored. Separate parts belong in a route of their
+#   own. A target that cannot be reached from AGENT_LOCATION but is
 #   connected to the rest is allowed: a side entry, see first_target=
 #   below.
 # Loops are allowed. A route need not end at an exit: a target without an
@@ -131,7 +134,7 @@ main_exits = sim.add_target(
 # Linear: wp1, wp2, then exit1
 route_a = sim.add_route(
     [
-        jps.FixedTransition(jps.START_TARGET, wp1),
+        jps.FixedTransition(jps.AGENT_LOCATION, wp1),
         jps.FixedTransition(wp1, wp2),
         jps.FixedTransition(wp2, exit1),
     ],
@@ -139,12 +142,12 @@ route_a = sim.add_route(
 )
 
 # Minimal evacuation route: walk to exit1
-route_x = sim.add_route([jps.FixedTransition(jps.START_TARGET, exit1)])
+route_x = sim.add_route([jps.FixedTransition(jps.AGENT_LOCATION, exit1)])
 
 # Branching after a waypoint
 route_c = sim.add_route(
     [
-        jps.FixedTransition(jps.START_TARGET, wp1),
+        jps.FixedTransition(jps.AGENT_LOCATION, wp1),
         jps.FixedTransition(wp1, wp2),
         jps.RoundRobinTransition(wp2, {wp3: 1, exit1: 2, exit2: 1}),
         jps.FixedTransition(wp3, exit2),
@@ -155,7 +158,7 @@ route_c = sim.add_route(
 # Split right at the start, 2:1, no helper waypoint needed
 split = sim.add_route(
     [
-        jps.RoundRobinTransition(jps.START_TARGET, {exit1: 2, exit2: 1}),
+        jps.RoundRobinTransition(jps.AGENT_LOCATION, {exit1: 2, exit2: 1}),
     ],
     name="split",
 )
@@ -163,7 +166,7 @@ split = sim.add_route(
 # Ending at an assembly point: no exit needed
 assembly = sim.add_route(
     [
-        jps.FixedTransition(jps.START_TARGET, wp1),
+        jps.FixedTransition(jps.AGENT_LOCATION, wp1),
         jps.LeastTargetedTransition(wp1, [wp2, wp3]),
     ],
 )
@@ -171,7 +174,7 @@ assembly = sim.add_route(
 # A loop, e.g. for single-file experiments
 ring = sim.add_route(
     [
-        jps.FixedTransition(jps.START_TARGET, wp1),
+        jps.FixedTransition(jps.AGENT_LOCATION, wp1),
         jps.FixedTransition(wp1, wp2),
         jps.FixedTransition(wp2, wp3),
         jps.FixedTransition(wp3, wp1),
@@ -195,7 +198,7 @@ agent9 = sim.add_agent(pos1, route=split, first_target=best)
 
 # --- Agents -----------------------------------------------------------
 # add_agent returns an Agent handle. Give either route= or steer_to=.
-# first_target= overrides the transition leaving START_TARGET: it can be
+# first_target= overrides the transition leaving AGENT_LOCATION: it can be
 # any target of the route, and the agent then does not take part in a
 # round robin at the start. Targets are completed in iterate(), not in
 # add_agent(): an agent placed inside its first target still has it right
@@ -221,7 +224,7 @@ agent5 = sim.add_agent(pos5, steer_to=floor1.at(x, y))
 # --- Runtime changes --------------------------------------------------
 # agent.reroute() changes where an agent goes, with the same parameters as
 # add_agent():
-#   agent.reroute(route=r)                  join r, START_TARGET decides
+#   agent.reroute(route=r)                  join r, AGENT_LOCATION decides
 #   agent.reroute(route=r, first_target=t)  join r at t
 #   agent.reroute(first_target=t)           jump to t in the current route
 #   agent.reroute(steer_to=location)        direct steering
@@ -270,6 +273,10 @@ print(agent1.route)  # Route(id=0, name="route_a"), or None in steering
 # The target the agent heads for: a RouteTarget on a route, a location in
 # direct steering
 print(agent1.target)  # RouteTarget(id=1, name="wp2")
+# The description a target was created from
+print(exit1.description)  # Exit([(exit_polygon1, floor0)])
+isinstance(exit1.description, jps.Exit)  # True
+exit1.description.areas  # [(exit_polygon1, floor0)]
 print(agent5.target)  # Location(x_new, y_new, region=floor0)
 # Where the agent stands, with its region and height; a snapshot
 print(agent1.location)  # Location(x, y, region=floor0)
@@ -335,11 +342,11 @@ sim.add_target(jps.Waypoint([(door_polygon, floor0)]), name="wp1")
 sim.add_route([])
 # ValueError: route is empty
 sim.add_route([jps.FixedTransition(wp1, exit1)])
-# ValueError: no transition leaves START_TARGET; add one, e.g.
-#   jps.FixedTransition(jps.START_TARGET, wp1)
+# ValueError: no transition leaves AGENT_LOCATION; add one, e.g.
+#   jps.FixedTransition(jps.AGENT_LOCATION, wp1)
 sim.add_route(
     [
-        jps.FixedTransition(jps.START_TARGET, wp1),
+        jps.FixedTransition(jps.AGENT_LOCATION, wp1),
         jps.FixedTransition(wp1, wp2),
         jps.FixedTransition(wp1, wp3),
     ]
@@ -348,13 +355,13 @@ sim.add_route(
 #   jps.RoundRobinTransition(wp1, {wp2: 1, wp3: 1})
 sim.add_route(
     [
-        jps.FixedTransition(jps.START_TARGET, wp1),
+        jps.FixedTransition(jps.AGENT_LOCATION, wp1),
         jps.FixedTransition(wp2, wp3),
     ]
 )
 # ValueError: wp2, wp3 are not connected to the rest of the route; define
 #   them as a route of their own
-sim.add_route([jps.FixedTransition(jps.START_TARGET, other_sim_wp)])
+sim.add_route([jps.FixedTransition(jps.AGENT_LOCATION, other_sim_wp)])
 # ValueError: other_sim_wp belongs to another simulation
 jps.RoundRobinTransition(wp2, {exit1: 0.6, exit2: 0.4})
 # ValueError: weights must be positive integers
@@ -429,8 +436,8 @@ custom_sim.add_agent(pos, route=route_a)  # simulation with a custom model
 #     region_id)                                exit1, floor0)
 
 # --- Open questions ---------------------------------------------------
-# 1. Kind of a target: how does a script tell a waypoint from an exit,
-#    given a RouteTarget handle?
+# 1. Kind of a target: answered by target.description (see State). Is a
+#    shorter target.kind (an enum) also wanted, e.g. for reprs?
 # 2. Reporting: which information is exposed all the time, and what users
 #    compute in their scripts, e.g. whether agents_completed_target()
 #    returns agent handles or ids.
