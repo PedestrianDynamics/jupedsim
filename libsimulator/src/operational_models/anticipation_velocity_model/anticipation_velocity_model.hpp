@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
+#include "agent_rng.hpp"
 #include "anticipation_velocity_model_state.hpp"
 #include "kernel.hpp"
 #include "operational_model.hpp"
@@ -10,7 +11,6 @@
 #include <fmt/core.h>
 
 #include <cstdint>
-#include <random>
 
 struct NeighborView;
 struct WallView;
@@ -24,8 +24,8 @@ private:
     /// Add a small outward component to maintain minimum distance from walls.
     double _pushout_strength{0.3};
     double _cut_off_radius{3};
-    // Shared sequential RNG: draws must stay on the model to keep simulations deterministic.
-    mutable std::mt19937 _gen;
+    /// Hands out the agents' random number streams.
+    AgentRngSeeder _rng_seeder;
 
 public:
     AnticipationVelocityModel(double pushout_strength, uint64_t rng_seed);
@@ -36,12 +36,15 @@ public:
         OperationalModelState& next,
         const AgentStep& step) const override;
     void check_model_constraint(const GenericAgent& agent, const AgentView& view) const override;
+    void seed_agent_state(OperationalModelState& state) override;
 
 private:
-    double optimal_speed(const State& current_state, double spacing, double time_gap) const;
+    double
+    optimal_speed(const State& current_state, double spacing, double time_gap, AgentRng& rng) const;
     Vector calculate_influence_direction(
         const Vector& desired_direction,
-        const Vector& predicted_direction) const;
+        const Vector& predicted_direction,
+        AgentRng& rng) const;
     double get_spacing(
         const State& current_state,
         const NeighborView& neighbor,
@@ -49,7 +52,8 @@ private:
     Vector neighbor_repulsion(
         const State& current_state,
         Vector desired_direction,
-        const NeighborView& neighbor) const;
+        const NeighborView& neighbor,
+        AgentRng& rng) const;
 
     Vector handle_wall_avoidance(
         const Vector& direction,

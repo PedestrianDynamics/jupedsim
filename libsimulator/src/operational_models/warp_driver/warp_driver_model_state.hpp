@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
+#include "agent_rng.hpp"
 #include "kernel.hpp"
 
 #include <fmt/core.h>
@@ -13,6 +14,7 @@ struct WarpDriverModelState {
     double displacement_y{0.0};
     double detour_time{0.0};
     int detour_side{1};
+    AgentRng rng{};
 };
 
 template <>

@@ -385,3 +385,47 @@ def test_leaving_the_with_block_closes_the_simulation():
         sim.iterate()
     with pytest.raises(jps.SimulationError, match="in state Closed"):
         sim.iterate()
+
+
+def run_crowd_on_u_stair(model, state, iterations=300):
+    sim, ground, upper = u_stair(model=model)
+    journey_id, exit_id = journey_to_upper_exit(sim, upper)
+    ids = [
+        sim.add_agent(
+            journey_id=journey_id,
+            stage_id=exit_id,
+            position=position,
+            state=state(),
+            region_id=ground,
+        )
+        for position in [(3.3, 7.6), (4.0, 7.6), (3.3, 8.3), (4.0, 8.3)]
+    ]
+    for _ in range(iterations):
+        sim.iterate()
+    return [sim.agent(agent_id).position for agent_id in ids]
+
+
+@pytest.mark.parametrize(
+    "model, state",
+    [
+        (jps.WarpDriverModel, jps.WarpDriverModelState),
+        (jps.AnticipationVelocityModel, jps.AnticipationVelocityModelState),
+    ],
+    ids=["warp_driver", "avm"],
+)
+def test_the_same_seed_reproduces_a_run_exactly(model, state):
+    # Compared without tolerance. Agent ids differ between the two simulations, so this also
+    # shows that the random numbers do not depend on them.
+    first = run_crowd_on_u_stair(model(rng_seed=7), state)
+    second = run_crowd_on_u_stair(model(rng_seed=7), state)
+    assert first == second
+
+
+def test_another_seed_gives_another_warp_driver_run():
+    first = run_crowd_on_u_stair(
+        jps.WarpDriverModel(rng_seed=7), jps.WarpDriverModelState
+    )
+    second = run_crowd_on_u_stair(
+        jps.WarpDriverModel(rng_seed=8), jps.WarpDriverModelState
+    )
+    assert first != second

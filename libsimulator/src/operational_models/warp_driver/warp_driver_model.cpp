@@ -34,11 +34,13 @@
 #include "operational_model_type.hpp"
 #include "simulation_error.hpp"
 
+#include <boost/random/uniform_int_distribution.hpp>
+#include <boost/random/uniform_real_distribution.hpp>
+
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
-#include <random>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -345,7 +347,7 @@ WarpDriverModel::WarpDriverModel(
     // 2 * v_max * time_horizon, plus their combined radii, plus a small margin.
     // v_max and r_max are hardcoded pedestrian defaults.
     , _cut_off_radius(2.0 * 1.5 * time_horizon + 2.0 * 0.3 + 0.5)
-    , _rng(rng_seed)
+    , _rng_seeder(rng_seed)
 {
     if(sigma <= 0.0) {
         throw SimulationError("WarpDriverModel: sigma must be > 0, got {}", sigma);
@@ -440,6 +442,11 @@ void WarpDriverModel::check_model_constraint(const GenericAgent& agent, const Ag
     }
 }
 
+void WarpDriverModel::seed_agent_state(OperationalModelState& state)
+{
+    std::get<State>(state).rng = _rng_seeder.next();
+}
+
 Vector WarpDriverModel::compute_next_state(
     const OperationalModelState& current,
     OperationalModelState& next,
@@ -509,7 +516,7 @@ Vector WarpDriverModel::compute_next_state(
     // Random perturbation: small lateral offset on trajectory samples to break
     // symmetry in perfectly aligned head-on encounters where the gradient field
     // cancels by symmetry, producing no lateral avoidance.
-    std::uniform_real_distribution<double> perturb_dist(-0.05, 0.05);
+    boost::random::uniform_real_distribution<double> perturb_dist(-0.05, 0.05);
 
     // Storage for per-sample combined probability and gradient
     struct Sample {
@@ -522,7 +529,7 @@ Vector WarpDriverModel::compute_next_state(
 
     for(int i = 0; i < this->_num_samples; ++i) {
         const double t = i * dt_sample;
-        const double lateral_perturbation = perturb_dist(_rng);
+        const double lateral_perturbation = perturb_dist(next_data.rng);
         samples[static_cast<size_t>(i)] =
             Sample{t, STP{speed * t, lateral_perturbation, t}, 0.0, STP{0, 0, 0}};
     }
@@ -734,8 +741,8 @@ Vector WarpDriverModel::compute_next_state(
         displacement = Vector{};
     } else if(stuck_time >= stuck_threshold) {
         // Stuck: no net progress for stuck_threshold seconds — enter detour
-        std::uniform_int_distribution<int> side_dist(0, 1);
-        detour_side = side_dist(_rng) * 2 - 1; // -1 or +1
+        boost::random::uniform_int_distribution<int> side_dist(0, 1);
+        detour_side = side_dist(next_data.rng) * 2 - 1; // -1 or +1
         detour_time = detour_duration;
         stuck_time = 0.0;
     }
