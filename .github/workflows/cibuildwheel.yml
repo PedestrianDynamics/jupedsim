@@ -52,13 +52,7 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Install dependencies
-        run: pip install pytest
-      - name: Install clang-tidy-23
-        run: |
-          sudo add-apt-repository 'deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-23 main'
-          wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
-          sudo apt update
-          sudo apt install clang-tidy-23 clang-tools-23
+        run: pip install pytest clang-tidy==23.1.4 clang-include-cleaner==23.1.4
       - name: Run clang-tidy
         run: ./scripts/ci/check_tidy.sh
   tests:

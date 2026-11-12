@@ -418,8 +418,11 @@ if(UNIX AND WITH_TIDY)
         message(FATAL_ERROR "Could not create clang-tidy targets, clang-tidy version ${version} found, but ${clang-tidy-version} required")
     endif()
     get_filename_component(clang-tidy-bindir "${CLANG_TIDY}" DIRECTORY)
+    # The clang-tidy wheel from PyPI names it run-clang-tidy.py. NAMES_PER_DIR so that the one
+    # next to clang-tidy wins over a plain run-clang-tidy of another LLVM version on the PATH.
     find_program(RUN_CLANG_TIDY
-        NAMES run-clang-tidy-${clang-tidy-version} run-clang-tidy
+        NAMES run-clang-tidy-${clang-tidy-version} run-clang-tidy run-clang-tidy.py
+        NAMES_PER_DIR
         HINTS ${clang-tidy-bindir}
         REQUIRED
     )
