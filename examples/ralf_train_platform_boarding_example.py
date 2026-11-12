@@ -35,25 +35,25 @@ sim = jps.Simulation(
     model=jps.CollisionFreeSpeedModel(), geometry=geo_builder.build()
 )
 
-waiting_area = sim.add_routing_target(
+waiting_area = sim.add_target(
     jps.Waypoint([(WAITING_AREA, platform)]), name="waiting area"
 )
-platform_edge = sim.add_routing_target(
+platform_edge = sim.add_target(
     jps.Waypoint([(PLATFORM_EDGE, platform)]), name="platform edge"
 )
-door1 = sim.add_routing_target(jps.Exit([(DOOR1, platform)]), name="door 1")
-door2 = sim.add_routing_target(jps.Exit([(DOOR2, platform)]), name="door 2")
+door1 = sim.add_target(jps.Exit([(DOOR1, platform)]), name="door 1")
+door2 = sim.add_target(jps.Exit([(DOOR2, platform)]), name="door 2")
 
 to_waiting_area = sim.add_route(
-    transitions=[jps.FixedTransition(jps.ENTER_ROUTE, waiting_area)],
+    [jps.FixedTransition(jps.START_TARGET, waiting_area)],
     name="to waiting area",
 )
 # Ich habe für das Boarding "RoundRobin" gewählt, weil die Leute vielleicht durch eine
 # bestimmte Tür gehen wollen wegen ihrer Sitzplatzreservierung. Man könnte auch die
 # "nächste" Tür wollen. Dazu könnte man Mohcines jps.LeastTravelTime() verwenden.
 boarding = sim.add_route(
-    transitions=[
-        jps.FixedTransition(jps.ENTER_ROUTE, platform_edge),
+    [
+        jps.FixedTransition(jps.START_TARGET, platform_edge),
         jps.RoundRobinTransition(platform_edge, {door1: 1, door2: 1}),
     ],
     name="boarding",
