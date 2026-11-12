@@ -76,6 +76,14 @@ public:
 
     bool contains(const Location& where, std::size_t id);
     Vector get_orientation(const Location& from, std::size_t id);
+    /// Solves destination @p id unless it already is; afterwards get_prepared_orientation
+    /// answers for it.
+    void prepare(std::size_t id);
+    /// contains() for a destination prepare() has solved; read-only, safe from several threads.
+    bool contains_prepared(const Location& where, std::size_t id) const;
+    /// get_orientation for a destination prepare() has solved. Only reads the field, so it may
+    /// be called from several threads at once.
+    Vector get_prepared_orientation(const Location& from, std::size_t id) const;
     /// Travel times and directions to destination @p id over the grid of @p region. Solves the
     /// destination on first use.
     TravelTimeGrid travel_times(std::size_t region, std::size_t id);

@@ -345,7 +345,7 @@ WarpDriverModel::WarpDriverModel(
     // 2 * v_max * time_horizon, plus their combined radii, plus a small margin.
     // v_max and r_max are hardcoded pedestrian defaults.
     , _cut_off_radius(2.0 * 1.5 * time_horizon + 2.0 * 0.3 + 0.5)
-    , _rng(rng_seed)
+    , _seed(rng_seed)
 {
     if(sigma <= 0.0) {
         throw SimulationError("WarpDriverModel: sigma must be > 0, got {}", sigma);
@@ -445,6 +445,7 @@ Vector WarpDriverModel::compute_next_state(
     OperationalModelState& next,
     const AgentStep& step) const
 {
+    StepRng rng{_seed, step.iteration(), step.agent_index()};
     const auto& agent_data = std::get<State>(current);
     auto& next_data = std::get<State>(next);
     const double speed = agent_data.v0;
@@ -522,7 +523,7 @@ Vector WarpDriverModel::compute_next_state(
 
     for(int i = 0; i < this->_num_samples; ++i) {
         const double t = i * dt_sample;
-        const double lateral_perturbation = perturb_dist(_rng);
+        const double lateral_perturbation = perturb_dist(rng);
         samples[static_cast<size_t>(i)] =
             Sample{t, STP{speed * t, lateral_perturbation, t}, 0.0, STP{0, 0, 0}};
     }
@@ -735,7 +736,7 @@ Vector WarpDriverModel::compute_next_state(
     } else if(stuck_time >= stuck_threshold) {
         // Stuck: no net progress for stuck_threshold seconds — enter detour
         std::uniform_int_distribution<int> side_dist(0, 1);
-        detour_side = side_dist(_rng) * 2 - 1; // -1 or +1
+        detour_side = side_dist(rng) * 2 - 1; // -1 or +1
         detour_time = detour_duration;
         stuck_time = 0.0;
     }

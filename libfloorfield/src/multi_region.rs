@@ -469,11 +469,30 @@ impl MultiRegionFloorfield {
     /// cell near it (`NotRoutable`). Solves the destination on first use, which
     /// can fail with `NotConverged`.
     pub fn direction(&mut self, region: usize, x: f64, y: f64, dest: usize) -> Result<(f64, f64)> {
+        // The point is checked first, as before, so a bad point is reported before an unsolvable
+        // destination.
+        self.covered(region, x, y)?;
+        self.prepare(dest)?;
+        self.direction_solved(region, x, y, dest)
+    }
+
+    /// Solves `dest` unless it already is, so that `direction_solved` can then answer for it.
+    pub fn prepare(&mut self, dest: usize) -> Result<()> {
+        self.solution(dest).map(|_| ())
+    }
+
+    /// `direction` for a destination `prepare` has solved. Only reads, so it can be called
+    /// from several threads at once. Fails with `Internal` when `dest` is not solved.
+    pub fn direction_solved(&self, region: usize, x: f64, y: f64, dest: usize) -> Result<(f64, f64)> {
         let g = self.covered(region, x, y)?;
         let cell = nearest_walkable(&self.spec, g, [x, y], None)
             .ok_or(MultiRegionError::NotRoutable { region, x, y })?;
-        self.solution(dest)?;
-        let d = &self.destinations[dest];
+        let d = self.destination(dest)?;
+        if d.solution.is_none() {
+            return Err(MultiRegionError::Internal(format!(
+                "destination {dest} queried before it was prepared"
+            )));
+        }
         let source = d
             .sources
             .iter()
@@ -533,6 +552,20 @@ impl MultiRegionFloorfield {
         Ok(sol.query[region]
             .as_ref()
             .map_or(f32::INFINITY, |query| query[cell as usize]))
+    }
+
+    /// `travel_time` for a destination `prepare` has solved. Only reads, so it can be called
+    /// from several threads at once. Fails with `Internal` when `dest` is not solved.
+    pub fn travel_time_solved(&self, region: usize, x: f64, y: f64, dest: usize) -> Result<f64> {
+        let g = self.covered(region, x, y)?;
+        let cell = nearest_walkable(&self.spec, g, [x, y], None)
+            .ok_or(MultiRegionError::NotRoutable { region, x, y })?;
+        let sol = self.destination(dest)?.solution.as_ref().ok_or_else(|| {
+            MultiRegionError::Internal(format!("destination {dest} queried before it was prepared"))
+        })?;
+        Ok(sol.query[region]
+            .as_ref()
+            .map_or(f64::INFINITY, |query| query[cell as usize]))
     }
 
     // ── Internals ───────────────────────────────────────────────────────────

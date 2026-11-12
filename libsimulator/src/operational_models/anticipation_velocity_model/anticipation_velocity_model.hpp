@@ -6,11 +6,11 @@
 #include "operational_model.hpp"
 #include "operational_model_state.hpp"
 #include "operational_model_type.hpp"
+#include "step_rng.hpp"
 
 #include <fmt/core.h>
 
 #include <cstdint>
-#include <random>
 
 struct NeighborView;
 struct WallView;
@@ -25,7 +25,7 @@ private:
     double _pushout_strength{0.3};
     double _cut_off_radius{3};
     // Shared sequential RNG: draws must stay on the model to keep simulations deterministic.
-    mutable std::mt19937 _gen;
+    std::uint64_t _seed;
 
 public:
     AnticipationVelocityModel(double pushout_strength, uint64_t rng_seed);
@@ -38,10 +38,12 @@ public:
     void check_model_constraint(const GenericAgent& agent, const AgentView& view) const override;
 
 private:
-    double optimal_speed(const State& current_state, double spacing, double time_gap) const;
+    double
+    optimal_speed(const State& current_state, double spacing, double time_gap, StepRng& rng) const;
     Vector calculate_influence_direction(
         const Vector& desired_direction,
-        const Vector& predicted_direction) const;
+        const Vector& predicted_direction,
+        StepRng& rng) const;
     double get_spacing(
         const State& current_state,
         const NeighborView& neighbor,
@@ -49,7 +51,8 @@ private:
     Vector neighbor_repulsion(
         const State& current_state,
         Vector desired_direction,
-        const NeighborView& neighbor) const;
+        const NeighborView& neighbor,
+        StepRng& rng) const;
 
     Vector handle_wall_avoidance(
         const Vector& direction,

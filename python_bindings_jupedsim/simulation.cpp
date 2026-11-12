@@ -171,7 +171,23 @@ void init_simulation(py::module_& m)
                 }
                 return agent_ids;
             })
-        .def("iterate", [](Simulation& sim) { sim.iterate(); })
+        .def(
+            "iterate",
+            [](Simulation& sim, std::size_t count) {
+                // Worker threads of the operational step may log; the Python log callbacks
+                // take the GIL themselves, so it must not be held here.
+                py::gil_scoped_release release;
+                sim.iterate(count);
+            },
+            py::arg("count") = 1)
+        .def("set_num_threads", &Simulation::set_num_threads, py::arg("threads"))
+        .def("num_threads", &Simulation::num_threads)
+        .def(
+            "spike_probe",
+            [](Simulation& sim, int kind, std::size_t threads, std::size_t reps) {
+                py::gil_scoped_release release;
+                return sim.spike_probe(kind, threads, reps);
+            })
         .def("close", [](Simulation& sim) { sim.close(); })
         .def(
             "switch_agent_journey",

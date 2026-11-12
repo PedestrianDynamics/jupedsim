@@ -48,4 +48,6 @@ public:
     ~CustomModel() override = default;
 
     OperationalModelType type() const override { return OperationalModelType::CustomModel; }
+
+    bool is_thread_safe() const override { return false; }
 };

@@ -68,10 +68,13 @@ target_sources(simulator PRIVATE
     src/stage_description.hpp
     src/stage_manager.cpp
     src/stage_manager.hpp
+    src/step_rng.hpp
     src/strategical_desicion_system.hpp
     src/surface_mesh_shortest_path_routing_engine.cpp
     src/surface_mesh_shortest_path_routing_engine.hpp
     src/tactical_decision_system.hpp
+    src/thread_pool.cpp
+    src/thread_pool.hpp
     src/timing.cpp
     src/timing.hpp
     src/tracing.cpp
@@ -85,6 +88,7 @@ target_link_libraries(simulator PRIVATE project_options)
 target_compile_definitions(simulator PUBLIC
     JPSCORE_VERSION="${PROJECT_VERSION}"
 )
+find_package(Threads REQUIRED)
 target_link_libraries(simulator PUBLIC
     common
     fmt::fmt
@@ -92,6 +96,7 @@ target_link_libraries(simulator PUBLIC
     build_info
     perfetto
     floorfield_cxx
+    Threads::Threads
 )
 target_link_options(simulator PUBLIC
     $<$<AND:$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>,$<BOOL:${BUILD_WITH_SANITIZERS}>>:-fsanitize=address,undefined>

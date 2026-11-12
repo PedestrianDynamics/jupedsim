@@ -127,6 +127,30 @@ Vector FloorfieldRoutingEngine::get_orientation(const Location& from, std::size_
     return {direction.x, direction.y};
 }
 
+bool FloorfieldRoutingEngine::contains_prepared(const Location& where, std::size_t id) const
+{
+    const auto xy = where.xy();
+    return checked([&] {
+               return static_cast<const jupedsim::floorfield::MultiRegionFloorfield&>(*_field)
+                   .region_travel_time_solved(where.region(), {xy.x(), xy.y()}, id);
+           }) == 0.0;
+}
+
+void FloorfieldRoutingEngine::prepare(std::size_t id)
+{
+    checked([&] { _field->prepare_destination(id); });
+}
+
+Vector FloorfieldRoutingEngine::get_prepared_orientation(const Location& from, std::size_t id) const
+{
+    const auto xy = from.xy();
+    const auto direction = checked([&] {
+        return static_cast<const jupedsim::floorfield::MultiRegionFloorfield&>(*_field)
+            .region_direction_solved(from.region(), {xy.x(), xy.y()}, id);
+    });
+    return {direction.x, direction.y};
+}
+
 TravelTimeGrid FloorfieldRoutingEngine::travel_times(std::size_t region, std::size_t id)
 {
     return checked([&] {

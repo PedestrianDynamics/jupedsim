@@ -18,6 +18,22 @@ Vector Destination::orientation(const Location& from) const
     return _engine->get_orientation(from, _id);
 }
 
+bool Destination::prepared_contains(const Location& where) const
+{
+    return static_cast<const FloorfieldRoutingEngine*>(_engine)->contains_prepared(where, _id);
+}
+
+void Destination::prepare() const
+{
+    _engine->prepare(_id);
+}
+
+Vector Destination::prepared_orientation(const Location& from) const
+{
+    return static_cast<const FloorfieldRoutingEngine*>(_engine)->get_prepared_orientation(
+        from, _id);
+}
+
 TravelTimeGrid Destination::travel_times(std::size_t region) const
 {
     return _engine->travel_times(region, _id);

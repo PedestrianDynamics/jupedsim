@@ -96,6 +96,9 @@ public:
     const SimulationClock& clock() const;
     void set_tracing(bool on);
     void iterate();
+    /// Runs @p count iterations in one call, so per-call costs (crossing into C++, the GIL)
+    /// are paid once per batch instead of once per iteration.
+    void iterate(std::size_t count);
     /// Closes the simulation freeing memory. Every entry point (except timer's) throws afterwards.
     void close();
     Journey::ID add_journey(const std::map<BaseStage::ID, TransitionDescription>& stages);
@@ -128,6 +131,12 @@ public:
     GenericAgent& agent(GenericAgent::ID id);
     AgentContainer<GenericAgent>& agents();
     OperationalModelType model_type() const;
+    /// Threads used for the operational step, including the calling one; 1 runs serially.
+    void set_num_threads(std::size_t threads);
+    std::size_t num_threads() const;
+    /// SPIKE: runs one kind of per-agent operation for every agent `reps` times on `threads`
+    /// threads and returns the elapsed seconds. Isolates which component contends.
+    double spike_probe(int kind, std::size_t threads, std::size_t reps);
     const BaseStage* stage(BaseStage::ID stage_id) const;
     /// Ids of all stages, in ascending order.
     std::vector<BaseStage::ID> stage_ids() const;

@@ -27,6 +27,11 @@ public:
     virtual RoutingTarget target(const GenericAgent& agent) = 0;
     /// The area this stage routes to, or nullptr if it has none.
     virtual const Destination* destination() const { return nullptr; }
+    /// is_completed() without its side effects, for a stage whose destination was prepared.
+    /// Read-only, so it may run for several agents at once; on_completed() applies the effects.
+    bool reached_prepared(const GenericAgent& agent) const;
+    /// The side effect of completing this stage (an exit queues the agent for removal).
+    virtual void on_completed(const GenericAgent&) {}
     ID id() const { return _id; }
     size_t count_targeting() const { return _targeting; }
     void increase_targeting() { _targeting = _targeting + 1; }
@@ -70,6 +75,7 @@ class Exit : public BaseStage
 public:
     Exit(Destination destination, std::vector<GenericAgent::ID>& to_remove);
     ~Exit() override = default;
+    void on_completed(const GenericAgent& agent) override { _to_remove.push_back(agent.id); }
     bool is_completed(const GenericAgent& agent) override;
     RoutingTarget target(const GenericAgent& agent) override;
     const Destination* destination() const override { return &_destination; }
