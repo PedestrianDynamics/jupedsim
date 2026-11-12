@@ -65,13 +65,18 @@ geometry.region(0)  # by id
 # A geometry can be shared by several simulations; a location can be used
 # in every simulation built on its geometry.
 sim = jps.Simulation(model=model, geometry=geometry)
+# Regions belong to the geometry and are looked up there only; a script
+# that holds just the simulation uses sim.geometry, the built geometry.
+sim.geometry.region("floor0")
 
 # --- Targets ----------------------------------------------------------
 # sim.add_target() adds a waypoint or an exit and returns a handle, a
 # RouteTarget. jps.Waypoint and jps.Exit describe the target; the handle
 # is the target in the simulation. target.description returns the
 # jps.Waypoint or jps.Exit it was created from, so a script can tell a
-# waypoint from an exit and read the areas back.
+# waypoint from an exit and read the areas back. It is read-only and
+# immutable, and describes the input: not the part clipped to a region,
+# nor the floor-field cells on which arrival is decided.
 #
 # A target is a list of (area, region) pairs. Reaching any one of its
 # areas completes the target. Areas may lie in different regions.
@@ -218,7 +223,7 @@ agent3 = sim.add_agent(pos3, route=split)  # exit1 or exit2, 2:1
 # there still follows the walkable surface, including connectors
 # (shortest path over the navigation mesh, no floor field), so speed
 # fields do not apply. A location on another floor is reached over the
-# staircase.
+# staircase. Arrival is reported once, see "Reporting".
 agent5 = sim.add_agent(pos5, steer_to=floor1.at(x, y))
 
 # --- Runtime changes --------------------------------------------------
@@ -235,24 +240,29 @@ agent5 = sim.add_agent(pos5, steer_to=floor1.at(x, y))
 while sim.agent_count() > 0 and sim.elapsed_time() < 600:
     sim.iterate()
 
-    # Targets completed in the most recent iteration, as {agent: target}.
-    # An agent is reported in every iteration in which it is inside the
-    # target, e.g. while it stays at the end of its route. An agent at an
-    # exit is still in the simulation until the start of the next
-    # iterate(), so evaluate the result right after iterate().
-    completed = sim.agents_completed_target()
+    # Completions of the most recent iterate(), as records, see
+    # "Reporting".
+    completions = sim.target_completions()
 
     # React: agents reaching wp1 walk on to a free spot of their own
-    for agent, target in completed.items():
-        if target == wp1:
-            agent.reroute(steer_to=next_free_spot())
+    for event in completions:
+        if event.target == wp1:
+            sim.agent(event.agent_id).reroute(steer_to=next_free_spot())
 
-    # Count: which door of main_exits an agent leaves through
-    for agent, target in completed.items():
-        if target == main_exits:
-            point = shapely.Point(agent.location.xy)
-            door = "3" if exit_polygon3.covers(point) else "4"
-            leaving_through[door] += 1
+    # React: agents that reached their steering location walk to exit1
+    for event in completions:
+        if isinstance(event.target, jps.Location):
+            sim.agent(event.agent_id).reroute(route=route_x)
+
+    # Count: which door of main_exits an agent leaves through. Arrival is
+    # decided on the floor-field grid, so the location can lie up to half
+    # a cell outside the door: take the nearer one.
+    for event in completions:
+        if event.target == main_exits:
+            point = shapely.Point(event.location.xy)
+            d3 = exit_polygon3.distance(point)
+            d4 = exit_polygon4.distance(point)
+            leaving_through["3" if d3 <= d4 else "4"] += 1
 
     # Filter agents with any condition: agents on route_c that head for
     # wp2 skip it
@@ -267,6 +277,41 @@ while sim.agent_count() > 0 and sim.elapsed_time() < 600:
 
     agent5.reroute(steer_to=floor0.at(x_new, y_new))
     agent1.reroute(route=route_c)
+
+# --- Reporting --------------------------------------------------------
+# Current state (agent.target, sim.agents(), sim.filter_agents(), ...)
+# returns handles, so scripts can act on them. What happened is returned
+# as immutable records with ids: a record does not suggest that its agent
+# still exists. sim.agent(event.agent_id) resolves the agent while it
+# does.
+#
+# sim.target_completions() -> tuple of TargetCompletion records
+#   event.agent_id  id of the agent
+#   event.target    the RouteTarget, or the Location in direct steering
+#   event.time      simulation time in seconds of the completion
+#   event.location  where the agent stood at completion, a snapshot
+# - One record per completed target assignment. Revisiting a target in a
+#   loop gives another record; staying at the last target of a route
+#   gives none.
+# - Direct steering: one record per steer_to assignment, when the agent
+#   is within the arrival tolerance of the location. The agent keeps
+#   steering toward it; being pushed away and returning gives no further
+#   record.
+#
+# sim.removed_agents() -> tuple of Removal records
+#   removal.agent_id  id of the removed agent
+#   removal.exit      the exit it left through, None after
+#                     mark_agent_for_removal()
+#   removal.time      simulation time in seconds of the exit completion,
+#                     or of the removal
+# - An exit completion always comes with a Removal record from the same
+#   iterate() call. The agent itself leaves at the start of the next
+#   iterate().
+#
+# Both cover all iterations of the most recent iterate(count=n) call.
+# Reading does not consume them; the next iterate() replaces them.
+# Histories and statistics (counts per door, flows, densities, travel
+# times) are computed in scripts from these records.
 
 # --- State (read-only) ------------------------------------------------
 print(agent1.route)  # Route(id=0, name="route_a"), or None in steering
@@ -322,17 +367,34 @@ sim.agents_in_polygon(polygon, region=floor0)  # list of agent handles
 # Removal is scheduled, as on master: the agent leaves at the start of the
 # next iterate(), before agents interact.
 sim.mark_agent_for_removal(agent1)
-# Ids of the agents removed by the most recent iterate(), as on master
+# Records of the agents removed by the most recent iterate(), see
+# "Reporting"
 sim.removed_agents()
 
 # --- Errors -----------------------------------------------------------
+# Exception types keep their Python meaning:
+#   TypeError        wrong argument type
+#   ValueError       right type, invalid value or combination
+#   KeyError         unknown name or id in a lookup
+#   SimulationError  invalid lifecycle operation, or a failure while the
+#                    simulation runs; derives from RuntimeError
+# Where an error is detected, in Python or in C++, does not decide its
+# type: the bindings translate C++ errors.
 floor1.at(100, 100)
 # ValueError: (100, 100) is not in floor1
 other_floor = new_builder.add_region(polygon=other_polygon)
 other_floor.at(x, y)  # before new_builder.build()
-# ValueError: other_floor is not built yet; call build() first
+# SimulationError: other_floor is not built yet; call build() first
 builder.build()  # a second time
-# ValueError: the builder was already built; create a new one
+# SimulationError: the builder was already built; create a new one
+sim.agent(99)  # no such agent, or already removed
+# KeyError: no agent with id 99
+sim.target("exit9")
+# KeyError: no target named 'exit9'; targets are wp1, wp2, wp3, doors,
+#   exit1, exit2, main_exits
+geometry.region("floor9")
+# KeyError: no region named 'floor9'; regions are floor0, floor1,
+#   staircase
 sim.add_target(jps.Waypoint([(door_polygon, floor1)]))  # not in floor1
 # ValueError: area does not overlap floor1
 sim.add_target(jps.Waypoint([(polygon_with_hole, floor0)]))
@@ -382,7 +444,7 @@ custom_sim.add_agent(pos, route=route_a)  # simulation with a custom model
 # --- Unchanged from master --------------------------------------------
 # sim.iterate(count=1), sim.agent_count(), sim.elapsed_time(),
 # sim.delta_time(), sim.iteration_count(), sim.close()
-# sim.get_geometry(), sim.set_tracing(), sim.timer
+# sim.set_tracing(), sim.timer
 # agent.id, agent.route_orientation, agent.state
 # Operational models, their agent states and the trajectory writers
 
@@ -425,6 +487,11 @@ custom_sim.add_agent(pos, route=route_a)  # simulation with a custom model
 # get_stage(stage_id)                       sim.target("exit1") or
 #                                               sim.target(5)
 # agent(agent_id)                           sim.agent(17) or sim.agent("anna")
+# get_geometry()                            sim.geometry, the built geometry
+# removed_agents() -> [int]                 sim.removed_agents()
+#                                               -> (Removal, ...)
+#                                           sim.target_completions()
+#                                               -> (TargetCompletion, ...)
 # travel_times(stage_id) -> {int: grid}     sim.travel_times(exit1)
 #                                               -> {Region: grid}
 # set_default_speed_field(region_id, ...)   sim.set_default_speed_field(
@@ -435,15 +502,17 @@ custom_sim.add_agent(pos, route=route_a)  # simulation with a custom model
 # clear_custom_speed_field(stage_id,        sim.clear_custom_speed_field(
 #     region_id)                                exit1, floor0)
 
+# --- Decisions --------------------------------------------------------
+# 1. Kind of a target: target.description; no target.kind.
+# 2. Reporting: handles for current state, records for events, see
+#    "Reporting".
+# 3. Direct steering: arrival is reported once per steer_to.
+# 4. Errors keep their Python meaning, see "Errors".
+# 5. Regions are looked up on the geometry only.
+
 # --- Open questions ---------------------------------------------------
-# 1. Kind of a target: answered by target.description (see State). Is a
-#    shorter target.kind (an enum) also wanted, e.g. for reprs?
-# 2. Reporting: which information is exposed all the time, and what users
-#    compute in their scripts, e.g. whether agents_completed_target()
-#    returns agent handles or ids.
-# 3. Direct steering is never completed. Should reaching the location be
-#    reported?
-# 4. Errors raised in C++: ValueError and TypeError, as above, or
-#    SimulationError?
-# 5. Looking regions up: on the geometry, as above, or on the simulation
-#    like targets, routes and agents (sim.region("floor0"))?
+# 1. Arrival tolerance in direct steering: a documented constant, e.g.
+#    one floor-field cell (0.2 m), or a parameter of steer_to?
+# 2. Which area of a multi-area target was reached: can the core tell,
+#    given that arrival is decided on one floor field for all areas? If
+#    so, TargetCompletion could carry it.
