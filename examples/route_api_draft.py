@@ -204,6 +204,10 @@ agent9 = sim.add_agent(pos1, route=split, first_target=best)
 
 # --- Agents -----------------------------------------------------------
 # add_agent returns an Agent handle. Give either route= or steer_to=.
+# first_target= selects the first target to visit after this call;
+# subsequent targets follow the route's transitions. It is not the final
+# destination, and it means the same in add_agent() and reroute(). The
+# target an agent heads for now is agent.current_target.
 # first_target= overrides the transition leaving AGENT_LOCATION: it can be
 # any target of the route, and the agent then does not take part in a
 # round robin at the start. Targets are completed in iterate(), not in
