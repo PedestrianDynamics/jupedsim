@@ -517,8 +517,10 @@ custom_sim.add_agent(pos, route=route_a)  # simulation with a custom model
 # 5. Regions are looked up on the geometry only.
 
 # --- Open questions ---------------------------------------------------
-# 1. Arrival tolerance in direct steering: a documented constant, e.g.
-#    one floor-field cell (0.2 m), or a parameter of steer_to?
+# 1. Arrival tolerance in direct steering: a documented constant, or a
+#    parameter of steer_to? The core has point_arrival_tolerance = 0.05 m:
+#    a point is reached when the agent's last step, as a segment, passes
+#    within 0.05 m of it, so fast agents and large dt arrive too.
 # 2. Which area of a multi-area target was reached: can the core tell,
 #    given that arrival is decided on one floor field for all areas? If
 #    so, TargetCompletion could carry it.
