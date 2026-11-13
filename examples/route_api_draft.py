@@ -292,7 +292,9 @@ while sim.agent_count() > 0 and sim.elapsed_time() < 600:
 #   event.location  where the agent stood at completion, a snapshot
 # - One record per completed target assignment. Revisiting a target in a
 #   loop gives another record; staying at the last target of a route
-#   gives none.
+#   gives none, and neither does being pushed out of it and returning.
+#   Records report arrivals, not presence: whether an agent is still
+#   there is state, see agent.current_target.
 # - Direct steering: one record per steer_to assignment, when the agent
 #   is within the arrival tolerance of the location. The agent keeps
 #   steering toward it; being pushed away and returning gives no further
@@ -310,6 +312,8 @@ while sim.agent_count() > 0 and sim.elapsed_time() < 600:
 #
 # Both cover all iterations of the most recent iterate(count=n) call.
 # Reading does not consume them; the next iterate() replaces them.
+# Scripts that react to completions call iterate() with count=1, so that
+# a reroute() takes effect in the step after the completion.
 # Histories and statistics (counts per door, flows, densities, travel
 # times) are computed in scripts from these records.
 
