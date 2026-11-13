@@ -7,6 +7,7 @@
 # - Ownership, scope and state changes are explicit, and so are keywords.
 # - Errors are informative and say how to fix the call.
 
+import collections
 import math
 
 import jupedsim as jps
@@ -237,6 +238,7 @@ agent5 = sim.add_agent(pos5, steer_to=floor1.at(x, y))
 # simulation iterates.
 # The calls in this loop illustrate the API; together they are not a
 # meaningful scenario.
+leaving_through = collections.Counter()  # door -> number of agents
 while sim.agent_count() > 0 and sim.elapsed_time() < 600:
     sim.iterate()
 
@@ -245,21 +247,21 @@ while sim.agent_count() > 0 and sim.elapsed_time() < 600:
     completions = sim.target_completions()
 
     # React: agents reaching wp1 walk on to a free spot of their own
-    for event in completions:
-        if event.target == wp1:
-            sim.agent(event.agent_id).reroute(steer_to=next_free_spot())
+    for completion in completions:
+        if completion.target == wp1:
+            sim.agent(completion.agent_id).reroute(steer_to=next_free_spot())
 
     # React: agents that reached their steering location walk to exit1
-    for event in completions:
-        if isinstance(event.target, jps.Location):
-            sim.agent(event.agent_id).reroute(route=route_x)
+    for completion in completions:
+        if isinstance(completion.target, jps.Location):
+            sim.agent(completion.agent_id).reroute(route=route_x)
 
     # Count: which door of main_exits an agent leaves through. Arrival is
     # decided on the floor-field grid, so the location can lie up to half
     # a cell outside the door: take the nearer one.
-    for event in completions:
-        if event.target == main_exits:
-            point = shapely.Point(event.location.xy)
+    for completion in completions:
+        if completion.target == main_exits:
+            point = shapely.Point(completion.location.xy)
             d3 = exit_polygon3.distance(point)
             d4 = exit_polygon4.distance(point)
             leaving_through["3" if d3 <= d4 else "4"] += 1
@@ -270,9 +272,9 @@ while sim.agent_count() > 0 and sim.elapsed_time() < 600:
         lambda a: a.route == route_c and a.current_target == wp2
     ):
         agent.reroute(first_target=wp3)
-    # filter_agents() yields the agents; to count them, make a list
-    heading_for_exit1 = len(
-        list(sim.filter_agents(lambda a: a.current_target == exit1))
+    # filter_agents() yields the agents; to count them, sum over it
+    heading_for_exit1 = sum(
+        1 for _ in sim.filter_agents(lambda a: a.current_target == exit1)
     )
 
     agent5.reroute(steer_to=floor0.at(x_new, y_new))
@@ -282,14 +284,14 @@ while sim.agent_count() > 0 and sim.elapsed_time() < 600:
 # Current state (agent.current_target, sim.agents(), sim.filter_agents(), ...)
 # returns handles, so scripts can act on them. What happened is returned
 # as immutable records with ids: a record does not suggest that its agent
-# still exists. sim.agent(event.agent_id) resolves the agent while it
+# still exists. sim.agent(completion.agent_id) resolves the agent while it
 # does.
 #
 # sim.target_completions() -> tuple of TargetCompletion records
-#   event.agent_id  id of the agent
-#   event.target    the RouteTarget, or the Location in direct steering
-#   event.time      simulation time in seconds of the completion
-#   event.location  where the agent stood at completion, a snapshot
+#   completion.agent_id  id of the agent
+#   completion.target    the RouteTarget, or the Location in direct steering
+#   completion.time      simulation time in seconds of the completion
+#   completion.location  where the agent stood at completion, a snapshot
 # - One record per completed target assignment. Revisiting a target in a
 #   loop gives another record; staying at the last target of a route
 #   gives none, and neither does being pushed out of it and returning.
