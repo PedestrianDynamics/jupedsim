@@ -267,19 +267,19 @@ while sim.agent_count() > 0 and sim.elapsed_time() < 600:
     # Filter agents with any condition: agents on route_c that head for
     # wp2 skip it
     for agent in sim.filter_agents(
-        lambda a: a.route == route_c and a.target == wp2
+        lambda a: a.route == route_c and a.current_target == wp2
     ):
         agent.reroute(first_target=wp3)
     # filter_agents() yields the agents; to count them, make a list
     heading_for_exit1 = len(
-        list(sim.filter_agents(lambda a: a.target == exit1))
+        list(sim.filter_agents(lambda a: a.current_target == exit1))
     )
 
     agent5.reroute(steer_to=floor0.at(x_new, y_new))
     agent1.reroute(route=route_c)
 
 # --- Reporting --------------------------------------------------------
-# Current state (agent.target, sim.agents(), sim.filter_agents(), ...)
+# Current state (agent.current_target, sim.agents(), sim.filter_agents(), ...)
 # returns handles, so scripts can act on them. What happened is returned
 # as immutable records with ids: a record does not suggest that its agent
 # still exists. sim.agent(event.agent_id) resolves the agent while it
@@ -317,12 +317,12 @@ while sim.agent_count() > 0 and sim.elapsed_time() < 600:
 print(agent1.route)  # Route(id=0, name="route_a"), or None in steering
 # The target the agent heads for: a RouteTarget on a route, a location in
 # direct steering
-print(agent1.target)  # RouteTarget(id=1, name="wp2")
+print(agent1.current_target)  # RouteTarget(id=1, name="wp2")
 # The description a target was created from
 print(exit1.description)  # Exit([(exit_polygon1, floor0)])
 isinstance(exit1.description, jps.Exit)  # True
 exit1.description.areas  # [(exit_polygon1, floor0)]
-print(agent5.target)  # Location(x_new, y_new, region=floor0)
+print(agent5.current_target)  # Location(x_new, y_new, region=floor0)
 # Where the agent stands, with its region and height; a snapshot
 print(agent1.location)  # Location(x, y, region=floor0)
 # Unit vector toward the current target, (0, 0) inside the area of the
@@ -477,7 +477,7 @@ custom_sim.add_agent(pos, route=route_a)  # simulation with a custom model
 # switch_agent_journey(agent_id,            agent.reroute(route=,
 #     journey_id, stage_id)                     first_target=)
 # agent.final_target = (x, y)               agent.reroute(steer_to=location)
-# agent.journey_id, agent.stage_id          agent.route, agent.target
+# agent.journey_id, agent.stage_id          agent.route, agent.current_target
 # agent.position                            agent.location
 # mark_agent_for_removal(agent_id)          sim.mark_agent_for_removal(agent)
 # agents_in_range((x, y), distance)         sim.agents_in_range(location,
