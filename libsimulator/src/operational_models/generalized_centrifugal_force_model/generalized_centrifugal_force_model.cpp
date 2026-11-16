@@ -311,14 +311,14 @@ inline Vector GeneralizedCentrifugalForceModel::force_rep_wall(
     }
     // Kraft soll nur orthgonal wirken
     // ???
-    if(fabs((w.p1 - w.p2).scalar_product(Vector{} - wall.closest_point)) > j_eps) {
+    if(fabs((w.p1 - w.p2).scalar_product(Point{} - wall.closest_point)) > j_eps) {
         return f;
     }
     double mind = 0.5; // for performance reasons this distance is assumed to be constant
     double vn = w.normal_comp(
         current_state.orientation *
         current_state.speed); // normal component of the velocity on the wall
-    f = force_rep_stat_point(current_state, wall.closest_point, mind, vn);
+    f = force_rep_stat_point(current_state, wall.closest_point - Point{}, mind, vn);
 
     return f; // line --> l != 0
 }

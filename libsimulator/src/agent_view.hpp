@@ -38,7 +38,7 @@ struct WallView {
     /// The segment itself, relative to the agent.
     LineSegment segment;
     /// The point on the segment closest to the agent.
-    Vector closest_point;
+    Point closest_point;
     /// Distance to that point.
     double distance;
     /// Unit vector pointing from the wall towards the agent, i.e. the direction a repulsion
@@ -135,12 +135,12 @@ private:
         return std::move(segments) |
                std::views::transform([origin = location().xy()](const LineSegment& s) {
                    const LineSegment segment{at_offset(s.p1 - origin), at_offset(s.p2 - origin)};
-                   const Vector closest_point = offset_from_origin(segment.shortest_point(Point{}));
+                   const Point closest_point = segment.shortest_point(Point{});
                    return WallView{
                        .segment = segment,
                        .closest_point = closest_point,
-                       .distance = closest_point.norm(),
-                       .normal = (Vector{} - closest_point).normalized()};
+                       .distance = distance(closest_point, Point{}),
+                       .normal = (Point{} - closest_point).normalized()};
                });
     }
 

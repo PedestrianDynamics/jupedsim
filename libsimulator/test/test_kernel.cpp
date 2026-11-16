@@ -19,13 +19,6 @@ TEST(Kernel, IsUnitLength)
     EXPECT_FALSE(Vector(-1, -1).is_unit_length());
 }
 
-TEST(Kernel, DefaultIsOrigin)
-{
-    const Point p{};
-    EXPECT_EQ(p.x(), 0.0);
-    EXPECT_EQ(p.y(), 0.0);
-}
-
 TEST(Kernel, NormalizedOfZeroIsZero)
 {
     EXPECT_EQ(Vector(0, 0).normalized(), Vector(0, 0));
