@@ -78,7 +78,7 @@ Vector GeneralizedCentrifugalForceModel::compute_next_state(
         current_state.tau,
         step.dt(),
         e0);
-    const Vector acc = (fd + f_rep + repwall) / current_state.mass;
+    const Vector acc = (fd + f_rep + repwall).guarded_division(current_state.mass);
 
     const Vector velocity = (current_state.orientation * current_state.speed) + acc * step.dt();
 
@@ -177,13 +177,13 @@ Vector GeneralizedCentrifugalForceModel::force_driv(
             orientation_to_target, delta_t, current_state.orientation_delay, current_state.e0);
         e0update = e0;
         f_driv =
-            ((e0 * current_state.v0 - (current_state.orientation * current_state.speed)) * mass) /
-            tau;
+            ((e0 * current_state.v0 - (current_state.orientation * current_state.speed)) * mass)
+                .guarded_division(tau);
     } else {
         const Vector e0 = current_state.e0;
         f_driv =
-            ((e0 * current_state.v0 - (current_state.orientation * current_state.speed)) * mass) /
-            tau;
+            ((e0 * current_state.v0 - (current_state.orientation * current_state.speed)) * mass)
+                .guarded_division(tau);
     }
     return f_driv;
 }

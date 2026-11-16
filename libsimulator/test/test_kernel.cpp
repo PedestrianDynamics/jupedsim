@@ -35,11 +35,11 @@ TEST(Kernel, NormAndNormalized)
     EXPECT_DOUBLE_EQ(direction.y(), 0.8);
 }
 
-TEST(Kernel, DivisionByZeroOrNegativeReturnsOperandUnchanged)
+TEST(Kernel, GuardedDivisionByZeroOrNegativeReturnsOperandUnchanged)
 {
-    EXPECT_EQ(Vector(1, 2) / 0.0, Vector(1, 2));
-    EXPECT_EQ(Vector(1, 2) / -2.0, Vector(1, 2));
-    EXPECT_EQ(Vector(1, 2) / 2.0, Vector(0.5, 1.0));
+    EXPECT_EQ(Vector(1, 2).guarded_division(0.0), Vector(1, 2));
+    EXPECT_EQ(Vector(1, 2).guarded_division(-2.0), Vector(1, 2));
+    EXPECT_EQ(Vector(1, 2).guarded_division(2.0), Vector(0.5, 1.0));
 }
 
 TEST(Kernel, Rotate)

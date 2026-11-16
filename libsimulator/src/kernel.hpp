@@ -23,7 +23,7 @@ class Point;
 /// Out of line and cold: keeps the formatting code out of every inlined division.
 JPS_COLD_NOINLINE inline void warn_small_divisor(double f)
 {
-    LOG_WARNING("Vector::operator/ dividend {} is too small. Using 1 instead.", f);
+    LOG_WARNING("Vector::guarded_division dividend {} is too small. Using 1 instead.", f);
 }
 
 /// Direction, force, velocity or offset. Defaults to the zero vector.
@@ -79,13 +79,14 @@ public:
     Vector operator-(const Vector& v) const { return Vector{_v - v._v}; }
     Vector operator-() const { return Vector{-_v}; }
     Vector operator*(double f) const { return Vector{_v * f}; }
+    Vector operator/(double f) const { return Vector{_v / f}; }
     /// Returns the vector unchanged and logs a warning unless @p f > epsilon^2.
-    Vector operator/(double f) const
+    Vector guarded_division(double f) const
     {
         static constexpr auto eps =
             std::numeric_limits<double>::epsilon() * std::numeric_limits<double>::epsilon();
         if(f > eps) {
-            return Vector{_v / f};
+            return *this / f;
         }
         warn_small_divisor(f);
         return *this;

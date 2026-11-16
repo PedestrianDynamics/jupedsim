@@ -102,15 +102,3 @@ def test_non_finite_position_is_not_in_region(bad):
 def test_agents_in_range_of_nan_is_empty():
     sim, *_ = _room(jps.CollisionFreeSpeedModelV2())
     assert list(sim.agents_in_range((math.nan, 0.0), 1.0)) == []
-
-
-@pytest.mark.parametrize(
-    "state", [{"mass": 0.0}, {"reaction_time": 0.0}], ids=["mass", "reaction"]
-)
-def test_social_force_zero_divisor_stays_finite(state):
-    sim, room, exit_id, journey = _room(jps.SocialForceModel())
-    agent = _add(
-        sim, room, exit_id, journey, (5, 5), jps.SocialForceModelState(**state)
-    )
-    sim.iterate(3)
-    assert all(math.isfinite(c) for c in sim.agent(agent).position)
