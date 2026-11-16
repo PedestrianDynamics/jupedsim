@@ -725,6 +725,73 @@ def test_generalized_centrifugal_force_model_can_add_agent_just_outside_the_marg
 
 
 @pytest.fixture
+def square_room_100x100_sfm():
+    surface = jps.GeometryBuilder()
+    room = surface.add_region(
+        boundary=[(-50, -50), (50, -50), (50, 50), (-50, 50)], height=0.0
+    )
+    simulation = jps.Simulation(
+        model=jps.SocialForceModel(), geometry=surface.build()
+    )
+
+    exit_id = simulation.add_exit_stage(
+        [([(49, -3), (49, 3), (50, 3), (50, -3)], room)]
+    )
+
+    journey = jps.JourneyDescription([exit_id])
+    journey_id = simulation.add_journey(journey)
+    agent_position = (0, 0)
+
+    return simulation, journey_id, exit_id, agent_position, room
+
+
+@pytest.mark.parametrize(
+    ("field", "name"), [("mass", "mass"), ("reaction_time", "reaction time")]
+)
+def test_social_force_model_can_not_set_zero(
+    square_room_100x100_sfm, field, name
+):
+    simulation, journey_id, exit_id, agent_position, room = (
+        square_room_100x100_sfm
+    )
+    with pytest.raises(
+        jps.SimulationError,
+        match=rf"Model constraint violation: {name} 0 .*",
+    ):
+        simulation.add_agent(
+            journey_id=journey_id,
+            stage_id=exit_id,
+            position=agent_position,
+            state=jps.SocialForceModelState(**{field: 0.0}),
+            region_id=room,
+        )
+
+
+@pytest.mark.parametrize("field", ["mass", "reaction_time"])
+def test_social_force_model_zero_set_after_add_agent_warns_and_stays_finite(
+    square_room_100x100_sfm, field
+):
+    simulation, journey_id, exit_id, agent_position, room = (
+        square_room_100x100_sfm
+    )
+    warnings = []
+    jps.set_warning_callback(warnings.append)
+
+    agent_id = simulation.add_agent(
+        journey_id=journey_id,
+        stage_id=exit_id,
+        position=agent_position,
+        state=jps.SocialForceModelState(),
+        region_id=room,
+    )
+    setattr(simulation.agent(agent_id).state, field, 0.0)
+    simulation.iterate(3)
+
+    assert np.all(np.isfinite(simulation.agent(agent_id).position))
+    assert any("guarded_division" in w for w in warnings)
+
+
+@pytest.fixture
 def square_room_100x100_avm():
     surface = jps.GeometryBuilder()
     room = surface.add_region(

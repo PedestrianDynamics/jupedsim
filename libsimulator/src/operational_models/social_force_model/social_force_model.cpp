@@ -43,12 +43,12 @@ Vector SocialForceModel::compute_next_state(
     for(const auto& neighbor : neighborhood) {
         f_rep += agent_force(current_state, neighbor);
     }
-    forces += f_rep / current_state.mass;
+    forces += f_rep.guarded_division(current_state.mass);
     Vector obstacle_f{};
     for(const auto& wall : step.walls_in_range(wall_search_radius)) {
         obstacle_f += obstacle_force(current_state, wall);
     }
-    forces += obstacle_f / current_state.mass;
+    forces += obstacle_f.guarded_division(current_state.mass);
 
     const auto velocity = current_state.velocity + forces * step.dt();
     std::get<State>(next).velocity = velocity;
@@ -60,11 +60,21 @@ void SocialForceModel::check_model_constraint(const GenericAgent& agent, const A
 {
     // none of these constraint are given by the paper but are useful to create a simulation that
     // does not break immediately
+    auto throw_unless_positive = [](double value, std::string name) {
+        if(value <= 0) {
+            throw SimulationError(
+                "Model constraint violation: {} {} not in allowed range, "
+                "{} needs to be positive",
+                name,
+                value,
+                name);
+        }
+    };
     auto throw_if_negative = [](double value, std::string name) {
         if(value < 0) {
             throw SimulationError(
                 "Model constraint violation: {} {} not in allowed range, "
-                "{} needs to be positive",
+                "{} must not be negative",
                 name,
                 value,
                 name);
@@ -74,13 +84,13 @@ void SocialForceModel::check_model_constraint(const GenericAgent& agent, const A
     const auto& current_state = std::get<State>(agent.state);
 
     const auto mass = current_state.mass;
-    throw_if_negative(mass, "mass");
+    throw_unless_positive(mass, "mass");
 
     const auto desired_speed = current_state.desired_speed;
     throw_if_negative(desired_speed, "desired speed");
 
     const auto reaction_time = current_state.reaction_time;
-    throw_if_negative(reaction_time, "reaction time");
+    throw_unless_positive(reaction_time, "reaction time");
 
     const auto radius = current_state.radius;
     throw_if_negative(radius, "radius");
@@ -111,8 +121,8 @@ void SocialForceModel::check_model_constraint(const GenericAgent& agent, const A
 
 Vector SocialForceModel::driving_force(const State& current_state, Vector e0)
 {
-    return (e0 * current_state.desired_speed - current_state.velocity) /
-           current_state.reaction_time;
+    return (e0 * current_state.desired_speed - current_state.velocity)
+        .guarded_division(current_state.reaction_time);
 };
 double SocialForceModel::pushing_force_length(double a, double b, double r, double distance)
 {

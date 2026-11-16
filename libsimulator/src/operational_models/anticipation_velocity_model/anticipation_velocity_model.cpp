@@ -84,8 +84,8 @@ Vector AnticipationVelocityModel::update_direction(
         updated_direction = calculated_direction;
     } else {
         // Compute the rate of change of direction (Eq. 7)
-        const Vector direction_derivative =
-            (calculated_direction.normalized() - actual_direction) / current_state.reaction_time;
+        const Vector direction_derivative = (calculated_direction.normalized() - actual_direction)
+                                                .guarded_division(current_state.reaction_time);
         updated_direction = actual_direction + direction_derivative * dt;
     }
 
