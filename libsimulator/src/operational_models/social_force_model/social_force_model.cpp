@@ -138,7 +138,7 @@ Vector SocialForceModel::agent_force(const State& current_state, const NeighborV
 Vector SocialForceModel::obstacle_force(const State& current_state, const WallView& wall) const
 {
     return force_from_separation(
-        -wall.closest_point,
+        Point{} - wall.closest_point,
         current_state.obstacle_scale,
         current_state.force_distance,
         current_state.radius,

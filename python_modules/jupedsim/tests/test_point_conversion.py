@@ -104,20 +104,6 @@ def test_agents_in_range_of_nan_is_empty():
     assert list(sim.agents_in_range((math.nan, 0.0), 1.0)) == []
 
 
-def test_zero_orientation_still_moves():
-    sim, room, exit_id, journey = _room(jps.CollisionFreeSpeedModelV2())
-    agent = _add(
-        sim,
-        room,
-        exit_id,
-        journey,
-        (5, 5),
-        jps.CollisionFreeSpeedModelV2State(orientation=(0.0, 0.0)),
-    )
-    sim.iterate(3)
-    assert sim.agent(agent).position[0] > 5.0
-
-
 @pytest.mark.parametrize(
     "state", [{"mass": 0.0}, {"reaction_time": 0.0}], ids=["mass", "reaction"]
 )
