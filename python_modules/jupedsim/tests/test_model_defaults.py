@@ -26,6 +26,7 @@ STATE_DEFAULTS = [
             "range_neighbor_repulsion": 0.1,
             "strength_geometry_repulsion": 5.0,
             "range_geometry_repulsion": 0.02,
+            "neighbor_repulsion_anisotropy": 0.0,
         },
     ),
     (

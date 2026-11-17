@@ -65,6 +65,11 @@ void init_collision_free_speed_model(py::module_& m)
                 boundaries.
             range_geometry_repulsion: Range of the repulsion from geometry boundaries
                 [m].
+            neighbor_repulsion_anisotropy: Weight of the vision factor on the
+                neighbor repulsion, in [0, 1]. A neighbor counts with the cosine
+                of its angle to the desired direction and not at all when it is
+                behind (as in the Generalized Centrifugal Force Model). 0 is
+                isotropic repulsion, 1 is the full vision factor.
             time_gap: Time constant that describes how fast a pedestrian closes gaps
                 [s].
             desired_speed: Maximum (free) walking speed of the agent [m/s].
@@ -77,6 +82,7 @@ void init_collision_free_speed_model(py::module_& m)
                         double range_neighbor_repulsion,
                         double strength_geometry_repulsion,
                         double range_geometry_repulsion,
+                        double neighbor_repulsion_anisotropy,
                         double time_gap,
                         double desired_speed,
                         double radius) {
@@ -86,6 +92,7 @@ void init_collision_free_speed_model(py::module_& m)
                     .range_neighbor_repulsion = range_neighbor_repulsion,
                     .strength_geometry_repulsion = strength_geometry_repulsion,
                     .range_geometry_repulsion = range_geometry_repulsion,
+                    .neighbor_repulsion_anisotropy = neighbor_repulsion_anisotropy,
                     .time_gap = time_gap,
                     .v0 = desired_speed,
                     .radius = radius};
@@ -96,6 +103,7 @@ void init_collision_free_speed_model(py::module_& m)
             py::arg("range_neighbor_repulsion") = d.range_neighbor_repulsion,
             py::arg("strength_geometry_repulsion") = d.strength_geometry_repulsion,
             py::arg("range_geometry_repulsion") = d.range_geometry_repulsion,
+            py::arg("neighbor_repulsion_anisotropy") = d.neighbor_repulsion_anisotropy,
             py::arg("time_gap") = d.time_gap,
             py::arg("desired_speed") = d.v0,
             py::arg("radius") = d.radius)
@@ -110,6 +118,9 @@ void init_collision_free_speed_model(py::module_& m)
             &CollisionFreeSpeedModel::State::strength_geometry_repulsion)
         .def_readwrite(
             "range_geometry_repulsion", &CollisionFreeSpeedModel::State::range_geometry_repulsion)
+        .def_readwrite(
+            "neighbor_repulsion_anisotropy",
+            &CollisionFreeSpeedModel::State::neighbor_repulsion_anisotropy)
         .def_readwrite("time_gap", &CollisionFreeSpeedModel::State::time_gap)
         .def_readwrite("desired_speed", &CollisionFreeSpeedModel::State::v0)
         .def_readwrite("radius", &CollisionFreeSpeedModel::State::radius);
