@@ -36,6 +36,9 @@ private:
         const State& current_state,
         const NeighborView& neighbor,
         const Vector& direction) const;
-    Vector neighbor_repulsion(const State& current_state, const NeighborView& neighbor) const;
+    Vector neighbor_repulsion(
+        const State& current_state,
+        const NeighborView& neighbor,
+        const Vector& desired_direction) const;
     Vector boundary_repulsion(const State& current_state, const WallView& boundary) const;
 };

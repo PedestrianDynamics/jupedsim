@@ -145,6 +145,7 @@ def test_initial_parameters_collision_free_speed_model(
         range_neighbor_repulsion=0.15,
         strength_geometry_repulsion=0.16,
         range_geometry_repulsion=0.17,
+        neighbor_repulsion_anisotropy=0.5,
     )
     agent_id = sim.add_agent(
         journey_id=journey_id,
@@ -176,6 +177,7 @@ def test_initial_parameters_collision_free_speed_model(
     assert agent_state.range_geometry_repulsion == 0.17, (
         f"Expected range_geometry_repulsion to be 0.17, got {agent_state.range_geometry_repulsion}"
     )
+    assert agent_state.neighbor_repulsion_anisotropy == 0.5
 
 
 def test_set_model_parameters_collision_free_speed_model(
