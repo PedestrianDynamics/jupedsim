@@ -50,8 +50,8 @@ class CsvTrajectoryWriter(TrajectoryWriter):
                 [
                     frame,
                     agent.id,
-                    agent.position[0],
-                    agent.position[1],
+                    agent.location.x,
+                    agent.location.y,
                 ]
             )
 
@@ -82,19 +82,18 @@ def main():
         ),
     )
 
-    exit_id = simulation.add_exit_stage(
-        [([(18, 4), (20, 4), (20, 6), (18, 6)], region)]
+    exit_ = simulation.add_target(
+        jps.Exit([([(18, 4), (20, 4), (20, 6), (18, 6)], region)])
     )
-    journey = jps.JourneyDescription([exit_id])
-    journey_id = simulation.add_journey(journey)
+    route = simulation.add_route(
+        [jps.FixedTransition(jps.AGENT_LOCATION, exit_)]
+    )
 
     for pos in [(1, 2), (3, 8), (5, 5)]:
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=pos,
+            simulation.get_location(*pos, region_id=region),
+            route=route,
             state=jps.CollisionFreeSpeedModelState(radius=0.3),
-            region_id=region,
         )
 
     print(f"Running simulation with CsvTrajectoryWriter -> {output_file}")

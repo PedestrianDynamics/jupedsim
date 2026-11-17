@@ -36,9 +36,10 @@ def main():
         ),
     )
 
-    exit_id = simulation.add_exit_stage([(exit_polygon, region)])
-    journey = jps.JourneyDescription([exit_id])
-    journey_id = simulation.add_journey(journey)
+    exit_ = simulation.add_target(jps.Exit([(exit_polygon, region)]))
+    route = simulation.add_route(
+        [jps.FixedTransition(jps.AGENT_LOCATION, exit_)]
+    )
 
     start_positions = jps.distribute_by_number(
         polygon=Polygon([(0, 0), (5, 0), (5, 10), (0, 10)]),
@@ -49,15 +50,13 @@ def main():
 
     for position in start_positions:
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=position,
+            simulation.get_location(*position, region_id=region),
+            route=route,
             state=jps.AnticipationVelocityModelState(
                 anticipation_time=0.5,
                 reaction_time=0.3,
                 wall_buffer_distance=0.05,
             ),
-            region_id=region,
         )
 
     while simulation.agent_count() > 0 and simulation.iteration_count() < 3000:
