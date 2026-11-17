@@ -6,6 +6,8 @@
 
 Demonstrates how to implement a custom TrajectoryWriter that outputs
 agent trajectory data to a CSV file instead of the built-in HDF5 format.
+Each row holds z and the region besides (x, y): on floors stacked above
+each other, (x, y) alone does not say where an agent is.
 """
 
 import csv
@@ -37,7 +39,7 @@ class CsvTrajectoryWriter(TrajectoryWriter):
     def begin_writing(self, simulation: Simulation) -> None:
         self._file = open(self._output_file, "w", newline="")
         self._csv_writer = csv.writer(self._file)
-        self._csv_writer.writerow(["frame", "id", "pos_x", "pos_y"])
+        self._csv_writer.writerow(["frame", "id", "x", "y", "z", "region_id"])
 
     def write_iteration_state(self, simulation: Simulation) -> None:
         iteration = simulation.iteration_count()
@@ -52,6 +54,8 @@ class CsvTrajectoryWriter(TrajectoryWriter):
                     agent.id,
                     agent.location.x,
                     agent.location.y,
+                    agent.location.z,
+                    agent.location.region_id,
                 ]
             )
 
