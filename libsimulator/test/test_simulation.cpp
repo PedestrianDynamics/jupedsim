@@ -4,13 +4,13 @@
 #include "geometry/geometry.hpp"
 #include "geometry/location.hpp"
 #include "geometry_fixtures.hpp"
-#include "journey.hpp"
 #include "kernel.hpp"
 #include "mesh_fixtures.hpp"
 #include "operational_models/agent_rng.hpp"
 #include "operational_models/anticipation_velocity_model/anticipation_velocity_model.hpp"
 #include "operational_models/collision_free_speed_model/collision_free_speed_model.hpp"
 #include "polygon.hpp"
+#include "route.hpp"
 #include "simulation.hpp"
 #include "simulation_error.hpp"
 #include "stage.hpp"
@@ -26,6 +26,7 @@
 #include <cstdint>
 #include <iterator>
 #include <memory>
+#include <optional>
 #include <utility>
 #include <vector>
 
@@ -66,15 +67,19 @@ FlatRoom on_a_flat_room()
 /// Both floors of the U-stair carry this (x, y).
 const Point stacked_point{2, 10};
 
-/// A journey of one waypoint, so that agents have somewhere to be routed to.
-std::pair<Journey::ID, BaseStage::ID>
-journey_to(Simulation& sim, Point position, std::size_t region_id)
+Location at(const Simulation& sim, Point xy, std::size_t region_id)
+{
+    return sim.get_location(xy.x(), xy.y(), region_id);
+}
+
+/// A route to one waypoint, so that agents have somewhere to be routed to.
+std::pair<Route::ID, BaseStage::ID> route_to(Simulation& sim, Point position, std::size_t region_id)
 {
     const Vector half{0.5, 0.5};
     const Polygon area{test_geometries::rectangle_points(position - half, position + half)};
     const auto stage = sim.add_stage(WaypointDescription{{{area, region_id}}});
-    const auto journey = sim.add_journey({{stage, NonTransitionDescription{}}});
-    return {journey, stage};
+    const auto route = sim.add_route({{std::nullopt, FixedTransitionDescription{stage}}});
+    return {route, stage};
 }
 
 /// A simulation whose model gives every agent a random number stream, ready to take agents.
@@ -89,11 +94,11 @@ struct SeededRoom {
         std::move(room.geometry),
         0.01,
         FloorfieldOptions{}};
-    std::pair<Journey::ID, BaseStage::ID> route = journey_to(sim, Point{18, 18}, room_id);
+    Route::ID route = route_to(sim, Point{18, 18}, room_id).first;
 
     GenericAgent::ID add(Point position, AgentState state = {})
     {
-        return sim.add_agent(route.first, route.second, position, state, room_id);
+        return sim.add_agent(at(sim, position, room_id), route, std::nullopt, state);
     }
 
     /// Whether agent `id` got the stream of the `index`-th agent taking one from the sequence.
@@ -113,9 +118,9 @@ TEST(MultiStoreySimulation, RunsOnAMultiStoreySurface)
 {
     auto stair = test_geometries::u_stair();
     Simulation sim{model(), std::move(stair.geometry), 0.01, FloorfieldOptions{}};
-    const auto [journey, stage] = journey_to(sim, stacked_point, stair.room_2);
+    const auto [route, stage] = route_to(sim, stacked_point, stair.room_2);
 
-    const auto id = sim.add_agent(journey, stage, Point{2, 2}, State{}, stair.room_1);
+    const auto id = sim.add_agent(at(sim, Point{2, 2}, stair.room_1), route, {}, State{});
     ASSERT_EQ(sim.agent_count(), 1u);
     EXPECT_NO_THROW(sim.iterate());
 
@@ -130,10 +135,10 @@ TEST(MultiStoreySimulation, AnAgentIsPutInTheRegionItNames)
 {
     auto stair = test_geometries::u_stair();
     Simulation sim{model(), std::move(stair.geometry), 0.01, FloorfieldOptions{}};
-    const auto [journey, stage] = journey_to(sim, stacked_point, stair.room_2);
+    const auto [route, stage] = route_to(sim, stacked_point, stair.room_2);
 
-    const auto downstairs = sim.add_agent(journey, stage, stacked_point, State{}, stair.room_1);
-    const auto upstairs = sim.add_agent(journey, stage, stacked_point, State{}, stair.room_2);
+    const auto downstairs = sim.add_agent(at(sim, stacked_point, stair.room_1), route, {}, State{});
+    const auto upstairs = sim.add_agent(at(sim, stacked_point, stair.room_2), route, {}, State{});
 
     EXPECT_EQ(sim.agent(downstairs).location.region(), stair.room_1);
     EXPECT_EQ(sim.agent(upstairs).location.region(), stair.room_2);
@@ -144,38 +149,64 @@ TEST(MultiStoreySimulation, AStageIsPutInTheRegionItNames)
 {
     auto stair = test_geometries::u_stair();
     Simulation sim{model(), std::move(stair.geometry), 0.01, FloorfieldOptions{}};
-    const auto [up_journey, up_stage] = journey_to(sim, stacked_point, stair.room_2);
-    const auto [down_journey, down_stage] = journey_to(sim, stacked_point, stair.room_1);
+    const auto [up_route, up_stage] = route_to(sim, stacked_point, stair.room_2);
+    const auto [down_route, down_stage] = route_to(sim, stacked_point, stair.room_1);
 
     // Upstairs, the waypoint is only reached over the stair to the east.
-    const auto id = sim.add_agent(up_journey, up_stage, Point{2, 2}, State{}, stair.room_1);
+    const auto id = sim.add_agent(at(sim, Point{2, 2}, stair.room_1), up_route, {}, State{});
     sim.iterate();
     EXPECT_GT(sim.agent(id).route_orientation.x(), 0.5);
 
     // Downstairs, it is in plain sight. Floor field directions follow a gradient on a grid, so
     // straight ahead holds only up to the grid.
-    sim.switch_agent_journey(id, down_journey, down_stage);
+    sim.reroute(id, down_route);
     sim.iterate();
     const Vector straight = (stacked_point - sim.agent(id).location.xy()).normalized();
     EXPECT_NEAR(sim.agent(id).route_orientation.x(), straight.x(), 1e-2);
     EXPECT_NEAR(sim.agent(id).route_orientation.y(), straight.y(), 1e-2);
 }
 
-TEST(MultiStoreySimulation, ATargetWrittenFromOutsideLandsOnTheAgentsOwnStorey)
+TEST(MultiStoreySimulation, AgentsInRangeAreTheOnesOnTheFloorOfTheLocation)
 {
     auto stair = test_geometries::u_stair();
     Simulation sim{model(), std::move(stair.geometry), 0.01, FloorfieldOptions{}};
-    const auto [journey, stage] = journey_to(sim, stacked_point, stair.room_2);
-    const auto upstairs = sim.add_agent(journey, stage, stacked_point, State{}, stair.room_2);
+    const auto [route, stage] = route_to(sim, Point{5, 5}, stair.room_1);
+    const auto downstairs = sim.add_agent(at(sim, stacked_point, stair.room_1), route, {}, State{});
+    const auto upstairs = sim.add_agent(at(sim, stacked_point, stair.room_2), route, {}, State{});
 
-    // Only (x, y) is given, and two storeys carry it. It has to mean the one the agent is on --
-    // anything else routes it through the wrong floor.
-    sim.set_agent_target(upstairs, Point{2, 6});
-    EXPECT_EQ(std::get<Location>(sim.agent(upstairs).final_target).region(), stair.room_2);
+    EXPECT_EQ(
+        sim.agents_in_range(at(sim, {2, 11}, stair.room_1), 2.0),
+        std::vector<GenericAgent::ID>{downstairs});
+    EXPECT_EQ(
+        sim.agents_in_range(at(sim, {2, 11}, stair.room_2), 2.0),
+        std::vector<GenericAgent::ID>{upstairs});
+}
 
-    const auto downstairs = sim.add_agent(journey, stage, stacked_point, State{}, stair.room_1);
-    sim.set_agent_target(downstairs, Point{2, 6});
-    EXPECT_EQ(std::get<Location>(sim.agent(downstairs).final_target).region(), stair.room_1);
+TEST(MultiStoreySimulation, AgentsInAPolygonAreTheOnesInItsRegion)
+{
+    auto stair = test_geometries::u_stair();
+    Simulation sim{model(), std::move(stair.geometry), 0.01, FloorfieldOptions{}};
+    const auto [route, stage] = route_to(sim, Point{5, 5}, stair.room_1);
+    const auto downstairs = sim.add_agent(at(sim, stacked_point, stair.room_1), route, {}, State{});
+    const auto upstairs = sim.add_agent(at(sim, stacked_point, stair.room_2), route, {}, State{});
+    const Polygon square{test_geometries::rectangle_points({1, 9}, {3, 11})};
+
+    EXPECT_EQ(
+        sim.agents_in_polygon(square, stair.room_1), std::vector<GenericAgent::ID>{downstairs});
+    EXPECT_EQ(sim.agents_in_polygon(square, stair.room_2), std::vector<GenericAgent::ID>{upstairs});
+}
+
+TEST(Simulation, AgentsBehindAWallAreNotInRange)
+{
+    auto room = test_geometries::rectangle_with_hole({0, 0}, {20, 10}, {9, 2}, {11, 8});
+    Simulation sim{model(), std::move(room.geometry), 0.01, FloorfieldOptions{}};
+    const auto [route, stage] = route_to(sim, Point{2, 2}, room.room_id);
+    const auto beside = sim.add_agent(at(sim, {8, 1}, room.room_id), route, {}, State{});
+    sim.add_agent(at(sim, {12, 5}, room.room_id), route, {}, State{});
+
+    EXPECT_EQ(
+        sim.agents_in_range(at(sim, {8, 5}, room.room_id), 4.5),
+        std::vector<GenericAgent::ID>{beside});
 }
 
 TEST(Simulation, AnExitMayBeConcave)
@@ -241,9 +272,9 @@ TEST(Simulation, ReportsTheTravelTimeFromALocation)
     const auto exit = flat.sim->add_stage(ExitDescription{{{strip, flat.room_id}}});
     const auto grid = flat.sim->travel_times(exit).at(flat.room_id);
 
-    EXPECT_EQ(flat.sim->travel_time(exit, flat.sim->get_location(0.5, 10, flat.room_id)), 0.0);
+    EXPECT_EQ(flat.sim->travel_time(exit, at(*flat.sim, {0.5, 10}, flat.room_id)), 0.0);
     EXPECT_EQ(
-        flat.sim->travel_time(exit, flat.sim->get_location(10, 10, flat.room_id)),
+        flat.sim->travel_time(exit, at(*flat.sim, {10, 10}, flat.room_id)),
         time_at(grid, {10, 10}));
 }
 
@@ -252,9 +283,8 @@ TEST(Simulation, ListsItsStagesInAscendingOrder)
     const auto flat = on_a_flat_room();
     const Polygon square{std::vector<Point>{{2, 2}, {4, 2}, {4, 4}, {2, 4}}};
     const auto exit = flat.sim->add_stage(ExitDescription{{{square, flat.room_id}}});
-    const auto steering = flat.sim->add_stage(DirectSteeringDescription{});
     const auto waypoint = flat.sim->add_stage(WaypointDescription{{{square, flat.room_id}}});
-    EXPECT_EQ(flat.sim->stage_ids(), (std::vector<BaseStage::ID>{exit, steering, waypoint}));
+    EXPECT_EQ(flat.sim->stage_ids(), (std::vector<BaseStage::ID>{exit, waypoint}));
 }
 
 TEST(Simulation, ReportsTheTravelTimesOfEveryRegion)
@@ -278,13 +308,6 @@ TEST(Simulation, ReportsTheTravelTimesOfEveryRegion)
             EXPECT_GT(shortest, 0.0) << "region " << region_id;
         }
     }
-}
-
-TEST(Simulation, AStageWithoutAnAreaHasNoTravelTimes)
-{
-    const auto flat = on_a_flat_room();
-    const auto steering = flat.sim->add_stage(DirectSteeringDescription{});
-    EXPECT_TRUE(flat.sim->travel_times(steering).empty());
 }
 
 /// @p grid's values, each multiplied by @p factor.
@@ -372,7 +395,6 @@ TEST(Simulation, InvalidSpeedFieldsAreRejected)
     const auto flat = on_a_flat_room();
     const Polygon strip{std::vector<Point>{{0, 0}, {1, 0}, {1, 20}, {0, 20}}};
     const auto exit = flat.sim->add_stage(ExitDescription{{{strip, flat.room_id}}});
-    const auto steering = flat.sim->add_stage(DirectSteeringDescription{});
     const auto defaults = flat.sim->default_speed_fields().at(flat.room_id);
     const auto walkable = std::distance(
         defaults.values.begin(),
@@ -396,13 +418,6 @@ TEST(Simulation, InvalidSpeedFieldsAreRejected)
     EXPECT_THROW(flat.sim->set_default_speed_field(99, defaults.values), SimulationError);
     EXPECT_THROW(flat.sim->set_custom_speed_field(exit, 99, defaults.values), SimulationError);
     EXPECT_THROW(flat.sim->has_custom_speed_field(exit, 99), SimulationError);
-
-    // A stage without an area has nothing to route to.
-    EXPECT_TRUE(flat.sim->custom_speed_fields(steering).empty());
-    EXPECT_FALSE(flat.sim->has_custom_speed_field(steering, flat.room_id));
-    EXPECT_THROW(
-        flat.sim->set_custom_speed_field(steering, flat.room_id, defaults.values), SimulationError);
-    EXPECT_THROW(flat.sim->clear_custom_speed_field(steering, flat.room_id), SimulationError);
 }
 
 TEST(MeshBuiltSimulation, IsRejected)
@@ -462,8 +477,8 @@ TEST(MultiStoreySimulation, WalkingUpTheUStairToTheExitAbove)
     // flights, and back west on the upper floor.
     const Polygon outline{{{0, 4}, {3, 4}, {3, 8}, {0, 8}}};
     const auto exit = sim.add_stage(ExitDescription{{{outline, stair.room_2}}});
-    const auto journey = sim.add_journey({{exit, NonTransitionDescription{}}});
-    const auto id = sim.add_agent(journey, exit, Point{2, 6}, State{}, stair.room_1);
+    const auto route = sim.add_route({{std::nullopt, FixedTransitionDescription{exit}}});
+    const auto id = sim.add_agent(at(sim, Point{2, 6}, stair.room_1), route, {}, State{});
 
     const auto walked = climb(sim, id, [&sim] { return sim.agent_count() == 0; });
 
@@ -479,11 +494,8 @@ TEST(MultiStoreySimulation, SteeredUpTheUStairToTheFloorAbove)
     Simulation sim{model(), std::move(stair.geometry), 0.01, FloorfieldOptions{}};
 
     // The same way as to the exit above, steered towards a single place.
-    const auto steering = sim.add_stage(DirectSteeringDescription{});
-    const auto journey = sim.add_journey({{steering, NonTransitionDescription{}}});
-    const auto id = sim.add_agent(journey, steering, Point{2, 6}, State{}, stair.room_1);
     const auto target = sim.get_location(2, 6, stair.room_2);
-    sim.set_agent_target(id, target);
+    const auto id = sim.add_agent(at(sim, Point{2, 6}, stair.room_1), target, State{});
 
     const auto arrived = [&] {
         const auto& at = sim.agent(id).location;
@@ -501,8 +513,8 @@ TEST(SimulationClose, RejectsFurtherUse)
     using testing::ThrowsMessage;
     const auto flat = on_a_flat_room();
     auto& sim = *flat.sim;
-    const auto [journey, stage] = journey_to(sim, Point{15, 15}, flat.room_id);
-    const auto id = sim.add_agent(journey, stage, Point{5, 5}, State{}, flat.room_id);
+    const auto [route, stage] = route_to(sim, Point{15, 15}, flat.room_id);
+    const auto id = sim.add_agent(at(sim, Point{5, 5}, flat.room_id), route, {}, State{});
     sim.iterate();
 
     sim.close();
@@ -510,8 +522,11 @@ TEST(SimulationClose, RejectsFurtherUse)
     const auto closed = ThrowsMessage<SimulationError>(HasSubstr("in state Closed"));
     EXPECT_THAT([&] { sim.iterate(); }, closed);
     EXPECT_THAT([&] { sim.agent(id); }, closed);
-    EXPECT_THAT([&] { sim.add_agent(journey, stage, Point{5, 5}, State{}, flat.room_id); }, closed);
-    EXPECT_THAT([&] { journey_to(sim, Point{10, 10}, flat.room_id); }, closed);
+    EXPECT_THAT(
+        [&] { sim.add_agent(at(sim, Point{5, 5}, flat.room_id), route, {}, State{}); }, closed);
+    EXPECT_THAT([&] { route_to(sim, Point{10, 10}, flat.room_id); }, closed);
+    EXPECT_THAT([&] { sim.reroute(id, route); }, closed);
+    EXPECT_THAT([&] { sim.target_completions(); }, closed);
     // The stage outlives close, its destination's floor field does not.
     EXPECT_THAT([&] { sim.travel_times(stage); }, closed);
     EXPECT_THAT([&] { sim.custom_speed_fields(stage); }, closed);

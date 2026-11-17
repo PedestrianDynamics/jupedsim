@@ -13,7 +13,7 @@ def test_geometry_holes_returns_coordinates():
     simulation = jps.Simulation(
         model=jps.CollisionFreeSpeedModel(), geometry=surface.build()
     )
-    geo = simulation.get_geometry()
+    geo = simulation.geometry
 
     polygon = shapely.from_wkt(geo.polygon(region_id=room).as_wkt())
     assert len(polygon.interiors) == 1

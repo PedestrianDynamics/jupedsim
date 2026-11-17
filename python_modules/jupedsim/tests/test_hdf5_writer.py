@@ -28,17 +28,17 @@ def square_simulation(tmp_path: pathlib.Path):
         trajectory_writer=writer,
         dt=0.01,
     )
-    exit_id = sim.add_exit_stage(
-        [(shapely.Polygon([(9, 0), (10, 0), (10, 10), (9, 10)]), room)]
+    exit_ = sim.add_target(
+        jps.Exit(
+            [(shapely.Polygon([(9, 0), (10, 0), (10, 10), (9, 10)]), room)]
+        )
     )
-    journey_id = sim.add_journey(jps.JourneyDescription([exit_id]))
+    route = sim.add_route([jps.FixedTransition(jps.AGENT_LOCATION, exit_)])
     for x, y in [(2, 5), (3, 4), (3, 6)]:
         sim.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=(x, y),
+            sim.get_location(x, y, region_id=room),
+            route=route,
             state=jps.CollisionFreeSpeedModelV2State(),
-            region_id=room,
         )
     for _ in range(50):
         sim.iterate()
@@ -226,7 +226,7 @@ def test_with_block_closes_writer_on_exception(tmp_path):
 
 
 def test_travel_times_round_trip(tmp_path):
-    """Every waypoint and exit gets one grid per region; direct steering none."""
+    """Every waypoint and exit gets one grid per region."""
 
     def rectangle(p1, p2):
         return [p1, (p1[0], p2[1]), p2, (p2[0], p1[1])]
@@ -255,12 +255,13 @@ def test_travel_times_round_trip(tmp_path):
         trajectory_writer=writer,
         dt=0.01,
     )
-    exit_id = sim.add_exit_stage([(rectangle((14, 0), (15, 5)), upper_floor)])
-    sim.add_direct_steering_stage()
+    exit_ = sim.add_target(
+        jps.Exit([(rectangle((14, 0), (15, 5)), upper_floor)])
+    )
     sim.iterate()
     # Added after the last iteration, still written on close.
-    waypoint_id = sim.add_waypoint_stage(
-        [(rectangle((1, 1), (2, 2)), ground_floor)]
+    waypoint = sim.add_target(
+        jps.Waypoint([(rectangle((1, 1), (2, 2)), ground_floor)])
     )
     writer.close()
 
@@ -280,14 +281,14 @@ def test_travel_times_round_trip(tmp_path):
         "cell_size",
         "offset",
     )
-    region_count = sim.get_geometry().region_count()
+    region_count = sim.geometry.region_count()
     # The exit was added before the first iteration, the waypoint after it.
     assert [
         (int(g["iteration"]), int(g["stage_id"]), int(g["region_id"]))
         for g in grids
     ] == [
         (iteration, stage, region)
-        for iteration, stage in [(0, exit_id), (1, waypoint_id)]
+        for iteration, stage in [(0, exit_.id), (1, waypoint.id)]
         for region in range(region_count)
     ]
     assert values.dtype.str == "<f4"
@@ -296,7 +297,9 @@ def test_travel_times_round_trip(tmp_path):
     assert directions.shape == (values.shape[0], 2)
 
     for g in grids:
-        expected = sim.travel_times(int(g["stage_id"]))[int(g["region_id"])]
+        expected = sim.travel_times(sim.target(int(g["stage_id"])))[
+            int(g["region_id"])
+        ]
         assert (g["origin_x"], g["origin_y"]) == expected.origin
         assert (g["width"], g["height"]) == (expected.width, expected.height)
         assert g["cell_size"] == expected.cell_size
@@ -336,7 +339,7 @@ def test_travel_times_without_stages(tmp_path):
 
 def _travel_time_simulation(writer):
     sim = _square_simulation(writer)
-    sim.add_exit_stage([([(4, 0), (5, 0), (5, 5), (4, 5)], 0)])
+    sim.add_target(jps.Exit([([(4, 0), (5, 0), (5, 5), (4, 5)], 0)]))
     return sim
 
 
@@ -399,27 +402,27 @@ def test_an_interrupted_snapshot_leaves_a_loadable_file(tmp_path, monkeypatch):
         output_file=out, every_nth_frame=1, write_travel_times=True
     )
     sim = _travel_time_simulation(writer)
-    sim.add_exit_stage([([(0, 0), (1, 0), (1, 5), (0, 5)], 0)])
+    sim.add_target(jps.Exit([([(0, 0), (1, 0), (1, 5), (0, 5)], 0)]))
     sim.iterate()
     _halve_default_speed(sim)  # both exits use the default
 
     real = jps.Simulation.travel_times
     calls = []
 
-    def fail_on_second_stage(self, stage_id):
-        calls.append(stage_id)
+    def fail_on_second_target(self, target):
+        calls.append(target)
         if len(calls) == 2:
             raise jps.SimulationError("solver failed")
-        return real(self, stage_id)
+        return real(self, target)
 
-    monkeypatch.setattr(jps.Simulation, "travel_times", fail_on_second_stage)
+    monkeypatch.setattr(jps.Simulation, "travel_times", fail_on_second_target)
     with pytest.raises(jps.SimulationError, match="solver failed"):
         writer.close()
     first, second = calls
 
     with jps.Hdf5TrajectoryLoader(out) as loader:
-        assert loader.load_travel_time_iterations(first) == [0, 1]
-        assert loader.load_travel_time_iterations(second) == [0]
+        assert loader.load_travel_time_iterations(first.id) == [0, 1]
+        assert loader.load_travel_time_iterations(second.id) == [0]
     with h5py.File(out, "r") as hf:
         assert hf["frame_offsets"].shape == (3,)
 
@@ -429,9 +432,9 @@ def _halve_default_speed(sim, region_id=0):
     sim.set_default_speed_field(region_id, grid.values * 0.5)
 
 
-def _iterations(path, stage_id):
+def _iterations(path, target):
     with jps.Hdf5TrajectoryLoader(path) as loader:
-        return loader.load_travel_time_iterations(stage_id)
+        return loader.load_travel_time_iterations(target.id)
 
 
 def test_travel_times_are_recorded_when_speed_fields_change(tmp_path):
@@ -440,8 +443,8 @@ def test_travel_times_are_recorded_when_speed_fields_change(tmp_path):
         output_file=out, every_nth_frame=4, write_travel_times=True
     )
     sim = _square_simulation(writer)
-    left = sim.add_exit_stage([([(0, 0), (1, 0), (1, 5), (0, 5)], 0)])
-    right = sim.add_exit_stage([([(4, 0), (5, 0), (5, 5), (4, 5)], 0)])
+    left = sim.add_target(jps.Exit([([(0, 0), (1, 0), (1, 5), (0, 5)], 0)]))
+    right = sim.add_target(jps.Exit([([(4, 0), (5, 0), (5, 5), (4, 5)], 0)]))
     expected = {(left, 0): sim.travel_times(left)[0].values}
     sim.iterate(3)
     # Not on a recorded frame: snapshots don't wait for one.
@@ -462,16 +465,16 @@ def test_travel_times_are_recorded_when_speed_fields_change(tmp_path):
     with jps.Hdf5TrajectoryLoader(out) as loader:
         for (stage, iteration), values in expected.items():
             np.testing.assert_array_equal(
-                loader.load_travel_times(stage, iteration)[0].values,
+                loader.load_travel_times(stage.id, iteration)[0].values,
                 values.astype("<f4"),
             )
         # Between snapshots the earlier one is in effect, without one the last.
         np.testing.assert_array_equal(
-            loader.load_travel_times(left, 5)[0].values,
+            loader.load_travel_times(left.id, 5)[0].values,
             expected[(left, 3)].astype("<f4"),
         )
         np.testing.assert_array_equal(
-            loader.load_travel_times(left)[0].values,
+            loader.load_travel_times(left.id)[0].values,
             expected[(left, 6)].astype("<f4"),
         )
     np.testing.assert_array_equal(
@@ -486,8 +489,8 @@ def test_a_default_speed_change_skips_stages_with_their_own_field(tmp_path):
         output_file=out, every_nth_frame=1, write_travel_times=True
     )
     sim = _square_simulation(writer)
-    own = sim.add_exit_stage([([(0, 0), (1, 0), (1, 5), (0, 5)], 0)])
-    default = sim.add_exit_stage([([(4, 0), (5, 0), (5, 5), (4, 5)], 0)])
+    own = sim.add_target(jps.Exit([([(0, 0), (1, 0), (1, 5), (0, 5)], 0)]))
+    default = sim.add_target(jps.Exit([([(4, 0), (5, 0), (5, 5), (4, 5)], 0)]))
     sim.set_custom_speed_field(own, 0, sim.default_speed_fields()[0].values)
     sim.iterate()
     _halve_default_speed(sim)
@@ -525,9 +528,9 @@ def test_every_nth_travel_time_field_keeps_the_first_and_every_nth_change(
         every_nth_travel_time_field=2,
     )
     sim = _square_simulation(writer)
-    exit_id = sim.add_exit_stage([([(4, 0), (5, 0), (5, 5), (4, 5)], 0)])
+    exit_ = sim.add_target(jps.Exit([([(4, 0), (5, 0), (5, 5), (4, 5)], 0)]))
     sim.iterate()
-    later_id = sim.add_exit_stage([([(0, 0), (1, 0), (1, 5), (0, 5)], 0)])
+    later = sim.add_target(jps.Exit([([(0, 0), (1, 0), (1, 5), (0, 5)], 0)]))
     # Five changes, at iterations 1..5; the later stage's first field is its own.
     base = sim.default_speed_fields()[0].values
     for factor in [0.5, 1.0, 0.5, 1.0, 0.5]:
@@ -535,8 +538,8 @@ def test_every_nth_travel_time_field_keeps_the_first_and_every_nth_change(
         sim.iterate()
     writer.close()
 
-    assert _iterations(out, exit_id) == [0, 2, 4]
-    assert _iterations(out, later_id) == [1, 3, 5]
+    assert _iterations(out, exit_) == [0, 2, 4]
+    assert _iterations(out, later) == [1, 3, 5]
     with h5py.File(out, "r") as hf:
         assert hf["travel_times"].attrs["every_nth_travel_time_field"] == 2
     with jps.Hdf5TrajectoryLoader(out) as loader:

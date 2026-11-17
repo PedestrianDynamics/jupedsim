@@ -249,6 +249,10 @@ void init_routing(py::module_& m)
             [](const Location& l) { return l.xy().y(); },
             clean_doc("y coordinate in metres.").c_str())
         .def_property_readonly(
+            "xy",
+            [](const Location& l) { return into_tuple(l.xy()); },
+            clean_doc("``(x, y)`` in metres.").c_str())
+        .def_property_readonly(
             "z", &Location::z, clean_doc("Height of the surface here, in metres.").c_str())
         .def_property_readonly(
             "region_id", &Location::region, clean_doc("Region this location lies in.").c_str())

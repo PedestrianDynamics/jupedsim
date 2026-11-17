@@ -20,7 +20,6 @@ from jupedsim.hdf5_serialization import (
     Hdf5TrajectoryWriter,
 )
 from jupedsim.internal.tracing import Timer, trace_event
-from jupedsim.journey import JourneyDescription
 from jupedsim.pyjupedsim import (
     AgentStep,
     AgentView,
@@ -33,8 +32,6 @@ from jupedsim.pyjupedsim import (
     CollisionFreeSpeedModelV2State,
     CollisionFreeSpeedModelV3,
     CollisionFreeSpeedModelV3State,
-    DirectSteeringStage,
-    ExitStage,
     FloorfieldOptions,
     GeneralizedCentrifugalForceModel,
     GeneralizedCentrifugalForceModelState,
@@ -47,12 +44,10 @@ from jupedsim.pyjupedsim import (
     SocialForceModelState,
     SpeedGrid,
     SurfaceMeshShortestPathRoutingEngine,
-    Transition,
     TravelTimeGrid,
     WallView,
     WarpDriverModel,
     WarpDriverModelState,
-    WaypointStage,
     disable_tracing,
     dump_traces,
     enable_tracing,
@@ -66,8 +61,17 @@ from jupedsim.pyjupedsim import (
     set_warning_callback,
     start_trace_event,
 )
+from jupedsim.records import RemovalRecord, TargetCompletionRecord
+from jupedsim.route import (
+    AGENT_LOCATION,
+    FixedTransition,
+    LeastTargetedTransition,
+    RoundRobinTransition,
+    Route,
+)
 from jupedsim.serialization import TrajectoryWriter
 from jupedsim.simulation import Simulation
+from jupedsim.target import Exit, RouteTarget, Waypoint
 
 __version__ = get_build_info().library_version
 """
@@ -88,6 +92,7 @@ Id of the compiler used to build the native portion of this module.
 
 
 __all__ = [
+    "AGENT_LOCATION",
     "Agent",
     "AgentNumberError",
     "AgentStep",
@@ -102,8 +107,8 @@ __all__ = [
     "CollisionFreeSpeedModelV3",
     "CollisionFreeSpeedModelV3State",
     "CustomOperationalModel",
-    "DirectSteeringStage",
-    "ExitStage",
+    "Exit",
+    "FixedTransition",
     "FloorfieldOptions",
     "GeneralizedCentrifugalForceModel",
     "GeneralizedCentrifugalForceModelState",
@@ -112,25 +117,29 @@ __all__ = [
     "Hdf5TrajectoryLoader",
     "Hdf5TrajectoryWriter",
     "IncorrectParameterError",
-    "JourneyDescription",
+    "LeastTargetedTransition",
     "Location",
     "NegativeValueError",
     "NeighborView",
     "OverlappingCirclesError",
+    "RemovalRecord",
+    "RoundRobinTransition",
+    "Route",
+    "RouteTarget",
     "Simulation",
     "SimulationError",
     "SocialForceModel",
     "SocialForceModelState",
     "SpeedGrid",
     "SurfaceMeshShortestPathRoutingEngine",
+    "TargetCompletionRecord",
     "Timer",
     "TrajectoryWriter",
-    "Transition",
     "TravelTimeGrid",
     "WallView",
     "WarpDriverModel",
     "WarpDriverModelState",
-    "WaypointStage",
+    "Waypoint",
     "__commit__",
     "__compiler__",
     "__version__",

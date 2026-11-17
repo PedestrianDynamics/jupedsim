@@ -125,21 +125,21 @@ def _trajectory(model, state_cls):
     surface = jps.GeometryBuilder()
     room = surface.add_region(boundary=_GEOMETRY, height=0.0)
     simulation = jps.Simulation(model=model, geometry=surface.build())
-    exit_id = simulation.add_exit_stage(
-        [([(49, -3), (49, 3), (50, 3), (50, -3)], room)]
+    exit_ = simulation.add_target(
+        jps.Exit([([(49, -3), (49, 3), (50, 3), (50, -3)], room)])
     )
-    journey_id = simulation.add_journey(jps.JourneyDescription([exit_id]))
-    agent_id = simulation.add_agent(
-        journey_id=journey_id,
-        stage_id=exit_id,
-        position=(0, 0),
+    route = simulation.add_route(
+        [jps.FixedTransition(jps.AGENT_LOCATION, exit_)]
+    )
+    agent = simulation.add_agent(
+        simulation.get_location(0, 0, region_id=room),
+        route=route,
         state=_default_state(state_cls),
-        region_id=room,
     )
     positions = []
     for _ in range(20):
         simulation.iterate()
-        positions.append(simulation.agent(agent_id).position)
+        positions.append(agent.location.xy)
     return positions
 
 

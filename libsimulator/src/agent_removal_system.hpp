@@ -2,6 +2,7 @@
 #pragma once
 
 #include "generic_agent.hpp"
+#include "stage.hpp"
 #include "stage_manager.hpp"
 
 #include <algorithm>
@@ -39,7 +40,7 @@ void AgentRemovalSystem<Agent>::run(
             auto found =
                 std::find(std::begin(removed_agent_ids), std::end(removed_agent_ids), agent.id) !=
                 std::end(removed_agent_ids);
-            if(found) {
+            if(found && agent.stage_id != BaseStage::ID::invalid) {
                 stage_manager.handle_remove_agent(agent.stage_id);
             }
             return found;

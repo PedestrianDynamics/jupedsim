@@ -3,6 +3,8 @@
 #include "generic_agent.hpp"
 #include "geometry/location.hpp"
 #include "operational_model_state.hpp"
+#include "route.hpp"
+#include "stage.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep
 
 #include <pybind11/cast.h>
@@ -10,6 +12,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h> // IWYU pragma: keep
 
+#include <cstdint>
 #include <optional>
 #include <variant>
 
@@ -26,9 +29,21 @@ void init_agent(py::module_& m)
     py::class_<GenericAgent>(m, "_Agent")
         .def_property_readonly("id", [](const GenericAgent& agent) { return agent.id.get_id(); })
         .def_property_readonly(
-            "journey_id", [](const GenericAgent& agent) { return agent.journey_id.get_id(); })
+            "route_id",
+            [](const GenericAgent& agent) -> std::optional<uint64_t> {
+                if(agent.route_id == Route::ID::invalid) {
+                    return std::nullopt;
+                }
+                return agent.route_id.get_id();
+            })
         .def_property_readonly(
-            "stage_id", [](const GenericAgent& agent) { return agent.stage_id.get_id(); })
+            "stage_id",
+            [](const GenericAgent& agent) -> std::optional<uint64_t> {
+                if(agent.stage_id == BaseStage::ID::invalid) {
+                    return std::nullopt;
+                }
+                return agent.stage_id.get_id();
+            })
         .def_property_readonly(
             "position", [](const GenericAgent& agent) { return into_tuple(agent.location.xy()); })
         .def_property_readonly(

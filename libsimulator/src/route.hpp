@@ -1,25 +1,24 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "generic_agent.hpp"
-#include "routing_target.hpp"
 #include "simulation_error.hpp"
 #include "stage.hpp"
+#include "stage_manager.hpp"
 #include "unique_id.hpp"
 
+#include <fmt/core.h>
+#include <fmt/ranges.h>
+
 #include <algorithm>
-#include <cstddef>
 #include <cstdint>
 #include <map>
 #include <memory>
+#include <optional>
+#include <string>
 #include <tuple>
 #include <utility>
 #include <variant>
 #include <vector>
-
-class NonTransitionDescription
-{
-};
 
 class FixedTransitionDescription
 {
@@ -45,6 +44,9 @@ public:
         const std::vector<std::tuple<BaseStage::ID, uint64_t>>& weighted_stages)
         : _weighted_stages(weighted_stages)
     {
+        if(_weighted_stages.empty()) {
+            throw SimulationError("A round robin transition needs at least one target.");
+        }
         for(const auto& [stage_id, _] : _weighted_stages) {
             if(stage_id == BaseStage::ID::invalid.get_id()) {
                 throw SimulationError(
@@ -68,6 +70,9 @@ public:
     LeastTargetedTransitionDescription(std::vector<BaseStage::ID> target_candidates)
         : _target_candidates(std::move(target_candidates))
     {
+        if(_target_candidates.empty()) {
+            throw SimulationError("A least targeted transition needs at least one target.");
+        }
         for(const auto& stage_id : _target_candidates) {
             if(stage_id == BaseStage::ID::invalid.get_id()) {
                 throw SimulationError(
@@ -80,10 +85,17 @@ public:
 };
 
 using TransitionDescription = std::variant<
-    NonTransitionDescription,
     FixedTransitionDescription,
     RoundRobinTransitionDescription,
     LeastTargetedTransitionDescription>;
+
+/// One transition of a route: the stage it leaves, and how it chooses the next one.
+struct RouteTransitionDescription {
+    /// std::nullopt for the agent's location when it joins the route: this transition chooses
+    /// the agent's first stage.
+    std::optional<BaseStage::ID> source;
+    TransitionDescription transition;
+};
 
 class Transition
 {
@@ -162,47 +174,61 @@ public:
     }
 };
 
-struct JourneyNode {
-    BaseStage* stage;
-    std::unique_ptr<Transition> transition;
-};
-
-class Journey
+/// A directed graph of stages, given by its transitions. Every route has its own transitions,
+/// so a round robin counts per route.
+class Route
 {
 public:
-    using ID = jps::UniqueID<Journey>;
+    using ID = jps::UniqueID<Route>;
 
 private:
     ID _id{};
-    std::map<BaseStage::ID, JourneyNode> _stages{};
+    std::optional<std::string> _name;
+    std::unique_ptr<Transition> _entry;
+    /// Every stage of the route, with the transition leaving it; nullptr where the route ends.
+    std::map<BaseStage::ID, std::unique_ptr<Transition>> _transitions;
 
 public:
-    ~Journey() = default;
-
-    Journey(std::map<BaseStage::ID, JourneyNode> stages) : _stages(std::move(stages)) {}
+    /// Throws unless exactly one of @p transitions leaves the agent's location, at most one leaves
+    /// each stage, none leaves an exit, none leads back to its own stage, and all of
+    /// them form one graph when their directions are ignored.
+    Route(
+        const std::vector<RouteTransitionDescription>& transitions,
+        std::optional<std::string> name,
+        StageManager& stages);
 
     ID id() const { return _id; }
+    const std::optional<std::string>& name() const { return _name; }
 
-    std::tuple<RoutingTarget, BaseStage::ID> target(const GenericAgent& agent) const
+    /// The stage an agent joining the route goes to first.
+    BaseStage* first_stage() { return _entry->next_stage(); }
+
+    /// The stage after @p completed, or nullptr where the route ends.
+    BaseStage* next_stage(BaseStage::ID completed);
+
+    bool contains(BaseStage::ID stage_id) const { return _transitions.contains(stage_id); }
+
+    /// Ids of all stages of the route, in ascending order.
+    std::vector<BaseStage::ID> stage_ids() const;
+};
+
+template <>
+struct fmt::formatter<Route> {
+
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+
+    template <typename FormatContext>
+    auto format(const Route& r, FormatContext& ctx) const
     {
-        auto& node = _stages.at(agent.stage_id);
-        auto stage = node.stage;
-        const auto& transition = node.transition;
-
-        if(stage->is_completed(agent)) {
-            stage = transition->next_stage();
+        if(r.name()) {
+            return fmt::format_to(
+                ctx.out(),
+                "Route(id={}, name={}, targets=[{}])",
+                r.id(),
+                *r.name(),
+                fmt::join(r.stage_ids(), ", "));
         }
-
-        return std::make_tuple(stage->target(agent), stage->id());
+        return fmt::format_to(
+            ctx.out(), "Route(id={}, targets=[{}])", r.id(), fmt::join(r.stage_ids(), ", "));
     }
-
-    size_t count_stages() const { return _stages.size(); }
-
-    bool contains_stage(BaseStage::ID stage_id) const
-    {
-        const auto find_iter = _stages.find(stage_id);
-        return find_iter != std::end(_stages);
-    }
-
-    const std::map<BaseStage::ID, JourneyNode>& stages() const { return _stages; };
 };
