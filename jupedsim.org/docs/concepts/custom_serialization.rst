@@ -152,7 +152,7 @@ Here is a complete example that writes trajectory data to a CSV file:
             self._file = open(self._output_file, "w", newline="")
             self._csv_writer = csv.writer(self._file)
             self._csv_writer.writerow(
-                ["frame", "id", "pos_x", "pos_y", "ori_x", "ori_y"]
+                ["frame", "id", "x", "y", "z", "region_id"]
             )
 
         def write_iteration_state(self, simulation: Simulation) -> None:
@@ -165,10 +165,10 @@ Here is a complete example that writes trajectory data to a CSV file:
                 self._csv_writer.writerow([
                     frame,
                     agent.id,
-                    agent.position[0],
-                    agent.position[1],
-                    agent.orientation[0],
-                    agent.orientation[1],
+                    agent.location.x,
+                    agent.location.y,
+                    agent.location.z,
+                    agent.location.region_id,
                 ])
 
         def every_nth_frame(self) -> int:
