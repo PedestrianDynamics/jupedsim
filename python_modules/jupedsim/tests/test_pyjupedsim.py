@@ -46,7 +46,7 @@ def test_can_query_agents_in_range():
     ):
         expected_agent_ids.append(
             simulation.add_agent(
-                simulation.get_location(*new_pos, region_id=room),
+                room.at(*new_pos),
                 route=route,
                 state=jps.CollisionFreeSpeedModelState(),
             ).id
@@ -55,9 +55,7 @@ def test_can_query_agents_in_range():
     actual_ids_in_range = [
         agent.id
         for agent in simulation.agents_in_range(
-            simulation.get_location(
-                *initial_agent_positions[2], region_id=room
-            ),
+            room.at(*initial_agent_positions[2]),
             10,
         )
     ]
@@ -65,7 +63,7 @@ def test_can_query_agents_in_range():
     actual_ids_in_polygon = [
         agent.id
         for agent in simulation.agents_in_polygon(
-            [(39, 11), (39, 9), (51, 9), (51, 11)], region_id=room
+            [(39, 11), (39, 9), (51, 9), (51, 11)], region=room
         )
     ]
 
@@ -113,7 +111,7 @@ def test_can_run_simulation():
     for new_pos in initial_agent_positions:
         expected_agent_ids.add(
             simulation.add_agent(
-                simulation.get_location(*new_pos, region_id=room),
+                room.at(*new_pos),
                 route=route,
                 state=jps.CollisionFreeSpeedModelState(),
             ).id
@@ -124,7 +122,7 @@ def test_can_run_simulation():
     assert actual_agent_ids == expected_agent_ids
 
     agent = simulation.add_agent(
-        simulation.get_location(6, 6, region_id=room),
+        room.at(6, 6),
         route=route,
         state=jps.CollisionFreeSpeedModelState(),
     )
@@ -175,7 +173,7 @@ def test_get_single_agent_from_simulation():
     for new_pos in initial_agent_positions:
         agent_ids.add(
             simulation.add_agent(
-                simulation.get_location(*new_pos, region_id=room),
+                room.at(*new_pos),
                 route=route,
                 state=jps.CollisionFreeSpeedModelState(),
             ).id
@@ -213,7 +211,7 @@ def test_get_agent_non_existing_agent_from_simulation():
     )
 
     agent = simulation.add_agent(
-        simulation.get_location(7, 7, region_id=room),
+        room.at(7, 7),
         route=route,
         state=jps.CollisionFreeSpeedModelState(),
     )
@@ -257,7 +255,7 @@ def test_agent_can_be_removed_from_simulation():
     for new_pos in initial_agent_positions:
         expected_agent_ids.add(
             simulation.add_agent(
-                simulation.get_location(*new_pos, region_id=room),
+                room.at(*new_pos),
                 route=route,
                 state=jps.CollisionFreeSpeedModelState(),
             ).id
@@ -318,7 +316,7 @@ def test_agent_can_not_be_added_outside_geometry():
     agent_position = (50, 50)
 
     simulation.add_agent(
-        simulation.get_location(*agent_position, region_id=room),
+        room.at(*agent_position),
         route=route,
         state=jps.CollisionFreeSpeedModelState(),
     )
@@ -328,7 +326,7 @@ def test_agent_can_not_be_added_outside_geometry():
         match=r"Point \(-50, -50\) is not in region 0",
     ):
         assert simulation.add_agent(
-            simulation.get_location(-50, -50, region_id=room),
+            room.at(-50, -50),
             route=route,
             state=jps.CollisionFreeSpeedModelState(),
         )

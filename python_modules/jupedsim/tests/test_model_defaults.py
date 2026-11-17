@@ -132,7 +132,7 @@ def _trajectory(model, state_cls):
         [jps.FixedTransition(jps.AGENT_LOCATION, exit_)]
     )
     agent = simulation.add_agent(
-        simulation.get_location(0, 0, region_id=room),
+        room.at(0, 0),
         route=route,
         state=_default_state(state_cls),
     )

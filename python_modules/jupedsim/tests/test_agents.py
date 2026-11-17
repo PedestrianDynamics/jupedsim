@@ -33,7 +33,7 @@ class _Room:
         )
 
     def at(self, x, y):
-        return self.sim.get_location(x, y, region_id=self.room)
+        return self.room.at(x, y)
 
 
 def test_an_agent_follows_its_route_and_is_recorded_on_the_way():
@@ -171,6 +171,21 @@ def test_reroute_rejects_invalid_calls():
         agent.reroute()
     with pytest.raises(ValueError, match="not both"):
         agent.reroute(route=r.route, steer_to=r.at(5, 8))
+
+
+def test_a_location_of_another_geometry_is_rejected():
+    r = _Room()
+    other = _Room()
+    with pytest.raises(
+        jps.SimulationError, match="location .* belongs to another geometry"
+    ):
+        r.sim.add_agent(other.at(2, 5), route=r.route)
+
+    shared = jps.Simulation(
+        model=jps.CollisionFreeSpeedModel(), geometry=r.sim.geometry
+    )
+    shared.add_agent(r.at(2, 5), steer_to=r.at(8, 5))
+    assert shared.agent_count() == 1
 
 
 def test_custom_models_need_a_state():

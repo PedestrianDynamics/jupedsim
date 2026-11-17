@@ -33,7 +33,7 @@ void init_collision_free_speed_model_v2(py::module_& m)
                 geometry=...,
             )
             sim.add_agent(
-                sim.get_location(1.0, 1.0, region_id=region_id),
+                region.at(1.0, 1.0),
                 route=route,
                 state=jupedsim.CollisionFreeSpeedModelV2State(strength_neighbor_repulsion=9.0),
             )

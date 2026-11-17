@@ -42,7 +42,7 @@ def test_a_route_with_every_transition_kind_leads_to_the_exit():
         ]
     )
     for y in (4.0, 6.0):
-        sim.add_agent(sim.get_location(1.0, y, region_id=room), route=route)
+        sim.add_agent(room.at(1.0, y), route=route)
     visited = set()
     while sim.agent_count() > 0 and sim.iteration_count() < 5000:
         sim.iterate()
@@ -80,8 +80,8 @@ def test_an_invalid_route_is_a_value_error():
 
 def test_a_target_of_another_simulation_is_rejected():
     sim, room = _simulation()
-    other, _ = _simulation()
-    foreign = _waypoint(other, room, (2, 5))
+    other, other_room = _simulation()
+    foreign = _waypoint(other, other_room, (2, 5))
     with pytest.raises(
         ValueError, match=f"Target {foreign.id} belongs to another simulation"
     ):

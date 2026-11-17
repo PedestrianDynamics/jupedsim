@@ -36,7 +36,7 @@ def square_simulation(tmp_path: pathlib.Path):
     route = sim.add_route([jps.FixedTransition(jps.AGENT_LOCATION, exit_)])
     for x, y in [(2, 5), (3, 4), (3, 6)]:
         sim.add_agent(
-            sim.get_location(x, y, region_id=room),
+            room.at(x, y),
             route=route,
             state=jps.CollisionFreeSpeedModelV2State(),
         )
@@ -152,9 +152,9 @@ def test_regions_round_trip(tmp_path):
         to_edge=((10, 0), (10, 5)),
     )
     expected = {
-        ground_floor: shapely.box(0, 0, 5, 5),
-        upper_floor: shapely.box(10, 0, 15, 5),
-        stairs: shapely.box(5, 0, 10, 5),
+        ground_floor.id: shapely.box(0, 0, 5, 5),
+        upper_floor.id: shapely.box(10, 0, 15, 5),
+        stairs.id: shapely.box(5, 0, 10, 5),
     }
 
     out = tmp_path / "regions.h5"
@@ -182,6 +182,10 @@ def test_regions_round_trip(tmp_path):
 
     # Every region owns at least one triangle of the mesh.
     assert set(triangle_regions.tolist()) == set(expected)
+
+
+def _room(sim):
+    return sim.geometry.region(0)
 
 
 def _square_simulation(writer):
@@ -298,7 +302,7 @@ def test_travel_times_round_trip(tmp_path):
 
     for g in grids:
         expected = sim.travel_times(sim.target(int(g["stage_id"])))[
-            int(g["region_id"])
+            sim.geometry.region(int(g["region_id"]))
         ]
         assert (g["origin_x"], g["origin_y"]) == expected.origin
         assert (g["width"], g["height"]) == (expected.width, expected.height)
@@ -339,7 +343,7 @@ def test_travel_times_without_stages(tmp_path):
 
 def _travel_time_simulation(writer):
     sim = _square_simulation(writer)
-    sim.add_target(jps.Exit([([(4, 0), (5, 0), (5, 5), (4, 5)], 0)]))
+    sim.add_target(jps.Exit([([(4, 0), (5, 0), (5, 5), (4, 5)], _room(sim))]))
     return sim
 
 
@@ -402,7 +406,7 @@ def test_an_interrupted_snapshot_leaves_a_loadable_file(tmp_path, monkeypatch):
         output_file=out, every_nth_frame=1, write_travel_times=True
     )
     sim = _travel_time_simulation(writer)
-    sim.add_target(jps.Exit([([(0, 0), (1, 0), (1, 5), (0, 5)], 0)]))
+    sim.add_target(jps.Exit([([(0, 0), (1, 0), (1, 5), (0, 5)], _room(sim))]))
     sim.iterate()
     _halve_default_speed(sim)  # both exits use the default
 
@@ -427,9 +431,9 @@ def test_an_interrupted_snapshot_leaves_a_loadable_file(tmp_path, monkeypatch):
         assert hf["frame_offsets"].shape == (3,)
 
 
-def _halve_default_speed(sim, region_id=0):
-    grid = sim.default_speed_fields()[region_id]
-    sim.set_default_speed_field(region_id, grid.values * 0.5)
+def _halve_default_speed(sim):
+    grid = sim.default_speed_fields()[_room(sim)]
+    sim.set_default_speed_field(_room(sim), grid.values * 0.5)
 
 
 def _iterations(path, target):
@@ -443,21 +447,25 @@ def test_travel_times_are_recorded_when_speed_fields_change(tmp_path):
         output_file=out, every_nth_frame=4, write_travel_times=True
     )
     sim = _square_simulation(writer)
-    left = sim.add_target(jps.Exit([([(0, 0), (1, 0), (1, 5), (0, 5)], 0)]))
-    right = sim.add_target(jps.Exit([([(4, 0), (5, 0), (5, 5), (4, 5)], 0)]))
-    expected = {(left, 0): sim.travel_times(left)[0].values}
+    left = sim.add_target(
+        jps.Exit([([(0, 0), (1, 0), (1, 5), (0, 5)], _room(sim))])
+    )
+    right = sim.add_target(
+        jps.Exit([([(4, 0), (5, 0), (5, 5), (4, 5)], _room(sim))])
+    )
+    expected = {(left, 0): sim.travel_times(left)[_room(sim)].values}
     sim.iterate(3)
     # Not on a recorded frame: snapshots don't wait for one.
-    slow = sim.default_speed_fields()[0].values * 0.5
-    sim.set_custom_speed_field(left, 0, slow)
+    slow = sim.default_speed_fields()[_room(sim)].values * 0.5
+    sim.set_custom_speed_field(left, _room(sim), slow)
     sim.iterate()
-    expected[(left, 3)] = sim.travel_times(left)[0].values
+    expected[(left, 3)] = sim.travel_times(left)[_room(sim)].values
     sim.iterate(2)
     # Two changes before one iteration make one snapshot.
-    sim.set_custom_speed_field(left, 0, slow * 0.5)
-    sim.clear_custom_speed_field(left, 0)
+    sim.set_custom_speed_field(left, _room(sim), slow * 0.5)
+    sim.clear_custom_speed_field(left, _room(sim))
     sim.iterate()
-    expected[(left, 6)] = sim.travel_times(left)[0].values
+    expected[(left, 6)] = sim.travel_times(left)[_room(sim)].values
     writer.close()
 
     assert _iterations(out, left) == [0, 3, 6]
@@ -489,14 +497,20 @@ def test_a_default_speed_change_skips_stages_with_their_own_field(tmp_path):
         output_file=out, every_nth_frame=1, write_travel_times=True
     )
     sim = _square_simulation(writer)
-    own = sim.add_target(jps.Exit([([(0, 0), (1, 0), (1, 5), (0, 5)], 0)]))
-    default = sim.add_target(jps.Exit([([(4, 0), (5, 0), (5, 5), (4, 5)], 0)]))
-    sim.set_custom_speed_field(own, 0, sim.default_speed_fields()[0].values)
+    own = sim.add_target(
+        jps.Exit([([(0, 0), (1, 0), (1, 5), (0, 5)], _room(sim))])
+    )
+    default = sim.add_target(
+        jps.Exit([([(4, 0), (5, 0), (5, 5), (4, 5)], _room(sim))])
+    )
+    sim.set_custom_speed_field(
+        own, _room(sim), sim.default_speed_fields()[_room(sim)].values
+    )
     sim.iterate()
     _halve_default_speed(sim)
     sim.iterate()
     # Clearing a field the stage does not have changes nothing.
-    sim.clear_custom_speed_field(default, 0)
+    sim.clear_custom_speed_field(default, _room(sim))
     sim.iterate()
     writer.close()
 
@@ -528,13 +542,17 @@ def test_every_nth_travel_time_field_keeps_the_first_and_every_nth_change(
         every_nth_travel_time_field=2,
     )
     sim = _square_simulation(writer)
-    exit_ = sim.add_target(jps.Exit([([(4, 0), (5, 0), (5, 5), (4, 5)], 0)]))
+    exit_ = sim.add_target(
+        jps.Exit([([(4, 0), (5, 0), (5, 5), (4, 5)], _room(sim))])
+    )
     sim.iterate()
-    later = sim.add_target(jps.Exit([([(0, 0), (1, 0), (1, 5), (0, 5)], 0)]))
+    later = sim.add_target(
+        jps.Exit([([(0, 0), (1, 0), (1, 5), (0, 5)], _room(sim))])
+    )
     # Five changes, at iterations 1..5; the later stage's first field is its own.
-    base = sim.default_speed_fields()[0].values
+    base = sim.default_speed_fields()[_room(sim)].values
     for factor in [0.5, 1.0, 0.5, 1.0, 0.5]:
-        sim.set_default_speed_field(0, base * factor)
+        sim.set_default_speed_field(_room(sim), base * factor)
         sim.iterate()
     writer.close()
 

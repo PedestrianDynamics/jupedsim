@@ -91,7 +91,7 @@ def test_a_waypoint_given_by_its_area_is_reached(square_room_5x5):
             jps.FixedTransition(waypoint, exit_),
         ]
     )
-    agent = sim.add_agent(sim.get_location(1.5, 0, region_id=room), route=route)
+    agent = sim.add_agent(room.at(1.5, 0), route=route)
     # It starts inside the waypoint, so the first step moves it on to the exit.
     sim.iterate()
     assert agent.current_target == exit_
@@ -101,7 +101,7 @@ def test_can_not_add_waypoint_outside_geometry(square_room_5x5):
     simulation, room = square_room_5x5
 
     with pytest.raises(
-        jps.SimulationError, match=f"Area does not intersect region {room}"
+        jps.SimulationError, match=f"Area does not intersect region {room.id}"
     ):
         simulation.add_target(
             jps.Waypoint(
@@ -114,7 +114,7 @@ def test_can_not_add_exit_completely_outside_geometry(square_room_5x5):
     simulation, room = square_room_5x5
 
     with pytest.raises(
-        jps.SimulationError, match=f"Area does not intersect region {room}"
+        jps.SimulationError, match=f"Area does not intersect region {room.id}"
     ):
         simulation.add_target(
             jps.Exit([([(-10, -10), (-8, -10), (-8, -8), (-10, -8)], room)])
@@ -148,9 +148,7 @@ def test_an_agent_standing_at_the_edge_of_an_exit_leaves():
     route = simulation.add_route(
         [jps.FixedTransition(jps.AGENT_LOCATION, exit_)]
     )
-    simulation.add_agent(
-        simulation.get_location(8.02, 5, region_id=room), route=route
-    )
+    simulation.add_agent(room.at(8.02, 5), route=route)
     expected_iterations_to_finish = 10
     simulation.iterate(expected_iterations_to_finish)
     assert simulation.agent_count() == 0, (
@@ -218,8 +216,8 @@ def test_travel_times_of_every_region(square_room_5x5):
 def test_travel_time_from_a_location(square_room_5x5):
     sim, room = square_room_5x5
     exit_ = sim.add_target(jps.Exit([(LEFT_STRIP, room)]))
-    inside = sim.get_location(-2.25, 0, region_id=room)
-    far = sim.get_location(2.25, 0, region_id=room)
+    inside = room.at(-2.25, 0)
+    far = room.at(2.25, 0)
     assert sim.travel_time(exit_, inside) == 0.0
     assert sim.travel_time(exit_, far) > 0.0
 
@@ -250,7 +248,7 @@ def test_targets_are_looked_up_by_name_or_id(square_room_5x5):
 
 def test_a_target_of_another_simulation_is_rejected(square_room_5x5):
     sim, room = square_room_5x5
-    other, _ = _square_room_5x5()
-    foreign = other.add_target(jps.Exit([(LEFT_STRIP, room)]))
+    other, other_room = _square_room_5x5()
+    foreign = other.add_target(jps.Exit([(LEFT_STRIP, other_room)]))
     with pytest.raises(ValueError, match="belongs to another simulation"):
         sim.travel_times(foreign)

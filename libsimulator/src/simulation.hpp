@@ -99,8 +99,7 @@ private:
 
 public:
     /// Shares ownership of the geometry, which is never modified: several simulations, or a
-    /// simulation and a routing engine, may use the same geometry. `geo()` hands out a reference
-    /// that stays valid for as long as the simulation lives.
+    /// simulation and a routing engine, may use the same geometry. `geo()` shares it too.
     Simulation(
         std::unique_ptr<OperationalModel>&& operational_model,
         std::shared_ptr<const Geometry> geometry,
@@ -215,7 +214,7 @@ public:
     /// @p region_id again.
     void clear_custom_speed_field(BaseStage::ID stage_id, std::size_t region_id);
     /// The geometry this simulation runs on. Borrowed: it lives as long as the simulation.
-    const Geometry& geo() const;
+    const std::shared_ptr<const Geometry>& geo() const;
     void push_timer(const std::string_view name, size_t probe_log_level = 0);
     void pop_timer(const std::string_view name);
     void set_timer_log_level(int level) { _timer.set_log_level(level); };

@@ -358,7 +358,7 @@ void Simulation::follow(GenericAgent& agent, Route::ID route_id, BaseStage& stag
 void Simulation::check_on_own_geometry(const Location& location, const char* what) const
 {
     if(!location.belongs_to(*_geometry)) {
-        throw SimulationError("{} {} belongs to another simulation.", what, location);
+        throw SimulationError("{} {} belongs to another geometry.", what, location);
     }
 }
 
@@ -621,10 +621,10 @@ void Simulation::clear_custom_speed_field(BaseStage::ID stage_id, std::size_t re
     _stage_manager.stage(stage_id)->destination().clear_speed_override(region_id);
 }
 
-const Geometry& Simulation::geo() const
+const std::shared_ptr<const Geometry>& Simulation::geo() const
 {
     throw_if_state(State::Closed, "geo");
-    return *_geometry;
+    return _geometry;
 }
 
 void Simulation::push_timer(const std::string_view name, size_t probe_log_level)

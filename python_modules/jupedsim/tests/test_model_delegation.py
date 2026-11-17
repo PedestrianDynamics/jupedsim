@@ -67,7 +67,7 @@ def _make_sim(model):
 
 def _run(sim, room, route, state, steps=40):
     agent = sim.add_agent(
-        sim.get_location(1.0, 10.0, region_id=room),
+        room.at(1.0, 10.0),
         route=route,
         state=state,
     )
@@ -125,7 +125,7 @@ def test_delegated_state_is_advanced():
     )
     # Off the exit axis, so that the model has to turn and the change is visible.
     agent = sim.add_agent(
-        sim.get_location(1.0, 3.0, region_id=room),
+        room.at(1.0, 3.0),
         route=route,
         state=_Wrapped(sub=initial),
     )
@@ -143,7 +143,7 @@ def test_wrong_state_type_is_reported_with_both_names():
         )
     )
     sim.add_agent(
-        sim.get_location(1.0, 10.0, region_id=room),
+        room.at(1.0, 10.0),
         route=route,
         state=_Wrapped(sub=jps.CollisionFreeSpeedModelV3State()),
     )
@@ -157,12 +157,12 @@ def test_wrong_state_type_is_reported_with_both_names():
 def _run_pair(sim, room, route, state_of, steps=40):
     """Two agents on a collision course, so that neighbor states are read."""
     left = sim.add_agent(
-        sim.get_location(1.0, 10.0, region_id=room),
+        room.at(1.0, 10.0),
         route=route,
         state=state_of(),
     )
     ahead = sim.add_agent(
-        sim.get_location(2.2, 10.0, region_id=room),
+        room.at(2.2, 10.0),
         route=route,
         state=state_of(),
     )
@@ -366,7 +366,7 @@ def test_seed_agent_state_must_return_the_agents_state(
         match=f"must return a state of type _Wrapped, got .*{returned}",
     ):
         sim.add_agent(
-            sim.get_location(1.0, 10.0, region_id=room),
+            room.at(1.0, 10.0),
             route=route,
             state=_Wrapped(sub=jps.WarpDriverModelState()),
         )

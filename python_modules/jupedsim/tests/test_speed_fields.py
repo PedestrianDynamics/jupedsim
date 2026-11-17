@@ -96,7 +96,10 @@ def test_invalid_speed_fields_are_rejected(corridor):
     with pytest.raises(jps.SimulationError, match="at least"):
         sim.set_custom_speed_field(left, room, zero)
 
-    with pytest.raises(jps.SimulationError):
-        sim.set_default_speed_field(room + 1, default)
-    with pytest.raises(jps.SimulationError):
-        sim.has_custom_speed_field(left, room + 1)
+    foreign = jps.GeometryBuilder().add_region(
+        boundary=[(0, 0), (10, 0), (10, 4), (0, 4)], height=0.0
+    )
+    with pytest.raises(ValueError, match="belongs to another geometry"):
+        sim.set_default_speed_field(foreign, default)
+    with pytest.raises(ValueError, match="belongs to another geometry"):
+        sim.has_custom_speed_field(left, foreign)

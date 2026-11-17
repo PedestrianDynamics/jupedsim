@@ -6,6 +6,7 @@
 #include "geometry/geometry.hpp"
 #include "geometry/geometry_builder.hpp"
 #include "geometry/location.hpp"
+#include "id_and_name.hpp"
 #include "kernel.hpp"
 #include "operational_model.hpp"
 #include "operational_model_state.hpp"
@@ -78,7 +79,7 @@ flat_speed_field(const Simulation& sim, std::size_t region_id, const SpeedArray&
         throw py::value_error(
             fmt::format(
                 "The speed field of region {} needs shape ({}, {}).",
-                region_id,
+                id_and_name(region_id, sim.geo()->region_name(region_id)),
                 grid.height,
                 grid.width));
     }
@@ -316,14 +317,6 @@ void init_simulation(py::module_& m)
             py::arg("agent_id"),
             py::return_value_policy::reference,
             py::keep_alive<0, 1>())
-        .def(
-            "get_location",
-            &Simulation::get_location,
-            py::arg("x"),
-            py::arg("y"),
-            py::arg("region_id"),
-            // The returned token points into geometry the simulation owns.
-            py::keep_alive<0, 1>())
         .def("stage_ids", &Simulation::stage_ids)
         .def(
             "default_speed_fields",
@@ -407,9 +400,7 @@ void init_simulation(py::module_& m)
             [](Simulation& sim, size_t level) { sim.set_timer_log_level(level); })
         .def(
             "get_geometry",
-            [](const Simulation& sim) -> const Geometry& { return sim.geo(); },
-            // Borrowed from the simulation, which keeps owning it.
-            py::return_value_policy::reference_internal)
+            [](const Simulation& sim) { return std::const_pointer_cast<Geometry>(sim.geo()); })
         .def(
             "push_timer",
             [](Simulation& sim, const std::string& name, size_t probe_log_level) {

@@ -35,7 +35,7 @@ void init_warp_driver_model(py::module_& m)
                 geometry=...,
             )
             sim.add_agent(
-                sim.get_location(1.0, 1.0, region_id=region_id),
+                region.at(1.0, 1.0),
                 route=route,
                 state=jupedsim.WarpDriverModelState(),
             )

@@ -191,7 +191,7 @@ class Agent:
                 handle belongs to another simulation.
             SimulationError: if ``first_target`` is not part of the route, the agent
                 has no route to jump in, or the location belongs to another
-                simulation.
+                geometry.
         """
         sim = self._simulation
         if steer_to is not None:

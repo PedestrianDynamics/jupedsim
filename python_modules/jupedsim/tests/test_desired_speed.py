@@ -68,7 +68,7 @@ def test_desired_speed_can_be_set_via_state(
     route = sim.add_route([jps.FixedTransition(jps.AGENT_LOCATION, wp)])
 
     agent = sim.add_agent(
-        sim.get_location(1, 1, region_id=room),
+        room.at(1, 1),
         route=route,
         state=state_class(desired_speed=1.5, **extra_state_kwargs),
     )
@@ -96,7 +96,7 @@ def test_desired_speed_can_be_mutated_via_agent_handle(
     route = sim.add_route([jps.FixedTransition(jps.AGENT_LOCATION, wp)])
 
     agent = sim.add_agent(
-        sim.get_location(1, 1, region_id=room),
+        room.at(1, 1),
         route=route,
         state=state_class(**extra_state_kwargs),
     )
@@ -134,7 +134,7 @@ def test_removed_parameter_names_raise(
             )
 
     agent = sim.add_agent(
-        sim.get_location(1, 1, region_id=room),
+        room.at(1, 1),
         route=route,
         state=state_class(**extra_state_kwargs),
     )

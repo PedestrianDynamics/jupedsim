@@ -45,7 +45,7 @@ def test_simulation_runs(warp_driver_corridor):
     route = sim.add_route([jps.FixedTransition(jps.AGENT_LOCATION, exit_)])
 
     agent = sim.add_agent(
-        sim.get_location(2, 2, region_id=room),
+        room.at(2, 2),
         route=route,
         state=jps.WarpDriverModelState(desired_speed=1.2, radius=0.15),
     )
@@ -68,7 +68,7 @@ def test_single_agent_straight_path(warp_driver_corridor):
     route = sim.add_route([jps.FixedTransition(jps.AGENT_LOCATION, wp)])
 
     aid = sim.add_agent(
-        sim.get_location(2, 2, region_id=room),
+        room.at(2, 2),
         route=route,
         state=jps.WarpDriverModelState(desired_speed=1.0, radius=0.15),
     )
@@ -101,14 +101,14 @@ def test_two_agents_head_on_avoid(warp_driver_corridor):
     )
 
     sim.add_agent(
-        sim.get_location(3, 2, region_id=room),
+        room.at(3, 2),
         route=journey_right,
         state=jps.WarpDriverModelState(
             orientation=(1, 0), desired_speed=1.2, radius=0.15
         ),
     )
     sim.add_agent(
-        sim.get_location(17, 2, region_id=room),
+        room.at(17, 2),
         route=journey_left,
         state=jps.WarpDriverModelState(
             orientation=(-1, 0), desired_speed=1.2, radius=0.15
@@ -142,7 +142,7 @@ def test_agent_parameters():
     route = sim.add_route([jps.FixedTransition(jps.AGENT_LOCATION, wp)])
 
     aid = sim.add_agent(
-        sim.get_location(1, 2, region_id=room),
+        room.at(1, 2),
         route=route,
         state=jps.WarpDriverModelState(desired_speed=1.0, radius=0.2),
     )
@@ -175,14 +175,14 @@ def test_invalid_agent_state():
 
     with pytest.raises(jps.SimulationError, match="radius"):
         sim.add_agent(
-            sim.get_location(1, 2, region_id=room),
+            room.at(1, 2),
             route=route,
             state=jps.WarpDriverModelState(radius=-1.0),
         )
 
     with pytest.raises(jps.SimulationError, match="v0"):
         sim.add_agent(
-            sim.get_location(1, 2, region_id=room),
+            room.at(1, 2),
             route=route,
             state=jps.WarpDriverModelState(desired_speed=-1.0),
         )

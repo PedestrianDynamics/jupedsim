@@ -7,6 +7,8 @@ from typing import TYPE_CHECKING
 
 import shapely
 
+from jupedsim.pyjupedsim import Region
+
 if TYPE_CHECKING:
     from jupedsim.simulation import Simulation
 
@@ -16,12 +18,12 @@ Area = shapely.Polygon | Sequence[tuple[float, float]]
 class _TargetDescription:
     __slots__ = ("_areas",)
 
-    def __init__(self, areas: Sequence[tuple[Area, int]]) -> None:
+    def __init__(self, areas: Sequence[tuple[Area, Region]]) -> None:
         object.__setattr__(self, "_areas", tuple(tuple(a) for a in areas))
 
     @property
-    def areas(self) -> tuple[tuple[Area, int], ...]:
-        """Pairs of an area and the id of the region it lies in, as given."""
+    def areas(self) -> tuple[tuple[Area, Region], ...]:
+        """Pairs of an area and the region it lies in, as given."""
         return self._areas
 
     def __setattr__(self, name, value):
@@ -37,7 +39,7 @@ class Waypoint(_TargetDescription):
     Reaching any one of its areas completes the waypoint.
 
     Args:
-        areas: Pairs of an area and the id of the region it lies in. An area is a
+        areas: Pairs of an area and the region it lies in. An area is a
             :class:`~shapely.Polygon` without holes or a sequence of at least three
             ``(x, y)`` points. Only the part of an area inside its region belongs to
             the waypoint. Areas may lie in different regions.
@@ -53,7 +55,7 @@ class Exit(_TargetDescription):
     iteration.
 
     Args:
-        areas: Pairs of an area and the id of the region it lies in, as for
+        areas: Pairs of an area and the region it lies in, as for
             :class:`Waypoint`.
     """
 

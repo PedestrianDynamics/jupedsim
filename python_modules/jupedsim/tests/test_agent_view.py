@@ -34,7 +34,7 @@ def _make_sim(model, geometry=None):
 
 def _add_agent(sim, room, route, position, group=0, probe=False):
     return sim.add_agent(
-        sim.get_location(*position, region_id=room),
+        room.at(*position),
         route=route,
         state=_State(group=group, probe=probe),
     )

@@ -26,6 +26,7 @@ from jupedsim.pyjupedsim import (
     Geometry,
     Location,
     OperationalModel,
+    Region,
     SimulationError,
     SocialForceModel,
     SocialForceModelState,
@@ -53,6 +54,7 @@ _STATE_TYPES = {
 }
 
 _Handle = TypeVar("_Handle", RouteTarget, Route, Agent)
+_Value = TypeVar("_Value")
 
 
 class Simulation:
@@ -166,19 +168,23 @@ class Simulation:
             Handle to the new target.
 
         Raises:
-            ValueError: if an area has holes.
+            ValueError: if an area has holes, or a region belongs to another geometry.
             SimulationError: if an area does not overlap its region, or the name is
                 already used.
         """
-        if isinstance(description, Waypoint):
-            target_id = self._obj.add_waypoint_stage(description.areas, name)
-        elif isinstance(description, Exit):
-            target_id = self._obj.add_exit_stage(description.areas, name)
-        else:
+        if not isinstance(description, Waypoint | Exit):
             raise TypeError(
                 "description must be a jupedsim.Waypoint or jupedsim.Exit, got "
                 f"{type(description).__name__}"
             )
+        areas = [
+            (area, self._region_id(region))
+            for area, region in description.areas
+        ]
+        if isinstance(description, Waypoint):
+            target_id = self._obj.add_waypoint_stage(areas, name)
+        else:
+            target_id = self._obj.add_exit_stage(areas, name)
         self._target_descriptions[target_id] = description
         self._routed_stage_added(target_id)
         return RouteTarget(self, target_id)
@@ -252,7 +258,7 @@ class Simulation:
         it afterwards and completes it in the next iteration.
 
         Args:
-            location: Where the agent stands, see :meth:`get_location`.
+            location: Where the agent stands, e.g. ``region.at(x, y)``.
             route: The route the agent follows.
             first_target: The first target the agent walks to, instead of the one the
                 transition leaving :data:`~jupedsim.AGENT_LOCATION` chooses; the
@@ -279,7 +285,7 @@ class Simulation:
             ValueError: if neither or both of ``route`` and ``steer_to`` are given,
                 or a handle belongs to another simulation.
             SimulationError: if ``first_target`` is not part of the route, a location
-                belongs to another simulation, or the name is already used.
+                belongs to another geometry, or the name is already used.
         """
         location = self._checked_location(location, "location")
         if state is None:
@@ -316,25 +322,7 @@ class Simulation:
             )
         return Agent(self, agent_id)
 
-    def get_location(self, x: float, y: float, *, region_id: int) -> Location:
-        """Get the location at ``(x, y)`` in region ``region_id``.
-
-        The location stays valid as long as this simulation exists.
-
-        Args:
-            x: x coordinate in metres.
-            y: y coordinate in metres.
-            region_id: Region the place lies in, see :func:`add_agent`.
-
-        Returns:
-            The location.
-
-        Raises:
-            SimulationError: if ``region_id`` does not exist or ``(x, y)`` is not in it.
-        """
-        return self._obj.get_location(x, y, region_id)
-
-    def travel_times(self, target: RouteTarget) -> dict[int, TravelTimeGrid]:
+    def travel_times(self, target: RouteTarget) -> dict[Region, TravelTimeGrid]:
         """Get the travel times to a target's areas over the floor field grid of every region.
 
         Every region has its own grid. Solves the target's floor field if no agent has
@@ -344,11 +332,11 @@ class Simulation:
             target: The target.
 
         Returns:
-            The grid of every region by region id, in ascending order, each with its
+            The grid of every region, in ascending order of region ids, each with its
             placement, travel times in seconds and walking directions.
         """
-        return self._obj.travel_times(
-            self._own(target, RouteTarget, "target").id
+        return self._by_region(
+            self._obj.travel_times(self._own(target, RouteTarget, "target").id)
         )
 
     def travel_time(self, target: RouteTarget, location: Location) -> float:
@@ -359,7 +347,7 @@ class Simulation:
 
         Args:
             target: The target.
-            location: Where to start, see :meth:`get_location`.
+            location: Where to start, e.g. ``region.at(x, y)``.
         """
         return self._obj.travel_time(
             self._own(target, RouteTarget, "target").id,
@@ -368,7 +356,7 @@ class Simulation:
 
     def custom_speed_fields(
         self, target: RouteTarget
-    ) -> dict[int, SpeedGrid | None]:
+    ) -> dict[Region, SpeedGrid | None]:
         """Get the speed fields a target has of its own, for every region.
 
         A target can have its own speed field in a region instead of the default, see
@@ -378,16 +366,18 @@ class Simulation:
             target: The target whose speed fields to get.
 
         Returns:
-            The grid of every region by region id, in ascending order: ``None`` where
-            the target has no speed field of its own and uses the default, see
+            The grid of every region, in ascending order of region ids: ``None``
+            where the target has no speed field of its own and uses the default, see
             :func:`default_speed_fields`.
         """
-        return self._obj.custom_speed_fields(
-            self._own(target, RouteTarget, "target").id
+        return self._by_region(
+            self._obj.custom_speed_fields(
+                self._own(target, RouteTarget, "target").id
+            )
         )
 
     def has_custom_speed_field(
-        self, target: RouteTarget, region_id: int
+        self, target: RouteTarget, region: Region
     ) -> bool:
         """Whether a target has a speed field of its own in a region.
 
@@ -395,20 +385,17 @@ class Simulation:
 
         Args:
             target: The target.
-            region_id: Id of the region.
+            region: The region.
 
         Returns:
             ``True`` if the target uses its own speed field in this region, ``False`` if
             it uses the default.
-
-        Raises:
-            SimulationError: if the region does not exist.
         """
         return self._obj.has_custom_speed_field(
-            self._own(target, RouteTarget, "target").id, region_id
+            self._own(target, RouteTarget, "target").id, self._region_id(region)
         )
 
-    def default_speed_fields(self) -> dict[int, SpeedGrid]:
+    def default_speed_fields(self) -> dict[Region, SpeedGrid]:
         """Get the default walking speeds the floor fields are computed with, for every region.
 
         Every region has a default speed field, which starts out slowing agents down
@@ -417,12 +404,12 @@ class Simulation:
         :func:`custom_speed_fields`.
 
         Returns:
-            The grid of every region by region id, in ascending order.
+            The grid of every region, in ascending order of region ids.
         """
-        return self._obj.default_speed_fields()
+        return self._by_region(self._obj.default_speed_fields())
 
     def set_default_speed_field(
-        self, region_id: int, values: npt.ArrayLike
+        self, region: Region, values: npt.ArrayLike
     ) -> None:
         """Set the default walking speeds a region's floor fields are computed with.
 
@@ -434,7 +421,7 @@ class Simulation:
         The speeds only change the routes, not how fast agents walk.
 
         Args:
-            region_id: Region whose default speed field to set.
+            region: Region whose default speed field to set.
             values: Speeds in m/s in an array of shape ``(height, width)`` of the
                 region's grid, see :class:`~jupedsim.SpeedGrid`. Finite and at least
                 0.01 m/s on every walkable cell: slower cells would make travel times
@@ -443,15 +430,16 @@ class Simulation:
 
         Raises:
             ValueError: if ``values`` has the wrong shape.
-            SimulationError: if a value is not allowed or the region does not exist.
+            SimulationError: if a value is not allowed.
         """
+        region_id = self._region_id(region)
         self._obj.set_default_speed_field(region_id, values)
         for stage_id in self._routed_stages:
             if not self._obj.has_custom_speed_field(stage_id, region_id):
                 self._travel_times_changed(stage_id)
 
     def set_custom_speed_field(
-        self, target: RouteTarget, region_id: int, values: npt.ArrayLike
+        self, target: RouteTarget, region: Region, values: npt.ArrayLike
     ) -> None:
         """Set the walking speeds one target's floor field is computed with in a region.
 
@@ -464,20 +452,22 @@ class Simulation:
 
         Args:
             target: Target whose speed field to set.
-            region_id: Region whose speed field to set.
+            region: Region whose speed field to set.
             values: Speeds in m/s, with the same rules as for
                 :func:`set_default_speed_field`.
 
         Raises:
             ValueError: if ``values`` has the wrong shape.
-            SimulationError: if a value is not allowed or the region does not exist.
+            SimulationError: if a value is not allowed.
         """
         stage_id = self._own(target, RouteTarget, "target").id
-        self._obj.set_custom_speed_field(stage_id, region_id, values)
+        self._obj.set_custom_speed_field(
+            stage_id, self._region_id(region), values
+        )
         self._travel_times_changed(stage_id)
 
     def clear_custom_speed_field(
-        self, target: RouteTarget, region_id: int
+        self, target: RouteTarget, region: Region
     ) -> None:
         """Remove a target's own speed field in a region, so it uses the default again.
 
@@ -486,12 +476,10 @@ class Simulation:
 
         Args:
             target: Target whose speed field to remove.
-            region_id: Region whose speed field to remove.
-
-        Raises:
-            SimulationError: if the region does not exist.
+            region: Region whose speed field to remove.
         """
         stage_id = self._own(target, RouteTarget, "target").id
+        region_id = self._region_id(region)
         had_one = self._obj.has_custom_speed_field(stage_id, region_id)
         self._obj.clear_custom_speed_field(stage_id, region_id)
         if had_one:
@@ -754,12 +742,32 @@ class Simulation:
             )
         return handle
 
+    def _region_id(self, region: object) -> int:
+        """Id of ``region``, checked to be a :class:`~jupedsim.Region` of this
+        simulation's geometry."""
+        if not isinstance(region, Region):
+            raise TypeError(
+                f"region must be a Region, got {type(region).__name__}"
+            )
+        try:
+            own = self.geometry.region(region.id)
+        except KeyError:
+            own = None
+        if own != region:
+            raise ValueError(
+                f"Region {id_and_name(region)} belongs to another geometry"
+            )
+        return region.id
+
+    def _by_region(self, by_id: dict[int, _Value]) -> dict[Region, _Value]:
+        geometry = self.geometry
+        return {geometry.region(region_id): v for region_id, v in by_id.items()}
+
     @staticmethod
     def _checked_location(location: object, what: str) -> Location:
         if not isinstance(location, Location):
             raise TypeError(
-                f"{what} must be a Location, e.g. "
-                "sim.get_location(x, y, region_id=...), got "
+                f"{what} must be a Location, e.g. region.at(x, y), got "
                 f"{type(location).__name__}"
             )
         return location
@@ -774,7 +782,7 @@ class Simulation:
         Agents on a floor above or below, or behind a wall, are not.
 
         Args:
-            location: Where to search around, see :meth:`get_location`.
+            location: Where to search around, e.g. ``region.at(x, y)``.
             distance: Search radius in metres.
         """
         return [
@@ -788,7 +796,7 @@ class Simulation:
         self,
         polygon: shapely.Polygon | Sequence[tuple[float, float]],
         *,
-        region_id: int,
+        region: Region,
     ) -> list[Agent]:
         """Handles to the agents inside a polygon in one region.
 
@@ -799,15 +807,18 @@ class Simulation:
         Args:
             polygon: A :class:`~shapely.Polygon` without holes or a sequence of at
                 least three ``(x, y)`` points.
-            region_id: The region the polygon lies in.
+            region: The region the polygon lies in.
 
         Raises:
-            ValueError: If the polygon has holes.
+            ValueError: If the polygon has holes, or the region belongs to another
+                geometry.
             SimulationError: If the polygon does not overlap the region.
         """
         return [
             Agent(self, agent_id)
-            for agent_id in self._obj.agents_in_polygon(polygon, region_id)
+            for agent_id in self._obj.agents_in_polygon(
+                polygon, self._region_id(region)
+            )
         ]
 
     def set_tracing(self, status: bool) -> None:

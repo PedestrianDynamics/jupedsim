@@ -27,7 +27,7 @@ def corridor_simulation():
 
 def _add_agent(sim, room, route, position, velocity=(0.0, 0.0)):
     return sim.add_agent(
-        sim.get_location(*position, region_id=room),
+        room.at(*position),
         route=route,
         state=PythonSocialForceModelState(velocity=velocity),
     )
@@ -144,7 +144,7 @@ def test_custom_desired_speed_affects_movement():
 
     # Slow agent
     slow = sim.add_agent(
-        sim.get_location(2.0, 8.0, region_id=room),
+        room.at(2.0, 8.0),
         route=route,
         state=PythonSocialForceModelState(
             velocity=(0.0, 0.0), desired_speed=0.5
@@ -153,7 +153,7 @@ def test_custom_desired_speed_affects_movement():
 
     # Fast agent
     fast = sim.add_agent(
-        sim.get_location(2.0, 12.0, region_id=room),
+        room.at(2.0, 12.0),
         route=route,
         state=PythonSocialForceModelState(
             velocity=(0.0, 0.0), desired_speed=2.0
@@ -202,7 +202,7 @@ def test_per_agent_state_survives_iterations(corridor_simulation):
     """
     sim, exit_, route, room = corridor_simulation
     agent = sim.add_agent(
-        sim.get_location(2.0, 10.0, region_id=room),
+        room.at(2.0, 10.0),
         route=route,
         state=PythonSocialForceModelState(
             velocity=(0.0, 0.0),

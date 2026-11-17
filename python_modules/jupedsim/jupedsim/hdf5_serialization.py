@@ -447,7 +447,7 @@ class Hdf5TrajectoryWriter(TrajectoryWriter):
             if seen % self._every_nth_travel_time_field != 0:
                 continue
             target = simulation.target(stage_id)
-            for region_id, grid in simulation.travel_times(target).items():
+            for region, grid in simulation.travel_times(target).items():
                 offset = self._travel_time_values_ds.shape[0]
                 values = grid.values.astype("<f4").ravel()
                 self._append(self._travel_time_values_ds, values, len(values))
@@ -462,7 +462,7 @@ class Hdf5TrajectoryWriter(TrajectoryWriter):
                         (
                             iteration,
                             stage_id,
-                            region_id,
+                            region.id,
                             *grid.origin,
                             grid.width,
                             grid.height,

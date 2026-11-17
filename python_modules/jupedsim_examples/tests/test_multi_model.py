@@ -117,7 +117,7 @@ def _collision_free_agent():
 
 def _add(sim, room, route, position, state):
     return sim.add_agent(
-        sim.get_location(*position, region_id=room),
+        room.at(*position),
         route=route,
         state=state,
     )

@@ -52,7 +52,7 @@ def test_simulation_from_model_instance(model, state_cls, state_kwargs):
     route = sim.add_route([jps.FixedTransition(jps.AGENT_LOCATION, wp)])
 
     agent = sim.add_agent(
-        sim.get_location(1, 1, region_id=room),
+        room.at(1, 1),
         route=route,
         state=state_cls(**state_kwargs),
     )
@@ -90,7 +90,7 @@ def test_set_desired_speed(corridor):
     route = sim.add_route([jps.FixedTransition(jps.AGENT_LOCATION, wp)])
 
     agent = sim.add_agent(
-        sim.get_location(1, 1, region_id=room),
+        room.at(1, 1),
         route=route,
         state=jps.CollisionFreeSpeedModelV2State(desired_speed=1),
     )
@@ -143,7 +143,7 @@ def test_initial_parameters_collision_free_speed_model_v2(
         range_geometry_repulsion=0.17,
     )
     agent = sim.add_agent(
-        sim.get_location(1, 1, region_id=room),
+        room.at(1, 1),
         route=route,
         state=state,
     )
@@ -184,7 +184,7 @@ def test_set_model_parameters_collision_free_speed_model_v2(
     route = sim.add_route([jps.FixedTransition(jps.AGENT_LOCATION, wp)])
 
     agent = sim.add_agent(
-        sim.get_location(1, 1, region_id=room),
+        room.at(1, 1),
         route=route,
         state=jps.CollisionFreeSpeedModelV2State(),
     )
@@ -237,7 +237,7 @@ def test_set_model_parameters_anticipation_velocity_model(
     route = sim.add_route([jps.FixedTransition(jps.AGENT_LOCATION, wp)])
 
     agent = sim.add_agent(
-        sim.get_location(1, 1, region_id=room),
+        room.at(1, 1),
         route=route,
         state=jps.AnticipationVelocityModelState(),
     )
@@ -293,7 +293,7 @@ def test_set_model_parameters_collision_free_speed_model(
     route = sim.add_route([jps.FixedTransition(jps.AGENT_LOCATION, wp)])
 
     agent = sim.add_agent(
-        sim.get_location(1, 1, region_id=room),
+        room.at(1, 1),
         route=route,
         state=jps.CollisionFreeSpeedModelState(),
     )
@@ -332,7 +332,7 @@ def test_collision_free_speed_model_repulsion_parameters_are_model_level():
     route = sim.add_route([jps.FixedTransition(jps.AGENT_LOCATION, wp)])
 
     agent = sim.add_agent(
-        sim.get_location(1, 1, region_id=room),
+        room.at(1, 1),
         route=route,
         state=jps.CollisionFreeSpeedModelState(),
     )
@@ -376,12 +376,12 @@ def test_set_model_parameters_generalized_centrifugal_force_model(
     route = sim.add_route([jps.FixedTransition(jps.AGENT_LOCATION, wp)])
 
     agent = sim.add_agent(
-        sim.get_location(1, 1, region_id=room),
+        room.at(1, 1),
         route=route,
         state=jps.GeneralizedCentrifugalForceModelState(orientation=(1.0, 0.0)),
     )
     sim.add_agent(
-        sim.get_location(3, 1, region_id=room),
+        room.at(3, 1),
         route=route,
         state=jps.GeneralizedCentrifugalForceModelState(orientation=(1.0, 0.0)),
     )
@@ -438,7 +438,7 @@ def test_set_model_parameters_social_force_model(
     route = sim.add_route([jps.FixedTransition(jps.AGENT_LOCATION, wp)])
 
     agent = sim.add_agent(
-        sim.get_location(1, 1, region_id=room),
+        room.at(1, 1),
         route=route,
         state=jps.SocialForceModelState(),
     )
@@ -484,7 +484,7 @@ def test_social_force_model_body_force_and_friction_are_model_level():
     route = sim.add_route([jps.FixedTransition(jps.AGENT_LOCATION, wp)])
 
     agent = sim.add_agent(
-        sim.get_location(1, 1, region_id=room),
+        room.at(1, 1),
         route=route,
         state=jps.SocialForceModelState(),
     )
@@ -515,8 +515,8 @@ def _velocity_along_wall(friction, y):
         dt=0.001,
     )
     agent = sim.add_agent(
-        sim.get_location(1, y, region_id=room),
-        steer_to=sim.get_location(59, y, region_id=room),
+        room.at(1, y),
+        steer_to=room.at(59, y),
         state=jps.SocialForceModelState(
             velocity=(1.0, 0.0),
             desired_speed=1.0,
@@ -559,7 +559,7 @@ def test_agent_handle_raises_after_removal(
     route = sim.add_route([jps.FixedTransition(jps.AGENT_LOCATION, wp)])
 
     agent = sim.add_agent(
-        sim.get_location(1, 1, region_id=room),
+        room.at(1, 1),
         route=route,
         state=jps.SocialForceModelState(),
     )
@@ -617,7 +617,7 @@ def test_initial_parameters_collision_free_speed_model_v3(
         agent_buffer=0.4,
     )
     agent = sim.add_agent(
-        sim.get_location(1, 1, region_id=room),
+        room.at(1, 1),
         route=route,
         state=state,
     )
@@ -648,7 +648,7 @@ def test_set_model_parameters_collision_free_speed_model_v3(
     route = sim.add_route([jps.FixedTransition(jps.AGENT_LOCATION, wp)])
 
     agent = sim.add_agent(
-        sim.get_location(1, 1, region_id=room),
+        room.at(1, 1),
         route=route,
         state=jps.CollisionFreeSpeedModelV3State(
             strength_neighbor_repulsion=8.0,
