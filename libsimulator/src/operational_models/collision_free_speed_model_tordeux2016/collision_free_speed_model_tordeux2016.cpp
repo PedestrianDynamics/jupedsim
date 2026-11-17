@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "collision_free_speed_model_v2.hpp"
+#include "collision_free_speed_model_tordeux2016.hpp"
 
 #include "agent_view.hpp"
 #include "generic_agent.hpp"
@@ -21,18 +21,30 @@ namespace
 constexpr double wall_search_radius = 4.0;
 } // namespace
 
-OperationalModelType CollisionFreeSpeedModelV2::type() const
+CollisionFreeSpeedModelTordeux2016::CollisionFreeSpeedModelTordeux2016(
+    double strength_neighbor_repulsion,
+    double range_neighbor_repulsion,
+    double strength_geometry_repulsion,
+    double range_geometry_repulsion)
+    : _strength_neighbor_repulsion(strength_neighbor_repulsion)
+    , _range_neighbor_repulsion(range_neighbor_repulsion)
+    , _strength_geometry_repulsion(strength_geometry_repulsion)
+    , _range_geometry_repulsion(range_geometry_repulsion)
 {
-    return OperationalModelType::CollisionFreeSpeedV2;
 }
 
-Vector CollisionFreeSpeedModelV2::compute_next_state(
+OperationalModelType CollisionFreeSpeedModelTordeux2016::type() const
+{
+    return OperationalModelType::CollisionFreeSpeedTordeux2016;
+}
+
+Vector CollisionFreeSpeedModelTordeux2016::compute_next_state(
     const OperationalModelState& current,
     OperationalModelState& next,
     const AgentStep& step) const
 {
     const auto& current_state = std::get<State>(current);
-    auto neighborhood = step.other_agents_in_range(
+    const auto neighborhood = step.other_agents_in_range(
         _cut_off_radius, [&step](const NeighborView& n) { return step.no_geometry_between(n); });
 
     Vector neighbor_repulsion{};
@@ -61,7 +73,7 @@ Vector CollisionFreeSpeedModelV2::compute_next_state(
     return velocity * step.dt();
 }
 
-void CollisionFreeSpeedModelV2::check_model_constraint(
+void CollisionFreeSpeedModelTordeux2016::check_model_constraint(
     const GenericAgent& agent,
     const AgentView& view) const
 {
@@ -105,7 +117,7 @@ void CollisionFreeSpeedModelV2::check_model_constraint(
     }
 }
 
-double CollisionFreeSpeedModelV2::optimal_speed(
+double CollisionFreeSpeedModelTordeux2016::optimal_speed(
     const State& current_state,
     double spacing,
     double time_gap) const
@@ -113,7 +125,7 @@ double CollisionFreeSpeedModelV2::optimal_speed(
     return std::min(std::max(spacing / time_gap, 0.0), current_state.v0);
 }
 
-double CollisionFreeSpeedModelV2::get_spacing(
+double CollisionFreeSpeedModelTordeux2016::get_spacing(
     const State& current_state,
     const NeighborView& neighbor,
     const Vector& direction) const
@@ -133,23 +145,23 @@ double CollisionFreeSpeedModelV2::get_spacing(
     }
     return distp12.norm() - l;
 }
-Vector CollisionFreeSpeedModelV2::neighbor_repulsion(
+Vector CollisionFreeSpeedModelTordeux2016::neighbor_repulsion(
     const State& current_state,
     const NeighborView& neighbor) const
 {
     const auto& other = std::get<State>(*neighbor.state);
     const auto [distance, direction] = neighbor.relative_position.norm_and_normalized();
     const auto l = current_state.radius + other.radius;
-    return direction * -(current_state.strength_neighbor_repulsion *
-                         exp((l - distance) / current_state.range_neighbor_repulsion));
+    return direction * -(this->_strength_neighbor_repulsion *
+                         exp((l - distance) / this->_range_neighbor_repulsion));
 }
 
-Vector CollisionFreeSpeedModelV2::boundary_repulsion(
+Vector CollisionFreeSpeedModelTordeux2016::boundary_repulsion(
     const State& current_state,
     const WallView& boundary) const
 {
     const auto l = current_state.radius;
-    const auto r_iw = -current_state.strength_geometry_repulsion *
-                      exp((l - boundary.distance) / current_state.range_geometry_repulsion);
+    const auto r_iw =
+        -_strength_geometry_repulsion * exp((l - boundary.distance) / _range_geometry_repulsion);
     return -boundary.normal * r_iw; // The repulsion points away from the agent
 }

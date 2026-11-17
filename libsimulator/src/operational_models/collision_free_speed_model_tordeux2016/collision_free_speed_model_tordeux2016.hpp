@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "collision_free_speed_model_v3_state.hpp"
+#include "collision_free_speed_model_tordeux2016_state.hpp"
 #include "kernel.hpp"
 #include "operational_model.hpp"
 #include "operational_model_state.hpp"
@@ -12,17 +12,25 @@
 struct NeighborView;
 struct WallView;
 
-class CollisionFreeSpeedModelV3 : public OperationalModel
+class CollisionFreeSpeedModelTordeux2016 : public OperationalModel
 {
 public:
-    using State = CollisionFreeSpeedModelV3State;
+    using State = CollisionFreeSpeedModelTordeux2016State;
 
 private:
     double _cut_off_radius{3};
+    double _strength_neighbor_repulsion{8.0};
+    double _range_neighbor_repulsion{0.1};
+    double _strength_geometry_repulsion{5.0};
+    double _range_geometry_repulsion{0.02};
 
 public:
-    CollisionFreeSpeedModelV3() = default;
-    ~CollisionFreeSpeedModelV3() override = default;
+    CollisionFreeSpeedModelTordeux2016(
+        double strength_neighbor_repulsion,
+        double range_neighbor_repulsion,
+        double strength_geometry_repulsion,
+        double range_geometry_repulsion);
+    ~CollisionFreeSpeedModelTordeux2016() override = default;
     OperationalModelType type() const override;
     Vector compute_next_state(
         const OperationalModelState& current,
@@ -36,5 +44,6 @@ private:
         const State& current_state,
         const NeighborView& neighbor,
         const Vector& direction) const;
+    Vector neighbor_repulsion(const State& current_state, const NeighborView& neighbor) const;
     Vector boundary_repulsion(const State& current_state, const WallView& boundary) const;
 };

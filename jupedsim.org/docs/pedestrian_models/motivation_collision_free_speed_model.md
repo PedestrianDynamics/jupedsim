@@ -1,10 +1,12 @@
-# CollisionFreeSpeedModelV3 (Rotational Steering)
+# MotivationCollisionFreeSpeedModel (Rotational Steering)
 
 ## Overview
 
-`CollisionFreeSpeedModelV3` is a variant of the Collision-Free Speed
-Model V2 (CFSV2; [Tordeux et al., 2016](https://doi.org/10.1007/978-3-319-33482-0_29))
-in which the steering and the speed selection are explicitly
+`MotivationCollisionFreeSpeedModel` is the model published by
+[Üsten et al. (2026)](https://arxiv.org/abs/2604.26858). It is a variant of
+the collision-free speed model
+([Tordeux et al., 2016](https://doi.org/10.1007/978-3-319-33482-0_29)),
+available as `CollisionFreeSpeedModel`, in which the steering and the speed selection are explicitly
 decoupled. The walking direction is
 obtained by rotating a reference direction toward the side opposite the
 most relevant forward neighbor, and the walking speed is computed from
@@ -39,7 +41,7 @@ where the sum runs over wall segments in the agent's vicinity, $d_{iw}$
 is the distance to the closest point on segment $w$, and
 $\mathbf{e}_{iw}$ is the unit vector from the agent toward that point.
 The wall repulsion only bends the reference direction; it is **not**
-summed into the final velocity as in V2. If the resulting vector is
+summed into the final velocity as in `CollisionFreeSpeedModel`. If the resulting vector is
 degenerate, the agent retains its current orientation.
 
 Second, only **visible** neighbors are considered: a neighbor whose
@@ -187,7 +189,7 @@ form persistent deadlocks.
 ## Per-agent parameters
 
 These are exposed as keyword-only constructor arguments of
-{class}`~jupedsim.CollisionFreeSpeedModelV3State`, which is passed
+{class}`~jupedsim.MotivationCollisionFreeSpeedModelState`, which is passed
 to `add_agent`, and can be modified per agent at any time through the
 agent handle (`sim.agent(id).state`).
 
@@ -195,13 +197,13 @@ agent handle (`sim.agent(id).state`).
 import jupedsim as jps
 
 sim = jps.Simulation(
-    model=jps.CollisionFreeSpeedModelV3(), geometry=surface.build()
+    model=jps.MotivationCollisionFreeSpeedModel(), geometry=surface.build()
 )
 agent_id = sim.add_agent(
     journey_id=journey_id,
     stage_id=stage_id,
     position=(1.0, 1.0),
-    state=jps.CollisionFreeSpeedModelV3State(),
+    state=jps.MotivationCollisionFreeSpeedModelState(),
     region_id=region_id,
 )
 
@@ -245,9 +247,9 @@ These are fixed in the implementation and are not exposed as parameters.
 | Agents react to too many lateral neighbors | `range_neighbor_repulsion` or `range_y_scale` | decrease |
 | Early lane-like splitting | `range_neighbor_repulsion` | often increase with moderate strength |
 
-## Differences from V2
+## Differences from CollisionFreeSpeedModel
 
-| Aspect | V2 | V3 |
+| Aspect | `CollisionFreeSpeedModel` | `MotivationCollisionFreeSpeedModel` |
 |---|---|---|
 | Neighbor avoidance | Sum of repulsion vectors over all neighbors | Rotational steering toward a single dominant forward neighbor |
 | Boundary contribution | Summed into the final velocity | Bends the reference direction only |

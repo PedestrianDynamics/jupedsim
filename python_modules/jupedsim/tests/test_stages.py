@@ -16,7 +16,7 @@ def square_room_5x5():
         height=0.0,
     )
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=surface.build()
+        model=jps.CollisionFreeSpeedModelTordeux2016(), geometry=surface.build()
     )
     return simulation, room
 
@@ -32,7 +32,7 @@ def square_room_5x5_with_obstacle():
         height=0.0,
     )
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=surface.build()
+        model=jps.CollisionFreeSpeedModelTordeux2016(), geometry=surface.build()
     )
     return simulation, room
 
@@ -79,7 +79,7 @@ def test_can_use_stage_proxy():
     surface = jps.GeometryBuilder()
     room = surface.add_region(polygon=polygon, height=0.0)
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=surface.build()
+        model=jps.CollisionFreeSpeedModelTordeux2016(), geometry=surface.build()
     )
 
     exit_id = simulation.add_exit_stage(
@@ -116,7 +116,7 @@ def test_can_use_stage_proxy():
         journey_id=exit_journey_id,
         stage_id=exit_id,
         position=(-9.5, 0),
-        state=jps.CollisionFreeSpeedModelState(),
+        state=jps.CollisionFreeSpeedModelTordeux2016State(),
         region_id=room,
     )
 
@@ -171,7 +171,7 @@ def test_a_waypoint_given_by_its_area_is_reached(square_room_5x5):
         journey_id=sim.add_journey(journey),
         stage_id=waypoint_id,
         position=(1.5, 0),
-        state=jps.CollisionFreeSpeedModelState(),
+        state=jps.CollisionFreeSpeedModelTordeux2016State(),
         region_id=room,
     )
     # It starts inside the waypoint, so the first step moves it on to the exit.
@@ -220,7 +220,7 @@ def test_an_agent_standing_at_the_edge_of_an_exit_leaves():
         boundary=[(0, 0), (10, 0), (10, 10), (0, 10)], height=0.0
     )
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=surface.build()
+        model=jps.CollisionFreeSpeedModelTordeux2016(), geometry=surface.build()
     )
     exit_id = simulation.add_exit_stage(
         [([(8.05, 4), (9.5, 4), (9.5, 6), (8.05, 6)], room)]
@@ -230,7 +230,7 @@ def test_an_agent_standing_at_the_edge_of_an_exit_leaves():
         journey_id=journey_id,
         stage_id=exit_id,
         position=(8.02, 5),
-        state=jps.CollisionFreeSpeedModelState(),
+        state=jps.CollisionFreeSpeedModelTordeux2016State(),
         region_id=room,
     )
     expected_iterations_to_finish = 10
@@ -271,7 +271,7 @@ def test_a_stage_keeps_its_simulation_alive():
         height=0.0,
     )
     sim = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=surface.build()
+        model=jps.CollisionFreeSpeedModelTordeux2016(), geometry=surface.build()
     )
     stage = sim.get_stage(
         sim.add_waypoint_stage(
@@ -333,7 +333,7 @@ def test_travel_times_follow_the_floorfield_options():
         height=0.0,
     )
     sim = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(),
+        model=jps.CollisionFreeSpeedModelTordeux2016(),
         geometry=surface.build(),
         floorfield_options=jps.FloorfieldOptions(cell_size=0.1),
     )

@@ -7,7 +7,7 @@ import pytest
 # exactly these values.
 STATE_DEFAULTS = [
     (
-        jps.CollisionFreeSpeedModelState,
+        jps.CollisionFreeSpeedModelTordeux2016State,
         {
             "orientation": (0.0, 0.0),
             "time_gap": 1.0,
@@ -16,7 +16,7 @@ STATE_DEFAULTS = [
         },
     ),
     (
-        jps.CollisionFreeSpeedModelV2State,
+        jps.CollisionFreeSpeedModelState,
         {
             "orientation": (0.0, 0.0),
             "time_gap": 1.0,
@@ -29,7 +29,7 @@ STATE_DEFAULTS = [
         },
     ),
     (
-        jps.CollisionFreeSpeedModelV3State,
+        jps.MotivationCollisionFreeSpeedModelState,
         {
             "orientation": (1.0, 0.0),
             "strength_neighbor_repulsion": 8.0,
@@ -145,8 +145,8 @@ def _trajectory(model, state_cls):
 
 MODEL_DEFAULTS = [
     (
-        jps.CollisionFreeSpeedModel,
-        jps.CollisionFreeSpeedModelState,
+        jps.CollisionFreeSpeedModelTordeux2016,
+        jps.CollisionFreeSpeedModelTordeux2016State,
         {},
         {
             "strength_neighbor_repulsion": 8.0,

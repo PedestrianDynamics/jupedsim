@@ -19,13 +19,14 @@ void init_collision_free_speed_model(py::module_& m)
     model.doc() = clean_doc(R"(
         Collision Free Speed Model.
 
-        A general description of the Collision Free Speed Model can be found in the
-        originating publication https://arxiv.org/abs/1512.05597. A more detailed
-        description can be found at
-        https://pedestriandynamics.org/models/collision_free_speed_model/
+        The default collision-free speed model. It is based on the model of Tordeux
+        et al. (2016) (https://arxiv.org/abs/1512.05597, available unchanged as
+        :class:`~jupedsim.CollisionFreeSpeedModelTordeux2016`), with all repulsion
+        parameters per agent instead of global.
 
-        The model-level repulsion parameters are carried by the model instance, which
-        is passed to the simulation:
+        The model has no model-level parameters; all parameters are per agent, see
+        :class:`~jupedsim.CollisionFreeSpeedModelState`. The model instance is
+        passed to the simulation:
 
         .. code:: python
 
@@ -37,7 +38,7 @@ void init_collision_free_speed_model(py::module_& m)
                 journey_id=journey_id,
                 stage_id=stage_id,
                 position=(1.0, 1.0),
-                state=jupedsim.CollisionFreeSpeedModelState(desired_speed=1.4),
+                state=jupedsim.CollisionFreeSpeedModelState(strength_neighbor_repulsion=9.0),
                 region_id=region_id,
             )
 
@@ -45,22 +46,8 @@ void init_collision_free_speed_model(py::module_& m)
 
             The model instance is consumed by the ``Simulation`` constructor and must
             not be reused afterwards.
-
-        Args:
-            strength_neighbor_repulsion: Strength of the repulsion from neighbors.
-            range_neighbor_repulsion: Range of the repulsion from neighbors [m].
-            strength_geometry_repulsion: Strength of the repulsion from geometry
-                boundaries.
-            range_geometry_repulsion: Range of the repulsion from geometry boundaries
-                [m].
     )");
-    model.def(
-        py::init<double, double, double, double>(),
-        py::kw_only(),
-        py::arg("strength_neighbor_repulsion") = 8.0,
-        py::arg("range_neighbor_repulsion") = 0.1,
-        py::arg("strength_geometry_repulsion") = 5.0,
-        py::arg("range_geometry_repulsion") = 0.02);
+    model.def(py::init<>());
 
     const CollisionFreeSpeedModel::State d{};
     py::class_<CollisionFreeSpeedModel::State> state(m, "CollisionFreeSpeedModelState");
@@ -72,6 +59,12 @@ void init_collision_free_speed_model(py::module_& m)
 
         Args:
             orientation: Unit vector the agent faces.
+            strength_neighbor_repulsion: Strength of the repulsion from neighbors.
+            range_neighbor_repulsion: Range of the repulsion from neighbors [m].
+            strength_geometry_repulsion: Strength of the repulsion from geometry
+                boundaries.
+            range_geometry_repulsion: Range of the repulsion from geometry boundaries
+                [m].
             time_gap: Time constant that describes how fast a pedestrian closes gaps
                 [s].
             desired_speed: Maximum (free) walking speed of the agent [m/s].
@@ -79,19 +72,44 @@ void init_collision_free_speed_model(py::module_& m)
     )");
     state
         .def(
-            py::init([](Vector orientation, double time_gap, double desired_speed, double radius) {
+            py::init([](Vector orientation,
+                        double strength_neighbor_repulsion,
+                        double range_neighbor_repulsion,
+                        double strength_geometry_repulsion,
+                        double range_geometry_repulsion,
+                        double time_gap,
+                        double desired_speed,
+                        double radius) {
                 return CollisionFreeSpeedModel::State{
                     .orientation = orientation,
+                    .strength_neighbor_repulsion = strength_neighbor_repulsion,
+                    .range_neighbor_repulsion = range_neighbor_repulsion,
+                    .strength_geometry_repulsion = strength_geometry_repulsion,
+                    .range_geometry_repulsion = range_geometry_repulsion,
                     .time_gap = time_gap,
                     .v0 = desired_speed,
                     .radius = radius};
             }),
             py::kw_only(),
             py::arg("orientation") = d.orientation,
+            py::arg("strength_neighbor_repulsion") = d.strength_neighbor_repulsion,
+            py::arg("range_neighbor_repulsion") = d.range_neighbor_repulsion,
+            py::arg("strength_geometry_repulsion") = d.strength_geometry_repulsion,
+            py::arg("range_geometry_repulsion") = d.range_geometry_repulsion,
             py::arg("time_gap") = d.time_gap,
             py::arg("desired_speed") = d.v0,
             py::arg("radius") = d.radius)
         .def_readwrite("orientation", &CollisionFreeSpeedModel::State::orientation)
+        .def_readwrite(
+            "strength_neighbor_repulsion",
+            &CollisionFreeSpeedModel::State::strength_neighbor_repulsion)
+        .def_readwrite(
+            "range_neighbor_repulsion", &CollisionFreeSpeedModel::State::range_neighbor_repulsion)
+        .def_readwrite(
+            "strength_geometry_repulsion",
+            &CollisionFreeSpeedModel::State::strength_geometry_repulsion)
+        .def_readwrite(
+            "range_geometry_repulsion", &CollisionFreeSpeedModel::State::range_geometry_repulsion)
         .def_readwrite("time_gap", &CollisionFreeSpeedModel::State::time_gap)
         .def_readwrite("desired_speed", &CollisionFreeSpeedModel::State::v0)
         .def_readwrite("radius", &CollisionFreeSpeedModel::State::radius);

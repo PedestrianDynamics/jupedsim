@@ -19,7 +19,7 @@ def test_can_query_agents_in_range():
         boundary=[(0, 0), (100, 0), (100, 100), (0, 100)], height=0.0
     )
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(),
+        model=jps.CollisionFreeSpeedModelTordeux2016(),
         geometry=surface.build(),
     )
     exit = simulation.add_exit_stage(
@@ -49,7 +49,7 @@ def test_can_query_agents_in_range():
                 journey_id=journey_id,
                 stage_id=exit,
                 position=new_pos,
-                state=jps.CollisionFreeSpeedModelState(),
+                state=jps.CollisionFreeSpeedModelTordeux2016State(),
                 region_id=room,
             )
         )
@@ -93,7 +93,7 @@ def test_can_run_simulation():
     surface = jps.GeometryBuilder()
     room = surface.add_region(polygon=p1.union(p2), height=0.0)
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=surface.build()
+        model=jps.CollisionFreeSpeedModelTordeux2016(), geometry=surface.build()
     )
     exit_stage_id = simulation.add_exit_stage(
         [([(18, 4), (20, 4), (20, 6), (18, 6)], room)]
@@ -113,7 +113,7 @@ def test_can_run_simulation():
                 journey_id=journey_id,
                 stage_id=exit_stage_id,
                 position=new_pos,
-                state=jps.CollisionFreeSpeedModelState(),
+                state=jps.CollisionFreeSpeedModelTordeux2016State(),
                 region_id=room,
             )
         )
@@ -126,7 +126,7 @@ def test_can_run_simulation():
         journey_id=journey_id,
         stage_id=exit_stage_id,
         position=(6, 6),
-        state=jps.CollisionFreeSpeedModelState(),
+        state=jps.CollisionFreeSpeedModelTordeux2016State(),
         region_id=room,
     )
 
@@ -160,7 +160,7 @@ def test_get_single_agent_from_simulation():
     surface = jps.GeometryBuilder()
     room = surface.add_region(polygon=p1.union(p2), height=0.0)
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=surface.build()
+        model=jps.CollisionFreeSpeedModelTordeux2016(), geometry=surface.build()
     )
     exit_id = simulation.add_exit_stage(
         [([(18, 4), (20, 4), (20, 6), (18, 6)], room)]
@@ -179,7 +179,7 @@ def test_get_single_agent_from_simulation():
                 journey_id=journey_id,
                 stage_id=exit_id,
                 position=new_pos,
-                state=jps.CollisionFreeSpeedModelState(),
+                state=jps.CollisionFreeSpeedModelTordeux2016State(),
                 region_id=room,
             )
         )
@@ -204,7 +204,7 @@ def test_get_agent_non_existing_agent_from_simulation():
     surface = jps.GeometryBuilder()
     room = surface.add_region(polygon=p1.union(p2), height=0.0)
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=surface.build()
+        model=jps.CollisionFreeSpeedModelTordeux2016(), geometry=surface.build()
     )
 
     exit_id = simulation.add_exit_stage(
@@ -218,7 +218,7 @@ def test_get_agent_non_existing_agent_from_simulation():
         journey_id=journey_id,
         stage_id=exit_id,
         position=(7, 7),
-        state=jps.CollisionFreeSpeedModelState(),
+        state=jps.CollisionFreeSpeedModelTordeux2016State(),
         region_id=room,
     )
 
@@ -246,7 +246,7 @@ def test_agent_can_be_removed_from_simulation():
     surface = jps.GeometryBuilder()
     room = surface.add_region(polygon=p1.union(p2), height=0.0)
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=surface.build()
+        model=jps.CollisionFreeSpeedModelTordeux2016(), geometry=surface.build()
     )
     exit_stage_id = simulation.add_exit_stage(
         [([(18, 4), (20, 4), (20, 6), (18, 6)], room)]
@@ -266,7 +266,7 @@ def test_agent_can_be_removed_from_simulation():
                 journey_id=journey_id,
                 stage_id=exit_stage_id,
                 position=new_pos,
-                state=jps.CollisionFreeSpeedModelState(),
+                state=jps.CollisionFreeSpeedModelTordeux2016State(),
                 region_id=room,
             )
         )
@@ -312,7 +312,7 @@ def test_agent_can_not_be_added_outside_geometry():
         boundary=[(0, 0), (100, 0), (100, 100), (0, 100)], height=0.0
     )
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(),
+        model=jps.CollisionFreeSpeedModelTordeux2016(),
         geometry=surface.build(),
     )
 
@@ -329,7 +329,7 @@ def test_agent_can_not_be_added_outside_geometry():
         journey_id=journey_id,
         stage_id=exit_id,
         position=agent_position,
-        state=jps.CollisionFreeSpeedModelState(),
+        state=jps.CollisionFreeSpeedModelTordeux2016State(),
         region_id=room,
     )
 
@@ -341,7 +341,7 @@ def test_agent_can_not_be_added_outside_geometry():
             journey_id=journey_id,
             stage_id=exit_id,
             position=(-50, -50),
-            state=jps.CollisionFreeSpeedModelState(),
+            state=jps.CollisionFreeSpeedModelTordeux2016State(),
             region_id=room,
         )
 
@@ -352,7 +352,7 @@ def test_direct_steering_target_must_be_inside_geometry():
         boundary=[(0, 0), (100, 0), (100, 100), (0, 100)], height=0.0
     )
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(),
+        model=jps.CollisionFreeSpeedModelTordeux2016(),
         geometry=surface.build(),
     )
     stage_id = simulation.add_direct_steering_stage()
@@ -361,7 +361,7 @@ def test_direct_steering_target_must_be_inside_geometry():
         journey_id=journey_id,
         stage_id=stage_id,
         position=(50, 50),
-        state=jps.CollisionFreeSpeedModelState(),
+        state=jps.CollisionFreeSpeedModelTordeux2016State(),
         region_id=room,
     )
     agent = simulation.agent(agent_id)

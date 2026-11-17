@@ -32,7 +32,7 @@ void init_geometry_builder(py::module_& m)
                 boundary=[(0, 0), (10, 0), (10, 10), (0, 10)], height=0.0
             )
             simulation = jps.Simulation(
-                model=jps.CollisionFreeSpeedModel(), geometry=geo_builder.build()
+                model=jps.CollisionFreeSpeedModelTordeux2016(), geometry=geo_builder.build()
             )
     )");
     builder.def(py::init())

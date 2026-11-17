@@ -19,7 +19,7 @@ def main():
     )
 
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(),
+        model=jps.CollisionFreeSpeedModelTordeux2016(),
         geometry=geo_builder.build(),
         trajectory_writer=jps.Hdf5TrajectoryWriter(
             output_file=pathlib.Path("example2_out.h5"),
@@ -84,7 +84,7 @@ def main():
             journey_id=journeys[0],
             stage_id=waypoints[0],
             position=position,
-            state=jps.CollisionFreeSpeedModelState(radius=0.3),
+            state=jps.CollisionFreeSpeedModelTordeux2016State(radius=0.3),
             region_id=region,
         )
 
