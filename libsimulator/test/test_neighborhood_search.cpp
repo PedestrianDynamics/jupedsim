@@ -2,11 +2,13 @@
 #include "generic_agent.hpp"
 #include "kernel.hpp"
 #include "neighborhood_search.hpp"
+#include "simulation_error.hpp"
 #include "test_common.hpp"
 
 #include <gtest/gtest.h>
 
 #include <cmath>
+#include <limits>
 #include <set>
 #include <vector>
 
@@ -178,4 +180,66 @@ TEST(NeighborhoodSearch, VisitsValuesOfACellInContainerOrder)
     neighborhood.for_each_in_range(
         {0, 0}, 1, [&visited](const ValueWithPos<int>& item) { visited.push_back(item.val); });
     ASSERT_EQ(visited, (std::vector<int>{3, 1, 2}));
+}
+
+TEST(NeighborhoodSearch, FindsValuesOfGroupsFarApart)
+{
+    NeighborhoodSearch<ValueWithPos<int>> neighborhood{3};
+    const AgentContainer<ValueWithPos<int>> agents{
+        {{0.3, 0.3}, 3},
+        {{1e5, 1e5}, 9},
+        {{0.1, 0.1}, 1},
+        {{-1e5, 2e5}, 8},
+        {{0.2, 0.2}, 2},
+        {{1e5 + 1, 1e5}, 10}};
+    neighborhood.update(agents);
+
+    std::vector<int> visited{};
+    neighborhood.for_each_in_range(
+        {0, 0}, 1, [&visited](const ValueWithPos<int>& item) { visited.push_back(item.val); });
+    ASSERT_EQ(visited, (std::vector<int>{3, 1, 2}));
+    ASSERT_EQ(item_ids_in_range(neighborhood, {1e5, 1e5}, 2), (std::set<int>{9, 10}));
+    ASSERT_EQ(item_ids_in_range(neighborhood, {-1e5, 2e5}, 2), (std::set<int>{8}));
+    ASSERT_TRUE(item_ids_in_range(neighborhood, {5e4, 5e4}, 100).empty());
+    ASSERT_EQ(item_ids_in_range(neighborhood, {0, 0}, 1e13), (std::set<int>{1, 2, 3, 8, 9, 10}));
+}
+
+TEST(NeighborhoodSearch, ManyAddedValuesAreSortedInBehindTheStoredOnesOfGroupsFarApart)
+{
+    NeighborhoodSearch<ValueWithPos<int>> neighborhood{3};
+    AgentContainer<ValueWithPos<int>> agents{{{0, 0}, 0}, {{1e5, 1e5}, -1}};
+    neighborhood.update(agents);
+    std::vector<int> expected{0};
+    for(int id = 1; id <= 1001; ++id) {
+        agents.push_back({{0.0004 * id, 0.0004 * id}, id});
+        neighborhood.add_agent(agents.back());
+        expected.push_back(id);
+    }
+
+    std::vector<int> visited{};
+    neighborhood.for_each_in_range(
+        {0, 0}, 1, [&visited](const ValueWithPos<int>& item) { visited.push_back(item.val); });
+    ASSERT_EQ(visited, expected);
+    ASSERT_EQ(item_ids_in_range(neighborhood, {1e5, 1e5}, 1), (std::set<int>{-1}));
+}
+
+TEST(NeighborhoodSearch, FindsValuesNextToHugeCoordinates)
+{
+    NeighborhoodSearch<ValueWithPos<int>> neighborhood{3};
+    const AgentContainer<ValueWithPos<int>> agents{{{0, 0}, 1}, {{1e300, 0}, 2}, {{0, -1e300}, 3}};
+    neighborhood.update(agents);
+
+    ASSERT_EQ(item_ids_in_range(neighborhood, {0, 0}, 1), (std::set<int>{1}));
+    ASSERT_EQ(item_ids_in_range(neighborhood, {1e300, 0}, 1), (std::set<int>{2}));
+}
+
+TEST(NeighborhoodSearch, RejectsPositionsThatAreNotFinite)
+{
+    NeighborhoodSearch<ValueWithPos<int>> neighborhood{3};
+    const auto nan = std::numeric_limits<double>::quiet_NaN();
+    const auto inf = std::numeric_limits<double>::infinity();
+    for(const auto& bad : {Point{nan, 0}, Point{0, nan}, Point{inf, 0}, Point{0, -inf}}) {
+        const AgentContainer<ValueWithPos<int>> agents{{{bad.x(), bad.y()}, 1}, {{0, 0}, 2}};
+        EXPECT_THROW(neighborhood.update(agents), SimulationError);
+    }
 }
