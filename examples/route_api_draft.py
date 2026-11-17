@@ -129,6 +129,8 @@ main_exits = sim.add_target(
 # - Exactly one transition leaves AGENT_LOCATION.
 # - At most one transition leaves each target.
 # - AGENT_LOCATION is never what a transition leads to.
+# - No transition leaves an exit: agents leave the simulation there.
+# - No transition leads back to its own source, for all three kinds.
 # - The graph, AGENT_LOCATION included, is connected when the directions
 #   of the transitions are ignored. Separate parts belong in a route of their
 #   own. A target that cannot be reached from AGENT_LOCATION but is
@@ -272,26 +274,26 @@ while sim.agent_count() > 0 and sim.elapsed_time() < 600:
 
     # Filter agents with any condition: agents on route_c that head for
     # wp2 skip it
-    for agent in sim.filter_agents(
-        lambda a: a.route == route_c and a.current_target == wp2
+    for agent in sim.agents(
+        filter=lambda a: a.route == route_c and a.current_target == wp2
     ):
         agent.reroute(first_target=wp3)
-    # filter_agents() yields the agents; to count them, sum over it
+    # agents() yields the agents; to count them, sum over it
     heading_for_exit1 = sum(
-        1 for _ in sim.filter_agents(lambda a: a.current_target == exit1)
+        1 for _ in sim.agents(filter=lambda a: a.current_target == exit1)
     )
 
     agent5.reroute(steer_to=floor0.at(x_new, y_new))
     agent1.reroute(route=route_c)
 
 # --- Reporting --------------------------------------------------------
-# Current state (agent.current_target, sim.agents(), sim.filter_agents(), ...)
+# Current state (agent.current_target, sim.agents(), ...)
 # returns handles, so scripts can act on them. What happened is returned
 # as immutable records with ids: a record does not suggest that its agent
 # still exists. sim.agent(completion.agent_id) resolves the agent while it
 # does.
 #
-# sim.target_completions() -> tuple of TargetCompletion records
+# sim.target_completions() -> tuple of TargetCompletionRecord
 #   completion.agent_id  id of the agent
 #   completion.target    the RouteTarget, or the Location in direct steering
 #   completion.time      simulation time in seconds of the completion
@@ -306,13 +308,13 @@ while sim.agent_count() > 0 and sim.elapsed_time() < 600:
 #   steering toward it; being pushed away and returning gives no further
 #   record.
 #
-# sim.removed_agents() -> tuple of Removal records
+# sim.removed_agents() -> tuple of RemovalRecord
 #   removal.agent_id  id of the removed agent
 #   removal.exit      the exit it left through, None after
 #                     mark_agent_for_removal()
 #   removal.time      simulation time in seconds of the exit completion,
 #                     or of the removal
-# - An exit completion always comes with a Removal record from the same
+# - An exit completion always comes with a RemovalRecord from the same
 #   iterate() call. The agent itself leaves at the start of the next
 #   iterate().
 #
@@ -400,11 +402,9 @@ builder.build()  # a second time
 sim.agent(99)  # no such agent, or already removed
 # KeyError: no agent with id 99
 sim.target("exit9")
-# KeyError: no target named 'exit9'; targets are wp1, wp2, wp3, doors,
-#   exit1, exit2, main_exits
+# KeyError: no target named 'exit9'
 geometry.region("floor9")
-# KeyError: no region named 'floor9'; regions are floor0, floor1,
-#   staircase
+# KeyError: no region named 'floor9'
 sim.add_target(jps.Waypoint([(door_polygon, floor1)]))  # not in floor1
 # ValueError: area does not overlap floor1
 sim.add_target(jps.Waypoint([(polygon_with_hole, floor0)]))
@@ -440,8 +440,7 @@ jps.RoundRobinTransition(wp2, {exit1: 0.6, exit2: 0.4})
 sim.add_agent(pos, route=route_a, steer_to=floor0.at(x, y))
 # ValueError: use route= or steer_to=, not both
 sim.add_agent(pos, route=route_c, first_target=main_exits)
-# ValueError: main_exits is not part of route_c; targets are wp1, wp2, wp3,
-#   exit1, exit2
+# ValueError: main_exits is not part of route_c
 sim.add_agent((x, y), route=route_a)
 # TypeError: location must be a Location, e.g. floor0.at(x, y)
 agent5.reroute(first_target=wp2)  # agent5 is in direct steering
@@ -499,9 +498,9 @@ custom_sim.add_agent(pos, route=route_a)  # simulation with a custom model
 # agent(agent_id)                           sim.agent(17) or sim.agent("anna")
 # get_geometry()                            sim.geometry, the built geometry
 # removed_agents() -> [int]                 sim.removed_agents()
-#                                               -> (Removal, ...)
+#                                               -> (RemovalRecord, ...)
 #                                           sim.target_completions()
-#                                               -> (TargetCompletion, ...)
+#                                               -> (TargetCompletionRecord, ...)
 # travel_times(stage_id) -> {int: grid}     sim.travel_times(exit1)
 #                                               -> {Region: grid}
 # set_default_speed_field(region_id, ...)   sim.set_default_speed_field(
@@ -519,12 +518,12 @@ custom_sim.add_agent(pos, route=route_a)  # simulation with a custom model
 # 3. Direct steering: arrival is reported once per steer_to.
 # 4. Errors keep their Python meaning, see "Errors".
 # 5. Regions are looked up on the geometry only.
+# 6. Arrival in direct steering: in the location's region and at most
+#    0.05 m away, a documented constant.
+# 7. Error messages name the culprit but list no alternatives: in a large
+#    building a list of all targets, routes or regions is unreadable.
 
 # --- Open questions ---------------------------------------------------
-# 1. Arrival tolerance in direct steering: a documented constant, or a
-#    parameter of steer_to? The core has point_arrival_tolerance = 0.05 m:
-#    a point is reached when the agent's last step, as a segment, passes
-#    within 0.05 m of it, so fast agents and large dt arrive too.
-# 2. Which area of a multi-area target was reached: can the core tell,
+# 1. Which area of a multi-area target was reached: can the core tell,
 #    given that arrival is decided on one floor field for all areas? If
-#    so, TargetCompletion could carry it.
+#    so, TargetCompletionRecord could carry it.
