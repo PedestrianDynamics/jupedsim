@@ -461,6 +461,16 @@ std::map<std::size_t, TravelTimeGrid> Simulation::travel_times(BaseStage::ID sta
     return grids;
 }
 
+double Simulation::travel_time(BaseStage::ID stage_id, const Location& from)
+{
+    throw_if_state(State::Iterating | State::Closed, "travel_time");
+    const auto* destination = _stage_manager.stage(stage_id)->destination();
+    if(destination == nullptr) {
+        throw SimulationError("Stage {} has no area to travel to.", stage_id);
+    }
+    return destination->travel_time(from);
+}
+
 std::map<std::size_t, SpeedGrid> Simulation::default_speed_fields() const
 {
     throw_if_state(State::Closed, "default_speed_fields");

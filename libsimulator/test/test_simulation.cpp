@@ -234,6 +234,19 @@ TEST(Simulation, ReportsTheTravelTimesToAStage)
     EXPECT_EQ(direction_at({0.5, 10}), (Vector{0, 0})) << "inside the exit";
 }
 
+TEST(Simulation, ReportsTheTravelTimeFromALocation)
+{
+    const auto flat = on_a_flat_room();
+    const Polygon strip{std::vector<Point>{{0, 0}, {1, 0}, {1, 20}, {0, 20}}};
+    const auto exit = flat.sim->add_stage(ExitDescription{{{strip, flat.room_id}}});
+    const auto grid = flat.sim->travel_times(exit).at(flat.room_id);
+
+    EXPECT_EQ(flat.sim->travel_time(exit, flat.sim->get_location(0.5, 10, flat.room_id)), 0.0);
+    EXPECT_EQ(
+        flat.sim->travel_time(exit, flat.sim->get_location(10, 10, flat.room_id)),
+        time_at(grid, {10, 10}));
+}
+
 TEST(Simulation, ListsItsStagesInAscendingOrder)
 {
     const auto flat = on_a_flat_room();
