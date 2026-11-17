@@ -19,17 +19,9 @@ public:
 
 private:
     double _cut_off_radius{3};
-    double _strength_neighbor_repulsion{8.0};
-    double _range_neighbor_repulsion{0.1};
-    double _strength_geometry_repulsion{5.0};
-    double _range_geometry_repulsion{0.02};
 
 public:
-    CollisionFreeSpeedModel(
-        double strength_neighbor_repulsion,
-        double range_neighbor_repulsion,
-        double strength_geometry_repulsion,
-        double range_geometry_repulsion);
+    CollisionFreeSpeedModel() = default;
     ~CollisionFreeSpeedModel() override = default;
     OperationalModelType type() const override;
     Vector compute_next_state(

@@ -2,10 +2,10 @@
 #pragma once
 
 enum class OperationalModelType {
-    CollisionFreeSpeed,
+    CollisionFreeSpeedTordeux2016,
     GeneralizedCentrifugalForce,
-    CollisionFreeSpeedV2,
-    CollisionFreeSpeedV3,
+    CollisionFreeSpeed,
+    MotivationCollisionFreeSpeed,
     AnticipationVelocityModel,
     SocialForce,
     WarpDriver,
@@ -17,14 +17,14 @@ enum class OperationalModelType {
 constexpr const char* to_string(OperationalModelType type)
 {
     switch(type) {
-        case OperationalModelType::CollisionFreeSpeed:
-            return "CollisionFreeSpeedModel";
+        case OperationalModelType::CollisionFreeSpeedTordeux2016:
+            return "CollisionFreeSpeedModelTordeux2016";
         case OperationalModelType::GeneralizedCentrifugalForce:
             return "GeneralizedCentrifugalForceModel";
-        case OperationalModelType::CollisionFreeSpeedV2:
-            return "CollisionFreeSpeedModelV2";
-        case OperationalModelType::CollisionFreeSpeedV3:
-            return "CollisionFreeSpeedModelV3";
+        case OperationalModelType::CollisionFreeSpeed:
+            return "CollisionFreeSpeedModel";
+        case OperationalModelType::MotivationCollisionFreeSpeed:
+            return "MotivationCollisionFreeSpeedModel";
         case OperationalModelType::AnticipationVelocityModel:
             return "AnticipationVelocityModel";
         case OperationalModelType::SocialForce:

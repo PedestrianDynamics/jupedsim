@@ -21,7 +21,7 @@ def main():
     )
     trajectory_file = "headon_CSM.h5"
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(),
+        model=jps.CollisionFreeSpeedModelTordeux2016(),
         geometry=geo_builder.build(),
         trajectory_writer=jps.Hdf5TrajectoryWriter(
             output_file=pathlib.Path(trajectory_file)
@@ -34,8 +34,12 @@ def main():
 
     start_positions = [(3, 0.5 * width), (0.5 * length, 0.5 * width)]
     states = [
-        jps.CollisionFreeSpeedModelState(radius=0.2, desired_speed=1.2),
-        jps.CollisionFreeSpeedModelState(radius=0.2, desired_speed=0.2),
+        jps.CollisionFreeSpeedModelTordeux2016State(
+            radius=0.2, desired_speed=1.2
+        ),
+        jps.CollisionFreeSpeedModelTordeux2016State(
+            radius=0.2, desired_speed=0.2
+        ),
     ]
     for position, state in zip(start_positions, states):
         simulation.add_agent(

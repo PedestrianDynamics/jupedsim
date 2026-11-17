@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #pragma once
 
-#include "collision_free_speed_model_v2_state.hpp"
 #include "kernel.hpp"
+#include "motivation_collision_free_speed_model_state.hpp"
 #include "operational_model.hpp"
 #include "operational_model_state.hpp"
 #include "operational_model_type.hpp"
@@ -12,17 +12,17 @@
 struct NeighborView;
 struct WallView;
 
-class CollisionFreeSpeedModelV2 : public OperationalModel
+class MotivationCollisionFreeSpeedModel : public OperationalModel
 {
 public:
-    using State = CollisionFreeSpeedModelV2State;
+    using State = MotivationCollisionFreeSpeedModelState;
 
 private:
     double _cut_off_radius{3};
 
 public:
-    CollisionFreeSpeedModelV2() = default;
-    ~CollisionFreeSpeedModelV2() override = default;
+    MotivationCollisionFreeSpeedModel() = default;
+    ~MotivationCollisionFreeSpeedModel() override = default;
     OperationalModelType type() const override;
     Vector compute_next_state(
         const OperationalModelState& current,
@@ -36,6 +36,5 @@ private:
         const State& current_state,
         const NeighborView& neighbor,
         const Vector& direction) const;
-    Vector neighbor_repulsion(const State& current_state, const NeighborView& neighbor) const;
     Vector boundary_repulsion(const State& current_state, const WallView& boundary) const;
 };

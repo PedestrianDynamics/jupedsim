@@ -2,7 +2,7 @@
 """Benchmark suite: compare all operational models on three scenarios.
 
 Scenarios: bidirectional corridor, bottleneck, crossing.
-Models: CollisionFreeSpeedModelV2, AnticipationVelocityModel,
+Models: CollisionFreeSpeedModel, AnticipationVelocityModel,
         SocialForceModel, WarpDriverModel.
 
 Produces HDF5 trajectory files and a 4-column plot of trajectories.
@@ -33,13 +33,13 @@ MODELS = {
     # Each entry is a dict with keys:
     #   factory      -> () -> OperationalModel instance
     #   state_cls    -> the *State class for this model
-    #   state_kwargs -> extra per-agent state (only CFSv2 and AVM use this)
+    #   state_kwargs -> extra per-agent state (only CFSM and AVM use this)
     #   dt           -> simulation timestep [s] used when constructing
     #                   jps.Simulation for this model. Per-model so a more
     #                   sensitive integrator (e.g. WarpDriver) can run finer.
-    "CFSV2": {
-        "factory": lambda: jps.CollisionFreeSpeedModelV2(),
-        "state_cls": jps.CollisionFreeSpeedModelV2State,
+    "CFSM": {
+        "factory": lambda: jps.CollisionFreeSpeedModel(),
+        "state_cls": jps.CollisionFreeSpeedModelState,
         "state_kwargs": {
             "strength_neighbor_repulsion": 8.0,  # repulsive force magnitude [N]
             "range_neighbor_repulsion": 0.1,  # exponential decay length [m]

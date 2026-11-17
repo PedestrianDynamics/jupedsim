@@ -25,7 +25,7 @@ def single_region_file(tmp_path: pathlib.Path) -> pathlib.Path:
         output_file=out, every_nth_frame=EVERY_NTH_FRAME
     ) as writer:
         sim = jps.Simulation(
-            model=jps.CollisionFreeSpeedModelV2(),
+            model=jps.CollisionFreeSpeedModel(),
             geometry=surface.build(),
             trajectory_writer=writer,
             dt=DT,
@@ -39,7 +39,7 @@ def single_region_file(tmp_path: pathlib.Path) -> pathlib.Path:
                 journey_id=journey_id,
                 stage_id=exit_id,
                 position=position,
-                state=jps.CollisionFreeSpeedModelV2State(),
+                state=jps.CollisionFreeSpeedModelState(),
                 region_id=room,
             )
         for _ in range(ITERATIONS):
@@ -68,7 +68,7 @@ def two_region_file(tmp_path: pathlib.Path) -> tuple[pathlib.Path, int, int]:
     out = tmp_path / "regions.h5"
     with jps.Hdf5TrajectoryWriter(output_file=out) as writer:
         sim = jps.Simulation(
-            model=jps.CollisionFreeSpeedModelV2(),
+            model=jps.CollisionFreeSpeedModel(),
             geometry=surface.build(),
             trajectory_writer=writer,
             dt=DT,

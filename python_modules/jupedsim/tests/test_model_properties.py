@@ -9,18 +9,22 @@ _UNIT_SQUARE_10 = [(0, 0), (10, 0), (10, 10), (0, 10)]
 
 # Each built-in model is constructed as a configured instance. Extra state
 # kwargs cover cases where the raw C++ struct defaults do not satisfy the
-# model's add_agent constraints (GCFM requires a unit-length orientation, V3
+# model's add_agent constraints (GCFM requires a unit-length orientation, MotivationCollisionFreeSpeedModel
 # requires non-zero repulsion ranges).
 MODEL_INSTANCE_STATE = [
-    (jps.CollisionFreeSpeedModel(), jps.CollisionFreeSpeedModelState, {}),
     (
-        jps.CollisionFreeSpeedModelV2(),
-        jps.CollisionFreeSpeedModelV2State,
+        jps.CollisionFreeSpeedModelTordeux2016(),
+        jps.CollisionFreeSpeedModelTordeux2016State,
         {},
     ),
     (
-        jps.CollisionFreeSpeedModelV3(),
-        jps.CollisionFreeSpeedModelV3State,
+        jps.CollisionFreeSpeedModel(),
+        jps.CollisionFreeSpeedModelState,
+        {},
+    ),
+    (
+        jps.MotivationCollisionFreeSpeedModel(),
+        jps.MotivationCollisionFreeSpeedModelState,
         {
             "strength_neighbor_repulsion": 8.0,
             "range_neighbor_repulsion": 0.1,
@@ -77,7 +81,7 @@ def corridor():
         boundary=[(0, 0), (10, 0), (10, 2), (0, 2)], height=0.0
     )
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModelV2(),
+        model=jps.CollisionFreeSpeedModel(),
         geometry=surface.build(),
     )
     return simulation, room
@@ -94,7 +98,7 @@ def test_set_desired_speed(corridor):
         journey_id=journey_id,
         stage_id=wp,
         position=(1, 1),
-        state=jps.CollisionFreeSpeedModelV2State(desired_speed=1),
+        state=jps.CollisionFreeSpeedModelState(desired_speed=1),
         region_id=room,
     )
     assert math.isclose(sim.agent(agent_id).position[0], 1)
@@ -114,27 +118,27 @@ def test_set_desired_speed(corridor):
 
 
 @pytest.fixture
-def simulation_with_collision_free_speed_model_v2():
+def simulation_with_collision_free_speed_model():
     surface = jps.GeometryBuilder()
     room = surface.add_region(boundary=_UNIT_SQUARE_10, height=0.0)
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModelV2(),
+        model=jps.CollisionFreeSpeedModel(),
         geometry=surface.build(),
     )
     return simulation, room
 
 
-def test_initial_parameters_collision_free_speed_model_v2(
-    simulation_with_collision_free_speed_model_v2,
+def test_initial_parameters_collision_free_speed_model(
+    simulation_with_collision_free_speed_model,
 ):
-    sim, room = simulation_with_collision_free_speed_model_v2
+    sim, room = simulation_with_collision_free_speed_model
     wp = sim.add_waypoint_stage(
         [(jps.circle_to_polygon(center=(10, 1), radius=0.5), room)]
     )
     journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
     # Create an agent with distinct non-default values for each parameter.
-    state = jps.CollisionFreeSpeedModelV2State(
+    state = jps.CollisionFreeSpeedModelState(
         time_gap=0.1,
         desired_speed=0.12,
         radius=0.13,
@@ -175,10 +179,10 @@ def test_initial_parameters_collision_free_speed_model_v2(
     )
 
 
-def test_set_model_parameters_collision_free_speed_model_v2(
-    simulation_with_collision_free_speed_model_v2,
+def test_set_model_parameters_collision_free_speed_model(
+    simulation_with_collision_free_speed_model,
 ):
-    sim, room = simulation_with_collision_free_speed_model_v2
+    sim, room = simulation_with_collision_free_speed_model
     wp = sim.add_waypoint_stage(
         [(jps.circle_to_polygon(center=(10, 1), radius=0.5), room)]
     )
@@ -188,7 +192,7 @@ def test_set_model_parameters_collision_free_speed_model_v2(
         journey_id=journey_id,
         stage_id=wp,
         position=(1, 1),
-        state=jps.CollisionFreeSpeedModelV2State(),
+        state=jps.CollisionFreeSpeedModelState(),
         region_id=room,
     )
 
@@ -274,20 +278,20 @@ def test_set_model_parameters_anticipation_velocity_model(
 
 
 @pytest.fixture
-def simulation_with_collision_free_speed_model():
+def simulation_with_collision_free_speed_model_tordeux2016():
     surface = jps.GeometryBuilder()
     room = surface.add_region(boundary=_UNIT_SQUARE_10, height=0.0)
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(),
+        model=jps.CollisionFreeSpeedModelTordeux2016(),
         geometry=surface.build(),
     )
     return simulation, room
 
 
-def test_set_model_parameters_collision_free_speed_model(
-    simulation_with_collision_free_speed_model,
+def test_set_model_parameters_collision_free_speed_model_tordeux2016(
+    simulation_with_collision_free_speed_model_tordeux2016,
 ):
-    sim, room = simulation_with_collision_free_speed_model
+    sim, room = simulation_with_collision_free_speed_model_tordeux2016
     wp = sim.add_waypoint_stage(
         [(jps.circle_to_polygon(center=(10, 1), radius=0.5), room)]
     )
@@ -297,7 +301,7 @@ def test_set_model_parameters_collision_free_speed_model(
         journey_id=journey_id,
         stage_id=wp,
         position=(1, 1),
-        state=jps.CollisionFreeSpeedModelState(),
+        state=jps.CollisionFreeSpeedModelTordeux2016State(),
         region_id=room,
     )
 
@@ -314,12 +318,12 @@ def test_set_model_parameters_collision_free_speed_model(
     assert sim.agent(agent_id).state.radius == 4.0
 
 
-def test_collision_free_speed_model_repulsion_parameters_are_model_level():
+def test_collision_free_speed_model_tordeux2016_repulsion_parameters_are_model_level():
     """The repulsion parameters are configured on the model instance."""
     surface = jps.GeometryBuilder()
     room = surface.add_region(boundary=_UNIT_SQUARE_10, height=0.0)
     sim = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(
+        model=jps.CollisionFreeSpeedModelTordeux2016(
             strength_neighbor_repulsion=7.5,
             range_neighbor_repulsion=0.2,
             strength_geometry_repulsion=4.5,
@@ -336,7 +340,7 @@ def test_collision_free_speed_model_repulsion_parameters_are_model_level():
         journey_id=journey_id,
         stage_id=wp,
         position=(1, 1),
-        state=jps.CollisionFreeSpeedModelState(),
+        state=jps.CollisionFreeSpeedModelTordeux2016State(),
         region_id=room,
     )
 
@@ -593,26 +597,26 @@ def test_agent_handle_raises_after_removal(
 
 
 @pytest.fixture
-def simulation_with_collision_free_speed_model_v3():
+def simulation_with_motivation_collision_free_speed_model():
     surface = jps.GeometryBuilder()
     room = surface.add_region(boundary=_UNIT_SQUARE_10, height=0.0)
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModelV3(),
+        model=jps.MotivationCollisionFreeSpeedModel(),
         geometry=surface.build(),
     )
     return simulation, room
 
 
-def test_initial_parameters_collision_free_speed_model_v3(
-    simulation_with_collision_free_speed_model_v3,
+def test_initial_parameters_motivation_collision_free_speed_model(
+    simulation_with_motivation_collision_free_speed_model,
 ):
-    sim, room = simulation_with_collision_free_speed_model_v3
+    sim, room = simulation_with_motivation_collision_free_speed_model
     wp = sim.add_waypoint_stage(
         [(jps.circle_to_polygon(center=(10, 1), radius=0.5), room)]
     )
     journey_id = sim.add_journey(jps.JourneyDescription([wp]))
 
-    state = jps.CollisionFreeSpeedModelV3State(
+    state = jps.MotivationCollisionFreeSpeedModelState(
         time_gap=0.11,
         desired_speed=0.12,
         radius=0.13,
@@ -647,10 +651,10 @@ def test_initial_parameters_collision_free_speed_model_v3(
     assert agent_state.agent_buffer == 0.4
 
 
-def test_set_model_parameters_collision_free_speed_model_v3(
-    simulation_with_collision_free_speed_model_v3,
+def test_set_model_parameters_motivation_collision_free_speed_model(
+    simulation_with_motivation_collision_free_speed_model,
 ):
-    sim, room = simulation_with_collision_free_speed_model_v3
+    sim, room = simulation_with_motivation_collision_free_speed_model
     wp = sim.add_waypoint_stage(
         [(jps.circle_to_polygon(center=(10, 1), radius=0.5), room)]
     )
@@ -660,7 +664,7 @@ def test_set_model_parameters_collision_free_speed_model_v3(
         journey_id=journey_id,
         stage_id=wp,
         position=(1, 1),
-        state=jps.CollisionFreeSpeedModelV3State(
+        state=jps.MotivationCollisionFreeSpeedModelState(
             strength_neighbor_repulsion=8.0,
             range_neighbor_repulsion=0.1,
             strength_geometry_repulsion=5.0,
@@ -702,7 +706,7 @@ def test_set_model_parameters_collision_free_speed_model_v3(
     assert state.agent_buffer == 0.5
 
 
-def test_collision_free_speed_model_v3_does_not_back_into_a_wall():
+def test_motivation_collision_free_speed_model_does_not_back_into_a_wall():
     """An agent whose spacing to the neighbor ahead is below its
     agent_buffer backs up, but stops at the wall behind it instead of
     walking into it."""
@@ -712,7 +716,7 @@ def test_collision_free_speed_model_v3_does_not_back_into_a_wall():
         height=0.0,
     )
     sim = jps.Simulation(
-        model=jps.CollisionFreeSpeedModelV3(),
+        model=jps.MotivationCollisionFreeSpeedModel(),
         geometry=surface.build(),
         dt=0.01,
     )
@@ -726,7 +730,7 @@ def test_collision_free_speed_model_v3_does_not_back_into_a_wall():
             journey_id=journey_id,
             stage_id=exit_id,
             position=position,
-            state=jps.CollisionFreeSpeedModelV3State(
+            state=jps.MotivationCollisionFreeSpeedModelState(
                 radius=0.15,
                 time_gap=1.0,
                 desired_speed=desired_speed,

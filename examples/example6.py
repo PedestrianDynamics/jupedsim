@@ -18,7 +18,7 @@ def main():
 
     trajectory_file = "example_6.h5"
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModelV2(),
+        model=jps.CollisionFreeSpeedModel(),
         geometry=geo_builder.build(),
         trajectory_writer=jps.Hdf5TrajectoryWriter(
             output_file=pathlib.Path(trajectory_file)
@@ -41,7 +41,7 @@ def main():
             journey_id=journey_id,
             stage_id=exit_id,
             position=position,
-            state=jps.CollisionFreeSpeedModelV2State(
+            state=jps.CollisionFreeSpeedModelState(
                 radius=0.12,
                 strength_neighbor_repulsion=8,
                 range_neighbor_repulsion=0.1,
@@ -63,7 +63,7 @@ def main():
             journey_id=journey_id,
             stage_id=exit_id,
             position=position,
-            state=jps.CollisionFreeSpeedModelV2State(
+            state=jps.CollisionFreeSpeedModelState(
                 radius=0.12,
                 strength_neighbor_repulsion=30,
                 range_neighbor_repulsion=0.1,

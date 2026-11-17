@@ -21,18 +21,6 @@ namespace
 constexpr double wall_search_radius = 4.0;
 } // namespace
 
-CollisionFreeSpeedModel::CollisionFreeSpeedModel(
-    double strength_neighbor_repulsion,
-    double range_neighbor_repulsion,
-    double strength_geometry_repulsion,
-    double range_geometry_repulsion)
-    : _strength_neighbor_repulsion(strength_neighbor_repulsion)
-    , _range_neighbor_repulsion(range_neighbor_repulsion)
-    , _strength_geometry_repulsion(strength_geometry_repulsion)
-    , _range_geometry_repulsion(range_geometry_repulsion)
-{
-}
-
 OperationalModelType CollisionFreeSpeedModel::type() const
 {
     return OperationalModelType::CollisionFreeSpeed;
@@ -44,7 +32,7 @@ Vector CollisionFreeSpeedModel::compute_next_state(
     const AgentStep& step) const
 {
     const auto& current_state = std::get<State>(current);
-    const auto neighborhood = step.other_agents_in_range(
+    auto neighborhood = step.other_agents_in_range(
         _cut_off_radius, [&step](const NeighborView& n) { return step.no_geometry_between(n); });
 
     Vector neighbor_repulsion{};
@@ -152,8 +140,8 @@ Vector CollisionFreeSpeedModel::neighbor_repulsion(
     const auto& other = std::get<State>(*neighbor.state);
     const auto [distance, direction] = neighbor.relative_position.norm_and_normalized();
     const auto l = current_state.radius + other.radius;
-    return direction * -(this->_strength_neighbor_repulsion *
-                         exp((l - distance) / this->_range_neighbor_repulsion));
+    return direction * -(current_state.strength_neighbor_repulsion *
+                         exp((l - distance) / current_state.range_neighbor_repulsion));
 }
 
 Vector CollisionFreeSpeedModel::boundary_repulsion(
@@ -161,7 +149,7 @@ Vector CollisionFreeSpeedModel::boundary_repulsion(
     const WallView& boundary) const
 {
     const auto l = current_state.radius;
-    const auto r_iw =
-        -_strength_geometry_repulsion * exp((l - boundary.distance) / _range_geometry_repulsion);
+    const auto r_iw = -current_state.strength_geometry_repulsion *
+                      exp((l - boundary.distance) / current_state.range_geometry_repulsion);
     return -boundary.normal * r_iw; // The repulsion points away from the agent
 }

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "collision_free_speed_model_v3.hpp"
+#include "motivation_collision_free_speed_model.hpp"
 
 #include "agent_view.hpp"
 #include "generic_agent.hpp"
@@ -31,7 +31,7 @@ constexpr double wall_search_radius = 4.0;
 double neighbor_influence(
     const std::vector<NeighborView>& neighborhood,
     const Vector& reference_direction,
-    const CollisionFreeSpeedModelV3::State& current_state)
+    const MotivationCollisionFreeSpeedModel::State& current_state)
 {
     const auto range_x =
         std::max(eps, current_state.range_neighbor_repulsion * current_state.range_x_scale);
@@ -64,12 +64,12 @@ double neighbor_influence(
 }
 } // namespace
 
-OperationalModelType CollisionFreeSpeedModelV3::type() const
+OperationalModelType MotivationCollisionFreeSpeedModel::type() const
 {
-    return OperationalModelType::CollisionFreeSpeedV3;
+    return OperationalModelType::MotivationCollisionFreeSpeed;
 }
 
-Vector CollisionFreeSpeedModelV3::compute_next_state(
+Vector MotivationCollisionFreeSpeedModel::compute_next_state(
     const OperationalModelState& current,
     OperationalModelState& next,
     const AgentStep& step) const
@@ -136,7 +136,7 @@ Vector CollisionFreeSpeedModelV3::compute_next_state(
     return velocity * step.dt();
 }
 
-void CollisionFreeSpeedModelV3::check_model_constraint(
+void MotivationCollisionFreeSpeedModel::check_model_constraint(
     const GenericAgent& agent,
     const AgentView& view) const
 {
@@ -198,7 +198,7 @@ void CollisionFreeSpeedModelV3::check_model_constraint(
     }
 }
 
-double CollisionFreeSpeedModelV3::optimal_speed(
+double MotivationCollisionFreeSpeedModel::optimal_speed(
     const State& current_state,
     double spacing,
     double time_gap) const
@@ -207,7 +207,7 @@ double CollisionFreeSpeedModelV3::optimal_speed(
     return std::min(std::max(effective_spacing / time_gap, min_reverse_speed), current_state.v0);
 }
 
-double CollisionFreeSpeedModelV3::get_spacing(
+double MotivationCollisionFreeSpeedModel::get_spacing(
     const State& current_state,
     const NeighborView& neighbor,
     const Vector& direction) const
@@ -228,7 +228,7 @@ double CollisionFreeSpeedModelV3::get_spacing(
     return distp12.norm() - l;
 }
 
-Vector CollisionFreeSpeedModelV3::boundary_repulsion(
+Vector MotivationCollisionFreeSpeedModel::boundary_repulsion(
     const State& current_state,
     const WallView& boundary) const
 {
