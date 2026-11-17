@@ -202,7 +202,7 @@ sim = jps.Simulation(model=model, geometry=surface.build(), dt=0.01)
 
 # Agent-level parameters: pass a state object to add_agent
 agent = sim.add_agent(
-    sim.get_location(2.0, 2.0, region_id=region_id),
+    region.at(2.0, 2.0),
     route=route,
     state=jps.WarpDriverModelState(orientation=(1.0, 0.0), desired_speed=1.2, radius=0.15),
 )

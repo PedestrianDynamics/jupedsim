@@ -64,7 +64,7 @@ def main():
 
     for x in range(-49, -9, 1):
         simulation.add_agent(
-            simulation.get_location(x, 0, region_id=region),
+            region.at(x, 0),
             route=route,
             state=jps.CollisionFreeSpeedModelState(radius=0.3),
         )

@@ -50,7 +50,7 @@ def main():
 
     for position in start_positions:
         simulation.add_agent(
-            simulation.get_location(*position, region_id=region),
+            region.at(*position),
             route=route,
             state=jps.AnticipationVelocityModelState(
                 anticipation_time=0.5,

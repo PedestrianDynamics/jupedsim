@@ -39,7 +39,7 @@ def main():
 
     for position in motivated_start_positions:
         simulation.add_agent(
-            simulation.get_location(*position, region_id=region),
+            region.at(*position),
             route=route,
             state=jps.CollisionFreeSpeedModelV2State(
                 radius=0.12,
@@ -59,7 +59,7 @@ def main():
 
     for position in slow_start_positions:
         simulation.add_agent(
-            simulation.get_location(*position, region_id=region),
+            region.at(*position),
             route=route,
             state=jps.CollisionFreeSpeedModelV2State(
                 radius=0.12,

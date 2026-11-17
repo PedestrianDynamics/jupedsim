@@ -84,7 +84,7 @@ def main():
 
     for position in [(10, 50), (8, 50), (6, 50)]:
         simulation.add_agent(
-            simulation.get_location(*position, region_id=region),
+            region.at(*position),
             route=short_route,
             state=jps.CollisionFreeSpeedModelState(radius=0.3),
         )
@@ -93,7 +93,7 @@ def main():
     while simulation.agent_count() > 0:
         try:
             agents_at_waypoint = simulation.agents_in_range(
-                simulation.get_location(60, 50, region_id=region), 1
+                region.at(60, 50), 1
             )
             if redirect_once and len(agents_at_waypoint) == 1:
                 agents_at_waypoint[0].reroute(route=long_route)

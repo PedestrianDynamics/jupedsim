@@ -121,7 +121,7 @@ start_positions = [
 ]
 for i, position in enumerate(start_positions):
     sim.add_agent(
-        sim.get_location(*position, region_id=upper),
+        upper.at(*position),
         route=routes[i % 2],
         state=jps.CollisionFreeSpeedModelState(),
     )

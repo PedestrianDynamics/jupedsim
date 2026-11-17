@@ -40,7 +40,7 @@ def main():
     ]
     for position, state in zip(start_positions, states):
         simulation.add_agent(
-            simulation.get_location(*position, region_id=region),
+            region.at(*position),
             route=route,
             state=state,
         )

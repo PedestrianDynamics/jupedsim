@@ -198,7 +198,7 @@ sim = jps.Simulation(
     model=jps.CollisionFreeSpeedModelV3(), geometry=surface.build()
 )
 agent = sim.add_agent(
-    sim.get_location(1.0, 1.0, region_id=region_id),
+    region.at(1.0, 1.0),
     route=route,
     state=jps.CollisionFreeSpeedModelV3State(),
 )

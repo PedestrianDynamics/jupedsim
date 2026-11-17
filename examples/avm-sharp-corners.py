@@ -102,7 +102,7 @@ pos_in_spawning_area = jps.distribute_by_number(
 # distribute agents evenly between two goals
 for i, pos in enumerate(pos_in_spawning_area):
     simulation.add_agent(
-        simulation.get_location(*pos, region_id=region),
+        region.at(*pos),
         route=route_1 if i % 2 == 0 else route_2,
         state=jps.AnticipationVelocityModelState(radius=0.15, desired_speed=1),
     )

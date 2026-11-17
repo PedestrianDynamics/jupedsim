@@ -53,7 +53,7 @@ def main() -> None:
         )
         for position in pos_in_spawning_area:
             sim.add_agent(
-                sim.get_location(*position, region_id=region),
+                region.at(*position),
                 route=route,
                 state=jps.CollisionFreeSpeedModelV2State(),
             )

@@ -72,7 +72,7 @@ A Waypoint at :math:`(0.6, -1.4)` with an accepted distance of 2m can be added t
 
 .. code:: python
 
-    waypoint = simulation.add_target(jps.Waypoint([(jps.circle_to_polygon(center=(0.6, -1.4), radius=2), region_id)]))
+    waypoint = simulation.add_target(jps.Waypoint([(jps.circle_to_polygon(center=(0.6, -1.4), radius=2), region)]))
 
 Exit
 ^^^^
@@ -98,11 +98,11 @@ An exit located in the polygon :math:`(-0.2, -1.9), (0.2, -1.9), (0.2, -1.7), (-
 .. code:: python
 
     # create exit from coordinates
-    exit_ = simulation.add_target(jps.Exit([([(-0.2, -1.9), (0.2, -1.9), (0.2, -1.7), (-0.2, -1.7)], region_id)]))
+    exit_ = simulation.add_target(jps.Exit([([(-0.2, -1.9), (0.2, -1.9), (0.2, -1.7), (-0.2, -1.7)], region)]))
 
     # create exit from shapely.Polygon
     exit_polygon = shapely.Polygon([(-0.2, -1.9), (0.2, -1.9), (0.2, -1.7), (-0.2, -1.7)])
-    exit_ = simulation.add_target(jps.Exit([(exit_polygon, region_id)]))
+    exit_ = simulation.add_target(jps.Exit([(exit_polygon, region)]))
 
 .. note::
 
@@ -225,8 +225,8 @@ To use direct steering in your simulation, you need to add a direct steering sta
 .. code:: python
 
     agent = simulation.add_agent(
-        simulation.get_location(0, 0, region_id=region_id),
-        steer_to=simulation.get_location(-10, -10, region_id=region_id),
+        region.at(0, 0),
+        steer_to=region.at(-10, -10),
     )
 
 Afterwards, an agent or agents can be added, targeting this journey and stage.
@@ -236,7 +236,7 @@ It will move towards the specified point and if the point is reached, it will co
 
 .. code:: python
 
-    agent.reroute(steer_to=simulation.get_location(-10, -10, region_id=region_id))
+    agent.reroute(steer_to=region.at(-10, -10))
 
 .. note::
 

@@ -95,7 +95,7 @@ def main():
 
     for pos in [(1, 2), (3, 8), (5, 5)]:
         simulation.add_agent(
-            simulation.get_location(*pos, region_id=region),
+            region.at(*pos),
             route=route,
             state=jps.CollisionFreeSpeedModelState(radius=0.3),
         )

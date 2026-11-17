@@ -122,7 +122,7 @@ class DensityDependentSpeed:
         """Smoothed density in persons/m² per region, at this instant."""
         counts = {r: np.zeros_like(g.values) for r, g in self._base.items()}
         for agent in sim.agents():
-            r = agent.location.region_id
+            r = agent.location.region
             g = self._base[r]
             x, y = agent.location.xy
             row = int((y - g.origin[1]) / g.cell_size)
@@ -230,7 +230,7 @@ def main():
     )
     for position in positions:
         simulation.add_agent(
-            simulation.get_location(*position, region_id=region),
+            region.at(*position),
             route=route,
             state=jps.AnticipationVelocityModelState(radius=0.15),
         )

@@ -135,7 +135,7 @@ def _add_bidirectional(sim, region, state_cls, routes, n=50, state_kwargs=None):
     )
     for pos in pos_r:
         aid = sim.add_agent(
-            sim.get_location(*pos, region_id=region),
+            region.at(*pos),
             route=jid_r,
             state=_make_state(
                 state_cls,
@@ -153,7 +153,7 @@ def _add_bidirectional(sim, region, state_cls, routes, n=50, state_kwargs=None):
     )
     for pos in pos_l:
         aid = sim.add_agent(
-            sim.get_location(*pos, region_id=region),
+            region.at(*pos),
             route=jid_l,
             state=_make_state(
                 state_cls,
@@ -203,7 +203,7 @@ def _add_bottleneck(
     )
     for pos in positions:
         sim.add_agent(
-            sim.get_location(*pos, region_id=region),
+            region.at(*pos),
             route=jid,
             state=_make_state(
                 state_cls,
@@ -289,7 +289,7 @@ def _add_crossing(sim, region, state_cls, routes, n=15, state_kwargs=None):
         ids = []
         for pos in positions:
             aid = sim.add_agent(
-                sim.get_location(*pos, region_id=region),
+                region.at(*pos),
                 route=jid,
                 state=_make_state(
                     state_cls,
