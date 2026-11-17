@@ -6,10 +6,27 @@ to its start position. Down the stairs, use different point-based waypoints to s
 agents and use an exit with multiple areas. Once again agents target the nearer one.
 """
 
+import argparse
+import pathlib
 from itertools import pairwise
 
 import jupedsim as jps
-from simulation_viewer import SimulationViewer
+
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "--viewer",
+    action="store_true",
+    help="watch the simulation in the 3D viewer instead of running it to the end",
+)
+parser.add_argument(
+    "--output",
+    type=pathlib.Path,
+    default=pathlib.Path("example_3d.h5"),
+    help="HDF5 file to write the trajectory to",
+)
+args = parser.parse_args()
+
+MAX_ITERATIONS = 20000
 
 GROUND_FLOOR = 0.0
 LANDING = 1.5
@@ -52,7 +69,9 @@ geo_builder.connect_regions(
 )
 
 sim = jps.Simulation(
-    model=jps.CollisionFreeSpeedModel(), geometry=geo_builder.build()
+    model=jps.CollisionFreeSpeedModel(),
+    geometry=geo_builder.build(),
+    trajectory_writer=jps.Hdf5TrajectoryWriter(output_file=args.output),
 )
 
 # An area on either side of the stairwell, close to the outer wall.
@@ -114,5 +133,15 @@ def on_step(sim):
     pass
 
 
-viewer = SimulationViewer(sim, on_step=on_step)
-viewer.run()
+with sim:
+    if args.viewer:
+        # Imported here: the viewer's dependencies are not needed without it.
+        from simulation_viewer import SimulationViewer
+
+        SimulationViewer(sim, on_step=on_step).run()
+    else:
+        while sim.agent_count() > 0 and sim.iteration_count() < MAX_ITERATIONS:
+            sim.iterate()
+        print(
+            f"{sim.agent_count()} agents left after {sim.iteration_count()} iterations"
+        )
