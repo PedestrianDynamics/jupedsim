@@ -33,19 +33,14 @@ MODELS = {
     # Each entry is a dict with keys:
     #   factory      -> () -> OperationalModel instance
     #   state_cls    -> the *State class for this model
-    #   state_kwargs -> extra per-agent state (only CFSM and AVM use this)
+    #   state_kwargs -> extra per-agent state (only AVM uses this)
     #   dt           -> simulation timestep [s] used when constructing
     #                   jps.Simulation for this model. Per-model so a more
     #                   sensitive integrator (e.g. WarpDriver) can run finer.
     "CFSM": {
         "factory": lambda: jps.CollisionFreeSpeedModel(),
         "state_cls": jps.CollisionFreeSpeedModelState,
-        "state_kwargs": {
-            "strength_neighbor_repulsion": 8.0,  # repulsive force magnitude [N]
-            "range_neighbor_repulsion": 0.1,  # exponential decay length [m]
-            "strength_geometry_repulsion": 5.0,  # wall repulsive force magnitude [N]
-            "range_geometry_repulsion": 0.02,  # wall exponential decay length [m]
-        },
+        "state_kwargs": {},
         "dt": 0.01,
     },
     "AVM": {
