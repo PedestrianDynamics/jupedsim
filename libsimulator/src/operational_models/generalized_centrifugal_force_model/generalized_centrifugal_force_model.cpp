@@ -289,12 +289,7 @@ Vector GeneralizedCentrifugalForceModel::force_rep_ped(
         f_rep = ep12 * px;
     }
     if(f_rep.x() != f_rep.x() || f_rep.y() != f_rep.y()) {
-        LOG_ERROR(
-            "NAN return distp12 {} Frepx={:f} Frepy={:f} K_ij={:f}",
-            distp12,
-            f_rep.x(),
-            f_rep.y(),
-            k_ij);
+        LOG_ERROR("NAN return distp12 {} Frep={} K_ij={:f}", distp12, f_rep, k_ij);
     }
     return f_rep;
 }

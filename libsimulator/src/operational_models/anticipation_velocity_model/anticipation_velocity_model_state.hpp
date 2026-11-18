@@ -30,7 +30,7 @@ struct fmt::formatter<AnticipationVelocityModelState> {
             ctx.out(),
             "AnticipationVelocityModel[orientation={}, strengthNeighborRepulsion={}, "
             "rangeNeighborRepulsion={}, wallBufferDistance={}, "
-            "timeGap={}, v0={}, radius={}, reactionTime={}, anticipationTime={}, velocity={}])",
+            "timeGap={}, v0={}, radius={}, reactionTime={}, anticipationTime={}, velocity={}]",
             m.orientation,
             m.strength_neighbor_repulsion,
             m.range_neighbor_repulsion,

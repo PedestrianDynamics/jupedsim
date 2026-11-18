@@ -20,7 +20,7 @@ struct fmt::formatter<CollisionFreeSpeedModelState> {
     {
         return fmt::format_to(
             ctx.out(),
-            "CollisionFreeSpeedModel[orientation={}, timeGap={}, v0={}, radius={}])",
+            "CollisionFreeSpeedModel[orientation={}, timeGap={}, v0={}, radius={}]",
             m.orientation,
             m.time_gap,
             m.v0,
