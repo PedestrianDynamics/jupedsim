@@ -14,14 +14,18 @@
 #include "stage_description.hpp"
 #include "test_common.hpp"
 
+#include <boost/random/splitmix64.hpp>
 #include <fmt/format.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
+#include <iterator>
 #include <memory>
 #include <optional>
+#include <set>
 #include <string>
 #include <tuple>
 #include <utility>
@@ -509,3 +513,137 @@ TEST_F(RecordFormatter, ShowsAllFields)
         fmt::format("{}", RemovalRecord{7, std::nullopt, 1.5}),
         "RemovalRecord(agent_id=7, time=1.5)");
 }
+
+namespace
+{
+/// Simulation::agent() finds agents by binary search, so the agents have to stay sorted by id
+/// whatever the simulation does with them. This test tries to guard that against any future
+/// change, e.g. to the agent container or the order agents are stepped in: a random mix of
+/// operations, from a fixed seed, on agents whose spatial order has nothing to do with their ids.
+/// After every operation, every agent ever added has to be found exactly while it is in the
+/// simulation.
+class AgentLookup : public OnAFlatRoom, public ::testing::WithParamInterface<std::uint64_t>
+{
+protected:
+    /// The raw draws of a generator with a fixed algorithm, unlike std distributions, are the
+    /// same on every platform, so a seed reproduces a failure everywhere.
+    boost::random::splitmix64 _rng{GetParam()};
+    std::vector<GenericAgent::ID> _added{};
+    std::set<GenericAgent::ID> _present{};
+    /// Agents that completed an exit; they leave at the beginning of the next iteration.
+    std::vector<GenericAgent::ID> _leaving{};
+
+    std::size_t draw(std::size_t count) { return _rng() % count; }
+
+    void add_agents(const std::vector<Route::ID>& routes)
+    {
+        for(std::size_t i = draw(3) + 1; i > 0; --i) {
+            const Point xy{static_cast<double>(draw(19) + 1), static_cast<double>(draw(19) + 1)};
+            if(!_sim.agents_in_range(at(xy), 1.0).empty()) {
+                continue;
+            }
+            const auto id = add_agent(xy, routes[draw(routes.size())]);
+            _added.push_back(id);
+            _present.insert(id);
+        }
+    }
+
+    GenericAgent::ID any_present_agent()
+    {
+        return *std::next(_present.begin(), static_cast<std::ptrdiff_t>(draw(_present.size())));
+    }
+
+    void iterate()
+    {
+        for(const auto id : _leaving) {
+            _present.erase(id);
+        }
+        _leaving.clear();
+        _sim.iterate();
+        for(const auto& removal : _sim.removed_agents()) {
+            if(removal.exit) {
+                _leaving.push_back(removal.agent_id);
+            } else {
+                _present.erase(removal.agent_id);
+            }
+        }
+    }
+
+    ::testing::AssertionResult finds_exactly_the_present_agents()
+    {
+        auto& agents = _sim.agents();
+        if(!std::is_sorted(
+               agents.begin(), agents.end(), [](const GenericAgent& a, const GenericAgent& b) {
+                   return a.id < b.id;
+               })) {
+            return ::testing::AssertionFailure()
+                   << "The agents are not sorted by id. Run this test in a Debug build: an assert "
+                      "in Simulation stops at the first operation that breaks the order.";
+        }
+        const Simulation& sim = _sim;
+        for(const auto id : _added) {
+            bool found = false;
+            try {
+                found = sim.agent(id).id == id;
+            } catch(const SimulationError&) {
+            }
+            if(found != _present.contains(id)) {
+                return ::testing::AssertionFailure()
+                       << "Agent " << id.get_id()
+                       << (found ? " is found after it left." : " is not found.");
+            }
+        }
+        if(sim.agent_count() != _present.size()) {
+            return ::testing::AssertionFailure() << "The simulation holds " << sim.agent_count()
+                                                 << " agents, expected " << _present.size() << ".";
+        }
+        return ::testing::AssertionSuccess();
+    }
+};
+} // namespace
+
+TEST_P(AgentLookup, FindsExactlyTheAgentsInTheSimulation)
+{
+    // Large exits, so that agents leave throughout the run.
+    const auto wide_exit = [this](Point lower, Point upper) {
+        return _sim.add_stage(
+            ExitDescription{
+                {{Polygon{test_geometries::rectangle_points(lower, upper)}, _room_id}}});
+    };
+    const auto exit1 = wide_exit({1, 15}, {5, 19});
+    const auto exit2 = wide_exit({15, 1}, {19, 5});
+    const auto wp1 = waypoint({10, 10});
+    const std::vector<Route::ID> routes{
+        _sim.add_route({fixed({}, exit1)}),
+        _sim.add_route({fixed({}, exit2)}),
+        _sim.add_route({fixed({}, wp1), fixed(wp1, exit1)}),
+        _sim.add_route({fixed({}, waypoint({18, 18}))})};
+
+    for(int operation = 0; operation < 200; ++operation) {
+        switch(draw(10)) {
+            case 0:
+            case 1:
+            case 2:
+                add_agents(routes);
+                break;
+            case 3:
+                if(!_present.empty()) {
+                    _sim.mark_agent_for_removal(any_present_agent());
+                }
+                break;
+            case 4:
+                if(!_present.empty()) {
+                    _sim.reroute(any_present_agent(), routes[draw(routes.size())]);
+                }
+                break;
+            default:
+                for(std::size_t step = draw(5) + 1; step > 0; --step) {
+                    iterate();
+                }
+        }
+        ASSERT_TRUE(finds_exactly_the_present_agents())
+            << "seed " << GetParam() << ", operation " << operation;
+    }
+}
+
+INSTANTIATE_TEST_SUITE_P(Seeds, AgentLookup, ::testing::Values(1, 2, 3, 4, 42));

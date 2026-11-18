@@ -29,6 +29,7 @@
 #include <fmt/ranges.h>
 
 #include <algorithm>
+#include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
@@ -55,6 +56,29 @@ std::vector<AreaPiece> pieces_of(const Geometry& geometry, const std::vector<Sta
         pieces.insert(pieces.end(), clipped.begin(), clipped.end());
     }
     return pieces;
+}
+
+/// The agent with @p id in @p agents, or their end. Agents are sorted by id: ids only grow,
+/// agents are appended, and removal keeps their order.
+template <typename Agents>
+auto find_agent(Agents& agents, GenericAgent::ID id)
+{
+    const auto iter = std::lower_bound(
+        std::begin(agents),
+        std::end(agents),
+        id,
+        [](const GenericAgent& agent, GenericAgent::ID wanted) { return agent.id < wanted; });
+    return iter != std::end(agents) && iter->id == id ? iter : std::end(agents);
+}
+
+/// Whether @p agents are sorted by id, as find_agent() requires.
+template <typename Agents>
+bool sorted_by_id(const Agents& agents)
+{
+    return std::is_sorted(
+        std::begin(agents), std::end(agents), [](const GenericAgent& a, const GenericAgent& b) {
+            return a.id < b.id;
+        });
 }
 } // namespace
 
@@ -115,6 +139,7 @@ void Simulation::iterate()
             }
         }
         _agent_removal_system.run(_agents, _to_remove, _stage_manager);
+        assert(sorted_by_id(_agents));
     }
 
     {
@@ -147,6 +172,7 @@ void Simulation::iterate()
         // reflects the new positions for queries before the next iteration (agents_in_range,
         // add_agent validation).
         _neighborhood_search.update(_agents);
+        assert(sorted_by_id(_agents));
     }
     _clock.advance();
 }
@@ -295,6 +321,7 @@ GenericAgent::ID Simulation::emplace_agent(GenericAgent&& agent, std::optional<s
         _agent_names.emplace(agent.id, std::move(*name));
     }
     _agents.emplace_back(std::move(agent));
+    assert(sorted_by_id(_agents));
     _neighborhood_search.add_agent(_agents.back());
     _tactical_decision_system.run(
         *_routing_engine, IteratorPair(std::prev(std::end(_agents)), std::end(_agents)));
@@ -407,9 +434,7 @@ void Simulation::mark_agent_for_removal(GenericAgent::ID id)
 {
     throw_if_state(State::Iterating | State::Closed, "mark_agent_for_removal");
     JPS_TRACE_FUNC;
-    const auto iter = std::find_if(
-        std::begin(_agents), std::end(_agents), [id](auto& agent) { return agent.id == id; });
-    if(iter == std::end(_agents)) {
+    if(find_agent(_agents, id) == std::end(_agents)) {
         throw SimulationError("Unknown agent id {}", id);
     }
     const auto scheduled = [id](const auto& ids) {
@@ -430,8 +455,7 @@ const GenericAgent& Simulation::agent(GenericAgent::ID id) const
 {
     throw_if_state(State::Closed, "agent");
     JPS_TRACE_FUNC;
-    const auto iter =
-        std::find_if(_agents.begin(), _agents.end(), [id](auto& ped) { return id == ped.id; });
+    const auto iter = find_agent(_agents, id);
     if(iter == _agents.end()) {
         throw SimulationError("Trying to access unknown Agent {}", id);
     }
@@ -442,8 +466,7 @@ GenericAgent& Simulation::agent(GenericAgent::ID id)
 {
     throw_if_state(State::Closed, "agent");
     JPS_TRACE_FUNC;
-    const auto iter =
-        std::find_if(_agents.begin(), _agents.end(), [id](auto& ped) { return id == ped.id; });
+    const auto iter = find_agent(_agents, id);
     if(iter == _agents.end()) {
         throw SimulationError("Trying to access unknown Agent {}", id);
     }
