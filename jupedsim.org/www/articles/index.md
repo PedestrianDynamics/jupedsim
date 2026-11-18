@@ -16,6 +16,7 @@ description: "Longer pieces on modelling, validation and working with JuPedSim."
 ```{toctree}
 :hidden:
 
+collision-free-speed-model-defaults
 writing-guide
 coding-style
 floor-fields
