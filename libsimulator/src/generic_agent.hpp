@@ -100,7 +100,7 @@ struct fmt::formatter<GenericAgent> {
                 return fmt::format_to(
                     ctx.out(),
                     "Agent[id={}, journey={}, stage={}, route_orientation={}, target={}, pos={}, "
-                    "state={})",
+                    "state={}]",
                     agent.id,
                     agent.journey_id,
                     agent.stage_id,
