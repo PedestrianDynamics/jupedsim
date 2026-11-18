@@ -74,7 +74,7 @@ def main():
     output_file = pathlib.Path("example_csv_out.csv")
 
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(),
+        model=jps.CollisionFreeSpeedModelTordeux2016(),
         geometry=geo_builder.build(),
         trajectory_writer=CsvTrajectoryWriter(
             output_file=output_file,
@@ -93,7 +93,7 @@ def main():
             journey_id=journey_id,
             stage_id=exit_id,
             position=pos,
-            state=jps.CollisionFreeSpeedModelState(radius=0.3),
+            state=jps.CollisionFreeSpeedModelTordeux2016State(radius=0.3),
             region_id=region,
         )
 

@@ -9,7 +9,9 @@ def _simulation():
         boundary=[(0, 0), (10, 0), (10, 10), (0, 10)], height=0.0
     )
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=surface.build(), dt=0.01
+        model=jps.CollisionFreeSpeedModelTordeux2016(),
+        geometry=surface.build(),
+        dt=0.01,
     )
     return simulation, room
 
@@ -66,7 +68,7 @@ def test_a_journey_with_every_transition_kind_leads_to_the_exit():
             journey_id=journey_id,
             stage_id=first,
             position=(1.0, y),
-            state=jps.CollisionFreeSpeedModelState(),
+            state=jps.CollisionFreeSpeedModelTordeux2016State(),
             region_id=room,
         )
     while sim.agent_count() > 0 and sim.iteration_count() < 5000:

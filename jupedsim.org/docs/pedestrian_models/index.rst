@@ -5,7 +5,7 @@ Pedestrian Models
 .. toctree::
    :hidden:
 
-   collision_free_speed_model_v3
+   motivation_collision_free_speed_model
 
 JuPedSim allows creating pedestrian simulations with different microscopic
 models. Below is a list of all the models that are currently available. Please
@@ -31,34 +31,51 @@ speed of the agent. This simplified and computationally efficient model aims to
 mirror real-world pedestrian behaviors while maintaining smooth movement
 dynamics.
 
-The collision-free speed model is available in three variants in JuPedSim,
-constructed via :class:`~jupedsim.CollisionFreeSpeedModel`,
-:class:`~jupedsim.CollisionFreeSpeedModelV2` and
-:class:`~jupedsim.CollisionFreeSpeedModelV3`. V1 and V2 differ in whether the
-repulsion parameters are global or per-agent: in
-:class:`~jupedsim.CollisionFreeSpeedModel` (V1) the repulsion parameters
-(``strength_neighbor_repulsion``, ``range_neighbor_repulsion``,
-``strength_geometry_repulsion``, ``range_geometry_repulsion``) are model-level
-constructor arguments shared by all agents, whereas in V2 they are per-agent.
-V3 uses a different steering approach (rotational steering with heading
-relaxation).
+The collision-free speed model is available in three variants in JuPedSim:
+
+- :class:`~jupedsim.CollisionFreeSpeedModel` is the default and recommended
+  variant. Its repulsion parameters are per-agent. It keeps improving with
+  fixes and tuning.
+- :class:`~jupedsim.CollisionFreeSpeedModelTordeux2016` is the model as
+  published by `Tordeux et al. (2016) <https://arxiv.org/abs/1512.05597>`__.
+  Its repulsion parameters (``strength_neighbor_repulsion``,
+  ``range_neighbor_repulsion``, ``strength_geometry_repulsion``,
+  ``range_geometry_repulsion``) are model-level constructor arguments shared
+  by all agents. It is kept unchanged so that results stay reproducible
+  against the paper.
+- :class:`~jupedsim.MotivationCollisionFreeSpeedModel` is the model as
+  published by `Üsten et al. (2026) <https://arxiv.org/abs/2604.26858>`__. It
+  uses a different steering approach (rotational steering with heading
+  relaxation) and is also kept unchanged.
+
+:class:`~jupedsim.CollisionFreeSpeedModel` differs from the published model in
+two ways. First, ``neighbor_repulsion_anisotropy`` weights the repulsion of a
+neighbor by the cosine of its angle to the desired direction and ignores
+neighbors behind, as the vision factor of the Generalized Centrifugal Force
+Model does; 0 restores the isotropic repulsion of the paper. This reduces
+deadlocks in front of narrow bottlenecks. Second, its default parameters come
+from a joint calibration on the Hermes bottleneck and the CrowdQueue gate
+experiments, described in `this note
+<https://pedestriandynamics.org/notes/dakota-defaults/>`__. The desired speed
+keeps its default of 1.2 m/s.
 
 The per-agent parameters are set when adding an agent (via
-:class:`~jupedsim.CollisionFreeSpeedModelState`,
-:class:`~jupedsim.CollisionFreeSpeedModelV2State` or
-:class:`~jupedsim.CollisionFreeSpeedModelV3State`) and can be changed at any
+:class:`~jupedsim.CollisionFreeSpeedModelTordeux2016State`,
+:class:`~jupedsim.CollisionFreeSpeedModelState` or
+:class:`~jupedsim.MotivationCollisionFreeSpeedModelState`) and can be changed at any
 time through the agent handle.
 
-In :class:`~jupedsim.CollisionFreeSpeedModelV3` the same per-agent base
+In :class:`~jupedsim.MotivationCollisionFreeSpeedModel` the same per-agent base
 parameters are available (via
-:class:`~jupedsim.CollisionFreeSpeedModelV3State`), plus rotational steering controls
+:class:`~jupedsim.MotivationCollisionFreeSpeedModelState`), plus rotational steering controls
 (``range_x_scale``, ``range_y_scale``, ``theta_max_upper_bound``)
 and ``agent_buffer``.
-V3 also uses temporal heading relaxation to damp rapid left-right turning
+It also uses temporal heading relaxation to damp rapid left-right turning
 changes and a tiny deterministic reverse-speed floor to help unblock contact
 situations.
 
-See the `V3 specification <collision_free_speed_model_v3.html>`_ for full details.
+See the `MotivationCollisionFreeSpeedModel specification
+<motivation_collision_free_speed_model.html>`_ for full details.
 
 A `detailed description
 <https://pedestriandynamics.org/models/collision_free_speed_model/>`__ is

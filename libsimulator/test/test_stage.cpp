@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "collision_free_speed_model_state.hpp"
+#include "collision_free_speed_model_tordeux2016_state.hpp"
 #include "destination.hpp"
 #include "floorfield_routing_engine.hpp"
 #include "generic_agent.hpp"
@@ -33,7 +33,7 @@ GenericAgent agent_at(Location location, BaseStage::ID stage_id)
         Journey::ID::invalid,
         stage_id,
         location,
-        CollisionFreeSpeedModelState{});
+        CollisionFreeSpeedModelTordeux2016State{});
 }
 } // namespace
 

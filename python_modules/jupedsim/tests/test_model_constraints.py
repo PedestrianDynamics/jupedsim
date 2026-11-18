@@ -13,7 +13,7 @@ def square_room_100x100_cfsm():
         boundary=[(-50, -50), (50, -50), (50, 50), (-50, 50)], height=0.0
     )
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=surface.build()
+        model=jps.CollisionFreeSpeedModelTordeux2016(), geometry=surface.build()
     )
 
     exit_id = simulation.add_exit_stage(
@@ -52,7 +52,7 @@ def square_room_100x100_gcfm():
     "radius",
     np.arange(0.01, 2, 0.5),
 )
-def test_collision_free_speed_model_can_set_radius(
+def test_collision_free_speed_model_tordeux2016_can_set_radius(
     square_room_100x100_cfsm, radius
 ):
     simulation, journey_id, exit_id, agent_position, room = (
@@ -63,12 +63,12 @@ def test_collision_free_speed_model_can_set_radius(
         journey_id=journey_id,
         stage_id=exit_id,
         position=agent_position,
-        state=jps.CollisionFreeSpeedModelState(radius=radius),
+        state=jps.CollisionFreeSpeedModelTordeux2016State(radius=radius),
         region_id=room,
     )
 
 
-def test_collision_free_speed_model_can_not_set_radius_too_small(
+def test_collision_free_speed_model_tordeux2016_can_not_set_radius_too_small(
     square_room_100x100_cfsm,
 ):
     simulation, journey_id, exit_id, agent_position, room = (
@@ -82,12 +82,12 @@ def test_collision_free_speed_model_can_not_set_radius_too_small(
             journey_id=journey_id,
             stage_id=exit_id,
             position=agent_position,
-            state=jps.CollisionFreeSpeedModelState(radius=-1),
+            state=jps.CollisionFreeSpeedModelTordeux2016State(radius=-1),
             region_id=room,
         )
 
 
-def test_collision_free_speed_model_can_not_set_radius_zero(
+def test_collision_free_speed_model_tordeux2016_can_not_set_radius_zero(
     square_room_100x100_cfsm,
 ):
     simulation, journey_id, exit_id, agent_position, room = (
@@ -101,12 +101,12 @@ def test_collision_free_speed_model_can_not_set_radius_zero(
             journey_id=journey_id,
             stage_id=exit_id,
             position=agent_position,
-            state=jps.CollisionFreeSpeedModelState(radius=0),
+            state=jps.CollisionFreeSpeedModelTordeux2016State(radius=0),
             region_id=room,
         )
 
 
-def test_collision_free_speed_model_can_not_set_radius_too_large(
+def test_collision_free_speed_model_tordeux2016_can_not_set_radius_too_large(
     square_room_100x100_cfsm,
 ):
     simulation, journey_id, exit_id, agent_position, room = (
@@ -120,13 +120,13 @@ def test_collision_free_speed_model_can_not_set_radius_too_large(
             journey_id=journey_id,
             stage_id=exit_id,
             position=agent_position,
-            state=jps.CollisionFreeSpeedModelState(radius=2.1),
+            state=jps.CollisionFreeSpeedModelTordeux2016State(radius=2.1),
             region_id=room,
         )
 
 
 @pytest.mark.parametrize("desired_speed", np.arange(0.0, 10, 1))
-def test_collision_free_speed_model_can_set_desired_speed(
+def test_collision_free_speed_model_tordeux2016_can_set_desired_speed(
     square_room_100x100_cfsm, desired_speed
 ):
     simulation, journey_id, exit_id, agent_position, room = (
@@ -137,12 +137,14 @@ def test_collision_free_speed_model_can_set_desired_speed(
         journey_id=journey_id,
         stage_id=exit_id,
         position=agent_position,
-        state=jps.CollisionFreeSpeedModelState(desired_speed=desired_speed),
+        state=jps.CollisionFreeSpeedModelTordeux2016State(
+            desired_speed=desired_speed
+        ),
         region_id=room,
     )
 
 
-def test_collision_free_speed_model_can_not_set_desired_speed_too_small(
+def test_collision_free_speed_model_tordeux2016_can_not_set_desired_speed_too_small(
     square_room_100x100_cfsm,
 ):
     simulation, journey_id, exit_id, agent_position, room = (
@@ -156,12 +158,12 @@ def test_collision_free_speed_model_can_not_set_desired_speed_too_small(
             journey_id=journey_id,
             stage_id=exit_id,
             position=agent_position,
-            state=jps.CollisionFreeSpeedModelState(desired_speed=-1),
+            state=jps.CollisionFreeSpeedModelTordeux2016State(desired_speed=-1),
             region_id=room,
         )
 
 
-def test_collision_free_speed_model_can_not_set_desired_speed_too_large(
+def test_collision_free_speed_model_tordeux2016_can_not_set_desired_speed_too_large(
     square_room_100x100_cfsm,
 ):
     simulation, journey_id, exit_id, agent_position, room = (
@@ -175,13 +177,15 @@ def test_collision_free_speed_model_can_not_set_desired_speed_too_large(
             journey_id=journey_id,
             stage_id=exit_id,
             position=agent_position,
-            state=jps.CollisionFreeSpeedModelState(desired_speed=10.1),
+            state=jps.CollisionFreeSpeedModelTordeux2016State(
+                desired_speed=10.1
+            ),
             region_id=room,
         )
 
 
 @pytest.mark.parametrize("time_gap", [*np.arange(0.1, 10, 1), 10])
-def test_collision_free_speed_model_can_set_time_gap(
+def test_collision_free_speed_model_tordeux2016_can_set_time_gap(
     square_room_100x100_cfsm, time_gap
 ):
     simulation, journey_id, exit_id, agent_position, room = (
@@ -192,12 +196,12 @@ def test_collision_free_speed_model_can_set_time_gap(
         journey_id=journey_id,
         stage_id=exit_id,
         position=agent_position,
-        state=jps.CollisionFreeSpeedModelState(time_gap=time_gap),
+        state=jps.CollisionFreeSpeedModelTordeux2016State(time_gap=time_gap),
         region_id=room,
     )
 
 
-def test_collision_free_speed_model_can_not_set_time_gap_too_small(
+def test_collision_free_speed_model_tordeux2016_can_not_set_time_gap_too_small(
     square_room_100x100_cfsm,
 ):
     simulation, journey_id, exit_id, agent_position, room = (
@@ -211,12 +215,12 @@ def test_collision_free_speed_model_can_not_set_time_gap_too_small(
             journey_id=journey_id,
             stage_id=exit_id,
             position=agent_position,
-            state=jps.CollisionFreeSpeedModelState(time_gap=-1),
+            state=jps.CollisionFreeSpeedModelTordeux2016State(time_gap=-1),
             region_id=room,
         )
 
 
-def test_collision_free_speed_model_can_not_set_time_too_large(
+def test_collision_free_speed_model_tordeux2016_can_not_set_time_too_large(
     square_room_100x100_cfsm,
 ):
     simulation, journey_id, exit_id, agent_position, room = (
@@ -231,13 +235,13 @@ def test_collision_free_speed_model_can_not_set_time_too_large(
             journey_id=journey_id,
             stage_id=exit_id,
             position=agent_position,
-            state=jps.CollisionFreeSpeedModelState(time_gap=10.1),
+            state=jps.CollisionFreeSpeedModelTordeux2016State(time_gap=10.1),
             region_id=room,
         )
 
 
 @pytest.mark.parametrize("radius", np.arange(0.1, 0.5, 0.1))
-def test_collision_free_speed_model_can_not_add_agent_too_close_to_wall(
+def test_collision_free_speed_model_tordeux2016_can_not_add_agent_too_close_to_wall(
     square_room_100x100_cfsm,
     radius,
 ):
@@ -253,7 +257,7 @@ def test_collision_free_speed_model_can_not_add_agent_too_close_to_wall(
             journey_id=journey_id,
             stage_id=exit_id,
             position=(50 - (0.99 * radius), 0),
-            state=jps.CollisionFreeSpeedModelState(radius=radius),
+            state=jps.CollisionFreeSpeedModelTordeux2016State(radius=radius),
             region_id=room,
         )
 

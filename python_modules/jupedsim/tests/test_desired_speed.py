@@ -11,14 +11,14 @@ model_params = [
         ["desiredSpeed", "v0"],
     ),
     (
-        jps.CollisionFreeSpeedModel,
-        jps.CollisionFreeSpeedModelState,
+        jps.CollisionFreeSpeedModelTordeux2016,
+        jps.CollisionFreeSpeedModelTordeux2016State,
         {},
         ["desiredSpeed", "v0"],
     ),
     (
-        jps.CollisionFreeSpeedModelV2,
-        jps.CollisionFreeSpeedModelV2State,
+        jps.CollisionFreeSpeedModel,
+        jps.CollisionFreeSpeedModelState,
         {},
         ["desiredSpeed", "v0"],
     ),

@@ -11,7 +11,7 @@ def test_geometry_holes_returns_coordinates():
     surface = jps.GeometryBuilder()
     room = surface.add_region(polygon=poly, height=0.0)
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=surface.build()
+        model=jps.CollisionFreeSpeedModelTordeux2016(), geometry=surface.build()
     )
     geo = simulation.get_geometry()
 

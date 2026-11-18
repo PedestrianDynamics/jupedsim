@@ -87,7 +87,9 @@ def test_timer_integration_small_simulation(tmp_path):
         boundary=[(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)], height=0.0
     )
     sim = Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=surface.build(), dt=0.01
+        model=jps.CollisionFreeSpeedModelTordeux2016(),
+        geometry=surface.build(),
+        dt=0.01,
     )
 
     # underlying C++ simulation object exposed as _obj

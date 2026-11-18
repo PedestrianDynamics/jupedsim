@@ -37,20 +37,20 @@ def _add(sim, room, exit_id, journey, position, state):
     ids=["ints", "floats", "list", "numpy"],
 )
 def test_position_accepts_any_two_element_sequence(position):
-    sim, room, exit_id, journey = _room(jps.CollisionFreeSpeedModelV2())
+    sim, room, exit_id, journey = _room(jps.CollisionFreeSpeedModel())
     agent = _add(
         sim,
         room,
         exit_id,
         journey,
         position,
-        jps.CollisionFreeSpeedModelV2State(),
+        jps.CollisionFreeSpeedModelState(),
     )
     assert sim.agent(agent).position == (5.0, 5.0)
 
 
 def test_position_rejects_wrong_length():
-    sim, room, exit_id, journey = _room(jps.CollisionFreeSpeedModelV2())
+    sim, room, exit_id, journey = _room(jps.CollisionFreeSpeedModel())
     with pytest.raises(TypeError):
         _add(
             sim,
@@ -58,7 +58,7 @@ def test_position_rejects_wrong_length():
             exit_id,
             journey,
             (1, 2, 3),
-            jps.CollisionFreeSpeedModelV2State(),
+            jps.CollisionFreeSpeedModelState(),
         )
 
 
@@ -68,26 +68,26 @@ def test_position_rejects_wrong_length():
     ids=["ints", "floats", "list", "numpy"],
 )
 def test_orientation_accepts_any_two_element_sequence(orientation):
-    sim, room, exit_id, journey = _room(jps.CollisionFreeSpeedModelV2())
+    sim, room, exit_id, journey = _room(jps.CollisionFreeSpeedModel())
     agent = _add(
         sim,
         room,
         exit_id,
         journey,
         (5, 5),
-        jps.CollisionFreeSpeedModelV2State(orientation=orientation),
+        jps.CollisionFreeSpeedModelState(orientation=orientation),
     )
     assert sim.agent(agent).state.orientation == (1.0, 0.0)
 
 
 def test_orientation_rejects_wrong_length():
     with pytest.raises(TypeError):
-        jps.CollisionFreeSpeedModelV2State(orientation=(1, 2, 3))
+        jps.CollisionFreeSpeedModelState(orientation=(1, 2, 3))
 
 
 @pytest.mark.parametrize("bad", [math.nan, math.inf])
 def test_non_finite_position_is_not_in_region(bad):
-    sim, room, exit_id, journey = _room(jps.CollisionFreeSpeedModelV2())
+    sim, room, exit_id, journey = _room(jps.CollisionFreeSpeedModel())
     with pytest.raises(jps.SimulationError, match="is not in region"):
         _add(
             sim,
@@ -95,24 +95,24 @@ def test_non_finite_position_is_not_in_region(bad):
             exit_id,
             journey,
             (bad, 5.0),
-            jps.CollisionFreeSpeedModelV2State(),
+            jps.CollisionFreeSpeedModelState(),
         )
 
 
 def test_agents_in_range_of_nan_is_empty():
-    sim, *_ = _room(jps.CollisionFreeSpeedModelV2())
+    sim, *_ = _room(jps.CollisionFreeSpeedModel())
     assert list(sim.agents_in_range((math.nan, 0.0), 1.0)) == []
 
 
 def test_zero_orientation_still_moves():
-    sim, room, exit_id, journey = _room(jps.CollisionFreeSpeedModelV2())
+    sim, room, exit_id, journey = _room(jps.CollisionFreeSpeedModel())
     agent = _add(
         sim,
         room,
         exit_id,
         journey,
         (5, 5),
-        jps.CollisionFreeSpeedModelV2State(orientation=(0.0, 0.0)),
+        jps.CollisionFreeSpeedModelState(orientation=(0.0, 0.0)),
     )
     sim.iterate(3)
     assert sim.agent(agent).position[0] > 5.0

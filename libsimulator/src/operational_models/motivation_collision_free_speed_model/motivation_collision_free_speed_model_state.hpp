@@ -4,7 +4,7 @@
 
 #include <fmt/core.h>
 
-struct CollisionFreeSpeedModelV3State {
+struct MotivationCollisionFreeSpeedModelState {
     Vector orientation{1.0, 0.0};
     double strength_neighbor_repulsion{8.0};
     double range_neighbor_repulsion{0.1};
@@ -23,15 +23,15 @@ struct CollisionFreeSpeedModelV3State {
 };
 
 template <>
-struct fmt::formatter<CollisionFreeSpeedModelV3State> {
+struct fmt::formatter<MotivationCollisionFreeSpeedModelState> {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
     template <typename FormatContext>
-    auto format(const CollisionFreeSpeedModelV3State& m, FormatContext& ctx) const
+    auto format(const MotivationCollisionFreeSpeedModelState& m, FormatContext& ctx) const
     {
         return fmt::format_to(
             ctx.out(),
-            "CollisionFreeSpeedModelV3[orientation={}, strengthNeighborRepulsion={}, "
+            "MotivationCollisionFreeSpeedModel[orientation={}, strengthNeighborRepulsion={}, "
             "rangeNeighborRepulsion={}, strengthGeometryRepulsion={}, rangeGeometryRepulsion={}, "
             "rangeXScale={}, rangeYScale={}, thetaMaxUpperBound={}, agentBuffer={}, "
             "timeGap={}, v0={}, radius={}, headingAngle={}])",

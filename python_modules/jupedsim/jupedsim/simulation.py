@@ -16,10 +16,8 @@ from jupedsim.pyjupedsim import (
     AnticipationVelocityModelState,
     CollisionFreeSpeedModel,
     CollisionFreeSpeedModelState,
-    CollisionFreeSpeedModelV2,
-    CollisionFreeSpeedModelV2State,
-    CollisionFreeSpeedModelV3,
-    CollisionFreeSpeedModelV3State,
+    CollisionFreeSpeedModelTordeux2016,
+    CollisionFreeSpeedModelTordeux2016State,
     DirectSteeringStage,
     ExitStage,
     FloorfieldOptions,
@@ -27,6 +25,8 @@ from jupedsim.pyjupedsim import (
     GeneralizedCentrifugalForceModelState,
     Geometry,
     Location,
+    MotivationCollisionFreeSpeedModel,
+    MotivationCollisionFreeSpeedModelState,
     OperationalModel,
     SocialForceModel,
     SocialForceModelState,
@@ -43,9 +43,9 @@ from jupedsim.serialization import TrajectoryWriter
 
 _STATE_TYPES = (
     GeneralizedCentrifugalForceModelState,
+    CollisionFreeSpeedModelTordeux2016State,
     CollisionFreeSpeedModelState,
-    CollisionFreeSpeedModelV2State,
-    CollisionFreeSpeedModelV3State,
+    MotivationCollisionFreeSpeedModelState,
     AnticipationVelocityModelState,
     SocialForceModelState,
     WarpDriverModelState,
@@ -65,9 +65,9 @@ class Simulation:
         self,
         *,
         model: (
-            CollisionFreeSpeedModel
-            | CollisionFreeSpeedModelV2
-            | CollisionFreeSpeedModelV3
+            CollisionFreeSpeedModelTordeux2016
+            | CollisionFreeSpeedModel
+            | MotivationCollisionFreeSpeedModel
             | GeneralizedCentrifugalForceModel
             | SocialForceModel
             | AnticipationVelocityModel
@@ -86,7 +86,7 @@ class Simulation:
             model:
                 Defines the operational model used in the simulation. Every built-in model is passed
                 as a configured instance carrying its model-level parameters, e.g.
-                :class:`~jupedsim.CollisionFreeSpeedModel` or :class:`~jupedsim.SocialForceModel`.
+                :class:`~jupedsim.CollisionFreeSpeedModelTordeux2016` or :class:`~jupedsim.SocialForceModel`.
                 Custom Python models are passed as instances of a
                 :class:`~jupedsim.CustomOperationalModel` subclass.
 
@@ -222,9 +222,9 @@ class Simulation:
         position: tuple[float, float],
         state: (
             GeneralizedCentrifugalForceModelState
+            | CollisionFreeSpeedModelTordeux2016State
             | CollisionFreeSpeedModelState
-            | CollisionFreeSpeedModelV2State
-            | CollisionFreeSpeedModelV3State
+            | MotivationCollisionFreeSpeedModelState
             | AnticipationVelocityModelState
             | SocialForceModelState
             | WarpDriverModelState
@@ -242,7 +242,7 @@ class Simulation:
                 :meth:`~jupedsim.GeometryBuilder.add_region` or
                 :meth:`~jupedsim.GeometryBuilder.connect_regions`.
             state: Initial per-agent model state. For built-in models this is the matching
-                ``XModelState`` instance, e.g. :class:`~jupedsim.CollisionFreeSpeedModelState`. For
+                ``XModelState`` instance, e.g. :class:`~jupedsim.CollisionFreeSpeedModelTordeux2016State`. For
                 custom models this is your own object, of whatever type your
                 :class:`~jupedsim.CustomOperationalModel` expects. The state type has to match the
                 model used in this simulation. When adding agents with invalid parameters, or too

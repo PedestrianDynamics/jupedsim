@@ -7,29 +7,30 @@ import pytest
 # exactly these values.
 STATE_DEFAULTS = [
     (
+        jps.CollisionFreeSpeedModelTordeux2016State,
+        {
+            "orientation": (0.0, 0.0),
+            "time_gap": 1.0,
+            "desired_speed": 1.2,
+            "radius": 0.2,
+        },
+    ),
+    (
         jps.CollisionFreeSpeedModelState,
         {
             "orientation": (0.0, 0.0),
-            "time_gap": 1.0,
+            "time_gap": 0.956,
             "desired_speed": 1.2,
-            "radius": 0.2,
+            "radius": 0.155,
+            "strength_neighbor_repulsion": 2.83,
+            "range_neighbor_repulsion": 0.15,
+            "strength_geometry_repulsion": 5.95,
+            "range_geometry_repulsion": 0.021,
+            "neighbor_repulsion_anisotropy": 0.5,
         },
     ),
     (
-        jps.CollisionFreeSpeedModelV2State,
-        {
-            "orientation": (0.0, 0.0),
-            "time_gap": 1.0,
-            "desired_speed": 1.2,
-            "radius": 0.2,
-            "strength_neighbor_repulsion": 8.0,
-            "range_neighbor_repulsion": 0.1,
-            "strength_geometry_repulsion": 5.0,
-            "range_geometry_repulsion": 0.02,
-        },
-    ),
-    (
-        jps.CollisionFreeSpeedModelV3State,
+        jps.MotivationCollisionFreeSpeedModelState,
         {
             "orientation": (1.0, 0.0),
             "strength_neighbor_repulsion": 8.0,
@@ -145,8 +146,8 @@ def _trajectory(model, state_cls):
 
 MODEL_DEFAULTS = [
     (
-        jps.CollisionFreeSpeedModel,
-        jps.CollisionFreeSpeedModelState,
+        jps.CollisionFreeSpeedModelTordeux2016,
+        jps.CollisionFreeSpeedModelTordeux2016State,
         {},
         {
             "strength_neighbor_repulsion": 8.0,

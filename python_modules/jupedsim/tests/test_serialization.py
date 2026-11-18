@@ -11,7 +11,7 @@ def _square_simulation(writer):
         polygon=shapely.Polygon([(0, 0), (5, 0), (5, 5), (0, 5)]), height=0.0
     )
     return jps.Simulation(
-        model=jps.CollisionFreeSpeedModelV2(),
+        model=jps.CollisionFreeSpeedModel(),
         geometry=surface.build(),
         trajectory_writer=writer,
         dt=0.01,

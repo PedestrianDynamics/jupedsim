@@ -21,18 +21,6 @@ namespace
 constexpr double wall_search_radius = 4.0;
 } // namespace
 
-CollisionFreeSpeedModel::CollisionFreeSpeedModel(
-    double strength_neighbor_repulsion,
-    double range_neighbor_repulsion,
-    double strength_geometry_repulsion,
-    double range_geometry_repulsion)
-    : _strength_neighbor_repulsion(strength_neighbor_repulsion)
-    , _range_neighbor_repulsion(range_neighbor_repulsion)
-    , _strength_geometry_repulsion(strength_geometry_repulsion)
-    , _range_geometry_repulsion(range_geometry_repulsion)
-{
-}
-
 OperationalModelType CollisionFreeSpeedModel::type() const
 {
     return OperationalModelType::CollisionFreeSpeed;
@@ -44,12 +32,13 @@ Vector CollisionFreeSpeedModel::compute_next_state(
     const AgentStep& step) const
 {
     const auto& current_state = std::get<State>(current);
-    const auto neighborhood = step.other_agents_in_range(
+    auto neighborhood = step.other_agents_in_range(
         _cut_off_radius, [&step](const NeighborView& n) { return step.no_geometry_between(n); });
 
+    const auto desired_direction = step.route_orientation();
     Vector neighbor_repulsion{};
     for(const auto& neighbor : neighborhood) {
-        neighbor_repulsion += this->neighbor_repulsion(current_state, neighbor);
+        neighbor_repulsion += this->neighbor_repulsion(current_state, neighbor, desired_direction);
     }
 
     Vector boundary_repulsion{};
@@ -57,7 +46,6 @@ Vector CollisionFreeSpeedModel::compute_next_state(
         boundary_repulsion += this->boundary_repulsion(current_state, wall);
     }
 
-    const auto desired_direction = step.route_orientation();
     auto direction = (desired_direction + neighbor_repulsion + boundary_repulsion).normalized();
     if(direction == Vector{}) {
         direction = current_state.orientation;
@@ -93,6 +81,9 @@ void CollisionFreeSpeedModel::check_model_constraint(
     constexpr double time_gap_min = 0.1;
     constexpr double time_gap_max = 10.;
     validate_constraint(time_gap, time_gap_min, time_gap_max, "timeGap");
+
+    validate_constraint(
+        current_state.neighbor_repulsion_anisotropy, 0.0, 1.0, "neighborRepulsionAnisotropy");
 
     const auto neighbors = view.other_agents_in_range(2.0);
     for(const auto& neighbor : neighbors) {
@@ -147,13 +138,19 @@ double CollisionFreeSpeedModel::get_spacing(
 }
 Vector CollisionFreeSpeedModel::neighbor_repulsion(
     const State& current_state,
-    const NeighborView& neighbor) const
+    const NeighborView& neighbor,
+    const Vector& desired_direction) const
 {
     const auto& other = std::get<State>(*neighbor.state);
     const auto [distance, direction] = neighbor.relative_position.norm_and_normalized();
     const auto l = current_state.radius + other.radius;
-    return direction * -(this->_strength_neighbor_repulsion *
-                         exp((l - distance) / this->_range_neighbor_repulsion));
+    // Vision factor as in the GCFM: a neighbor counts with the cosine of its angle to the
+    // desired direction, and not at all when it is behind.
+    const auto vision = std::max(desired_direction.scalar_product(direction), 0.0);
+    const auto anisotropy = current_state.neighbor_repulsion_anisotropy;
+    const auto weight = 1.0 - anisotropy + anisotropy * vision;
+    return direction * -(weight * current_state.strength_neighbor_repulsion *
+                         exp((l - distance) / current_state.range_neighbor_repulsion));
 }
 
 Vector CollisionFreeSpeedModel::boundary_repulsion(
@@ -161,7 +158,7 @@ Vector CollisionFreeSpeedModel::boundary_repulsion(
     const WallView& boundary) const
 {
     const auto l = current_state.radius;
-    const auto r_iw =
-        -_strength_geometry_repulsion * exp((l - boundary.distance) / _range_geometry_repulsion);
+    const auto r_iw = -current_state.strength_geometry_repulsion *
+                      exp((l - boundary.distance) / current_state.range_geometry_repulsion);
     return -boundary.normal * r_iw; // The repulsion points away from the agent
 }
