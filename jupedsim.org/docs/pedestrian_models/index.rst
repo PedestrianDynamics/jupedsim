@@ -48,6 +48,17 @@ The collision-free speed model is available in three variants in JuPedSim:
   uses a different steering approach (rotational steering with heading
   relaxation) and is also kept unchanged.
 
+:class:`~jupedsim.CollisionFreeSpeedModel` differs from the published model in
+two ways. First, ``neighbor_repulsion_anisotropy`` weights the repulsion of a
+neighbor by the cosine of its angle to the desired direction and ignores
+neighbors behind, as the vision factor of the Generalized Centrifugal Force
+Model does; 0 restores the isotropic repulsion of the paper. This reduces
+deadlocks in front of narrow bottlenecks. Second, its default parameters come
+from a joint calibration on the Hermes bottleneck and the CrowdQueue gate
+experiments, described in `this note
+<https://pedestriandynamics.org/notes/dakota-defaults/>`__. The desired speed
+keeps its default of 1.2 m/s.
+
 The per-agent parameters are set when adding an agent (via
 :class:`~jupedsim.CollisionFreeSpeedModelTordeux2016State`,
 :class:`~jupedsim.CollisionFreeSpeedModelState` or
