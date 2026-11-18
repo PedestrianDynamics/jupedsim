@@ -34,30 +34,99 @@ the model has one more parameter, the vision factor described below.
 All of them are per-agent parameters of `CollisionFreeSpeedModelState`. Any value
 you pass replaces the default for that agent.
 
+## The model
+
+In each time step, agent $i$ first chooses a direction $\mathbf{e}_i$ and then a
+speed along it. The direction is the normalised sum of the desired direction
+$\mathbf{e}_0$, given by the route, and the repulsion from neighbors and walls:
+
+```{math}
+:label: cfsm-direction
+
+\mathbf{e}_i = \frac{\mathbf{u}_i}{\lVert \mathbf{u}_i \rVert}, \qquad
+\mathbf{u}_i = \mathbf{e}_0 + \sum_j w_{ij}\, \mathbf{R}_{ij} + \sum_w \mathbf{R}_{iw}.
+```
+
+The repulsion of neighbor $j$ and of wall $w$ decays exponentially with the
+distance:
+
+```{math}
+:label: cfsm-repulsion
+
+\mathbf{R}_{ij} = -k \exp\left(\frac{\ell_{ij} - d_{ij}}{D}\right) \mathbf{e}_{ij}, \qquad
+\mathbf{R}_{iw} = k_w \exp\left(\frac{r_i - d_{iw}}{D_w}\right) \mathbf{n}_{iw},
+```
+
+where $d_{ij}$ is the distance between the centres of $i$ and $j$,
+$\mathbf{e}_{ij}$ the unit vector from $i$ to $j$, $\ell_{ij} = r_i + r_j$ the
+sum of the radii, $d_{iw}$ the distance from $i$ to wall $w$, and
+$\mathbf{n}_{iw}$ the unit vector from the wall to the agent. Neighbors count
+within 3 m if no wall lies between them, walls within 4 m.
+
+The speed is the optimal velocity function of the spacing $s_i$ to the closest
+neighbor in front:
+
+```{math}
+:label: cfsm-speed
+
+\mathbf{v}_i = V(s_i)\, \mathbf{e}_i, \qquad
+V(s) = \min\left(\max\left(\frac{s}{T},\, 0\right),\, v_0\right), \qquad
+s_i = \min_{j \in J_i} \left(d_{ij} - \ell_{ij}\right).
+```
+
+$J_i$ contains the neighbors in front of $i$ (with
+$\mathbf{e}_i \cdot \mathbf{e}_{ij} \geq 0$) whose centre lies at most
+$\ell_{ij}$ to the side of the line through $i$ in direction $\mathbf{e}_i$.
+Without such a neighbor, the agent walks at $v_0$. Since the speed is never
+larger than $s_i / T$, an agent never steps into the neighbor in front.
+
+The symbols map to the per-agent parameters of `CollisionFreeSpeedModelState`
+as follows:
+
+| symbol | parameter |
+|---|---|
+| $r_i$ | `radius` |
+| $T$ | `time_gap` |
+| $v_0$ | `desired_speed` |
+| $k$, $D$ | `strength_neighbor_repulsion`, `range_neighbor_repulsion` |
+| $k_w$, $D_w$ | `strength_geometry_repulsion`, `range_geometry_repulsion` |
+| $\lambda$ | `neighbor_repulsion_anisotropy` |
+
+Equations {eq}`cfsm-direction` to {eq}`cfsm-speed` are the model of Tordeux et
+al. (2016) with per-agent parameters, except for the weight $w_{ij}$, which is
+new in JuPedSim 2.0.
+
 ## The vision factor
 
-The direction of an agent is the sum of its desired direction and the repulsion
-from its neighbors and from the walls. In the published model (Tordeux et al.
-2016), every neighbor within range repels the agent, whether it is in front or
-behind. In front of a narrow bottleneck, this can block the flow: the crowd
-behind pushes the agents of the front row sideways against the wall next to the
-opening. They turn away from the exit, find a neighbor or a wall in their path,
-and stop. Since the speed of the model depends only on the free space in the
-walking direction, nothing restarts them.
+In the published model, every neighbor within range repels the agent, i.e.
+$w_{ij} = 1$, whether the neighbor is in front or behind. In front of a narrow
+bottleneck, this can block the flow: the crowd behind pushes the agents of the
+front row sideways against the wall next to the opening. They turn away from
+the exit, find a neighbor or a wall in their path, and stop. Since the speed
+depends only on the spacing in the walking direction, nothing restarts them.
 
-The Generalized Centrifugal Force Model (Chraibi et al. 2010) weights the force of
-a neighbor by the cosine of its angle to the desired direction and ignores
-neighbors behind. The `CollisionFreeSpeedModel` adopts this vision factor. The
-repulsion of neighbor $j$ on agent $i$ is multiplied by
+The Generalized Centrifugal Force Model (Chraibi et al. 2010) weights the force
+of a neighbor by the cosine of its angle to the desired direction and ignores
+neighbors behind. The `CollisionFreeSpeedModel` adopts this vision factor with
+a weight $\lambda$:
 
-$$
-w_{ij} = 1 - \lambda + \lambda \max(0,\, \mathbf{e}_0 \cdot \mathbf{e}_{ij}),
-$$
+```{math}
+:label: cfsm-vision
 
-where $\mathbf{e}_0$ is the desired direction, $\mathbf{e}_{ij}$ the unit vector
-from $i$ to $j$, and $\lambda$ is `neighbor_repulsion_anisotropy`. $\lambda = 0$
-is the isotropic model of the paper, $\lambda = 1$ the full vision factor. The
-default is 0.5.
+w_{ij} = 1 - \lambda + \lambda \max\left(0,\, \mathbf{e}_0 \cdot \mathbf{e}_{ij}\right).
+```
+
+$\lambda = 0$ is the isotropic model of the paper, and $\lambda = 1$ is the full
+vision factor. With the default $\lambda = 0.5$, a neighbor in front counts
+fully, and a neighbor beside or behind counts half, see Fig. 1.
+
+```{figure} cfsm_vision_weight.png
+:alt: Polar plot of the weight of a neighbor's repulsion against its angle to the desired direction, for lambda 0, 0.5 and 1
+:width: 420px
+
+Weight $w_{ij}$ of a neighbor's repulsion, Eq. {eq}`cfsm-vision`, against the
+angle $\theta$ between the desired direction and the direction to the neighbor.
+```
 
 ## How the values were found
 
@@ -84,13 +153,24 @@ We compared three values of the vision factor. With $\lambda = 0$, the best set
 stalled in 13 of 50 runs. With $\lambda = 1$, the fit at the gate was about
 twice as bad. With $\lambda = 0.5$, the selected set stalled in none of 50 runs
 and fitted the data slightly better than the best set found earlier for
-JuPedSim 1.4.
+JuPedSim 1.4, see Fig. 2. Its parameters are the defaults in the table above.
+
+```{figure} cfsm_calibration_results.png
+:alt: Four panels with the flow in a narrow bottleneck, the calibration objective of all candidate sets, the flow in the Hermes bottleneck and the relative errors at the CrowdQueue gate
+
+Calibration results. (a) Flow in the bottleneck of Xu et al. (2019), not used in
+the calibration, desired speeds as in that paper. (b) Calibration objective of
+the candidate sets, each re-evaluated with 5 seeds (50 runs); red is the stall
+penalty, the default set is "C, anisotropy 0.5". (c) Hermes flow; open markers
+are widths not used in the calibration. (d) Relative error of flow, density and
+speed at the seven CrowdQueue runs.
+```
 
 ## What the defaults reproduce
 
 The following results come from data that were not used in the calibration.
 
-**Narrow bottleneck.** Fig. 1 shows the bottleneck of Xu et al. (2019), 1.0 to
+**Narrow bottleneck.** Fig. 3 shows the bottleneck of Xu et al. (2019), 1.0 to
 2.5 m wide, with all agents at the default desired speed of 1.2 m/s. With the
 former defaults, the flow is 39 to 56 % below the experiment, and in 2 of 10
 runs at 1.0 m nobody passes for 60 s. With the 2.0 defaults, no run stalls, and
@@ -108,12 +188,12 @@ runs.
 **Wide bottleneck.** At the Hermes widths 3.0 and 4.4 m, the flow is about 20 %
 too low.
 
-**Both changes are needed.** Fig. 2 separates the two changes at w = 1.0 m. The
+**Both changes are needed.** Fig. 4 separates the two changes at w = 1.0 m. The
 vision factor alone does not change the former defaults. The calibrated
 parameters alone, with $\lambda = 0$, clog after about 34 s: a dense arch closes
 over the entrance. Only the combination empties the room. The calibrated
 parameters make the crowd denser and faster, and the vision factor keeps such a
-crowd from blocking the opening. Fig. 2 shows one seed. However, it agrees with
+crowd from blocking the opening. Fig. 4 shows one seed. However, it agrees with
 the stalls of the five-seed tests above.
 
 ```{figure} cfsm_defaults_variants.png
