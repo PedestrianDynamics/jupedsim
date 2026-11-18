@@ -64,8 +64,10 @@ Simulation::Simulation(
     std::unique_ptr<OperationalModel>&& operational_model,
     std::shared_ptr<const Geometry> geometry,
     double dt,
-    FloorfieldOptions floorfield_options)
+    FloorfieldOptions floorfield_options,
+    std::size_t worker_count)
     : _clock(dt)
+    , _jobs(worker_count)
     , _operational_decision_system(std::move(operational_model))
     , _geometry(std::move(geometry))
     , _routing_engine(std::make_unique<RoutingEngine>(*_geometry, floorfield_options))
@@ -111,13 +113,13 @@ void Simulation::iterate()
 
     {
         JPS_SCOPED_TIMER_AND_TRACE(_timer, "Tactical Decision System", General);
-        _tactical_decision_system.run(*_routing_engine, _agents);
+        _tactical_decision_system.run(*_routing_engine, _agents, _jobs);
     }
 
     {
         JPS_SCOPED_TIMER_AND_TRACE(_timer, "Operational Decision System", General);
         _operational_decision_system.run(
-            _clock.dt(), _clock.elapsed_time(), _neighborhood_search, *_geometry, _agents);
+            _clock.dt(), _clock.elapsed_time(), _neighborhood_search, *_geometry, _agents, _jobs);
         // Agents moved during the operational step; rebuild the grid so cell membership
         // reflects the new positions for queries before the next iteration (agents_in_range,
         // add_agent validation).
@@ -272,7 +274,7 @@ GenericAgent::ID Simulation::add_agent(
 
     auto v = IteratorPair(std::prev(std::end(_agents)), std::end(_agents));
     _stategical_decision_system.run(_journeys, v, _stage_manager);
-    _tactical_decision_system.run(*_routing_engine, v);
+    _tactical_decision_system.run(*_routing_engine, v, _jobs);
     return _agents.back().id.get_id();
 }
 

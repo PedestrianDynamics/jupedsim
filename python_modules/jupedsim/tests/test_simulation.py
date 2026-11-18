@@ -389,6 +389,24 @@ def test_leaving_the_with_block_closes_the_simulation():
         sim.iterate()
 
 
+def run_crowd_on_u_stair(model, state, iterations=300, **simulation_args):
+    sim, ground, upper = u_stair(model=model, **simulation_args)
+    journey_id, exit_id = journey_to_upper_exit(sim, upper)
+    ids = [
+        sim.add_agent(
+            journey_id=journey_id,
+            stage_id=exit_id,
+            position=position,
+            state=state(),
+            region_id=ground,
+        )
+        for position in [(3.3, 7.6), (4.0, 7.6), (3.3, 8.3), (4.0, 8.3)]
+    ]
+    for _ in range(iterations):
+        sim.iterate()
+    return [sim.agent(agent_id).position for agent_id in ids]
+
+
 @pytest.mark.parametrize(
     "model, state",
     [
@@ -486,3 +504,22 @@ def test_a_geometry_is_shared_not_consumed():
     path = engine.get_shortest_path((1, 1, 0), (9, 9, 0))
     assert path[0] == pytest.approx((1, 1, 0))
     assert path[-1] == pytest.approx((9, 9, 0))
+
+
+def test_results_do_not_depend_on_the_worker_count():
+    without_workers = run_crowd_on_u_stair(
+        jps.WarpDriverModel(rng_seed=7),
+        jps.WarpDriverModelState,
+        worker_count=0,
+    )
+    with_workers = run_crowd_on_u_stair(
+        jps.WarpDriverModel(rng_seed=7),
+        jps.WarpDriverModelState,
+        worker_count=3,
+    )
+    assert without_workers == with_workers
+
+
+def test_a_negative_worker_count_is_rejected():
+    with pytest.raises(TypeError):
+        u_stair(model=jps.CollisionFreeSpeedModel(), worker_count=-1)

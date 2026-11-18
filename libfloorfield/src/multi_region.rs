@@ -469,19 +469,29 @@ impl MultiRegionFloorfield {
     /// cell near it (`NotRoutable`). Solves the destination on first use, which
     /// can fail with `NotConverged`.
     pub fn direction(&mut self, region: usize, x: f64, y: f64, dest: usize) -> Result<(f64, f64)> {
-        let g = self.covered(region, x, y)?;
-        let cell = nearest_walkable(&self.spec, g, [x, y], None)
-            .ok_or(MultiRegionError::NotRoutable { region, x, y })?;
+        let cell = self.routable_cell(region, x, y)?;
         self.solution(dest)?;
-        let d = &self.destinations[dest];
-        let source = d
-            .sources
-            .iter()
-            .find(|s| s.region == region && s.cells.binary_search(&cell).is_ok())
-            .map(|s| s.kind);
-        let query = d.solution.as_ref().expect("solved above").query[region].as_deref();
-        direction_at_cell(&self.regions[region], query, cell, source, (x, y))
-            .ok_or_else(|| no_descent(region, (x, y), dest))
+        self.direction_from_cell(region, cell, (x, y), dest)
+    }
+
+    /// Solves `dest` unless it already is, for `solved_direction`. Can fail
+    /// with `NotConverged`.
+    pub fn solve_destination(&mut self, dest: usize) -> Result<()> {
+        self.solution(dest).map(|_| ())
+    }
+
+    /// `direction` towards a destination `solve_destination` has solved.
+    /// Reads only, so any number of threads can call it at once. Same errors
+    /// as `direction`, and `Internal` if `dest` is not solved.
+    pub fn solved_direction(
+        &self,
+        region: usize,
+        x: f64,
+        y: f64,
+        dest: usize,
+    ) -> Result<(f64, f64)> {
+        let cell = self.routable_cell(region, x, y)?;
+        self.direction_from_cell(region, cell, (x, y), dest)
     }
 
     /// The direction of `direction` at the centre of every cell of `region`'s
@@ -526,9 +536,7 @@ impl MultiRegionFloorfield {
     /// the same cell as `direction`, with the same errors. Solves the
     /// destination on first use.
     pub fn travel_time(&mut self, region: usize, x: f64, y: f64, dest: usize) -> Result<f32> {
-        let g = self.covered(region, x, y)?;
-        let cell = nearest_walkable(&self.spec, g, [x, y], None)
-            .ok_or(MultiRegionError::NotRoutable { region, x, y })?;
+        let cell = self.routable_cell(region, x, y)?;
         let sol = self.solution(dest)?;
         Ok(sol.query[region]
             .as_ref()
@@ -536,6 +544,43 @@ impl MultiRegionFloorfield {
     }
 
     // ── Internals ───────────────────────────────────────────────────────────
+
+    /// The cell `direction` and `travel_time` are taken at for (x, y).
+    fn routable_cell(&self, region: usize, x: f64, y: f64) -> Result<u32> {
+        let g = self.covered(region, x, y)?;
+        nearest_walkable(&self.spec, g, [x, y], None).ok_or(MultiRegionError::NotRoutable {
+            region,
+            x,
+            y,
+        })
+    }
+
+    fn direction_from_cell(
+        &self,
+        region: usize,
+        cell: u32,
+        p: (f64, f64),
+        dest: usize,
+    ) -> Result<(f64, f64)> {
+        let d = self.destination(dest)?;
+        let solution = d
+            .solution
+            .as_ref()
+            .ok_or_else(|| MultiRegionError::Internal(format!("destination {dest} not solved")))?;
+        let source = d
+            .sources
+            .iter()
+            .find(|s| s.region == region && s.cells.binary_search(&cell).is_ok())
+            .map(|s| s.kind);
+        direction_at_cell(
+            &self.regions[region],
+            solution.query[region].as_deref(),
+            cell,
+            source,
+            p,
+        )
+        .ok_or_else(|| no_descent(region, p, dest))
+    }
 
     fn region(&self, region: usize) -> Result<&RegionGrid> {
         self.regions
@@ -1224,6 +1269,30 @@ mod tests {
             points.push((r, px, py));
         }
         points
+    }
+
+    /// The tactical step shares the field between threads through this.
+    #[test]
+    fn the_field_can_be_shared_between_threads() {
+        fn assert_sync<T: Sync>() {}
+        assert_sync::<MultiRegionFloorfield>();
+    }
+
+    #[test]
+    fn solved_direction_needs_a_solved_destination_and_then_matches_direction() {
+        let mut ff = whole_corridor();
+        let dest = ff.add_point_destination(0, 18.0, 2.0).unwrap();
+
+        assert!(matches!(
+            ff.solved_direction(0, 2.0, 2.0, dest),
+            Err(MultiRegionError::Internal(_))
+        ));
+
+        ff.solve_destination(dest).unwrap();
+        assert_eq!(
+            ff.solved_direction(0, 2.0, 2.0, dest).unwrap(),
+            ff.direction(0, 2.0, 2.0, dest).unwrap()
+        );
     }
 
     /// An agent inside the polygon but in a cell whose centre lies outside it

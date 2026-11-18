@@ -9,6 +9,7 @@
 #include "generic_agent.hpp"
 #include "geometry/geometry.hpp"
 #include "geometry_fixtures.hpp"
+#include "job_queue.hpp"
 #include "kernel.hpp"
 #include "neighborhood_search.hpp"
 #include "operational_decision_system.hpp"
@@ -149,7 +150,8 @@ TEST(CustomModel, RunsThroughOperationalDecisionSystem)
     neighborhood_search.update(agents);
 
     OperationalDecisionSystem system{std::make_unique<MinimalCustomModel>()};
-    system.run(0.5, 0.0, neighborhood_search, flat_square(), agents);
+    JobQueue jobs{0};
+    system.run(0.5, 0.0, neighborhood_search, flat_square(), agents, jobs);
 
     const auto& agent = agents.front();
     const auto& state = std::get<CustomModel::State>(agent.state).get<MinimalState>();

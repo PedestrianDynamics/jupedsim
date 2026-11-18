@@ -29,6 +29,13 @@ public:
     /// Unit vector from @p from along the route to the destination. Zero once inside it.
     Vector orientation(const Location& from) const;
 
+    /// Solves the floor field of the destination unless it already is, for solved_orientation.
+    void solve() const;
+
+    /// orientation() once solve() was called. Reads only, so any number of threads can call it
+    /// at once.
+    Vector solved_orientation(const Location& from) const;
+
     /// Travel times to the destination over the grid of @p region.
     TravelTimeGrid travel_times(std::size_t region) const;
 

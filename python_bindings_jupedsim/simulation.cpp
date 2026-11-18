@@ -99,7 +99,8 @@ void init_simulation(py::module_& m)
             py::init([](std::unique_ptr<OperationalModel> model,
                         std::shared_ptr<Geometry> geometry,
                         double dt,
-                        FloorfieldOptions floorfield_options) {
+                        FloorfieldOptions floorfield_options,
+                        std::size_t worker_count) {
                 if(!model) {
                     throw std::invalid_argument("model must not be None");
                 }
@@ -107,13 +108,14 @@ void init_simulation(py::module_& m)
                     throw std::invalid_argument("geometry must not be None");
                 }
                 return std::make_unique<Simulation>(
-                    std::move(model), std::move(geometry), dt, floorfield_options);
+                    std::move(model), std::move(geometry), dt, floorfield_options, worker_count);
             }),
             py::kw_only(),
             py::arg("model"),
             py::arg("geometry"),
             py::arg("dt"),
-            py::arg("floorfield_options"))
+            py::arg("floorfield_options"),
+            py::arg("worker_count"))
         .def(
             "add_waypoint_stage",
             [](Simulation& sim, Areas areas) {

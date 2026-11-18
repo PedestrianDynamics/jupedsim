@@ -7,6 +7,7 @@
 #include "generic_agent.hpp"
 #include "geometry/geometry.hpp"
 #include "geometry/location.hpp"
+#include "job_queue.hpp"
 #include "journey.hpp"
 #include "kernel.hpp"
 #include "neighborhood_search.hpp"
@@ -59,6 +60,7 @@ private:
     };
 
     SimulationClock _clock;
+    JobQueue _jobs;
     StrategicalDecisionSystem _stategical_decision_system{};
     TacticalDecisionSystem _tactical_decision_system{};
     OperationalDecisionSystem _operational_decision_system;
@@ -83,11 +85,14 @@ public:
     /// Shares ownership of the geometry, which is never modified: several simulations, or a
     /// simulation and a routing engine, may use the same geometry. `geo()` hands out a reference
     /// that stays valid for as long as the simulation lives.
+    /// @param worker_count Threads computing the tactical and operational steps next to the
+    /// calling one; 0 computes them on the calling thread alone.
     Simulation(
         std::unique_ptr<OperationalModel>&& operational_model,
         std::shared_ptr<const Geometry> geometry,
         double dt,
-        FloorfieldOptions floorfield_options);
+        FloorfieldOptions floorfield_options,
+        std::size_t worker_count = 4);
 
     Simulation(const Simulation& other) = delete;
     Simulation& operator=(const Simulation& other) = delete;

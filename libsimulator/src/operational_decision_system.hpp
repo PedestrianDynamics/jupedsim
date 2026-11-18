@@ -5,6 +5,7 @@
 #include "environment_query.hpp"
 #include "generic_agent.hpp"
 #include "geometry/geometry.hpp"
+#include "job_queue.hpp"
 #include "kernel.hpp"
 #include "neighborhood_search.hpp"
 #include "operational_model.hpp"
@@ -39,17 +40,27 @@ public:
         double /*t_in_sec*/,
         const NeighborhoodSearch<GenericAgent>& neighborhood_search,
         const Geometry& geometry,
-        AgentContainer<GenericAgent>& agents)
+        AgentContainer<GenericAgent>& agents,
+        JobQueue& jobs)
     {
         const EnvironmentQuery env_query{geometry, neighborhood_search};
         _next.clear();
         std::copy(std::begin(agents), std::end(agents), std::back_inserter(_next));
-        for(size_t index = 0; index < agents.size(); ++index) {
+        // Each step reads only the current generation and writes only its own slot in
+        // _next, so steps can run in any order and at the same time.
+        const auto compute_step = [&](size_t index) {
             const auto& current = agents[index];
             auto& next = _next[index];
             const AgentStep step{env_query, current, dt};
             const Vector movement = _model->compute_next_state(current.state, next.state, step);
             next.location.move_on_surface(movement);
+        };
+        if(_model->supports_parallel_step()) {
+            parallel_for(jobs, agents.size(), compute_step);
+        } else {
+            for(size_t index = 0; index < agents.size(); ++index) {
+                compute_step(index);
+            }
         }
         // Swap in the computed generation. This is safe because no caller retains
         // pointers/references across an iteration (Python-side agent handles resolve per

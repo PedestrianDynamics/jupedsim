@@ -5,9 +5,18 @@
 
 #include <functional>
 #include <string>
+#include <vector>
 
 namespace logging
 {
+
+enum class Level { Debug, Info, Warning, Error, Off };
+
+/// A message collected instead of logged, see Logger::Collect.
+struct Message {
+    Level level;
+    std::string text;
+};
 
 class Logger
 {
@@ -36,6 +45,25 @@ public:
     void log_error_message(const std::string& msg);
     void clear_all_callbacks();
 
+    /// Passes @p message to the callback of its level.
+    void log(const Message& message);
+
+    /// While alive, messages logged on the thread that created it are appended to `into`
+    /// instead of being passed to the callbacks. Lets threads other than the one that set the
+    /// callbacks log, which then passes their messages on with log().
+    class Collect
+    {
+        std::vector<Message>* _previous;
+
+    public:
+        explicit Collect(std::vector<Message>& into);
+        ~Collect();
+        Collect(const Collect& other) = delete;
+        Collect& operator=(const Collect& other) = delete;
+        Collect(Collect&& other) = delete;
+        Collect& operator=(Collect&& other) = delete;
+    };
+
 private:
     Logger() = default;
     ~Logger() = default;
@@ -44,8 +72,6 @@ private:
     Logger(Logger&& other) = delete;
     Logger& operator=(Logger&& other) = delete;
 };
-
-enum class Level { Debug, Info, Warning, Error, Off };
 
 } // namespace logging
 

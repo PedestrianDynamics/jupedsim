@@ -12,7 +12,6 @@
 #include <algorithm>
 #include <cmath>
 #include <limits>
-#include <vector>
 
 namespace
 {
@@ -29,7 +28,7 @@ constexpr double min_reverse_speed =
 constexpr double wall_search_radius = 4.0;
 
 double neighbor_influence(
-    const std::vector<NeighborView>& neighborhood,
+    const NeighborList& neighborhood,
     const Vector& reference_direction,
     const CollisionFreeSpeedModelV3::State& current_state)
 {

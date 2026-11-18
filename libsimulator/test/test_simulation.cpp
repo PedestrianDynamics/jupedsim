@@ -541,3 +541,56 @@ TEST(AgentRngSeeding, ARemovedAgentsStreamIsNotHandedOutAgain)
     ASSERT_EQ(world.sim.agent_count(), 1u);
     EXPECT_TRUE(world.has_stream(world.add({10, 2}), 2));
 }
+
+namespace
+{
+/// Where a crowd ends up that is routed to two destinations and, for every third agent, to a
+/// directly steered target. The model draws random numbers, so a draw that depends on the
+/// thread shows up as well.
+std::vector<Point> crowd_positions_with(std::size_t worker_count)
+{
+    using AgentState = AnticipationVelocityModel::State;
+    auto room = test_geometries::rectangle({0, 0}, {20, 20});
+    const auto room_id = room.room_id;
+    Simulation sim{
+        std::make_unique<AnticipationVelocityModel>(0.3, 1234),
+        std::move(room.geometry),
+        0.01,
+        FloorfieldOptions{},
+        worker_count};
+    const auto to_right = journey_to(sim, Point{18, 18}, room_id);
+    const auto to_left = journey_to(sim, Point{2, 18}, room_id);
+    const auto steering = sim.add_stage(DirectSteeringDescription{});
+    const auto steered = sim.add_journey({{steering, NonTransitionDescription{}}});
+
+    for(int column = 0; column < 12; ++column) {
+        for(int row = 0; row < 8; ++row) {
+            const Point position{4.0 + column * 1.0, 2.0 + row * 1.0};
+            const auto kind = (column + row) % 3;
+            if(kind == 0) {
+                const auto id = sim.add_agent(steered, steering, position, AgentState{}, room_id);
+                sim.set_agent_target(id, Point{10, 15});
+            } else {
+                const auto& route = kind == 1 ? to_right : to_left;
+                sim.add_agent(route.first, route.second, position, AgentState{}, room_id);
+            }
+        }
+    }
+    for(int step = 0; step < 100; ++step) {
+        sim.iterate();
+    }
+
+    std::vector<Point> positions{};
+    for(const auto& agent : sim.agents()) {
+        positions.push_back(agent.location.xy());
+    }
+    return positions;
+}
+} // namespace
+
+TEST(SimulationWorkers, ResultsDoNotDependOnTheWorkerCount)
+{
+    const auto expected = crowd_positions_with(0);
+    EXPECT_EQ(crowd_positions_with(1), expected);
+    EXPECT_EQ(crowd_positions_with(4), expected);
+}

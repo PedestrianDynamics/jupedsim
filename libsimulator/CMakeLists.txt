@@ -2,6 +2,7 @@
 # Build libsimulator
 ################################################################################
 
+find_package(Threads REQUIRED)
 
 add_library(simulator STATIC)
 
@@ -41,6 +42,8 @@ target_sources(simulator PRIVATE
     src/hash_combine.hpp
     src/into.hpp
     src/iterator_pair.hpp
+    src/job_queue.cpp
+    src/job_queue.hpp
     src/journey.cpp
     src/journey.hpp
     src/line_segment.cpp
@@ -91,6 +94,7 @@ target_link_libraries(simulator PUBLIC
     build_info
     perfetto
     floorfield_cxx
+    Threads::Threads
 )
 target_link_options(simulator PUBLIC
     $<$<AND:$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>,$<BOOL:${BUILD_WITH_SANITIZERS}>>:-fsanitize=address,undefined>
@@ -119,6 +123,7 @@ if (BUILD_TESTS)
         test/test_generic_agent_formatter.cpp
         test/test_geometry.cpp
         test/test_geometry_builder.cpp
+        test/test_job_queue.cpp
         test/test_journey.cpp
         test/test_line_segment.cpp
         test/test_location.cpp
@@ -155,6 +160,7 @@ if (BUILD_BENCHMARKS)
     add_executable(libsimulator-benchmarks
         benchmark/benchmark_main.cpp
         benchmark/benchmark_line_segment.hpp
+        benchmark/benchmark_operational_step.hpp
     )
 
     target_link_libraries(libsimulator-benchmarks PRIVATE
