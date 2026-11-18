@@ -25,6 +25,6 @@ struct fmt::formatter<GeneralizedCentrifugalForceModelState> {
     template <typename FormatContext>
     auto format(const GeneralizedCentrifugalForceModelState& m, FormatContext& ctx) const
     {
-        return fmt::format_to(ctx.out(), "GCFM[orientation={}, speed={}])", m.orientation, m.speed);
+        return fmt::format_to(ctx.out(), "GCFM[orientation={}, speed={}]", m.orientation, m.speed);
     }
 };
