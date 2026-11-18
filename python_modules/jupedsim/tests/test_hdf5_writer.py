@@ -276,7 +276,7 @@ def test_travel_times_round_trip(tmp_path):
 
     assert grids.dtype.names == (
         "iteration",
-        "stage_id",
+        "target_id",
         "region_id",
         "origin_x",
         "origin_y",
@@ -288,11 +288,11 @@ def test_travel_times_round_trip(tmp_path):
     region_count = sim.geometry.region_count()
     # The exit was added before the first iteration, the waypoint after it.
     assert [
-        (int(g["iteration"]), int(g["stage_id"]), int(g["region_id"]))
+        (int(g["iteration"]), int(g["target_id"]), int(g["region_id"]))
         for g in grids
     ] == [
-        (iteration, stage, region)
-        for iteration, stage in [(0, exit_.id), (1, waypoint.id)]
+        (iteration, target, region)
+        for iteration, target in [(0, exit_.id), (1, waypoint.id)]
         for region in range(region_count)
     ]
     assert values.dtype.str == "<f4"
@@ -301,7 +301,7 @@ def test_travel_times_round_trip(tmp_path):
     assert directions.shape == (values.shape[0], 2)
 
     for g in grids:
-        expected = sim.travel_times(sim.target(int(g["stage_id"])))[
+        expected = sim.travel_times(sim.target(int(g["target_id"])))[
             sim.geometry.region(int(g["region_id"]))
         ]
         assert (g["origin_x"], g["origin_y"]) == expected.origin
@@ -326,8 +326,8 @@ def test_travel_times_are_not_written_by_default(square_simulation):
         assert "travel_times" not in hf
 
 
-def test_travel_times_without_stages(tmp_path):
-    out = tmp_path / "no_stages.h5"
+def test_travel_times_without_targets(tmp_path):
+    out = tmp_path / "no_targets.h5"
     writer = jps.Hdf5TrajectoryWriter(
         output_file=out, every_nth_frame=1, write_travel_times=True
     )
@@ -471,9 +471,9 @@ def test_travel_times_are_recorded_when_speed_fields_change(tmp_path):
     assert _iterations(out, left) == [0, 3, 6]
     assert _iterations(out, right) == [0]
     with jps.Hdf5TrajectoryLoader(out) as loader:
-        for (stage, iteration), values in expected.items():
+        for (target, iteration), values in expected.items():
             np.testing.assert_array_equal(
-                loader.load_travel_times(stage.id, iteration)[0].values,
+                loader.load_travel_times(target.id, iteration)[0].values,
                 values.astype("<f4"),
             )
         # Between snapshots the earlier one is in effect, without one the last.
@@ -491,7 +491,7 @@ def test_travel_times_are_recorded_when_speed_fields_change(tmp_path):
     assert not np.array_equal(expected[(left, 0)], expected[(left, 3)])
 
 
-def test_a_default_speed_change_skips_stages_with_their_own_field(tmp_path):
+def test_a_default_speed_change_skips_targets_with_their_own_field(tmp_path):
     out = tmp_path / "default.h5"
     writer = jps.Hdf5TrajectoryWriter(
         output_file=out, every_nth_frame=1, write_travel_times=True
@@ -509,7 +509,7 @@ def test_a_default_speed_change_skips_stages_with_their_own_field(tmp_path):
     sim.iterate()
     _halve_default_speed(sim)
     sim.iterate()
-    # Clearing a field the stage does not have changes nothing.
+    # Clearing a field the target does not have changes nothing.
     sim.clear_custom_speed_field(default, _room(sim))
     sim.iterate()
     writer.close()
@@ -549,7 +549,7 @@ def test_every_nth_travel_time_field_keeps_the_first_and_every_nth_change(
     later = sim.add_target(
         jps.Exit([([(0, 0), (1, 0), (1, 5), (0, 5)], _room(sim))])
     )
-    # Five changes, at iterations 1..5; the later stage's first field is its own.
+    # Five changes, at iterations 1..5; the later target's first field is its own.
     base = sim.default_speed_fields()[_room(sim)].values
     for factor in [0.5, 1.0, 0.5, 1.0, 0.5]:
         sim.set_default_speed_field(_room(sim), base * factor)

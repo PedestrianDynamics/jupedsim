@@ -345,16 +345,18 @@ def travel_time_file(tmp_path):
 def test_hdf5_trajectory_loading_travel_times_round_trip(
     travel_time_file,
 ) -> None:
-    path, sim, stage_ids = travel_time_file
+    path, sim, target_ids = travel_time_file
     with jps.Hdf5TrajectoryLoader(path) as loader:
         assert loader.has_travel_times()
-        assert loader.load_travel_time_stage_ids() == stage_ids
-        loaded = {stage: loader.load_travel_times(stage) for stage in stage_ids}
+        assert loader.load_travel_time_target_ids() == target_ids
+        loaded = {
+            target: loader.load_travel_times(target) for target in target_ids
+        }
 
-    for stage in stage_ids:
-        expected = sim.travel_times(sim.target(stage))
-        assert list(loaded[stage]) == [region.id for region in expected]
-        for region_id, grid in loaded[stage].items():
+    for target in target_ids:
+        expected = sim.travel_times(sim.target(target))
+        assert list(loaded[target]) == [region.id for region in expected]
+        for region_id, grid in loaded[target].items():
             want = expected[sim.geometry.region(region_id)]
             assert grid.origin == want.origin
             assert (grid.width, grid.height) == (want.width, want.height)
@@ -378,22 +380,22 @@ def test_hdf5_trajectory_loading_without_travel_times(tmp_path) -> None:
         with pytest.raises(
             jps.Hdf5TrajectoryLoader.Error, match="holds no travel times"
         ):
-            loader.load_travel_time_stage_ids()
+            loader.load_travel_time_target_ids()
         with pytest.raises(
             jps.Hdf5TrajectoryLoader.Error, match="holds no travel times"
         ):
             loader.load_travel_times(0)
 
 
-def test_hdf5_trajectory_loading_travel_times_unknown_stage_reports_id(
+def test_hdf5_trajectory_loading_travel_times_unknown_target_reports_id(
     travel_time_file,
 ) -> None:
-    path, _, stage_ids = travel_time_file
+    path, _, target_ids = travel_time_file
     with (
         jps.Hdf5TrajectoryLoader(path) as loader,
         pytest.raises(
             jps.Hdf5TrajectoryLoader.Error,
-            match=rf"No travel times for stage_id=99, found stages \{stage_ids}",
+            match=r"No travel times for target_id=99$",
         ),
     ):
         loader.load_travel_times(99)
@@ -402,20 +404,20 @@ def test_hdf5_trajectory_loading_travel_times_unknown_stage_reports_id(
 def test_hdf5_trajectory_loading_travel_times_before_the_first_snapshot(
     travel_time_file,
 ) -> None:
-    path, sim, stage_ids = travel_time_file
+    path, sim, target_ids = travel_time_file
     with jps.Hdf5TrajectoryLoader(path) as loader:
-        assert loader.load_travel_time_iterations(stage_ids[0]) == [0]
-        assert list(loader.load_travel_times(stage_ids[0], 7)) == [
-            region.id for region in sim.travel_times(sim.target(stage_ids[0]))
+        assert loader.load_travel_time_iterations(target_ids[0]) == [0]
+        assert list(loader.load_travel_times(target_ids[0], 7)) == [
+            region.id for region in sim.travel_times(sim.target(target_ids[0]))
         ]
         with pytest.raises(
             jps.Hdf5TrajectoryLoader.Error,
-            match=r"No travel times for stage_id=99, found stages",
+            match=r"No travel times for target_id=99$",
         ):
             loader.load_travel_time_iterations(99)
 
 
-def test_hdf5_trajectory_loading_travel_times_of_a_stage_added_later(
+def test_hdf5_trajectory_loading_travel_times_of_a_target_added_later(
     tmp_path,
 ) -> None:
     surface = jps.GeometryBuilder()
@@ -439,7 +441,7 @@ def test_hdf5_trajectory_loading_travel_times_of_a_stage_added_later(
         assert list(loader.load_travel_times(exit_.id, 2)) == [room.id]
         with pytest.raises(
             jps.Hdf5TrajectoryLoader.Error,
-            match=rf"No travel times for stage_id={exit_.id} at iteration 1, the first are from iteration 2",
+            match=rf"No travel times for target_id={exit_.id} at iteration 1, the first are from iteration 2",
         ):
             loader.load_travel_times(exit_.id, 1)
 

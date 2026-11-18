@@ -28,7 +28,7 @@ public:
     FixedTransitionDescription(BaseStage::ID next) : _next(next)
     {
         if(next == BaseStage::ID::invalid.get_id()) {
-            throw SimulationError("Can not create fixed transition from invalid stage id.");
+            throw SimulationError("Can not create fixed transition from invalid target id.");
         }
     };
 
@@ -50,7 +50,7 @@ public:
         for(const auto& [stage_id, _] : _weighted_stages) {
             if(stage_id == BaseStage::ID::invalid.get_id()) {
                 throw SimulationError(
-                    "Can not create round robin transition from invalid stage id.");
+                    "Can not create round robin transition from invalid target id.");
             }
         }
     };
@@ -76,7 +76,7 @@ public:
         for(const auto& stage_id : _target_candidates) {
             if(stage_id == BaseStage::ID::invalid.get_id()) {
                 throw SimulationError(
-                    "Can not create least targeted transition from invalid stage id.");
+                    "Can not create least targeted transition from invalid target id.");
             }
         }
     }

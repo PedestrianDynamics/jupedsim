@@ -161,8 +161,8 @@ void Simulation::close()
 BaseStage::ID
 Simulation::add_stage(const StageDescription& stage_description, std::optional<std::string> name)
 {
-    throw_if_state(State::Iterating | State::Closed, "add_stage");
-    JPS_SCOPED_TIMER_AND_TRACE(_timer, "Add Stage", Detailed);
+    throw_if_state(State::Iterating | State::Closed, "add_target");
+    JPS_SCOPED_TIMER_AND_TRACE(_timer, "Add Target", Detailed);
     if(name) {
         for(const auto& [_, stage] : _stage_manager.stages()) {
             if(stage->name() == name) {
@@ -528,12 +528,12 @@ OperationalModelType Simulation::model_type() const
 
 const BaseStage* Simulation::stage(BaseStage::ID stage_id) const
 {
-    throw_if_state(State::Closed, "stage");
+    throw_if_state(State::Closed, "target");
     return _stage_manager.stage(stage_id);
 }
 std::vector<BaseStage::ID> Simulation::stage_ids() const
 {
-    throw_if_state(State::Closed, "stage_ids");
+    throw_if_state(State::Closed, "targets");
     std::vector<BaseStage::ID> ids{};
     ids.reserve(_stage_manager.stages().size());
     for(const auto& [id, stage] : _stage_manager.stages()) {

@@ -302,8 +302,8 @@ closed. The loader returns them per stage in the same form as
     import numpy as np
 
     with jps.Hdf5TrajectoryLoader(Path("traj.h5")) as loader:
-        stage_id = loader.load_travel_time_stage_ids()[0]
-        grids = loader.load_travel_times(stage_id)
+        target_id = loader.load_travel_time_target_ids()[0]
+        grids = loader.load_travel_times(target_id)
 
     for region_id, grid in grids.items():
         plt.imshow(

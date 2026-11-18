@@ -109,7 +109,7 @@ class Simulation:
             dt: Iteration step size in seconds. It is recommended to leave this at its default
                 value.
             floorfield_options: Parameters of the floor fields used to route agents to their
-                stage areas. Defaults to :class:`~jupedsim.FloorfieldOptions` with its default
+                target areas. Defaults to :class:`~jupedsim.FloorfieldOptions` with its default
                 values.
             trajectory_writer: Any object implementing the TrajectoryWriter interface. JuPedSim
                 provides :class:`~jupedsim.Hdf5TrajectoryWriter`, which writes HDF5 files. If
@@ -399,7 +399,7 @@ class Simulation:
         """Get the default walking speeds the floor fields are computed with, for every region.
 
         Every region has a default speed field, which starts out slowing agents down
-        near walls (see :class:`~jupedsim.FloorfieldOptions`). Every stage uses it in
+        near walls (see :class:`~jupedsim.FloorfieldOptions`). Every target uses it in
         a region where it has no speed field of its own, see
         :func:`custom_speed_fields`.
 
