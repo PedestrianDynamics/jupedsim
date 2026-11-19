@@ -132,6 +132,8 @@ void Simulation::iterate()
         }
         _to_remove.insert(_to_remove.end(), _marked_for_removal.begin(), _marked_for_removal.end());
         _marked_for_removal.clear();
+        // AgentRemovalSystem::run needs them sorted.
+        std::ranges::sort(_to_remove);
         for(const auto id : _to_remove) {
             if(const auto named = _agent_names.find(id); named != std::end(_agent_names)) {
                 _agent_ids_by_name.erase(named->second);
@@ -434,13 +436,12 @@ void Simulation::mark_agent_for_removal(GenericAgent::ID id)
 {
     throw_if_state(State::Iterating | State::Closed, "mark_agent_for_removal");
     JPS_TRACE_FUNC;
-    if(find_agent(_agents, id) == std::end(_agents)) {
+    const auto agent = find_agent(_agents, id);
+    if(agent == std::end(_agents)) {
         throw SimulationError("Unknown agent id {}", id);
     }
-    const auto scheduled = [id](const auto& ids) {
-        return std::find(std::begin(ids), std::end(ids), id) != std::end(ids);
-    };
-    if(!scheduled(_to_remove) && !scheduled(_marked_for_removal)) {
+    if(!agent->leaving) {
+        agent->leaving = true;
         _marked_for_removal.push_back(id);
     }
 }

@@ -34,6 +34,9 @@ struct GenericAgent {
     /// Whether the agent has completed its current target and stays there: the last stage of its
     /// route, or the location it is steered to. Completing it again is not reported.
     bool target_completed{false};
+    /// Whether the agent leaves the simulation at the beginning of the next iteration: it
+    /// completed an exit, or was marked for removal.
+    bool leaving{false};
 
     /// Where the agent stands. Only the geometry can say that, so only it can build one.
     Location location;

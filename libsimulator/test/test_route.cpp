@@ -405,6 +405,19 @@ TEST_F(FollowRoute, AMarkedAgentIsRecordedWhenItIsRemoved)
     EXPECT_EQ(_sim.removed_agents().front().time, _sim.dt());
 }
 
+TEST_F(FollowRoute, AnAgentMarkedAfterCompletingAnExitIsRecordedOnce)
+{
+    const auto route = _sim.add_route({fixed({}, exit({2, 2}))});
+    const auto id = add_agent({2, 2}, route);
+    _sim.iterate();
+    ASSERT_EQ(_sim.removed_agents().size(), 1u);
+
+    _sim.mark_agent_for_removal(id);
+    _sim.iterate();
+    EXPECT_EQ(_sim.agent_count(), 0u);
+    EXPECT_TRUE(_sim.removed_agents().empty());
+}
+
 TEST_F(FollowRoute, AnAgentNameIsFreeAgainOnceItsAgentHasLeft)
 {
     const auto route = _sim.add_route({fixed({}, exit({2, 2}))});

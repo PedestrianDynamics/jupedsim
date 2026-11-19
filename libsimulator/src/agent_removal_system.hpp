@@ -20,6 +20,7 @@ public:
     AgentRemovalSystem(AgentRemovalSystem&& other) = delete;
     AgentRemovalSystem& operator=(AgentRemovalSystem&& other) = delete;
 
+    /// Removes the agents in @p removed_agent_ids, which has to be sorted, and clears it.
     void
     run(AgentContainer<Agent>& agents,
         std::vector<GenericAgent::ID>& removed_agent_ids,
@@ -32,14 +33,15 @@ void AgentRemovalSystem<Agent>::run(
     std::vector<GenericAgent::ID>& removed_agent_ids,
     StageManager& stage_manager) const
 {
-
+    if(removed_agent_ids.empty()) {
+        return;
+    }
     auto iter = std::remove_if(
         std::begin(agents),
         std::end(agents),
         [&removed_agent_ids, &stage_manager](const GenericAgent& agent) {
-            auto found =
-                std::find(std::begin(removed_agent_ids), std::end(removed_agent_ids), agent.id) !=
-                std::end(removed_agent_ids);
+            const bool found = std::binary_search(
+                std::begin(removed_agent_ids), std::end(removed_agent_ids), agent.id);
             if(found && agent.stage_id != BaseStage::ID::invalid) {
                 stage_manager.handle_remove_agent(agent.stage_id);
             }

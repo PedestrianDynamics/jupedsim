@@ -54,6 +54,7 @@ public:
             completions.push_back({agent.id, stage->id(), time, agent.location});
             if(dynamic_cast<const Exit*>(stage) != nullptr) {
                 agent.target_completed = true;
+                agent.leaving = true;
                 removals.push_back({agent.id, stage->id(), time});
                 to_remove.push_back(agent.id);
                 continue;
