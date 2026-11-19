@@ -18,4 +18,5 @@ description: "Longer pieces on modelling, validation and working with JuPedSim."
 
 writing-guide
 coding-style
+floor-fields
 ```
