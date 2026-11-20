@@ -9,6 +9,8 @@
 #include "neighborhood_search.hpp"
 
 #include <concepts>
+#include <optional>
+#include <variant>
 #include <vector>
 
 class EnvironmentQuery
@@ -57,8 +59,25 @@ public:
         return _geometry.no_geometry_between(who, other);
     }
 
+    /// True if no wall or seam lies within 'distance' of 'who'. May answer false although
+    /// there is none: it relies on a coarse lower bound.
+    bool no_geometry_in_range(const Location& who, double distance) const
+    {
+        return _geometry.clearance(who) > distance;
+    }
+
     std::vector<LineSegment> line_segments_in_range(const Location& who, double distance) const
     {
         return _geometry.line_segments_in_range(who, distance);
+    }
+
+    std::variant<Location, LineSegment> walk_on_surface(const Location& who, Vector direction) const
+    {
+        return who.walk_on_surface(direction);
+    }
+
+    std::optional<LineSegment> wall_along(const Location& who, Vector direction) const
+    {
+        return who.wall_along(direction);
     }
 };

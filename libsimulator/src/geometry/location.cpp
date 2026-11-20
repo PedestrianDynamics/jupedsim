@@ -4,12 +4,14 @@
 #include "cfg_cgal.hpp"
 #include "geometry/geometry.hpp"
 #include "kernel.hpp"
+#include "line_segment.hpp"
 #include "simulation_error.hpp"
 
 #include <array>
 #include <cassert>
 #include <cstddef>
 #include <optional>
+#include <variant>
 
 namespace
 {
@@ -82,8 +84,9 @@ fan_face(const epick::Mesh& mesh, epick::Mesh::Vertex_index v, const epick::Vect
 /// target `from + direction` starting in @p start_face. Advances face by face
 /// through the xy-projected triangulation. Steps may be arbitrarily long (cost
 /// O(crossed faces)). Requires that faces are CCW in the xy projection.
-/// Returns `nullopt` if the walkable area is left.
-std::optional<Geometry::FaceLocation> straight_walk(
+/// Returns the arrival, or, if the walkable area is left, the wall it leaves through.
+/// Leaving through a mesh vertex reports that vertex as a zero-length wall.
+std::variant<Geometry::FaceLocation, LineSegment> straight_walk(
     const epick::Mesh& mesh,
     epick::Mesh::Face_index start_face,
     const epick::Point2D& from,
@@ -137,7 +140,7 @@ std::optional<Geometry::FaceLocation> straight_walk(
                 const auto g = fan_face(mesh, v, direction);
                 if(g == epick::Mesh::null_face()) {
                     // Left the walkable area crossing this vertex.
-                    return std::nullopt;
+                    return LineSegment{Point{vp.x(), vp.y()}, Point{vp.x(), vp.y()}};
                 }
                 last_crossed_vertex = v;
                 f = g;
@@ -169,7 +172,9 @@ std::optional<Geometry::FaceLocation> straight_walk(
         const auto neighbor = mesh.face(mesh.opposite(exit));
         if(neighbor == epick::Mesh::null_face()) {
             // Exit edge is a border edge: the path leaves the walkable area.
-            return std::nullopt;
+            const auto a = xy_of(mesh, mesh.source(exit));
+            const auto b = xy_of(mesh, mesh.target(exit));
+            return LineSegment{Point{a.x(), a.y()}, Point{b.x(), b.y()}};
         }
         f = neighbor;
     }
@@ -177,19 +182,25 @@ std::optional<Geometry::FaceLocation> straight_walk(
 }
 } // namespace
 
-std::optional<Location> Location::try_move_on_surface(Vector xy_direction) const
+std::variant<Location, LineSegment> Location::walk_on_surface(Vector xy_direction) const
 {
-    // Walk from current Location along the provided xy-direction. A null result
-    // means the straight path leaves the walkable area.
-    const auto new_face_location =
-        straight_walk(_geometry->mesh(), _face, _xy.cgal(), xy_direction.cgal());
-    if(new_face_location) {
+    const auto walk = straight_walk(_geometry->mesh(), _face, _xy.cgal(), xy_direction.cgal());
+    if(const auto* arrival = std::get_if<Geometry::FaceLocation>(&walk)) {
         return Location{
             _geometry,
             _xy + xy_direction,
-            _geometry->region_of(new_face_location->face),
-            new_face_location->face,
-            new_face_location->point.z()};
+            _geometry->region_of(arrival->face),
+            arrival->face,
+            arrival->point.z()};
+    }
+    return std::get<LineSegment>(walk);
+}
+
+std::optional<Location> Location::try_move_on_surface(Vector xy_direction) const
+{
+    const auto reached = walk_on_surface(xy_direction);
+    if(const auto* location = std::get_if<Location>(&reached)) {
+        return *location;
     }
     return std::nullopt;
 }
@@ -206,4 +217,13 @@ void Location::move_on_surface(Vector xy_direction)
         throw SimulationError("move_on_surface(): path hit a wall");
     }
     *this = *moved;
+}
+
+std::optional<LineSegment> Location::wall_along(Vector xy_direction) const
+{
+    const auto reached = walk_on_surface(xy_direction);
+    if(const auto* wall = std::get_if<LineSegment>(&reached)) {
+        return *wall;
+    }
+    return std::nullopt;
 }
