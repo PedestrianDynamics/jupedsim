@@ -198,7 +198,7 @@ def test_invalid_agent_state():
         )
 
 
-def _agent_a_position_after(seconds, with_agent_behind_wall):
+def _agent_a_path(seconds, with_agent_behind_wall):
     """Agent A walks towards a wall; agent B walks towards the same wall from behind it."""
     room = shapely.Polygon([(0, 0), (10, 0), (10, 4), (0, 4)])
     wall = shapely.Polygon([(4.9, 0), (5.1, 0), (5.1, 3), (4.9, 3)])
@@ -226,13 +226,15 @@ def _agent_a_position_after(seconds, with_agent_behind_wall):
     agent_a = add((3.5, 1.5), (4.5, 1.5))
     if with_agent_behind_wall:
         add((6.5, 1.5), (5.5, 1.5))
+    path = []
     while sim.elapsed_time() < seconds:
         sim.iterate()
-    return sim.agent(agent_a).position
+        path.append(sim.agent(agent_a).position)
+    return path
 
 
 def test_agent_behind_a_wall_does_not_influence_the_agent_in_front():
     """Neighbors without a line of sight must not take part in collision avoidance."""
-    alone = _agent_a_position_after(3.0, with_agent_behind_wall=False)
-    with_neighbor = _agent_a_position_after(3.0, with_agent_behind_wall=True)
-    assert with_neighbor == pytest.approx(alone)
+    alone = _agent_a_path(3.0, with_agent_behind_wall=False)
+    with_neighbor = _agent_a_path(3.0, with_agent_behind_wall=True)
+    assert with_neighbor == alone
