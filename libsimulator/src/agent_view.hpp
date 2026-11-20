@@ -10,8 +10,10 @@
 #include "line_segment.hpp"
 #include "operational_model_state.hpp"
 
+#include <algorithm>
 #include <cmath>
 #include <concepts>
+#include <optional>
 #include <ranges>
 #include <type_traits>
 #include <utility>
@@ -134,14 +136,19 @@ private:
     {
         return std::move(segments) |
                std::views::transform([origin = location().xy()](const LineSegment& s) {
-                   const LineSegment segment{at_offset(s.p1 - origin), at_offset(s.p2 - origin)};
-                   const Point closest_point = segment.shortest_point(Point{});
-                   return WallView{
-                       .segment = segment,
-                       .closest_point = closest_point,
-                       .distance = distance(closest_point, Point{}),
-                       .normal = (Point{} - closest_point).normalized()};
+                   return seen_from(origin, s);
                });
+    }
+
+    static WallView seen_from(Point origin, const LineSegment& s)
+    {
+        const LineSegment segment{at_offset(s.p1 - origin), at_offset(s.p2 - origin)};
+        const Point closest_point = segment.shortest_point(Point{});
+        return WallView{
+            .segment = segment,
+            .closest_point = closest_point,
+            .distance = distance(closest_point, Point{}),
+            .normal = (Point{} - closest_point).normalized()};
     }
 
 public:
@@ -149,6 +156,55 @@ public:
     auto walls_in_range(double distance) const
     {
         return as_seen_from_agent(_world.line_segments_in_range(location(), distance));
+    }
+
+    /// The first wall the straight path along 'direction' would cross, relative to the
+    /// agent. The length of 'direction' is how far ahead to look.
+    std::optional<WallView> wall_ahead(Vector direction) const
+    {
+        const auto wall = _world.wall_along(location(), direction);
+        if(!wall) {
+            return std::nullopt;
+        }
+        return seen_from(location().xy(), *wall);
+    }
+
+    /// The walls a body of 'half_width' meets moving along 'direction', relative to the
+    /// agent: the first wall crossed by the centre line and by the two lines offset sideways
+    /// by 'half_width', and a wall within 'half_width' to either side. Each wall appears once.
+    /// The length of 'direction' is how far ahead to look.
+    std::vector<WallView> walls_ahead(Vector direction, double half_width) const
+    {
+        std::vector<LineSegment> walls{};
+        const auto add = [&walls](const LineSegment& wall) {
+            const LineSegment reversed{wall.p2, wall.p1};
+            if(std::ranges::find_if(walls, [&](const LineSegment& s) {
+                   return s == wall || s == reversed;
+               }) == walls.end()) {
+                walls.push_back(wall);
+            }
+        };
+        if(const auto wall = _world.wall_along(location(), direction)) {
+            add(*wall);
+        }
+        const Vector side = direction.normalized().rotate90_deg() * half_width;
+        for(const Vector offset : {side, -side}) {
+            const auto start = location().try_move_on_surface(offset);
+            if(!start) {
+                // A wall beside the agent; the offset line would start behind it.
+                add(*_world.wall_along(location(), offset));
+                continue;
+            }
+            if(const auto wall = _world.wall_along(*start, direction)) {
+                add(*wall);
+            }
+        }
+        std::vector<WallView> views{};
+        views.reserve(walls.size());
+        for(const auto& wall : walls) {
+            views.push_back(seen_from(location().xy(), wall));
+        }
+        return views;
     }
 
     /// The same view, but with neighbors seen through 'states'. 'states' has to outlive the

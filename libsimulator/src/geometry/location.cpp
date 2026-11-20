@@ -4,6 +4,7 @@
 #include "cfg_cgal.hpp"
 #include "geometry/geometry.hpp"
 #include "kernel.hpp"
+#include "line_segment.hpp"
 #include "simulation_error.hpp"
 
 #include <array>
@@ -13,6 +14,13 @@
 
 namespace
 {
+/// Result of `straight_walk`: the arrival, or, if the walkable area is left, the wall it
+/// leaves through. Leaving through a mesh vertex reports that vertex as a zero-length wall.
+struct WalkResult {
+    std::optional<Geometry::FaceLocation> arrival;
+    LineSegment wall{};
+};
+
 /// The on-surface 3D point of face @p f at (x,y) @p q. @p q is assumed inside
 /// f's (x,y) projection. z is the barycentric blend of the vertices' heights:
 /// find q's weights in the projected triangle, then interpolate z.
@@ -82,8 +90,7 @@ fan_face(const epick::Mesh& mesh, epick::Mesh::Vertex_index v, const epick::Vect
 /// target `from + direction` starting in @p start_face. Advances face by face
 /// through the xy-projected triangulation. Steps may be arbitrarily long (cost
 /// O(crossed faces)). Requires that faces are CCW in the xy projection.
-/// Returns `nullopt` if the walkable area is left.
-std::optional<Geometry::FaceLocation> straight_walk(
+WalkResult straight_walk(
     const epick::Mesh& mesh,
     epick::Mesh::Face_index start_face,
     const epick::Point2D& from,
@@ -120,7 +127,7 @@ std::optional<Geometry::FaceLocation> straight_walk(
     for(std::size_t step = 0; step < max_steps; ++step) {
         if(covers(f)) {
             // Done: target is inside the triangle
-            return Geometry::FaceLocation{f, point_on_face(mesh, f, to)};
+            return {Geometry::FaceLocation{f, point_on_face(mesh, f, to)}};
         }
 
         // 'to' lies outside f -> find the forward exit across f's boundary.
@@ -137,7 +144,8 @@ std::optional<Geometry::FaceLocation> straight_walk(
                 const auto g = fan_face(mesh, v, direction);
                 if(g == epick::Mesh::null_face()) {
                     // Left the walkable area crossing this vertex.
-                    return std::nullopt;
+                    return {
+                        std::nullopt, LineSegment{Point{vp.x(), vp.y()}, Point{vp.x(), vp.y()}}};
                 }
                 last_crossed_vertex = v;
                 f = g;
@@ -169,7 +177,9 @@ std::optional<Geometry::FaceLocation> straight_walk(
         const auto neighbor = mesh.face(mesh.opposite(exit));
         if(neighbor == epick::Mesh::null_face()) {
             // Exit edge is a border edge: the path leaves the walkable area.
-            return std::nullopt;
+            const auto a = xy_of(mesh, mesh.source(exit));
+            const auto b = xy_of(mesh, mesh.target(exit));
+            return {std::nullopt, LineSegment{Point{a.x(), a.y()}, Point{b.x(), b.y()}}};
         }
         f = neighbor;
     }
@@ -181,15 +191,14 @@ std::optional<Location> Location::try_move_on_surface(Vector xy_direction) const
 {
     // Walk from current Location along the provided xy-direction. A null result
     // means the straight path leaves the walkable area.
-    const auto new_face_location =
-        straight_walk(_geometry->mesh(), _face, _xy.cgal(), xy_direction.cgal());
-    if(new_face_location) {
+    const auto walk = straight_walk(_geometry->mesh(), _face, _xy.cgal(), xy_direction.cgal());
+    if(walk.arrival) {
         return Location{
             _geometry,
             _xy + xy_direction,
-            _geometry->region_of(new_face_location->face),
-            new_face_location->face,
-            new_face_location->point.z()};
+            _geometry->region_of(walk.arrival->face),
+            walk.arrival->face,
+            walk.arrival->point.z()};
     }
     return std::nullopt;
 }
@@ -206,4 +215,13 @@ void Location::move_on_surface(Vector xy_direction)
         throw SimulationError("move_on_surface(): path hit a wall");
     }
     *this = *moved;
+}
+
+std::optional<LineSegment> Location::wall_along(Vector xy_direction) const
+{
+    const auto walk = straight_walk(_geometry->mesh(), _face, _xy.cgal(), xy_direction.cgal());
+    if(walk.arrival) {
+        return std::nullopt;
+    }
+    return walk.wall;
 }

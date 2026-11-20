@@ -9,6 +9,7 @@
 #include "neighborhood_search.hpp"
 
 #include <concepts>
+#include <optional>
 #include <vector>
 
 class EnvironmentQuery
@@ -60,5 +61,10 @@ public:
     std::vector<LineSegment> line_segments_in_range(const Location& who, double distance) const
     {
         return _geometry.line_segments_in_range(who, distance);
+    }
+
+    std::optional<LineSegment> wall_along(const Location& who, Vector direction) const
+    {
+        return who.wall_along(direction);
     }
 };
