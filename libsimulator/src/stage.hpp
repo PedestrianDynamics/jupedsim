@@ -3,14 +3,15 @@
 
 #include "destination.hpp"
 #include "generic_agent.hpp"
-#include "routing_target.hpp"
 #include "unique_id.hpp"
 
 #include <fmt/core.h>
 
 #include <cassert>
 #include <cstddef>
-#include <vector>
+#include <optional>
+#include <string>
+#include <utility>
 
 class BaseStage
 {
@@ -19,15 +20,24 @@ public:
 
 protected:
     ID _id;
+    std::optional<std::string> _name;
+    Destination _destination;
     size_t _targeting{0};
 
 public:
+    BaseStage(Destination destination, std::optional<std::string> name)
+        : _name(std::move(name)), _destination(destination)
+    {
+    }
     virtual ~BaseStage() = default;
-    virtual bool is_completed(const GenericAgent& agent) = 0;
-    virtual RoutingTarget target(const GenericAgent& agent) = 0;
-    /// The area this stage routes to, or nullptr if it has none.
-    virtual const Destination* destination() const { return nullptr; }
+    bool is_reached_by(const GenericAgent& agent) const
+    {
+        return _destination.contains(agent.location);
+    }
+    /// The area this stage routes to.
+    const Destination& destination() const { return _destination; }
     ID id() const { return _id; }
+    const std::optional<std::string>& name() const { return _name; }
     size_t count_targeting() const { return _targeting; }
     void increase_targeting() { _targeting = _targeting + 1; }
     void decrease_targeting()
@@ -45,41 +55,27 @@ struct fmt::formatter<BaseStage> {
     template <typename FormatContext>
     auto format(const BaseStage& s, FormatContext& ctx) const
     {
+        if(s.name()) {
+            return fmt::format_to(
+                ctx.out(),
+                "(id={}, name={}, targeting={})",
+                s.id(),
+                *s.name(),
+                s.count_targeting());
+        }
         return fmt::format_to(ctx.out(), "(id={}, targeting={})", s.id(), s.count_targeting());
     }
 };
 
 class Waypoint : public BaseStage
 {
-    Destination _destination;
-
 public:
-    explicit Waypoint(Destination destination);
-    ~Waypoint() override = default;
-    bool is_completed(const GenericAgent& agent) override;
-    RoutingTarget target(const GenericAgent& agent) override;
-    const Destination* destination() const override { return &_destination; }
+    using BaseStage::BaseStage;
 };
 
-/// Notifies simulation of all agents that need to be removed at the beginning of the next iteration
+/// Agents that reach an exit leave the simulation at the beginning of the next iteration.
 class Exit : public BaseStage
 {
-    Destination _destination;
-    std::vector<GenericAgent::ID>& _to_remove;
-
 public:
-    Exit(Destination destination, std::vector<GenericAgent::ID>& to_remove);
-    ~Exit() override = default;
-    bool is_completed(const GenericAgent& agent) override;
-    RoutingTarget target(const GenericAgent& agent) override;
-    const Destination* destination() const override { return &_destination; }
-};
-
-class DirectSteering : public BaseStage
-{
-public:
-    DirectSteering() = default;
-    ~DirectSteering() override = default;
-    bool is_completed(const GenericAgent&) override { return false; };
-    RoutingTarget target(const GenericAgent& agent) override;
+    using BaseStage::BaseStage;
 };

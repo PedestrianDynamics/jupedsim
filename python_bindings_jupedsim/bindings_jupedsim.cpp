@@ -23,12 +23,12 @@ void init_geometry(py::module_& m);
 void init_routing(py::module_& m);
 void init_agent(py::module_& m);
 void init_transition(py::module_& m);
-void init_stage(py::module_& m);
 void init_simulation(py::module_& m);
 void init_agent_view(py::module_& m);
 void init_python_model(py::module_& m);
 void init_boundary_index(py::module_& m);
 void init_geometry_builder(py::module_& m);
+void init_region(py::module_& m);
 
 // Export every public name, recursing into submodules. Must run after all bindings are registered.
 static void set_all(py::module_& m)
@@ -68,11 +68,11 @@ PYBIND11_MODULE(pyjupedsim, m)
     init_social_force_model(m);
     init_warp_driver_model(m);
     init_agent_view(m);
+    init_region(m);
     init_geometry(m);
     init_routing(m);
     init_agent(m);
     init_transition(m);
-    init_stage(m);
     init_simulation(m);
     init_boundary_index(m);
     init_geometry_builder(m);

@@ -7,8 +7,6 @@
 #include <variant>
 #include <vector>
 
-struct DirectSteeringDescription {};
-
 /// Input area of a stage
 struct StageArea {
     Polygon polygon;
@@ -23,5 +21,4 @@ struct ExitDescription {
     std::vector<StageArea> areas;
 };
 
-using StageDescription =
-    std::variant<DirectSteeringDescription, WaypointDescription, ExitDescription>;
+using StageDescription = std::variant<WaypointDescription, ExitDescription>;

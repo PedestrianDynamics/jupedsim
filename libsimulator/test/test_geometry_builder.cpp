@@ -11,6 +11,7 @@
 
 #include <cstddef>
 #include <limits>
+#include <optional>
 #include <string_view>
 #include <utility>
 #include <vector>
@@ -209,6 +210,53 @@ TEST(GeometryBuilder, BuilderCannotBeUsedAfterBuild)
     expect_error(
         [&] { builder.connect_regions(ground, {{0, 10}, {0, 0}}, upper, {{20, 0}, {20, 10}}); },
         "already built");
+}
+
+TEST(GeometryBuilderRegionName, ReachesTheGeometry)
+{
+    GeometryBuilder builder{};
+    const auto ground =
+        builder.add_region({{{0, 0}, {10, 0}, {10, 10}, {0, 10}}, {}}, 0.0, "ground");
+    const auto upper = builder.add_region({{{14, 0}, {20, 0}, {20, 10}, {14, 10}}, {}}, 1.0);
+    const auto stair =
+        builder.connect_regions(ground, {{10, 0}, {10, 10}}, upper, {{14, 0}, {14, 10}}, "stair");
+    const auto geometry = builder.build();
+
+    EXPECT_EQ(geometry->region_name(ground), "ground");
+    EXPECT_EQ(geometry->region_name(upper), std::nullopt);
+    EXPECT_EQ(geometry->region_name(stair), "stair");
+}
+
+TEST(GeometryBuilderRegionName, UsedTwiceIsRejected)
+{
+    GeometryBuilder builder{};
+    const auto ground =
+        builder.add_region({{{0, 0}, {10, 0}, {10, 10}, {0, 10}}, {}}, 0.0, "ground");
+    const auto upper = builder.add_region({{{14, 0}, {20, 0}, {20, 10}, {14, 10}}, {}}, 1.0);
+
+    expect_error(
+        [&] { builder.add_region({{{0, 20}, {10, 20}, {10, 30}, {0, 30}}, {}}, 0.0, "ground"); },
+        "The region name 'ground' is already used.");
+    expect_error(
+        [&] {
+            builder.connect_regions(
+                ground, {{10, 0}, {10, 10}}, upper, {{14, 0}, {14, 10}}, "ground");
+        },
+        "The region name 'ground' is already used.");
+}
+
+TEST(GeometryBuilderRegionName, FollowsTheIdInMessages)
+{
+    GeometryBuilder builder{};
+    builder.add_region({{{0, 0}, {10, 0}, {10, 10}, {0, 10}}, {}}, 0.0, "ground");
+    builder.add_region({{{0, 20}, {10, 20}, {10, 30}, {0, 30}}, {}}, 0.0);
+
+    expect_error(
+        [&] { builder.add_region({{{5, 5}, {15, 5}, {15, 8}, {5, 8}}, {}}, 0.0); },
+        "New region overlaps with region 0 (ground).");
+    expect_error(
+        [&] { builder.add_region({{{5, 25}, {15, 25}, {15, 28}, {5, 28}}, {}}, 0.0); },
+        "New region overlaps with region 1.");
 }
 
 TEST(GeometryBuilder, FailedAddOrConnectLeavesTheBuilderUnchanged)

@@ -92,7 +92,7 @@ def test_overlapping_geometry():
     builder = jps.GeometryBuilder()
     id_0 = builder.add_region(boundary=rectangle((0, 0), (10, 10)), height=0.0)
     with pytest.raises(
-        jps.SimulationError, match=f"New region overlaps with region {id_0}"
+        jps.SimulationError, match=f"New region overlaps with region {id_0.id}"
     ):
         builder.add_region(boundary=rectangle((5, 5), (15, 15)), height=0.0)
 
@@ -101,7 +101,7 @@ def test_touching_polygons():
     builder = jps.GeometryBuilder()
     id_0 = builder.add_region(boundary=rectangle((0, 0), (1, 1)), height=0.0)
     with pytest.raises(
-        jps.SimulationError, match=f"New region touches region {id_0}"
+        jps.SimulationError, match=f"New region touches region {id_0.id}"
     ):
         builder.add_region(boundary=rectangle((1, 1), (3, 3)), height=0.0)
 
@@ -182,33 +182,24 @@ def test_gets_region_after_error_and_can_build():
         jps.SimulationError, match="Invalid polygon provided to add_region"
     ):
         builder.add_region(boundary=polygon, height=0.0)
-    region_id = builder.add_region(
-        boundary=rectangle((0, 0), (1, 1)), height=0.0
-    )
-    assert region_id == 0
+    region = builder.add_region(boundary=rectangle((0, 0), (1, 1)), height=0.0)
+    assert region.id == 0
     builder.build()
 
 
 ########### Error cases: Connect Regions ###########
-def test_connect_with_unknown_region(two_floors):
-    # from region
+def test_connect_with_a_region_of_another_builder(two_floors):
+    other = jps.GeometryBuilder().add_region(
+        boundary=rectangle((0, 0), (1, 1)), height=0.0, name="other"
+    )
     with pytest.raises(
-        jps.SimulationError, match="Unknown region id used for fromRegion"
+        jps.SimulationError,
+        match=r"Region 0 \(other\) belongs to another GeometryBuilder",
     ):
         two_floors.surface.connect_regions(
-            from_region=42,
+            from_region=other,
             from_edge=two_floors.ground_conn_edge,
             to_region=two_floors.upper_floor,
-            to_edge=two_floors.upper_conn_edge,
-        )
-    # to region
-    with pytest.raises(
-        jps.SimulationError, match="Unknown region id used for toRegion"
-    ):
-        two_floors.surface.connect_regions(
-            from_region=two_floors.ground_floor,
-            from_edge=two_floors.ground_conn_edge,
-            to_region=42,
             to_edge=two_floors.upper_conn_edge,
         )
 
@@ -226,7 +217,7 @@ def test_connect_same_region(two_floors):
 def test_connect_with_nonexisting_point(two_floors):
     with pytest.raises(
         jps.SimulationError,
-        match=f"is not an edge of region {two_floors.upper_floor}",
+        match=f"is not an edge of region {two_floors.upper_floor.id}",
     ):
         two_floors.surface.connect_regions(
             from_region=two_floors.ground_floor,
@@ -239,7 +230,7 @@ def test_connect_with_nonexisting_point(two_floors):
 def test_connect_points_but_no_edge(two_floors):
     with pytest.raises(
         jps.SimulationError,
-        match=f"is not an edge of region {two_floors.ground_floor}",
+        match=f"is not an edge of region {two_floors.ground_floor.id}",
     ):
         two_floors.surface.connect_regions(
             from_region=two_floors.ground_floor,
@@ -315,7 +306,7 @@ def test_connect_to_connector(two_floors):
     stairs = two_floors.add_stairs()
     # from connector
     with pytest.raises(
-        jps.SimulationError, match=f"fromRegion {stairs} is not connectable"
+        jps.SimulationError, match=f"fromRegion {stairs.id} is not connectable"
     ):
         two_floors.surface.connect_regions(
             from_region=stairs,
@@ -325,7 +316,7 @@ def test_connect_to_connector(two_floors):
         )
     # to connector
     with pytest.raises(
-        jps.SimulationError, match=f"toRegion {stairs} is not connectable"
+        jps.SimulationError, match=f"toRegion {stairs.id} is not connectable"
     ):
         two_floors.surface.connect_regions(
             from_region=two_floors.ground_floor,
@@ -371,8 +362,8 @@ def test_stairs_through_other_floor():
         builder.build()
     message = str(error.value)
     assert "pass through each other" in message
-    assert re.search(rf"[Rr]egion {first_floor}\b", message)
-    assert re.search(rf"[Rr]egion {stairs}\b", message)
+    assert re.search(rf"[Rr]egion {first_floor.id}\b", message)
+    assert re.search(rf"[Rr]egion {stairs.id}\b", message)
 
 
 def test_edge_used_by_several_connectors(two_floors):
@@ -382,7 +373,7 @@ def test_edge_used_by_several_connectors(two_floors):
     )
     with pytest.raises(
         jps.SimulationError,
-        match=f"of region {two_floors.ground_floor} is already connected",
+        match=f"of region {two_floors.ground_floor.id} is already connected",
     ):
         two_floors.surface.connect_regions(
             from_region=two_floors.ground_floor,
@@ -412,11 +403,9 @@ def test_impossible_stairs(two_floors):
 ########### Correct cases ###########
 def test_region_ids(two_floors):
     stairs = two_floors.add_stairs()
-    assert [two_floors.ground_floor, two_floors.upper_floor, stairs] == [
-        0,
-        1,
-        2,
-    ]
+    assert [
+        r.id for r in (two_floors.ground_floor, two_floors.upper_floor, stairs)
+    ] == [0, 1, 2]
     assert two_floors.surface.build().region_count() == 3
 
 

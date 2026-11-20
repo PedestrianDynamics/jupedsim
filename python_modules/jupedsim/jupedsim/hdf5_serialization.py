@@ -53,19 +53,19 @@ File Layout:
     │       │  Region id of each triangle
     │       └─ [M] <u8
     └── travel_times   only with write_travel_times=True
-        │  Floor field travel times to every waypoint and exit stage, one
-        │  grid per region in every snapshot of a stage. A stage gets a
+        │  Floor field travel times to every target (waypoint or exit), one
+        │  grid per region in every snapshot of a target. A target gets a
         │  snapshot when it is added and whenever its speed fields change,
         │  written after the next iteration (or on close); after the first,
         │  only every n-th change is kept
         │  @every_nth_travel_time_field int  n
         ├── grids
-        │   │  One row per grid, ordered by iteration, then stage id, then
+        │   │  One row per grid, ordered by iteration, then target id, then
         │   │  region id
         │   │  type compound {
         │   │    iteration <u8 iteration from which on agents are routed with
         │   │                  these travel times, see @every_nth_frame
-        │   │    stage_id  <u8 stage the travel times lead to
+        │   │    target_id <u8 target the travel times lead to
         │   │    region_id <u8 region the grid covers, see /regions
         │   │    origin_x  <f8 x of the lower-left corner of cell (0, 0) [m]
         │   │    origin_y  <f8 y of the lower-left corner of cell (0, 0) [m]
@@ -80,13 +80,13 @@ File Layout:
         │   │  Travel times [s] of all grids, one after another, each
         │   │  row-major from its lowest row: grid i is
         │   │  values[offset:offset + width * height].reshape(height, width)
-        │   └─ Zero inside the stage's area, inf where a cell is not walkable
+        │   └─ Zero inside the target's area, inf where a cell is not walkable
         └── directions
             │  [N, 2] <f4, shuffle + zstd, row k belongs to values[k]
             │  Walking direction (x, y) at each cell's centre, the unit
             │  vector an agent there is sent along: grid i is
             │  directions[offset:offset + width * height].reshape(height, width, 2)
-            └─ Zero inside the stage's area, nan where a cell is not walkable
+            └─ Zero inside the target's area, nan where a cell is not walkable
 ```
 
 Reading the file requires the Zstd filter: ``import hdf5plugin`` before
@@ -127,15 +127,15 @@ class Hdf5TrajectoryWriter(TrajectoryWriter):
         output_file: File to write to; an existing file is overwritten.
         every_nth_frame: Record every n-th iteration, 1 records all of them.
         write_travel_times: Also store the floor field travel times to every
-            waypoint and exit stage in /travel_times: a snapshot when the
-            stage is added, and again whenever its speed fields change, so a
+            target (waypoint or exit) in /travel_times: a snapshot when the
+            target is added, and again whenever its speed fields change, so a
             run with dynamic speed fields can be replayed. Snapshots are
             written after the next iteration, reusing the floor fields the
             agents needed; fields no agent needed are solved for them.
             Changes after the last iteration are written by :meth:`close`,
             not by :meth:`close_after_error`.
         every_nth_travel_time_field: Of the travel times written with
-            ``write_travel_times=True``, keep the first of every stage and
+            ``write_travel_times=True``, keep the first of every target and
             then every n-th change of it; 1 keeps all of them. Use it to make
             the file smaller when the speed fields change often. A skipped
             change is not in the file: agents were routed with it, but a reader
@@ -162,7 +162,7 @@ class Hdf5TrajectoryWriter(TrajectoryWriter):
         self._every_nth_frame: int = every_nth_frame
         self._write_travel_times: bool = write_travel_times
         self._every_nth_travel_time_field: int = every_nth_travel_time_field
-        # Stage id -> travel time fields seen so far, written or skipped.
+        # Target id -> travel time fields seen so far, written or skipped.
         self._travel_time_fields_seen: dict[int, int] = {}
         self._simulation: Simulation | None = None
         self._records_to_cache: int = 2**16 // self.trajectory_dtype().itemsize
@@ -247,7 +247,7 @@ class Hdf5TrajectoryWriter(TrajectoryWriter):
             shuffle=True,
             **hdf5plugin.Zstd(clevel=3),  # pyright: ignore[reportUnknownArgumentType]
         )
-        geo: Geometry = simulation.get_geometry()
+        geo: Geometry = simulation.geometry
 
         regions = [
             (idx, geo.polygon(region_id=idx).as_wkt())
@@ -412,7 +412,7 @@ class Hdf5TrajectoryWriter(TrajectoryWriter):
         grids_ds.attrs["iteration"] = (
             "Iteration from which on agents are routed with these travel times"
         )
-        grids_ds.attrs["stage_id"] = "Stage the travel times lead to"
+        grids_ds.attrs["target_id"] = "Target the travel times lead to"
         grids_ds.attrs["region_id"] = "Region the grid covers"
         grids_ds.attrs["origin_x"] = (
             "X of the lower-left corner of cell (0, 0) [m]"
@@ -429,24 +429,25 @@ class Hdf5TrajectoryWriter(TrajectoryWriter):
         self._travel_time_grids_ds: h5py.Dataset = grids_ds
 
     def _write_travel_time_changes(self, simulation: Simulation) -> None:
-        """Append a snapshot of every stage whose travel times changed, see
+        """Append a snapshot of every target whose travel times changed, see
         :meth:`~jupedsim.Simulation._take_travel_time_changes`: its first, then
         every n-th change, see ``every_nth_travel_time_field``.
 
-        A stage's travel times span all regions, so a snapshot holds a grid for
+        A target's travel times span all regions, so a snapshot holds a grid for
         every region. Each grid's row is appended after its values, so an
         interrupted run leaves no row pointing past the stored values; memory
         holds one grid at a time.
         """
         for (
-            stage_id,
+            target_id,
             iteration,
         ) in simulation._take_travel_time_changes().items():
-            seen = self._travel_time_fields_seen.get(stage_id, 0)
-            self._travel_time_fields_seen[stage_id] = seen + 1
+            seen = self._travel_time_fields_seen.get(target_id, 0)
+            self._travel_time_fields_seen[target_id] = seen + 1
             if seen % self._every_nth_travel_time_field != 0:
                 continue
-            for region_id, grid in simulation.travel_times(stage_id).items():
+            target = simulation.target(target_id)
+            for region, grid in simulation.travel_times(target).items():
                 offset = self._travel_time_values_ds.shape[0]
                 values = grid.values.astype("<f4").ravel()
                 self._append(self._travel_time_values_ds, values, len(values))
@@ -460,8 +461,8 @@ class Hdf5TrajectoryWriter(TrajectoryWriter):
                     [
                         (
                             iteration,
-                            stage_id,
-                            region_id,
+                            target_id,
+                            region.id,
                             *grid.origin,
                             grid.width,
                             grid.height,
@@ -501,7 +502,7 @@ class Hdf5TrajectoryWriter(TrajectoryWriter):
         return np.dtype(
             [
                 ("iteration", "<u8"),
-                ("stage_id", "<u8"),
+                ("target_id", "<u8"),
                 ("region_id", "<u8"),
                 ("origin_x", "<f8"),
                 ("origin_y", "<f8"),
@@ -545,7 +546,7 @@ class Hdf5TrajectoryLoader:
 
     @dataclasses.dataclass(frozen=True)
     class TravelTimeGrid:
-        """Travel times and walking directions to one stage over the floor field
+        """Travel times and walking directions to one target over the floor field
         grid of one region, as stored in /travel_times.
 
         Has the fields of :class:`~jupedsim.TravelTimeGrid`, so code written
@@ -563,11 +564,11 @@ class Hdf5TrajectoryLoader:
         """Edge length of a cell in metres."""
         values: npt.NDArray[np.float32]
         """Travel times in seconds, shape ``(height, width)``; row 0 is the
-        lowest. Zero inside the stage's area, ``inf`` where a cell is not
+        lowest. Zero inside the target's area, ``inf`` where a cell is not
         walkable."""
         directions: npt.NDArray[np.float32]
         """Walking direction at each cell's centre, shape ``(height, width, 2)``.
-        Zero inside the stage's area, ``nan`` where a cell is not walkable."""
+        Zero inside the target's area, ``nan`` where a cell is not walkable."""
 
         @property
         def extent(self) -> tuple[float, float, float, float]:
@@ -678,14 +679,14 @@ class Hdf5TrajectoryLoader:
                 f"Travel times hold {values_ds.shape[0]} values but {directions_ds.shape[0]} directions"
             )
 
-        # One row per grid, small enough to keep: loading a stage then needs no
+        # One row per grid, small enough to keep: loading a target then needs no
         # second read of /travel_times/grids.
         grids = grids_ds[:]
         ends = grids["offset"] + grids["width"].astype("<u8") * grids["height"]
         if len(grids) and ends.max() > values_ds.shape[0]:
             bad = grids[np.argmax(ends > values_ds.shape[0])]
             raise Hdf5TrajectoryLoader.Error(
-                f"Travel time grid of stage_id={bad['stage_id']}, region_id={bad['region_id']} runs past the {values_ds.shape[0]} stored values"
+                f"Travel time grid of target_id={bad['target_id']}, region_id={bad['region_id']} runs past the {values_ds.shape[0]} stored values"
             )
         attrs = self._file["travel_times"].attrs
         if "every_nth_travel_time_field" not in attrs:
@@ -778,18 +779,18 @@ class Hdf5TrajectoryLoader:
         ``write_travel_times=True``."""
         return self._travel_time_grids is not None
 
-    def load_travel_time_stage_ids(self) -> list[int]:
-        """Returns the ids of all stages with travel times in the file, ascending.
+    def load_travel_time_target_ids(self) -> list[int]:
+        """Returns the ids of all targets with travel times in the file, ascending.
 
         Raises:
             Hdf5TrajectoryLoader.Error: if the file holds no travel times.
         """
         grids = self._require_travel_time_grids()
-        return np.unique(grids["stage_id"]).tolist()
+        return np.unique(grids["target_id"]).tolist()
 
     def load_every_nth_travel_time_field(self) -> int:
         """Returns the ``every_nth_travel_time_field`` the file was written with:
-        of the changes of a stage's travel times, the first and then every n-th
+        of the changes of a target's travel times, the first and then every n-th
         one was kept. 1 means every change is in the file.
 
         Raises:
@@ -798,34 +799,34 @@ class Hdf5TrajectoryLoader:
         self._require_travel_time_grids()
         return self._every_nth_travel_time_field
 
-    def load_travel_time_iterations(self, stage_id: int) -> list[int]:
-        """Returns the iterations at which the travel times to one stage were
-        recorded, ascending: when the stage was added, and whenever its speed
+    def load_travel_time_iterations(self, target_id: int) -> list[int]:
+        """Returns the iterations at which the travel times to one target were
+        recorded, ascending: when the target was added, and whenever its speed
         fields changed. Agents were routed with a snapshot from its iteration
-        until the stage's next change. If the file was written with
+        until the target's next change. If the file was written with
         :meth:`load_every_nth_travel_time_field` 1, that is the next snapshot;
         with n > 1 the changes in between are not in the file, and agents were
         routed with travel times the file does not hold.
 
         Args:
-            stage_id: id of the stage, see :meth:`load_travel_time_stage_ids`.
+            target_id: id of the target, see :meth:`load_travel_time_target_ids`.
 
         Raises:
             Hdf5TrajectoryLoader.Error: if the file holds no travel times, or none
-                for ``stage_id``.
+                for ``target_id``.
         """
         return np.unique(
-            self._stage_travel_time_rows(stage_id)["iteration"]
+            self._target_travel_time_rows(target_id)["iteration"]
         ).tolist()
 
     def load_travel_times(
-        self, stage_id: int, iteration: int | None = None
+        self, target_id: int, iteration: int | None = None
     ) -> dict[int, Hdf5TrajectoryLoader.TravelTimeGrid]:
-        """Loads the travel times to one stage, the counterpart of
+        """Loads the travel times to one target, the counterpart of
         :meth:`~jupedsim.Simulation.travel_times`.
 
         Args:
-            stage_id: id of the stage, see :meth:`load_travel_time_stage_ids`.
+            target_id: id of the target, see :meth:`load_travel_time_target_ids`.
             iteration: iteration whose travel times to load: the last snapshot
                 recorded at or before it, see :meth:`load_travel_time_iterations`.
                 With :meth:`load_every_nth_travel_time_field` n > 1, a change
@@ -840,16 +841,16 @@ class Hdf5TrajectoryLoader:
 
         Raises:
             Hdf5TrajectoryLoader.Error: if the file holds no travel times, none
-                for ``stage_id``, or none recorded at or before ``iteration``.
+                for ``target_id``, or none recorded at or before ``iteration``.
         """
-        rows = self._stage_travel_time_rows(stage_id)
+        rows = self._target_travel_time_rows(target_id)
         if iteration is None:
             snapshot = rows["iteration"].max()
         else:
             earlier = rows["iteration"][rows["iteration"] <= iteration]
             if len(earlier) == 0:
                 raise Hdf5TrajectoryLoader.Error(
-                    f"No travel times for stage_id={stage_id} at iteration {iteration}, the first are from iteration {rows['iteration'].min()}"
+                    f"No travel times for target_id={target_id} at iteration {iteration}, the first are from iteration {rows['iteration'].min()}"
                 )
             snapshot = earlier.max()
         rows = rows[rows["iteration"] == snapshot]
@@ -872,13 +873,15 @@ class Hdf5TrajectoryLoader:
             )
         return result
 
-    def _stage_travel_time_rows(self, stage_id: int) -> npt.NDArray[typing.Any]:
-        """The rows of /travel_times/grids for one stage, all snapshots."""
+    def _target_travel_time_rows(
+        self, target_id: int
+    ) -> npt.NDArray[typing.Any]:
+        """The rows of /travel_times/grids for one target, all snapshots."""
         grids = self._require_travel_time_grids()
-        rows = grids[grids["stage_id"] == stage_id]
+        rows = grids[grids["target_id"] == target_id]
         if len(rows) == 0:
             raise Hdf5TrajectoryLoader.Error(
-                f"No travel times for stage_id={stage_id}, found stages {self.load_travel_time_stage_ids()}"
+                f"No travel times for target_id={target_id}"
             )
         return rows
 

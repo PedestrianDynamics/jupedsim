@@ -14,6 +14,7 @@
 #include <cstddef>
 #include <memory>
 #include <optional>
+#include <string>
 #include <vector>
 
 /// Assembles the walkable area of a simulation and creates the Geometry from it.
@@ -42,9 +43,15 @@ public:
 
     GeometryBuilder();
 
-    size_t add_region(Polygon polygon, double height);
+    /// @p name, if given, is unique among the regions and connectors of the geometry.
+    size_t add_region(Polygon polygon, double height, std::optional<std::string> name = {});
 
-    size_t connect_regions(size_t from_region, LineSegment from, size_t to_region, LineSegment to);
+    size_t connect_regions(
+        size_t from_region,
+        LineSegment from,
+        size_t to_region,
+        LineSegment to,
+        std::optional<std::string> name = {});
 
     /// Creates the geometry from the regions and connections added so far. After success, the
     /// builder cannot be used any more; after an error, it is left unchanged.
@@ -62,6 +69,7 @@ private:
         std::optional<double> height;
         /// Polygons projected to x/y.
         epick::PolyWithHoles poly_with_holes;
+        std::optional<std::string> name;
 
         /// Connectors may not be connected again.
         bool is_connectable() const { return height.has_value(); }
@@ -93,6 +101,9 @@ private:
     /// height_tolerance), or overlaps one less than min_headroom above or below it.
     void check_against_floors(const epick::PolyWithHoles& poly_with_holes, double height) const;
     void throw_if_built() const;
+    void throw_if_name_used(const std::optional<std::string>& name) const;
+    /// id_and_name() of region @p region_id.
+    std::string label(size_t region_id) const;
 
     std::vector<epick::Point3D> _global_vertices;
     RegionGraph _region_graph{};

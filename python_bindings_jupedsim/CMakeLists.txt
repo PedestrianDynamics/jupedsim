@@ -18,14 +18,14 @@ add_library(pyjupedsim MODULE
     logging.hpp
     python_model.cpp
     python_model.hpp
+    region.cpp
+    region.hpp
     routing.cpp
     simulation.cpp
     social_force_model.cpp
-    stage.cpp
     temporary/boundary_index.cpp
     trace.cpp
     transition.cpp
-    transition.hpp
     type_casters.hpp
     warp_driver_model.cpp
 )

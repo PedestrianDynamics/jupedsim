@@ -27,7 +27,7 @@ struct fmt::formatter<CollisionFreeSpeedModelV2State> {
             ctx.out(),
             "CollisionFreeSpeedModelV2[orientation={}, strengthNeighborRepulsion={}, "
             "rangeNeighborRepulsion={}, strengthGeometryRepulsion={}, rangeGeometryRepulsion={}, "
-            "timeGap={}, v0={}, radius={}])",
+            "timeGap={}, v0={}, radius={}]",
             m.orientation,
             m.strength_neighbor_repulsion,
             m.range_neighbor_repulsion,

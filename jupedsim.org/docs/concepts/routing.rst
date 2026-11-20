@@ -72,7 +72,7 @@ A Waypoint at :math:`(0.6, -1.4)` with an accepted distance of 2m can be added t
 
 .. code:: python
 
-    waypoint_id = simulation.add_waypoint_stage([(jps.circle_to_polygon(center=(0.6, -1.4), radius=2), region_id)])
+    waypoint = simulation.add_target(jps.Waypoint([(jps.circle_to_polygon(center=(0.6, -1.4), radius=2), region)]))
 
 Exit
 ^^^^
@@ -98,11 +98,11 @@ An exit located in the polygon :math:`(-0.2, -1.9), (0.2, -1.9), (0.2, -1.7), (-
 .. code:: python
 
     # create exit from coordinates
-    exit_id = simulation.add_exit_stage([([(-0.2, -1.9), (0.2, -1.9), (0.2, -1.7), (-0.2, -1.7)], region_id)])
+    exit_ = simulation.add_target(jps.Exit([([(-0.2, -1.9), (0.2, -1.9), (0.2, -1.7), (-0.2, -1.7)], region)]))
 
     # create exit from shapely.Polygon
     exit_polygon = shapely.Polygon([(-0.2, -1.9), (0.2, -1.9), (0.2, -1.7), (-0.2, -1.7)])
-    exit_id = simulation.add_exit_stage([(exit_polygon, region_id)])
+    exit_ = simulation.add_target(jps.Exit([(exit_polygon, region)]))
 
 .. note::
 
@@ -127,11 +127,11 @@ But before we can add transitions we have to create Journeys:
     # create stages
     ...
 
-    # define a journey
-    journey = jps.JourneyDescription(
+    # define a route
+    route = simulation.add_route(
         [
-            waypoint_id,
-            exit_id
+            jps.FixedTransition(jps.AGENT_LOCATION, waypoint),
+            jps.FixedTransition(waypoint, exit_),
         ]
     )
 
@@ -162,10 +162,7 @@ The most basic form of transition is to define that the agent will proceed on it
 .. code-block:: python
 
 
-    journey.set_transition_for_stage(
-        start_stage_id,
-        jps.Transition.create_fixed_transition(next_stage_id)
-    )
+    jps.FixedTransition(start, next_target)
 
 Round-robin transition
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -185,15 +182,13 @@ To create a round-robin transition as described above, you can follow these step
 
 .. code-block:: python
 
-    journey.set_transition_for_stage(
-        start_stage_id,
-        jps.Transition.create_round_robin_transition(
-            [
-                (first_candidate_stage_id, 10),
-                (second_candidate_stage_id, 5),
-                (third_candidate_stage_id, 1),
-            ]
-        )
+    jps.RoundRobinTransition(
+        start,
+        {
+            first_candidate: 10,
+            second_candidate: 5,
+            third_candidate: 1,
+        },
     )
 
 Least-targeted transition
@@ -211,15 +206,13 @@ A least-targeted transition can be added to a journey with:
 
 .. code-block:: python
 
-    journey.set_transition_for_stage(
-        start_stage_id,
-        jps.Transition.create_least_targeted_transition(
-            [
-                first_candidate_stage_id,
-                second_candidate_stage_id,
-                third_candidate_stage_id,
-            ]
-        )
+    jps.LeastTargetedTransition(
+        start,
+        [
+            first_candidate,
+            second_candidate,
+            third_candidate,
+        ],
     )
 
 Direct Steering
@@ -231,9 +224,10 @@ To use direct steering in your simulation, you need to add a direct steering sta
 
 .. code:: python
 
-    direct_steering_stage = simulation.add_direct_steering_stage()
-    direct_steering_journey = jps.JourneyDescription([direct_steering_stage])
-    direct_steering_journey_id = simulation.add_journey(direct_steering_journey)
+    agent = simulation.add_agent(
+        region.at(0, 0),
+        steer_to=region.at(-10, -10),
+    )
 
 Afterwards, an agent or agents can be added, targeting this journey and stage.
 The agent with the ID `direct_steering_agent_id` is using the direct steering journey.
@@ -242,8 +236,7 @@ It will move towards the specified point and if the point is reached, it will co
 
 .. code:: python
 
-    agent = simulation.agent(direct_steering_agent_id)
-    agent.final_target = (-10, -10)
+    agent.reroute(steer_to=region.at(-10, -10))
 
 .. note::
 
@@ -252,7 +245,7 @@ It will move towards the specified point and if the point is reached, it will co
 
     .. code:: python
 
-        simulation.mark_agent_for_removal(direct_steering_agent_id)
+        simulation.mark_agent_for_removal(agent)
 
     Alternatively, the journey of an agent can be switched to some other journey, see :ref:`Switch journey`.
 
@@ -265,11 +258,7 @@ After the following code, the agent with the ID `agent_id` will continue in the 
 
 .. code::
 
-        simulation.switch_agent_journey(
-            agent_id,
-            new_journey_id,
-            new_stage_id
-        )
+        agent.reroute(route=new_route, first_target=new_target)
 
 Way finding
 ===========

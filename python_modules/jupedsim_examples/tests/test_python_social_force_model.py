@@ -18,21 +18,18 @@ def corridor_simulation():
         height=0.0,
     )
     sim = jps.Simulation(model=model, geometry=surface.build(), dt=0.05)
-    exit_id = sim.add_exit_stage(
-        [([(19, 9), (19, 11), (20, 11), (20, 9)], room)]
+    exit_ = sim.add_target(
+        jps.Exit([([(19, 9), (19, 11), (20, 11), (20, 9)], room)])
     )
-    journey = jps.JourneyDescription([exit_id])
-    journey_id = sim.add_journey(journey)
-    return sim, exit_id, journey_id, room
+    route = sim.add_route([jps.FixedTransition(jps.AGENT_LOCATION, exit_)])
+    return sim, exit_, route, room
 
 
-def _add_agent(sim, room, journey_id, stage_id, position, velocity=(0.0, 0.0)):
+def _add_agent(sim, room, route, position, velocity=(0.0, 0.0)):
     return sim.add_agent(
-        journey_id=journey_id,
-        stage_id=stage_id,
-        position=position,
+        room.at(*position),
+        route=route,
         state=PythonSocialForceModelState(velocity=velocity),
-        region_id=room,
     )
 
 
@@ -48,27 +45,27 @@ def test_simulation_can_be_created_with_python_social_force_model():
 
 
 def test_agent_can_be_added_with_default_parameters(corridor_simulation):
-    sim, exit_id, journey_id, room = corridor_simulation
-    agent_id = _add_agent(sim, room, journey_id, exit_id, (2.0, 10.0))
+    sim, exit_, route, room = corridor_simulation
+    agent = _add_agent(sim, room, route, (2.0, 10.0))
     assert sim.agent_count() == 1
-    assert sim.agent(agent_id).position == pytest.approx((2.0, 10.0))
+    assert agent.location.xy == pytest.approx((2.0, 10.0))
 
 
 def test_agent_moves_toward_exit(corridor_simulation):
-    sim, exit_id, journey_id, room = corridor_simulation
+    sim, exit_, route, room = corridor_simulation
     start = (2.0, 10.0)
-    agent_id = _add_agent(sim, room, journey_id, exit_id, start)
+    agent = _add_agent(sim, room, route, start)
 
     for _ in range(50):
         sim.iterate()
 
-    pos = sim.agent(agent_id).position
+    pos = agent.location.xy
     assert pos[0] > start[0], "Agent should move in +x direction toward exit"
 
 
 def test_single_agent_reaches_exit(corridor_simulation):
-    sim, exit_id, journey_id, room = corridor_simulation
-    _add_agent(sim, room, journey_id, exit_id, (2.0, 10.0))
+    sim, exit_, route, room = corridor_simulation
+    _add_agent(sim, room, route, (2.0, 10.0))
 
     max_steps = 2000
     for _ in range(max_steps):
@@ -82,10 +79,10 @@ def test_single_agent_reaches_exit(corridor_simulation):
 
 
 def test_multiple_agents_all_reach_exit(corridor_simulation):
-    sim, exit_id, journey_id, room = corridor_simulation
+    sim, exit_, route, room = corridor_simulation
     positions = [(2.0, 10.0), (3.0, 10.5), (2.5, 9.5), (4.0, 10.0)]
     for pos in positions:
-        _add_agent(sim, room, journey_id, exit_id, pos)
+        _add_agent(sim, room, route, pos)
 
     assert sim.agent_count() == len(positions)
 
@@ -107,21 +104,20 @@ def test_social_force_prevents_agent_collapse():
         height=0.0,
     )
     sim = jps.Simulation(model=model, geometry=surface.build(), dt=0.05)
-    exit_id = sim.add_exit_stage(
-        [([(19, 9), (19, 11), (20, 11), (20, 9)], room)]
+    exit_ = sim.add_target(
+        jps.Exit([([(19, 9), (19, 11), (20, 11), (20, 9)], room)])
     )
-    journey = jps.JourneyDescription([exit_id])
-    journey_id = sim.add_journey(journey)
+    route = sim.add_route([jps.FixedTransition(jps.AGENT_LOCATION, exit_)])
 
     # Two agents starting 1 m apart — within interaction range (2 m) but not overlapping
-    id1 = _add_agent(sim, room, journey_id, exit_id, (5.0, 9.5))
-    id2 = _add_agent(sim, room, journey_id, exit_id, (5.0, 10.5))
+    first = _add_agent(sim, room, route, (5.0, 9.5))
+    second = _add_agent(sim, room, route, (5.0, 10.5))
 
     min_dist = float("inf")
     for _ in range(100):
         sim.iterate()
-        p1 = sim.agent(id1).position
-        p2 = sim.agent(id2).position
+        p1 = first.location.xy
+        p2 = second.location.xy
         d = ((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2) ** 0.5
         if d < min_dist:
             min_dist = d
@@ -141,39 +137,34 @@ def test_custom_desired_speed_affects_movement():
         height=0.0,
     )
     sim = jps.Simulation(model=model, geometry=surface.build(), dt=0.05)
-    exit_id = sim.add_exit_stage(
-        [([(19, 9), (19, 11), (20, 11), (20, 9)], room)]
+    exit_ = sim.add_target(
+        jps.Exit([([(19, 9), (19, 11), (20, 11), (20, 9)], room)])
     )
-    journey = jps.JourneyDescription([exit_id])
-    journey_id = sim.add_journey(journey)
+    route = sim.add_route([jps.FixedTransition(jps.AGENT_LOCATION, exit_)])
 
     # Slow agent
-    slow_id = sim.add_agent(
-        journey_id=journey_id,
-        stage_id=exit_id,
-        position=(2.0, 8.0),
+    slow = sim.add_agent(
+        room.at(2.0, 8.0),
+        route=route,
         state=PythonSocialForceModelState(
             velocity=(0.0, 0.0), desired_speed=0.5
         ),
-        region_id=room,
     )
 
     # Fast agent
-    fast_id = sim.add_agent(
-        journey_id=journey_id,
-        stage_id=exit_id,
-        position=(2.0, 12.0),
+    fast = sim.add_agent(
+        room.at(2.0, 12.0),
+        route=route,
         state=PythonSocialForceModelState(
             velocity=(0.0, 0.0), desired_speed=2.0
         ),
-        region_id=room,
     )
 
     for _ in range(100):
         sim.iterate()
 
-    slow_x = sim.agent(slow_id).position[0]
-    fast_x = sim.agent(fast_id).position[0]
+    slow_x = slow.location.xy[0]
+    fast_x = fast.location.xy[0]
     assert fast_x > slow_x, "Fast agent should travel further than slow agent"
 
 
@@ -186,20 +177,19 @@ def test_obstacle_force_keeps_agents_from_walls():
         height=0.0,
     )
     sim = jps.Simulation(model=model, geometry=surface.build(), dt=0.05)
-    exit_id = sim.add_exit_stage(
-        [([(19, 9), (19, 11), (20, 11), (20, 9)], room)]
+    exit_ = sim.add_target(
+        jps.Exit([([(19, 9), (19, 11), (20, 11), (20, 9)], room)])
     )
-    journey = jps.JourneyDescription([exit_id])
-    journey_id = sim.add_journey(journey)
+    route = sim.add_route([jps.FixedTransition(jps.AGENT_LOCATION, exit_)])
 
-    agent_id = _add_agent(sim, room, journey_id, exit_id, (2.0, 10.0))
+    agent = _add_agent(sim, room, route, (2.0, 10.0))
 
     for _ in range(200):
         if sim.agent_count() == 0:
             break
         sim.iterate()
         if sim.agent_count() > 0:
-            pos = sim.agent(agent_id).position
+            pos = agent.location.xy
             assert 0 < pos[0] < 20, f"Agent x={pos[0]} went outside geometry"
             assert 0 < pos[1] < 20, f"Agent y={pos[1]} went outside geometry"
 
@@ -210,23 +200,21 @@ def test_per_agent_state_survives_iterations(corridor_simulation):
     Guards against compute_next_state rebuilding the state from defaults
     instead of carrying the current state forward (dataclasses.replace).
     """
-    sim, exit_id, journey_id, room = corridor_simulation
-    agent_id = sim.add_agent(
-        journey_id=journey_id,
-        stage_id=exit_id,
-        position=(2.0, 10.0),
+    sim, exit_, route, room = corridor_simulation
+    agent = sim.add_agent(
+        room.at(2.0, 10.0),
+        route=route,
         state=PythonSocialForceModelState(
             velocity=(0.0, 0.0),
             desired_speed=2.0,
             reaction_time=0.25,
         ),
-        region_id=room,
     )
 
     for _ in range(20):
         sim.iterate()
 
-    state = sim.agent(agent_id).state
+    state = agent.state
     assert isinstance(state, PythonSocialForceModelState)
     assert state.desired_speed == 2.0
     assert state.reaction_time == 0.25
