@@ -19,7 +19,7 @@
 
 namespace
 {
-/// How far to ask for walls. The force reaches max_geometry_interaction_distance beyond the
+/// How far ahead to look for a wall. The force reaches max_geometry_interaction_distance beyond the
 /// agent's ellipse, 3.4 m with the default parameters. Use the 4m default of previous impl.
 constexpr double wall_search_radius = 4.0;
 } // namespace
@@ -65,12 +65,6 @@ Vector GeneralizedCentrifugalForceModel::compute_next_state(
     // force_driv leaves e0 untouched when the agent has practically arrived; the default
     // constructed value is what gets stored then.
     Vector e0{};
-    // repulsive forces to the walls and transitions that are not my target
-    Vector repwall{};
-    for(const auto& wall : step.walls_in_range(wall_search_radius)) {
-        repwall += force_rep_wall(current_state, wall);
-    }
-
     const Vector fd = force_driv(
         current_state,
         step.route_orientation(),
@@ -78,6 +72,18 @@ Vector GeneralizedCentrifugalForceModel::compute_next_state(
         current_state.tau,
         step.dt(),
         e0);
+
+    // repulsive forces to the walls and transitions that are not my target
+    Vector repwall{};
+    const Vector velocity_without_walls =
+        (current_state.orientation * current_state.speed) +
+        (fd + f_rep).guarded_division(current_state.mass) * step.dt();
+    // The side lines run along the widest the ellipse gets, plus the interpolation margin.
+    for(const auto& wall : step.walls_ahead(
+            velocity_without_walls.normalized() * wall_search_radius,
+            current_state.b_max + _max_geometry_interpolation_distance)) {
+        repwall += force_rep_wall(current_state, wall);
+    }
     const Vector acc = (fd + f_rep + repwall).guarded_division(current_state.mass);
 
     const Vector velocity = (current_state.orientation * current_state.speed) + acc * step.dt();

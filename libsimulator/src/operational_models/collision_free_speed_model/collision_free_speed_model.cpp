@@ -16,9 +16,12 @@
 
 namespace
 {
-/// How far to ask for walls. The repulsion decays with `range_geometry_repulsion` (0.02 m by
-/// default), so a wall this far off contributes "nothing".
+/// How far ahead to look for a wall. The repulsion decays with `range_geometry_repulsion` (0.02 m
+/// by default), so a wall this far off contributes "nothing".
 constexpr double wall_search_radius = 4.0;
+/// How far beyond the body the side lines run, in units of `range_geometry_repulsion`. A wall
+/// just outside them pushes with at most exp(-5) of the strength at contact.
+constexpr double wall_margin_in_ranges = 5.0;
 } // namespace
 
 CollisionFreeSpeedModel::CollisionFreeSpeedModel(
@@ -52,16 +55,21 @@ Vector CollisionFreeSpeedModel::compute_next_state(
         neighbor_repulsion += this->neighbor_repulsion(current_state, neighbor);
     }
 
+    const auto desired_direction = step.route_orientation();
+    // The orientation along 'v'; where 'v' has no direction, the current one.
+    const auto orientation_along = [&current_state](Vector v) {
+        const Vector heading = v.normalized();
+        return heading == Vector{} ? current_state.orientation : heading;
+    };
     Vector boundary_repulsion{};
-    for(const auto& wall : step.walls_in_range(wall_search_radius)) {
+    for(const auto& wall : step.walls_ahead(
+            orientation_along(desired_direction + neighbor_repulsion) * wall_search_radius,
+            current_state.radius + wall_margin_in_ranges * _range_geometry_repulsion)) {
         boundary_repulsion += this->boundary_repulsion(current_state, wall);
     }
 
-    const auto desired_direction = step.route_orientation();
-    auto direction = (desired_direction + neighbor_repulsion + boundary_repulsion).normalized();
-    if(direction == Vector{}) {
-        direction = current_state.orientation;
-    }
+    const Vector direction =
+        orientation_along(desired_direction + neighbor_repulsion + boundary_repulsion);
     auto spacing = std::numeric_limits<double>::max();
     for(const auto& neighbor : neighborhood) {
         spacing = std::min(spacing, get_spacing(current_state, neighbor, direction));
