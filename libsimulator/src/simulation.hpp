@@ -69,10 +69,10 @@ private:
     std::shared_ptr<const Geometry> _geometry{};
     std::unique_ptr<RoutingEngine> _routing_engine{};
     AgentContainer<GenericAgent> _agents;
-    /// Agents that completed an exit, removed at the beginning of the next iteration.
-    std::vector<GenericAgent::ID> _to_remove;
-    std::vector<GenericAgent::ID> _marked_for_removal;
-    std::vector<TargetCompletionRecord> _target_completions;
+    /// Agents that reached an exit or were marked, removed at the beginning of the next
+    /// iteration.
+    std::vector<RemovalRecord> _marked_for_removal;
+    std::vector<TargetReachedRecord> _reached_targets;
     std::vector<RemovalRecord> _removals;
     std::unordered_map<Route::ID, std::unique_ptr<Route>> _routes;
     /// Kept apart from the agents, which are copied every iteration; only named agents.
@@ -127,16 +127,16 @@ public:
     /// Removes the agent at the beginning of the next iteration. Nothing changes for an agent
     /// that is about to leave already.
     void mark_agent_for_removal(GenericAgent::ID id);
-    /// The targets completed in the most recent iteration.
-    const std::vector<TargetCompletionRecord>& target_completions() const;
-    /// The agents removed in the most recent iteration, and those that completed an exit in it.
-    /// An agent completing an exit leaves at the beginning of the next iteration.
+    /// The targets reached in the most recent iteration, and by the agents added since.
+    const std::vector<TargetReachedRecord>& reached_targets() const;
+    /// The agents removed at the beginning of the most recent iteration.
     const std::vector<RemovalRecord>& removed_agents() const;
     size_t agent_count() const;
     double elapsed_time() const;
     double dt() const;
     /// Lets the agent follow @p route_id, from @p first_stage on, or from where the route's
-    /// first transition leads if none is given.
+    /// first transition leads if none is given. The agent reaches its new target after the next
+    /// step at the earliest, even if it stands in it already.
     void reroute(
         GenericAgent::ID agent_id,
         Route::ID route_id,
@@ -153,8 +153,8 @@ public:
     /// Ids of the agents inside @p polygon, clipped to region @p region_id as a stage area is.
     /// Throws if @p polygon does not intersect that region.
     std::vector<GenericAgent::ID> agents_in_polygon(const Polygon& polygon, std::size_t region_id);
-    /// Adds an agent at @p location that follows @p route_id, see reroute(). Targets are
-    /// completed in iterate() only, so an agent added inside its first stage completes it there.
+    /// Adds an agent at @p location that follows @p route_id, see reroute(). An agent added
+    /// inside its first stage has reached it; it moves on in the next iteration.
     /// @p name has to be unique among the agents, if given; it is free again once its agent has
     /// left.
     GenericAgent::ID add_agent(

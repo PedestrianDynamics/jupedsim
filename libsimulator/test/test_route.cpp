@@ -29,6 +29,7 @@
 #include <string>
 #include <tuple>
 #include <utility>
+#include <variant>
 #include <vector>
 
 TEST(FixedTransition, NextIsCorrect)
@@ -321,70 +322,74 @@ TEST_F(FollowRoute, AFirstStageOutsideTheRouteIsRejected)
     EXPECT_EQ(_sim.agent_count(), 0u);
 }
 
-TEST_F(FollowRoute, StagesAreCompletedInIterateOnly)
+TEST_F(FollowRoute, AnAgentAddedInsideItsFirstStageHasReachedIt)
 {
     const auto wp1 = waypoint({2, 2});
     const auto wp2 = waypoint({15, 15});
     const auto route = _sim.add_route({fixed({}, wp1), fixed(wp1, wp2)});
     const auto id = add_agent({2, 2}, route);
-    EXPECT_EQ(_sim.agent(id).stage_id, wp1);
+
+    ASSERT_EQ(_sim.reached_targets().size(), 1u);
+    const auto& reached = _sim.reached_targets().front();
+    EXPECT_EQ(reached.agent_id, id);
+    EXPECT_EQ(std::get<BaseStage::ID>(reached.target), wp1);
+    EXPECT_EQ(reached.time, 0.0);
+    EXPECT_EQ(reached.location.xy(), Point(2, 2));
+    EXPECT_EQ(_sim.agent(id).stage_id, wp1) << "moves on in the next iteration";
 
     _sim.iterate();
-
-    ASSERT_EQ(_sim.target_completions().size(), 1u);
-    const auto& completion = _sim.target_completions().front();
-    EXPECT_EQ(completion.agent_id, id);
-    EXPECT_EQ(std::get<BaseStage::ID>(completion.target), wp1);
-    EXPECT_EQ(completion.time, 0.0);
-    EXPECT_EQ(completion.location.xy(), Point(2, 2));
+    EXPECT_TRUE(_sim.reached_targets().empty());
     EXPECT_EQ(_sim.agent(id).stage_id, wp2);
 }
 
-TEST_F(FollowRoute, TheLastStageIsCompletedOnce)
+TEST_F(FollowRoute, TheLastStageIsReachedOnce)
 {
     const auto wp1 = waypoint({2, 2});
     const auto route = _sim.add_route({fixed({}, wp1)});
     const auto id = add_agent({2, 2}, route);
+    EXPECT_EQ(_sim.reached_targets().size(), 1u);
 
     _sim.iterate();
-    EXPECT_EQ(_sim.target_completions().size(), 1u);
+    EXPECT_TRUE(_sim.reached_targets().empty());
     _sim.iterate();
-    EXPECT_TRUE(_sim.target_completions().empty());
+    EXPECT_TRUE(_sim.reached_targets().empty());
     EXPECT_EQ(_sim.agent(id).stage_id, wp1);
 }
 
-TEST_F(FollowRoute, ALoopCompletesEveryVisit)
+TEST_F(FollowRoute, AStageTheAgentStandsInAlreadyIsReachedInTheNextStep)
 {
     const auto wp1 = waypoint({2, 2});
     const auto wp2 = waypoint({2, 2});
     const auto route = _sim.add_route({fixed({}, wp1), fixed(wp1, wp2), fixed(wp2, wp1)});
     add_agent({2, 2}, route);
 
-    for(const auto expected : {wp1, wp2, wp1}) {
+    for(const auto expected : {wp2, wp1, wp2}) {
         _sim.iterate();
-        ASSERT_EQ(_sim.target_completions().size(), 1u);
-        EXPECT_EQ(std::get<BaseStage::ID>(_sim.target_completions().front().target), expected);
+        ASSERT_EQ(_sim.reached_targets().size(), 1u);
+        EXPECT_EQ(std::get<BaseStage::ID>(_sim.reached_targets().front().target), expected);
     }
 }
 
-TEST_F(FollowRoute, AnExitCompletionComesWithARemovalRecord)
+TEST_F(FollowRoute, AnAgentReachingAnExitLeavesAtTheBeginningOfTheNextIteration)
 {
-    const auto exit1 = exit({2, 2});
-    const auto route = _sim.add_route({fixed({}, exit1)});
-    const auto id = add_agent({2, 2}, route);
+    const auto exit1 = exit({4, 2});
+    const auto id = add_agent({2, 2}, _sim.add_route({fixed({}, exit1)}));
+
+    while(_sim.reached_targets().empty()) {
+        ASSERT_LT(_sim.iteration(), 1000u);
+        _sim.iterate();
+    }
+    const auto reached_at = _sim.reached_targets().front().time;
+    EXPECT_TRUE(_sim.agent(id).leaving);
+    EXPECT_TRUE(_sim.removed_agents().empty());
 
     _sim.iterate();
-    ASSERT_EQ(_sim.target_completions().size(), 1u);
+    EXPECT_EQ(_sim.agent_count(), 0u);
     ASSERT_EQ(_sim.removed_agents().size(), 1u);
     const auto& removal = _sim.removed_agents().front();
     EXPECT_EQ(removal.agent_id, id);
     EXPECT_EQ(removal.exit, exit1);
-    EXPECT_EQ(removal.time, 0.0);
-    EXPECT_EQ(_sim.agent_count(), 1u) << "leaves at the beginning of the next iteration";
-
-    _sim.iterate();
-    EXPECT_EQ(_sim.agent_count(), 0u);
-    EXPECT_TRUE(_sim.removed_agents().empty());
+    EXPECT_EQ(removal.time, reached_at);
 }
 
 TEST_F(FollowRoute, AMarkedAgentIsRecordedWhenItIsRemoved)
@@ -405,30 +410,27 @@ TEST_F(FollowRoute, AMarkedAgentIsRecordedWhenItIsRemoved)
     EXPECT_EQ(_sim.removed_agents().front().time, _sim.dt());
 }
 
-TEST_F(FollowRoute, AnAgentMarkedAfterCompletingAnExitIsRecordedOnce)
+TEST_F(FollowRoute, AnAgentMarkedAfterReachingAnExitIsRecordedOnce)
 {
-    const auto route = _sim.add_route({fixed({}, exit({2, 2}))});
-    const auto id = add_agent({2, 2}, route);
-    _sim.iterate();
-    ASSERT_EQ(_sim.removed_agents().size(), 1u);
+    const auto exit1 = exit({2, 2});
+    const auto id = add_agent({2, 2}, _sim.add_route({fixed({}, exit1)}));
 
     _sim.mark_agent_for_removal(id);
     _sim.iterate();
     EXPECT_EQ(_sim.agent_count(), 0u);
-    EXPECT_TRUE(_sim.removed_agents().empty());
+    ASSERT_EQ(_sim.removed_agents().size(), 1u);
+    EXPECT_EQ(_sim.removed_agents().front().exit, exit1);
 }
 
 TEST_F(FollowRoute, AnAgentNameIsFreeAgainOnceItsAgentHasLeft)
 {
     const auto route = _sim.add_route({fixed({}, exit({2, 2}))});
     const auto id = _sim.add_agent(at({2, 2}), route, {}, State{}, "anna");
-    EXPECT_EQ(_sim.agent_named("anna"), id);
+    EXPECT_EQ(_sim.agent_named("anna"), id) << "still there, about to leave";
     EXPECT_THAT(
         [&] { _sim.add_agent(at({5, 5}), route, {}, State{}, "anna"); },
         ThrowsMessage<SimulationError>(HasSubstr("'anna' is already used")));
 
-    _sim.iterate();
-    EXPECT_EQ(_sim.agent_named("anna"), id) << "still there, about to leave";
     _sim.iterate();
     EXPECT_EQ(_sim.agent_named("anna"), std::nullopt);
     EXPECT_NO_THROW(_sim.add_agent(at({5, 5}), route, {}, State{}, "anna"));
@@ -447,8 +449,23 @@ TEST_F(FollowRoute, RerouteWithinTheRouteJumpsToTheStage)
     _sim.reroute(id, wp1);
     EXPECT_EQ(_sim.agent(id).stage_id, wp1);
     _sim.iterate();
-    EXPECT_EQ(_sim.target_completions().size(), 1u) << "completed again after the jump";
+    EXPECT_EQ(_sim.reached_targets().size(), 1u) << "reached again after the step";
+    EXPECT_EQ(_sim.agent(id).stage_id, wp1);
+    _sim.iterate();
     EXPECT_EQ(_sim.agent(id).stage_id, wp2);
+}
+
+TEST_F(FollowRoute, ARerouteIsReachedAfterTheNextStepEvenInsideTheTarget)
+{
+    const auto id = add_agent({2, 2}, _sim.add_route({fixed({}, waypoint({2, 2}))}));
+    _sim.iterate();
+    const auto wp2 = waypoint({2, 2});
+
+    _sim.reroute(id, _sim.add_route({fixed({}, wp2)}));
+    EXPECT_TRUE(_sim.reached_targets().empty());
+    _sim.iterate();
+    ASSERT_EQ(_sim.reached_targets().size(), 1u);
+    EXPECT_EQ(std::get<BaseStage::ID>(_sim.reached_targets().front().target), wp2);
 }
 
 TEST_F(FollowRoute, ASteeredAgentHasNoRouteToJumpIn)
@@ -468,9 +485,9 @@ TEST_F(FollowRoute, ASteeredAgentArrivesOnce)
     std::size_t arrivals = 0;
     for(int step = 0; step < 300; ++step) {
         _sim.iterate();
-        for(const auto& completion : _sim.target_completions()) {
-            EXPECT_EQ(completion.agent_id, id);
-            EXPECT_EQ(std::get<Location>(completion.target).xy(), target.xy());
+        for(const auto& reached : _sim.reached_targets()) {
+            EXPECT_EQ(reached.agent_id, id);
+            EXPECT_EQ(std::get<Location>(reached.target).xy(), target.xy());
             ++arrivals;
         }
     }
@@ -514,11 +531,9 @@ TEST_F(RecordFormatter, ShowsAllFields)
     const auto location = at({2, 2});
 
     EXPECT_EQ(
-        fmt::format("{}", TargetCompletionRecord{7, exit1, 1.5, location}),
+        fmt::format("{}", TargetReachedRecord{7, exit1, 1.5, location}),
         fmt::format(
-            "TargetCompletionRecord(agent_id=7, target={}, time=1.5, location={})",
-            exit1,
-            location));
+            "TargetReachedRecord(agent_id=7, target={}, time=1.5, location={})", exit1, location));
     EXPECT_EQ(
         fmt::format("{}", RemovalRecord{7, exit1, 1.5}),
         fmt::format("RemovalRecord(agent_id=7, exit={}, time=1.5)", exit1));
@@ -543,8 +558,10 @@ protected:
     boost::random::splitmix64 _rng{GetParam()};
     std::vector<GenericAgent::ID> _added{};
     std::set<GenericAgent::ID> _present{};
-    /// Agents that completed an exit; they leave at the beginning of the next iteration.
-    std::vector<GenericAgent::ID> _leaving{};
+    std::set<BaseStage::ID> _exits{};
+    /// Agents that reached an exit or were marked for removal; they leave at the beginning of the
+    /// next iteration.
+    std::set<GenericAgent::ID> _leaving{};
 
     std::size_t draw(std::size_t count) { return _rng() % count; }
 
@@ -558,6 +575,17 @@ protected:
             const auto id = add_agent(xy, routes[draw(routes.size())]);
             _added.push_back(id);
             _present.insert(id);
+        }
+        note_reached_exits();
+    }
+
+    void note_reached_exits()
+    {
+        for(const auto& reached : _sim.reached_targets()) {
+            const auto* stage = std::get_if<BaseStage::ID>(&reached.target);
+            if(stage != nullptr && _exits.contains(*stage)) {
+                _leaving.insert(reached.agent_id);
+            }
         }
     }
 
@@ -573,13 +601,7 @@ protected:
         }
         _leaving.clear();
         _sim.iterate();
-        for(const auto& removal : _sim.removed_agents()) {
-            if(removal.exit) {
-                _leaving.push_back(removal.agent_id);
-            } else {
-                _present.erase(removal.agent_id);
-            }
-        }
+        note_reached_exits();
     }
 
     ::testing::AssertionResult finds_exactly_the_present_agents()
@@ -625,6 +647,7 @@ TEST_P(AgentLookup, FindsExactlyTheAgentsInTheSimulation)
     };
     const auto exit1 = wide_exit({1, 15}, {5, 19});
     const auto exit2 = wide_exit({15, 1}, {19, 5});
+    _exits = {exit1, exit2};
     const auto wp1 = waypoint({10, 10});
     const std::vector<Route::ID> routes{
         _sim.add_route({fixed({}, exit1)}),
@@ -641,7 +664,9 @@ TEST_P(AgentLookup, FindsExactlyTheAgentsInTheSimulation)
                 break;
             case 3:
                 if(!_present.empty()) {
-                    _sim.mark_agent_for_removal(any_present_agent());
+                    const auto id = any_present_agent();
+                    _sim.mark_agent_for_removal(id);
+                    _leaving.insert(id);
                 }
                 break;
             case 4:

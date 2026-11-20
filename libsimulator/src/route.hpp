@@ -203,8 +203,8 @@ public:
     /// The stage an agent joining the route goes to first.
     BaseStage* first_stage() { return _entry->next_stage(); }
 
-    /// The stage after @p completed, or nullptr where the route ends.
-    BaseStage* next_stage(BaseStage::ID completed);
+    /// The stage after @p reached, or nullptr where the route ends.
+    BaseStage* next_stage(BaseStage::ID reached);
 
     bool contains(BaseStage::ID stage_id) const { return _transitions.contains(stage_id); }
 

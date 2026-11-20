@@ -43,17 +43,17 @@ def test_an_agent_follows_its_route_and_is_recorded_on_the_way():
     assert r.sim.agent("anna") == agent
     assert repr(agent) == f"Agent(id={agent.id}, name='anna')"
 
+    (reached,) = r.sim.reached_targets()
+    assert (reached.agent_id, reached.target) == (agent.id, r.waypoint)
+    assert reached.location.xy == (2, 5)
     r.sim.iterate()
-    (completion,) = r.sim.target_completions()
-    assert (completion.agent_id, completion.target) == (agent.id, r.waypoint)
-    assert completion.location.xy == (2, 5)
     assert agent.current_target == r.exit
 
-    removals = []
-    while r.sim.agent_count() > 0 and r.sim.iteration_count() < 2000:
+    while not agent.leaving and r.sim.iteration_count() < 2000:
         r.sim.iterate()
-        removals += r.sim.removed_agents()
-    (removal,) = removals
+    assert r.sim.reached_targets()[-1].target == r.exit
+    r.sim.iterate()
+    (removal,) = r.sim.removed_agents()
     assert (removal.agent_id, removal.exit) == (agent.id, r.exit)
     with pytest.raises(KeyError, match="no agent named 'anna'"):
         r.sim.agent("anna")
@@ -61,12 +61,21 @@ def test_an_agent_follows_its_route_and_is_recorded_on_the_way():
 
 def test_records_cover_all_iterations_of_one_iterate_call():
     r = _Room()
+    for x, y in ((3.1, 4.5), (3.3, 5.5)):
+        r.sim.add_agent(r.at(x, y), route=r.route)
+    r.sim.iterate(40)
+    assert len({record.time for record in r.sim.reached_targets()}) == 2
+    r.sim.iterate()
+    assert r.sim.reached_targets() == ()
+
+
+def test_agents_added_inside_their_target_are_recorded_until_the_next_iterate():
+    r = _Room()
     for y in (4.5, 5.5):
         r.sim.add_agent(r.at(2, y), route=r.route)
-    r.sim.iterate(3)
-    assert len(r.sim.target_completions()) == 2
+    assert len(r.sim.reached_targets()) == 2
     r.sim.iterate()
-    assert r.sim.target_completions() == ()
+    assert r.sim.reached_targets() == ()
 
 
 def test_a_marked_agent_is_recorded_without_exit():
@@ -101,7 +110,7 @@ def test_a_steered_agent_reports_its_arrival_once():
     arrivals = []
     for _ in range(300):
         r.sim.iterate()
-        arrivals += r.sim.target_completions()
+        arrivals += r.sim.reached_targets()
     (arrival,) = arrivals
     assert arrival.agent_id == agent.id
     assert isinstance(arrival.target, jps.Location)

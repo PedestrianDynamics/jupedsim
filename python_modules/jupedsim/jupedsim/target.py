@@ -36,7 +36,7 @@ class _TargetDescription:
 class Waypoint(_TargetDescription):
     """Describes a waypoint, to be added with :meth:`~jupedsim.Simulation.add_target`.
 
-    Reaching any one of its areas completes the waypoint.
+    An agent reaches the waypoint when it stands in any one of its areas.
 
     Args:
         areas: Pairs of an area and the region it lies in. An area is a
@@ -51,7 +51,7 @@ class Waypoint(_TargetDescription):
 class Exit(_TargetDescription):
     """Describes an exit, to be added with :meth:`~jupedsim.Simulation.add_target`.
 
-    Agents completing an exit leave the simulation at the beginning of the next
+    Agents reaching an exit leave the simulation at the beginning of the next
     iteration.
 
     Args:

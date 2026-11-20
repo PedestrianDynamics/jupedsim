@@ -55,8 +55,8 @@ TEST_F(StagesTests, WaypointIsReachedWithinItsArea)
     const Polygon area{test_geometries::rectangle_points({-1, -1}, {1, 1})};
     Waypoint waypoint(destination_of(engine, *room.geometry, area, room.room_id), {});
 
-    EXPECT_TRUE(waypoint.is_completed(agent_at({0.9, 0}, waypoint.id())));
-    EXPECT_FALSE(waypoint.is_completed(agent_at({1.1, 0}, waypoint.id())));
+    EXPECT_TRUE(waypoint.is_reached_by(agent_at({0.9, 0}, waypoint.id())));
+    EXPECT_FALSE(waypoint.is_reached_by(agent_at({1.1, 0}, waypoint.id())));
 }
 
 /// Two floors over the same footprint: (x, y) alone no longer says where a stage is.
@@ -89,8 +89,8 @@ TEST_F(StagesOnTwoStoreys, WaypointIsReachedOnlyFromItsOwnFloor)
     // Reaches further than the height between the floors.
     Waypoint waypoint(square_around({3, 3}, 3.1, rooms.room_2), {});
 
-    EXPECT_FALSE(waypoint.is_completed(agent_at({3, 3}, rooms.room_1, waypoint.id())));
-    EXPECT_TRUE(waypoint.is_completed(agent_at({3, 3}, rooms.room_2, waypoint.id())));
+    EXPECT_FALSE(waypoint.is_reached_by(agent_at({3, 3}, rooms.room_1, waypoint.id())));
+    EXPECT_TRUE(waypoint.is_reached_by(agent_at({3, 3}, rooms.room_2, waypoint.id())));
 }
 
 TEST_F(StagesOnTwoStoreys, PassingOverOrUnderAnExitDoesNotTakeIt)
@@ -99,9 +99,9 @@ TEST_F(StagesOnTwoStoreys, PassingOverOrUnderAnExitDoesNotTakeIt)
     Exit lower(destination_of(engine, *rooms.geometry, area, rooms.room_1), {});
     Exit upper_exit(destination_of(engine, *rooms.geometry, area, rooms.room_2), {});
 
-    EXPECT_FALSE(lower.is_completed(agent_at({3, 3}, rooms.room_2, lower.id())));
-    EXPECT_FALSE(upper_exit.is_completed(agent_at({3, 3}, rooms.room_1, upper_exit.id())));
+    EXPECT_FALSE(lower.is_reached_by(agent_at({3, 3}, rooms.room_2, lower.id())));
+    EXPECT_FALSE(upper_exit.is_reached_by(agent_at({3, 3}, rooms.room_1, upper_exit.id())));
 
-    EXPECT_TRUE(lower.is_completed(agent_at({3, 3}, rooms.room_1, lower.id())));
-    EXPECT_TRUE(upper_exit.is_completed(agent_at({3, 3}, rooms.room_2, upper_exit.id())));
+    EXPECT_TRUE(lower.is_reached_by(agent_at({3, 3}, rooms.room_1, lower.id())));
+    EXPECT_TRUE(upper_exit.is_reached_by(agent_at({3, 3}, rooms.room_2, upper_exit.id())));
 }

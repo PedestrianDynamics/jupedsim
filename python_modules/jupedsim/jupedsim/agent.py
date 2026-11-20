@@ -144,6 +144,12 @@ class Agent:
         return self._resolve().location
 
     @property
+    def leaving(self) -> bool:
+        """Whether the agent leaves the simulation at the beginning of the next
+        iteration: it reached an exit, or was marked for removal."""
+        return self._resolve().leaving
+
+    @property
     def route_orientation(self) -> tuple[float, float]:
         """Unit vector toward the current target.
 
@@ -185,6 +191,8 @@ class Agent:
 
         It takes effect in the next iteration and cannot be called while the
         simulation iterates. :attr:`current_target` returns the new target at once.
+        The agent reaches it after the next step at the earliest, even if it stands
+        in it already.
 
         Raises:
             ValueError: if the arguments do not form one of the calls above, or a

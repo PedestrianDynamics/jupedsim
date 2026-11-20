@@ -30,7 +30,7 @@ public:
     {
     }
     virtual ~BaseStage() = default;
-    bool is_completed(const GenericAgent& agent) const
+    bool is_reached_by(const GenericAgent& agent) const
     {
         return _destination.contains(agent.location);
     }
@@ -73,7 +73,7 @@ public:
     using BaseStage::BaseStage;
 };
 
-/// Agents that complete an exit leave the simulation at the beginning of the next iteration.
+/// Agents that reach an exit leave the simulation at the beginning of the next iteration.
 class Exit : public BaseStage
 {
 public:

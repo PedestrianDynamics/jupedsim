@@ -2,6 +2,7 @@
 #pragma once
 
 #include "generic_agent.hpp"
+#include "records.hpp"
 #include "stage.hpp"
 #include "stage_manager.hpp"
 
@@ -20,34 +21,32 @@ public:
     AgentRemovalSystem(AgentRemovalSystem&& other) = delete;
     AgentRemovalSystem& operator=(AgentRemovalSystem&& other) = delete;
 
-    /// Removes the agents in @p removed_agent_ids, which has to be sorted, and clears it.
+    /// Removes the agents of @p removals, which have to be sorted by agent id.
     void
     run(AgentContainer<Agent>& agents,
-        std::vector<GenericAgent::ID>& removed_agent_ids,
+        const std::vector<RemovalRecord>& removals,
         StageManager& stage_manager) const;
 };
 
 template <typename Agent>
 void AgentRemovalSystem<Agent>::run(
     AgentContainer<Agent>& agents,
-    std::vector<GenericAgent::ID>& removed_agent_ids,
+    const std::vector<RemovalRecord>& removals,
     StageManager& stage_manager) const
 {
-    if(removed_agent_ids.empty()) {
+    if(removals.empty()) {
         return;
     }
     auto iter = std::remove_if(
         std::begin(agents),
         std::end(agents),
-        [&removed_agent_ids, &stage_manager](const GenericAgent& agent) {
-            const bool found = std::binary_search(
-                std::begin(removed_agent_ids), std::end(removed_agent_ids), agent.id);
+        [&removals, &stage_manager](const GenericAgent& agent) {
+            const bool found =
+                std::ranges::binary_search(removals, agent.id, {}, &RemovalRecord::agent_id);
             if(found && agent.stage_id != BaseStage::ID::invalid) {
                 stage_manager.handle_remove_agent(agent.stage_id);
             }
             return found;
         });
     agents.erase(iter, std::end(agents));
-
-    removed_agent_ids.clear();
 }

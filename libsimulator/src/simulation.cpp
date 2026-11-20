@@ -123,24 +123,21 @@ void Simulation::iterate()
     IterationScope iteration_scope(_state);
     JPS_SCOPED_TIMER_AND_TRACE(_timer, "Total Iteration", General);
 
-    _target_completions.clear();
-    _removals.clear();
+    _reached_targets.clear();
     {
         JPS_SCOPED_TIMER_AND_TRACE(_timer, "Agent Removal System", Detailed);
-        for(const auto id : _marked_for_removal) {
-            _removals.push_back({id, std::nullopt, _clock.elapsed_time()});
-        }
-        _to_remove.insert(_to_remove.end(), _marked_for_removal.begin(), _marked_for_removal.end());
-        _marked_for_removal.clear();
+        _removals.clear();
+        std::swap(_removals, _marked_for_removal);
         // AgentRemovalSystem::run needs them sorted.
-        std::ranges::sort(_to_remove);
-        for(const auto id : _to_remove) {
-            if(const auto named = _agent_names.find(id); named != std::end(_agent_names)) {
+        std::ranges::sort(_removals, {}, &RemovalRecord::agent_id);
+        for(const auto& removal : _removals) {
+            if(const auto named = _agent_names.find(removal.agent_id);
+               named != std::end(_agent_names)) {
                 _agent_ids_by_name.erase(named->second);
                 _agent_names.erase(named);
             }
         }
-        _agent_removal_system.run(_agents, _to_remove, _stage_manager);
+        _agent_removal_system.run(_agents, _removals, _stage_manager);
         assert(sorted_by_id(_agents));
     }
 
@@ -151,14 +148,7 @@ void Simulation::iterate()
 
     {
         JPS_SCOPED_TIMER_AND_TRACE(_timer, "Strategical Decision System", General);
-        _stategical_decision_system.run(
-            _routes,
-            _agents,
-            _stage_manager,
-            _clock.elapsed_time(),
-            _target_completions,
-            _removals,
-            _to_remove);
+        _stategical_decision_system.run(_routes, _agents, _stage_manager);
     }
 
     {
@@ -177,6 +167,12 @@ void Simulation::iterate()
         assert(sorted_by_id(_agents));
     }
     _clock.advance();
+
+    {
+        JPS_SCOPED_TIMER_AND_TRACE(_timer, "Strategical Decision System", General);
+        _stategical_decision_system.record_reached(
+            _agents, _stage_manager, _clock.elapsed_time(), _reached_targets, _marked_for_removal);
+    }
 }
 
 void Simulation::close()
@@ -325,8 +321,10 @@ GenericAgent::ID Simulation::emplace_agent(GenericAgent&& agent, std::optional<s
     _agents.emplace_back(std::move(agent));
     assert(sorted_by_id(_agents));
     _neighborhood_search.add_agent(_agents.back());
-    _tactical_decision_system.run(
-        *_routing_engine, IteratorPair(std::prev(std::end(_agents)), std::end(_agents)));
+    const IteratorPair added(std::prev(std::end(_agents)), std::end(_agents));
+    _stategical_decision_system.record_reached(
+        added, _stage_manager, _clock.elapsed_time(), _reached_targets, _marked_for_removal);
+    _tactical_decision_system.run(*_routing_engine, added);
     return _agents.back().id;
 }
 
@@ -368,7 +366,7 @@ void Simulation::reroute(GenericAgent::ID agent_id, const Location& steer_to)
     agent.route_id = Route::ID::invalid;
     agent.stage_id = BaseStage::ID::invalid;
     agent.final_target = steer_to;
-    agent.target_completed = false;
+    agent.target_reached = false;
 }
 
 void Simulation::follow(GenericAgent& agent, Route::ID route_id, BaseStage& stage)
@@ -381,7 +379,7 @@ void Simulation::follow(GenericAgent& agent, Route::ID route_id, BaseStage& stag
     agent.route_id = route_id;
     agent.stage_id = stage.id();
     agent.final_target = stage.destination();
-    agent.target_completed = false;
+    agent.target_reached = false;
 }
 
 void Simulation::check_on_own_geometry(const Location& location, const char* what) const
@@ -442,14 +440,14 @@ void Simulation::mark_agent_for_removal(GenericAgent::ID id)
     }
     if(!agent->leaving) {
         agent->leaving = true;
-        _marked_for_removal.push_back(id);
+        _marked_for_removal.push_back({id, std::nullopt, _clock.elapsed_time()});
     }
 }
 
-const std::vector<TargetCompletionRecord>& Simulation::target_completions() const
+const std::vector<TargetReachedRecord>& Simulation::reached_targets() const
 {
-    throw_if_state(State::Closed, "target_completions");
-    return _target_completions;
+    throw_if_state(State::Closed, "reached_targets");
+    return _reached_targets;
 }
 
 const GenericAgent& Simulation::agent(GenericAgent::ID id) const

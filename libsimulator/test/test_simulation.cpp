@@ -526,7 +526,7 @@ TEST(SimulationClose, RejectsFurtherUse)
         [&] { sim.add_agent(at(sim, Point{5, 5}, flat.room_id), route, {}, State{}); }, closed);
     EXPECT_THAT([&] { route_to(sim, Point{10, 10}, flat.room_id); }, closed);
     EXPECT_THAT([&] { sim.reroute(id, route); }, closed);
-    EXPECT_THAT([&] { sim.target_completions(); }, closed);
+    EXPECT_THAT([&] { sim.reached_targets(); }, closed);
     // The stage outlives close, its destination's floor field does not.
     EXPECT_THAT([&] { sim.travel_times(stage); }, closed);
     EXPECT_THAT([&] { sim.custom_speed_fields(stage); }, closed);

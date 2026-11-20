@@ -31,11 +31,11 @@ struct GenericAgent {
     /// Invalid, as is stage_id, while the agent is steered to the location in final_target.
     jps::UniqueID<Route> route_id{jps::UniqueID<Route>::invalid};
     jps::UniqueID<BaseStage> stage_id{jps::UniqueID<BaseStage>::invalid};
-    /// Whether the agent has completed its current target and stays there: the last stage of its
-    /// route, or the location it is steered to. Completing it again is not reported.
-    bool target_completed{false};
+    /// Whether the agent has reached its current target; until it moves on or is rerouted,
+    /// reaching it again is not reported.
+    bool target_reached{false};
     /// Whether the agent leaves the simulation at the beginning of the next iteration: it
-    /// completed an exit, or was marked for removal.
+    /// reached an exit, or was marked for removal.
     bool leaving{false};
 
     /// Where the agent stands. Only the geometry can say that, so only it can build one.

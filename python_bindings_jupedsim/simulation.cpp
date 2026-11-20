@@ -272,21 +272,25 @@ void init_simulation(py::module_& m)
             "mark_agent_for_removal",
             [](Simulation& sim, uint64_t id) { sim.mark_agent_for_removal(id); })
         .def(
-            // (agent id, stage id or location, time, location) per completion.
-            "target_completions",
-            [](py::object self) {
+            // (agent id, stage id or location, time, location) per reached target, from index
+            // @p since on.
+            "reached_targets",
+            [](py::object self, std::size_t since) {
                 const auto& sim = self.cast<const Simulation&>();
-                py::list completions{};
-                for(const auto& c : sim.target_completions()) {
-                    const auto target = std::holds_alternative<BaseStage::ID>(c.target) ?
-                                            py::cast(std::get<BaseStage::ID>(c.target).get_id()) :
-                                            kept_alive_by(std::get<Location>(c.target), self);
-                    completions.append(
+                const auto& records = sim.reached_targets();
+                py::list reached{};
+                for(std::size_t i = since; i < records.size(); ++i) {
+                    const auto& r = records[i];
+                    const auto target = std::holds_alternative<BaseStage::ID>(r.target) ?
+                                            py::cast(std::get<BaseStage::ID>(r.target).get_id()) :
+                                            kept_alive_by(std::get<Location>(r.target), self);
+                    reached.append(
                         py::make_tuple(
-                            c.agent_id.get_id(), target, c.time, kept_alive_by(c.location, self)));
+                            r.agent_id.get_id(), target, r.time, kept_alive_by(r.location, self)));
                 }
-                return completions;
-            })
+                return reached;
+            },
+            py::arg("since") = 0)
         .def(
             // (agent id, exit stage id or None, time) per removal.
             "removed_agents",

@@ -59,7 +59,7 @@ def _checked_target(target: object) -> RouteTarget:
 
 
 class FixedTransition:
-    """Leads every agent completing ``source`` to ``target``.
+    """Leads every agent reaching ``source`` to ``target``.
 
     Args:
         source: The target the transition leaves, or :data:`AGENT_LOCATION`.
@@ -91,7 +91,7 @@ class FixedTransition:
 
 
 class RoundRobinTransition:
-    """Distributes the agents completing ``source`` over targets by weight.
+    """Distributes the agents reaching ``source`` over targets by weight.
 
     The agents deciding here go to the targets in turn, as many in a row to each as
     its weight says: with weights ``{a: 2, b: 1}`` the sequence is a, a, b, a, a, b,
@@ -146,7 +146,7 @@ class RoundRobinTransition:
 
 
 class LeastTargetedTransition:
-    """Leads an agent completing ``source`` to the target fewest agents head for.
+    """Leads an agent reaching ``source`` to the target fewest agents head for.
 
     Agents are counted over all routes of the simulation, at the moment of the
     decision. On a tie, the earlier target in ``targets`` is chosen.

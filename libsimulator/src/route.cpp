@@ -201,9 +201,9 @@ Route::Route(
     }
 }
 
-BaseStage* Route::next_stage(BaseStage::ID completed)
+BaseStage* Route::next_stage(BaseStage::ID reached)
 {
-    const auto& transition = _transitions.at(completed);
+    const auto& transition = _transitions.at(reached);
     return transition ? transition->next_stage() : nullptr;
 }
 

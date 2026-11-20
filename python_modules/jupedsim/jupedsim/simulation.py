@@ -38,7 +38,7 @@ from jupedsim.pyjupedsim import (
     _PythonModel,
     _Simulation,
 )
-from jupedsim.records import RemovalRecord, TargetCompletionRecord
+from jupedsim.records import RemovalRecord, TargetReachedRecord
 from jupedsim.route import AGENT_LOCATION, Route, Transition
 from jupedsim.serialization import TrajectoryWriter
 from jupedsim.target import Exit, RouteTarget, Waypoint
@@ -138,7 +138,10 @@ class Simulation:
         )
         self._timer = Timer(self._obj, timer_log_level=timer_log_level)
         self._target_descriptions: dict[int, Waypoint | Exit] = {}
-        self._target_completions: list[TargetCompletionRecord] = []
+        self._reached_targets: list[TargetReachedRecord] = []
+        # How many of the native records, which cover its most recent iteration and
+        # the agents added since, are in _reached_targets.
+        self._native_reached_seen = 0
         self._removals: list[RemovalRecord] = []
         # Stages with a floor field: a default speed field change reaches those
         # without a speed field of their own in its region.
@@ -196,7 +199,7 @@ class Simulation:
 
         The targets of the route are those in its transitions. The transition leaving
         :data:`~jupedsim.AGENT_LOCATION` chooses an agent's first target, once, when
-        it joins the route. An agent completing a target goes on to what the
+        it joins the route. An agent reaching a target goes on to what the
         transition leaving that target chooses. A target without an outgoing
         transition ends the route; the agent stays in its area. Loops are allowed.
 
@@ -253,9 +256,9 @@ class Simulation:
     ) -> Agent:
         """Add an agent to the simulation.
 
-        Give either ``route`` or ``steer_to``. Targets are completed in
-        :meth:`iterate`, not here: an agent placed inside its first target still has
-        it afterwards and completes it in the next iteration.
+        Give either ``route`` or ``steer_to``. An agent placed inside its first target
+        has reached it, see :meth:`reached_targets`, and moves on in the next
+        iteration; inside an exit, it leaves at the beginning of the next iteration.
 
         Args:
             location: Where the agent stands, e.g. ``region.at(x, y)``.
@@ -267,7 +270,7 @@ class Simulation:
             steer_to: Steers the agent to this location instead of a route. The way
                 there follows the walkable surface (the shortest path, not the floor
                 field), so speed fields do not apply. Its arrival is reported once by
-                :meth:`target_completions`.
+                :meth:`reached_targets`.
             state: Initial per-agent model state. For built-in models the matching
                 ``XModelState``, e.g. :class:`~jupedsim.CollisionFreeSpeedModelState`;
                 its defaults if not given. For custom models your own object, of
@@ -320,6 +323,7 @@ class Simulation:
                 state=state,
                 name=name,
             )
+        self._collect_reached_targets()
         return Agent(self, agent_id)
 
     def travel_times(self, target: RouteTarget) -> dict[Region, TravelTimeGrid]:
@@ -511,29 +515,36 @@ class Simulation:
         """
         self._obj.mark_agent_for_removal(self._own(agent, Agent, "agent").id)
 
-    def target_completions(self) -> tuple[TargetCompletionRecord, ...]:
-        """The targets completed in the most recent :meth:`iterate` call.
+    def reached_targets(self) -> tuple[TargetReachedRecord, ...]:
+        """The targets reached in the most recent :meth:`iterate` call, and by the agents
+        added since.
 
-        One record per completed target assignment: revisiting a target in a loop
-        gives another record; staying at the last target of a route gives none, and
-        neither does being pushed out of it and returning. In direct steering, one
+        An agent reaches its target when it stands in one of its areas after a step, or
+        when it is added there. One record per target assignment: revisiting a target in
+        a loop gives another record; staying at the last target of a route gives none,
+        and neither does being pushed out of it and returning. In direct steering, one
         record per ``steer_to`` assignment, once the agent is within 0.05 m of the
         location.
 
+        An agent moves on at the beginning of the next iteration, by one target per step:
+        if it stands in its next target already, it reaches that one after the step.
+        After :meth:`~jupedsim.Agent.reroute`, too, it reaches its new target after the
+        next step at the earliest.
+
         Records cover all iterations of the most recent ``iterate(count)`` call.
         Reading does not consume them; the next :meth:`iterate` replaces them. Scripts
-        that react to completions call :meth:`iterate` with ``count=1``, so that a
-        :meth:`~jupedsim.Agent.reroute` takes effect in the step after the
-        completion.
+        that react to them call :meth:`iterate` with ``count=1``, so that a
+        :meth:`~jupedsim.Agent.reroute` takes effect in the step after.
         """
-        return tuple(self._target_completions)
+        return tuple(self._reached_targets)
 
     def removed_agents(self) -> tuple[RemovalRecord, ...]:
         """The agents removed in the most recent :meth:`iterate` call.
 
-        An exit completion always comes with a removal record from the same
-        :meth:`iterate` call; the agent itself leaves at the beginning of the next.
-        Covers the same iterations as :meth:`target_completions`.
+        An agent that reaches an exit, or is marked by :meth:`mark_agent_for_removal`,
+        is removed at the beginning of the next iteration; until then
+        :attr:`Agent.leaving <jupedsim.Agent.leaving>` is true. Covers the same
+        iterations as :meth:`reached_targets`.
         """
         return tuple(self._removals)
 
@@ -547,29 +558,33 @@ class Simulation:
             self._writer.begin_writing(self)
             self._writer.write_iteration_state(self)
 
-        self._target_completions.clear()
+        self._reached_targets.clear()
         self._removals.clear()
         for _ in range(0, count):
             self._obj.iterate()
-            self._collect_records()
+            self._native_reached_seen = 0
+            self._collect_reached_targets()
+            for agent_id, exit_id, time in self._obj.removed_agents():
+                self._removals.append(
+                    RemovalRecord(
+                        agent_id,
+                        None if exit_id is None else RouteTarget(self, exit_id),
+                        time,
+                    )
+                )
             if self._writer:
                 self._writer.write_iteration_state(self)
 
-    def _collect_records(self) -> None:
-        for agent_id, target, time, location in self._obj.target_completions():
+    def _collect_reached_targets(self) -> None:
+        for agent_id, target, time, location in self._obj.reached_targets(
+            self._native_reached_seen
+        ):
             if isinstance(target, int):
                 target = RouteTarget(self, target)
-            self._target_completions.append(
-                TargetCompletionRecord(agent_id, target, time, location)
+            self._reached_targets.append(
+                TargetReachedRecord(agent_id, target, time, location)
             )
-        for agent_id, exit_id, time in self._obj.removed_agents():
-            self._removals.append(
-                RemovalRecord(
-                    agent_id,
-                    None if exit_id is None else RouteTarget(self, exit_id),
-                    time,
-                )
-            )
+            self._native_reached_seen += 1
 
     def close(self) -> None:
         """Close the simulation and free its memory.

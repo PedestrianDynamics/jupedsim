@@ -62,7 +62,7 @@ from jupedsim.pyjupedsim import (
     set_warning_callback,
     start_trace_event,
 )
-from jupedsim.records import RemovalRecord, TargetCompletionRecord
+from jupedsim.records import RemovalRecord, TargetReachedRecord
 from jupedsim.route import (
     AGENT_LOCATION,
     FixedTransition,
@@ -134,7 +134,7 @@ __all__ = [
     "SocialForceModelState",
     "SpeedGrid",
     "SurfaceMeshShortestPathRoutingEngine",
-    "TargetCompletionRecord",
+    "TargetReachedRecord",
     "Timer",
     "TrajectoryWriter",
     "TravelTimeGrid",

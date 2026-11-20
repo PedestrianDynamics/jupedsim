@@ -10,8 +10,8 @@
 #include <optional>
 #include <variant>
 
-/// An agent completed its target: a stage of its route, or the location it is steered to.
-struct TargetCompletionRecord {
+/// An agent reached its target: a stage of its route, or the location it is steered to.
+struct TargetReachedRecord {
     GenericAgent::ID agent_id;
     std::variant<BaseStage::ID, Location> target;
     /// Simulation time in seconds.
@@ -25,20 +25,20 @@ struct RemovalRecord {
     GenericAgent::ID agent_id;
     /// std::nullopt after Simulation::mark_agent_for_removal.
     std::optional<BaseStage::ID> exit;
-    /// Simulation time in seconds of the exit completion, or of the removal.
+    /// Simulation time in seconds of the removal.
     double time;
 };
 
 template <>
-struct fmt::formatter<TargetCompletionRecord> {
+struct fmt::formatter<TargetReachedRecord> {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
     template <typename FormatContext>
-    auto format(const TargetCompletionRecord& r, FormatContext& ctx) const
+    auto format(const TargetReachedRecord& r, FormatContext& ctx) const
     {
         return fmt::format_to(
             ctx.out(),
-            "TargetCompletionRecord(agent_id={}, target={}, time={}, location={})",
+            "TargetReachedRecord(agent_id={}, target={}, time={}, location={})",
             r.agent_id,
             std::visit([](const auto& target) { return fmt::format("{}", target); }, r.target),
             r.time,

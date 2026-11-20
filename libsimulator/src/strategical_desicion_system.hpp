@@ -23,50 +23,62 @@ public:
     StrategicalDecisionSystem(StrategicalDecisionSystem&& other) = delete;
     StrategicalDecisionSystem& operator=(StrategicalDecisionSystem&& other) = delete;
 
-    /// Completes the targets agents have reached, recorded in @p completions, and moves them on
-    /// along their routes. An agent completing an exit is recorded in @p removals and goes to
-    /// @p to_remove instead.
-    void
-    run(const std::unordered_map<Route::ID, std::unique_ptr<Route>>& routes,
-        AgentContainer<GenericAgent>& agents,
-        StageManager& stage_manager,
+    /// Records in @p reached the agents in @p agents that reached their target, a stage of their
+    /// route or the location they are steered to. Reaching it again is not recorded until the
+    /// agent moves on or is rerouted. An agent reaching an exit leaves: it is recorded in
+    /// @p leaving, to be removed at the beginning of the next iteration.
+    template <typename Agents>
+    void record_reached(
+        Agents&& agents,
+        const StageManager& stage_manager,
         double time,
-        std::vector<TargetCompletionRecord>& completions,
-        std::vector<RemovalRecord>& removals,
-        std::vector<GenericAgent::ID>& to_remove) const
+        std::vector<TargetReachedRecord>& reached,
+        std::vector<RemovalRecord>& leaving) const
     {
         for(auto& agent : agents) {
-            if(agent.target_completed) {
+            if(agent.target_reached) {
                 continue;
             }
             if(agent.route_id == Route::ID::invalid) {
                 const auto& target = std::get<Location>(agent.final_target);
                 if(has_reached(agent.location, target)) {
-                    agent.target_completed = true;
-                    completions.push_back({agent.id, target, time, agent.location});
+                    agent.target_reached = true;
+                    reached.push_back({agent.id, target, time, agent.location});
                 }
                 continue;
             }
             const auto* stage = stage_manager.stage(agent.stage_id);
-            if(!stage->is_completed(agent)) {
+            if(!stage->is_reached_by(agent)) {
                 continue;
             }
-            completions.push_back({agent.id, stage->id(), time, agent.location});
+            agent.target_reached = true;
+            reached.push_back({agent.id, stage->id(), time, agent.location});
             if(dynamic_cast<const Exit*>(stage) != nullptr) {
-                agent.target_completed = true;
                 agent.leaving = true;
-                removals.push_back({agent.id, stage->id(), time});
-                to_remove.push_back(agent.id);
+                leaving.push_back({agent.id, stage->id(), time});
+            }
+        }
+    }
+
+    /// Moves the agents that reached a stage of their route on to the next one. An agent stays
+    /// at the last stage of its route.
+    void
+    run(const std::unordered_map<Route::ID, std::unique_ptr<Route>>& routes,
+        AgentContainer<GenericAgent>& agents,
+        StageManager& stage_manager) const
+    {
+        for(auto& agent : agents) {
+            if(!agent.target_reached || agent.leaving || agent.route_id == Route::ID::invalid) {
                 continue;
             }
-            const auto* next = routes.at(agent.route_id)->next_stage(stage->id());
+            const auto* next = routes.at(agent.route_id)->next_stage(agent.stage_id);
             if(next == nullptr) {
-                agent.target_completed = true;
                 continue;
             }
             stage_manager.migrate_agent(agent.stage_id, next->id());
             agent.stage_id = next->id();
             agent.final_target = next->destination();
+            agent.target_reached = false;
         }
     }
 };
