@@ -422,6 +422,20 @@ TEST_F(FollowRoute, AnAgentMarkedAfterReachingAnExitIsRecordedOnce)
     EXPECT_EQ(_sim.removed_agents().front().exit, exit1);
 }
 
+TEST_F(FollowRoute, ALeavingAgentCannotBeRerouted)
+{
+    const auto wp1 = waypoint({15, 15});
+    const auto to_wp1 = _sim.add_route({fixed({}, wp1)});
+    const auto exited = add_agent({2, 2}, _sim.add_route({fixed({}, exit({2, 2}))}));
+    const auto marked = add_agent({8, 8}, to_wp1);
+    _sim.mark_agent_for_removal(marked);
+
+    const auto leaves = ThrowsMessage<SimulationError>(HasSubstr("leaves the simulation"));
+    EXPECT_THAT([&] { _sim.reroute(exited, to_wp1); }, leaves);
+    EXPECT_THAT([&] { _sim.reroute(marked, wp1); }, leaves);
+    EXPECT_THAT([&] { _sim.reroute(marked, at({10, 10})); }, leaves);
+}
+
 TEST_F(FollowRoute, AnAgentNameIsFreeAgainOnceItsAgentHasLeft)
 {
     const auto route = _sim.add_route({fixed({}, exit({2, 2}))});
@@ -671,7 +685,13 @@ TEST_P(AgentLookup, FindsExactlyTheAgentsInTheSimulation)
                 break;
             case 4:
                 if(!_present.empty()) {
-                    _sim.reroute(any_present_agent(), routes[draw(routes.size())]);
+                    const auto id = any_present_agent();
+                    const auto route = routes[draw(routes.size())];
+                    if(_leaving.contains(id)) {
+                        EXPECT_THROW(_sim.reroute(id, route), SimulationError);
+                    } else {
+                        _sim.reroute(id, route);
+                    }
                 }
                 break;
             default:

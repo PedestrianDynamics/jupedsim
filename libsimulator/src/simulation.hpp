@@ -89,6 +89,8 @@ private:
     Route& route(Route::ID route_id);
     /// The stage @p stage_id of @p route; throws if it is not part of it.
     BaseStage* stage_in(const Route& route, BaseStage::ID stage_id) const;
+    /// The agent @p agent_id; throws if it leaves the simulation.
+    GenericAgent& reroutable(GenericAgent::ID agent_id);
     /// Lets @p agent follow @p route_id from @p stage on.
     void follow(GenericAgent& agent, Route::ID route_id, BaseStage& stage);
     void validate_new_agent(const GenericAgent& agent) const;
@@ -136,7 +138,8 @@ public:
     double dt() const;
     /// Lets the agent follow @p route_id, from @p first_stage on, or from where the route's
     /// first transition leads if none is given. The agent reaches its new target after the next
-    /// step at the earliest, even if it stands in it already.
+    /// step at the earliest, even if it stands in it already. Every reroute() throws for an agent
+    /// that leaves the simulation: it reached an exit, or was marked for removal.
     void reroute(
         GenericAgent::ID agent_id,
         Route::ID route_id,

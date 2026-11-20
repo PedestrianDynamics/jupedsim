@@ -198,8 +198,8 @@ class Agent:
             ValueError: if the arguments do not form one of the calls above, or a
                 handle belongs to another simulation.
             SimulationError: if ``first_target`` is not part of the route, the agent
-                has no route to jump in, or the location belongs to another
-                geometry.
+                has no route to jump in, the location belongs to another geometry, or
+                the agent is :attr:`leaving`.
         """
         sim = self._simulation
         if steer_to is not None:

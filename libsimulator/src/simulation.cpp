@@ -340,7 +340,7 @@ void Simulation::reroute(
     std::optional<BaseStage::ID> first_stage)
 {
     throw_if_state(State::Iterating | State::Closed, "reroute");
-    auto& agent = this->agent(agent_id);
+    auto& agent = reroutable(agent_id);
     auto& route = this->route(route_id);
     follow(agent, route_id, first_stage ? *stage_in(route, *first_stage) : *route.first_stage());
 }
@@ -348,7 +348,7 @@ void Simulation::reroute(
 void Simulation::reroute(GenericAgent::ID agent_id, BaseStage::ID first_stage)
 {
     throw_if_state(State::Iterating | State::Closed, "reroute");
-    auto& agent = this->agent(agent_id);
+    auto& agent = reroutable(agent_id);
     if(agent.route_id == Route::ID::invalid) {
         throw SimulationError("The agent has no route; pass route=.");
     }
@@ -359,7 +359,7 @@ void Simulation::reroute(GenericAgent::ID agent_id, const Location& steer_to)
 {
     throw_if_state(State::Iterating | State::Closed, "reroute");
     check_on_own_geometry(steer_to, "steer_to");
-    auto& agent = this->agent(agent_id);
+    auto& agent = reroutable(agent_id);
     if(agent.stage_id != BaseStage::ID::invalid) {
         _stage_manager.handle_remove_agent(agent.stage_id);
     }
@@ -367,6 +367,18 @@ void Simulation::reroute(GenericAgent::ID agent_id, const Location& steer_to)
     agent.stage_id = BaseStage::ID::invalid;
     agent.final_target = steer_to;
     agent.target_reached = false;
+}
+
+GenericAgent& Simulation::reroutable(GenericAgent::ID agent_id)
+{
+    auto& agent = this->agent(agent_id);
+    if(agent.leaving) {
+        throw SimulationError(
+            "Agent {} leaves the simulation at the beginning of the next iteration; it cannot be "
+            "rerouted.",
+            id_and_name(agent_id, agent_name(agent_id)));
+    }
+    return agent;
 }
 
 void Simulation::follow(GenericAgent& agent, Route::ID route_id, BaseStage& stage)
