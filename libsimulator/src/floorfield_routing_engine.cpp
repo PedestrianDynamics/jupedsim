@@ -127,6 +127,19 @@ Vector FloorfieldRoutingEngine::get_orientation(const Location& from, std::size_
     return {direction.x, direction.y};
 }
 
+void FloorfieldRoutingEngine::solve(std::size_t id)
+{
+    checked([&] { _field->solve_destination(id); });
+}
+
+Vector FloorfieldRoutingEngine::solved_orientation(const Location& from, std::size_t id) const
+{
+    const auto xy = from.xy();
+    const auto direction = checked(
+        [&] { return _field->solved_region_direction(from.region(), {xy.x(), xy.y()}, id); });
+    return {direction.x, direction.y};
+}
+
 TravelTimeGrid FloorfieldRoutingEngine::travel_times(std::size_t region, std::size_t id)
 {
     return checked([&] {

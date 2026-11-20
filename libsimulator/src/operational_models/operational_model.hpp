@@ -67,6 +67,10 @@ public:
 
     virtual void check_model_constraint(const GenericAgent& agent, const AgentView& view) const = 0;
 
+    /// Whether compute_next_state() may run for several agents at once. Models that mutate
+    /// shared state while computing a step have to return false.
+    virtual bool supports_parallel_step() const { return true; }
+
     /// Called once for every agent added to a simulation, after it passed validation. Models
     /// drawing random numbers give the agent its own stream here, the next one of a sequence
     /// seeded with the model's seed.

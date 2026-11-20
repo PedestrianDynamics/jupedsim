@@ -48,4 +48,6 @@ public:
     ~CustomModel() override = default;
 
     OperationalModelType type() const override { return OperationalModelType::CustomModel; }
+    /// Python implementations need the GIL for every step.
+    bool supports_parallel_step() const override { return false; }
 };

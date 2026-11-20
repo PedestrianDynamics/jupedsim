@@ -76,6 +76,11 @@ public:
 
     bool contains(const Location& where, std::size_t id);
     Vector get_orientation(const Location& from, std::size_t id);
+    /// Solves destination @p id unless it already is, for solved_orientation.
+    void solve(std::size_t id);
+    /// get_orientation towards a destination solve() has solved. Reads only, so any number of
+    /// threads can call it at once. Throws if the destination is not solved.
+    Vector solved_orientation(const Location& from, std::size_t id) const;
     /// Travel times and directions to destination @p id over the grid of @p region. Solves the
     /// destination on first use.
     TravelTimeGrid travel_times(std::size_t region, std::size_t id);

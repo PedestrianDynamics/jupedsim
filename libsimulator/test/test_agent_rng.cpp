@@ -3,6 +3,7 @@
 #include "generic_agent.hpp"
 #include "geometry/geometry.hpp"
 #include "geometry_fixtures.hpp"
+#include "job_queue.hpp"
 #include "kernel.hpp"
 #include "neighborhood_search.hpp"
 #include "operational_decision_system.hpp"
@@ -70,11 +71,12 @@ void expect_results_independent_of_step_order(const Model& model_a, const Model&
     NeighborhoodSearch<GenericAgent> reversed_search{2.2};
     OperationalDecisionSystem in_order_system{std::make_unique<Model>(model_a)};
     OperationalDecisionSystem reversed_system{std::make_unique<Model>(model_b)};
+    JobQueue jobs{0};
     for(int step = 0; step < 10; ++step) {
         in_order_search.update(in_order);
         reversed_search.update(reversed);
-        in_order_system.run(0.05, 0.0, in_order_search, *room.geometry, in_order);
-        reversed_system.run(0.05, 0.0, reversed_search, *room.geometry, reversed);
+        in_order_system.run(0.05, 0.0, in_order_search, *room.geometry, in_order, jobs);
+        reversed_system.run(0.05, 0.0, reversed_search, *room.geometry, reversed, jobs);
     }
 
     for(std::size_t index = 0; index < in_order.size(); ++index) {
@@ -99,7 +101,8 @@ void expect_unseeded_states_to_be_refused(const Model& model)
     NeighborhoodSearch<GenericAgent> search{2.2};
     search.update(agents);
     OperationalDecisionSystem system{std::make_unique<Model>(model)};
-    EXPECT_THROW(system.run(0.05, 0.0, search, *room.geometry, agents), SimulationError);
+    JobQueue jobs{0};
+    EXPECT_THROW(system.run(0.05, 0.0, search, *room.geometry, agents, jobs), SimulationError);
 }
 } // namespace
 
