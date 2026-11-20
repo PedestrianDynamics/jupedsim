@@ -3,6 +3,7 @@
 
 #include "cfg_cgal.hpp"
 #include "kernel.hpp"
+#include "line_segment.hpp"
 
 #include <fmt/core.h>
 
@@ -29,6 +30,10 @@ public:
     /// Move on surface along the provided horizontal @p xy_direction.
     /// Throws if the path hits a wall. On throw the location is left unchanged.
     void move_on_surface(Vector xy_direction);
+
+    /// The first wall (in xy) the straight path along @p xy_direction would cross, if any.
+    /// A path leaving through a mesh vertex returns that vertex as a zero-length segment.
+    std::optional<LineSegment> wall_along(Vector xy_direction) const;
 
     /// Feasibility variant of `move_on_surface`: walk along @p xy_direction and
     /// return the resulting Location, or `nullopt` if the straight path leaves

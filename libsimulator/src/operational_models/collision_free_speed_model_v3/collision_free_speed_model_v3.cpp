@@ -24,9 +24,12 @@ constexpr double spacing_blend_weight =
 constexpr double tau_theta = 0.3; // Heading relaxation timescale [s] for temporal smoothing.
 constexpr double min_reverse_speed =
     -0.01; // Deterministic tiny reverse floor [m/s] to release local blockages.
-/// How far to ask for walls. The repulsion decays with `range_geometry_repulsion` (0.02 m by
-/// default), so a wall this far off contributes "nothing".
+/// How far ahead to look for a wall. The repulsion decays with `range_geometry_repulsion` (0.02 m
+/// by default), so a wall this far off contributes "nothing".
 constexpr double wall_search_radius = 4.0;
+/// How far beyond the body the side lines run, in units of `range_geometry_repulsion`. A wall
+/// just outside them pushes with at most exp(-5) of the strength at contact.
+constexpr double wall_margin_in_ranges = 5.0;
 
 double neighbor_influence(
     const std::vector<NeighborView>& neighborhood,
@@ -78,8 +81,12 @@ Vector CollisionFreeSpeedModelV3::compute_next_state(
     auto neighborhood = step.other_agents_in_range(
         _cut_off_radius, [&step](const NeighborView& n) { return step.no_geometry_between(n); });
 
+    // The final direction depends on the repulsion, so look along the current orientation.
     Vector boundary_repulsion{};
-    for(const auto& wall : step.walls_in_range(wall_search_radius)) {
+    for(const auto& wall : step.walls_ahead(
+            current_state.orientation * wall_search_radius,
+            current_state.radius +
+                wall_margin_in_ranges * current_state.range_geometry_repulsion)) {
         boundary_repulsion += this->boundary_repulsion(current_state, wall);
     }
 
@@ -116,7 +123,19 @@ Vector CollisionFreeSpeedModelV3::compute_next_state(
     const auto spacing =
         spacing_move * (1.0 - spacing_blend_weight) + spacing_goal * spacing_blend_weight;
 
-    const auto optimal_speed = this->optimal_speed(current_state, spacing, current_state.time_gap);
+    auto optimal_speed = this->optimal_speed(current_state, spacing, current_state.time_gap);
+    if(optimal_speed < 0.0) {
+        // Backing up must not move the agent closer than its radius to a wall behind it.
+        const auto step_back = direction * (optimal_speed * step.dt());
+        const auto look_back = step_back.normalized() * (current_state.radius + step_back.norm());
+        for(const auto& wall : step.walls_ahead(look_back, current_state.radius)) {
+            const auto dist = wall.segment.dist_to(at_offset(step_back));
+            if(dist <= current_state.radius && dist < wall.distance) {
+                optimal_speed = 0.0;
+                break;
+            }
+        }
+    }
     const auto velocity = direction * optimal_speed;
     auto& next_model = std::get<State>(next);
     next_model.orientation = direction;
