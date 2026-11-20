@@ -196,3 +196,43 @@ def test_invalid_agent_state():
             state=jps.WarpDriverModelState(desired_speed=-1.0),
             region_id=room,
         )
+
+
+def _agent_a_position_after(seconds, with_agent_behind_wall):
+    """Agent A walks towards a wall; agent B walks towards the same wall from behind it."""
+    room = shapely.Polygon([(0, 0), (10, 0), (10, 4), (0, 4)])
+    wall = shapely.Polygon([(4.9, 0), (5.1, 0), (5.1, 3), (4.9, 3)])
+    surface = jps.GeometryBuilder()
+    region = surface.add_region(polygon=room.difference(wall), height=0.0)
+    sim = jps.Simulation(
+        model=jps.WarpDriverModel(), geometry=surface.build(), dt=0.01
+    )
+    steering = sim.add_direct_steering_stage()
+    journey = sim.add_journey(jps.JourneyDescription([steering]))
+
+    def add(position, target):
+        agent_id = sim.add_agent(
+            journey_id=journey,
+            stage_id=steering,
+            position=position,
+            state=jps.WarpDriverModelState(desired_speed=1.2, radius=0.2),
+            region_id=region,
+        )
+        sim.agent(agent_id).final_target = sim.get_location(
+            *target, region_id=region
+        )
+        return agent_id
+
+    agent_a = add((3.5, 1.5), (4.5, 1.5))
+    if with_agent_behind_wall:
+        add((6.5, 1.5), (5.5, 1.5))
+    while sim.elapsed_time() < seconds:
+        sim.iterate()
+    return sim.agent(agent_a).position
+
+
+def test_agent_behind_a_wall_does_not_influence_the_agent_in_front():
+    """Neighbors without a line of sight must not take part in collision avoidance."""
+    alone = _agent_a_position_after(3.0, with_agent_behind_wall=False)
+    with_neighbor = _agent_a_position_after(3.0, with_agent_behind_wall=True)
+    assert with_neighbor == pytest.approx(alone)
