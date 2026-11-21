@@ -238,3 +238,55 @@ def test_agent_behind_a_wall_does_not_influence_the_agent_in_front():
     alone = _agent_a_path(3.0, with_agent_behind_wall=False)
     with_neighbor = _agent_a_path(3.0, with_agent_behind_wall=True)
     assert with_neighbor == alone
+
+
+@pytest.mark.parametrize(
+    "start, radius",
+    [
+        ((-2.0, 0.0), 0.20),
+        ((-2.0, 0.0), 0.24),
+        ((-2.0, 0.0), 0.26),
+        ((-2.0, 1.5), 0.26),
+        ((-1.0, 2.0), 0.26),
+        ((-0.5, 3.0), 0.24),
+        ((-0.5, 3.0), 0.26),
+    ],
+)
+def test_lone_agent_passes_narrow_door_without_stalling(start, radius):
+    """Regression test for #1719: a lone agent with r <= 0.26 m passes a 0.9 m door smoothly."""
+    door_width = 0.9
+    room_a = shapely.box(-5.0, -5.0, 0.0, 5.0)
+    room_b = shapely.box(0.2, -5.0, 5.2, 5.0)
+    door = shapely.box(0.0, -door_width / 2.0, 0.2, door_width / 2.0)
+    geometry_poly = room_a.union(door).union(room_b)
+    target = (3.0, 0.0)
+
+    surface = jps.GeometryBuilder()
+    region = surface.add_region(polygon=geometry_poly, height=0.0)
+    sim = jps.Simulation(
+        model=jps.WarpDriverModel(), geometry=surface.build(), dt=0.01
+    )
+    steering = sim.add_direct_steering_stage()
+    journey = sim.add_journey(jps.JourneyDescription([steering]))
+    agent_id = sim.add_agent(
+        journey_id=journey,
+        stage_id=steering,
+        position=start,
+        state=jps.WarpDriverModelState(desired_speed=1.3, radius=radius),
+        region_id=region,
+    )
+    sim.agent(agent_id).final_target = sim.get_location(
+        *target, region_id=region
+    )
+
+    reached = False
+    while sim.elapsed_time() < 8.0:
+        sim.iterate()
+        x, y = sim.agent(agent_id).position
+        if math.hypot(x - target[0], y - target[1]) < 0.3:
+            reached = True
+            break
+
+    assert reached, (
+        f"Lone agent (r={radius}, start={start}) failed to pass 0.9 m door within 8.0 s"
+    )
