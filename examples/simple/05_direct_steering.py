@@ -33,9 +33,9 @@ def main() -> None:
 
     # Steer the agent along a circular path of radius 5 m for 10 seconds
     orbit_radius = 5.0
-    angular_rate = 0.35
+    angular_rate = 0.25
     while sim.elapsed_time() < 10.0:
-        angle = angular_rate * sim.elapsed_time() + 0.3
+        angle = angular_rate * sim.elapsed_time() + 0.1
         tx = orbit_radius * math.cos(angle)
         ty = orbit_radius * math.sin(angle)
         sim.agent(agent_id).final_target = sim.get_location(

@@ -70,6 +70,8 @@ def main() -> None:
             region_id=floor,
         )
 
+    # Agents squeeze through the gap above the first wall, then through the
+    # gap below the second wall; LeastTargeted spreads them over both exits.
     while sim.agent_count() > 0:
         sim.iterate()
 

@@ -32,7 +32,7 @@ def main() -> None:
     arrival_time: dict[int, float] = {}
     released: set[int] = set()
     hold_duration_s = 3.0
-    release_interval_s = 1.0
+    release_interval_s = 5.0
     next_release_time = 0.0
 
     for idx in range(5):
