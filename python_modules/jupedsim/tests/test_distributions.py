@@ -2,6 +2,7 @@
 import math
 
 import jupedsim as jps
+import numpy as np
 import pytest
 import shapely
 from jupedsim import distributions as jps_dist
