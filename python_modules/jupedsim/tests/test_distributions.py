@@ -673,3 +673,37 @@ def test_distribute_until_filled_square_within_theoretical_bounds(
             dx = sample[0] - samples[j][0]
             dy = sample[1] - samples[j][1]
             assert math.sqrt(dx**2 + dy**2) >= distance_to_agents
+
+
+@pytest.mark.parametrize("n_holes", [0, 10, 80])
+def test_distribute_by_number_with_holes_matches_ring_distance(n_holes):
+    rng = np.random.default_rng(0)
+    room = shapely.box(0.0, 0.0, 20.0, 20.0)
+    holes = []
+    while len(holes) < n_holes:
+        x, y = rng.uniform(1.0, 19.0, 2)
+        hole = shapely.box(x - 0.15, y - 0.15, x + 0.15, y + 0.15)
+        if all(hole.distance(other) > 0.5 for other in holes):
+            holes.append(hole)
+    polygon = room.difference(shapely.union_all(holes)) if holes else room
+
+    distance_to_polygon = 0.25
+    samples = jps.distribute_by_number(
+        polygon=polygon,
+        number_of_agents=40,
+        distance_to_agents=0.5,
+        distance_to_polygon=distance_to_polygon,
+        seed=42,
+    )
+    assert len(samples) == 40
+    for pt in samples:
+        point = shapely.Point(pt)
+        assert polygon.contains(point)
+        ring_min = min(
+            [polygon.exterior.distance(point)]
+            + [ring.distance(point) for ring in polygon.interiors]
+        )
+        assert math.isclose(
+            polygon.boundary.distance(point), ring_min, rel_tol=0.0, abs_tol=0.0
+        )
+        assert ring_min >= distance_to_polygon
