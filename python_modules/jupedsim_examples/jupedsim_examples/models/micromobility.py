@@ -347,12 +347,26 @@ class SharedSpaceDispatcher(CustomOperationalModel):
             )
             self._social_force.check_model_constraint(state.sub, sub_view)
         elif state.kind == "collision_free":
-            sub_view = view.with_neighbor_state_mapping(
-                self._as_collision_free_neighbor
-            )
-            self._collision_free.check_model_constraint(state.sub, sub_view)
+            if not isinstance(state.sub, jps.CollisionFreeSpeedModelV3State):
+                raise TypeError(
+                    "Expected CollisionFreeSpeedModelV3State for 'collision_free', "
+                    f"got {type(state.sub).__name__}."
+                )
         else:
             raise ValueError(f"Unknown SharedSpaceState kind: {state.kind!r}.")
+
+    def seed_agent_state(self, state: SharedSpaceState) -> SharedSpaceState:
+        if state.kind == "wheeler":
+            return replace(state, sub=self._bicycle.seed_agent_state(state.sub))
+        if state.kind == "social_force":
+            return replace(
+                state, sub=self._social_force.seed_agent_state(state.sub)
+            )
+        if state.kind == "collision_free":
+            return replace(
+                state, sub=self._collision_free.seed_state(state.sub)
+            )
+        raise ValueError(f"Unknown SharedSpaceState kind: {state.kind!r}.")
 
     def compute_next_state(self, state: SharedSpaceState, step):
         if state.kind == "wheeler":
