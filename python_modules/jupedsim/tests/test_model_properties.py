@@ -740,3 +740,44 @@ def test_collision_free_speed_model_v3_does_not_back_into_a_wall():
     for _ in range(3000):
         sim.iterate()
     assert -0.5 + 0.15 <= sim.agent(backing).position[0] < -0.3
+
+
+def test_anticipation_velocity_model_does_not_back_into_a_wall():
+    """An agent closer to the neighbor ahead than their radiuses plus buffer
+    backs up, but stops at the wall behind it instead of walking into it."""
+    surface = jps.GeometryBuilder()
+    room = surface.add_region(
+        polygon=shapely.Polygon([(-0.5, -2), (20, -2), (20, 2), (-0.5, 2)]),
+        height=0.0,
+    )
+    sim = jps.Simulation(
+        model=jps.AnticipationVelocityModel(),
+        geometry=surface.build(),
+        dt=0.01,
+    )
+    exit_id = sim.add_exit_stage(
+        [(shapely.Polygon([(19, -1), (20, -1), (20, 1), (19, 1)]), room)]
+    )
+    journey_id = sim.add_journey(jps.JourneyDescription([exit_id]))
+
+    def add(position, desired_speed):
+        return sim.add_agent(
+            journey_id=journey_id,
+            stage_id=exit_id,
+            position=position,
+            # Neighbor repulsion would turn the agent sideways.
+            state=jps.AnticipationVelocityModelState(
+                radius=0.15,
+                time_gap=1.0,
+                desired_speed=desired_speed,
+                strength_neighbor_repulsion=0.0,
+            ),
+            region_id=room,
+        )
+
+    # 5 mm in front of the wall; the spacing to the neighbor is -0.015 m.
+    backing = add((-0.345, 0), desired_speed=1.0)
+    add((-0.04, 0), desired_speed=0.0)
+    for _ in range(3000):
+        sim.iterate()
+    assert -0.5 + 0.15 <= sim.agent(backing).position[0] < -0.345
