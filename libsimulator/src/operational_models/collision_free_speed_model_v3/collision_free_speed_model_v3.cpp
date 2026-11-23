@@ -116,7 +116,19 @@ Vector CollisionFreeSpeedModelV3::compute_next_state(
     const auto spacing =
         spacing_move * (1.0 - spacing_blend_weight) + spacing_goal * spacing_blend_weight;
 
-    const auto optimal_speed = this->optimal_speed(current_state, spacing, current_state.time_gap);
+    auto optimal_speed = this->optimal_speed(current_state, spacing, current_state.time_gap);
+    if(optimal_speed < 0.0) {
+        // Backing up must not move the agent closer than its radius to a wall behind it.
+        const auto step_back = direction * (optimal_speed * step.dt());
+        const auto next_position = at_offset(step_back);
+        for(const auto& wall : step.walls_in_range(current_state.radius + step_back.norm())) {
+            const auto dist = wall.segment.dist_to(next_position);
+            if(dist <= current_state.radius && dist < wall.distance) {
+                optimal_speed = 0.0;
+                break;
+            }
+        }
+    }
     const auto velocity = direction * optimal_speed;
     auto& next_model = std::get<State>(next);
     next_model.orientation = direction;
