@@ -32,6 +32,13 @@ It shows how to:
   perceives in `step` (route orientation, neighbours, walls, `dt`),
 - return the updated state and the movement the agent wants to make.
 
+## Where to put your model
+
+- Model: `python_modules/jupedsim_models/jupedsim_models/models/my_model.py`
+  (this directory), imported as `jupedsim_models.models.my_model`.
+- Test: `python_modules/jupedsim_models/tests/test_my_model.py`.
+- Example script, if any: `examples/`.
+
 ## Contributing a model
 
 1. Add one module per model, for example `my_model.py`.
