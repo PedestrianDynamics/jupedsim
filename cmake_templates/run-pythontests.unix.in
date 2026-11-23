@@ -1,8 +1,8 @@
 #! /usr/bin/env bash
 export JPSCORE_SOURCE_PATH="@PROJECT_SOURCE_DIR@"
-export PYTHONPATH="@PROJECT_BINARY_DIR@/stage:@PROJECT_SOURCE_DIR@/python_modules/jupedsim_examples"
+export PYTHONPATH="@PROJECT_BINARY_DIR@/stage:@PROJECT_SOURCE_DIR@/python_modules/jupedsim_models"
 
 echo "Source path ${JPSCORE_SOURCE_PATH}"
 echo "PYTHONPATH=${PYTHONPATH}"
 
-@Python_EXECUTABLE@ -m pytest ${JPSCORE_SOURCE_PATH}/python_modules/jupedsim/tests ${JPSCORE_SOURCE_PATH}/python_modules/jupedsim_examples/tests --basetemp="$(pwd)/test-results" "$@"
+@Python_EXECUTABLE@ -m pytest ${JPSCORE_SOURCE_PATH}/python_modules/jupedsim/tests ${JPSCORE_SOURCE_PATH}/python_modules/jupedsim_models/tests --basetemp="$(pwd)/test-results" "$@"

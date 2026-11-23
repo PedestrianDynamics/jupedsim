@@ -1,2 +1,2 @@
-export PYTHONPATH="@PROJECT_BINARY_DIR@/stage:@PROJECT_SOURCE_DIR@/python_modules/jupedsim_examples"
+export PYTHONPATH="@PROJECT_BINARY_DIR@/stage:@PROJECT_SOURCE_DIR@/python_modules/jupedsim_models"
 

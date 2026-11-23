@@ -2,7 +2,7 @@
 import jupedsim as jps
 import pytest
 import shapely
-from jupedsim_examples.models.pysocial_force import (
+from jupedsim_models.models.pysocial_force import (
     PythonSocialForceModel,
     PythonSocialForceModelState,
 )
