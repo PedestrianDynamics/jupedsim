@@ -5,6 +5,7 @@
 #include "geometry/geometry.hpp"
 #include "geometry/region_split.hpp"
 #include "geometry/validation.hpp"
+#include "id_and_name.hpp"
 #include "into.hpp"
 #include "kernel.hpp"
 #include "line_segment.hpp"
@@ -29,6 +30,7 @@
 #include <memory>
 #include <optional>
 #include <ranges>
+#include <string>
 #include <string_view>
 #include <unordered_map>
 #include <utility>
@@ -144,9 +146,10 @@ GeometryBuilder::GeometryBuilder()
     _global_vertices.reserve(1024);
 }
 
-size_t GeometryBuilder::add_region(Polygon polygon, double height)
+size_t GeometryBuilder::add_region(Polygon polygon, double height, std::optional<std::string> name)
 {
     throw_if_built();
+    throw_if_name_used(name);
     if(!std::isfinite(height) || std::abs(height) > max_coordinate) {
         throw SimulationError(
             "Region height must be finite and at most {} m in magnitude", max_coordinate);
@@ -224,7 +227,8 @@ size_t GeometryBuilder::add_region(Polygon polygon, double height)
     Region region{
         .polygons = std::move(indices),
         .height = height,
-        .poly_with_holes = std::move(poly_with_holes)};
+        .poly_with_holes = std::move(poly_with_holes),
+        .name = std::move(name)};
     // Boost has no add_vertex overload taking an rvalue property, so move it in afterwards.
     const auto id = boost::add_vertex(_region_graph);
     _region_graph[id] = std::move(region);
@@ -253,16 +257,18 @@ void GeometryBuilder::check_against_floors(
             into<epeck::PolyWithHoles>(poly_with_holes));
         if(height_difference <= height_tolerance) {
             if(side == CGAL::ON_POSITIVE_SIDE) {
-                throw SimulationError("New region overlaps with region {}.", region_id);
+                throw SimulationError(
+                    "New region overlaps with region {}.", region_id_and_name(region_id));
             }
             if(side == CGAL::ON_ORIENTED_BOUNDARY) {
-                throw SimulationError("New region touches region {}.", region_id);
+                throw SimulationError(
+                    "New region touches region {}.", region_id_and_name(region_id));
             }
         } else if(side == CGAL::ON_POSITIVE_SIDE) {
             throw SimulationError(
                 "New region overlaps region {} with only {} m between them; regions above each "
                 "other need a headroom of {} m.",
-                region_id,
+                region_id_and_name(region_id),
                 height_difference,
                 min_headroom);
         }
@@ -273,6 +279,23 @@ void GeometryBuilder::throw_if_built() const
 {
     if(_built) {
         throw SimulationError("Geometry was already built; create a new GeometryBuilder.");
+    }
+}
+
+std::string GeometryBuilder::region_id_and_name(size_t region_id) const
+{
+    return id_and_name(region_id, _region_graph[region_id].name);
+}
+
+void GeometryBuilder::throw_if_name_used(const std::optional<std::string>& name) const
+{
+    if(!name) {
+        return;
+    }
+    for(const auto region_id : boost::make_iterator_range(boost::vertices(_region_graph))) {
+        if(_region_graph[region_id].name == name) {
+            throw SimulationError("The region name '{}' is already used.", *name);
+        }
     }
 }
 
@@ -296,23 +319,25 @@ std::array<size_t, 2> GeometryBuilder::find_edge(size_t region_id, const LineSeg
             }
         }
     }
-    throw SimulationError("{} is not an edge of region {}.", edge, region_id);
+    throw SimulationError("{} is not an edge of region {}.", edge, region_id_and_name(region_id));
 }
 
 size_t GeometryBuilder::connect_regions(
     size_t from_region,
     LineSegment from,
     size_t to_region,
-    LineSegment to)
+    LineSegment to,
+    std::optional<std::string> name)
 {
     throw_if_built();
+    throw_if_name_used(name);
     auto check_region = [this](size_t region_id, std::string_view name) {
         if(region_id >= boost::num_vertices(_region_graph)) {
             throw SimulationError("Unknown region id used for {}: {}", name, region_id);
         }
         const Region& region = _region_graph[region_id];
         if(!region.is_connectable()) {
-            throw SimulationError("{} {} is not connectable", name, region_id);
+            throw SimulationError("{} {} is not connectable", name, region_id_and_name(region_id));
         }
     };
     check_region(from_region, "fromRegion");
@@ -332,10 +357,12 @@ size_t GeometryBuilder::connect_regions(
     for(const auto edge : boost::make_iterator_range(boost::edges(_region_graph))) {
         const Seam& seam = _region_graph[edge];
         if(is_same_seam(seam, a, b)) {
-            throw SimulationError("{} of region {} is already connected.", from, from_region);
+            throw SimulationError(
+                "{} of region {} is already connected.", from, region_id_and_name(from_region));
         }
         if(is_same_seam(seam, c, d)) {
-            throw SimulationError("{} of region {} is already connected.", to, to_region);
+            throw SimulationError(
+                "{} of region {} is already connected.", to, region_id_and_name(to_region));
         }
     }
     const std::vector<size_t> connector_polygon{b, a, d, c};
@@ -395,7 +422,8 @@ size_t GeometryBuilder::connect_regions(
     Region connector{
         .polygons = {connector_polygon},
         .height = std::nullopt,
-        .poly_with_holes = std::move(poly_with_holes)};
+        .poly_with_holes = std::move(poly_with_holes),
+        .name = std::move(name)};
     const auto connector_region = boost::add_vertex(connector, _region_graph);
     boost::add_edge(from_region, connector_region, Seam{a, b}, _region_graph);
     boost::add_edge(connector_region, to_region, Seam{c, d}, _region_graph);
@@ -465,7 +493,8 @@ std::unique_ptr<Geometry> GeometryBuilder::build()
             triangulate_rings(_region_graph[region_id].polygons, _global_vertices);
         if(!triangles) {
             // Already checked within add_region and connect_regions - but kept for safety.
-            throw SimulationError("Region {} has self-intersecting boundaries.", region_id);
+            throw SimulationError(
+                "Region {} has self-intersecting boundaries.", region_id_and_name(region_id));
         }
 
         for(const auto& triangle : *triangles) {
@@ -474,7 +503,7 @@ std::unique_ptr<Geometry> GeometryBuilder::build()
             if(added == epick::Mesh::null_face()) {
                 throw SimulationError(
                     "Region {} does not fit to a walkable surface, check its connectors.",
-                    region_id);
+                    region_id_and_name(region_id));
             }
             if(region_split.region.size() != added.idx()) {
                 throw SimulationError(
@@ -494,14 +523,21 @@ std::unique_ptr<Geometry> GeometryBuilder::build()
         if(CGAL::Polygon_mesh_processing::compute_face_normal(face, mesh).z() <= 0) {
             throw SimulationError(
                 "Region {} has a vertex (almost) on one of its edges; move it at least {} m away.",
-                region_split.region[face.idx()],
+                region_id_and_name(region_split.region[face.idx()]),
                 min_clearance);
         }
     }
     validate_mesh(mesh, &region_split.region);
 
+    std::vector<std::optional<std::string>> region_names{};
+    for(const auto region_id : boost::make_iterator_range(boost::vertices(_region_graph))) {
+        region_names.push_back(_region_graph[region_id].name);
+    }
     auto geometry = std::make_unique<Geometry>(
-        std::move(mesh), std::move(region_split), create_region_graph_2d());
+        std::move(mesh),
+        std::move(region_split),
+        create_region_graph_2d(),
+        std::move(region_names));
     _built = true;
     return geometry;
 }

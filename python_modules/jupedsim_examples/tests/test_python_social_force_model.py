@@ -30,9 +30,8 @@ def _add_agent(sim, room, journey_id, stage_id, position, velocity=(0.0, 0.0)):
     return sim.add_agent(
         journey_id=journey_id,
         stage_id=stage_id,
-        position=position,
+        location=room.at(*position),
         state=PythonSocialForceModelState(velocity=velocity),
-        region_id=room,
     )
 
 
@@ -151,22 +150,20 @@ def test_custom_desired_speed_affects_movement():
     slow_id = sim.add_agent(
         journey_id=journey_id,
         stage_id=exit_id,
-        position=(2.0, 8.0),
+        location=room.at(2.0, 8.0),
         state=PythonSocialForceModelState(
             velocity=(0.0, 0.0), desired_speed=0.5
         ),
-        region_id=room,
     )
 
     # Fast agent
     fast_id = sim.add_agent(
         journey_id=journey_id,
         stage_id=exit_id,
-        position=(2.0, 12.0),
+        location=room.at(2.0, 12.0),
         state=PythonSocialForceModelState(
             velocity=(0.0, 0.0), desired_speed=2.0
         ),
-        region_id=room,
     )
 
     for _ in range(100):
@@ -214,13 +211,12 @@ def test_per_agent_state_survives_iterations(corridor_simulation):
     agent_id = sim.add_agent(
         journey_id=journey_id,
         stage_id=exit_id,
-        position=(2.0, 10.0),
+        location=room.at(2.0, 10.0),
         state=PythonSocialForceModelState(
             velocity=(0.0, 0.0),
             desired_speed=2.0,
             reaction_time=0.25,
         ),
-        region_id=room,
     )
 
     for _ in range(20):

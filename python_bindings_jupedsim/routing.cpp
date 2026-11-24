@@ -3,6 +3,7 @@
 #include "floorfield_routing_engine.hpp"
 #include "geometry/geometry.hpp"
 #include "geometry/location.hpp"
+#include "region.hpp"
 #include "surface_mesh_shortest_path_routing_engine.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep
 
@@ -227,15 +228,14 @@ void init_routing(py::module_& m)
     location.doc() = clean_doc(R"(
         A point on the walkable surface, together with the region it lies in.
 
-        Locations cannot be created directly, get them from the simulation:
+        Locations cannot be created directly, get them from a region or an agent:
 
         .. code:: python
 
-            sim.get_location(x, y, region_id=upper_floor)
+            upper_floor.at(x, y)
             sim.agent(agent_id).location
 
-        A location is read-only and stays valid as long as its simulation exists.
-        It does not move with an agent: read
+        A location is read-only. It does not move with an agent: read
         :attr:`~jupedsim.Agent.location` again to get the agent's current
         location.
     )");
@@ -249,9 +249,27 @@ void init_routing(py::module_& m)
             [](const Location& l) { return l.xy().y(); },
             clean_doc("y coordinate in metres.").c_str())
         .def_property_readonly(
+            "xy",
+            [](const Location& l) { return into_tuple(l.xy()); },
+            clean_doc("``(x, y)`` in metres.").c_str())
+        .def_property_readonly(
             "z", &Location::z, clean_doc("Height of the surface here, in metres.").c_str())
         .def_property_readonly(
-            "region_id", &Location::region, clean_doc("Region this location lies in.").c_str())
+            "region_id",
+            &Location::region,
+            clean_doc("Id of the region this location lies in.").c_str())
+        .def_property_readonly(
+            "region",
+            py::cpp_function(
+                [](const Location& l) {
+                    // Non-owning: the location's own lifetime guarantees keep its geometry
+                    // alive, and the handle keeps the location alive.
+                    return region_of(
+                        std::shared_ptr<const Geometry>(std::shared_ptr<void>{}, &l.geometry()),
+                        l.region());
+                },
+                py::keep_alive<0, 1>()),
+            clean_doc("Region this location lies in.").c_str())
         .def("__repr__", [](const Location& l) {
             // Python float formatting (3.0, not fmt's 3), as the former Python wrapper printed.
             return py::str("Location({!r}, {!r}, {!r})").format(l.xy().x(), l.xy().y(), l.z());

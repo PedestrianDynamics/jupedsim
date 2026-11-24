@@ -2,13 +2,14 @@
 
 import types
 from collections.abc import Sequence
-from typing import Any, Iterator, Self
+from typing import Any, Iterator, Self, TypeVar
 
 import numpy.typing as npt
 import shapely
 
 from jupedsim.agent import Agent
 from jupedsim.custom_model import CustomOperationalModel
+from jupedsim.internal.messages import id_and_name
 from jupedsim.internal.tracing import Timer
 from jupedsim.journey import JourneyDescription
 from jupedsim.pyjupedsim import (
@@ -28,6 +29,7 @@ from jupedsim.pyjupedsim import (
     Geometry,
     Location,
     OperationalModel,
+    Region,
     SocialForceModel,
     SocialForceModelState,
     SpeedGrid,
@@ -50,6 +52,8 @@ _STATE_TYPES = (
     SocialForceModelState,
     WarpDriverModelState,
 )
+
+_Value = TypeVar("_Value")
 
 
 class Simulation:
@@ -141,7 +145,7 @@ class Simulation:
     def add_waypoint_stage(
         self,
         areas: Sequence[
-            tuple[shapely.Polygon | Sequence[tuple[float, float]], int]
+            tuple[shapely.Polygon | Sequence[tuple[float, float]], Region]
         ],
     ) -> int:
         """Add a waypoint stage to the simulation.
@@ -156,16 +160,16 @@ class Simulation:
             Id of the new stage.
 
         Raises:
-            ValueError: If an area has holes.
+            ValueError: If an area has holes, or a region belongs to another geometry.
         """
-        stage_id = self._obj.add_waypoint_stage(areas)
+        stage_id = self._obj.add_waypoint_stage(self._area_ids(areas))
         self._routed_stage_added(stage_id)
         return stage_id
 
     def add_exit_stage(
         self,
         areas: Sequence[
-            tuple[shapely.Polygon | Sequence[tuple[float, float]], int]
+            tuple[shapely.Polygon | Sequence[tuple[float, float]], Region]
         ],
     ) -> int:
         """Add an exit stage to the simulation.
@@ -180,9 +184,9 @@ class Simulation:
             Id of the added exit stage.
 
         Raises:
-            ValueError: If an area has holes.
+            ValueError: If an area has holes, or a region belongs to another geometry.
         """
-        stage_id = self._obj.add_exit_stage(areas)
+        stage_id = self._obj.add_exit_stage(self._area_ids(areas))
         self._routed_stage_added(stage_id)
         return stage_id
 
@@ -219,7 +223,7 @@ class Simulation:
         *,
         journey_id: int,
         stage_id: int,
-        position: tuple[float, float],
+        location: Location,
         state: (
             GeneralizedCentrifugalForceModelState
             | CollisionFreeSpeedModelState
@@ -230,17 +234,13 @@ class Simulation:
             | WarpDriverModelState
             | Any
         ),
-        region_id: int,
     ) -> int:
         """Add an agent to the simulation.
 
         Args:
             journey_id: Id of the journey the agent follows.
             stage_id: Id of the stage the agent initially targets.
-            position: Position to spawn the agent at, as ``(x, y)`` in metres.
-            region_id: Region the agent stands in, as returned by
-                :meth:`~jupedsim.GeometryBuilder.add_region` or
-                :meth:`~jupedsim.GeometryBuilder.connect_regions`.
+            location: Where the agent stands, e.g. ``region.at(x, y)``.
             state: Initial per-agent model state. For built-in models this is the matching
                 ``XModelState`` instance, e.g. :class:`~jupedsim.CollisionFreeSpeedModelState`. For
                 custom models this is your own object, of whatever type your
@@ -250,42 +250,23 @@ class Simulation:
 
         Returns:
             Id of the added agent.
+
+        Raises:
+            ValueError: if the location belongs to another geometry.
         """
-        if isinstance(state, _STATE_TYPES):
-            return self._obj.add_agent(
-                journey_id=journey_id,
-                stage_id=stage_id,
-                position=position,
-                state=state,
-                region_id=region_id,
-            )
+        location = self._checked_location(location, "location")
+        region_id = self._region_id(location.region)
+        if not isinstance(state, _STATE_TYPES):
+            state = _CustomModelState(state)
         return self._obj.add_agent(
             journey_id=journey_id,
             stage_id=stage_id,
-            position=position,
-            state=_CustomModelState(state),
+            position=location.xy,
+            state=state,
             region_id=region_id,
         )
 
-    def get_location(self, x: float, y: float, *, region_id: int) -> Location:
-        """Get the location at ``(x, y)`` in region ``region_id``.
-
-        The location stays valid as long as this simulation exists.
-
-        Args:
-            x: x coordinate in metres.
-            y: y coordinate in metres.
-            region_id: Region the place lies in, see :func:`add_agent`.
-
-        Returns:
-            The location.
-
-        Raises:
-            SimulationError: if ``region_id`` does not exist or ``(x, y)`` is not in it.
-        """
-        return self._obj.get_location(x, y, region_id)
-
-    def travel_times(self, stage_id: int) -> dict[int, TravelTimeGrid]:
+    def travel_times(self, stage_id: int) -> dict[Region, TravelTimeGrid]:
         """Get the travel times to a stage's area over the floor field grid of every region.
 
         Every region has its own grid. Solves the stage's floor field if no agent has
@@ -295,16 +276,18 @@ class Simulation:
             stage_id: Id of the stage.
 
         Returns:
-            The grid of every region by region id, in ascending order, each with its
+            The grid of every region, in ascending order of region ids, each with its
             placement, travel times in seconds and walking directions. Empty for a
             stage without an area to route to, such as a direct steering stage.
 
         Raises:
             SimulationError: if the stage does not exist.
         """
-        return self._obj.travel_times(stage_id)
+        return self._by_region(self._obj.travel_times(stage_id))
 
-    def custom_speed_fields(self, stage_id: int) -> dict[int, SpeedGrid | None]:
+    def custom_speed_fields(
+        self, stage_id: int
+    ) -> dict[Region, SpeedGrid | None]:
         """Get the speed fields a stage has of its own, for every region.
 
         A stage can have its own speed field in a region instead of the default, see
@@ -314,7 +297,7 @@ class Simulation:
             stage_id: Id of the stage whose speed fields to get.
 
         Returns:
-            The grid of every region by region id, in ascending order: ``None`` where
+            The grid of every region, in ascending order of region ids: ``None`` where
             the stage has no speed field of its own and uses the default, see
             :func:`default_speed_fields`. Empty for a stage without an area to route
             to, such as a direct steering stage.
@@ -322,29 +305,31 @@ class Simulation:
         Raises:
             SimulationError: if the stage does not exist.
         """
-        return self._obj.custom_speed_fields(stage_id)
+        return self._by_region(self._obj.custom_speed_fields(stage_id))
 
-    def has_custom_speed_field(self, stage_id: int, region_id: int) -> bool:
+    def has_custom_speed_field(self, stage_id: int, region: Region) -> bool:
         """Whether a stage has a speed field of its own in a region.
 
         Unlike :func:`custom_speed_fields`, this does not copy the speed fields.
 
         Args:
             stage_id: Id of the stage.
-            region_id: Id of the region.
+            region: The region.
 
         Returns:
             ``True`` if the stage uses its own speed field in this region, ``False`` if
             it uses the default. ``False`` for a stage without an area to route to, such
-            as a direct steering stage, whatever ``region_id`` is.
+            as a direct steering stage, whatever ``region`` is.
 
         Raises:
-            SimulationError: if the stage does not exist, or if it has an area to route
-                to and the region does not exist.
+            ValueError: if the region belongs to another geometry.
+            SimulationError: if the stage does not exist.
         """
-        return self._obj.has_custom_speed_field(stage_id, region_id)
+        return self._obj.has_custom_speed_field(
+            stage_id, self._region_id(region)
+        )
 
-    def default_speed_fields(self) -> dict[int, SpeedGrid]:
+    def default_speed_fields(self) -> dict[Region, SpeedGrid]:
         """Get the default walking speeds the floor fields are computed with, for every region.
 
         Every region has a default speed field, which starts out slowing agents down
@@ -353,12 +338,12 @@ class Simulation:
         :func:`custom_speed_fields`.
 
         Returns:
-            The grid of every region by region id, in ascending order.
+            The grid of every region, in ascending order of region ids.
         """
-        return self._obj.default_speed_fields()
+        return self._by_region(self._obj.default_speed_fields())
 
     def set_default_speed_field(
-        self, region_id: int, values: npt.ArrayLike
+        self, region: Region, values: npt.ArrayLike
     ) -> None:
         """Set the default walking speeds a region's floor fields are computed with.
 
@@ -370,7 +355,7 @@ class Simulation:
         The speeds only change the routes, not how fast agents walk.
 
         Args:
-            region_id: Region whose default speed field to set.
+            region: Region whose default speed field to set.
             values: Speeds in m/s in an array of shape ``(height, width)`` of the
                 region's grid, see :class:`~jupedsim.SpeedGrid`. Finite and at least
                 0.01 m/s on every walkable cell: slower cells would make travel times
@@ -378,16 +363,18 @@ class Simulation:
                 walkable is fixed by the geometry.
 
         Raises:
-            ValueError: if ``values`` has the wrong shape.
-            SimulationError: if a value is not allowed or the region does not exist.
+            ValueError: if ``values`` has the wrong shape, or the region belongs to
+                another geometry.
+            SimulationError: if a value is not allowed.
         """
+        region_id = self._region_id(region)
         self._obj.set_default_speed_field(region_id, values)
         for stage_id in self._routed_stages:
-            if not self.has_custom_speed_field(stage_id, region_id):
+            if not self._obj.has_custom_speed_field(stage_id, region_id):
                 self._travel_times_changed(stage_id)
 
     def set_custom_speed_field(
-        self, stage_id: int, region_id: int, values: npt.ArrayLike
+        self, stage_id: int, region: Region, values: npt.ArrayLike
     ) -> None:
         """Set the walking speeds one stage's floor field is computed with in a region.
 
@@ -400,19 +387,22 @@ class Simulation:
 
         Args:
             stage_id: Stage whose speed field to set.
-            region_id: Region whose speed field to set.
+            region: Region whose speed field to set.
             values: Speeds in m/s, with the same rules as for
                 :func:`set_default_speed_field`.
 
         Raises:
-            ValueError: if ``values`` has the wrong shape.
-            SimulationError: if a value is not allowed, the region or stage does not
-                exist, or the stage has no area to route to.
+            ValueError: if ``values`` has the wrong shape, or the region belongs to
+                another geometry.
+            SimulationError: if a value is not allowed, the stage does not exist, or
+                it has no area to route to.
         """
-        self._obj.set_custom_speed_field(stage_id, region_id, values)
+        self._obj.set_custom_speed_field(
+            stage_id, self._region_id(region), values
+        )
         self._travel_times_changed(stage_id)
 
-    def clear_custom_speed_field(self, stage_id: int, region_id: int) -> None:
+    def clear_custom_speed_field(self, stage_id: int, region: Region) -> None:
         """Remove a stage's own speed field in a region, so it uses the default again.
 
         The stage's floor field is computed again when next needed. Nothing changes
@@ -420,13 +410,15 @@ class Simulation:
 
         Args:
             stage_id: Stage whose speed field to remove.
-            region_id: Region whose speed field to remove.
+            region: Region whose speed field to remove.
 
         Raises:
-            SimulationError: if the region or stage does not exist, or the stage has
-                no area to route to.
+            ValueError: if the region belongs to another geometry.
+            SimulationError: if the stage does not exist, or it has no area to route
+                to.
         """
-        had_one = self.has_custom_speed_field(stage_id, region_id)
+        region_id = self._region_id(region)
+        had_one = self._obj.has_custom_speed_field(stage_id, region_id)
         self._obj.clear_custom_speed_field(stage_id, region_id)
         if had_one:
             self._travel_times_changed(stage_id)
@@ -589,43 +581,90 @@ class Simulation:
         self._obj.agent(agent_id)
         return Agent(self, agent_id)
 
+    def _region_id(self, region: object) -> int:
+        """Id of ``region``, checked to be a :class:`~jupedsim.Region` of this
+        simulation's geometry."""
+        if not isinstance(region, Region):
+            raise TypeError(
+                f"region must be a Region, got {type(region).__name__}"
+            )
+        try:
+            own = self.get_geometry().region(region.id)
+        except KeyError:
+            own = None
+        if own != region:
+            raise ValueError(
+                f"Region {id_and_name(region)} belongs to another geometry"
+            )
+        return region.id
+
+    def _area_ids(
+        self,
+        areas: Sequence[
+            tuple[shapely.Polygon | Sequence[tuple[float, float]], Region]
+        ],
+    ) -> list[tuple[shapely.Polygon | Sequence[tuple[float, float]], int]]:
+        return [(area, self._region_id(region)) for area, region in areas]
+
+    def _by_region(self, by_id: dict[int, _Value]) -> dict[Region, _Value]:
+        geometry = self.get_geometry()
+        return {geometry.region(region_id): v for region_id, v in by_id.items()}
+
+    @staticmethod
+    def _checked_location(location: object, what: str) -> Location:
+        if not isinstance(location, Location):
+            raise TypeError(
+                f"{what} must be a Location, e.g. region.at(x, y), got "
+                f"{type(location).__name__}"
+            )
+        return location
+
     def agents_in_range(
-        self, pos: tuple[float, float], distance: float
+        self, location: Location, distance: float
     ) -> list[Agent]:
-        """Handles to all agents within the given distance to the given position.
+        """Handles to the agents near a location.
+
+        The agents within ``distance`` of ``location`` that are its neighbors in the
+        sense of the operational models: in plain sight over the walkable surface.
+        Agents on a floor above or below, or behind a wall, are not.
 
         Args:
-             pos:  point around which to search for agents
-             distance: search radius
-
-        Returns:
-            List of handles to all agents within the given distance to the given position.
+            location: Where to search around, e.g. ``region.at(x, y)``.
+            distance: Search radius in metres.
         """
         return [
             Agent(self, agent_id)
-            for agent_id in self._obj.agents_in_range(pos, distance)
+            for agent_id in self._obj.agents_in_range(
+                self._checked_location(location, "location"), distance
+            )
         ]
 
     def agents_in_polygon(
         self,
-        poly: shapely.Polygon | Sequence[tuple[float, float]],
+        polygon: shapely.Polygon | Sequence[tuple[float, float]],
+        *,
+        region: Region,
     ) -> list[Agent]:
-        """Handles to all agents inside the given polygon.
+        """Handles to the agents inside a polygon in one region.
+
+        Only the part of the polygon inside its region counts, as for the areas of a
+        waypoint stage, so agents on a floor above or below are not included.
 
         Args:
-            poly: Convex polygon in which to look for agents, as a
-                :class:`~shapely.Polygon` without holes or as a list of 2D
-                points describing its boundary.
-
-        Returns:
-            List of handles to all agents inside the given polygon.
+            polygon: A :class:`~shapely.Polygon` without holes or a sequence of at
+                least three ``(x, y)`` points.
+            region: The region the polygon lies in.
 
         Raises:
-            ValueError: If the polygon has holes.
+            ValueError: If the polygon has holes, or the region belongs to another
+                geometry.
+            SimulationError: If the polygon does not overlap the region.
         """
         return [
             Agent(self, agent_id)
-            for agent_id in self._obj.agents_in_polygon(poly)
+            for agent_id in self._obj.agents_in_polygon(
+                polygon, self._region_id(region)
+            )
         ]
 
     def stage_ids(self) -> list[int]:

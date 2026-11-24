@@ -55,9 +55,8 @@ def test_simulation_from_model_instance(model, state_cls, state_kwargs):
     agent_id = sim.add_agent(
         journey_id=journey_id,
         stage_id=wp,
-        position=(1, 1),
+        location=room.at(1, 1),
         state=state_cls(**state_kwargs),
-        region_id=room,
     )
 
     for _ in range(10):
@@ -93,9 +92,8 @@ def test_set_desired_speed(corridor):
     agent_id = sim.add_agent(
         journey_id=journey_id,
         stage_id=wp,
-        position=(1, 1),
+        location=room.at(1, 1),
         state=jps.CollisionFreeSpeedModelV2State(desired_speed=1),
-        region_id=room,
     )
     assert math.isclose(sim.agent(agent_id).position[0], 1)
     for _ in range(0, 100):
@@ -146,9 +144,8 @@ def test_initial_parameters_collision_free_speed_model_v2(
     agent_id = sim.add_agent(
         journey_id=journey_id,
         stage_id=wp,
-        position=(1, 1),
+        location=room.at(1, 1),
         state=state,
-        region_id=room,
     )
 
     agent_state = sim.agent(agent_id).state
@@ -187,9 +184,8 @@ def test_set_model_parameters_collision_free_speed_model_v2(
     agent_id = sim.add_agent(
         journey_id=journey_id,
         stage_id=wp,
-        position=(1, 1),
+        location=room.at(1, 1),
         state=jps.CollisionFreeSpeedModelV2State(),
-        region_id=room,
     )
 
     sim.agent(agent_id).state.desired_speed = 2.0
@@ -240,9 +236,8 @@ def test_set_model_parameters_anticipation_velocity_model(
     agent_id = sim.add_agent(
         journey_id=journey_id,
         stage_id=wp,
-        position=(1, 1),
+        location=room.at(1, 1),
         state=jps.AnticipationVelocityModelState(),
-        region_id=room,
     )
 
     sim.agent(agent_id).state.desired_speed = 2.0
@@ -296,9 +291,8 @@ def test_set_model_parameters_collision_free_speed_model(
     agent_id = sim.add_agent(
         journey_id=journey_id,
         stage_id=wp,
-        position=(1, 1),
+        location=room.at(1, 1),
         state=jps.CollisionFreeSpeedModelState(),
-        region_id=room,
     )
 
     sim.agent(agent_id).state.desired_speed = 2.0
@@ -335,9 +329,8 @@ def test_collision_free_speed_model_repulsion_parameters_are_model_level():
     agent_id = sim.add_agent(
         journey_id=journey_id,
         stage_id=wp,
-        position=(1, 1),
+        location=room.at(1, 1),
         state=jps.CollisionFreeSpeedModelState(),
-        region_id=room,
     )
 
     # The repulsion parameters no longer appear on the per-agent state.
@@ -379,16 +372,14 @@ def test_set_model_parameters_generalized_centrifugal_force_model(
     agent_id = sim.add_agent(
         journey_id=journey_id,
         stage_id=wp,
-        position=(1, 1),
+        location=room.at(1, 1),
         state=jps.GeneralizedCentrifugalForceModelState(orientation=(1.0, 0.0)),
-        region_id=room,
     )
     sim.add_agent(
         journey_id=journey_id,
         stage_id=wp,
-        position=(3, 1),
+        location=room.at(3, 1),
         state=jps.GeneralizedCentrifugalForceModelState(orientation=(1.0, 0.0)),
-        region_id=room,
     )
 
     sim.agent(agent_id).state.speed = 2.0
@@ -443,9 +434,8 @@ def test_set_model_parameters_social_force_model(
     agent_id = sim.add_agent(
         journey_id=journey_id,
         stage_id=wp,
-        position=(1, 1),
+        location=room.at(1, 1),
         state=jps.SocialForceModelState(),
-        region_id=room,
     )
 
     sim.agent(agent_id).state.velocity = (2.0, -2.0)
@@ -489,9 +479,8 @@ def test_social_force_model_body_force_and_friction_are_model_level():
     agent_id = sim.add_agent(
         journey_id=journey_id,
         stage_id=wp,
-        position=(1, 1),
+        location=room.at(1, 1),
         state=jps.SocialForceModelState(),
-        region_id=room,
     )
 
     # body_force and friction no longer appear on the per-agent state.
@@ -524,14 +513,13 @@ def _velocity_along_wall(friction, y):
     agent_id = sim.add_agent(
         journey_id=journey_id,
         stage_id=stage_id,
-        position=(1, y),
+        location=room.at(1, y),
         state=jps.SocialForceModelState(
             velocity=(1.0, 0.0),
             desired_speed=1.0,
             reaction_time=0.5,
             radius=0.3,
         ),
-        region_id=room,
     )
     sim.agent(agent_id).final_target = (59, y)
     for _ in range(20):
@@ -569,9 +557,8 @@ def test_agent_handle_raises_after_removal(
     agent_id = sim.add_agent(
         journey_id=journey_id,
         stage_id=wp,
-        position=(1, 1),
+        location=room.at(1, 1),
         state=jps.SocialForceModelState(),
-        region_id=room,
     )
     agent = sim.agent(agent_id)
     state = agent.state
@@ -628,9 +615,8 @@ def test_initial_parameters_collision_free_speed_model_v3(
     agent_id = sim.add_agent(
         journey_id=journey_id,
         stage_id=wp,
-        position=(1, 1),
+        location=room.at(1, 1),
         state=state,
-        region_id=room,
     )
 
     agent_state = sim.agent(agent_id).state
@@ -659,14 +645,13 @@ def test_set_model_parameters_collision_free_speed_model_v3(
     agent_id = sim.add_agent(
         journey_id=journey_id,
         stage_id=wp,
-        position=(1, 1),
+        location=room.at(1, 1),
         state=jps.CollisionFreeSpeedModelV3State(
             strength_neighbor_repulsion=8.0,
             range_neighbor_repulsion=0.1,
             strength_geometry_repulsion=5.0,
             range_geometry_repulsion=0.02,
         ),
-        region_id=room,
     )
     state = sim.agent(agent_id).state
 
@@ -725,14 +710,13 @@ def test_collision_free_speed_model_v3_does_not_back_into_a_wall():
         return sim.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
-            position=position,
+            location=room.at(*position),
             state=jps.CollisionFreeSpeedModelV3State(
                 radius=0.15,
                 time_gap=1.0,
                 desired_speed=desired_speed,
                 agent_buffer=agent_buffer,
             ),
-            region_id=room,
         )
 
     backing = add((-0.3, 0), desired_speed=0.5, agent_buffer=1.0)
@@ -764,7 +748,7 @@ def test_anticipation_velocity_model_does_not_back_into_a_wall():
         return sim.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
-            position=position,
+            location=room.at(*position),
             # Neighbor repulsion would turn the agent sideways.
             state=jps.AnticipationVelocityModelState(
                 radius=0.15,
@@ -772,7 +756,6 @@ def test_anticipation_velocity_model_does_not_back_into_a_wall():
                 desired_speed=desired_speed,
                 strength_neighbor_repulsion=0.0,
             ),
-            region_id=room,
         )
 
     # 5 mm in front of the wall; the spacing to the neighbor is -0.015 m.

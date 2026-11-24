@@ -48,21 +48,22 @@ def test_can_query_agents_in_range():
             simulation.add_agent(
                 journey_id=journey_id,
                 stage_id=exit,
-                position=new_pos,
+                location=room.at(*new_pos),
                 state=jps.CollisionFreeSpeedModelState(),
-                region_id=room,
             )
         )
 
     actual_ids_in_range = [
         agent.id
-        for agent in simulation.agents_in_range(initial_agent_positions[2], 10)
+        for agent in simulation.agents_in_range(
+            room.at(*initial_agent_positions[2]), 10
+        )
     ]
 
     actual_ids_in_polygon = [
         agent.id
         for agent in simulation.agents_in_polygon(
-            [(39, 11), (39, 9), (51, 9), (51, 11)]
+            [(39, 11), (39, 9), (51, 9), (51, 11)], region=room
         )
     ]
 
@@ -112,9 +113,8 @@ def test_can_run_simulation():
             simulation.add_agent(
                 journey_id=journey_id,
                 stage_id=exit_stage_id,
-                position=new_pos,
+                location=room.at(*new_pos),
                 state=jps.CollisionFreeSpeedModelState(),
-                region_id=room,
             )
         )
 
@@ -125,9 +125,8 @@ def test_can_run_simulation():
     agent_id = simulation.add_agent(
         journey_id=journey_id,
         stage_id=exit_stage_id,
-        position=(6, 6),
+        location=room.at(6, 6),
         state=jps.CollisionFreeSpeedModelState(),
-        region_id=room,
     )
 
     for actual, expected in zip(simulation.agents(), initial_agent_positions):
@@ -178,9 +177,8 @@ def test_get_single_agent_from_simulation():
             simulation.add_agent(
                 journey_id=journey_id,
                 stage_id=exit_id,
-                position=new_pos,
+                location=room.at(*new_pos),
                 state=jps.CollisionFreeSpeedModelState(),
-                region_id=room,
             )
         )
 
@@ -217,9 +215,8 @@ def test_get_agent_non_existing_agent_from_simulation():
     agent_id = simulation.add_agent(
         journey_id=journey_id,
         stage_id=exit_id,
-        position=(7, 7),
+        location=room.at(7, 7),
         state=jps.CollisionFreeSpeedModelState(),
-        region_id=room,
     )
 
     assert simulation.agent(agent_id).id == agent_id
@@ -265,9 +262,8 @@ def test_agent_can_be_removed_from_simulation():
             simulation.add_agent(
                 journey_id=journey_id,
                 stage_id=exit_stage_id,
-                position=new_pos,
+                location=room.at(*new_pos),
                 state=jps.CollisionFreeSpeedModelState(),
-                region_id=room,
             )
         )
 
@@ -328,9 +324,8 @@ def test_agent_can_not_be_added_outside_geometry():
     simulation.add_agent(
         journey_id=journey_id,
         stage_id=exit_id,
-        position=agent_position,
+        location=room.at(*agent_position),
         state=jps.CollisionFreeSpeedModelState(),
-        region_id=room,
     )
 
     with pytest.raises(
@@ -340,9 +335,8 @@ def test_agent_can_not_be_added_outside_geometry():
         assert simulation.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
-            position=(-50, -50),
+            location=room.at(-50, -50),
             state=jps.CollisionFreeSpeedModelState(),
-            region_id=room,
         )
 
 
@@ -360,9 +354,8 @@ def test_direct_steering_target_must_be_inside_geometry():
     agent_id = simulation.add_agent(
         journey_id=journey_id,
         stage_id=stage_id,
-        position=(50, 50),
+        location=room.at(50, 50),
         state=jps.CollisionFreeSpeedModelState(),
-        region_id=room,
     )
     agent = simulation.agent(agent_id)
 

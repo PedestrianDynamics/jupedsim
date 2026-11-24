@@ -75,21 +75,20 @@ def test_agents_spawn_on_either_of_two_stacked_floors():
         sim.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
-            position=STACKED_XY,
+            location=region_id.at(*STACKED_XY),
             state=jps.CollisionFreeSpeedModelState(),
-            region_id=region_id,
         )
     assert sim.agent_count() == 2
 
 
 def test_a_region_id_picks_which_of_the_stacked_floors_a_location_is_on():
     sim, ground, upper = u_stair()
-    downstairs = sim.get_location(*STACKED_XY, region_id=ground)
-    upstairs = sim.get_location(*STACKED_XY, region_id=upper)
+    downstairs = ground.at(*STACKED_XY)
+    upstairs = upper.at(*STACKED_XY)
     assert (
         (downstairs.x, downstairs.y) == (upstairs.x, upstairs.y) == STACKED_XY
     )
-    assert (downstairs.region_id, upstairs.region_id) == (ground, upper)
+    assert (downstairs.region, upstairs.region) == (ground, upper)
     assert downstairs.z == pytest.approx(GROUND_Z)
     assert upstairs.z == pytest.approx(UPPER_Z)
 
@@ -98,21 +97,21 @@ def test_a_location_off_the_given_region_is_refused():
     sim, ground, _ = u_stair()
     # In the stairwell: the ground floor has a hole there.
     with pytest.raises(jps.SimulationError, match="not in region"):
-        sim.get_location(10.0, 7.5, region_id=ground)
+        ground.at(10.0, 7.5)
 
 
 def test_a_location_keeps_the_simulation_alive():
     sim, _, upper = u_stair()
-    location = sim.get_location(*STACKED_XY, region_id=upper)
+    location = upper.at(*STACKED_XY)
     del sim
     assert location.z == pytest.approx(UPPER_Z)
 
 
 def test_a_location_reads_only_a_place():
     sim, _, upper = u_stair()
-    location = sim.get_location(*STACKED_XY, region_id=upper)
+    location = upper.at(*STACKED_XY)
     assert repr(location) == f"Location({location.x}, {location.y}, 3.0)"
-    assert location.region_id == upper
+    assert location.region == upper
     for hidden in ("face", "_geometry"):
         assert not hasattr(location, hidden)
     with pytest.raises(AttributeError):
@@ -126,12 +125,11 @@ def test_locations_are_the_native_type():
         sim.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
-            position=STACKED_XY,
+            location=ground.at(*STACKED_XY),
             state=jps.CollisionFreeSpeedModelState(),
-            region_id=ground,
         )
     )
-    location = sim.get_location(*STACKED_XY, region_id=upper)
+    location = upper.at(*STACKED_XY)
     assert type(location) is jps.Location
     assert type(agent.location) is jps.Location
     assert jps.Location.__module__ == "jupedsim.pyjupedsim"
@@ -147,9 +145,8 @@ def test_an_agent_reports_the_floor_it_stands_on():
             sim.add_agent(
                 journey_id=journey_id,
                 stage_id=exit_id,
-                position=STACKED_XY,
+                location=region_id.at(*STACKED_XY),
                 state=jps.CollisionFreeSpeedModelState(),
-                region_id=region_id,
             )
         )
         for region_id in (ground, upper)
@@ -157,7 +154,7 @@ def test_an_agent_reports_the_floor_it_stands_on():
     for region_id, z in ((ground, GROUND_Z), (upper, UPPER_Z)):
         agent = agents[region_id]
         assert agent.position == STACKED_XY
-        assert agent.location.region_id == region_id
+        assert agent.location.region == region_id
         assert agent.location.z == pytest.approx(z)
         # the 2D position and the location agree on where the agent is
         assert (agent.location.x, agent.location.y) == agent.position
@@ -170,9 +167,8 @@ def test_a_location_does_not_follow_the_agent_it_came_from():
         sim.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
-            position=STACKED_XY,
+            location=ground.at(*STACKED_XY),
             state=jps.CollisionFreeSpeedModelState(),
-            region_id=ground,
         )
     )
     where_it_started = agent.location
@@ -189,12 +185,11 @@ def test_a_direct_steering_target_can_be_given_as_a_location():
         sim.add_agent(
             journey_id=journey_id,
             stage_id=steering,
-            position=STACKED_XY,
+            location=upper.at(*STACKED_XY),
             state=jps.CollisionFreeSpeedModelState(),
-            region_id=upper,
         )
     )
-    target = sim.get_location(6.0, 7.6, region_id=upper)
+    target = upper.at(6.0, 7.6)
     agent.final_target = target
     final_target = agent.final_target
     assert final_target is not None
@@ -206,7 +201,7 @@ def test_a_direct_steering_target_can_be_given_as_a_location():
     sim.iterate(100)
     # it walks along its own floor towards the target, and stays up there
     assert agent.position[0] > STACKED_XY[0]
-    assert agent.location.region_id == upper
+    assert agent.location.region == upper
 
 
 def test_an_agent_heading_for_an_exit_has_no_final_target_location():
@@ -217,9 +212,8 @@ def test_an_agent_heading_for_an_exit_has_no_final_target_location():
         sim.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
-            position=(2.0, 5.0),
+            location=room.at(2.0, 5.0),
             state=jps.CollisionFreeSpeedModelState(),
-            region_id=room,
         )
     )
     sim.iterate()
@@ -235,9 +229,8 @@ def test_an_agent_reports_the_orientation_of_its_route():
         sim.add_agent(
             journey_id=journey_id,
             stage_id=steering,
-            position=(2.0, 5.0),
+            location=room.at(2.0, 5.0),
             state=jps.CollisionFreeSpeedModelState(),
-            region_id=room,
         )
     )
     agent.final_target = (8.0, 5.0)
@@ -274,9 +267,8 @@ def test_agents_walk_up_the_u_stair_to_an_exit_on_the_floor_above(model, state):
             sim.add_agent(
                 journey_id=journey_id,
                 stage_id=exit_id,
-                position=position,
+                location=ground.at(*position),
                 state=state(),
-                region_id=ground,
             )
         )
         for position in [
@@ -314,9 +306,8 @@ def test_one_exit_with_an_area_on_each_floor_is_reached_from_both():
         sim.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
-            position=STACKED_XY,
+            location=region_id.at(*STACKED_XY),
             state=jps.CollisionFreeSpeedModelState(),
-            region_id=region_id,
         ): z
         for region_id, z in ((ground, GROUND_Z), (upper, UPPER_Z))
     }
@@ -347,9 +338,8 @@ def test_an_exit_area_reaching_over_a_seam_stays_in_its_region():
     sim.add_agent(
         journey_id=sim.add_journey(jps.JourneyDescription([exit_id])),
         stage_id=exit_id,
-        position=(11, 5),
+        location=ramp.at(11, 5),
         state=jps.CollisionFreeSpeedModelState(),
-        region_id=ramp,
     )
     sim.iterate()
     assert sim.agent_count() == 1
@@ -368,9 +358,8 @@ def test_the_exit_an_agent_walks_towards_is_the_one_on_its_own_floor():
         sim.add_agent(
             journey_id=journey_id,
             stage_id=ground_exit,
-            position=STACKED_XY,
+            location=ground.at(*STACKED_XY),
             state=jps.CollisionFreeSpeedModelState(),
-            region_id=ground,
         )
     )
     for _ in range(1000):
@@ -428,9 +417,8 @@ def test_identically_set_up_simulations_stay_identical(model, state):
                 self.sim.add_agent(
                     journey_id=journey_id,
                     stage_id=exit_id,
-                    position=position,
+                    location=self.room.at(*position),
                     state=state(),
-                    region_id=self.room,
                 )
             )
 

@@ -1168,8 +1168,10 @@ def build_app(h5_path: str | None = None):
         regions = picker.GetDataSet().GetCellData().GetArray("region")
         region_id = int(regions.GetValue(picker.GetCellId()))
         try:
-            loc = current["geometry"].get_location(
-                float(pos[0]), float(pos[1]), region_id=region_id
+            loc = (
+                current["geometry"]
+                .region(region_id)
+                .at(float(pos[0]), float(pos[1]))
             )
         except jps.SimulationError:
             return  # pick rounds off the region's edge

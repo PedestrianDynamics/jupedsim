@@ -39,9 +39,8 @@ void init_collision_free_speed_model_v3(py::module_& m)
             sim.add_agent(
                 journey_id=journey_id,
                 stage_id=stage_id,
-                position=(1.0, 1.0),
+                location=region.at(1.0, 1.0),
                 state=jupedsim.CollisionFreeSpeedModelV3State(desired_speed=1.4),
-                region_id=region_id,
             )
 
         .. warning::

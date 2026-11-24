@@ -14,6 +14,7 @@
 #include "operational_model.hpp"
 #include "operational_model_state.hpp"
 #include "operational_model_type.hpp"
+#include "polygon.hpp"
 #include "routing_engine.hpp"
 #include "simulation_clock.hpp"
 #include "stage.hpp"
@@ -76,13 +77,14 @@ private:
 
     /// Throws SimulationError if the current state is in the mask @p forbidden.
     void throw_if_state(State forbidden, const char* operation) const;
+    /// Throws unless @p location lies on this simulation's geometry.
+    void check_on_own_geometry(const Location& location, const char* what) const;
     /// The destination of stage @p stage_id; throws for a stage without an area.
     const Destination& destination_of(BaseStage::ID stage_id) const;
 
 public:
     /// Shares ownership of the geometry, which is never modified: several simulations, or a
-    /// simulation and a routing engine, may use the same geometry. `geo()` hands out a reference
-    /// that stays valid for as long as the simulation lives.
+    /// simulation and a routing engine, may use the same geometry. `geo()` shares it too.
     Simulation(
         std::unique_ptr<OperationalModel>&& operational_model,
         std::shared_ptr<const Geometry> geometry,
@@ -109,10 +111,13 @@ public:
     void
     switch_agent_journey(GenericAgent::ID agent_id, Journey::ID journey_id, BaseStage::ID stage_id);
     uint64_t iteration() const;
-    std::vector<GenericAgent::ID> agents_in_range(Point p, double distance);
-    /// Returns IDs of all agents inside the defined polygon
-    /// @param polygon Required to be a simple convex polygon with CCW ordering.
-    std::vector<GenericAgent::ID> agents_in_polygon(const std::vector<Point>& polygon);
+    /// Ids of the agents within @p distance of @p from that are neighbors in the sense of the
+    /// operational models: in plain sight over the surface, see Geometry::no_geometry_between.
+    /// Agents on a floor above or below are not.
+    std::vector<GenericAgent::ID> agents_in_range(const Location& from, double distance);
+    /// Ids of the agents inside @p polygon, clipped to region @p region_id as a stage area is.
+    /// Throws if @p polygon does not intersect that region.
+    std::vector<GenericAgent::ID> agents_in_polygon(const Polygon& polygon, std::size_t region_id);
     /// @param region_id Region @p position lies in, see `Geometry::get_location`.
     GenericAgent::ID add_agent(
         Journey::ID journey_id,
@@ -163,7 +168,7 @@ public:
     /// @p region_id again. Throws for a stage without an area.
     void clear_custom_speed_field(BaseStage::ID stage_id, std::size_t region_id);
     /// The geometry this simulation runs on. Borrowed: it lives as long as the simulation.
-    const Geometry& geo() const;
+    const std::shared_ptr<const Geometry>& geo() const;
     void push_timer(const std::string_view name, size_t probe_log_level = 0);
     void pop_timer(const std::string_view name);
     void set_timer_log_level(int level) { _timer.set_log_level(level); };

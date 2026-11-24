@@ -394,34 +394,45 @@ void Simulation::switch_agent_journey(
     agent.stage_id = stage_id;
 }
 
-std::vector<GenericAgent::ID> Simulation::agents_in_range(Point p, double distance)
+std::vector<GenericAgent::ID> Simulation::agents_in_range(const Location& from, double distance)
 {
     throw_if_state(State::Closed, "agents_in_range");
     JPS_SCOPED_TIMER_AND_TRACE(_timer, "Agents in Range", Debug);
+    check_on_own_geometry(from, "location");
     std::vector<GenericAgent::ID> neighbor_ids{};
-    _neighborhood_search.for_each_in_range(p, distance, [&neighbor_ids](const GenericAgent& agent) {
-        neighbor_ids.push_back(agent.id);
-    });
+    _neighborhood_search.for_each_in_range(
+        from.xy(), distance, [this, &from, &neighbor_ids](const GenericAgent& agent) {
+            if(_geometry->no_geometry_between(from, agent.location)) {
+                neighbor_ids.push_back(agent.id);
+            }
+        });
     return neighbor_ids;
 }
 
-std::vector<GenericAgent::ID> Simulation::agents_in_polygon(const std::vector<Point>& polygon)
+std::vector<GenericAgent::ID>
+Simulation::agents_in_polygon(const Polygon& polygon, std::size_t region_id)
 {
     throw_if_state(State::Closed, "agents_in_polygon");
     JPS_SCOPED_TIMER_AND_TRACE(_timer, "Agents in Polygon", Debug);
-    const Polygon poly{polygon};
-    if(!poly.is_convex()) {
-        throw SimulationError("Polygon needs to be simple and convex");
-    }
-    const auto [p, dist] = poly.containing_circle();
-
     std::vector<GenericAgent::ID> result{};
-    _neighborhood_search.for_each_in_range(p, dist, [&result, &poly](const GenericAgent& agent) {
-        if(poly.is_inside(agent.location.xy())) {
-            result.push_back(agent.id);
-        }
-    });
+    for(const auto& piece : _geometry->clip_to_region(polygon, region_id)) {
+        const Polygon clipped{piece.polygon};
+        const auto [center, radius] = clipped.containing_circle();
+        _neighborhood_search.for_each_in_range(
+            center, radius, [region_id, &clipped, &result](const GenericAgent& agent) {
+                if(agent.location.region() == region_id && clipped.is_inside(agent.location.xy())) {
+                    result.push_back(agent.id);
+                }
+            });
+    }
     return result;
+}
+
+void Simulation::check_on_own_geometry(const Location& location, const char* what) const
+{
+    if(!location.belongs_to(*_geometry)) {
+        throw SimulationError("{} {} belongs to another geometry.", what, location);
+    }
 }
 
 OperationalModelType Simulation::model_type() const
@@ -534,10 +545,10 @@ const Destination& Simulation::destination_of(BaseStage::ID stage_id) const
     return *destination;
 }
 
-const Geometry& Simulation::geo() const
+const std::shared_ptr<const Geometry>& Simulation::geo() const
 {
     throw_if_state(State::Closed, "geo");
-    return *_geometry;
+    return _geometry;
 }
 
 void Simulation::push_timer(const std::string_view name, size_t probe_log_level)

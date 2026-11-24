@@ -58,8 +58,8 @@ def test_orientation_is_unit_vector(u_stair_geometry):
     engine = jps.SurfaceMeshShortestPathRoutingEngine(geo)
     d = engine.get_orientation(
         # from the ground floor (region 0) to the upper floor (region 1)
-        geo.get_location(3, 4, region_id=0),
-        geo.get_location(13, 14, region_id=1),
+        geo.region(0).at(3, 4),
+        geo.region(1).at(13, 14),
     )
     assert len(d) == 2
     assert math.hypot(*d) == pytest.approx(1.0)

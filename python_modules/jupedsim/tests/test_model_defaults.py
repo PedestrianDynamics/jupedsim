@@ -132,9 +132,8 @@ def _trajectory(model, state_cls):
     agent_id = simulation.add_agent(
         journey_id=journey_id,
         stage_id=exit_id,
-        position=(0, 0),
+        location=room.at(0, 0),
         state=_default_state(state_cls),
-        region_id=room,
     )
     positions = []
     for _ in range(20):

@@ -250,8 +250,7 @@ class Hdf5TrajectoryWriter(TrajectoryWriter):
         geo: Geometry = simulation.get_geometry()
 
         regions = [
-            (idx, geo.polygon(region_id=idx).as_wkt())
-            for idx in range(geo.region_count())
+            (region.id, region.polygon().as_wkt()) for region in geo.regions()
         ]
         regions_arr = np.array(regions, dtype=self.regions_dtype())
         regions_ds = self._file.create_dataset("regions", data=regions_arr)
@@ -446,7 +445,7 @@ class Hdf5TrajectoryWriter(TrajectoryWriter):
             self._travel_time_fields_seen[stage_id] = seen + 1
             if seen % self._every_nth_travel_time_field != 0:
                 continue
-            for region_id, grid in simulation.travel_times(stage_id).items():
+            for region, grid in simulation.travel_times(stage_id).items():
                 offset = self._travel_time_values_ds.shape[0]
                 values = grid.values.astype("<f4").ravel()
                 self._append(self._travel_time_values_ds, values, len(values))
@@ -461,7 +460,7 @@ class Hdf5TrajectoryWriter(TrajectoryWriter):
                         (
                             iteration,
                             stage_id,
-                            region_id,
+                            region.id,
                             *grid.origin,
                             grid.width,
                             grid.height,

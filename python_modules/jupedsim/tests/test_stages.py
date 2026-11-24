@@ -115,9 +115,8 @@ def test_can_use_stage_proxy():
     agent_id = simulation.add_agent(
         journey_id=exit_journey_id,
         stage_id=exit_id,
-        position=(-9.5, 0),
+        location=room.at(-9.5, 0),
         state=jps.CollisionFreeSpeedModelState(),
-        region_id=room,
     )
 
     assert exit.count_targeting() == 1
@@ -170,9 +169,8 @@ def test_a_waypoint_given_by_its_area_is_reached(square_room_5x5):
     agent_id = sim.add_agent(
         journey_id=sim.add_journey(journey),
         stage_id=waypoint_id,
-        position=(1.5, 0),
+        location=room.at(1.5, 0),
         state=jps.CollisionFreeSpeedModelState(),
-        region_id=room,
     )
     # It starts inside the waypoint, so the first step moves it on to the exit.
     sim.iterate()
@@ -183,7 +181,7 @@ def test_can_not_add_waypoint_outside_geometry(square_room_5x5):
     simulation, room = square_room_5x5
 
     with pytest.raises(
-        jps.SimulationError, match=f"Area does not intersect region {room}"
+        jps.SimulationError, match=f"Area does not intersect region {room.id}"
     ):
         simulation.add_waypoint_stage(
             [(jps.circle_to_polygon(center=(10, 10), radius=1), room)]
@@ -194,7 +192,7 @@ def test_can_not_add_exit_completely_outside_geometry(square_room_5x5):
     simulation, room = square_room_5x5
 
     with pytest.raises(
-        jps.SimulationError, match=f"Area does not intersect region {room}"
+        jps.SimulationError, match=f"Area does not intersect region {room.id}"
     ):
         simulation.add_exit_stage(
             [([(-10, -10), (-8, -10), (-8, -8), (-10, -8)], room)]
@@ -229,9 +227,8 @@ def test_an_agent_standing_at_the_edge_of_an_exit_leaves():
     simulation.add_agent(
         journey_id=journey_id,
         stage_id=exit_id,
-        position=(8.02, 5),
+        location=room.at(8.02, 5),
         state=jps.CollisionFreeSpeedModelState(),
-        region_id=room,
     )
     expected_iterations_to_finish = 10
     simulation.iterate(expected_iterations_to_finish)
