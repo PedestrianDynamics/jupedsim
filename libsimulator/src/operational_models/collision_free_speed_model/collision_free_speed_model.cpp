@@ -16,7 +16,7 @@
 
 namespace
 {
-/// How far to ask for walls. The repulsion decays with `range_geometry_repulsion` (0.02 m by
+/// How far to ask for walls. The repulsion decays with `range_geometry_repulsion` (0.021 m by
 /// default), so a wall this far off contributes "nothing".
 constexpr double wall_search_radius = 4.0;
 } // namespace
