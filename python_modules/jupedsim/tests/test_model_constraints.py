@@ -313,6 +313,18 @@ def test_collision_free_speed_model_can_not_set_neighbor_repulsion_anisotropy_ou
         )
 
 
+def test_collision_free_speed_model_can_not_set_neighbor_repulsion_anisotropy_nan():
+    with pytest.raises(
+        jps.SimulationError,
+        match=r"Model constraint violation: neighborRepulsionAnisotropy nan .*",
+    ):
+        _add_collision_free_speed_model_agent(
+            jps.CollisionFreeSpeedModelState(
+                neighbor_repulsion_anisotropy=float("nan")
+            )
+        )
+
+
 @pytest.mark.parametrize("mass", [*np.arange(1, 100, 20), 100])
 def test_generalized_centrifugal_force_model_can_set_mass(
     square_room_100x100_gcfm, mass
