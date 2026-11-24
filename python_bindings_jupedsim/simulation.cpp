@@ -11,6 +11,7 @@
 #include "operational_model.hpp"
 #include "operational_model_state.hpp"
 #include "polygon.hpp"
+#include "records.hpp"
 #include "route.hpp"
 #include "stage.hpp"
 #include "stage_description.hpp"
@@ -85,6 +86,15 @@ flat_speed_field(const Simulation& sim, std::size_t region_id, const SpeedArray&
     return {values.data(), values.data() + values.size()};
 }
 
+/// @p location as a Python object that keeps @p simulation alive: it points into the geometry
+/// the simulation owns.
+py::object kept_alive_by(const Location& location, py::handle simulation)
+{
+    auto object = py::cast(location);
+    py::detail::keep_alive_impl(object, simulation);
+    return object;
+}
+
 /// One of the _...TransitionDescription objects bound in transition.cpp. The variant has no
 /// type caster: its alternatives cannot be default constructed.
 TransitionDescription transition_description(const py::handle& transition)
@@ -96,6 +106,11 @@ TransitionDescription transition_description(const py::handle& transition)
         return transition.cast<RoundRobinTransitionDescription>();
     }
     return transition.cast<LeastTargetedTransitionDescription>();
+}
+
+std::optional<uint64_t> optional_id(const std::optional<BaseStage::ID>& id)
+{
+    return id ? std::optional{id->get_id()} : std::nullopt;
 }
 } // namespace
 
@@ -258,13 +273,34 @@ void init_simulation(py::module_& m)
             "mark_agent_for_removal",
             [](Simulation& sim, uint64_t id) { sim.mark_agent_for_removal(id); })
         .def(
+            // (agent id, target id or location, time, location) per reached target, from index
+            // @p since on.
+            "reached_targets",
+            [](py::object self, std::size_t since) {
+                const auto& sim = self.cast<const Simulation&>();
+                const auto& records = sim.reached_targets();
+                py::list reached{};
+                for(std::size_t i = since; i < records.size(); ++i) {
+                    const auto& r = records[i];
+                    const auto target = std::holds_alternative<BaseStage::ID>(r.target) ?
+                                            py::cast(std::get<BaseStage::ID>(r.target).get_id()) :
+                                            kept_alive_by(std::get<Location>(r.target), self);
+                    reached.append(
+                        py::make_tuple(
+                            r.agent_id.get_id(), target, r.time, kept_alive_by(r.location, self)));
+                }
+                return reached;
+            },
+            py::arg("since") = 0)
+        .def(
+            // (agent id, exit id or None, time) per removal.
             "removed_agents",
             [](const Simulation& sim) {
-                std::vector<uint64_t> ids{};
-                for(const auto id : sim.removed_agents()) {
-                    ids.push_back(id.get_id());
+                std::vector<std::tuple<uint64_t, std::optional<uint64_t>, double>> removals{};
+                for(const auto& r : sim.removed_agents()) {
+                    removals.emplace_back(r.agent_id.get_id(), optional_id(r.exit), r.time);
                 }
-                return ids;
+                return removals;
             })
         .def("iterate", [](Simulation& sim) { sim.iterate(); })
         .def("close", [](Simulation& sim) { sim.close(); })

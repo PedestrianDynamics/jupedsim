@@ -13,6 +13,7 @@
 #include "operational_model_state.hpp"
 #include "operational_model_type.hpp"
 #include "polygon.hpp"
+#include "records.hpp"
 #include "route.hpp"
 #include "routing_engine.hpp"
 #include "simulation_clock.hpp"
@@ -70,7 +71,9 @@ private:
     AgentContainer<GenericAgent> _agents;
     /// Agents that reached an exit or were marked, removed at the beginning of the next
     /// iteration.
-    std::vector<GenericAgent::ID> _marked_for_removal;
+    std::vector<RemovalRecord> _marked_for_removal;
+    std::vector<TargetReachedRecord> _reached_targets;
+    std::vector<RemovalRecord> _removals;
     std::unordered_map<Route::ID, std::unique_ptr<Route>> _routes;
     /// Kept apart from the agents, which are copied every iteration; only named agents.
     std::unordered_map<GenericAgent::ID, std::string> _agent_names;
@@ -126,8 +129,10 @@ public:
     /// Removes the agent at the beginning of the next iteration. Nothing changes for an agent
     /// that is about to leave already.
     void mark_agent_for_removal(GenericAgent::ID id);
-    /// The agents removed at the beginning of the next iteration.
-    const std::vector<GenericAgent::ID>& removed_agents() const;
+    /// The targets reached in the most recent iteration, and by the agents added since.
+    const std::vector<TargetReachedRecord>& reached_targets() const;
+    /// The agents removed at the beginning of the most recent iteration.
+    const std::vector<RemovalRecord>& removed_agents() const;
     size_t agent_count() const;
     double elapsed_time() const;
     double dt() const;

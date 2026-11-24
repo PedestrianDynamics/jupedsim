@@ -54,6 +54,7 @@ target_sources(simulator PRIVATE
     src/kernel.hpp
     src/polygon.cpp
     src/polygon.hpp
+    src/records.hpp
     src/route.cpp
     src/route.hpp
     src/routing_engine.cpp

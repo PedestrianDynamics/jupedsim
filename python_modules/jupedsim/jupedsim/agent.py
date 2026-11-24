@@ -144,6 +144,12 @@ class Agent:
         return self._resolve().location
 
     @property
+    def leaving(self) -> bool:
+        """Whether the agent leaves the simulation at the beginning of the next
+        iteration: it reached an exit, or was marked for removal."""
+        return self._resolve().leaving
+
+    @property
     def route_orientation(self) -> tuple[float, float]:
         """Unit vector towards the current target.
 
@@ -193,8 +199,7 @@ class Agent:
                 handle belongs to another simulation.
             SimulationError: if ``first_target`` is not part of the route, the agent
                 has no route to jump in, the location belongs to another geometry, or
-                the agent leaves the simulation at the beginning of the next
-                iteration.
+                the agent is :attr:`leaving`.
         """
         sim = self._simulation
         if steer_to is not None:

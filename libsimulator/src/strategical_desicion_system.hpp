@@ -3,6 +3,7 @@
 
 #include "generic_agent.hpp"
 #include "geometry/location.hpp"
+#include "records.hpp"
 #include "route.hpp"
 #include "routing_target.hpp"
 #include "stage.hpp"
@@ -22,14 +23,17 @@ public:
     StrategicalDecisionSystem(StrategicalDecisionSystem&& other) = delete;
     StrategicalDecisionSystem& operator=(StrategicalDecisionSystem&& other) = delete;
 
-    /// Marks the agents in @p agents that reached their target, a stage of their route or the
-    /// location they are steered to. An agent reaching an exit leaves: it is added to @p leaving,
-    /// to be removed at the beginning of the next iteration.
+    /// Records in @p reached the agents in @p agents that reached their target, a stage of their
+    /// route or the location they are steered to. Reaching it again is not recorded until the
+    /// agent moves on or is rerouted. An agent reaching an exit leaves: it is recorded in
+    /// @p leaving, to be removed at the beginning of the next iteration.
     template <typename Agents>
-    void mark_reached(
+    void record_reached(
         Agents&& agents,
         const StageManager& stage_manager,
-        std::vector<GenericAgent::ID>& leaving) const
+        double time,
+        std::vector<TargetReachedRecord>& reached,
+        std::vector<RemovalRecord>& leaving) const
     {
         for(auto& agent : agents) {
             if(agent.target_reached) {
@@ -39,6 +43,7 @@ public:
                 const auto& target = std::get<Location>(agent.current_target);
                 if(has_reached(agent.location, target)) {
                     agent.target_reached = true;
+                    reached.push_back({agent.id, target, time, agent.location});
                 }
                 continue;
             }
@@ -47,9 +52,10 @@ public:
                 continue;
             }
             agent.target_reached = true;
+            reached.push_back({agent.id, stage->id(), time, agent.location});
             if(dynamic_cast<const Exit*>(stage) != nullptr) {
                 agent.leaving = true;
-                leaving.push_back(agent.id);
+                leaving.push_back({agent.id, stage->id(), time});
             }
         }
     }

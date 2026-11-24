@@ -224,7 +224,7 @@ def test_agents_walk_up_the_u_stair_to_an_exit_on_the_floor_above(model, state):
     heights = [watched.location.z]
     for _ in range(6000):
         sim.iterate()
-        if agents[0].id in sim.removed_agents():
+        if any(r.agent_id == agents[0].id for r in sim.removed_agents()):
             watched = None
         if watched is not None:
             heights.append(watched.location.z)

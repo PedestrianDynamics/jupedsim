@@ -31,7 +31,8 @@ struct GenericAgent {
     /// Invalid, as is stage_id, while the agent is steered to the location in current_target.
     jps::UniqueID<Route> route_id{jps::UniqueID<Route>::invalid};
     jps::UniqueID<BaseStage> stage_id{jps::UniqueID<BaseStage>::invalid};
-    /// Whether the agent has reached its current target, until it moves on or is rerouted.
+    /// Whether the agent has reached its current target; until it moves on or is rerouted,
+    /// reaching it again is not reported.
     bool target_reached{false};
     /// Whether the agent leaves the simulation at the beginning of the next iteration: it
     /// reached an exit, or was marked for removal.

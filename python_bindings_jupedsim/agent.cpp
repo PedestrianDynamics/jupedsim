@@ -63,6 +63,7 @@ void init_agent(py::module_& m)
                     return std::nullopt;
                 },
                 py::keep_alive<0, 1>()))
+        .def_property_readonly("leaving", [](const GenericAgent& agent) { return agent.leaving; })
         .def_property_readonly(
             "route_orientation",
             [](const GenericAgent& agent) { return into_tuple(agent.route_orientation); })
