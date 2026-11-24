@@ -42,8 +42,12 @@ Vector SocialForceModel::compute_next_state(
     const double driving =
         current_state.mass * current_state.desired_speed / current_state.reaction_time;
 
-    auto neighborhood = step.other_agents_in_range(
-        _cut_off_radius, [&step](const NeighborView& n) { return step.no_geometry_between(n); });
+    const double neighbor_reach =
+        reach_beyond_contact(current_state.agent_scale, current_state.force_distance, driving);
+    auto neighborhood = step.other_agents_in_range(_cut_off_radius, [&](const NeighborView& n) {
+        const double contact = current_state.radius + std::get<State>(*n.state).radius;
+        return n.relative_position.norm() < contact + neighbor_reach && step.no_geometry_between(n);
+    });
     Vector f_rep;
     for(const auto& neighbor : neighborhood) {
         f_rep += agent_force(current_state, neighbor);

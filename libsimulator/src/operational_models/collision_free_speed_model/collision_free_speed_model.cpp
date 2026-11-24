@@ -33,8 +33,16 @@ Vector CollisionFreeSpeedModel::compute_next_state(
     const AgentStep& step) const
 {
     const auto& current_state = std::get<State>(current);
-    auto neighborhood = step.other_agents_in_range(
-        _cut_off_radius, [&step](const NeighborView& n) { return step.no_geometry_between(n); });
+    // Farther off, a neighbor neither repels by more than 1% of the desired direction nor slows
+    // the agent down.
+    const double neighbor_reach = std::max(
+        reach_beyond_contact(
+            current_state.strength_neighbor_repulsion, current_state.range_neighbor_repulsion, 1.0),
+        current_state.v0 * current_state.time_gap);
+    auto neighborhood = step.other_agents_in_range(_cut_off_radius, [&](const NeighborView& n) {
+        const double contact = current_state.radius + std::get<State>(*n.state).radius;
+        return n.relative_position.norm() < contact + neighbor_reach && step.no_geometry_between(n);
+    });
 
     const auto desired_direction = step.route_orientation();
     // The route orientation is a unit vector, or zero when the agent stands on its target or

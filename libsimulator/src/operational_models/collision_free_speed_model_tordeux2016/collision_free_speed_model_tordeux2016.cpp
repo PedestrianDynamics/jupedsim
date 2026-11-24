@@ -45,8 +45,17 @@ Vector CollisionFreeSpeedModelTordeux2016::compute_next_state(
     const AgentStep& step) const
 {
     const auto& current_state = std::get<State>(current);
-    const auto neighborhood = step.other_agents_in_range(
-        _cut_off_radius, [&step](const NeighborView& n) { return step.no_geometry_between(n); });
+    // Farther off, a neighbor neither repels by more than 1% of the desired direction nor slows
+    // the agent down.
+    const double neighbor_reach = std::max(
+        reach_beyond_contact(_strength_neighbor_repulsion, _range_neighbor_repulsion, 1.0),
+        current_state.v0 * current_state.time_gap);
+    const auto neighborhood =
+        step.other_agents_in_range(_cut_off_radius, [&](const NeighborView& n) {
+            const double contact = current_state.radius + std::get<State>(*n.state).radius;
+            return n.relative_position.norm() < contact + neighbor_reach &&
+                   step.no_geometry_between(n);
+        });
 
     Vector neighbor_repulsion{};
     for(const auto& neighbor : neighborhood) {

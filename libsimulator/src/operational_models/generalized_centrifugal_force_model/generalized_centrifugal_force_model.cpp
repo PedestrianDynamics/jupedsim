@@ -49,8 +49,12 @@ Vector GeneralizedCentrifugalForceModel::compute_next_state(
     const AgentStep& step) const
 {
     const auto& current_state = std::get<State>(current);
-    const auto neighborhood = step.other_agents_in_range(
-        _cut_off_radius, [&step](const NeighborView& n) { return step.no_geometry_between(n); });
+    // The force vanishes beyond `max_neighbor_interaction_distance`.
+    const auto neighborhood =
+        step.other_agents_in_range(_cut_off_radius, [&](const NeighborView& n) {
+            return agent_to_agent_spacing(current_state, n) < _max_neighbor_interaction_distance &&
+                   step.no_geometry_between(n);
+        });
     Vector f_rep;
     for(const auto& neighbor : neighborhood) {
         f_rep += force_rep_ped(current_state, neighbor);
