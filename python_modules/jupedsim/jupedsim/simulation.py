@@ -85,8 +85,9 @@ class Simulation:
         Args:
             model:
                 Defines the operational model used in the simulation. Every built-in model is passed
-                as a configured instance carrying its model-level parameters, e.g.
-                :class:`~jupedsim.CollisionFreeSpeedModelTordeux2016` or :class:`~jupedsim.SocialForceModel`.
+                as a configured instance, e.g. :class:`~jupedsim.CollisionFreeSpeedModel` or
+                :class:`~jupedsim.SocialForceModel`. A model with model-level parameters carries
+                them in this instance.
                 Custom Python models are passed as instances of a
                 :class:`~jupedsim.CustomOperationalModel` subclass.
 
