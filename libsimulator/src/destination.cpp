@@ -18,6 +18,16 @@ Vector Destination::orientation(const Location& from) const
     return _engine->get_orientation(from, _id);
 }
 
+void Destination::solve() const
+{
+    _engine->solve(_id);
+}
+
+Vector Destination::solved_orientation(const Location& from) const
+{
+    return _engine->solved_orientation(from, _id);
+}
+
 TravelTimeGrid Destination::travel_times(std::size_t region) const
 {
     return _engine->travel_times(region, _id);

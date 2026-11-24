@@ -10,8 +10,11 @@
 #include "line_segment.hpp"
 #include "operational_model_state.hpp"
 
+#include <boost/container/small_vector.hpp>
+
 #include <cmath>
 #include <concepts>
+#include <cstddef>
 #include <ranges>
 #include <type_traits>
 #include <utility>
@@ -31,6 +34,14 @@ private:
     }
     const Location* _location;
 };
+
+/// Neighbors one query holds without a heap allocation: a dense crowd (about 1.5 persons/m^2)
+/// within a 3 m radius holds about 45. More spill over to the heap.
+inline constexpr std::size_t inline_neighbor_count = 64;
+
+/// The neighbors of one agent. Kept on the stack, as an allocation per agent and step costs
+/// time and, in parallel steps, contention on the allocator.
+using NeighborList = boost::container::small_vector<NeighborView, inline_neighbor_count>;
 
 /// A wall segment as seen from the agent that asked for it. It carries what agents typically
 /// use/compute to avoid repetitions plus harmonizes computation.
@@ -83,9 +94,9 @@ public:
 
     /// All agents within 'radius', excluding this agent.
     template <std::predicate<const NeighborView&> Pred = AcceptAllNeighbors>
-    std::vector<NeighborView> other_agents_in_range(double radius, Pred filter = {}) const
+    NeighborList other_agents_in_range(double radius, Pred filter = {}) const
     {
-        std::vector<NeighborView> neighbors{};
+        NeighborList neighbors{};
         // The grid searches by (x, y). Only filters out the asking agent itself plus applies
         // a quick z-filter - whether agents are "too far" away in z.
         const double z = location().z();

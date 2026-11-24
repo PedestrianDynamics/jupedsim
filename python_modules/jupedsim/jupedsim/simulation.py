@@ -79,6 +79,7 @@ class Simulation:
         floorfield_options: FloorfieldOptions | None = None,
         trajectory_writer: TrajectoryWriter | None = None,
         timer_log_level: int = 1,
+        worker_count: int = 4,
     ) -> None:
         """Creates a Simulation.
 
@@ -110,6 +111,10 @@ class Simulation:
                 provides :class:`~jupedsim.Hdf5TrajectoryWriter`, which writes HDF5 files. If
                 you want other formats such as CSV you need to provide your own custom
                 implementation.
+            worker_count: Threads computing agent decisions next to the one calling
+                :func:`iterate`; 0 computes them on the calling thread alone. Results do not
+                depend on it. Steps of a :class:`~jupedsim.CustomOperationalModel` always run on
+                the calling thread.
         """
         if isinstance(model, OperationalModel):
             the_model = model
@@ -129,6 +134,7 @@ class Simulation:
             geometry=geometry,
             dt=dt,
             floorfield_options=floorfield_options,
+            worker_count=worker_count,
         )
         self._timer = Timer(self._obj, timer_log_level=timer_log_level)
         # Stages with a floor field: a default speed field change reaches those
