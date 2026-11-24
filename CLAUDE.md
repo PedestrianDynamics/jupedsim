@@ -24,7 +24,7 @@ to the repository root.
 
 - **`Simulation::iterate()`**: agent removal → neighborhood search → strategical (next
   target) → tactical (routing) → operational (model) → neighborhood rebuild → clock advance
-  → mark reached targets.
+  → record reached targets.
 - **Geometric primitives**: `kernel.hpp` — `Point` and `Vector` wrap CGAL Epick (no glm).
   Geometry is built with `GeometryBuilder` (`src/geometry/`), mirrored in Python.
 - **Operational models**: one folder each in `libsimulator/src/operational_models/` (social

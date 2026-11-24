@@ -13,6 +13,7 @@
 #include "operational_model_state.hpp"
 #include "operational_model_type.hpp"
 #include "polygon.hpp"
+#include "records.hpp"
 #include "route.hpp"
 #include "routing_engine.hpp"
 #include "simulation_clock.hpp"
@@ -122,16 +123,19 @@ void Simulation::iterate()
     IterationScope iteration_scope(_state);
     JPS_SCOPED_TIMER_AND_TRACE(_timer, "Total Iteration", General);
 
+    _reached_targets.clear();
     {
         JPS_SCOPED_TIMER_AND_TRACE(_timer, "Agent Removal System", Detailed);
-        if(!_marked_for_removal.empty()) {
-            for(const auto id : _marked_for_removal) {
-                if(const auto named = _agent_names.find(id); named != std::end(_agent_names)) {
+        _removals.clear();
+        std::swap(_removals, _marked_for_removal);
+        if(!_removals.empty()) {
+            for(const auto& removal : _removals) {
+                if(const auto named = _agent_names.find(removal.agent_id);
+                   named != std::end(_agent_names)) {
                     _agent_ids_by_name.erase(named->second);
                     _agent_names.erase(named);
                 }
             }
-            _marked_for_removal.clear();
             _agent_removal_system.run(_agents, _stage_manager);
             assert(sorted_by_id(_agents));
         }
@@ -166,7 +170,8 @@ void Simulation::iterate()
 
     {
         JPS_SCOPED_TIMER_AND_TRACE(_timer, "Strategical Decision System", General);
-        _stategical_decision_system.mark_reached(_agents, _stage_manager, _marked_for_removal);
+        _stategical_decision_system.record_reached(
+            _agents, _stage_manager, _clock.elapsed_time(), _reached_targets, _marked_for_removal);
     }
 }
 
@@ -317,7 +322,8 @@ GenericAgent::ID Simulation::emplace_agent(GenericAgent&& agent, std::optional<s
     assert(sorted_by_id(_agents));
     _neighborhood_search.add_agent(_agents.back());
     const IteratorPair added(std::prev(std::end(_agents)), std::end(_agents));
-    _stategical_decision_system.mark_reached(added, _stage_manager, _marked_for_removal);
+    _stategical_decision_system.record_reached(
+        added, _stage_manager, _clock.elapsed_time(), _reached_targets, _marked_for_removal);
     _tactical_decision_system.run(*_routing_engine, added);
     return _agents.back().id;
 }
@@ -446,8 +452,14 @@ void Simulation::mark_agent_for_removal(GenericAgent::ID id)
     }
     if(!agent->leaving) {
         agent->leaving = true;
-        _marked_for_removal.push_back(id);
+        _marked_for_removal.push_back({id, std::nullopt, _clock.elapsed_time()});
     }
+}
+
+const std::vector<TargetReachedRecord>& Simulation::reached_targets() const
+{
+    throw_if_state(State::Closed, "reached_targets");
+    return _reached_targets;
 }
 
 const GenericAgent& Simulation::agent(GenericAgent::ID id) const
@@ -472,10 +484,10 @@ GenericAgent& Simulation::agent(GenericAgent::ID id)
     return *iter;
 }
 
-const std::vector<GenericAgent::ID>& Simulation::removed_agents() const
+const std::vector<RemovalRecord>& Simulation::removed_agents() const
 {
     throw_if_state(State::Closed, "removed_agents");
-    return _marked_for_removal;
+    return _removals;
 }
 
 double Simulation::elapsed_time() const

@@ -43,10 +43,10 @@ def test_a_route_with_every_transition_kind_leads_to_the_exit():
     )
     for y in (4.0, 6.0):
         sim.add_agent(room.at(1.0, y), route=route)
-    visited = set()
+    visited = {r.target for r in sim.reached_targets()}
     while sim.agent_count() > 0 and sim.iteration_count() < 5000:
-        visited.update(agent.current_target for agent in sim.agents())
         sim.iterate()
+        visited.update(r.target for r in sim.reached_targets())
     assert sim.agent_count() == 0
     assert visited == {first, upper, lower, last, exit_}
 
