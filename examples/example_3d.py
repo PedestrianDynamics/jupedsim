@@ -52,7 +52,7 @@ geo_builder.connect_regions(
 )
 
 sim = jps.Simulation(
-    model=jps.CollisionFreeSpeedModelTordeux2016(), geometry=geo_builder.build()
+    model=jps.CollisionFreeSpeedModel(), geometry=geo_builder.build()
 )
 
 # An area on either side of the stairwell, close to the outer wall.
@@ -100,7 +100,7 @@ for i, position in enumerate(start_positions):
         journey_id=journey_ids[i % 2],
         stage_id=upper_waypoint_id,
         position=position,
-        state=jps.CollisionFreeSpeedModelTordeux2016State(),
+        state=jps.CollisionFreeSpeedModelState(),
         region_id=upper,
     )
 

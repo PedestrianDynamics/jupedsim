@@ -191,7 +191,7 @@ This can be done with:
     room = geo_builder.add_region(polygon=..., height=0.0)
 
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModelTordeux2016(),
+        model=jps.CollisionFreeSpeedModel(),
         geometry=geo_builder.build(),
         trajectory_writer=jps.Hdf5TrajectoryWriter(
             output_file=pathlib.Path("traj.h5")

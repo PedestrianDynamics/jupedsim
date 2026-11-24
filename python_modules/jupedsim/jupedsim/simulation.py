@@ -242,7 +242,7 @@ class Simulation:
                 :meth:`~jupedsim.GeometryBuilder.add_region` or
                 :meth:`~jupedsim.GeometryBuilder.connect_regions`.
             state: Initial per-agent model state. For built-in models this is the matching
-                ``XModelState`` instance, e.g. :class:`~jupedsim.CollisionFreeSpeedModelTordeux2016State`. For
+                ``XModelState`` instance, e.g. :class:`~jupedsim.CollisionFreeSpeedModelState`. For
                 custom models this is your own object, of whatever type your
                 :class:`~jupedsim.CustomOperationalModel` expects. The state type has to match the
                 model used in this simulation. When adding agents with invalid parameters, or too

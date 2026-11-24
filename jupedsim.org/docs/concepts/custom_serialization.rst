@@ -193,7 +193,7 @@ Using the custom writer is identical to using the built-in HDF5 writer:
         every_nth_frame=5,
     ) as writer:
         simulation = jps.Simulation(
-            model=jps.CollisionFreeSpeedModelTordeux2016(),
+            model=jps.CollisionFreeSpeedModel(),
             geometry=my_geometry,
             trajectory_writer=writer,
         )
