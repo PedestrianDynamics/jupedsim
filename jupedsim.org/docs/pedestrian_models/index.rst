@@ -19,10 +19,10 @@ Collision Free Speed Model
 
 The collision-free speed model is a mathematical approach designed for
 pedestrian dynamics, emphasizing the prevention of collisions among agents. The
-direction in which an agent moves is determined through an isotropic
-combination of exponential repulsion from nearby agents. The strength of this
-repulsion is influenced by the proximity to others within their surroundings,
-treating all directions equally in terms of influence. Agents adjust their
+direction in which an agent moves is determined through a combination of
+exponential repulsion from nearby agents. The strength of this repulsion is
+influenced by the proximity to others within their surroundings; in the
+published model all directions count equally. Agents adjust their
 speed according to the nearest neighbor in their headway, allowing them to
 navigate through congested areas without overlapping or obstructing each other.
 The collision-free speed model takes into account the length of the agent,
@@ -49,11 +49,14 @@ The collision-free speed model is available in three variants in JuPedSim:
   relaxation) and is also kept unchanged.
 
 :class:`~jupedsim.CollisionFreeSpeedModel` differs from the published model in
-two ways. First, ``neighbor_repulsion_anisotropy`` weights the repulsion of a
-neighbor by the cosine of its angle to the desired direction and ignores
-neighbors behind, as the vision factor of the Generalized Centrifugal Force
-Model does; 0 restores the isotropic repulsion of the paper. This reduces
-deadlocks in front of narrow bottlenecks. Second, its default parameters come
+two ways. First, ``neighbor_repulsion_anisotropy`` :math:`\lambda` adds a
+vision factor like that of the Generalized Centrifugal Force Model: the
+repulsion of a neighbor is weighted by
+:math:`1 - \lambda + \lambda \max(0, \cos\theta)`, where :math:`\theta` is
+its angle to the desired direction. With :math:`\lambda = 1` neighbors behind
+are ignored, with the default 0.5 they count half, and 0 restores the
+isotropic repulsion of the paper. This reduces deadlocks in front of narrow
+bottlenecks. Second, its default parameters come
 from a joint calibration on the Hermes bottleneck and the CrowdQueue gate
 experiments, described in `this note
 <https://pedestriandynamics.org/notes/dakota-defaults/>`__. The desired speed

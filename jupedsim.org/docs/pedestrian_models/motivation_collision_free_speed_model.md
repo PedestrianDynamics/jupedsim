@@ -6,7 +6,7 @@
 [Üsten et al. (2026)](https://arxiv.org/abs/2604.26858). It is a variant of
 the collision-free speed model
 ([Tordeux et al., 2016](https://doi.org/10.1007/978-3-319-33482-0_29)),
-available as `CollisionFreeSpeedModel`, in which the steering and the speed selection are explicitly
+available as `CollisionFreeSpeedModelTordeux2016`, in which the steering and the speed selection are explicitly
 decoupled. The walking direction is
 obtained by rotating a reference direction toward the side opposite the
 most relevant forward neighbor, and the walking speed is computed from
@@ -256,5 +256,5 @@ These are fixed in the implementation and are not exposed as parameters.
 | Heading state | None (instantaneous) | Persistent, relaxed toward the target with timescale $\tau_\theta$ |
 | Spacing direction | Single direction from the steering field | Blend of move-direction and goal-direction spacings |
 | Speed lower bound | $v \ge 0$ | $v_{\min} = -0.01$ m/s for deadlock release |
-| Anisotropy | Equal weighting of distances | Asymmetric perception field via $\sigma_x \ne \sigma_y$ |
+| Anisotropy | Vision factor on the summed repulsion (`neighbor_repulsion_anisotropy`) | Asymmetric perception field via $\sigma_x \ne \sigma_y$ |
 | Neighbor visibility | All neighbors within range | Line-of-sight filter excludes occluded neighbors |

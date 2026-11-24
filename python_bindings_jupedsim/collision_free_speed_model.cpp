@@ -22,7 +22,9 @@ void init_collision_free_speed_model(py::module_& m)
         The default collision-free speed model. It is based on the model of Tordeux
         et al. (2016) (https://arxiv.org/abs/1512.05597, available unchanged as
         :class:`~jupedsim.CollisionFreeSpeedModelTordeux2016`), with all repulsion
-        parameters per agent instead of global.
+        parameters per agent instead of global, a vision factor on the neighbor
+        repulsion (``neighbor_repulsion_anisotropy``) and calibrated default
+        parameters.
 
         The model has no model-level parameters; all parameters are per agent, see
         :class:`~jupedsim.CollisionFreeSpeedModelState`. The model instance is
