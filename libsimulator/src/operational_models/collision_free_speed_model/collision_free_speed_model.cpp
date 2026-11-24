@@ -36,9 +36,12 @@ Vector CollisionFreeSpeedModel::compute_next_state(
         _cut_off_radius, [&step](const NeighborView& n) { return step.no_geometry_between(n); });
 
     const auto desired_direction = step.route_orientation();
+    // The route orientation is not a unit vector: it is zero when the agent stands on its
+    // target and shorter than 1 for interpolated floor-field directions.
+    const auto view_direction = desired_direction.normalized();
     Vector neighbor_repulsion{};
     for(const auto& neighbor : neighborhood) {
-        neighbor_repulsion += this->neighbor_repulsion(current_state, neighbor, desired_direction);
+        neighbor_repulsion += this->neighbor_repulsion(current_state, neighbor, view_direction);
     }
 
     Vector boundary_repulsion{};
@@ -139,14 +142,16 @@ double CollisionFreeSpeedModel::get_spacing(
 Vector CollisionFreeSpeedModel::neighbor_repulsion(
     const State& current_state,
     const NeighborView& neighbor,
-    const Vector& desired_direction) const
+    const Vector& view_direction) const
 {
     const auto& other = std::get<State>(*neighbor.state);
     const auto [distance, direction] = neighbor.relative_position.norm_and_normalized();
     const auto l = current_state.radius + other.radius;
     // Vision factor as in the GCFM: a neighbor counts with the cosine of its angle to the
-    // desired direction, and not at all when it is behind.
-    const auto vision = std::max(desired_direction.scalar_product(direction), 0.0);
+    // unit view direction, and not at all when it is behind. Without a view direction every
+    // neighbor counts fully.
+    const auto vision =
+        view_direction == Vector{} ? 1.0 : std::max(view_direction.scalar_product(direction), 0.0);
     const auto anisotropy = current_state.neighbor_repulsion_anisotropy;
     const auto weight = 1.0 - anisotropy + anisotropy * vision;
     return direction * -(weight * current_state.strength_neighbor_repulsion *
