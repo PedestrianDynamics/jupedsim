@@ -8,70 +8,53 @@
 JuPedSim is a library to simulate pedestrian dynamics. This software was
 initiated at the Institute for Civil Safety
 [IAS-7](https://www.fz-juelich.de/en/ias/ias-7) of the Jülich Research Center
-(Forschungszentrum Jülich) in Germany and continues to evolve with support and
+(Forschungszentrum Jülich GmbH) in Germany and continues to evolve with support and
 contributions from a diverse and engaged community.
-
-## Contributors
 
 We are grateful to all the contributors who have helped shape JuPedSim into what
 it is today.
 
 You can find the full list of contributors [here](CONTRIBUTORS.md).
 
-## Installation
+**AI Usage Disclosure**: We use AI coding agents in the development of JuPedSim.
+Commits generated partially or fully by coding agents are annotated.
+
+## Quick User Guide
+
+### Installation
 
 It is easiest to install directly with pip from
-[PyPi.org](https://pypi.org/project/jupedsim/)
+[PyPI](https://pypi.org/project/jupedsim/):
 
 ```
 pip install jupedsim
 ```
 
-## Usage
+### Usage
 
-Please consult our [documentation.](http://jupedsim.org)
+Please consult our [documentation](http://jupedsim.org).
 
 ## Contributing
 
-JuPedSim is licensed under [GNU LGPLv3](LICENSE) hence we are looking forward to
-your contributions and would be happy to see questions, issues and pull
-requests.
+JuPedSim is licensed under [GNU LGPLv3](LICENSE). We are open to
+contributions. 
+
+> [!NOTE]
+> For contributions beyond trivial fixes we require you to first
+> interact with us through GitHub discussions.
+
+> [!IMPORTANT]
+> We require all commits with AI-generated code to be flagged with
+> a git trailer naming the model and the provider's no-reply address, e.g.:
+> `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`
+
+If you have found an issue with JuPedSim and want to report it, open a new GitHub
+discussion, ideally with a reproducer that helps us diagnose the issue.
 
 ### Questions
 
-If you have a question or a problem please open a new topic in
+If you have a question or a problem, please open a new topic in
 [GitHub discussions](https://github.com/PedestrianDynamics/jupedsim/discussions).
-
-### Issues
-
-If you found a bug and want to give us a chance to fix it we would be very happy
-to hear from you. To make it easy for us to help you please include the
-following information when you open a
-[new discussion](https://github.com/PedestrianDynamics/jupedsim/discussions):
-
-- What did JuPedSim do?
-- What did you expect JuPedSim to do?
-- How can we reproduce the issue?
-
-### Pull Requests
-
-If you encounter a bug and are would like to submit a fix feel free to open a
-PR, we will look into it.
-
-Before embarking on larger work it is a good idea to
-[discuss](https://github.com/PedestrianDynamics/jupedsim/discussions) what you
-plan.
-
-While we are very happy if you contribute we reserve us the right to decline
-your PR because it may not fit into our vision of JuPedSim.
-
-> [!NOTE]
-> It is recommended to install the pre-commit hooks via:
->
-> ```bash
-> pip install -r requirements.txt   # provides pre-commit
-> pre-commit install
-> ```
 
 ## License
 
@@ -83,7 +66,7 @@ Here you have two options.
 
 ### With pip
 
-You will need a C++20 capable compiler and a Rust toolchain (`rustc` and
+You will need a C++20-capable compiler and a Rust toolchain (`rustc` and
 `cargo`, >= 1.88) installed on your system. CMake and Ninja are installed
 automatically if they are missing. Then call `pip install .` in the source
 directory:
@@ -96,17 +79,17 @@ pip install .
 
 ### Compile yourself
 
-You will need a C++20 capable compiler, CMake >= 3.22 as well as a Rust
+You will need a C++20-capable compiler, CMake >= 3.22 as well as a Rust
 toolchain (`rustc` and `cargo`, >= 1.88) installed on your system. Then install
-our python dependencies via pip. Our python package dependencies are listed in
+our Python dependencies via pip. Our Python package dependencies are listed in
 `requirements.txt` in the root of this repository. Now you can generate
-makefiles with CMake, then compile and run the python library.
+makefiles with CMake, then compile and run the Python library.
 
 ```bash
+git -C jupedsim submodule update --init
 pip install -r jupedsim/requirements.txt
 mkdir jupedsim-build
 cd jupedsim-build
-git submodule update --init
 cmake ../jupedsim
 make -j
 source ./environment
@@ -114,7 +97,7 @@ source ./environment
 
 The last line puts `<build>/stage` on your `PYTHONPATH`. The stage is an
 importable `jupedsim` package: the Python sources (linked from the source
-tree), the compiled module and its type stubs. After every `make`/`ninja` you
+tree), the compiled module and its type stubs. After every `make`/`ninja`, you
 can use the result from Python right away, without reinstalling.
 
 > [!TIP]
@@ -129,6 +112,6 @@ can use the result from Python right away, without reinstalling.
 
 > [!WARNING]
 > When sourcing `./environment` from the build folder you need to ensure
-> JuPedSim is not installed in the current python environment. Otherwise there
-> will be erroneous calls to the wrong python code, resulting in crashes and/or
+> JuPedSim is not installed in the current Python environment. Otherwise there
+> will be erroneous calls to the wrong Python code, resulting in crashes and/or
 > exceptions.

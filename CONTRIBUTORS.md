@@ -22,8 +22,8 @@
 - Michael Behrisch
 - Mind-the-Cap
 - Mohcine Chraibi
-- Pit Steinbach
 - Olaf Angelo Banse
+- Pit Steinbach
 - Qiancheng Xu
 - Ralf Leibold
 - Tao Zhong
