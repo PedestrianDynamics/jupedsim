@@ -38,47 +38,41 @@ def main():
             output_file=pathlib.Path("example4_out.h5"),
         ),
     )
-    exit_left = simulation.add_exit_stage(
-        [([(-24, -8), (-24, 8), (-23, 8), (-23, -8)], region)]
+    exit_left = simulation.add_target(
+        jps.Exit([([(-24, -8), (-24, 8), (-23, 8), (-23, -8)], region)])
     )
-    exit_top = simulation.add_exit_stage(
-        [([(-8, 24), (8, 24), (8, 23), (-8, 23)], region)]
+    exit_top = simulation.add_target(
+        jps.Exit([([(-8, 24), (8, 24), (8, 23), (-8, 23)], region)])
     )
-    exit_right = simulation.add_exit_stage(
-        [([(24, -8), (24, 8), (23, 8), (23, -8)], region)]
-    )
-
-    waypoint_entrance = simulation.add_waypoint_stage(
-        [(jps.circle_to_polygon(center=(0, -4), radius=1), region)]
-    )
-    waypoint_middle = simulation.add_waypoint_stage(
-        [(jps.circle_to_polygon(center=(0, 0), radius=1), region)]
+    exit_right = simulation.add_target(
+        jps.Exit([([(24, -8), (24, 8), (23, 8), (23, -8)], region)])
     )
 
-    journey = jps.JourneyDescription(
-        [waypoint_entrance, waypoint_middle, exit_left, exit_top, exit_right]
+    waypoint_entrance = simulation.add_target(
+        jps.Waypoint(
+            [(jps.circle_to_polygon(center=(0, -4), radius=1), region)]
+        )
+    )
+    waypoint_middle = simulation.add_target(
+        jps.Waypoint([(jps.circle_to_polygon(center=(0, 0), radius=1), region)])
     )
 
-    journey.set_transition_for_stage(
-        waypoint_entrance,
-        jps.Transition.create_fixed_transition(waypoint_middle),
+    route = simulation.add_route(
+        [
+            jps.FixedTransition(jps.AGENT_LOCATION, waypoint_entrance),
+            jps.FixedTransition(waypoint_entrance, waypoint_middle),
+            jps.RoundRobinTransition(
+                waypoint_middle, {exit_left: 5, exit_top: 1, exit_right: 3}
+            ),
+        ]
     )
-    journey.set_transition_for_stage(
-        waypoint_middle,
-        jps.Transition.create_round_robin_transition(
-            [(exit_left, 5), (exit_top, 1), (exit_right, 3)]
-        ),
-    )
-    journey_id = simulation.add_journey(journey)
 
     for y in range(-23, -12, 2):
         for x in range(-7, 8, 2):
             simulation.add_agent(
-                journey_id=journey_id,
-                stage_id=waypoint_entrance,
-                position=(x, y),
+                region.at(x, y),
+                route=route,
                 state=jps.CollisionFreeSpeedModelState(radius=0.3),
-                region_id=region,
             )
 
     while simulation.agent_count() > 0:

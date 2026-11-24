@@ -32,6 +32,6 @@ mesh. A file whose run stopped before the writer was closed plays too.
 Files written by `jupedsim.Hdf5TrajectoryWriter(..., write_travel_times=True)`
 can be opened with `--h5` or *File → Load HDF5…*. The *Travel Times*
 mode then colours the walkable surface by the floor field travel time to the
-selected stage; a right-click reads off the value. An HDF5 file brings only its
+selected target; a right-click reads off the value. An HDF5 file brings only its
 mesh, not a `Geometry`, so *Pathfinding* and *Boundary Highlight* are
 unavailable until a format that can recreate a `Geometry` exists.

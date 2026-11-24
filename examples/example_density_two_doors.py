@@ -122,9 +122,9 @@ class DensityDependentSpeed:
         """Smoothed density in persons/m² per region, at this instant."""
         counts = {r: np.zeros_like(g.values) for r, g in self._base.items()}
         for agent in sim.agents():
-            r = agent.location.region_id
+            r = agent.location.region
             g = self._base[r]
-            x, y = agent.position
+            x, y = agent.location.xy
             row = int((y - g.origin[1]) / g.cell_size)
             col = int((x - g.origin[0]) / g.cell_size)
             counts[r][row, col] += 1.0
@@ -138,7 +138,7 @@ class DensityDependentSpeed:
             for r, c in counts.items()
         }
 
-    def update(self, sim, stage_id):
+    def update(self, sim, target):
         now = sim.elapsed_time()
         alpha = (
             1.0
@@ -153,9 +153,7 @@ class DensityDependentSpeed:
                 self._rho_congestion - self._rho_start
             )
             factor = np.clip(factor, self._min, 1.0)
-            sim.set_custom_speed_field(
-                stage_id, r, self._base[r].values * factor
-            )
+            sim.set_custom_speed_field(target, r, self._base[r].values * factor)
 
 
 def rect(x0, y0, x1, y1):
@@ -218,8 +216,10 @@ def main():
         trajectory_writer=writer,
         floorfield_options=ff_options,
     )
-    exit_id = simulation.add_exit_stage([(EXIT_POLYGON, region)])
-    journey_id = simulation.add_journey(jps.JourneyDescription([exit_id]))
+    exit_ = simulation.add_target(jps.Exit([(EXIT_POLYGON, region)]))
+    route = simulation.add_route(
+        [jps.FixedTransition(jps.AGENT_LOCATION, exit_)]
+    )
 
     positions = jps.distributions.distribute_by_number(
         polygon=shapely.Polygon(CROWD_POLYGON),
@@ -230,11 +230,9 @@ def main():
     )
     for position in positions:
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=position,
+            region.at(*position),
+            route=route,
             state=jps.AnticipationVelocityModelState(radius=0.15),
-            region_id=region,
         )
 
     crowding = DensityDependentSpeed(simulation)
@@ -244,7 +242,7 @@ def main():
         near = sum(door == "near" for door in door_of.values())
         print(
             f"t = {simulation.elapsed_time():6.1f} s  "
-            f"in room: {sum(a.position[0] < WALL[1] for a in simulation.agents()):4d}  "
+            f"in room: {sum(a.location.xy[0] < WALL[1] for a in simulation.agents()):4d}  "
             f"through near door: {near:4d}  "
             f"through far door: {len(door_of) - near:4d}"
         )
@@ -255,15 +253,15 @@ def main():
     ):
         iteration = simulation.iteration_count()
         if iteration % DENSITY_UPDATE_INTERVAL == 0:
-            crowding.update(simulation, exit_id)
+            crowding.update(simulation, exit_)
         if iteration % REPORT_INTERVAL == 0:
             report()
         simulation.iterate()
         for agent in simulation.agents():
-            if agent.id not in door_of and agent.position[0] > WALL[1]:
+            if agent.id not in door_of and agent.location.xy[0] > WALL[1]:
                 door_of[agent.id] = (
                     "near"
-                    if agent.position[1] < (NEAR_DOOR_Y + FAR_DOOR_Y) / 2
+                    if agent.location.xy[1] < (NEAR_DOOR_Y + FAR_DOOR_Y) / 2
                     else "far"
                 )
     report()
