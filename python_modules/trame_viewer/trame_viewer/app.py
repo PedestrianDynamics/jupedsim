@@ -81,29 +81,29 @@ class Hdf5Scene:
 
 @dataclass(frozen=True)
 class TravelTimeSnapshots:
-    """The travel time snapshots of an HDF5 file, without their grids: a stage gets one
+    """The travel time snapshots of an HDF5 file, without their grids: a target gets one
     when it is added and whenever its speed fields change. load() reads one from the
     file, so a long run with many snapshots is not held in memory."""
 
     path: str
-    # Stage id -> iterations of its snapshots, ascending.
+    # Target id -> iterations of its snapshots, ascending.
     iterations: dict[int, list[int]]
 
-    def at(self, stage: int, iteration: int | None) -> int | None:
-        """The snapshot of @p stage agents are routed with at @p iteration: the last
+    def at(self, target: int, iteration: int | None) -> int | None:
+        """The snapshot of @p target agents are routed with at @p iteration: the last
         one at or before it, or the last of all for None. None before the first."""
-        iterations = self.iterations[stage]
+        iterations = self.iterations[target]
         if iteration is None:
             return iterations[-1]
         i = bisect.bisect_right(iterations, iteration) - 1
         return iterations[i] if i >= 0 else None
 
     def load(
-        self, stage: int, snapshot: int
+        self, target: int, snapshot: int
     ) -> dict[int, jps.Hdf5TrajectoryLoader.TravelTimeGrid]:
         """The grid of every region by region id of one snapshot, see at()."""
         with jps.Hdf5TrajectoryLoader(self.path) as loader:
-            return loader.load_travel_times(stage, snapshot)
+            return loader.load_travel_times(target, snapshot)
 
 
 def read_hdf5(path: str) -> Hdf5Scene:
@@ -137,8 +137,8 @@ def read_travel_times(path: str) -> TravelTimeSnapshots | None:
             return TravelTimeSnapshots(
                 path=path,
                 iterations={
-                    stage: loader.load_travel_time_iterations(stage)
-                    for stage in loader.load_travel_time_stage_ids()
+                    target: loader.load_travel_time_iterations(target)
+                    for target in loader.load_travel_time_target_ids()
                 },
             )
     except jps.Hdf5TrajectoryLoader.Error as e:
@@ -211,7 +211,7 @@ def travel_time_surface(
 ) -> pv.PolyData | None:
     """One quad per walkable cell of @p grids, lying on its region's surface.
 
-    @p grids holds the grid of every region by region id, for one stage: as
+    @p grids holds the grid of every region by region id, for one target: as
     Hdf5TrajectoryLoader.load_travel_times or Simulation.travel_times return them. Every
     region of a geometry built by a GeometryBuilder is planar - floors are flat, stairs and
     ramps are planar quads - so a cell takes its region's plane and cells on stairs and
@@ -390,13 +390,13 @@ def build_app(h5_path: str | None = None):
     state.has_geometry = False
     # Travel Times mode: floor field travel times from an HDF5 file's /travel_times.
     state.travel_available = False
-    state.travel_stages = []  # dropdown items, one per stage in the file
-    state.travel_stage = None  # selected stage id
+    state.travel_targets = []  # dropdown items, one per target in the file
+    state.travel_target = None  # selected target id
     state.travel_max = (
-        0.0  # largest finite travel time of the selected stage [s]
+        0.0  # largest finite travel time of the selected target [s]
     )
     state.travel_pick = "—"  # travel time at the last right-clicked point
-    # Which snapshot of the selected stage is shown: the one in effect at the replay frame.
+    # Which snapshot of the selected target is shown: the one in effect at the replay frame.
     state.travel_snapshot = "—"
     state.travel_arrows = True  # draw the walking directions as arrows
     state.travel_arrow_stride = (
@@ -422,8 +422,8 @@ def build_app(h5_path: str | None = None):
         "face_regions": None,
     }
     # Travel time snapshots of the loaded HDF5 file (see Hdf5Scene.travel_times); the
-    # overlay surface and cell size of the last few shown, by (stage, snapshot), built on
-    # first display; and the (stage, snapshot) drawn now, None if none is.
+    # overlay surface and cell size of the last few shown, by (target, snapshot), built on
+    # first display; and the (target, snapshot) drawn now, None if none is.
     travel: dict = {
         "snapshots": None,
         "surfaces": OrderedDict(),
@@ -482,7 +482,7 @@ def build_app(h5_path: str | None = None):
         by_region = bool(state.color_by_region) and current["n_regions"] > 0
         if (
             state.interaction_mode == "travel_times"
-            and state.travel_stage is not None
+            and state.travel_target is not None
         ):
             # The travel time overlay carries the colour; the mesh is just the floor under it.
             plotter.add_mesh(
@@ -530,15 +530,15 @@ def build_app(h5_path: str | None = None):
         return frame * recording.every_nth_frame
 
     def _travel_key() -> tuple[int, int] | None:
-        """(stage, snapshot) to show in Travel Times mode, None for nothing."""
-        stage = state.travel_stage
-        if state.interaction_mode != "travel_times" or stage is None:
+        """(target, snapshot) to show in Travel Times mode, None for nothing."""
+        target = state.travel_target
+        if state.interaction_mode != "travel_times" or target is None:
             return None
-        snapshot = travel["snapshots"].at(stage, _replay_iteration())
-        return None if snapshot is None else (stage, snapshot)
+        snapshot = travel["snapshots"].at(target, _replay_iteration())
+        return None if snapshot is None else (target, snapshot)
 
     def _travel_surface(key: tuple[int, int]):
-        """The overlay surface and cell size of a (stage, snapshot); the last few are
+        """The overlay surface and cell size of a (target, snapshot); the last few are
         kept, so scrubbing back and forth reads the file once."""
         surfaces = travel["surfaces"]
         if key in surfaces:
@@ -562,11 +562,11 @@ def build_app(h5_path: str | None = None):
         return surfaces[key]
 
     def _publish_travel_snapshot(key: tuple[int, int] | None) -> None:
-        stage = state.travel_stage
-        if stage is None or travel["snapshots"] is None:
+        target = state.travel_target
+        if target is None or travel["snapshots"] is None:
             state.travel_snapshot = "—"
             return
-        iterations = travel["snapshots"].iterations[stage]
+        iterations = travel["snapshots"].iterations[target]
         if key is None:
             state.travel_snapshot = (
                 f"none yet, the first is from iteration {iterations[0]}"
@@ -756,7 +756,7 @@ def build_app(h5_path: str | None = None):
         nonlocal engine
         scene = read_hdf5(h5_path)
         engine = None  # no Geometry to route on
-        # Swap the data in before the mesh is drawn, and publish the stages only after, so
+        # Swap the data in before the mesh is drawn, and publish the targets only after, so
         # no redraw ever pairs one file's grids with another file's mesh.
         travel.update(
             snapshots=scene.travel_times, surfaces=OrderedDict(), shown=None
@@ -770,18 +770,18 @@ def build_app(h5_path: str | None = None):
             None,
             name,
         )
-        _publish_travel_stages()
+        _publish_travel_targets()
         _publish_replay()
 
-    def _publish_travel_stages() -> None:
+    def _publish_travel_targets() -> None:
         snapshots = travel["snapshots"]
-        stages = sorted(snapshots.iterations) if snapshots is not None else []
+        targets = sorted(snapshots.iterations) if snapshots is not None else []
         with state:
             state.travel_available = snapshots is not None
-            state.travel_stages = [
-                {"title": f"Stage {s}", "value": s} for s in stages
+            state.travel_targets = [
+                {"title": f"Target {t}", "value": t} for t in targets
             ]
-            state.travel_stage = stages[0] if stages else None
+            state.travel_target = targets[0] if targets else None
 
     def show_scene(verts, tris, face_region_ids, n_regions, geo, name) -> None:
         """Show a mesh; @p geo is its jps.Geometry, or None if there is none."""
@@ -1204,7 +1204,7 @@ def build_app(h5_path: str | None = None):
     # -- travel times from an HDF5 file ---------------------------------
 
     def _travel_click(fx, fy):
-        if state.travel_stage is None:
+        if state.travel_target is None:
             return
         pos = _pick_world_fraction(fx, fy)
         if pos is None:
@@ -1228,8 +1228,8 @@ def build_app(h5_path: str | None = None):
         if ctrl.view_update:
             ctrl.view_update()
 
-    @state.change("travel_stage")
-    def _on_travel_stage(**_):
+    @state.change("travel_target")
+    def _on_travel_target(**_):
         if state.interaction_mode == "travel_times":
             _reset_travel_pick()
             _redraw()
@@ -1244,7 +1244,7 @@ def build_app(h5_path: str | None = None):
         state.travel_pick = "—"
 
     def _reset_travel() -> None:
-        # The stage selection is a user setting and survives leaving the mode. The overlay
+        # The target selection is a user setting and survives leaving the mode. The overlay
         # itself goes with the next draw(), which only draws it in this mode.
         _reset_travel_pick()
 
@@ -1257,9 +1257,9 @@ def build_app(h5_path: str | None = None):
         with v3.Template(v_else=True):
             v3.VListItem("right-click reads the travel time", subtitle="Usage")
             v3.VSelect(
-                v_model=("travel_stage", None),
-                items=("travel_stages", []),
-                label="Stage",
+                v_model=("travel_target", None),
+                items=("travel_targets", []),
+                label="Target",
                 density="compact",
                 variant="outlined",
                 hide_details=True,
