@@ -2,6 +2,7 @@
 #include "motivation_collision_free_speed_model.hpp"
 
 #include "agent_view.hpp"
+#include "force_reach.hpp"
 #include "generic_agent.hpp"
 #include "kernel.hpp"
 #include "operational_model.hpp"
@@ -24,9 +25,6 @@ constexpr double spacing_blend_weight =
 constexpr double tau_theta = 0.3; // Heading relaxation timescale [s] for temporal smoothing.
 constexpr double min_reverse_speed =
     -0.01; // Deterministic tiny reverse floor [m/s] to release local blockages.
-/// How far ahead to look for a wall. The repulsion decays with `range_geometry_repulsion` (0.02 m
-/// by default), so a wall this far off contributes "nothing".
-constexpr double wall_search_radius = 4.0;
 /// How far beyond the body the side lines run, in units of `range_geometry_repulsion`. A wall
 /// just outside them pushes with at most exp(-5) of the strength at contact.
 constexpr double wall_margin_in_ranges = 5.0;
@@ -83,8 +81,15 @@ Vector MotivationCollisionFreeSpeedModel::compute_next_state(
 
     // The final direction depends on the repulsion, so look along the current orientation.
     Vector boundary_repulsion{};
+    // The repulsion adds to the desired direction, a unit vector.
+    const double wall_reach = std::min(
+        current_state.radius + reach_beyond_contact(
+                                   current_state.strength_geometry_repulsion,
+                                   current_state.range_geometry_repulsion,
+                                   1.0),
+        max_wall_search_radius);
     for(const auto& wall : step.walls_ahead(
-            current_state.orientation * wall_search_radius,
+            current_state.orientation * wall_reach,
             current_state.radius +
                 wall_margin_in_ranges * current_state.range_geometry_repulsion)) {
         boundary_repulsion += this->boundary_repulsion(current_state, wall);
