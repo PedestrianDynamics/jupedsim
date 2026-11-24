@@ -42,8 +42,6 @@ target_sources(simulator PRIVATE
     src/id_and_name.hpp
     src/into.hpp
     src/iterator_pair.hpp
-    src/journey.cpp
-    src/journey.hpp
     src/line_segment.cpp
     src/line_segment.hpp
     src/logger.cpp
@@ -56,6 +54,8 @@ target_sources(simulator PRIVATE
     src/kernel.hpp
     src/polygon.cpp
     src/polygon.hpp
+    src/route.cpp
+    src/route.hpp
     src/routing_engine.cpp
     src/routing_engine.hpp
     src/simulation.cpp
@@ -63,7 +63,6 @@ target_sources(simulator PRIVATE
     src/simulation_clock.cpp
     src/simulation_clock.hpp
     src/simulation_error.hpp
-    src/stage.cpp
     src/stage.hpp
     src/stage_description.hpp
     src/stage_manager.cpp
@@ -120,7 +119,6 @@ if (BUILD_TESTS)
         test/test_generic_agent_formatter.cpp
         test/test_geometry.cpp
         test/test_geometry_builder.cpp
-        test/test_journey.cpp
         test/test_line_segment.cpp
         test/test_location.cpp
         test/test_neighborhood_search.cpp
@@ -128,6 +126,7 @@ if (BUILD_TESTS)
         test/test_kernel.cpp
         test/test_projected_boundary.cpp
         test/test_region_split.cpp
+        test/test_route.cpp
         test/test_routing_engine.cpp
         test/test_segment_grid.cpp
         test/test_simulation.cpp

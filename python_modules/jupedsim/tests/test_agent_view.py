@@ -25,18 +25,17 @@ def _make_sim(model, geometry=None):
     surface = jps.GeometryBuilder()
     room = surface.add_region(polygon=geometry, height=0.0)
     sim = jps.Simulation(model=model, geometry=surface.build(), dt=0.05)
-    exit_id = sim.add_exit_stage(
-        [([(19, 9), (19, 11), (20, 11), (20, 9)], room)]
+    exit_ = sim.add_target(
+        jps.Exit([([(19, 9), (19, 11), (20, 11), (20, 9)], room)])
     )
-    journey_id = sim.add_journey(jps.JourneyDescription([exit_id]))
-    return sim, exit_id, journey_id, room
+    route = sim.add_route([jps.FixedTransition(jps.AGENT_LOCATION, exit_)])
+    return sim, exit_, route, room
 
 
-def _add_agent(sim, room, journey_id, stage_id, position, group=0, probe=False):
+def _add_agent(sim, room, route, position, group=0, probe=False):
     return sim.add_agent(
-        journey_id=journey_id,
-        stage_id=stage_id,
-        location=room.at(*position),
+        room.at(*position),
+        route=route,
         state=_State(group=group, probe=probe),
     )
 
@@ -83,14 +82,14 @@ class _CapturingModel(jps.CustomOperationalModel):
 
 def test_no_predicate_returns_all_in_radius():
     model = _CapturingModel(radius=5.0)
-    sim, exit_id, journey_id, room = _make_sim(model)
-    _add_agent(sim, room, journey_id, exit_id, (2.0, 10.0), probe=True)
+    sim, exit_, route, room = _make_sim(model)
+    _add_agent(sim, room, route, (2.0, 10.0), probe=True)
     # 1.0 m away — in range
-    _add_agent(sim, room, journey_id, exit_id, (3.0, 10.0))
+    _add_agent(sim, room, route, (3.0, 10.0))
     # 2.0 m away — in range
-    _add_agent(sim, room, journey_id, exit_id, (4.0, 10.0))
+    _add_agent(sim, room, route, (4.0, 10.0))
     # 13.0 m away — out of range
-    _add_agent(sim, room, journey_id, exit_id, (15.0, 10.0))
+    _add_agent(sim, room, route, (15.0, 10.0))
 
     sim.iterate()
 
@@ -101,10 +100,10 @@ def test_no_predicate_returns_all_in_radius():
 
 def test_reject_all_predicate_returns_empty():
     model = _CapturingModel(radius=5.0, predicate=lambda step, n: False)
-    sim, exit_id, journey_id, room = _make_sim(model)
-    _add_agent(sim, room, journey_id, exit_id, (2.0, 10.0), probe=True)
-    _add_agent(sim, room, journey_id, exit_id, (3.0, 10.0))
-    _add_agent(sim, room, journey_id, exit_id, (4.0, 10.0))
+    sim, exit_, route, room = _make_sim(model)
+    _add_agent(sim, room, route, (2.0, 10.0), probe=True)
+    _add_agent(sim, room, route, (3.0, 10.0))
+    _add_agent(sim, room, route, (4.0, 10.0))
 
     sim.iterate()
 
@@ -115,15 +114,15 @@ def test_group_filter_returns_only_matching_group():
     model = _CapturingModel(
         radius=5.0, predicate=lambda step, n: n.state.group == 1
     )
-    sim, exit_id, journey_id, room = _make_sim(model)
+    sim, exit_, route, room = _make_sim(model)
     # probe — not a neighbor of itself
-    _add_agent(sim, room, journey_id, exit_id, (2.0, 10.0), group=1, probe=True)
+    _add_agent(sim, room, route, (2.0, 10.0), group=1, probe=True)
     # same group → kept
-    _add_agent(sim, room, journey_id, exit_id, (3.0, 10.0), group=1)
+    _add_agent(sim, room, route, (3.0, 10.0), group=1)
     # different group → filtered out
-    _add_agent(sim, room, journey_id, exit_id, (4.0, 10.0), group=0)
+    _add_agent(sim, room, route, (4.0, 10.0), group=0)
     # same group → kept
-    _add_agent(sim, room, journey_id, exit_id, (2.0, 11.0), group=1)
+    _add_agent(sim, room, route, (2.0, 11.0), group=1)
 
     sim.iterate()
 
@@ -135,9 +134,9 @@ def test_group_filter_returns_only_matching_group():
 def test_predicate_never_called_with_self():
     # accept-all predicate — only here to trigger tracking
     model = _CapturingModel(radius=100.0, predicate=lambda step, n: True)
-    sim, exit_id, journey_id, room = _make_sim(model)
-    _add_agent(sim, room, journey_id, exit_id, (2.0, 10.0), probe=True)
-    _add_agent(sim, room, journey_id, exit_id, (3.0, 10.0))
+    sim, exit_, route, room = _make_sim(model)
+    _add_agent(sim, room, route, (2.0, 10.0), probe=True)
+    _add_agent(sim, room, route, (3.0, 10.0))
 
     sim.iterate()
 
@@ -162,9 +161,9 @@ class _NeighborTypeModel(jps.CustomOperationalModel):
 
 def test_neighbors_are_the_native_type():
     model = _NeighborTypeModel()
-    sim, exit_id, journey_id, room = _make_sim(model)
-    _add_agent(sim, room, journey_id, exit_id, (2.0, 10.0), probe=True)
-    _add_agent(sim, room, journey_id, exit_id, (3.0, 10.0))
+    sim, exit_, route, room = _make_sim(model)
+    _add_agent(sim, room, route, (2.0, 10.0), probe=True)
+    _add_agent(sim, room, route, (3.0, 10.0))
 
     sim.iterate()
 
@@ -191,12 +190,12 @@ def _visible(step, neighbor):
 def test_no_geometry_between_filters_occluded_agents():
     """Agents behind the wall should be excluded by no_geometry_between."""
     model = _CapturingModel(radius=20.0, predicate=_visible)
-    sim, exit_id, journey_id, room = _make_sim(model, geometry=_walled_room())
-    _add_agent(sim, room, journey_id, exit_id, (5.0, 10.0), probe=True)
+    sim, exit_, route, room = _make_sim(model, geometry=_walled_room())
+    _add_agent(sim, room, route, (5.0, 10.0), probe=True)
     # same side, visible
-    _add_agent(sim, room, journey_id, exit_id, (5.0, 5.0))
+    _add_agent(sim, room, route, (5.0, 5.0))
     # behind wall, occluded
-    _add_agent(sim, room, journey_id, exit_id, (15.0, 10.0))
+    _add_agent(sim, room, route, (15.0, 10.0))
 
     sim.iterate()
 
@@ -211,11 +210,11 @@ def test_no_geometry_between_agent_above_wall_is_seen():
     crosses the wall (which ends at y=15), so the target must be returned.
     """
     model = _CapturingModel(radius=20.0, predicate=_visible)
-    sim, exit_id, journey_id, room = _make_sim(model, geometry=_walled_room())
+    sim, exit_, route, room = _make_sim(model, geometry=_walled_room())
     # probe — above wall top
-    _add_agent(sim, room, journey_id, exit_id, (5.0, 18.0), probe=True)
+    _add_agent(sim, room, route, (5.0, 18.0), probe=True)
     # far side, same height → visible
-    _add_agent(sim, room, journey_id, exit_id, (15.0, 18.0))
+    _add_agent(sim, room, route, (15.0, 18.0))
 
     sim.iterate()
 
@@ -228,15 +227,15 @@ def test_composed_no_geometry_between_and_group_filter():
         radius=20.0,
         predicate=lambda step, n: _visible(step, n) and n.state.group == 1,
     )
-    sim, exit_id, journey_id, room = _make_sim(model, geometry=_walled_room())
+    sim, exit_, route, room = _make_sim(model, geometry=_walled_room())
     # probe
-    _add_agent(sim, room, journey_id, exit_id, (5.0, 10.0), group=0, probe=True)
+    _add_agent(sim, room, route, (5.0, 10.0), group=0, probe=True)
     # visible, group 1 → kept
-    _add_agent(sim, room, journey_id, exit_id, (5.0, 15.0), group=1)
+    _add_agent(sim, room, route, (5.0, 15.0), group=1)
     # visible, group 0 → filtered
-    _add_agent(sim, room, journey_id, exit_id, (5.0, 5.0), group=0)
+    _add_agent(sim, room, route, (5.0, 5.0), group=0)
     # occluded, group 1 → filtered
-    _add_agent(sim, room, journey_id, exit_id, (15.0, 10.0), group=1)
+    _add_agent(sim, room, route, (15.0, 10.0), group=1)
 
     sim.iterate()
 
@@ -264,8 +263,8 @@ class _WallCapturingModel(jps.CustomOperationalModel):
 
 def test_wall_view_carries_the_projection_onto_the_wall():
     model = _WallCapturingModel(distance=3.0)
-    sim, exit_id, journey_id, room = _make_sim(model, geometry=_walled_room())
-    _add_agent(sim, room, journey_id, exit_id, (8.0, 5.0), probe=True)
+    sim, exit_, route, room = _make_sim(model, geometry=_walled_room())
+    _add_agent(sim, room, route, (8.0, 5.0), probe=True)
 
     sim.iterate()
 
@@ -284,8 +283,8 @@ def test_wall_view_carries_the_projection_onto_the_wall():
 
 def test_walls_are_the_native_type():
     model = _WallCapturingModel(distance=3.0)
-    sim, exit_id, journey_id, room = _make_sim(model, geometry=_walled_room())
-    _add_agent(sim, room, journey_id, exit_id, (8.0, 5.0), probe=True)
+    sim, exit_, route, room = _make_sim(model, geometry=_walled_room())
+    _add_agent(sim, room, route, (8.0, 5.0), probe=True)
 
     sim.iterate()
 
@@ -301,8 +300,8 @@ def test_walls_are_the_native_type():
 
 def test_wall_segment_is_clipped_to_the_queried_distance():
     model = _WallCapturingModel(distance=3.0)
-    sim, exit_id, journey_id, room = _make_sim(model, geometry=_walled_room())
-    _add_agent(sim, room, journey_id, exit_id, (8.0, 5.0), probe=True)
+    sim, exit_, route, room = _make_sim(model, geometry=_walled_room())
+    _add_agent(sim, room, route, (8.0, 5.0), probe=True)
 
     sim.iterate()
 
@@ -342,8 +341,8 @@ class _StoringModel(jps.CustomOperationalModel):
 
 def test_views_are_the_native_types():
     model = _StoringModel()
-    sim, exit_id, journey_id, room = _make_sim(model)
-    _add_agent(sim, room, journey_id, exit_id, (2.0, 10.0), probe=True)
+    sim, exit_, route, room = _make_sim(model)
+    _add_agent(sim, room, route, (2.0, 10.0), probe=True)
     sim.iterate()
     assert (jps.AgentView, True, True) in model.types  # check_model_constraint
     assert (jps.AgentStep, True, True) in model.types  # compute_next_state
@@ -355,8 +354,8 @@ def test_views_are_the_native_types():
 
 def test_views_cannot_be_used_after_the_callback():
     model = _StoringModel()
-    sim, exit_id, journey_id, room = _make_sim(model)
-    _add_agent(sim, room, journey_id, exit_id, (2.0, 10.0), probe=True)
+    sim, exit_, route, room = _make_sim(model)
+    _add_agent(sim, room, route, (2.0, 10.0), probe=True)
     sim.iterate()
     assert len(model.views) >= 3
     for view in model.views:
@@ -371,9 +370,9 @@ def test_views_cannot_be_used_after_the_callback():
 
 def test_a_raising_predicate_propagates():
     model = _CapturingModel(radius=5.0, predicate=lambda step, n: 1 / 0)
-    sim, exit_id, journey_id, room = _make_sim(model)
-    _add_agent(sim, room, journey_id, exit_id, (2.0, 10.0), probe=True)
-    _add_agent(sim, room, journey_id, exit_id, (3.0, 10.0))
+    sim, exit_, route, room = _make_sim(model)
+    _add_agent(sim, room, route, (2.0, 10.0), probe=True)
+    _add_agent(sim, room, route, (3.0, 10.0))
     with pytest.raises(ZeroDivisionError):
         sim.iterate()
 
@@ -383,10 +382,10 @@ def test_predicate_results_are_used_by_truthiness():
     model = _CapturingModel(
         radius=5.0, predicate=lambda step, n: n.relative_position[0]
     )
-    sim, exit_id, journey_id, room = _make_sim(model)
-    _add_agent(sim, room, journey_id, exit_id, (2.0, 10.0), probe=True)
-    _add_agent(sim, room, journey_id, exit_id, (3.0, 10.0))
-    _add_agent(sim, room, journey_id, exit_id, (2.0, 11.0))
+    sim, exit_, route, room = _make_sim(model)
+    _add_agent(sim, room, route, (2.0, 10.0), probe=True)
+    _add_agent(sim, room, route, (3.0, 10.0))
+    _add_agent(sim, room, route, (2.0, 11.0))
     sim.iterate()
     assert model.neighbors == [(1.0, 0.0)]
 
@@ -398,8 +397,8 @@ def test_views_from_a_raising_callback_expire_too():
             raise RuntimeError("boom")
 
     model = _RaisingModel()
-    sim, exit_id, journey_id, room = _make_sim(model)
-    _add_agent(sim, room, journey_id, exit_id, (2.0, 10.0), probe=True)
+    sim, exit_, route, room = _make_sim(model)
+    _add_agent(sim, room, route, (2.0, 10.0), probe=True)
     with pytest.raises(RuntimeError, match="boom"):
         sim.iterate()
     step = next(v for v in model.views if isinstance(v, jps.AgentStep))
@@ -431,18 +430,18 @@ class _NeighborStoringModel(jps.CustomOperationalModel):
 
 def test_neighbors_of_a_temporary_derived_view_see_the_mapping():
     model = _NeighborStoringModel()
-    sim, exit_id, journey_id, room = _make_sim(model)
-    _add_agent(sim, room, journey_id, exit_id, (2.0, 10.0), probe=True)
-    _add_agent(sim, room, journey_id, exit_id, (3.0, 10.0), group=7)
+    sim, exit_, route, room = _make_sim(model)
+    _add_agent(sim, room, route, (2.0, 10.0), probe=True)
+    _add_agent(sim, room, route, (3.0, 10.0), group=7)
     sim.iterate()
     assert model.mapped_groups == [42]
 
 
 def test_neighbors_cannot_be_used_after_the_callback():
     model = _NeighborStoringModel()
-    sim, exit_id, journey_id, room = _make_sim(model)
-    _add_agent(sim, room, journey_id, exit_id, (2.0, 10.0), probe=True)
-    _add_agent(sim, room, journey_id, exit_id, (3.0, 10.0), group=7)
+    sim, exit_, route, room = _make_sim(model)
+    _add_agent(sim, room, route, (2.0, 10.0), probe=True)
+    _add_agent(sim, room, route, (3.0, 10.0), group=7)
     sim.iterate()
     [neighbor] = model.neighbors
     assert neighbor.relative_position == (1.0, 0.0)

@@ -41,44 +41,42 @@ def test_simulation_runs(warp_driver_corridor):
     """Test that a basic simulation runs without errors."""
     sim, room = warp_driver_corridor
     exit_area = shapely.Polygon([(19, 0), (20, 0), (20, 4), (19, 4)])
-    exit_id = sim.add_exit_stage([(exit_area, room)])
-    journey_id = sim.add_journey(jps.JourneyDescription([exit_id]))
+    exit_ = sim.add_target(jps.Exit([(exit_area, room)]))
+    route = sim.add_route([jps.FixedTransition(jps.AGENT_LOCATION, exit_)])
 
-    aid = sim.add_agent(
-        journey_id=journey_id,
-        stage_id=exit_id,
-        location=room.at(2, 2),
+    agent = sim.add_agent(
+        room.at(2, 2),
+        route=route,
         state=jps.WarpDriverModelState(desired_speed=1.2, radius=0.15),
     )
 
-    initial_x = sim.agent(aid).position[0]
+    initial_x = agent.location.xy[0]
     for _ in range(50):
         sim.iterate()
     assert sim.agent_count() == 1
-    assert sim.agent(aid).position[0] > initial_x, (
-        "Agent should have moved forward"
-    )
+    assert agent.location.xy[0] > initial_x, "Agent should have moved forward"
 
 
 def test_single_agent_straight_path(warp_driver_corridor):
     """Single agent with no neighbors follows straight path towards target."""
     sim, room = warp_driver_corridor
-    wp = sim.add_waypoint_stage(
-        [(jps.circle_to_polygon(center=(10, 2), radius=0.5), room)]
+    wp = sim.add_target(
+        jps.Waypoint(
+            [(jps.circle_to_polygon(center=(10, 2), radius=0.5), room)]
+        )
     )
-    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
+    route = sim.add_route([jps.FixedTransition(jps.AGENT_LOCATION, wp)])
 
     aid = sim.add_agent(
-        journey_id=journey_id,
-        stage_id=wp,
-        location=room.at(2, 2),
+        room.at(2, 2),
+        route=route,
         state=jps.WarpDriverModelState(desired_speed=1.0, radius=0.15),
     )
 
     for _ in range(100):
         sim.iterate()
 
-    pos = sim.agent(aid).position
+    pos = aid.location.xy
     # Agent should have moved towards x=10, staying near y=2
     assert pos[0] > 2.5, f"Agent should have moved forward, got x={pos[0]}"
     assert abs(pos[1] - 2.0) < 0.5, (
@@ -92,24 +90,26 @@ def test_two_agents_head_on_avoid(warp_driver_corridor):
     exit_left = shapely.Polygon([(0, 0), (1, 0), (1, 4), (0, 4)])
     exit_right = shapely.Polygon([(19, 0), (20, 0), (20, 4), (19, 4)])
 
-    exit_left_id = sim.add_exit_stage([(exit_left, room)])
-    exit_right_id = sim.add_exit_stage([(exit_right, room)])
+    exit_left_id = sim.add_target(jps.Exit([(exit_left, room)]))
+    exit_right_id = sim.add_target(jps.Exit([(exit_right, room)]))
 
-    journey_right = sim.add_journey(jps.JourneyDescription([exit_right_id]))
-    journey_left = sim.add_journey(jps.JourneyDescription([exit_left_id]))
+    journey_right = sim.add_route(
+        [jps.FixedTransition(jps.AGENT_LOCATION, exit_right_id)]
+    )
+    journey_left = sim.add_route(
+        [jps.FixedTransition(jps.AGENT_LOCATION, exit_left_id)]
+    )
 
     sim.add_agent(
-        journey_id=journey_right,
-        stage_id=exit_right_id,
-        location=room.at(3, 2),
+        room.at(3, 2),
+        route=journey_right,
         state=jps.WarpDriverModelState(
             orientation=(1, 0), desired_speed=1.2, radius=0.15
         ),
     )
     sim.add_agent(
-        journey_id=journey_left,
-        stage_id=exit_left_id,
-        location=room.at(17, 2),
+        room.at(17, 2),
+        route=journey_left,
         state=jps.WarpDriverModelState(
             orientation=(-1, 0), desired_speed=1.2, radius=0.15
         ),
@@ -136,27 +136,26 @@ def test_agent_parameters():
         model=jps.WarpDriverModel(), geometry=surface.build(), dt=0.01
     )
 
-    wp = sim.add_waypoint_stage(
-        [(jps.circle_to_polygon(center=(5, 2), radius=0.5), room)]
+    wp = sim.add_target(
+        jps.Waypoint([(jps.circle_to_polygon(center=(5, 2), radius=0.5), room)])
     )
-    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
+    route = sim.add_route([jps.FixedTransition(jps.AGENT_LOCATION, wp)])
 
     aid = sim.add_agent(
-        journey_id=journey_id,
-        stage_id=wp,
-        location=room.at(1, 2),
+        room.at(1, 2),
+        route=route,
         state=jps.WarpDriverModelState(desired_speed=1.0, radius=0.2),
     )
 
-    state = sim.agent(aid).state
+    state = aid.state
     assert math.isclose(state.radius, 0.2)
     assert math.isclose(state.desired_speed, 1.0)
 
     # Mutate radius and desired_speed
     state.radius = 0.3
     state.desired_speed = 1.5
-    assert math.isclose(sim.agent(aid).state.radius, 0.3)
-    assert math.isclose(sim.agent(aid).state.desired_speed, 1.5)
+    assert math.isclose(aid.state.radius, 0.3)
+    assert math.isclose(aid.state.desired_speed, 1.5)
 
 
 def test_invalid_agent_state():
@@ -169,24 +168,22 @@ def test_invalid_agent_state():
         model=jps.WarpDriverModel(), geometry=surface.build(), dt=0.01
     )
 
-    wp = sim.add_waypoint_stage(
-        [(jps.circle_to_polygon(center=(5, 2), radius=0.5), room)]
+    wp = sim.add_target(
+        jps.Waypoint([(jps.circle_to_polygon(center=(5, 2), radius=0.5), room)])
     )
-    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
+    route = sim.add_route([jps.FixedTransition(jps.AGENT_LOCATION, wp)])
 
     with pytest.raises(jps.SimulationError, match="radius"):
         sim.add_agent(
-            journey_id=journey_id,
-            stage_id=wp,
-            location=room.at(1, 2),
+            room.at(1, 2),
+            route=route,
             state=jps.WarpDriverModelState(radius=-1.0),
         )
 
     with pytest.raises(jps.SimulationError, match="v0"):
         sim.add_agent(
-            journey_id=journey_id,
-            stage_id=wp,
-            location=room.at(1, 2),
+            room.at(1, 2),
+            route=route,
             state=jps.WarpDriverModelState(desired_speed=-1.0),
         )
 
@@ -200,18 +197,13 @@ def _agent_a_path(seconds, with_agent_behind_wall):
     sim = jps.Simulation(
         model=jps.WarpDriverModel(), geometry=surface.build(), dt=0.01
     )
-    steering = sim.add_direct_steering_stage()
-    journey = sim.add_journey(jps.JourneyDescription([steering]))
 
     def add(position, target):
-        agent_id = sim.add_agent(
-            journey_id=journey,
-            stage_id=steering,
-            location=region.at(*position),
+        return sim.add_agent(
+            region.at(*position),
+            steer_to=region.at(*target),
             state=jps.WarpDriverModelState(desired_speed=1.2, radius=0.2),
         )
-        sim.agent(agent_id).final_target = region.at(*target)
-        return agent_id
 
     agent_a = add((3.5, 1.5), (4.5, 1.5))
     if with_agent_behind_wall:
@@ -219,7 +211,7 @@ def _agent_a_path(seconds, with_agent_behind_wall):
     path = []
     while sim.elapsed_time() < seconds:
         sim.iterate()
-        path.append(sim.agent(agent_a).position)
+        path.append(agent_a.location.xy)
     return path
 
 

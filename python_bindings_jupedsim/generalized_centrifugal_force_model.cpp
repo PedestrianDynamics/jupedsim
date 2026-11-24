@@ -32,9 +32,8 @@ void init_generalized_centrifugal_force_model(py::module_& m)
                 geometry=...,
             )
             sim.add_agent(
-                journey_id=journey_id,
-                stage_id=stage_id,
-                location=region.at(1.0, 1.0),
+                region.at(1.0, 1.0),
+                route=route,
                 state=jupedsim.GeneralizedCentrifugalForceModelState(desired_speed=1.0),
             )
 

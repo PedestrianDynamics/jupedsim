@@ -33,9 +33,8 @@ void init_social_force_model(py::module_& m)
                 geometry=...,
             )
             sim.add_agent(
-                journey_id=journey_id,
-                stage_id=stage_id,
-                location=region.at(1.0, 1.0),
+                region.at(1.0, 1.0),
+                route=route,
                 state=jupedsim.SocialForceModelState(mass=75.0),
             )
 

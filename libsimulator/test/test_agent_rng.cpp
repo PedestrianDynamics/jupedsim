@@ -9,6 +9,7 @@
 #include "operational_model_state.hpp"
 #include "operational_models/anticipation_velocity_model/anticipation_velocity_model.hpp"
 #include "operational_models/warp_driver/warp_driver_model.hpp"
+#include "route.hpp"
 #include "simulation_error.hpp"
 #include "test_common.hpp"
 #include "unique_id.hpp"
@@ -49,7 +50,7 @@ head_on_pairs(const Geometry& geometry, Model model, bool reverse, bool seed = t
         const double row = static_cast<double>(index / 2);
         auto& agent = agents.emplace_back(
             GenericAgent::ID::invalid,
-            jps::UniqueID<Journey>::invalid,
+            jps::UniqueID<Route>::invalid,
             jps::UniqueID<BaseStage>::invalid,
             *geometry.get_location_near_z(10.0 - heading(index), 2.0 + row * 8.0, 0.0),
             states[index]);

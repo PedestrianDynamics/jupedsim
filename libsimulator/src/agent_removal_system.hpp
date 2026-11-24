@@ -2,11 +2,8 @@
 #pragma once
 
 #include "generic_agent.hpp"
+#include "stage.hpp"
 #include "stage_manager.hpp"
-
-#include <algorithm>
-#include <map>
-#include <vector>
 
 template <typename Agent>
 class AgentRemovalSystem
@@ -19,32 +16,18 @@ public:
     AgentRemovalSystem(AgentRemovalSystem&& other) = delete;
     AgentRemovalSystem& operator=(AgentRemovalSystem&& other) = delete;
 
-    void
-    run(AgentContainer<Agent>& agents,
-        std::vector<GenericAgent::ID>& removed_agent_ids,
-        StageManager& stage_manager) const;
+    /// Removes the agents that leave the simulation, see GenericAgent::leaving.
+    void run(AgentContainer<Agent>& agents, StageManager& stage_manager) const;
 };
 
 template <typename Agent>
-void AgentRemovalSystem<Agent>::run(
-    AgentContainer<Agent>& agents,
-    std::vector<GenericAgent::ID>& removed_agent_ids,
-    StageManager& stage_manager) const
+void AgentRemovalSystem<Agent>::run(AgentContainer<Agent>& agents, StageManager& stage_manager)
+    const
 {
-
-    auto iter = std::remove_if(
-        std::begin(agents),
-        std::end(agents),
-        [&removed_agent_ids, &stage_manager](const GenericAgent& agent) {
-            auto found =
-                std::find(std::begin(removed_agent_ids), std::end(removed_agent_ids), agent.id) !=
-                std::end(removed_agent_ids);
-            if(found) {
-                stage_manager.handle_remove_agent(agent.stage_id);
-            }
-            return found;
-        });
-    agents.erase(iter, std::end(agents));
-
-    removed_agent_ids.clear();
+    std::erase_if(agents, [&stage_manager](const GenericAgent& agent) {
+        if(agent.leaving && agent.stage_id != BaseStage::ID::invalid) {
+            stage_manager.handle_remove_agent(agent.stage_id);
+        }
+        return agent.leaving;
+    });
 }

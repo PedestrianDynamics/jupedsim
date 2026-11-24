@@ -22,13 +22,13 @@ def test_can_query_agents_in_range():
         model=jps.CollisionFreeSpeedModel(),
         geometry=surface.build(),
     )
-    exit = simulation.add_exit_stage(
-        [([(99, 45), (99, 55), (100, 55), (100, 45)], room)]
+    exit = simulation.add_target(
+        jps.Exit([([(99, 45), (99, 55), (100, 55), (100, 45)], room)])
     )
 
-    journey = jps.JourneyDescription([exit])
-
-    journey_id = simulation.add_journey(journey)
+    route = simulation.add_route(
+        [jps.FixedTransition(jps.AGENT_LOCATION, exit)]
+    )
 
     initial_agent_positions = [
         (10, 10),
@@ -46,17 +46,17 @@ def test_can_query_agents_in_range():
     ):
         expected_agent_ids.append(
             simulation.add_agent(
-                journey_id=journey_id,
-                stage_id=exit,
-                location=room.at(*new_pos),
+                room.at(*new_pos),
+                route=route,
                 state=jps.CollisionFreeSpeedModelState(),
-            )
+            ).id
         )
 
     actual_ids_in_range = [
         agent.id
         for agent in simulation.agents_in_range(
-            room.at(*initial_agent_positions[2]), 10
+            room.at(*initial_agent_positions[2]),
+            10,
         )
     ]
 
@@ -96,13 +96,13 @@ def test_can_run_simulation():
     simulation = jps.Simulation(
         model=jps.CollisionFreeSpeedModel(), geometry=surface.build()
     )
-    exit_stage_id = simulation.add_exit_stage(
-        [([(18, 4), (20, 4), (20, 6), (18, 6)], room)]
+    exit_ = simulation.add_target(
+        jps.Exit([([(18, 4), (20, 4), (20, 6), (18, 6)], room)])
     )
 
-    journey = jps.JourneyDescription([exit_stage_id])
-
-    journey_id = simulation.add_journey(journey)
+    route = simulation.add_route(
+        [jps.FixedTransition(jps.AGENT_LOCATION, exit_)]
+    )
 
     initial_agent_positions = [(7, 7), (1, 3), (1, 5), (1, 7), (2, 7)]
 
@@ -111,32 +111,30 @@ def test_can_run_simulation():
     for new_pos in initial_agent_positions:
         expected_agent_ids.add(
             simulation.add_agent(
-                journey_id=journey_id,
-                stage_id=exit_stage_id,
-                location=room.at(*new_pos),
+                room.at(*new_pos),
+                route=route,
                 state=jps.CollisionFreeSpeedModelState(),
-            )
+            ).id
         )
 
     actual_agent_ids = {agent.id for agent in simulation.agents()}
 
     assert actual_agent_ids == expected_agent_ids
 
-    agent_id = simulation.add_agent(
-        journey_id=journey_id,
-        stage_id=exit_stage_id,
-        location=room.at(6, 6),
+    agent = simulation.add_agent(
+        room.at(6, 6),
+        route=route,
         state=jps.CollisionFreeSpeedModelState(),
     )
 
     for actual, expected in zip(simulation.agents(), initial_agent_positions):
-        assert actual.position == expected
+        assert actual.location.xy == expected
 
-    simulation.mark_agent_for_removal(agent_id)
+    simulation.mark_agent_for_removal(agent)
     simulation.iterate()
 
     with pytest.raises(jps.SimulationError, match=r"Unknown agent id \d+"):
-        simulation.mark_agent_for_removal(agent_id)
+        simulation.mark_agent_for_removal(agent)
 
     while simulation.agent_count() > 0:
         simulation.iterate()
@@ -161,13 +159,13 @@ def test_get_single_agent_from_simulation():
     simulation = jps.Simulation(
         model=jps.CollisionFreeSpeedModel(), geometry=surface.build()
     )
-    exit_id = simulation.add_exit_stage(
-        [([(18, 4), (20, 4), (20, 6), (18, 6)], room)]
+    exit_id = simulation.add_target(
+        jps.Exit([([(18, 4), (20, 4), (20, 6), (18, 6)], room)])
     )
 
-    journey = jps.JourneyDescription([exit_id])
-
-    journey_id = simulation.add_journey(journey)
+    route = simulation.add_route(
+        [jps.FixedTransition(jps.AGENT_LOCATION, exit_id)]
+    )
     initial_agent_positions = [(7, 7), (1, 3), (1, 5), (1, 7), (2, 7)]
 
     agent_ids = set()
@@ -175,11 +173,10 @@ def test_get_single_agent_from_simulation():
     for new_pos in initial_agent_positions:
         agent_ids.add(
             simulation.add_agent(
-                journey_id=journey_id,
-                stage_id=exit_id,
-                location=room.at(*new_pos),
+                room.at(*new_pos),
+                route=route,
                 state=jps.CollisionFreeSpeedModelState(),
-            )
+            ).id
         )
 
     for agent_id in agent_ids:
@@ -205,21 +202,21 @@ def test_get_agent_non_existing_agent_from_simulation():
         model=jps.CollisionFreeSpeedModel(), geometry=surface.build()
     )
 
-    exit_id = simulation.add_exit_stage(
-        [([(18, 4), (20, 4), (20, 6), (18, 6)], room)]
+    exit_id = simulation.add_target(
+        jps.Exit([([(18, 4), (20, 4), (20, 6), (18, 6)], room)])
     )
-    journey = jps.JourneyDescription([exit_id])
 
-    journey_id = simulation.add_journey(journey)
+    route = simulation.add_route(
+        [jps.FixedTransition(jps.AGENT_LOCATION, exit_id)]
+    )
 
-    agent_id = simulation.add_agent(
-        journey_id=journey_id,
-        stage_id=exit_id,
-        location=room.at(7, 7),
+    agent = simulation.add_agent(
+        room.at(7, 7),
+        route=route,
         state=jps.CollisionFreeSpeedModelState(),
     )
 
-    assert simulation.agent(agent_id).id == agent_id
+    assert simulation.agent(agent.id) == agent
 
     with pytest.raises(KeyError, match="no agent with id 1000"):
         simulation.agent(1000)
@@ -243,13 +240,13 @@ def test_agent_can_be_removed_from_simulation():
     simulation = jps.Simulation(
         model=jps.CollisionFreeSpeedModel(), geometry=surface.build()
     )
-    exit_stage_id = simulation.add_exit_stage(
-        [([(18, 4), (20, 4), (20, 6), (18, 6)], room)]
+    exit_ = simulation.add_target(
+        jps.Exit([([(18, 4), (20, 4), (20, 6), (18, 6)], room)])
     )
 
-    journey = jps.JourneyDescription([exit_stage_id])
-
-    journey_id = simulation.add_journey(journey)
+    route = simulation.add_route(
+        [jps.FixedTransition(jps.AGENT_LOCATION, exit_)]
+    )
 
     initial_agent_positions = [(7, 7), (1, 3), (1, 5), (1, 7), (2, 7)]
 
@@ -258,34 +255,33 @@ def test_agent_can_be_removed_from_simulation():
     for new_pos in initial_agent_positions:
         expected_agent_ids.add(
             simulation.add_agent(
-                journey_id=journey_id,
-                stage_id=exit_stage_id,
-                location=room.at(*new_pos),
+                room.at(*new_pos),
+                route=route,
                 state=jps.CollisionFreeSpeedModelState(),
-            )
+            ).id
         )
 
     actual_agent_ids = {agent.id for agent in simulation.agents()}
     assert actual_agent_ids == expected_agent_ids
 
     # remove one agent form simulation
-    agent_removed_id = actual_agent_ids.pop()
-    expected_agent_ids.remove(agent_removed_id)
+    agent_removed = simulation.agent(actual_agent_ids.pop())
+    expected_agent_ids.remove(agent_removed.id)
 
-    simulation.mark_agent_for_removal(agent_removed_id)
+    simulation.mark_agent_for_removal(agent_removed)
     simulation.iterate()
     actual_agent_ids = {agent.id for agent in simulation.agents()}
     assert actual_agent_ids == expected_agent_ids
 
     # try removing the same agent will raise an error
     with pytest.raises(jps.SimulationError, match=r"Unknown agent id \d+"):
-        simulation.mark_agent_for_removal(agent_removed_id)
+        simulation.mark_agent_for_removal(agent_removed)
 
     # remove second agent form simulation
-    second_agent_removed_id = actual_agent_ids.pop()
-    expected_agent_ids.remove(second_agent_removed_id)
+    second_agent_removed = simulation.agent(actual_agent_ids.pop())
+    expected_agent_ids.remove(second_agent_removed.id)
 
-    simulation.mark_agent_for_removal(second_agent_removed_id)
+    simulation.mark_agent_for_removal(second_agent_removed)
     simulation.iterate()
     actual_agent_ids = {agent.id for agent in simulation.agents()}
     assert actual_agent_ids == expected_agent_ids
@@ -310,19 +306,18 @@ def test_agent_can_not_be_added_outside_geometry():
         geometry=surface.build(),
     )
 
-    exit_id = simulation.add_exit_stage(
-        [([(99, 45), (99, 55), (100, 55), (100, 45)], room)]
+    exit_id = simulation.add_target(
+        jps.Exit([([(99, 45), (99, 55), (100, 55), (100, 45)], room)])
     )
-
-    journey = jps.JourneyDescription([exit_id])
-    journey_id = simulation.add_journey(journey)
+    route = simulation.add_route(
+        [jps.FixedTransition(jps.AGENT_LOCATION, exit_id)]
+    )
 
     agent_position = (50, 50)
 
     simulation.add_agent(
-        journey_id=journey_id,
-        stage_id=exit_id,
-        location=room.at(*agent_position),
+        room.at(*agent_position),
+        route=route,
         state=jps.CollisionFreeSpeedModelState(),
     )
 
@@ -331,40 +326,10 @@ def test_agent_can_not_be_added_outside_geometry():
         match=r"Point \(-50, -50\) is not in region 0",
     ):
         assert simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            location=room.at(-50, -50),
+            room.at(-50, -50),
+            route=route,
             state=jps.CollisionFreeSpeedModelState(),
         )
-
-
-def test_direct_steering_target_must_be_inside_geometry():
-    surface = jps.GeometryBuilder()
-    room = surface.add_region(
-        boundary=[(0, 0), (100, 0), (100, 100), (0, 100)], height=0.0
-    )
-    simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(),
-        geometry=surface.build(),
-    )
-    stage_id = simulation.add_direct_steering_stage()
-    journey_id = simulation.add_journey(jps.JourneyDescription([stage_id]))
-    agent_id = simulation.add_agent(
-        journey_id=journey_id,
-        stage_id=stage_id,
-        location=room.at(50, 50),
-        state=jps.CollisionFreeSpeedModelState(),
-    )
-    agent = simulation.agent(agent_id)
-
-    agent.final_target = (60, 60)
-    assert (agent.final_target.x, agent.final_target.y) == (60, 60)
-
-    with pytest.raises(
-        jps.SimulationError,
-        match=r"Point \(-50, -50\) is outside of accessible area",
-    ):
-        agent.final_target = (-50, -50)
 
 
 @pytest.mark.parametrize("level", ["debug", "info", "warning", "error"])
@@ -391,32 +356,3 @@ def test_build_info_is_native():
     assert repr(jps.BuildInfo()) == repr(info)
     assert "SHA1 commit hash" in jps.BuildInfo.git_commit_hash.__doc__
     assert "printable" in jps.get_build_info.__doc__
-
-
-def test_agents_can_be_looked_up_by_name():
-    surface = jps.GeometryBuilder()
-    room = surface.add_region(
-        boundary=[(0, 0), (10, 0), (10, 10), (0, 10)], height=0.0
-    )
-    sim = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=surface.build()
-    )
-    exit_id = sim.add_exit_stage([([(9, 4), (10, 4), (10, 6), (9, 6)], room)])
-    journey_id = sim.add_journey(jps.JourneyDescription([exit_id]))
-    agent_id = sim.add_agent(
-        journey_id=journey_id,
-        stage_id=exit_id,
-        location=room.at(2, 5),
-        state=jps.CollisionFreeSpeedModelState(),
-        name="anna",
-    )
-    agent = sim.agent("anna")
-    assert (agent.id, agent.name) == (agent_id, "anna")
-    assert repr(agent) == f"Agent(id={agent_id}, name='anna')"
-    with pytest.raises(TypeError, match="id or name"):
-        sim.agent(True)
-
-    sim.mark_agent_for_removal(agent_id)
-    sim.iterate()
-    with pytest.raises(KeyError, match="no agent named 'anna'"):
-        sim.agent("anna")
