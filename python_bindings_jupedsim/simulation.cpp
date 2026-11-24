@@ -31,6 +31,7 @@
 #include <cstdint>
 #include <map>
 #include <memory>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -147,10 +148,16 @@ void init_simulation(py::module_& m)
                uint64_t stage_id,
                std::tuple<double, double> position,
                OperationalModelState state,
-               std::size_t region_id) {
+               std::size_t region_id,
+               std::optional<std::string> name) {
                 return sim
                     .add_agent(
-                        journey_id, stage_id, into_point(position), std::move(state), region_id)
+                        journey_id,
+                        stage_id,
+                        into_point(position),
+                        std::move(state),
+                        region_id,
+                        std::move(name))
                     .get_id();
             },
             py::kw_only(),
@@ -158,7 +165,19 @@ void init_simulation(py::module_& m)
             py::arg("stage_id"),
             py::arg("position"),
             py::arg("state"),
-            py::arg("region_id"))
+            py::arg("region_id"),
+            py::arg("name"))
+        .def(
+            "agent_name",
+            [](const Simulation& sim, uint64_t agent_id) { return sim.agent_name(agent_id); },
+            py::arg("agent_id"))
+        .def(
+            "agent_named",
+            [](const Simulation& sim, const std::string& name) -> std::optional<uint64_t> {
+                const auto id = sim.agent_named(name);
+                return id ? std::optional{id->get_id()} : std::nullopt;
+            },
+            py::arg("name"))
         .def(
             "mark_agent_for_removal",
             [](Simulation& sim, uint64_t id) { sim.mark_agent_for_removal(id); })

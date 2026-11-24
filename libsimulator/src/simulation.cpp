@@ -23,6 +23,7 @@
 #include "visitor.hpp"
 
 #include <algorithm>
+#include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
@@ -50,6 +51,29 @@ std::vector<AreaPiece> pieces_of(const Geometry& geometry, const std::vector<Sta
         pieces.insert(pieces.end(), clipped.begin(), clipped.end());
     }
     return pieces;
+}
+
+/// The agent with @p id in @p agents, or their end. Agents are sorted by id: ids only grow,
+/// agents are appended, and removal keeps their order.
+template <typename Agents>
+auto find_agent(Agents& agents, GenericAgent::ID id)
+{
+    const auto iter = std::lower_bound(
+        std::begin(agents),
+        std::end(agents),
+        id,
+        [](const GenericAgent& agent, GenericAgent::ID wanted) { return agent.id < wanted; });
+    return iter != std::end(agents) && iter->id == id ? iter : std::end(agents);
+}
+
+/// Whether @p agents are sorted by id, as find_agent() requires.
+template <typename Agents>
+bool sorted_by_id(const Agents& agents)
+{
+    return std::is_sorted(
+        std::begin(agents), std::end(agents), [](const GenericAgent& a, const GenericAgent& b) {
+            return a.id < b.id;
+        });
 }
 } // namespace
 
@@ -96,7 +120,14 @@ void Simulation::iterate()
 
     {
         JPS_SCOPED_TIMER_AND_TRACE(_timer, "Agent Removal System", Detailed);
+        for(const auto id : _removed_agents_in_last_iteration) {
+            if(const auto named = _agent_names.find(id); named != std::end(_agent_names)) {
+                _agent_ids_by_name.erase(named->second);
+                _agent_names.erase(named);
+            }
+        }
         _agent_removal_system.run(_agents, _removed_agents_in_last_iteration, _stage_manager);
+        assert(sorted_by_id(_agents));
     }
 
     {
@@ -122,6 +153,7 @@ void Simulation::iterate()
         // reflects the new positions for queries before the next iteration (agents_in_range,
         // add_agent validation).
         _neighborhood_search.update(_agents);
+        assert(sorted_by_id(_agents));
     }
     _clock.advance();
 }
@@ -238,10 +270,12 @@ GenericAgent::ID Simulation::add_agent(
     BaseStage::ID stage_id,
     Point position,
     OperationalModelState model,
-    std::size_t region_id)
+    std::size_t region_id,
+    std::optional<std::string> name)
 {
     throw_if_state(State::Iterating | State::Closed, "add_agent");
     JPS_SCOPED_TIMER_AND_TRACE(_timer, "Add Agent", Detailed);
+    check_agent_name(name);
     const auto location = _geometry->get_location(position.x(), position.y(), region_id);
     if(_journeys.count(journey_id) == 0) {
         throw SimulationError("Unknown journey id: {}", journey_id);
@@ -267,13 +301,39 @@ GenericAgent::ID Simulation::add_agent(
     _operational_decision_system.seed_agent_state(agent.state);
 
     _stage_manager.handle_new_agent(agent.stage_id);
+    if(name) {
+        _agent_ids_by_name.emplace(*name, agent.id);
+        _agent_names.emplace(agent.id, std::move(*name));
+    }
     _agents.emplace_back(std::move(agent));
+    assert(sorted_by_id(_agents));
     _neighborhood_search.add_agent(_agents.back());
 
     auto v = IteratorPair(std::prev(std::end(_agents)), std::end(_agents));
     _stategical_decision_system.run(_journeys, v, _stage_manager);
     _tactical_decision_system.run(*_routing_engine, v);
     return _agents.back().id.get_id();
+}
+
+void Simulation::check_agent_name(const std::optional<std::string>& name) const
+{
+    if(name && agent_named(*name)) {
+        throw SimulationError("The agent name '{}' is already used.", *name);
+    }
+}
+
+std::optional<std::string> Simulation::agent_name(GenericAgent::ID id) const
+{
+    throw_if_state(State::Closed, "agent_name");
+    const auto iter = _agent_names.find(id);
+    return iter == std::end(_agent_names) ? std::nullopt : std::optional{iter->second};
+}
+
+std::optional<GenericAgent::ID> Simulation::agent_named(const std::string& name) const
+{
+    throw_if_state(State::Closed, "agent_named");
+    const auto iter = _agent_ids_by_name.find(name);
+    return iter == std::end(_agent_ids_by_name) ? std::nullopt : std::optional{iter->second};
 }
 
 Location Simulation::get_location(double x, double y, std::size_t region_id) const
@@ -304,9 +364,7 @@ void Simulation::mark_agent_for_removal(GenericAgent::ID id)
 {
     throw_if_state(State::Iterating | State::Closed, "mark_agent_for_removal");
     JPS_TRACE_FUNC;
-    const auto iter = std::find_if(
-        std::begin(_agents), std::end(_agents), [id](auto& agent) { return agent.id == id; });
-    if(iter == std::end(_agents)) {
+    if(find_agent(_agents, id) == std::end(_agents)) {
         throw SimulationError("Unknown agent id {}", id);
     }
 
@@ -317,8 +375,7 @@ const GenericAgent& Simulation::agent(GenericAgent::ID id) const
 {
     throw_if_state(State::Closed, "agent");
     JPS_TRACE_FUNC;
-    const auto iter =
-        std::find_if(_agents.begin(), _agents.end(), [id](auto& ped) { return id == ped.id; });
+    const auto iter = find_agent(_agents, id);
     if(iter == _agents.end()) {
         throw SimulationError("Trying to access unknown Agent {}", id);
     }
@@ -329,8 +386,7 @@ GenericAgent& Simulation::agent(GenericAgent::ID id)
 {
     throw_if_state(State::Closed, "agent");
     JPS_TRACE_FUNC;
-    const auto iter =
-        std::find_if(_agents.begin(), _agents.end(), [id](auto& ped) { return id == ped.id; });
+    const auto iter = find_agent(_agents, id);
     if(iter == _agents.end()) {
         throw SimulationError("Trying to access unknown Agent {}", id);
     }

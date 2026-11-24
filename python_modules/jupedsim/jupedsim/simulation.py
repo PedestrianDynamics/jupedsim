@@ -30,6 +30,7 @@ from jupedsim.pyjupedsim import (
     Location,
     OperationalModel,
     Region,
+    SimulationError,
     SocialForceModel,
     SocialForceModelState,
     SpeedGrid,
@@ -234,6 +235,7 @@ class Simulation:
             | WarpDriverModelState
             | Any
         ),
+        name: str | None = None,
     ) -> int:
         """Add an agent to the simulation.
 
@@ -247,12 +249,15 @@ class Simulation:
                 :class:`~jupedsim.CustomOperationalModel` expects. The state type has to match the
                 model used in this simulation. When adding agents with invalid parameters, or too
                 close to the boundary or other agents, this will cause an error.
+            name: Unique among the agents of this simulation, if given; free again
+                once its agent has left. Used in :meth:`agent`.
 
         Returns:
             Id of the added agent.
 
         Raises:
             ValueError: if the location belongs to another geometry.
+            SimulationError: if the name is already used.
         """
         location = self._checked_location(location, "location")
         region_id = self._region_id(location.region)
@@ -264,6 +269,7 @@ class Simulation:
             position=location.xy,
             state=state,
             region_id=region_id,
+            name=name,
         )
 
     def travel_times(self, stage_id: int) -> dict[Region, TravelTimeGrid]:
@@ -564,22 +570,33 @@ class Simulation:
         ids = [agent.id for agent in self._obj.agents()]
         return iter(Agent(self, agent_id) for agent_id in ids)
 
-    def agent(self, agent_id) -> Agent:
-        """Access specific agent in the simulation.
-
-        Args:
-            agent_id: Id of the agent to access
+    def agent(self, key: int | str) -> Agent:
+        """Look an agent up by id or by name.
 
         Returns:
-            Handle to the agent. The handle resolves the agent on every attribute access and stays
-            valid across :func:`iterate` as long as the agent exists.
+            Handle to the agent. The handle resolves the agent on every attribute
+            access and stays valid across :func:`iterate` as long as the agent exists.
 
         Raises:
-            SimulationError: if no agent with this id exists.
+            KeyError: if there is no such agent.
         """
-        # Resolve once to fail fast on unknown ids.
-        self._obj.agent(agent_id)
-        return Agent(self, agent_id)
+        if isinstance(key, str):
+            agent_id = self._obj.agent_named(key)
+            if agent_id is None:
+                raise KeyError(f"no agent named {key!r}")
+            return Agent(self, agent_id)
+        # The native lookup crashes on anything but an int.
+        if isinstance(key, bool) or not isinstance(key, int):
+            raise TypeError(
+                f"key must be an agent id or name, got {type(key).__name__}"
+            )
+        # Fails on a closed simulation with its own error, unlike the lookup below.
+        self._obj.agent_count()
+        try:
+            self._obj.agent(key)
+        except SimulationError:
+            raise KeyError(f"no agent with id {key}") from None
+        return Agent(self, key)
 
     def _region_id(self, region: object) -> int:
         """Id of ``region``, checked to be a :class:`~jupedsim.Region` of this
