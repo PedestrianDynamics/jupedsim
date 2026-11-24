@@ -36,8 +36,8 @@ Vector CollisionFreeSpeedModel::compute_next_state(
         _cut_off_radius, [&step](const NeighborView& n) { return step.no_geometry_between(n); });
 
     const auto desired_direction = step.route_orientation();
-    // The route orientation is not a unit vector: it is zero when the agent stands on its
-    // target and shorter than 1 for interpolated floor-field directions.
+    // The route orientation is a unit vector, or zero when the agent stands on its target or
+    // inside an area destination. Normalizing keeps the vision factor a cosine in any case.
     const auto view_direction = desired_direction.normalized();
     Vector neighbor_repulsion{};
     for(const auto& neighbor : neighborhood) {
