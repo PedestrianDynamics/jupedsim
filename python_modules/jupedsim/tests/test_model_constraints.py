@@ -325,6 +325,60 @@ def test_collision_free_speed_model_can_not_set_neighbor_repulsion_anisotropy_na
         )
 
 
+_CFSM_REPULSION_PARAMETERS = {
+    "strength_neighbor_repulsion": "strengthNeighborRepulsion",
+    "range_neighbor_repulsion": "rangeNeighborRepulsion",
+    "strength_geometry_repulsion": "strengthGeometryRepulsion",
+    "range_geometry_repulsion": "rangeGeometryRepulsion",
+}
+
+
+@pytest.mark.parametrize("field", _CFSM_REPULSION_PARAMETERS)
+@pytest.mark.parametrize("value", [0.01, 1.0, 100.0])
+def test_collision_free_speed_model_can_set_repulsion_parameter(field, value):
+    _add_collision_free_speed_model_agent(
+        jps.CollisionFreeSpeedModelState(**{field: value})
+    )
+
+
+@pytest.mark.parametrize(
+    "field", ["strength_neighbor_repulsion", "strength_geometry_repulsion"]
+)
+def test_collision_free_speed_model_can_set_repulsion_strength_zero(field):
+    _add_collision_free_speed_model_agent(
+        jps.CollisionFreeSpeedModelState(**{field: 0.0})
+    )
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("strength_neighbor_repulsion", -1.0),
+        ("range_neighbor_repulsion", 0.0),
+        ("range_neighbor_repulsion", -0.1),
+        ("strength_geometry_repulsion", -1.0),
+        ("range_geometry_repulsion", 0.0),
+        ("range_geometry_repulsion", -0.1),
+        *(
+            (field, v)
+            for field in _CFSM_REPULSION_PARAMETERS
+            for v in (float("nan"), float("inf"))
+        ),
+    ],
+)
+def test_collision_free_speed_model_can_not_set_repulsion_parameter(
+    field, value
+):
+    name = _CFSM_REPULSION_PARAMETERS[field]
+    with pytest.raises(
+        jps.SimulationError,
+        match=rf"Model constraint violation: {name} {value:g} .*",
+    ):
+        _add_collision_free_speed_model_agent(
+            jps.CollisionFreeSpeedModelState(**{field: value})
+        )
+
+
 @pytest.mark.parametrize("mass", [*np.arange(1, 100, 20), 100])
 def test_generalized_centrifugal_force_model_can_set_mass(
     square_room_100x100_gcfm, mass

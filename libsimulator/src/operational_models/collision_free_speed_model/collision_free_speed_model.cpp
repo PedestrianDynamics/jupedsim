@@ -88,6 +88,17 @@ void CollisionFreeSpeedModel::check_model_constraint(
     validate_constraint(
         current_state.neighbor_repulsion_anisotropy, 0.0, 1.0, "neighborRepulsionAnisotropy");
 
+    // Both repulsion terms divide by the ranges; any finite strength and range is allowed.
+    constexpr double finite_max = std::numeric_limits<double>::max();
+    validate_constraint(
+        current_state.strength_neighbor_repulsion, 0.0, finite_max, "strengthNeighborRepulsion");
+    validate_constraint(
+        current_state.range_neighbor_repulsion, 0.0, finite_max, "rangeNeighborRepulsion", true);
+    validate_constraint(
+        current_state.strength_geometry_repulsion, 0.0, finite_max, "strengthGeometryRepulsion");
+    validate_constraint(
+        current_state.range_geometry_repulsion, 0.0, finite_max, "rangeGeometryRepulsion", true);
+
     const auto neighbors = view.other_agents_in_range(2.0);
     for(const auto& neighbor : neighbors) {
         const auto& neighbor_state = std::get<State>(*neighbor.state);
