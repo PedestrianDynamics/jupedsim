@@ -1,4 +1,4 @@
-## collision_free_speed_model_tordeux2016 sources
+## motivation_collision_free_speed_model sources
 target_sources(simulator PRIVATE
     motivation_collision_free_speed_model.cpp
     motivation_collision_free_speed_model.hpp
