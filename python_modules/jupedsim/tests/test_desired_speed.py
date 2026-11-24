@@ -68,9 +68,8 @@ def test_desired_speed_can_be_set_via_state(
     agent_id = sim.add_agent(
         journey_id=journey_id,
         stage_id=wp,
-        position=(1, 1),
+        location=room.at(1, 1),
         state=state_class(desired_speed=1.5, **extra_state_kwargs),
-        region_id=room,
     )
 
     assert sim.agent(agent_id).state.desired_speed == 1.5
@@ -96,9 +95,8 @@ def test_desired_speed_can_be_mutated_via_agent_handle(
     agent_id = sim.add_agent(
         journey_id=journey_id,
         stage_id=wp,
-        position=(1, 1),
+        location=room.at(1, 1),
         state=state_class(**extra_state_kwargs),
-        region_id=room,
     )
 
     sim.agent(agent_id).state.desired_speed = 1.5
@@ -134,9 +132,8 @@ def test_removed_parameter_names_raise(
     agent_id = sim.add_agent(
         journey_id=journey_id,
         stage_id=wp,
-        position=(1, 1),
+        location=room.at(1, 1),
         state=state_class(**extra_state_kwargs),
-        region_id=room,
     )
 
     for removed_attr in removed_attrs:

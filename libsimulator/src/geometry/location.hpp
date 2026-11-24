@@ -38,6 +38,11 @@ public:
     /// Whether walking straight from here arrives where @p other stands.
     bool can_walk_straight_to(const Location& other) const;
 
+    /// Whether this location was created by @p geometry.
+    bool belongs_to(const Geometry& geometry) const { return _geometry == &geometry; }
+
+    const Geometry& geometry() const { return *_geometry; }
+
 private:
     // Location uses private constructor. Only Geometry can create Location objects.
     friend class Geometry;

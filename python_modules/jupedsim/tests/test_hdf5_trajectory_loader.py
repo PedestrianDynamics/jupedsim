@@ -352,9 +352,9 @@ def test_hdf5_trajectory_loading_travel_times_round_trip(
 
     for stage in stage_ids:
         expected = sim.travel_times(stage)
-        assert list(loaded[stage]) == list(expected)
-        for region, grid in loaded[stage].items():
-            want = expected[region]
+        assert list(loaded[stage]) == [region.id for region in expected]
+        for region_id, grid in loaded[stage].items():
+            want = expected[sim.get_geometry().region(region_id)]
             assert grid.origin == want.origin
             assert (grid.width, grid.height) == (want.width, want.height)
             assert grid.cell_size == want.cell_size
@@ -404,9 +404,9 @@ def test_hdf5_trajectory_loading_travel_times_before_the_first_snapshot(
     path, sim, stage_ids = travel_time_file
     with jps.Hdf5TrajectoryLoader(path) as loader:
         assert loader.load_travel_time_iterations(stage_ids[0]) == [0]
-        assert list(loader.load_travel_times(stage_ids[0], 7)) == list(
-            sim.travel_times(stage_ids[0])
-        )
+        assert list(loader.load_travel_times(stage_ids[0], 7)) == [
+            region.id for region in sim.travel_times(stage_ids[0])
+        ]
         with pytest.raises(
             jps.Hdf5TrajectoryLoader.Error,
             match=r"No travel times for stage_id=99, found stages",
@@ -435,7 +435,7 @@ def test_hdf5_trajectory_loading_travel_times_of_a_stage_added_later(
     writer.close()
     with jps.Hdf5TrajectoryLoader(out) as loader:
         assert loader.load_travel_time_iterations(exit_id) == [2]
-        assert list(loader.load_travel_times(exit_id, 2)) == [room]
+        assert list(loader.load_travel_times(exit_id, 2)) == [room.id]
         with pytest.raises(
             jps.Hdf5TrajectoryLoader.Error,
             match=rf"No travel times for stage_id={exit_id} at iteration 1, the first are from iteration 2",

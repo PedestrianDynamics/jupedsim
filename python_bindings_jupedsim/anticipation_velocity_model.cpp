@@ -39,9 +39,8 @@ void init_anticipation_velocity_model(py::module_& m)
             sim.add_agent(
                 journey_id=journey_id,
                 stage_id=stage_id,
-                position=(1.0, 1.0),
+                location=region.at(1.0, 1.0),
                 state=jupedsim.AnticipationVelocityModelState(),
-                region_id=region_id,
             )
 
         .. warning::

@@ -69,9 +69,8 @@ def _run(sim, room, journey_id, stage_id, state, steps=40):
     agent_id = sim.add_agent(
         journey_id=journey_id,
         stage_id=stage_id,
-        position=(1.0, 10.0),
+        location=room.at(1.0, 10.0),
         state=state,
-        region_id=room,
     )
     trajectory = [sim.agent(agent_id).position]
     for _ in range(steps):
@@ -132,9 +131,8 @@ def test_delegated_state_is_advanced():
     agent_id = sim.add_agent(
         journey_id=journey_id,
         stage_id=exit_id,
-        position=(1.0, 3.0),
+        location=room.at(1.0, 3.0),
         state=_Wrapped(sub=initial),
-        region_id=room,
     )
     sim.iterate()
 
@@ -152,9 +150,8 @@ def test_wrong_state_type_is_reported_with_both_names():
     sim.add_agent(
         journey_id=journey_id,
         stage_id=exit_id,
-        position=(1.0, 10.0),
+        location=room.at(1.0, 10.0),
         state=_Wrapped(sub=jps.CollisionFreeSpeedModelV3State()),
-        region_id=room,
     )
 
     with pytest.raises(
@@ -168,16 +165,14 @@ def _run_pair(sim, room, journey_id, stage_id, state_of, steps=40):
     left = sim.add_agent(
         journey_id=journey_id,
         stage_id=stage_id,
-        position=(1.0, 10.0),
+        location=room.at(1.0, 10.0),
         state=state_of(),
-        region_id=room,
     )
     ahead = sim.add_agent(
         journey_id=journey_id,
         stage_id=stage_id,
-        position=(2.2, 10.0),
+        location=room.at(2.2, 10.0),
         state=state_of(),
-        region_id=room,
     )
     trajectory = []
     for _ in range(steps):
@@ -394,8 +389,7 @@ def test_seed_agent_state_must_return_the_agents_state(
         sim.add_agent(
             journey_id=journey_id,
             stage_id=exit_id,
-            position=(1.0, 10.0),
+            location=room.at(1.0, 10.0),
             state=_Wrapped(sub=jps.WarpDriverModelState()),
-            region_id=room,
         )
     assert sim.agent_count() == 0

@@ -7,6 +7,7 @@
 #include "geometry/geometry.hpp"
 #include "geometry/geometry_builder.hpp"
 #include "geometry/location.hpp"
+#include "id_and_name.hpp"
 #include "journey.hpp"
 #include "kernel.hpp"
 #include "operational_model.hpp"
@@ -80,7 +81,7 @@ flat_speed_field(const Simulation& sim, std::size_t region_id, const SpeedArray&
         throw py::value_error(
             fmt::format(
                 "The speed field of region {} needs shape ({}, {}).",
-                region_id,
+                id_and_name(region_id, sim.geo()->region_name(region_id)),
                 grid.height,
                 grid.width));
     }
@@ -201,14 +202,6 @@ void init_simulation(py::module_& m)
             py::arg("agent_id"),
             py::return_value_policy::reference,
             py::keep_alive<0, 1>())
-        .def(
-            "get_location",
-            &Simulation::get_location,
-            py::arg("x"),
-            py::arg("y"),
-            py::arg("region_id"),
-            // The returned token points into geometry the simulation owns.
-            py::keep_alive<0, 1>())
         .def("stage_ids", &Simulation::stage_ids)
         .def(
             "default_speed_fields",
@@ -272,27 +265,27 @@ void init_simulation(py::module_& m)
             py::arg("target"))
         .def(
             "agents_in_range",
-            [](Simulation& sim, std::tuple<double, double> pos, double distance) {
-                auto agents_in_range = sim.agents_in_range(into_point(pos), distance);
-                auto agents = std::vector<uint64_t>();
-                agents.reserve(agents_in_range.size());
-                for(auto agent : agents_in_range) {
-                    agents.emplace_back(agent.get_id());
+            [](Simulation& sim, const Location& location, double distance) {
+                std::vector<uint64_t> ids{};
+                for(const auto id : sim.agents_in_range(location, distance)) {
+                    ids.push_back(id.get_id());
                 }
-                return agents;
-            })
+                return ids;
+            },
+            py::arg("location"),
+            py::arg("distance"))
         .def(
             "agents_in_polygon",
-            [](Simulation& sim, Area polygon) {
-                auto agents_in_range =
-                    sim.agents_in_polygon(boundary_without_holes(std::move(polygon)));
-                auto agents = std::vector<uint64_t>();
-                agents.reserve(agents_in_range.size());
-                for(auto agent : agents_in_range) {
-                    agents.emplace_back(agent.get_id());
+            [](Simulation& sim, Area polygon, std::size_t region_id) {
+                std::vector<uint64_t> ids{};
+                for(const auto id : sim.agents_in_polygon(
+                        Polygon{boundary_without_holes(std::move(polygon))}, region_id)) {
+                    ids.push_back(id.get_id());
                 }
-                return agents;
-            })
+                return ids;
+            },
+            py::arg("polygon"),
+            py::arg("region_id"))
         .def(
             "get_stage",
             [](py::object self, uint64_t id) -> py::typing::Union<Waypoint, Exit, DirectSteering> {
@@ -308,9 +301,7 @@ void init_simulation(py::module_& m)
             [](Simulation& sim, size_t level) { sim.set_timer_log_level(level); })
         .def(
             "get_geometry",
-            [](const Simulation& sim) -> const Geometry& { return sim.geo(); },
-            // Borrowed from the simulation, which keeps owning it.
-            py::return_value_policy::reference_internal)
+            [](const Simulation& sim) { return std::const_pointer_cast<Geometry>(sim.geo()); })
         .def(
             "push_timer",
             [](Simulation& sim, const std::string& name, size_t probe_log_level) {

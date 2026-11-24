@@ -117,9 +117,8 @@ def _add(sim, room, journey_id, stage_id, position, state):
     return sim.add_agent(
         journey_id=journey_id,
         stage_id=stage_id,
-        position=position,
+        location=room.at(*position),
         state=state,
-        region_id=room,
     )
 
 

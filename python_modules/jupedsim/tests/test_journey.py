@@ -65,9 +65,8 @@ def test_a_journey_with_every_transition_kind_leads_to_the_exit():
         sim.add_agent(
             journey_id=journey_id,
             stage_id=first,
-            position=(1.0, y),
+            location=room.at(1.0, y),
             state=jps.CollisionFreeSpeedModelState(),
-            region_id=room,
         )
     while sim.agent_count() > 0 and sim.iteration_count() < 5000:
         sim.iterate()

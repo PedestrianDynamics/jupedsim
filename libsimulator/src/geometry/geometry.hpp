@@ -14,6 +14,7 @@
 #include <cstddef>
 #include <memory>
 #include <optional>
+#include <string>
 #include <vector>
 
 class GeometryBuilder;
@@ -55,7 +56,8 @@ public:
     explicit Geometry(
         epick::Mesh&& mesh,
         RegionSplit&& region_split,
-        std::unique_ptr<RegionGraph2D> region_graph_2d);
+        std::unique_ptr<RegionGraph2D> region_graph_2d,
+        std::vector<std::optional<std::string>> region_names);
 
     ~Geometry() = default;
 
@@ -127,6 +129,12 @@ public:
 
     std::size_t region_count() const { return _region_split.count; }
 
+    /// Name of region @p region_id, if it was given one.
+    const std::optional<std::string>& region_name(std::size_t region_id) const
+    {
+        return _region_names.at(region_id);
+    }
+
     /// Region id (0-based) of a single face, as assigned by the region overlay.
     std::size_t region_of(epick::Mesh::Face_index face) const { return _region[face]; }
 
@@ -170,4 +178,5 @@ private:
     ClearanceField _clearance{};
     RegionMap _region{};
     RegionSplit _region_split{};
+    std::vector<std::optional<std::string>> _region_names{};
 };

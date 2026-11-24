@@ -72,11 +72,11 @@ class Agent:
         # all agents as iterator
         sim.agents()
 
-        # agents in a specific distance to a point
-        sim.agents_in_range(position, distance)
+        # agents in a specific distance to a location
+        sim.agents_in_range(location, distance)
 
-        # agents in a polygon
-        sim.agents_in_polygon(polygon)
+        # agents in a polygon in one region
+        sim.agents_in_polygon(polygon, region=region)
 
     A handle stores only the simulation and the agent id. Every attribute
     read or write resolves the agent freshly through the simulation, so
@@ -162,8 +162,7 @@ class Agent:
 
         Accepts a :class:`~jupedsim.Location` or an ``(x, y)`` tuple. A
         tuple is placed on the surface closest to the agent's own height; to
-        target another floor, pass a location from
-        :meth:`~jupedsim.simulation.Simulation.get_location`.
+        target another floor, pass a location from :meth:`~jupedsim.Region.at`.
 
         Returns:
             Current final target of the agent, or ``None`` while it heads

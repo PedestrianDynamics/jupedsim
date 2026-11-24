@@ -25,9 +25,8 @@ def _add(sim, room, exit_id, journey, position, state):
     return sim.add_agent(
         journey_id=journey,
         stage_id=exit_id,
-        position=position,
+        location=room.at(*position),
         state=state,
-        region_id=room,
     )
 
 
@@ -97,8 +96,3 @@ def test_non_finite_position_is_not_in_region(bad):
             (bad, 5.0),
             jps.CollisionFreeSpeedModelV2State(),
         )
-
-
-def test_agents_in_range_of_nan_is_empty():
-    sim, *_ = _room(jps.CollisionFreeSpeedModelV2())
-    assert list(sim.agents_in_range((math.nan, 0.0), 1.0)) == []

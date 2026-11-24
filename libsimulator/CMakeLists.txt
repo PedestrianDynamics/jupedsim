@@ -39,6 +39,7 @@ target_sources(simulator PRIVATE
     src/geometry/validation.cpp
     src/geometry/validation.hpp
     src/hash_combine.hpp
+    src/id_and_name.hpp
     src/into.hpp
     src/iterator_pair.hpp
     src/journey.cpp

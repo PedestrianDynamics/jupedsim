@@ -18,6 +18,8 @@ add_library(pyjupedsim MODULE
     logging.hpp
     python_model.cpp
     python_model.hpp
+    region.cpp
+    region.hpp
     routing.cpp
     simulation.cpp
     social_force_model.cpp

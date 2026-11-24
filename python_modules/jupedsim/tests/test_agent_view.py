@@ -36,9 +36,8 @@ def _add_agent(sim, room, journey_id, stage_id, position, group=0, probe=False):
     return sim.add_agent(
         journey_id=journey_id,
         stage_id=stage_id,
-        position=position,
+        location=room.at(*position),
         state=_State(group=group, probe=probe),
-        region_id=room,
     )
 
 
