@@ -17,6 +17,7 @@
 #include "stage_description.hpp"
 #include "test_common.hpp"
 
+#include <boost/random/splitmix64.hpp>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
@@ -26,6 +27,9 @@
 #include <cstdint>
 #include <iterator>
 #include <memory>
+#include <optional>
+#include <set>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -541,3 +545,168 @@ TEST(AgentRngSeeding, ARemovedAgentsStreamIsNotHandedOutAgain)
     ASSERT_EQ(world.sim.agent_count(), 1u);
     EXPECT_TRUE(world.has_stream(world.add({10, 2}), 2));
 }
+
+TEST(AgentNames, ANameIsFreeAgainOnceItsAgentHasLeft)
+{
+    using testing::HasSubstr;
+    using testing::ThrowsMessage;
+    const auto flat = on_a_flat_room();
+    auto& sim = *flat.sim;
+    const auto [journey, stage] = journey_to(sim, Point{15, 15}, flat.room_id);
+    const auto id = sim.add_agent(journey, stage, Point{2, 2}, State{}, flat.room_id, "anna");
+    EXPECT_EQ(sim.agent_named("anna"), id);
+    EXPECT_EQ(sim.agent_name(id), "anna");
+    EXPECT_THAT(
+        [&] { sim.add_agent(journey, stage, Point{5, 5}, State{}, flat.room_id, "anna"); },
+        ThrowsMessage<SimulationError>(HasSubstr("'anna' is already used")));
+
+    sim.mark_agent_for_removal(id);
+    EXPECT_EQ(sim.agent_named("anna"), id) << "still there, about to leave";
+    sim.iterate();
+    EXPECT_EQ(sim.agent_named("anna"), std::nullopt);
+    EXPECT_NO_THROW(sim.add_agent(journey, stage, Point{5, 5}, State{}, flat.room_id, "anna"));
+}
+
+namespace
+{
+/// Simulation::agent() finds agents by binary search, so the agents have to stay sorted by id
+/// whatever the simulation does with them. This test tries to guard that against any future
+/// change, e.g. to the agent container or the order agents are stepped in: a random mix of
+/// operations, from a fixed seed, on agents whose spatial order has nothing to do with their ids.
+/// After every operation, every agent ever added has to be found exactly while it is in the
+/// simulation.
+class AgentLookup : public ::testing::TestWithParam<std::uint64_t>
+{
+protected:
+    FlatRoom _flat = on_a_flat_room();
+    Simulation& _sim = *_flat.sim;
+    /// The raw draws of a generator with a fixed algorithm, unlike std distributions, are the
+    /// same on every platform, so a seed reproduces a failure everywhere.
+    boost::random::splitmix64 _rng{GetParam()};
+    std::vector<GenericAgent::ID> _added{};
+    std::set<GenericAgent::ID> _present{};
+
+    std::size_t draw(std::size_t count) { return _rng() % count; }
+
+    BaseStage::ID exit(Point lower, Point upper)
+    {
+        return _sim.add_stage(
+            ExitDescription{
+                {{Polygon{test_geometries::rectangle_points(lower, upper)}, _flat.room_id}}});
+    }
+
+    BaseStage::ID waypoint(Point center)
+    {
+        const Vector half{0.5, 0.5};
+        return _sim.add_stage(
+            WaypointDescription{
+                {{Polygon{test_geometries::rectangle_points(center - half, center + half)},
+                  _flat.room_id}}});
+    }
+
+    void add_agents(const std::vector<std::pair<Journey::ID, BaseStage::ID>>& journeys)
+    {
+        for(std::size_t i = draw(3) + 1; i > 0; --i) {
+            const Point xy{static_cast<double>(draw(19) + 1), static_cast<double>(draw(19) + 1)};
+            if(!_sim.agents_in_range(_sim.get_location(xy.x(), xy.y(), _flat.room_id), 1.0)
+                    .empty()) {
+                continue;
+            }
+            const auto [journey, first] = journeys[draw(journeys.size())];
+            const auto id = _sim.add_agent(journey, first, xy, State{}, _flat.room_id);
+            _added.push_back(id);
+            _present.insert(id);
+        }
+    }
+
+    GenericAgent::ID any_present_agent()
+    {
+        return *std::next(_present.begin(), static_cast<std::ptrdiff_t>(draw(_present.size())));
+    }
+
+    void iterate()
+    {
+        // Agents that reached an exit or were marked leave at the beginning of the iteration.
+        for(const auto id : _sim.removed_agents()) {
+            _present.erase(id);
+        }
+        _sim.iterate();
+    }
+
+    ::testing::AssertionResult finds_exactly_the_present_agents()
+    {
+        auto& agents = _sim.agents();
+        if(!std::is_sorted(
+               agents.begin(), agents.end(), [](const GenericAgent& a, const GenericAgent& b) {
+                   return a.id < b.id;
+               })) {
+            return ::testing::AssertionFailure()
+                   << "The agents are not sorted by id. Run this test in a Debug build: an assert "
+                      "in Simulation stops at the first operation that breaks the order.";
+        }
+        const Simulation& sim = _sim;
+        for(const auto id : _added) {
+            bool found = false;
+            try {
+                found = sim.agent(id).id == id;
+            } catch(const SimulationError&) {
+            }
+            if(found != _present.contains(id)) {
+                return ::testing::AssertionFailure()
+                       << "Agent " << id.get_id()
+                       << (found ? " is found after it left." : " is not found.");
+            }
+        }
+        if(sim.agent_count() != _present.size()) {
+            return ::testing::AssertionFailure() << "The simulation holds " << sim.agent_count()
+                                                 << " agents, expected " << _present.size() << ".";
+        }
+        return ::testing::AssertionSuccess();
+    }
+};
+} // namespace
+
+TEST_P(AgentLookup, FindsExactlyTheAgentsInTheSimulation)
+{
+    // Large exits, so that agents leave throughout the run.
+    const auto exit1 = exit({1, 15}, {5, 19});
+    const auto exit2 = exit({15, 1}, {19, 5});
+    const auto wp1 = waypoint({10, 10});
+    const auto wp2 = waypoint({18, 18});
+    const std::vector<std::pair<Journey::ID, BaseStage::ID>> journeys{
+        {_sim.add_journey({{exit1, NonTransitionDescription{}}}), exit1},
+        {_sim.add_journey({{exit2, NonTransitionDescription{}}}), exit2},
+        {_sim.add_journey(
+             {{wp1, FixedTransitionDescription{exit1}}, {exit1, NonTransitionDescription{}}}),
+         wp1},
+        {_sim.add_journey({{wp2, NonTransitionDescription{}}}), wp2}};
+
+    for(int operation = 0; operation < 200; ++operation) {
+        switch(draw(10)) {
+            case 0:
+            case 1:
+            case 2:
+                add_agents(journeys);
+                break;
+            case 3:
+                if(!_present.empty()) {
+                    _sim.mark_agent_for_removal(any_present_agent());
+                }
+                break;
+            case 4:
+                if(!_present.empty()) {
+                    const auto [journey, first] = journeys[draw(journeys.size())];
+                    _sim.switch_agent_journey(any_present_agent(), journey, first);
+                }
+                break;
+            default:
+                for(std::size_t step = draw(5) + 1; step > 0; --step) {
+                    iterate();
+                }
+        }
+        ASSERT_TRUE(finds_exactly_the_present_agents())
+            << "seed " << GetParam() << ", operation " << operation;
+    }
+}
+
+INSTANTIATE_TEST_SUITE_P(Seeds, AgentLookup, ::testing::Values(1, 2, 3, 4, 42));

@@ -71,6 +71,9 @@ private:
     AgentContainer<GenericAgent> _agents;
     std::vector<GenericAgent::ID> _removed_agents_in_last_iteration;
     std::unordered_map<Journey::ID, std::unique_ptr<Journey>> _journeys;
+    /// Kept apart from the agents, which are copied every iteration; only named agents.
+    std::unordered_map<GenericAgent::ID, std::string> _agent_names;
+    std::unordered_map<std::string, GenericAgent::ID> _agent_ids_by_name;
     Timer _timer{};
     State _state{State::Ready};
     enum LogLevel { General = 1, Detailed = 2, Debug = 3 };
@@ -79,6 +82,8 @@ private:
     void throw_if_state(State forbidden, const char* operation) const;
     /// Throws unless @p location lies on this simulation's geometry.
     void check_on_own_geometry(const Location& location, const char* what) const;
+    /// Throws if another agent has @p name.
+    void check_agent_name(const std::optional<std::string>& name) const;
     /// The destination of stage @p stage_id; throws for a stage without an area.
     const Destination& destination_of(BaseStage::ID stage_id) const;
 
@@ -119,12 +124,18 @@ public:
     /// Throws if @p polygon does not intersect that region.
     std::vector<GenericAgent::ID> agents_in_polygon(const Polygon& polygon, std::size_t region_id);
     /// @param region_id Region @p position lies in, see `Geometry::get_location`.
+    /// @p name has to be unique among the agents, if given; it is free again once its agent has
+    /// left.
     GenericAgent::ID add_agent(
         Journey::ID journey_id,
         BaseStage::ID stage_id,
         Point position,
         OperationalModelState model,
-        std::size_t region_id);
+        std::size_t region_id,
+        std::optional<std::string> name = {});
+    std::optional<std::string> agent_name(GenericAgent::ID id) const;
+    /// The agent named @p name, if there is one.
+    std::optional<GenericAgent::ID> agent_named(const std::string& name) const;
     /// See `Geometry::get_location`.
     Location get_location(double x, double y, std::size_t region_id) const;
     /// Locates @p target on the surface closest to the agent's height.

@@ -575,7 +575,7 @@ def test_agent_handle_raises_after_removal(
         state.desired_speed
     with pytest.raises(jps.SimulationError):
         state.desired_speed = 1.0
-    with pytest.raises(jps.SimulationError):
+    with pytest.raises(KeyError):
         sim.agent(agent_id)
 
 

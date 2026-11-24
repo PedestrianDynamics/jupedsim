@@ -221,9 +221,7 @@ def test_get_agent_non_existing_agent_from_simulation():
 
     assert simulation.agent(agent_id).id == agent_id
 
-    with pytest.raises(
-        jps.SimulationError, match=".*Trying to access unknown Agent.*"
-    ):
+    with pytest.raises(KeyError, match="no agent with id 1000"):
         simulation.agent(1000)
 
 
@@ -393,3 +391,32 @@ def test_build_info_is_native():
     assert repr(jps.BuildInfo()) == repr(info)
     assert "SHA1 commit hash" in jps.BuildInfo.git_commit_hash.__doc__
     assert "printable" in jps.get_build_info.__doc__
+
+
+def test_agents_can_be_looked_up_by_name():
+    surface = jps.GeometryBuilder()
+    room = surface.add_region(
+        boundary=[(0, 0), (10, 0), (10, 10), (0, 10)], height=0.0
+    )
+    sim = jps.Simulation(
+        model=jps.CollisionFreeSpeedModel(), geometry=surface.build()
+    )
+    exit_id = sim.add_exit_stage([([(9, 4), (10, 4), (10, 6), (9, 6)], room)])
+    journey_id = sim.add_journey(jps.JourneyDescription([exit_id]))
+    agent_id = sim.add_agent(
+        journey_id=journey_id,
+        stage_id=exit_id,
+        location=room.at(2, 5),
+        state=jps.CollisionFreeSpeedModelState(),
+        name="anna",
+    )
+    agent = sim.agent("anna")
+    assert (agent.id, agent.name) == (agent_id, "anna")
+    assert repr(agent) == f"Agent(id={agent_id}, name='anna')"
+    with pytest.raises(TypeError, match="id or name"):
+        sim.agent(True)
+
+    sim.mark_agent_for_removal(agent_id)
+    sim.iterate()
+    with pytest.raises(KeyError, match="no agent named 'anna'"):
+        sim.agent("anna")

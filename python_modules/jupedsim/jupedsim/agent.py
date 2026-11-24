@@ -66,8 +66,9 @@ class Agent:
 
     .. code:: python
 
-        # a specific agent
-        sim.agent(id)
+        # a specific agent, by id or by name
+        sim.agent(17)
+        sim.agent("anna")
 
         # all agents as iterator
         sim.agents()
@@ -116,6 +117,11 @@ class Agent:
     def id(self) -> int:
         """Numeric id of the agent in this simulation."""
         return self.__resolve().id
+
+    @property
+    def name(self) -> str | None:
+        """Name of the agent or ``None``."""
+        return self.__simulation._obj.agent_name(self.__id)
 
     @property
     def journey_id(self) -> int:
@@ -200,4 +206,7 @@ class Agent:
         return _ModelStateHandle(self.__simulation, self.__id)
 
     def __repr__(self) -> str:
-        return f"Agent(id={self.__id})"
+        name = self.name
+        if name is None:
+            return f"Agent(id={self.__id})"
+        return f"Agent(id={self.__id}, name={name!r})"
