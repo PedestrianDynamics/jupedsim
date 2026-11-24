@@ -82,7 +82,7 @@ def test_a_region_of_another_geometry_is_rejected():
     with pytest.raises(
         ValueError, match=r"Region 0 \(room\) belongs to another geometry"
     ):
-        sim.add_exit_stage([(SQUARE, other_room)])
+        sim.add_target(jps.Exit([(SQUARE, other_room)]))
 
 
 def test_travel_times_are_given_by_region():
@@ -90,5 +90,7 @@ def test_travel_times_are_given_by_region():
     sim = jps.Simulation(
         model=jps.CollisionFreeSpeedModel(), geometry=builder.build()
     )
-    exit_id = sim.add_exit_stage([([(9, 0), (10, 0), (10, 10), (9, 10)], room)])
-    assert list(sim.travel_times(exit_id)) == [room]
+    exit_ = sim.add_target(
+        jps.Exit([([(9, 0), (10, 0), (10, 10), (9, 10)], room)])
+    )
+    assert list(sim.travel_times(exit_)) == [room]

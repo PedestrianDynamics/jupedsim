@@ -30,7 +30,7 @@ GenericAgent make_agent(const Geometry& geo, Point pos, double radius = 0.2, dou
     s.radius = radius;
     return GenericAgent(
         GenericAgent::ID::invalid,
-        jps::UniqueID<Journey>::invalid,
+        jps::UniqueID<Route>::invalid,
         jps::UniqueID<BaseStage>::invalid,
         *geo.get_location_near_z(pos.x(), pos.y(), z),
         std::move(s));

@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
 import types
-from collections.abc import Sequence
-from typing import Any, Iterator, Self, TypeVar
+from collections.abc import Callable, Iterator, Sequence
+from typing import Any, Self, TypeVar
 
 import numpy.typing as npt
 import shapely
@@ -11,7 +11,6 @@ from jupedsim.agent import Agent
 from jupedsim.custom_model import CustomOperationalModel
 from jupedsim.internal.messages import id_and_name
 from jupedsim.internal.tracing import Timer
-from jupedsim.journey import JourneyDescription
 from jupedsim.pyjupedsim import (
     AnticipationVelocityModel,
     AnticipationVelocityModelState,
@@ -21,8 +20,6 @@ from jupedsim.pyjupedsim import (
     CollisionFreeSpeedModelV2State,
     CollisionFreeSpeedModelV3,
     CollisionFreeSpeedModelV3State,
-    DirectSteeringStage,
-    ExitStage,
     FloorfieldOptions,
     GeneralizedCentrifugalForceModel,
     GeneralizedCentrifugalForceModelState,
@@ -37,30 +34,32 @@ from jupedsim.pyjupedsim import (
     TravelTimeGrid,
     WarpDriverModel,
     WarpDriverModelState,
-    WaypointStage,
     _CustomModelState,
     _PythonModel,
     _Simulation,
 )
+from jupedsim.route import AGENT_LOCATION, Route, Transition
 from jupedsim.serialization import TrajectoryWriter
+from jupedsim.target import Exit, RouteTarget, Waypoint
 
-_STATE_TYPES = (
-    GeneralizedCentrifugalForceModelState,
-    CollisionFreeSpeedModelState,
-    CollisionFreeSpeedModelV2State,
-    CollisionFreeSpeedModelV3State,
-    AnticipationVelocityModelState,
-    SocialForceModelState,
-    WarpDriverModelState,
-)
+_STATE_TYPES = {
+    GeneralizedCentrifugalForceModel: GeneralizedCentrifugalForceModelState,
+    CollisionFreeSpeedModel: CollisionFreeSpeedModelState,
+    CollisionFreeSpeedModelV2: CollisionFreeSpeedModelV2State,
+    CollisionFreeSpeedModelV3: CollisionFreeSpeedModelV3State,
+    AnticipationVelocityModel: AnticipationVelocityModelState,
+    SocialForceModel: SocialForceModelState,
+    WarpDriverModel: WarpDriverModelState,
+}
 
+_Handle = TypeVar("_Handle", RouteTarget, Route, Agent)
 _Value = TypeVar("_Value")
 
 
 class Simulation:
     """Defines a simulation of pedestrian movement over a continuous walkable area.
 
-    Movement of agents is described with Journeys, Stages and Transitions. Agents can be added and
+    Agents walk along routes of targets, or are steered to a location. Agents can be added and
     removed at will. The simulation processes one step at a time. No automatic stop condition
     exists. You can simulate multiple disconnected walkable areas by instantiating multiple
     instances of simulation.
@@ -109,7 +108,7 @@ class Simulation:
             dt: Iteration step size in seconds. It is recommended to leave this at its default
                 value.
             floorfield_options: Parameters of the floor fields used to route agents to their
-                stage areas. Defaults to :class:`~jupedsim.FloorfieldOptions` with its default
+                target areas. Defaults to :class:`~jupedsim.FloorfieldOptions` with its default
                 values.
             trajectory_writer: Any object implementing the TrajectoryWriter interface. JuPedSim
                 provides :class:`~jupedsim.Hdf5TrajectoryWriter`, which writes HDF5 files. If
@@ -127,6 +126,7 @@ class Simulation:
                 f"{type(model).__name__}"
             )
         self._writer = trajectory_writer
+        self._default_state = _STATE_TYPES.get(type(model))
         if floorfield_options is None:
             floorfield_options = FloorfieldOptions()
         self._obj = _Simulation(
@@ -136,95 +136,106 @@ class Simulation:
             floorfield_options=floorfield_options,
         )
         self._timer = Timer(self._obj, timer_log_level=timer_log_level)
-        # Stages with a floor field: a default speed field change reaches those
+        self._target_descriptions: dict[int, Waypoint | Exit] = {}
+        # Targets with a floor field: a default speed field change reaches those
         # without a speed field of their own in its region.
-        self._routed_stages: list[int] = []
-        # Stage id -> iteration from which on its travel times may differ from
+        self._routed_targets: list[int] = []
+        # Target id -> iteration from which on its travel times may differ from
         # the last ones handed out by _take_travel_time_changes.
         self._travel_time_changes: dict[int, int] = {}
 
-    def add_waypoint_stage(
-        self,
-        areas: Sequence[
-            tuple[shapely.Polygon | Sequence[tuple[float, float]], Region]
-        ],
-    ) -> int:
-        """Add a waypoint stage to the simulation.
+    def add_target(
+        self, description: Waypoint | Exit, *, name: str | None = None
+    ) -> RouteTarget:
+        """Add a waypoint or an exit.
+
+        Agents move towards the areas of a target along paths of least travel time on
+        the floor field, see :meth:`travel_times`. A target is reached on the floor
+        field grid, not on its polygon: arrival is off by up to half a cell.
+
+        Floor fields are solved when first needed and cost memory per target and
+        region, so create a target once and share it between routes.
 
         Args:
-            areas: Pairs of an area and the region it lies in. An area is a
-                :class:`~shapely.Polygon` without holes or a list of 2D points
-                describing its boundary. Only the part of an area inside its
-                region belongs to the waypoint.
+            description: The :class:`~jupedsim.Waypoint` or :class:`~jupedsim.Exit`.
+            name: Unique among the targets of this simulation, if given. Used in
+                reprs, error messages and :meth:`target`.
 
         Returns:
-            Id of the new stage.
+            Handle to the new target.
 
         Raises:
-            ValueError: If an area has holes, or a region belongs to another geometry.
+            ValueError: if an area has holes, or a region belongs to another geometry.
+            SimulationError: if an area does not overlap its region, or the name is
+                already used.
         """
-        stage_id = self._obj.add_waypoint_stage(self._area_ids(areas))
-        self._routed_stage_added(stage_id)
-        return stage_id
+        if not isinstance(description, Waypoint | Exit):
+            raise TypeError(
+                "description must be a jupedsim.Waypoint or jupedsim.Exit, got "
+                f"{type(description).__name__}"
+            )
+        areas = [
+            (area, self._region_id(region))
+            for area, region in description.areas
+        ]
+        if isinstance(description, Waypoint):
+            target_id = self._obj.add_waypoint(areas, name)
+        else:
+            target_id = self._obj.add_exit(areas, name)
+        self._target_descriptions[target_id] = description
+        self._routed_target_added(target_id)
+        return RouteTarget(self, target_id)
 
-    def add_exit_stage(
-        self,
-        areas: Sequence[
-            tuple[shapely.Polygon | Sequence[tuple[float, float]], Region]
-        ],
-    ) -> int:
-        """Add an exit stage to the simulation.
+    def add_route(
+        self, transitions: Sequence[Transition], *, name: str | None = None
+    ) -> Route:
+        """Add a route: a directed graph of targets, given by its transitions.
+
+        The targets of the route are those in its transitions. The transition leaving
+        :data:`~jupedsim.AGENT_LOCATION` chooses an agent's first target, once, when
+        it joins the route. An agent reaching a target goes on to what the
+        transition leaving that target chooses. A target without an outgoing
+        transition ends the route; the agent stays in its area. Loops are allowed.
 
         Args:
-            areas: Pairs of an area and the region it lies in. An area is a
-                :class:`~shapely.Polygon` without holes or a list of 2D points
-                describing its boundary. Only the part of an area inside its
-                region belongs to the exit.
+            transitions: Exactly one leaves :data:`~jupedsim.AGENT_LOCATION`, at most
+                one leaves each target, and all of them form one graph when their
+                directions are ignored. A target that cannot be reached from
+                :data:`~jupedsim.AGENT_LOCATION` but leads into the route is a side
+                entry, see ``first_target`` of :meth:`add_agent`.
+            name: Unique among the routes of this simulation, if given. Used in
+                reprs, error messages and :meth:`route`.
 
         Returns:
-            Id of the added exit stage.
+            Handle to the new route.
 
         Raises:
-            ValueError: If an area has holes, or a region belongs to another geometry.
+            ValueError: if a target belongs to another simulation.
+            SimulationError: if the transitions do not form a route as described,
+                or the name is already used.
         """
-        stage_id = self._obj.add_exit_stage(self._area_ids(areas))
-        self._routed_stage_added(stage_id)
-        return stage_id
-
-    def add_direct_steering_stage(self) -> int:
-        """Add an direct steering stage to the simulation.
-
-        This stage allows a direct control of the target the agent is walking to. Thus, it will
-        bypass the tactical and stragecial level of the simulation, but the operational level will
-        still be active.
-
-        .. important::
-
-            A direct steering stage can only be used if it is the only stage in a Journey.
-
-        Returns:
-            Id of the added direct steering stage.
-        """
-        return self._obj.add_direct_steering_stage()
-
-    def add_journey(self, journey: JourneyDescription) -> int:
-        """Add a journey to the simulation.
-
-        Args:
-            journey: Description of the journey.
-
-        Returns:
-            Id of the added Journey.
-
-        """
-        return self._obj.add_journey(dict(journey._transitions))
+        native = []
+        for transition in transitions:
+            for target in transition._targets():
+                self._own(target, RouteTarget, "target")
+            source = transition.source
+            native.append(
+                (
+                    None
+                    if source is AGENT_LOCATION
+                    else self._own(source, RouteTarget, "source").id,
+                    transition._description(),
+                )
+            )
+        return Route(self, self._obj.add_route(native, name))
 
     def add_agent(
         self,
-        *,
-        journey_id: int,
-        stage_id: int,
         location: Location,
+        *,
+        route: Route | None = None,
+        first_target: RouteTarget | None = None,
+        steer_to: Location | None = None,
         state: (
             GeneralizedCentrifugalForceModelState
             | CollisionFreeSpeedModelState
@@ -234,112 +245,157 @@ class Simulation:
             | SocialForceModelState
             | WarpDriverModelState
             | Any
-        ),
+        ) = None,
         name: str | None = None,
-    ) -> int:
+    ) -> Agent:
         """Add an agent to the simulation.
 
+        Give either ``route`` or ``steer_to``. An agent placed inside its first target
+        has reached it and moves on in the next iteration; inside an exit, it leaves
+        at the beginning of the next iteration.
+
         Args:
-            journey_id: Id of the journey the agent follows.
-            stage_id: Id of the stage the agent initially targets.
             location: Where the agent stands, e.g. ``region.at(x, y)``.
-            state: Initial per-agent model state. For built-in models this is the matching
-                ``XModelState`` instance, e.g. :class:`~jupedsim.CollisionFreeSpeedModelState`. For
-                custom models this is your own object, of whatever type your
-                :class:`~jupedsim.CustomOperationalModel` expects. The state type has to match the
-                model used in this simulation. When adding agents with invalid parameters, or too
-                close to the boundary or other agents, this will cause an error.
+            route: The route the agent follows.
+            first_target: The first target the agent walks to, instead of the one the
+                transition leaving :data:`~jupedsim.AGENT_LOCATION` chooses; the
+                agent then takes no turn in that transition. Any target of the route.
+                Later targets follow the route's transitions.
+            steer_to: Steers the agent to this location instead of a route. The way
+                there follows the walkable surface (the shortest path, not the floor
+                field), so speed fields do not apply.
+            state: Initial per-agent model state. For built-in models the matching
+                ``XModelState``, e.g. :class:`~jupedsim.CollisionFreeSpeedModelState`;
+                its defaults if not given. For custom models your own object, of
+                whatever type your :class:`~jupedsim.CustomOperationalModel` expects;
+                required. When adding agents with invalid parameters, or too close to
+                the boundary or other agents, this will cause an error.
             name: Unique among the agents of this simulation, if given; free again
                 once its agent has left. Used in :meth:`agent`.
 
         Returns:
-            Id of the added agent.
+            Handle to the new agent.
 
         Raises:
-            ValueError: if the location belongs to another geometry.
-            SimulationError: if the name is already used.
+            TypeError: if ``location`` is not a :class:`~jupedsim.Location`.
+            ValueError: if neither or both of ``route`` and ``steer_to`` are given,
+                or a handle belongs to another simulation.
+            SimulationError: if ``first_target`` is not part of the route, a location
+                belongs to another geometry, or the name is already used.
         """
         location = self._checked_location(location, "location")
-        region_id = self._region_id(location.region)
-        if not isinstance(state, _STATE_TYPES):
+        if state is None:
+            if self._default_state is None:
+                raise ValueError(
+                    "custom models need state=; pass your model's agent state"
+                )
+            state = self._default_state()
+        elif not isinstance(state, tuple(_STATE_TYPES.values())):
             state = _CustomModelState(state)
-        return self._obj.add_agent(
-            journey_id=journey_id,
-            stage_id=stage_id,
-            position=location.xy,
-            state=state,
-            region_id=region_id,
-            name=name,
-        )
+        if (route is None) == (steer_to is None):
+            raise ValueError("use route= or steer_to=, one of them")
+        if steer_to is not None:
+            if first_target is not None:
+                raise ValueError(
+                    "first_target= selects a target of route=; it does not apply "
+                    "to steer_to="
+                )
+            agent_id = self._obj.add_steered_agent(
+                location=location,
+                steer_to=self._checked_location(steer_to, "steer_to"),
+                state=state,
+                name=name,
+            )
+        else:
+            agent_id = self._obj.add_agent(
+                location=location,
+                route_id=self._own(route, Route, "route").id,
+                first_target_id=None
+                if first_target is None
+                else self._own(first_target, RouteTarget, "first_target").id,
+                state=state,
+                name=name,
+            )
+        return Agent(self, agent_id)
 
-    def travel_times(self, stage_id: int) -> dict[Region, TravelTimeGrid]:
-        """Get the travel times to a stage's area over the floor field grid of every region.
+    def travel_times(self, target: RouteTarget) -> dict[Region, TravelTimeGrid]:
+        """Get the travel times to a target's areas over the floor field grid of every region.
 
-        Every region has its own grid. Solves the stage's floor field if no agent has
+        Every region has its own grid. Solves the target's floor field if no agent has
         needed it yet.
 
         Args:
-            stage_id: Id of the stage.
+            target: The target.
 
         Returns:
             The grid of every region, in ascending order of region ids, each with its
-            placement, travel times in seconds and walking directions. Empty for a
-            stage without an area to route to, such as a direct steering stage.
-
-        Raises:
-            SimulationError: if the stage does not exist.
+            placement, travel times in seconds and walking directions.
         """
-        return self._by_region(self._obj.travel_times(stage_id))
+        return self._by_region(
+            self._obj.travel_times(self._own(target, RouteTarget, "target").id)
+        )
+
+    def travel_time(self, target: RouteTarget, location: Location) -> float:
+        """Travel time in seconds from a location to a target.
+
+        The value of the floor field cell nearest to ``location``, see
+        :meth:`travel_times`: 0 inside the target, ``inf`` if it cannot be reached.
+
+        Args:
+            target: The target.
+            location: Where to start, e.g. ``region.at(x, y)``.
+        """
+        return self._obj.travel_time(
+            self._own(target, RouteTarget, "target").id,
+            self._checked_location(location, "location"),
+        )
 
     def custom_speed_fields(
-        self, stage_id: int
+        self, target: RouteTarget
     ) -> dict[Region, SpeedGrid | None]:
-        """Get the speed fields a stage has of its own, for every region.
+        """Get the speed fields a target has of its own, for every region.
 
-        A stage can have its own speed field in a region instead of the default, see
+        A target can have its own speed field in a region instead of the default, see
         :func:`set_custom_speed_field`.
 
         Args:
-            stage_id: Id of the stage whose speed fields to get.
+            target: The target whose speed fields to get.
 
         Returns:
-            The grid of every region, in ascending order of region ids: ``None`` where
-            the stage has no speed field of its own and uses the default, see
-            :func:`default_speed_fields`. Empty for a stage without an area to route
-            to, such as a direct steering stage.
-
-        Raises:
-            SimulationError: if the stage does not exist.
+            The grid of every region, in ascending order of region ids: ``None``
+            where the target has no speed field of its own and uses the default, see
+            :func:`default_speed_fields`.
         """
-        return self._by_region(self._obj.custom_speed_fields(stage_id))
+        return self._by_region(
+            self._obj.custom_speed_fields(
+                self._own(target, RouteTarget, "target").id
+            )
+        )
 
-    def has_custom_speed_field(self, stage_id: int, region: Region) -> bool:
-        """Whether a stage has a speed field of its own in a region.
+    def has_custom_speed_field(
+        self, target: RouteTarget, region: Region
+    ) -> bool:
+        """Whether a target has a speed field of its own in a region.
 
         Unlike :func:`custom_speed_fields`, this does not copy the speed fields.
 
         Args:
-            stage_id: Id of the stage.
+            target: The target.
             region: The region.
 
         Returns:
-            ``True`` if the stage uses its own speed field in this region, ``False`` if
-            it uses the default. ``False`` for a stage without an area to route to, such
-            as a direct steering stage, whatever ``region`` is.
-
-        Raises:
-            ValueError: if the region belongs to another geometry.
-            SimulationError: if the stage does not exist.
+            ``True`` if the target uses its own speed field in this region, ``False`` if
+            it uses the default.
         """
         return self._obj.has_custom_speed_field(
-            stage_id, self._region_id(region)
+            self._own(target, RouteTarget, "target").id, self._region_id(region)
         )
 
     def default_speed_fields(self) -> dict[Region, SpeedGrid]:
         """Get the default walking speeds the floor fields are computed with, for every region.
 
         Every region has a default speed field, which starts out slowing agents down
-        near walls (see :class:`~jupedsim.FloorfieldOptions`). Every stage uses it in
+        near walls (see :class:`~jupedsim.FloorfieldOptions`). Every target uses it in
         a region where it has no speed field of its own, see
         :func:`custom_speed_fields`.
 
@@ -355,7 +411,7 @@ class Simulation:
 
         Use this to make agents route around slow areas, for example smoke: start
         from :func:`default_speed_fields`, change the values and set them again.
-        Every stage without a speed field of its own in this region is affected; its
+        Every target without a speed field of its own in this region is affected; its
         floor field is computed again when next needed.
 
         The speeds only change the routes, not how fast agents walk.
@@ -369,103 +425,91 @@ class Simulation:
                 walkable is fixed by the geometry.
 
         Raises:
-            ValueError: if ``values`` has the wrong shape, or the region belongs to
-                another geometry.
+            ValueError: if ``values`` has the wrong shape.
             SimulationError: if a value is not allowed.
         """
         region_id = self._region_id(region)
         self._obj.set_default_speed_field(region_id, values)
-        for stage_id in self._routed_stages:
-            if not self._obj.has_custom_speed_field(stage_id, region_id):
-                self._travel_times_changed(stage_id)
+        for target_id in self._routed_targets:
+            if not self._obj.has_custom_speed_field(target_id, region_id):
+                self._travel_times_changed(target_id)
 
     def set_custom_speed_field(
-        self, stage_id: int, region: Region, values: npt.ArrayLike
+        self, target: RouteTarget, region: Region, values: npt.ArrayLike
     ) -> None:
-        """Set the walking speeds one stage's floor field is computed with in a region.
+        """Set the walking speeds one target's floor field is computed with in a region.
 
-        The stage then uses these speeds instead of the default in this region, for
-        example where smoke only matters on the way to one exit. Other stages are not
-        affected; the stage's floor field is computed again when next needed. Use
+        The target then uses these speeds instead of the default in this region, for
+        example where smoke only matters on the way to one exit. Other targets are not
+        affected; the target's floor field is computed again when next needed. Use
         :func:`clear_custom_speed_field` to go back to the default.
 
         The speeds only change the routes, not how fast agents walk.
 
         Args:
-            stage_id: Stage whose speed field to set.
+            target: Target whose speed field to set.
             region: Region whose speed field to set.
             values: Speeds in m/s, with the same rules as for
                 :func:`set_default_speed_field`.
 
         Raises:
-            ValueError: if ``values`` has the wrong shape, or the region belongs to
-                another geometry.
-            SimulationError: if a value is not allowed, the stage does not exist, or
-                it has no area to route to.
+            ValueError: if ``values`` has the wrong shape.
+            SimulationError: if a value is not allowed.
         """
+        target_id = self._own(target, RouteTarget, "target").id
         self._obj.set_custom_speed_field(
-            stage_id, self._region_id(region), values
+            target_id, self._region_id(region), values
         )
-        self._travel_times_changed(stage_id)
+        self._travel_times_changed(target_id)
 
-    def clear_custom_speed_field(self, stage_id: int, region: Region) -> None:
-        """Remove a stage's own speed field in a region, so it uses the default again.
+    def clear_custom_speed_field(
+        self, target: RouteTarget, region: Region
+    ) -> None:
+        """Remove a target's own speed field in a region, so it uses the default again.
 
-        The stage's floor field is computed again when next needed. Nothing changes
-        if the stage has no speed field of its own in this region.
+        The target's floor field is computed again when next needed. Nothing changes
+        if the target has no speed field of its own in this region.
 
         Args:
-            stage_id: Stage whose speed field to remove.
+            target: Target whose speed field to remove.
             region: Region whose speed field to remove.
-
-        Raises:
-            ValueError: if the region belongs to another geometry.
-            SimulationError: if the stage does not exist, or it has no area to route
-                to.
         """
+        target_id = self._own(target, RouteTarget, "target").id
         region_id = self._region_id(region)
-        had_one = self._obj.has_custom_speed_field(stage_id, region_id)
-        self._obj.clear_custom_speed_field(stage_id, region_id)
+        had_one = self._obj.has_custom_speed_field(target_id, region_id)
+        self._obj.clear_custom_speed_field(target_id, region_id)
         if had_one:
-            self._travel_times_changed(stage_id)
+            self._travel_times_changed(target_id)
 
-    def _routed_stage_added(self, stage_id: int) -> None:
-        self._routed_stages.append(stage_id)
-        self._travel_times_changed(stage_id)
+    def _routed_target_added(self, target_id: int) -> None:
+        self._routed_targets.append(target_id)
+        self._travel_times_changed(target_id)
 
-    def _travel_times_changed(self, stage_id: int) -> None:
-        self._travel_time_changes.setdefault(stage_id, self.iteration_count())
+    def _travel_times_changed(self, target_id: int) -> None:
+        self._travel_time_changes.setdefault(target_id, self.iteration_count())
 
     def _take_travel_time_changes(self) -> dict[int, int]:
-        """The stages whose travel times may have changed since the last call, each
+        """The targets whose travel times may have changed since the last call, each
         with the iteration from which on agents are routed with the new ones, by
-        ascending stage id. For :class:`~jupedsim.Hdf5TrajectoryWriter`."""
+        ascending target id. For :class:`~jupedsim.Hdf5TrajectoryWriter`."""
         changes = dict(sorted(self._travel_time_changes.items()))
         self._travel_time_changes.clear()
         return changes
 
-    def mark_agent_for_removal(self, agent_id: int):
-        """Marks an agent for removal.
+    def mark_agent_for_removal(self, agent: Agent) -> None:
+        """Remove an agent at the beginning of the next :meth:`iterate`.
 
-        Marks the given agent for removal in the simulation. The agent will be removed from the
-        simulation in the start of the next :func:`iterate` call. The removal will take place before
-        any interaction between agents will be computed.
+        The removal takes place before agents interact. Nothing changes for an agent
+        that is about to leave already.
 
         Args:
-            agent_id: Id of the agent marked for removal
+            agent: The agent to remove.
         """
-
-        self._obj.mark_agent_for_removal(agent_id)
+        self._obj.mark_agent_for_removal(self._own(agent, Agent, "agent").id)
 
     def removed_agents(self) -> list[int]:
-        """All agents (given by Id) removed in the last iteration.
-
-        All agents removed from the simulation since the last call of :func:`iterate`. These agents
-        are can no longer be accessed.
-
-        Returns:
-            Ids of all removed agents since the last call of :func:`iterate`.
-        """
+        """Ids of the agents removed at the beginning of the next :meth:`iterate`: those
+        that reached an exit, or were marked by :meth:`mark_agent_for_removal`."""
         return self._obj.removed_agents()
 
     def iterate(self, count: int = 1) -> None:
@@ -510,20 +554,6 @@ class Simulation:
         finally:
             self.close()
 
-    def switch_agent_journey(
-        self, agent_id: int, journey_id: int, stage_id: int
-    ) -> None:
-        """Switch agent to the given journey at the given stage.
-
-        Args:
-            agent_id: Id of the agent to switch
-            journey_id: Id of the new journey to follow
-            stage_id: Id of the stage in the new journey the agent continues with
-        """
-        self._obj.switch_agent_journey(
-            agent_id=agent_id, journey_id=journey_id, stage_id=stage_id
-        )
-
     def agent_count(self) -> int:
         """Number of agents in the simulation.
 
@@ -556,19 +586,35 @@ class Simulation:
         """
         return self._obj.iteration_count()
 
-    def agents(self) -> Iterator[Agent]:
+    def agents(
+        self, *, filter: Callable[[Agent], bool] | None = None
+    ) -> Iterator[Agent]:
         """Agents in the simulation.
 
         The set of agents is snapshot when this method is called; agents added or removed afterwards
         are not reflected by the returned iterator.
 
+        .. code:: python
+
+            for agent in sim.agents(
+                filter=lambda a: a.route == route_c and a.current_target == wp2
+            ):
+                agent.reroute(first_target=wp3)
+
+        Args:
+            filter: Selects the agents for which it returns ``True``; all agents if not
+                given.
+
         Returns:
-            Iterator over handles to all agents in the simulation. The handles resolve the agent on
-            every attribute access and stay valid across :func:`iterate` as long as the agent
+            Iterator over handles to the agents. The handles resolve the agent on every
+            attribute access and stay valid across :func:`iterate` as long as the agent
             exists.
         """
         ids = [agent.id for agent in self._obj.agents()]
-        return iter(Agent(self, agent_id) for agent_id in ids)
+        handles = (Agent(self, agent_id) for agent_id in ids)
+        if filter is None:
+            return handles
+        return (agent for agent in handles if filter(agent))
 
     def agent(self, key: int | str) -> Agent:
         """Look an agent up by id or by name.
@@ -598,6 +644,60 @@ class Simulation:
             raise KeyError(f"no agent with id {key}") from None
         return Agent(self, key)
 
+    def target(self, key: int | str) -> RouteTarget:
+        """Look a target up by id or by name.
+
+        Raises:
+            KeyError: if there is no such target.
+        """
+        return self._lookup(key, self.targets(), "target")
+
+    def targets(self) -> list[RouteTarget]:
+        """All targets, in the order they were added."""
+        return [RouteTarget(self, i) for i in self._obj.target_ids()]
+
+    def route(self, key: int | str) -> Route:
+        """Look a route up by id or by name.
+
+        Raises:
+            KeyError: if there is no such route.
+        """
+        return self._lookup(key, self.routes(), "route")
+
+    def routes(self) -> list[Route]:
+        """All routes, in the order they were added."""
+        return [Route(self, i) for i in self._obj.route_ids()]
+
+    def _lookup(
+        self, key: int | str, handles: list[_Handle], kind: str
+    ) -> _Handle:
+        if isinstance(key, str):
+            for handle in handles:
+                if handle.name == key:
+                    return handle
+            raise KeyError(f"no {kind} named {key!r}")
+        if isinstance(key, bool) or not isinstance(key, int):
+            raise TypeError(
+                f"key must be a {kind} id or name, got {type(key).__name__}"
+            )
+        for handle in handles:
+            if handle.id == key:
+                return handle
+        raise KeyError(f"no {kind} with id {key}")
+
+    def _own(self, handle: object, kind: type[_Handle], what: str) -> _Handle:
+        """``handle``, checked to be a ``kind`` of this simulation."""
+        if not isinstance(handle, kind):
+            raise TypeError(
+                f"{what} must be a {kind.__name__}, got {type(handle).__name__}"
+            )
+        if handle._simulation is not self:
+            word = "Target" if kind is RouteTarget else kind.__name__
+            raise ValueError(
+                f"{word} {id_and_name(handle)} belongs to another simulation"
+            )
+        return handle
+
     def _region_id(self, region: object) -> int:
         """Id of ``region``, checked to be a :class:`~jupedsim.Region` of this
         simulation's geometry."""
@@ -606,7 +706,7 @@ class Simulation:
                 f"region must be a Region, got {type(region).__name__}"
             )
         try:
-            own = self.get_geometry().region(region.id)
+            own = self.geometry.region(region.id)
         except KeyError:
             own = None
         if own != region:
@@ -615,16 +715,8 @@ class Simulation:
             )
         return region.id
 
-    def _area_ids(
-        self,
-        areas: Sequence[
-            tuple[shapely.Polygon | Sequence[tuple[float, float]], Region]
-        ],
-    ) -> list[tuple[shapely.Polygon | Sequence[tuple[float, float]], int]]:
-        return [(area, self._region_id(region)) for area, region in areas]
-
     def _by_region(self, by_id: dict[int, _Value]) -> dict[Region, _Value]:
-        geometry = self.get_geometry()
+        geometry = self.geometry
         return {geometry.region(region_id): v for region_id, v in by_id.items()}
 
     @staticmethod
@@ -665,7 +757,8 @@ class Simulation:
         """Handles to the agents inside a polygon in one region.
 
         Only the part of the polygon inside its region counts, as for the areas of a
-        waypoint stage, so agents on a floor above or below are not included.
+        :class:`~jupedsim.Waypoint`, so agents on a floor above or below are not
+        included.
 
         Args:
             polygon: A :class:`~shapely.Polygon` without holes or a sequence of at
@@ -684,39 +777,12 @@ class Simulation:
             )
         ]
 
-    def stage_ids(self) -> list[int]:
-        """Get the ids of all stages.
-
-        Returns:
-            The ids of all stages in ascending order.
-        """
-        return self._obj.stage_ids()
-
-    def get_stage(
-        self, stage_id: int
-    ) -> WaypointStage | ExitStage | DirectSteeringStage:
-        """Get the stage with the given id.
-
-        Args:
-            stage_id: Id of the stage to retrieve.
-
-        Returns:
-            The stage object. It keeps the simulation alive.
-
-        Raises:
-            SimulationError: If no stage with this id exists.
-        """
-        return self._obj.get_stage(stage_id)
-
     def set_tracing(self, status: bool) -> None:
         self._obj.set_tracing(status)
 
-    def get_geometry(self) -> Geometry:
-        """Current geometry of the simulation.
-
-        Returns:
-            The geometry of the simulation.
-        """
+    @property
+    def geometry(self) -> Geometry:
+        """The geometry of the simulation."""
         return self._obj.get_geometry()
 
     @property

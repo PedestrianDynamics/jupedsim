@@ -17,7 +17,7 @@ public:
     {
         for(auto& agent : agents) {
             agent.route_orientation =
-                routing_engine.get_orientation(agent.location, agent.final_target);
+                routing_engine.get_orientation(agent.location, agent.current_target);
         }
     }
 };

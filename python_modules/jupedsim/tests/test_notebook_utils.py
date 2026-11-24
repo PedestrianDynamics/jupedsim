@@ -30,15 +30,16 @@ def single_region_file(tmp_path: pathlib.Path) -> pathlib.Path:
             trajectory_writer=writer,
             dt=DT,
         )
-        exit_id = sim.add_exit_stage(
-            [(shapely.Polygon([(9, 0), (10, 0), (10, 10), (9, 10)]), room)]
+        exit_ = sim.add_target(
+            jps.Exit(
+                [(shapely.Polygon([(9, 0), (10, 0), (10, 10), (9, 10)]), room)]
+            )
         )
-        journey_id = sim.add_journey(jps.JourneyDescription([exit_id]))
+        route = sim.add_route([jps.FixedTransition(jps.AGENT_LOCATION, exit_)])
         for position in AGENT_POSITIONS:
             sim.add_agent(
-                journey_id=journey_id,
-                stage_id=exit_id,
-                location=room.at(*position),
+                room.at(*position),
+                route=route,
                 state=jps.CollisionFreeSpeedModelV2State(),
             )
         for _ in range(ITERATIONS):

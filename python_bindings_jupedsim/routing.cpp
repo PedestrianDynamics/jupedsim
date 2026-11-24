@@ -140,7 +140,7 @@ void init_routing(py::module_& m)
                 return values;
             },
             "Travel times in seconds as an array of shape ``(height, width)``; row 0 is the "
-            "lowest. Zero inside the stage's area, ``inf`` where a cell is not walkable. "
+            "lowest. Zero inside the target's area, ``inf`` where a cell is not walkable. "
             "Each access returns a new copy.")
         .def_property_readonly(
             "directions",
@@ -159,7 +159,7 @@ void init_routing(py::module_& m)
             },
             "Walking directions as unit vectors ``(x, y)`` in an array of shape "
             "``(height, width, 2)``, laid out like :attr:`values`: the direction an agent at "
-            "a cell's centre is sent along. Zero inside the stage's area, ``nan`` where a "
+            "a cell's centre is sent along. Zero inside the target's area, ``nan`` where a "
             "cell is not walkable. Each access returns a new copy.");
 
     py::class_<SpeedGrid> speed_grid(m, "SpeedGrid");

@@ -21,15 +21,21 @@
 #include <deque>
 #include <utility>
 #include <variant>
-class Journey;
+class Route;
 class BaseStage;
 
 struct GenericAgent {
     using ID = jps::UniqueID<GenericAgent>;
     ID id{};
 
-    jps::UniqueID<Journey> journey_id{jps::UniqueID<Journey>::invalid};
+    /// Invalid, as is stage_id, while the agent is steered to the location in current_target.
+    jps::UniqueID<Route> route_id{jps::UniqueID<Route>::invalid};
     jps::UniqueID<BaseStage> stage_id{jps::UniqueID<BaseStage>::invalid};
+    /// Whether the agent has reached its current target, until it moves on or is rerouted.
+    bool target_reached{false};
+    /// Whether the agent leaves the simulation at the beginning of the next iteration: it
+    /// reached an exit, or was marked for removal.
+    bool leaving{false};
 
     /// Where the agent stands. Only the geometry can say that, so only it can build one.
     Location location;
@@ -37,21 +43,21 @@ struct GenericAgent {
     // This is evaluated by the "operational level"
     /// Unit vector along the route to the final target. Zero if the agent has reached it.
     Vector route_orientation{};
-    RoutingTarget final_target;
+    RoutingTarget current_target;
 
     OperationalModelState state{};
 
     GenericAgent(
         ID id,
-        jps::UniqueID<Journey> journey_id,
+        jps::UniqueID<Route> route_id,
         jps::UniqueID<BaseStage> stage_id,
         Location location,
         OperationalModelState state)
         : id(id != ID::invalid ? id : ID{})
-        , journey_id(journey_id)
+        , route_id(route_id)
         , stage_id(stage_id)
         , location(location)
-        , final_target(location)
+        , current_target(location)
         , state(std::move(state))
     {
     }
@@ -99,13 +105,13 @@ struct fmt::formatter<GenericAgent> {
             [&ctx, &agent](const auto& m) {
                 return fmt::format_to(
                     ctx.out(),
-                    "Agent[id={}, journey={}, stage={}, route_orientation={}, target={}, pos={}, "
+                    "Agent[id={}, route={}, stage={}, route_orientation={}, target={}, pos={}, "
                     "state={}]",
                     agent.id,
-                    agent.journey_id,
+                    agent.route_id,
                     agent.stage_id,
                     agent.route_orientation,
-                    agent.final_target,
+                    agent.current_target,
                     agent.location,
                     m);
             },

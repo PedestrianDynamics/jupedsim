@@ -24,7 +24,6 @@ void init_polygon2d(py::module_& m);
 void init_routing(py::module_& m);
 void init_agent(py::module_& m);
 void init_transition(py::module_& m);
-void init_stage(py::module_& m);
 void init_simulation(py::module_& m);
 void init_agent_view(py::module_& m);
 void init_python_model(py::module_& m);
@@ -76,7 +75,6 @@ PYBIND11_MODULE(pyjupedsim, m)
     init_routing(m);
     init_agent(m);
     init_transition(m);
-    init_stage(m);
     init_simulation(m);
     init_boundary_index(m);
     init_geometry_builder(m);

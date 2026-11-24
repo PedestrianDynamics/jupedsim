@@ -26,7 +26,7 @@ public:
     BaseStage::ID add_stage(std::unique_ptr<BaseStage> stage)
     {
         if(_stages.find(stage->id()) != _stages.end()) {
-            throw SimulationError("Internal error, stage id already in use.");
+            throw SimulationError("Internal error, target id already in use.");
         }
         const auto id = stage->id();
         _stages.emplace(id, std::move(stage));
@@ -47,7 +47,7 @@ public:
     {
         const auto iter = _stages.find(stage_id);
         if(iter == std::end(_stages)) {
-            throw SimulationError("Unknown stage id ({}) provided in journey.", stage_id.get_id());
+            throw SimulationError("Unknown target id {}.", stage_id);
         }
         return iter->second.get();
     }
@@ -56,7 +56,7 @@ public:
     {
         auto iter = _stages.find(stage_id);
         if(iter == std::end(_stages)) {
-            throw SimulationError("Unknown stage id ({}) provided in journey.", stage_id.get_id());
+            throw SimulationError("Unknown target id {}.", stage_id);
         }
         return iter->second.get();
     }
