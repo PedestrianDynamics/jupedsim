@@ -84,12 +84,23 @@ jobs:
         if: steps.pr.outputs.deploy == 'true'
         run: python -m pip install ./jupedsim/jupedsim.org/tools
 
+      - name: Create previews repository token
+        if: steps.pr.outputs.deploy == 'true'
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.DOCS_DEPLOY_APP_CLIENT_ID }}
+          private-key: ${{ secrets.DOCS_DEPLOY_APP_PRIVATE_KEY }}
+          owner: PedestrianDynamics
+          repositories: jupedsim-pr-previews
+          permission-contents: write
+
       - name: Checkout previews repository
         if: steps.pr.outputs.deploy == 'true'
         uses: actions/checkout@v7
         with:
           repository: ${{ env.PREVIEWS_REPOSITORY }}
-          token: ${{ secrets.JUPEDSIM_PR_PREVIEWS_TOKEN }}
+          token: ${{ steps.app-token.outputs.token }}
           ref: main
           path: previews
 
