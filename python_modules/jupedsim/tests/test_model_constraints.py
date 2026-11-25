@@ -1330,6 +1330,19 @@ def test_custom_model_update_wrong_movement_type_names_source():
         simulation.iterate()
 
 
+@pytest.mark.parametrize("movement", [(float("nan"), 0.0), (0.0, float("inf"))])
+def test_custom_model_update_non_finite_movement_is_rejected(movement):
+    simulation = _custom_model_simulation_with_agent(
+        _ConstantMovementModel(movement)
+    )
+
+    with pytest.raises(
+        ValueError,
+        match=r"Movement returned by compute_next_state\(\) must be finite",
+    ):
+        simulation.iterate()
+
+
 def test_custom_model_update_returning_the_current_state_is_rejected():
     simulation = _custom_model_simulation_with_agent(_SameStateModel())
 

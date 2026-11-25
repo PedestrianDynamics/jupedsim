@@ -89,6 +89,13 @@ void Simulation::throw_if_state(State forbidden, const char* operation) const
     }
 }
 
+void Simulation::throw_if_unknown_region(std::size_t region_id) const
+{
+    if(region_id >= _geometry->region_count()) {
+        throw NotFoundError("Unknown region ID {}", region_id);
+    }
+}
+
 Simulation::Simulation(
     std::unique_ptr<OperationalModel>&& operational_model,
     std::shared_ptr<const Geometry> geometry,
@@ -608,12 +615,14 @@ std::map<std::size_t, SpeedGrid> Simulation::default_speed_fields() const
 GridInfo Simulation::grid_info(std::size_t region_id) const
 {
     throw_if_state(State::Closed, "grid_info");
+    throw_if_unknown_region(region_id);
     return _routing_engine->grid_info(region_id);
 }
 
 void Simulation::set_default_speed_field(std::size_t region_id, const std::vector<double>& values)
 {
     throw_if_state(State::Iterating | State::Closed, "set_default_speed_field");
+    throw_if_unknown_region(region_id);
     _routing_engine->set_default_speed(region_id, values);
 }
 
@@ -640,18 +649,21 @@ void Simulation::set_custom_speed_field(
     const std::vector<double>& values)
 {
     throw_if_state(State::Iterating | State::Closed, "set_custom_speed_field");
+    throw_if_unknown_region(region_id);
     _stage_manager.stage(stage_id)->destination().set_speed_override(region_id, values);
 }
 
 bool Simulation::has_custom_speed_field(BaseStage::ID stage_id, std::size_t region_id) const
 {
     throw_if_state(State::Closed, "has_custom_speed_field");
+    throw_if_unknown_region(region_id);
     return _stage_manager.stage(stage_id)->destination().has_speed_override(region_id);
 }
 
 void Simulation::clear_custom_speed_field(BaseStage::ID stage_id, std::size_t region_id)
 {
     throw_if_state(State::Iterating | State::Closed, "clear_custom_speed_field");
+    throw_if_unknown_region(region_id);
     _stage_manager.stage(stage_id)->destination().clear_speed_override(region_id);
 }
 

@@ -414,10 +414,11 @@ TEST(Simulation, InvalidSpeedFieldsAreRejected)
     EXPECT_EQ(flat.sim->default_speed_fields().at(flat.room_id).values, defaults.values);
     EXPECT_FALSE(flat.sim->custom_speed_fields(exit).at(flat.room_id).has_value());
 
-    EXPECT_THROW(flat.sim->grid_info(99), SimulationError);
-    EXPECT_THROW(flat.sim->set_default_speed_field(99, defaults.values), SimulationError);
-    EXPECT_THROW(flat.sim->set_custom_speed_field(exit, 99, defaults.values), SimulationError);
-    EXPECT_THROW(flat.sim->has_custom_speed_field(exit, 99), SimulationError);
+    EXPECT_THROW(flat.sim->grid_info(99), NotFoundError);
+    EXPECT_THROW(flat.sim->set_default_speed_field(99, defaults.values), NotFoundError);
+    EXPECT_THROW(flat.sim->set_custom_speed_field(exit, 99, defaults.values), NotFoundError);
+    EXPECT_THROW(flat.sim->has_custom_speed_field(exit, 99), NotFoundError);
+    EXPECT_THROW(flat.sim->clear_custom_speed_field(exit, 99), NotFoundError);
 }
 
 TEST(MeshBuiltSimulation, IsRejected)

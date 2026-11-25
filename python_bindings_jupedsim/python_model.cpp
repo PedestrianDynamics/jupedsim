@@ -17,6 +17,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include <cmath>
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -158,6 +159,10 @@ Vector PythonModel::compute_next_state(
             "Movement returned by compute_next_state() is of wrong type: "
             "expected tuple[float, float], got {}",
             describe(movement_value));
+    }
+    if(!std::isfinite(movement.x()) || !std::isfinite(movement.y())) {
+        throw InvalidValueError(
+            "Movement returned by compute_next_state() must be finite, got {}", movement);
     }
     custom_model_data.set(next_state);
     return movement;
