@@ -323,6 +323,55 @@ TEST(AgentView, WallsAheadSeeACornerTheCentreLineMisses)
     EXPECT_NEAR(walls[0].closest_point.y(), -0.6, 1e-12);
 }
 
+TEST(AgentView, WallsAheadKeepDistinctWallsInACorner)
+{
+    // Walking along the top wall (y = 100) towards the right wall (x = 100): the centre and
+    // the right-hand line leave through x = 100, the left-hand line would start behind y = 100.
+    Environment env{};
+    env.add_agent({99.0, 99.8});
+    const auto geo = open_geometry();
+    const auto q = env.query(*geo);
+
+    const auto walls = env.first_agent_view(q).walls_ahead(Vector{3, 0}, 0.3);
+    ASSERT_EQ(walls.size(), 2u);
+    const auto [nearest, furthest] =
+        std::ranges::minmax(walls, {}, [](const WallView& w) { return w.distance; });
+    EXPECT_NEAR(nearest.distance, 0.2, 1e-12);
+    EXPECT_NEAR(nearest.normal.y(), -1.0, 1e-12);
+    EXPECT_NEAR(furthest.distance, 1.0, 1e-12);
+    EXPECT_NEAR(furthest.normal.x(), -1.0, 1e-12);
+}
+
+TEST(AgentView, WallsAheadReportACornerAsAPointWall)
+{
+    // The centre line leaves exactly through the corner (100, 100), 5 away; the side lines
+    // leave through the two walls that meet there.
+    Environment env{};
+    env.add_agent({96.0, 97.0});
+    const auto geo = open_geometry();
+    const auto q = env.query(*geo);
+
+    const auto walls = env.first_agent_view(q).walls_ahead(Vector{8, 6}, 0.3);
+    ASSERT_EQ(walls.size(), 3u);
+    const auto corner =
+        std::ranges::find_if(walls, [](const WallView& w) { return w.segment.p1 == w.segment.p2; });
+    ASSERT_NE(corner, walls.end());
+    EXPECT_NEAR(corner->distance, 5.0, 1e-12);
+    EXPECT_NEAR(corner->normal.x(), -0.8, 1e-12);
+    EXPECT_NEAR(corner->normal.y(), -0.6, 1e-12);
+}
+
+TEST(AgentView, WallsAheadWithoutADirectionSeeNoWall)
+{
+    // 0.2 beside the block's near face, but with nowhere to look.
+    Environment env{};
+    env.add_agent({0.7, 0.0});
+    const auto geo = walled_geometry();
+    const auto q = env.query(*geo);
+
+    EXPECT_TRUE(env.first_agent_view(q).walls_ahead(Vector{}, 0.3).empty());
+}
+
 TEST(AgentView, AgentsOnAnotherStoreyAreNotNeighbours)
 {
     // Two floors sharing a footprint, one agent on each, standing at the same (x, y) three

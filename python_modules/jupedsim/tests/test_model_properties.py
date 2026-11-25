@@ -771,3 +771,64 @@ def test_anticipation_velocity_model_does_not_back_into_a_wall():
     for _ in range(3000):
         sim.iterate()
     assert -0.5 + 0.15 <= backing.location.x < -0.345
+
+
+# (model, state class, state kwargs, closest the centre may come to the wall)
+_WALL_APPROACH = [
+    (jps.CollisionFreeSpeedModel, jps.CollisionFreeSpeedModelState, {}, 0.2),
+    (
+        jps.CollisionFreeSpeedModelV2,
+        jps.CollisionFreeSpeedModelV2State,
+        {},
+        0.2,
+    ),
+    (
+        jps.CollisionFreeSpeedModelV3,
+        jps.CollisionFreeSpeedModelV3State,
+        {
+            "strength_neighbor_repulsion": 8.0,
+            "range_neighbor_repulsion": 0.1,
+            "strength_geometry_repulsion": 5.0,
+            "range_geometry_repulsion": 0.02,
+        },
+        0.2,
+    ),
+    (
+        jps.AnticipationVelocityModel,
+        jps.AnticipationVelocityModelState,
+        {},
+        0.2,
+    ),
+    (jps.SocialForceModel, jps.SocialForceModelState, {}, 0.3),
+]
+
+
+@pytest.mark.parametrize(
+    "start_y, target_x", [(3.0, 8.0), (1.0, 19.0)], ids=["steep", "shallow"]
+)
+@pytest.mark.parametrize(
+    "model, state_cls, state_kwargs, body",
+    _WALL_APPROACH,
+    ids=[model.__name__ for model, _, _, _ in _WALL_APPROACH],
+)
+def test_agent_steered_at_a_wall_stays_out_of_it(
+    model, state_cls, state_kwargs, body, start_y, target_x
+):
+    """An agent steered at a point 2 cm in front of the wall y = 0 walks
+    obliquely towards the wall. The wall keeps its body out: its centre
+    never comes closer than `body`."""
+    surface = jps.GeometryBuilder()
+    room = surface.add_region(
+        boundary=[(0, 0), (20, 0), (20, 4), (0, 4)], height=0.0
+    )
+    sim = jps.Simulation(model=model(), geometry=surface.build())
+    agent = sim.add_agent(
+        room.at(1, start_y),
+        steer_to=room.at(target_x, 0.02),
+        state=state_cls(**state_kwargs),
+    )
+    closest = start_y
+    for _ in range(3000):
+        sim.iterate()
+        closest = min(closest, agent.location.y)
+    assert closest >= body
