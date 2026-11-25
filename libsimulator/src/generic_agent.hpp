@@ -16,9 +16,10 @@
 #include "visitor.hpp"
 #include "warp_driver_model_state.hpp"
 
+#include <boost/container/deque.hpp>
+#include <boost/container/options.hpp>
 #include <fmt/core.h>
 
-#include <deque>
 #include <utility>
 #include <variant>
 class Route;
@@ -92,8 +93,10 @@ inline OperationalModelType model_type_of(const OperationalModelState& model)
         model);
 }
 
+// Chunk size of std::deque is fixed in bytes, leaving room for only a few large elements
 template <class Agent>
-using AgentContainer = std::deque<Agent>;
+using AgentContainer = boost::container::
+    deque<Agent, void, boost::container::deque_options_t<boost::container::block_size<256>>>;
 
 template <>
 struct fmt::formatter<GenericAgent> {
