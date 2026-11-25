@@ -4,7 +4,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from jupedsim.pyjupedsim import Location, _CustomModelState
+from jupedsim.pyjupedsim import (
+    InvalidValueError,
+    Location,
+    _CustomModelState,
+)
 from jupedsim.route import Route
 from jupedsim.target import RouteTarget
 
@@ -204,7 +208,7 @@ class Agent:
         sim = self._simulation
         if steer_to is not None:
             if route is not None or first_target is not None:
-                raise ValueError(
+                raise InvalidValueError(
                     "use route= and first_target=, or steer_to=, not both"
                 )
             sim._obj.steer(
@@ -223,7 +227,7 @@ class Agent:
                 self._id, sim._own(first_target, RouteTarget, "first_target").id
             )
         else:
-            raise ValueError("give route=, first_target= or steer_to=")
+            raise InvalidValueError("give route=, first_target= or steer_to=")
 
     def __eq__(self, other: object) -> bool:
         return (

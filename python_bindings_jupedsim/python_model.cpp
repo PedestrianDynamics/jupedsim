@@ -127,13 +127,13 @@ Vector PythonModel::compute_next_state(
     py::object python_update = _model.attr("compute_next_state")(python_state, python_step);
 
     if(!py::isinstance<py::tuple>(python_update)) {
-        throw SimulationError(
+        throw InvalidTypeError(
             "compute_next_state() must return a (state, movement) pair, got {}",
             describe(python_update));
     }
     auto update = py::reinterpret_borrow<py::tuple>(python_update);
     if(update.size() != 2) {
-        throw SimulationError(
+        throw InvalidTypeError(
             "compute_next_state() must return a (state, movement) pair, got {} values",
             update.size());
     }
@@ -144,7 +144,7 @@ Vector PythonModel::compute_next_state(
     // refcounted, not cloned), so this also rejects returning the current state instance.
     auto& custom_model_data = std::get<CustomModel::State>(next).get<GilSafePyObject>();
     if(next_state.is(custom_model_data.get())) {
-        throw SimulationError(
+        throw InvalidValueError(
             "Current and updated model state are the same instance. "
             "compute_next_state() must return a new state object, "
             "e.g. dataclasses.replace(state, ...).");
@@ -154,7 +154,7 @@ Vector PythonModel::compute_next_state(
     try {
         movement = into_vector(py::cast<std::tuple<double, double>>(movement_value));
     } catch(const py::cast_error&) {
-        throw SimulationError(
+        throw InvalidTypeError(
             "Movement returned by compute_next_state() is of wrong type: "
             "expected tuple[float, float], got {}",
             describe(movement_value));
@@ -186,7 +186,7 @@ void PythonModel::seed_agent_state(OperationalModelState& state)
     // agent's own.
     const py::type state_type = py::type::of(python_state.get());
     if(!py::isinstance(seeded_state, state_type)) {
-        throw SimulationError(
+        throw InvalidTypeError(
             "seed_agent_state() must return a state of type {}, got {}",
             std::string(py::str(state_type.attr("__name__"))),
             describe(seeded_state));
@@ -200,7 +200,7 @@ static const AgentStep& as_agent_step(const py::object& step)
     try {
         return step.cast<const PyAgentStep&>().step();
     } catch(const py::cast_error&) {
-        throw SimulationError(
+        throw InvalidTypeError(
             "compute_next_state() expects the step it was called with, got {}", describe(step));
     }
 }
@@ -231,7 +231,7 @@ void init_python_model(py::module_& m)
             const AgentStep& agent_step = as_agent_step(step);
             const OperationalModelState current{std::move(state)};
             if(model_type_of(current) != self.type()) {
-                throw SimulationError(
+                throw InvalidTypeError(
                     "{} cannot compute a state of type '{}'",
                     to_string(self.type()),
                     to_string(model_type_of(current)));
@@ -243,7 +243,7 @@ void init_python_model(py::module_& m)
                 movement = self.compute_next_state(current, next, agent_step);
             } catch(const std::bad_variant_access&) {
                 // The state handed in is of the right type, so it was a neighbor's.
-                throw SimulationError(
+                throw InvalidTypeError(
                     agent_step.has_neighbor_mapping() ?
                         "{} encountered a neighbor it cannot read. The mapping passed to "
                         "with_neighbor_state_mapping() has to return '{}' states." :
@@ -288,7 +288,7 @@ void init_python_model(py::module_& m)
         "seed_state",
         [](OperationalModel& self, OperationalModelState state) {
             if(model_type_of(state) != self.type()) {
-                throw SimulationError(
+                throw InvalidTypeError(
                     "{} cannot seed a state of type '{}'",
                     to_string(self.type()),
                     to_string(model_type_of(state)));

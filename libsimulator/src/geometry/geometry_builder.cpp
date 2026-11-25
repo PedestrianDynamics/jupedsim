@@ -133,7 +133,7 @@ find_seam_edge(const epick::PolyWithHoles& poly, const epick::Point2D& a, const 
             return {hole + 1, *index};
         }
     }
-    throw SimulationError("Internal Error: Seam is not an edge of the region.");
+    throw JupedsimInternalError("Seam is not an edge of the region.");
 }
 
 } // namespace
@@ -151,7 +151,7 @@ size_t GeometryBuilder::add_region(Polygon polygon, double height, std::optional
     throw_if_built();
     throw_if_name_used(name);
     if(!std::isfinite(height) || std::abs(height) > max_coordinate) {
-        throw SimulationError(
+        throw InvalidValueError(
             "Region height must be finite and at most {} m in magnitude", max_coordinate);
     }
     // Checked up front: CGAL's predicates are not guarded against non-finite or huge values, and
@@ -164,7 +164,7 @@ size_t GeometryBuilder::add_region(Polygon polygon, double height, std::optional
         return std::ranges::all_of(ring, is_valid_point);
     };
     if(!is_valid_ring(polygon.boundary) || !std::ranges::all_of(polygon.holes, is_valid_ring)) {
-        throw SimulationError(
+        throw InvalidValueError(
             "Region coordinates must be finite and at most {} m in magnitude", max_coordinate);
     }
 
@@ -180,7 +180,7 @@ size_t GeometryBuilder::add_region(Polygon polygon, double height, std::optional
         };
         if(!is_simple_ring(exact_polygon.outer_boundary()) ||
            !std::ranges::all_of(exact_polygon.holes(), is_simple_ring)) {
-            throw SimulationError(
+            throw InvalidValueError(
                 "Invalid polygon provided to add_region: every ring needs at least 3 vertices and "
                 "must not intersect itself.");
         }
@@ -188,20 +188,20 @@ size_t GeometryBuilder::add_region(Polygon polygon, double height, std::optional
         // With simple rings, only the holes' placement can make the polygon invalid.
         epeck::Traits traits;
         if(!CGAL::is_valid_polygon_with_holes(exact_polygon, traits)) {
-            throw SimulationError(
+            throw InvalidValueError(
                 "Holes must lie strictly inside the boundary and must neither overlap nor touch "
                 "each other.");
         }
         poly_with_holes = into<epick::PolyWithHoles>(exact_polygon);
         if(const auto too_close = find_edge_clearance_violation(poly_with_holes, min_clearance)) {
-            throw SimulationError(
+            throw InvalidValueError(
                 "Walls of the region come closer than {} m to each other at {}.",
                 min_clearance,
                 *too_close);
         }
         check_against_floors(poly_with_holes, height);
     } catch(const CGAL::Failure_exception& e) {
-        throw SimulationError("{}", e.what());
+        throw InvalidValueError("{}", e.what());
     }
 
     std::vector<std::vector<size_t>> indices{};
@@ -257,15 +257,15 @@ void GeometryBuilder::check_against_floors(
             into<epeck::PolyWithHoles>(poly_with_holes));
         if(height_difference <= height_tolerance) {
             if(side == CGAL::ON_POSITIVE_SIDE) {
-                throw SimulationError(
+                throw InvalidValueError(
                     "New region overlaps with region {}.", region_id_and_name(region_id));
             }
             if(side == CGAL::ON_ORIENTED_BOUNDARY) {
-                throw SimulationError(
+                throw InvalidValueError(
                     "New region touches region {}.", region_id_and_name(region_id));
             }
         } else if(side == CGAL::ON_POSITIVE_SIDE) {
-            throw SimulationError(
+            throw InvalidValueError(
                 "New region overlaps region {} with only {} m between them; regions above each "
                 "other need a headroom of {} m.",
                 region_id_and_name(region_id),
@@ -294,7 +294,7 @@ void GeometryBuilder::throw_if_name_used(const std::optional<std::string>& name)
     }
     for(const auto region_id : boost::make_iterator_range(boost::vertices(_region_graph))) {
         if(_region_graph[region_id].name == name) {
-            throw SimulationError("The region name '{}' is already used.", *name);
+            throw InvalidValueError("The region name '{}' is already used.", *name);
         }
     }
 }
@@ -319,7 +319,7 @@ std::array<size_t, 2> GeometryBuilder::find_edge(size_t region_id, const LineSeg
             }
         }
     }
-    throw SimulationError("{} is not an edge of region {}.", edge, region_id_and_name(region_id));
+    throw InvalidValueError("{} is not an edge of region {}.", edge, region_id_and_name(region_id));
 }
 
 size_t GeometryBuilder::connect_regions(
@@ -333,17 +333,18 @@ size_t GeometryBuilder::connect_regions(
     throw_if_name_used(name);
     auto check_region = [this](size_t region_id, std::string_view name) {
         if(region_id >= boost::num_vertices(_region_graph)) {
-            throw SimulationError("Unknown region id used for {}: {}", name, region_id);
+            throw NotFoundError("Unknown region id used for {}: {}", name, region_id);
         }
         const Region& region = _region_graph[region_id];
         if(!region.is_connectable()) {
-            throw SimulationError("{} {} is not connectable", name, region_id_and_name(region_id));
+            throw InvalidValueError(
+                "{} {} is not connectable", name, region_id_and_name(region_id));
         }
     };
     check_region(from_region, "fromRegion");
     check_region(to_region, "toRegion");
     if(from_region == to_region) {
-        throw SimulationError("fromRegion and toRegion may not be the same region.");
+        throw InvalidValueError("fromRegion and toRegion may not be the same region.");
     }
 
     // Seams in ring order, i.e. with their region to the left. The connector lies to the right
@@ -357,11 +358,11 @@ size_t GeometryBuilder::connect_regions(
     for(const auto edge : boost::make_iterator_range(boost::edges(_region_graph))) {
         const Seam& seam = _region_graph[edge];
         if(is_same_seam(seam, a, b)) {
-            throw SimulationError(
+            throw InvalidValueError(
                 "{} of region {} is already connected.", from, region_id_and_name(from_region));
         }
         if(is_same_seam(seam, c, d)) {
-            throw SimulationError(
+            throw InvalidValueError(
                 "{} of region {} is already connected.", to, region_id_and_name(to_region));
         }
     }
@@ -374,12 +375,12 @@ size_t GeometryBuilder::connect_regions(
         corners_2d[index] = onto_xy(corners[index]);
     }
     if(!epick::Poly(std::begin(corners_2d), std::end(corners_2d)).is_simple()) {
-        throw SimulationError("Connector is no simple polygon in 2D.");
+        throw InvalidValueError("Connector is no simple polygon in 2D.");
     }
     epick::PolyWithHoles poly_with_holes =
         as_2d_poly_with_holes({connector_polygon}, _global_vertices);
     if(const auto too_close = find_edge_clearance_violation(poly_with_holes, min_clearance)) {
-        throw SimulationError(
+        throw InvalidValueError(
             "Walls of the connector come closer than {} m to each other at {}.",
             min_clearance,
             *too_close);
@@ -395,7 +396,7 @@ size_t GeometryBuilder::connect_regions(
             std::abs(CGAL::determinant(from_direction, to_direction)) /
             std::sqrt(from_direction.squared_length() * to_direction.squared_length());
         if(sine > max_seam_angle_sine) {
-            throw SimulationError("Connector is not planar: the seams are not parallel.");
+            throw InvalidValueError("Connector is not planar: the seams are not parallel.");
         }
     }
 
@@ -412,11 +413,11 @@ size_t GeometryBuilder::connect_regions(
                               (p.x() - q.x()) * (p.y() + q.y())};
     }
     if(normal.z() < 0) {
-        throw SimulationError("Connector does not lie outside of both regions.");
+        throw InvalidValueError("Connector does not lie outside of both regions.");
     }
     normal = normal / std::sqrt(normal.squared_length());
     if(!is_walkable_normal(normal)) {
-        throw SimulationError("Connector is too steep.");
+        throw InvalidValueError("Connector is too steep.");
     }
 
     Region connector{
@@ -465,7 +466,7 @@ std::unique_ptr<Geometry> GeometryBuilder::build()
     }
 
     if(const auto too_close = find_clearance_violation(_global_vertices, min_clearance)) {
-        throw SimulationError(
+        throw InvalidValueError(
             "Vertices {} and {} are closer than {} m: all vertices of the geometry need a "
             "clearance of {} m.",
             too_close->first,
@@ -493,7 +494,7 @@ std::unique_ptr<Geometry> GeometryBuilder::build()
             triangulate_rings(_region_graph[region_id].polygons, _global_vertices);
         if(!triangles) {
             // Already checked within add_region and connect_regions - but kept for safety.
-            throw SimulationError(
+            throw JupedsimInternalError(
                 "Region {} has self-intersecting boundaries.", region_id_and_name(region_id));
         }
 
@@ -501,13 +502,13 @@ std::unique_ptr<Geometry> GeometryBuilder::build()
             const auto added = mesh.add_face(
                 mesh_vertex(triangle[0]), mesh_vertex(triangle[1]), mesh_vertex(triangle[2]));
             if(added == epick::Mesh::null_face()) {
-                throw SimulationError(
+                throw InvalidValueError(
                     "Region {} does not fit to a walkable surface, check its connectors.",
                     region_id_and_name(region_id));
             }
             if(region_split.region.size() != added.idx()) {
-                throw SimulationError(
-                    "Internal Error: Added face id {} does not match expected id {}",
+                throw JupedsimInternalError(
+                    "Added face id {} does not match expected id {}",
                     added.idx(),
                     region_split.region.size());
             }
@@ -521,7 +522,7 @@ std::unique_ptr<Geometry> GeometryBuilder::build()
     // this checks what the triangulation made of it.
     for(const auto face : mesh.faces()) {
         if(CGAL::Polygon_mesh_processing::compute_face_normal(face, mesh).z() <= 0) {
-            throw SimulationError(
+            throw InvalidValueError(
                 "Region {} has a vertex (almost) on one of its edges; move it at least {} m away.",
                 region_id_and_name(region_split.region[face.idx()]),
                 min_clearance);

@@ -20,7 +20,7 @@ struct AABB {
     AABB(const Container& container)
     {
         if(std::empty(container)) {
-            throw SimulationError("Cannot create a AABB from zero points");
+            throw JupedsimInternalError("Cannot create a AABB from zero points");
         }
         for(const Point& p : container) {
             xmin = std::min(p.x(), xmin);

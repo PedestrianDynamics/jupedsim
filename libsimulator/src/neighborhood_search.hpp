@@ -98,7 +98,7 @@ public:
                 return;
             }
         }
-        throw SimulationError("Unknown agent id {}", item.id);
+        throw JupedsimInternalError("Unknown agent id {}", item.id);
     }
 
     void update(const AgentContainer<Value>& items)

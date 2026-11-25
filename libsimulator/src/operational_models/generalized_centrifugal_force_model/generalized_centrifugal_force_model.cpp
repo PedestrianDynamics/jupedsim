@@ -103,7 +103,7 @@ void GeneralizedCentrifugalForceModel::check_model_constraint(
     const auto& current_state = std::get<State>(agent.state);
 
     if(!current_state.orientation.is_unit_length()) {
-        throw SimulationError(
+        throw InvalidValueError(
             "Orientation is invalid: {}. Length should be 1.", current_state.orientation);
     }
 
@@ -147,7 +147,7 @@ void GeneralizedCentrifugalForceModel::check_model_constraint(
         const auto contanct_dist = agent_to_agent_spacing(current_state, neighbor);
         const auto distance = neighbor.relative_position.norm();
         if(contanct_dist >= distance) {
-            throw SimulationError(
+            throw InvalidValueError(
                 "Model constraint violation: Agent at {} too close to agent at {}: distance {}, "
                 "contactDist {}, "
                 "effective distance {}",
@@ -161,7 +161,7 @@ void GeneralizedCentrifugalForceModel::check_model_constraint(
 
     const auto max_radius = std::max(a_min, b_max) / 2.;
     if(!view.walls_in_range(max_radius).empty()) {
-        throw SimulationError(
+        throw InvalidValueError(
             "Model constraint violation: Agent {} too close to geometry boundaries, distance < {}",
             agent.location.xy(),
             max_radius);

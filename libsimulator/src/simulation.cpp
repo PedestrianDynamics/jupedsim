@@ -48,7 +48,7 @@ namespace
 std::vector<AreaPiece> pieces_of(const Geometry& geometry, const std::vector<StageArea>& areas)
 {
     if(areas.empty()) {
-        throw SimulationError("A target needs at least one area.");
+        throw InvalidValueError("A target needs at least one area.");
     }
     std::vector<AreaPiece> pieces{};
     for(const auto& area : areas) {
@@ -190,7 +190,7 @@ Simulation::add_stage(const StageDescription& stage_description, std::optional<s
     if(name) {
         for(const auto& [_, stage] : _stage_manager.stages()) {
             if(stage->name() == name) {
-                throw SimulationError("The target name '{}' is already used.", *name);
+                throw InvalidValueError("The target name '{}' is already used.", *name);
             }
         }
     }
@@ -219,7 +219,7 @@ Route::ID Simulation::add_route(
     if(name) {
         for(const auto& [_, route] : _routes) {
             if(route->name() == name) {
-                throw SimulationError("The route name '{}' is already used.", *name);
+                throw InvalidValueError("The route name '{}' is already used.", *name);
             }
         }
     }
@@ -280,7 +280,7 @@ void Simulation::validate_new_agent(const GenericAgent& agent) const
 {
     if(const auto agent_model_type = model_type_of(agent.state);
        agent_model_type != _operational_decision_system.model_type()) {
-        throw SimulationError(
+        throw InvalidTypeError(
             "Agent model data of type '{}' does not match the simulation's operational model "
             "'{}'",
             to_string(agent_model_type),
@@ -292,7 +292,7 @@ void Simulation::validate_new_agent(const GenericAgent& agent) const
 void Simulation::check_agent_name(const std::optional<std::string>& name) const
 {
     if(name && agent_named(*name)) {
-        throw SimulationError("The agent name '{}' is already used.", *name);
+        throw InvalidValueError("The agent name '{}' is already used.", *name);
     }
 }
 
@@ -350,7 +350,7 @@ void Simulation::reroute(GenericAgent::ID agent_id, BaseStage::ID first_stage)
     throw_if_state(State::Iterating | State::Closed, "reroute");
     auto& agent = reroutable(agent_id);
     if(agent.route_id == Route::ID::invalid) {
-        throw SimulationError("The agent has no route; pass route=.");
+        throw InvalidValueError("The agent has no route; pass route=.");
     }
     follow(agent, agent.route_id, *stage_in(route(agent.route_id), first_stage));
 }
@@ -397,7 +397,7 @@ void Simulation::follow(GenericAgent& agent, Route::ID route_id, BaseStage& stag
 void Simulation::check_on_own_geometry(const Location& location, const char* what) const
 {
     if(!location.belongs_to(*_geometry)) {
-        throw SimulationError("{} {} belongs to another geometry.", what, location);
+        throw InvalidValueError("{} {} belongs to another geometry.", what, location);
     }
 }
 
@@ -405,7 +405,7 @@ Route& Simulation::route(Route::ID route_id)
 {
     const auto iter = _routes.find(route_id);
     if(iter == std::end(_routes)) {
-        throw SimulationError("Unknown route id {}.", route_id);
+        throw NotFoundError("Unknown route id {}.", route_id);
     }
     return *iter->second;
 }
@@ -415,7 +415,7 @@ const Route& Simulation::route(Route::ID route_id) const
     throw_if_state(State::Closed, "route");
     const auto iter = _routes.find(route_id);
     if(iter == std::end(_routes)) {
-        throw SimulationError("Unknown route id {}.", route_id);
+        throw NotFoundError("Unknown route id {}.", route_id);
     }
     return *iter->second;
 }
@@ -436,7 +436,7 @@ BaseStage* Simulation::stage_in(const Route& route, BaseStage::ID stage_id) cons
 {
     auto* stage = _stage_manager.stage(stage_id);
     if(!route.contains(stage_id)) {
-        throw SimulationError(
+        throw InvalidValueError(
             "Target {} is not part of route {}.", id_and_name(*stage), id_and_name(route));
     }
     return stage;
@@ -448,7 +448,7 @@ void Simulation::mark_agent_for_removal(GenericAgent::ID id)
     JPS_TRACE_FUNC;
     const auto agent = find_agent(_agents, id);
     if(agent == std::end(_agents)) {
-        throw SimulationError("Unknown agent id {}", id);
+        throw NotFoundError("Unknown agent id {}", id);
     }
     if(!agent->leaving) {
         agent->leaving = true;
@@ -468,7 +468,7 @@ const GenericAgent& Simulation::agent(GenericAgent::ID id) const
     JPS_TRACE_FUNC;
     const auto iter = find_agent(_agents, id);
     if(iter == _agents.end()) {
-        throw SimulationError("Trying to access unknown Agent {}", id);
+        throw NotFoundError("Trying to access unknown Agent {}", id);
     }
     return *iter;
 }
@@ -479,7 +479,7 @@ GenericAgent& Simulation::agent(GenericAgent::ID id)
     JPS_TRACE_FUNC;
     const auto iter = find_agent(_agents, id);
     if(iter == _agents.end()) {
-        throw SimulationError("Trying to access unknown Agent {}", id);
+        throw NotFoundError("Trying to access unknown Agent {}", id);
     }
     return *iter;
 }

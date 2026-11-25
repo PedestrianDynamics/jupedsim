@@ -82,8 +82,8 @@ INSTANTIATE_TEST_SUITE_P(
 
 TEST(TestCheckMinClerance, ThrowsOnInvalidDist)
 {
-    ASSERT_THROW(check_min_clearance(std::vector<epick::Point2D>{}, 0), SimulationError);
-    ASSERT_THROW(check_min_clearance(std::vector<epick::Point2D>{}, -1), SimulationError);
+    ASSERT_THROW(check_min_clearance(std::vector<epick::Point2D>{}, 0), JupedsimInternalError);
+    ASSERT_THROW(check_min_clearance(std::vector<epick::Point2D>{}, -1), JupedsimInternalError);
 }
 
 static_assert(CgalPoint<epick::Point2D> && CgalPoint<epick::Point3D>);
@@ -126,9 +126,9 @@ TEST(TestCheckMinClearance, WorksOnMeshPoints)
 TEST(TestCheckMinClearance, ThrowsOnNonFiniteCoordinates)
 {
     const std::vector<epick::Point2D> points{{0, 0}, {std::numeric_limits<double>::quiet_NaN(), 0}};
-    EXPECT_THROW(check_min_clearance(points, 1), SimulationError);
+    EXPECT_THROW(check_min_clearance(points, 1), JupedsimInternalError);
     const std::vector<epick::Point3D> far{{0, 0, std::numeric_limits<double>::infinity()}};
-    EXPECT_THROW(check_min_clearance(far, 1), SimulationError);
+    EXPECT_THROW(check_min_clearance(far, 1), JupedsimInternalError);
 }
 
 TEST(TestCheckMinClearance, NegativeCoordinatesAcrossCellBorders)

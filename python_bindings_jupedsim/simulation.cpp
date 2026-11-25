@@ -13,11 +13,11 @@
 #include "polygon.hpp"
 #include "records.hpp"
 #include "route.hpp"
+#include "simulation_error.hpp"
 #include "stage.hpp"
 #include "stage_description.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep
 
-#include <fmt/format.h>
 #include <pybind11/attr.h>
 #include <pybind11/cast.h>
 #include <pybind11/detail/common.h>
@@ -47,7 +47,7 @@ std::vector<Point> boundary_without_holes(Area area)
 {
     if(auto* polygon = std::get_if<GeometryBuilder::Polygon>(&area)) {
         if(!polygon->holes.empty()) {
-            throw py::value_error("Polygon must not have holes");
+            throw InvalidValueError("Polygon must not have holes");
         }
         return std::move(polygon->boundary);
     }
@@ -76,12 +76,11 @@ flat_speed_field(const Simulation& sim, std::size_t region_id, const SpeedArray&
 {
     const auto grid = sim.grid_info(region_id);
     if(values.ndim() != 2 || values.shape(0) != grid.height || values.shape(1) != grid.width) {
-        throw py::value_error(
-            fmt::format(
-                "The speed field of region {} needs shape ({}, {}).",
-                id_and_name(region_id, sim.geo()->region_name(region_id)),
-                grid.height,
-                grid.width));
+        throw InvalidValueError(
+            "The speed field of region {} needs shape ({}, {}).",
+            id_and_name(region_id, sim.geo()->region_name(region_id)),
+            grid.height,
+            grid.width);
     }
     return {values.data(), values.data() + values.size()};
 }

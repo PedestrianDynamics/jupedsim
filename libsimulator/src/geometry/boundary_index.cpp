@@ -633,7 +633,7 @@ incident_face_and_halfedge(const epick::Mesh& mesh, epick::Mesh::Edge_index e)
         h = mesh.opposite(h);
     }
     if(mesh.is_border(h)) {
-        throw SimulationError("Input mesh contains edges without incident faces.");
+        throw JupedsimInternalError("Input mesh contains edges without incident faces.");
     }
     return {mesh.face(h), h};
 }

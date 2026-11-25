@@ -21,7 +21,7 @@ SurfaceMeshShortestPathRoutingEngine::SurfaceMeshShortestPathRoutingEngine(
     : _geometry(geometry), _wall_clearance(wall_clearance)
 {
     if(wall_clearance < 0.0) {
-        throw SimulationError("Wall clearance cannot be negative, got {}.", wall_clearance);
+        throw InvalidValueError("Wall clearance cannot be negative, got {}.", wall_clearance);
     }
 }
 
@@ -35,7 +35,7 @@ SurfaceMeshShortestPathRoutingEngine::on_surface(const epick::Point3D& p, const 
 {
     const auto below = _geometry.face_below(p);
     if(below.face == epick::Mesh::null_face()) {
-        throw SimulationError(
+        throw InvalidValueError(
             "GetShortestPath(): {} does not project onto the walkable surface.", what);
     }
     return below;

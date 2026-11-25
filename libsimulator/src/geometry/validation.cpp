@@ -98,7 +98,7 @@ void normalise_and_validate_mesh(epick::Mesh& mesh, const RegionMap* regions)
     }
 
     if(!all_faces_in_mesh_planar(mesh)) {
-        throw SimulationError("Not all faces are planar.");
+        throw JupedsimInternalError("Not all faces are planar.");
     }
 
     const auto n = pmp::compute_face_normal(*std::begin(CGAL::faces(mesh)), mesh);
@@ -115,15 +115,15 @@ void validate_mesh(const epick::Mesh& mesh, const RegionMap* regions)
     for(auto&& face : CGAL::faces(mesh)) {
         const auto n = pmp::compute_face_normal(face, mesh);
         if(!is_walkable_normal(n)) {
-            throw SimulationError("Face {} inclination exceeds 50deg.", face.idx());
+            throw InvalidValueError("Face {} inclination exceeds 50deg.", face.idx());
         }
     }
 
     if(const auto intersection = first_self_intersection(mesh)) {
         if(regions == nullptr) {
-            throw SimulationError("Mesh faces pass through each other.");
+            throw InvalidValueError("Mesh faces pass through each other.");
         }
-        throw SimulationError(
+        throw InvalidValueError(
             "Region {} and region {} pass through each other.",
             (*regions)[intersection->first],
             (*regions)[intersection->second]);
@@ -135,12 +135,12 @@ void validate_mesh(const epick::Mesh& mesh, const RegionMap* regions)
     const auto count = pmp::connected_components(mesh, component_of);
     if(count > 1) {
         if(regions == nullptr) {
-            throw SimulationError("Expected exactly 1 connected component, got: {}", count);
+            throw InvalidValueError("Expected exactly 1 connected component, got: {}", count);
         }
         const auto first = *mesh.faces().begin();
         for(const auto face : mesh.faces()) {
             if(component[face] != component[first]) {
-                throw SimulationError(
+                throw InvalidValueError(
                     "Region {} is not connected to region {}.",
                     (*regions)[face],
                     (*regions)[first]);

@@ -78,15 +78,15 @@ TEST(ClearanceField, IsCappedFarFromAllSegments)
 TEST(ClearanceField, RejectsAnUnknownRegion)
 {
     const ClearanceField field({room_with_hole_walls()});
-    EXPECT_THROW(field.clearance(1, {2, 2}), SimulationError);
+    EXPECT_THROW(field.clearance(1, {2, 2}), JupedsimInternalError);
 }
 
 TEST(ClearanceField, RejectsAPointOutsideTheRegionsBoundingBox)
 {
     const ClearanceField field({room_with_hole_walls()});
-    EXPECT_THROW(field.clearance(0, {-1, 5}), SimulationError);
-    EXPECT_THROW(field.clearance(0, {5, 11}), SimulationError);
-    EXPECT_THROW(field.clearance(0, {std::nan(""), 2}), SimulationError);
+    EXPECT_THROW(field.clearance(0, {-1, 5}), JupedsimInternalError);
+    EXPECT_THROW(field.clearance(0, {5, 11}), JupedsimInternalError);
+    EXPECT_THROW(field.clearance(0, {std::nan(""), 2}), JupedsimInternalError);
 }
 
 TEST(ClearanceField, CoversTheWholeBoundingBox)

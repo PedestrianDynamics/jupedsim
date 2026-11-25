@@ -52,8 +52,9 @@ def test_regions_of_different_geometries_differ():
 def test_an_unknown_region_is_a_key_error():
     builder, _ = _builder()
     geometry = builder.build()
-    with pytest.raises(KeyError, match="no region named 'hall'"):
+    with pytest.raises(KeyError, match="^no region named 'hall'$") as error:
         geometry.region("hall")
+    assert isinstance(error.value, jps.SimulationError)
     with pytest.raises(KeyError, match="no region with id 1"):
         geometry.region(1)
     with pytest.raises(TypeError):

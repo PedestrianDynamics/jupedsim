@@ -52,10 +52,41 @@ static void set_all(py::module_& m)
 
 PYBIND11_MODULE(pyjupedsim, m)
 {
-    py::register_exception<SimulationError>(m, "SimulationError").attr("__doc__") = clean_doc(R"(
+    const py::module_ builtins = py::module_::import("builtins");
+    auto& simulation_error = py::register_exception<SimulationError>(m, "SimulationError");
+    simulation_error.attr("__doc__") = clean_doc(R"(
         Raised for simulation errors, e.g. when accessing an agent handle whose
         agent no longer exists or when calling mutating simulation methods from a
         custom-model callback.
+    )");
+    // Registered after SimulationError: pybind11 tries the latest translator first.
+    auto& not_found_error = py::register_exception<NotFoundError>(
+        m, "NotFoundError", py::make_tuple(simulation_error, builtins.attr("KeyError")));
+    // Ensure KeyError does not add quotes around "our" message as it takes it as the key
+    not_found_error.attr("__str__") = builtins.attr("Exception").attr("__str__");
+    not_found_error.attr("__doc__") = clean_doc(R"(
+        Raised when an id refers to nothing, e.g. an unknown region or agent id.
+        It is both a :class:`SimulationError` and a :class:`KeyError`.
+    )");
+    py::register_exception<InvalidValueError>(
+        m, "InvalidValueError", py::make_tuple(simulation_error, builtins.attr("ValueError")))
+        .attr("__doc__") = clean_doc(R"(
+        Raised when a value is not allowed, e.g. an invalid polygon or a model
+        parameter out of range. It is both a :class:`SimulationError` and a
+        :class:`ValueError`.
+    )");
+    py::register_exception<InvalidTypeError>(
+        m, "InvalidTypeError", py::make_tuple(simulation_error, builtins.attr("TypeError")))
+        .attr("__doc__") = clean_doc(R"(
+        Raised when an object has the wrong type, e.g. a state that belongs to
+        another model. It is both a :class:`SimulationError` and a
+        :class:`TypeError`.
+    )");
+    py::register_exception<JupedsimInternalError>(
+        m, "JupedsimInternalError", builtins.attr("RuntimeError"))
+        .attr("__doc__") = clean_doc(R"(
+        Raised when a check fails that should never fail. This is a bug in
+        JuPedSim, please report it.
     )");
     init_logging(m);
     init_build_info(m);

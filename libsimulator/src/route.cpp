@@ -111,7 +111,7 @@ void check_connected(
         }
     }
     if(!apart.empty()) {
-        throw SimulationError(
+        throw InvalidValueError(
             "{} {} {} not connected to the rest of the route; define {} as a route of {} own.",
             apart.size() == 1 ? "Target" : "Targets",
             list_of(apart, stages),
@@ -129,7 +129,7 @@ Route::Route(
     : _name(std::move(name))
 {
     if(transitions.empty()) {
-        throw SimulationError("The route is empty.");
+        throw InvalidValueError("The route is empty.");
     }
     for(const auto& [source, transition] : transitions) {
         if(source) {
@@ -145,7 +145,7 @@ Route::Route(
         }
         const auto& stage = *stages.stage(*source);
         if(dynamic_cast<const Exit*>(&stage) != nullptr) {
-            throw SimulationError(
+            throw InvalidValueError(
                 "Target {} is an exit: agents leave the simulation there, so no transition can "
                 "leave it.",
                 id_and_name(stage));
@@ -155,11 +155,11 @@ Route::Route(
             continue;
         }
         if(std::holds_alternative<FixedTransitionDescription>(transition)) {
-            throw SimulationError(
+            throw InvalidValueError(
                 "Target {} cannot follow itself; remove the self-transition to keep agents there.",
                 id_and_name(stage));
         }
-        throw SimulationError(
+        throw InvalidValueError(
             "Target {} cannot follow itself; remove it from the targets of its own transition.",
             id_and_name(stage));
     }
@@ -169,7 +169,7 @@ Route::Route(
     }
     for(const auto& [source, count] : outgoing) {
         if(source && count > 1) {
-            throw SimulationError(
+            throw InvalidValueError(
                 "Target {} has {} outgoing transitions; combine them into one, e.g. a "
                 "jps.RoundRobinTransition.",
                 id_and_name(*stages.stage(*source)),
@@ -177,12 +177,12 @@ Route::Route(
         }
     }
     if(!outgoing.contains(std::nullopt)) {
-        throw SimulationError(
+        throw InvalidValueError(
             "No transition leaves AGENT_LOCATION; add one, e.g. "
             "jps.FixedTransition(jps.AGENT_LOCATION, ...).");
     }
     if(outgoing[std::nullopt] > 1) {
-        throw SimulationError(
+        throw InvalidValueError(
             "{} transitions leave AGENT_LOCATION; combine them into one, e.g. a "
             "jps.RoundRobinTransition.",
             outgoing[std::nullopt]);

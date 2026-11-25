@@ -36,7 +36,7 @@ struct ScopedGeometryBuilder {
     std::size_t own(const RegionHandle& region) const
     {
         if(region.scope != scope) {
-            throw SimulationError(
+            throw InvalidValueError(
                 "Region {} belongs to another GeometryBuilder.",
                 id_and_name(region.id, region.name));
         }

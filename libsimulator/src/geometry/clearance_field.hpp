@@ -37,7 +37,7 @@ public:
         double max_clearance = default_max_clearance);
 
     /// Lower bound on the distance from @p p to the nearest segment of region @p region.
-    /// Throws SimulationError for an unknown @p region, and for a @p p outside the region's
+    /// Throws JupedsimInternalError for an unknown @p region, and for a @p p outside the region's
     /// bounding box (NaN included).
     double clearance(std::size_t region, Point p) const;
 

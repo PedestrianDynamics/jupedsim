@@ -82,7 +82,7 @@ def test_collision_free_speed_models_can_not_set_radius_too_small(
     )
 
     with pytest.raises(
-        jps.SimulationError, match=r"Model constraint violation: radius -1 .*"
+        ValueError, match=r"Model constraint violation: radius -1 .*"
     ):
         simulation.add_agent(
             room.at(*agent_position),
@@ -1207,7 +1207,7 @@ def test_add_agent_rejects_state_of_different_model_on_custom_simulation():
     )
 
     with pytest.raises(
-        jps.SimulationError,
+        TypeError,
         match="does not match the simulation's operational model",
     ):
         simulation.add_agent(

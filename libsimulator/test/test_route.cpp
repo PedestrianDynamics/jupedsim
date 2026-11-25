@@ -94,7 +94,7 @@ TEST(RoundRobinTransition, ZeroWeightGivesException)
     std::vector<std::tuple<BaseStage*, uint64_t>> weighted_stages = {
         {reinterpret_cast<BaseStage*>(&stage1), 0}};
 
-    ASSERT_THROW(RoundRobinTransition sut(weighted_stages), SimulationError);
+    ASSERT_THROW(RoundRobinTransition sut(weighted_stages), JupedsimInternalError);
 }
 
 TEST(LeastTargetedTransition, NextIsCorrect)

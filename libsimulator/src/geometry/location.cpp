@@ -166,7 +166,7 @@ std::variant<Geometry::FaceLocation, LineSegment> straight_walk(
         if(exit == epick::Mesh::null_halfedge()) {
             // [RL] Purely defensive safeguard - should not be possible by mesh
             // construction/validation.
-            throw SimulationError(
+            throw JupedsimInternalError(
                 "straight_walk(): no forward exit found (mesh/predicate inconsistency)");
         }
         const auto neighbor = mesh.face(mesh.opposite(exit));
@@ -178,7 +178,7 @@ std::variant<Geometry::FaceLocation, LineSegment> straight_walk(
         }
         f = neighbor;
     }
-    throw SimulationError("straight_walk(): did not converge (mesh/predicate inconsistency)");
+    throw JupedsimInternalError("straight_walk(): did not converge (mesh/predicate inconsistency)");
 }
 } // namespace
 

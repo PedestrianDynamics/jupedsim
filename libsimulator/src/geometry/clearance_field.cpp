@@ -82,7 +82,7 @@ ClearanceField::ClearanceField(
 double ClearanceField::clearance(std::size_t region, Point p) const
 {
     if(region >= _rasters.size()) {
-        throw SimulationError("ClearanceField: region id {} out of range", region);
+        throw JupedsimInternalError("ClearanceField: region id {} out of range", region);
     }
     const auto& raster = _rasters[region];
     const double fx = std::floor((p.x() - raster.origin.x()) / _cell_size);
@@ -90,7 +90,7 @@ double ClearanceField::clearance(std::size_t region, Point p) const
     // Also rejects NaN: every comparison with it is false.
     if(!(fx >= 0 && fy >= 0 && fx < static_cast<double>(raster.width) &&
          fy < static_cast<double>(raster.height))) {
-        throw SimulationError(
+        throw JupedsimInternalError(
             "ClearanceField: point {} is outside the bounding box of region {}", p, region);
     }
     const auto x = static_cast<std::int64_t>(fx);

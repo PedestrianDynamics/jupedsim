@@ -422,7 +422,7 @@ TEST(Simulation, InvalidSpeedFieldsAreRejected)
 
 TEST(MeshBuiltSimulation, IsRejected)
 {
-    EXPECT_THROW(on_a_mesh_built_switchback_stair(), SimulationError);
+    EXPECT_THROW(on_a_mesh_built_switchback_stair(), JupedsimInternalError);
     EXPECT_NO_THROW(on_a_flat_room());
 }
 
