@@ -2,10 +2,12 @@
 """Benchmark suite: compare all operational models on three scenarios.
 
 Scenarios: bidirectional corridor, bottleneck, crossing.
-Models: CollisionFreeSpeedModelV2, AnticipationVelocityModel,
-        SocialForceModel, WarpDriverModel.
+Models: CollisionFreeSpeedModel, CollisionFreeSpeedModelV2,
+        CollisionFreeSpeedModelV3, AnticipationVelocityModel,
+        GeneralizedCentrifugalForceModel, SocialForceModel,
+        WarpDriverModel.
 
-Produces HDF5 trajectory files and a 4-column plot of trajectories.
+Produces HDF5 trajectory files and a multi-column plot of trajectories.
 """
 
 from __future__ import annotations
@@ -37,6 +39,12 @@ MODELS = {
     #   dt           -> simulation timestep [s] used when constructing
     #                   jps.Simulation for this model. Per-model so a more
     #                   sensitive integrator (e.g. WarpDriver) can run finer.
+    "CFS": {
+        "factory": lambda: jps.CollisionFreeSpeedModel(),
+        "state_cls": jps.CollisionFreeSpeedModelState,
+        "state_kwargs": {},
+        "dt": 0.01,
+    },
     "CFSV2": {
         "factory": lambda: jps.CollisionFreeSpeedModelV2(),
         "state_cls": jps.CollisionFreeSpeedModelV2State,
@@ -46,6 +54,12 @@ MODELS = {
             "strength_geometry_repulsion": 5.0,  # wall repulsive force magnitude [N]
             "range_geometry_repulsion": 0.02,  # wall exponential decay length [m]
         },
+        "dt": 0.01,
+    },
+    "CFSV3": {
+        "factory": lambda: jps.CollisionFreeSpeedModelV3(),
+        "state_cls": jps.CollisionFreeSpeedModelV3State,
+        "state_kwargs": {},
         "dt": 0.01,
     },
     "AVM": {
@@ -58,6 +72,12 @@ MODELS = {
             "anticipation_time": 1.0,  # look-ahead for neighbor prediction [s]
             "reaction_time": 0.3,  # velocity relaxation time [s]
         },
+        "dt": 0.01,
+    },
+    "GCFM": {
+        "factory": lambda: jps.GeneralizedCentrifugalForceModel(),
+        "state_cls": jps.GeneralizedCentrifugalForceModelState,
+        "state_kwargs": {},
         "dt": 0.01,
     },
     "SocialForce": {
@@ -84,11 +104,18 @@ MODELS = {
     },
 }
 
-_HAS_ORIENTATION = {jps.WarpDriverModelState}
+_HAS_ORIENTATION = {
+    jps.CollisionFreeSpeedModelV3State,
+    jps.GeneralizedCentrifugalForceModelState,
+    jps.WarpDriverModelState,
+}
 
 
 def _make_state(state_cls, orientation=None, state_kwargs=None):
-    kwargs = dict(desired_speed=1.2, radius=0.15)
+    if state_cls is jps.GeneralizedCentrifugalForceModelState:
+        kwargs = dict(desired_speed=1.2, a_min=0.15, b_min=0.15, b_max=0.30)
+    else:
+        kwargs = dict(desired_speed=1.2, radius=0.15)
     if state_cls in _HAS_ORIENTATION and orientation is not None:
         kwargs["orientation"] = orientation
     if state_kwargs:
