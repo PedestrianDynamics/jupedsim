@@ -663,23 +663,38 @@ Vector WarpDriverModel::compute_next_state(
     // State repulsion
     new_vel_world = new_vel_world + repulsion;
 
-    // Boundary avoidance: steer agents away from walls
-    const double reach = agent_data.radius * 3.0;
+    // Boundary avoidance: slide tangentially along nearby walls and apply gentle
+    // short-range pushout only on body overlap. Using a tight clearance band
+    // (radius + wall_buffer) and projecting out only the inward normal component
+    // prevents opposing doorposts and shared corner vertices from pushing agents
+    // backward out of narrow doorways (e.g., r = 0.26 m at a 0.9 m door).
+    constexpr double wall_buffer = 0.05;
+    const double reach = agent_data.radius + wall_buffer;
+    const double pre_wall_speed = std::min(new_vel_world.norm(), agent_data.v0);
+    bool touched_wall = false;
     for(const auto& wall : step.walls_in_range(reach)) {
-        if(wall.segment.length_square() < 1e-12) {
-            continue; // degenerate wall segment
+        if(wall.segment.length_square() < 1e-12 || wall.distance <= 1e-6) {
+            continue;
         }
-        if(wall.distance > 1e-6) {
-            const double steering = agent_data.v0 * (reach - wall.distance) / wall.distance;
-            new_vel_world = new_vel_world + wall.normal * steering;
+        const double dot = new_vel_world.scalar_product(wall.normal);
+        if(dot < 0.0) {
+            new_vel_world = new_vel_world - wall.normal * dot;
+            touched_wall = true;
+        }
+        if(wall.distance < agent_data.radius) {
+            const double overlap =
+                (agent_data.radius - wall.distance) / std::max(agent_data.radius, 1e-6);
+            new_vel_world = new_vel_world + wall.normal * (0.3 * agent_data.v0 * overlap);
+            touched_wall = true;
         }
     }
 
-    // Re-clamp speed to v0 after wall steering
-    double final_speed = new_vel_world.norm();
-    if(final_speed > agent_data.v0 && final_speed > 1e-9) {
+    // Preserve tangential walking speed when sliding along a wall, and clamp to v0
+    const double final_speed = new_vel_world.norm();
+    if(touched_wall && final_speed > 1e-9) {
+        new_vel_world = new_vel_world * (pre_wall_speed / final_speed);
+    } else if(final_speed > agent_data.v0 && final_speed > 1e-9) {
         new_vel_world = new_vel_world * (agent_data.v0 / final_speed);
-        final_speed = agent_data.v0;
     }
 
     // Stuck detection: accumulate the movement since the last reset over a time window.
