@@ -5,6 +5,8 @@
 #include "stage.hpp"
 #include "stage_manager.hpp"
 
+#include <boost/container/deque.hpp>
+
 template <typename Agent>
 class AgentRemovalSystem
 {
@@ -24,7 +26,7 @@ template <typename Agent>
 void AgentRemovalSystem<Agent>::run(AgentContainer<Agent>& agents, StageManager& stage_manager)
     const
 {
-    std::erase_if(agents, [&stage_manager](const GenericAgent& agent) {
+    boost::container::erase_if(agents, [&stage_manager](const GenericAgent& agent) {
         if(agent.leaving && agent.stage_id != BaseStage::ID::invalid) {
             stage_manager.handle_remove_agent(agent.stage_id);
         }
