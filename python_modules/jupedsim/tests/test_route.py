@@ -43,7 +43,7 @@ def test_a_route_with_every_transition_kind_leads_to_the_exit():
             jps.FixedTransition(last, exit_),
         ]
     )
-    for y in (4.0, 6.0):
+    for y in (4.0, 6.5):
         sim.add_agent(room.at(1.0, y), route=route)
     visited = {r.target for r in sim.reached_targets()}
     while sim.agent_count() > 0 and sim.iteration_count() < 5000:

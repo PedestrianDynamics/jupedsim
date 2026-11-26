@@ -235,7 +235,7 @@ The B→A direction is the same set mirrored, because it is sampled from B's own
 - **Trade-off:** The first query for a destination pays the full solve inside a simulation step.
 
 ### 3.10 Query semantics of `direction()`
-- Returns a unit vector downhill along the Sobel gradient. If the point's cell is an obstacle, which happens next to a slanted wall, the nearest walkable cell within two cells is used instead.
+- Returns a unit vector downhill along the Sobel gradient. The field holds one value per cell; the direction at a point is blended bilinearly from the four cell centres around it, so it changes smoothly (why: see 7.6). Cells that are not walkable, have no finite time or belong to the destination are left out. If none counts or the blended directions cancel, the direction of the point's cell is used; if that cell is an obstacle, which happens next to a slanted wall, the nearest walkable cell within two cells.
 - Inside an area destination it returns zero. Inside a point destination's cell it points towards the point, and returns zero exactly on it.
 - On a ridge, where the gradient vanishes between two equally near exits, the steepest-descent neighbour decides.
 - `is_routable` tests the exact polygon, not the grid, so points in holes or walls are rejected.
@@ -269,14 +269,13 @@ Broken internal invariants come back as an `Internal` error instead of a panic, 
 | Passages narrower than two cells | May close: cells a wall runs through are not walkable, so only a passage at least two cells wide is sure to stay open. A closed one fails construction as unreachable | `speed_field_on_grid`, `check_reachability` |
 | Lazy solve on first query | A latency spike in the first step that uses a destination, and again after each speed field change | `MultiRegionFloorfield::solution` |
 | One `f32` array per region per destination | Memory grows with destinations × area | `multi_region.rs` |
-| Direction taken per cell | Directions change in steps at cell borders | `direction()` |
 
 ---
 
 ## 6. Next areas to extend
 
 ### 6.1 Better accuracy
-Options include a second-order FSM, an 8-neighbour stencil, or bilinear interpolation of the gradient between cells for smoother headings.
+Options include a second-order FSM or an 8-neighbour stencil.
 - **How to measure:** Tighten the bounds in `gradient_direction_open_space` and `gradient_direction_behind_wall_corner`, and compare trajectories with `run_scenarios.py`.
 
 ### 6.2 Eager and/or parallel solving
@@ -310,7 +309,7 @@ Items that were on the list above and are now done, with how they were done.
 `cell_size` and `wall_influence_radius` were constants in `floorfield_routing_engine.cpp`. They are now a `FloorfieldOptions` struct (defaults 0.2 m and 0.5 m) passed to `Simulation`, and in Python as `jps.Simulation(..., floorfield_options=jps.FloorfieldOptions(cell_size=..., wall_influence_radius=...))`. The options apply to the whole simulation, not per region. The only check is the existing one in `validate_settings`: both must be positive and finite.
 
 ### 7.2 Travel times and directions exposed to Python (`428715586`)
-The grids go through C++, not straight from Rust to Python. The bridge got `region_directions` next to `region_travel_times` and `region_grid`; `FloorfieldRoutingEngine::travel_times` builds a `TravelTimeGrid` from them, and `Simulation.travel_times(stage_id)` returns one per region (`origin`, `width`, `height`, `cell_size`, `extent`, `values`, `directions`). `directions()` works on cells directly instead of calling the point-based `direction()` once per cell: the solution and the destination's cells are looked up once, and both share `direction_at_cell`, so the results are identical. `Hdf5TrajectoryWriter(write_travel_times=True)` stores all grids in `/travel_times` on close, `Hdf5TrajectoryLoader.load_travel_times()` reads them back in the same form, and the trame viewer draws them (`d44e903a0`, `babca8b5f`).
+The grids go through C++, not straight from Rust to Python. The bridge got `region_directions` next to `region_travel_times` and `region_grid`; `FloorfieldRoutingEngine::travel_times` builds a `TravelTimeGrid` from them, and `Simulation.travel_times(stage_id)` returns one per region (`origin`, `width`, `height`, `cell_size`, `extent`, `values`, `directions`). `directions()` works on cells directly instead of calling the point-based `direction()` once per cell: the solution and the destination's cells are looked up once, and both share `direction_at_cell`, so the results agree at cell centres (up to rounding, since `direction()` blends). `Hdf5TrajectoryWriter(write_travel_times=True)` stores all grids in `/travel_times` on close, `Hdf5TrajectoryLoader.load_travel_times()` reads them back in the same form, and the trame viewer draws them (`d44e903a0`, `babca8b5f`).
 
 ### 7.3 User-defined speed fields (`0d9323ab7`)
 Every region has a *default* speed field (the wall-distance rule of 3.8), and every destination can *override* it per region. In Python:
@@ -325,6 +324,9 @@ Values are a `(height, width)` raster on the region's grid. `checked_speed` requ
 
 ### 7.5 `f32` storage (`75fdf5f43`)
 The fast sweeping solver, speed fields, seam seeds and solved travel times are `f32`, halving the memory per destination and region. Geometry stays `f64` (coordinates, cell size, seam distances, wall tolerances), and gradients are taken in `f64` from the `f32` values. The cxx bridge keeps its `f64` signatures and converts at the boundary, so C++ and Python are unchanged. The seam propagation tolerance `EPS` went from `1e-9` to 1 ms, since an `f32` step at realistic travel times is far larger than `1e-9`. On the 5-floor office example, travel times differ from `f64` by at most 0.26 ms (relative 4e-6).
+
+### 7.6 Interpolated direction (discussion #1756)
+`direction()` took the direction of the cell the point lies in, so it jumped at cell borders. An agent alone on the centre line of a 1 m corridor changed direction by about 80° on every step and walked at 0.91 m/s instead of 1.2 m/s. It now blends the directions of the four cell centres around the point bilinearly (`interpolated_direction`, see 3.10). `directions()` still reports the per-cell direction, which is what the blend gives at a cell centre.
 
 ---
 
