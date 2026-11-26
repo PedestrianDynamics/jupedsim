@@ -22,8 +22,9 @@ to the repository root.
 
 ## Architecture
 
-- **`Simulation::iterate()`**: agent removal → neighborhood search → strategical (journeys,
-  stages) → tactical (routing) → operational (model) → neighborhood rebuild → clock advance.
+- **`Simulation::iterate()`**: agent removal → neighborhood search → strategical (next
+  target) → tactical (routing) → operational (model) → neighborhood rebuild → clock advance
+  → record reached targets.
 - **Geometric primitives**: `kernel.hpp` — `Point` and `Vector` wrap CGAL Epick (no glm).
   Geometry is built with `GeometryBuilder` (`src/geometry/`), mirrored in Python.
 - **Operational models**: one folder each in `libsimulator/src/operational_models/` (social
@@ -35,8 +36,9 @@ to the repository root.
 - **Custom/Python models**: `CustomModel` (C++), driven from Python via
   `python_bindings_jupedsim/python_model.cpp` and `jupedsim/custom_model.py`
   (`CustomOperationalModel`).
-- **Stages**: `Waypoint`, `Exit`, `DirectSteering`. Transitions: fixed, round-robin,
-  least-targeted.
+- **Routes** (`route.hpp`): targets (stages `Waypoint`, `Exit`) connected by transitions:
+  fixed, round-robin, least-targeted; the transition from `AGENT_LOCATION` picks the first
+  target. An agent without a route is steered to a location (direct steering).
 - **Routing**: `FloorfieldRoutingEngine` (floor fields from `libfloorfield`, Python-settable
   speed fields) and a CGAL surface-mesh shortest-path engine.
 - **Python output**: HDF5 (`hdf5_serialization.py`, writer + loader); no SQLite.
@@ -86,7 +88,7 @@ CMake custom targets (not ctest), run from the build dir; JUnit XML lands there.
 ```sh
 <build-dir>/bin/libsimulator-tests --gtest_filter='Suite.Name'
 source <build-dir>/environment   # PYTHONPATH = <build-dir>/stage + jupedsim_examples
-pytest python_modules/jupedsim/tests/test_stages.py::test_name   # from repo root
+pytest python_modules/jupedsim/tests/test_targets.py::test_name   # from repo root
 ```
 
 Where new tests go:

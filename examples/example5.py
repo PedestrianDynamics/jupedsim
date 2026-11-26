@@ -39,40 +39,34 @@ def main():
         ),
     )
 
-    exit_top = simulation.add_exit_stage(
-        [([(-2, 24), (2, 24), (2, 25), (-2, 25)], region)]
+    exit_top = simulation.add_target(
+        jps.Exit([([(-2, 24), (2, 24), (2, 25), (-2, 25)], region)])
     )
-    exit_right = simulation.add_exit_stage(
-        [([(34, -2), (34, 2), (35, 2), (35, -2)], region)]
+    exit_right = simulation.add_target(
+        jps.Exit([([(34, -2), (34, 2), (35, 2), (35, -2)], region)])
     )
-    exit_bottom = simulation.add_exit_stage(
-        [([(-2, -24), (2, -24), (2, -25), (-2, -25)], region)]
-    )
-
-    waypoint_middle = simulation.add_waypoint_stage(
-        [(jps.circle_to_polygon(center=(0, 0), radius=1), region)]
+    exit_bottom = simulation.add_target(
+        jps.Exit([([(-2, -24), (2, -24), (2, -25), (-2, -25)], region)])
     )
 
-    journey = jps.JourneyDescription(
-        [waypoint_middle, exit_top, exit_right, exit_bottom]
+    waypoint_middle = simulation.add_target(
+        jps.Waypoint([(jps.circle_to_polygon(center=(0, 0), radius=1), region)])
     )
 
-    journey.set_transition_for_stage(
-        waypoint_middle,
-        jps.Transition.create_least_targeted_transition(
-            [exit_top, exit_right, exit_bottom]
-        ),
+    route = simulation.add_route(
+        [
+            jps.FixedTransition(jps.AGENT_LOCATION, waypoint_middle),
+            jps.LeastTargetedTransition(
+                waypoint_middle, [exit_top, exit_right, exit_bottom]
+            ),
+        ]
     )
-
-    journey_id = simulation.add_journey(journey)
 
     for x in range(-49, -9, 1):
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=waypoint_middle,
-            position=(x, 0),
+            region.at(x, 0),
+            route=route,
             state=jps.CollisionFreeSpeedModelState(radius=0.3),
-            region_id=region,
         )
 
     while simulation.agent_count() > 0:

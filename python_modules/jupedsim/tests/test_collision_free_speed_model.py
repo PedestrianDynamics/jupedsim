@@ -11,21 +11,17 @@ def _simulation_with_agents(agents):
     sim = jps.Simulation(
         model=jps.CollisionFreeSpeedModel(), geometry=builder.build()
     )
-    wp = sim.add_waypoint_stage(
-        [(jps.circle_to_polygon(center=(19, 1), radius=0.5), room)]
-    )
-    journey_id = sim.add_journey(jps.JourneyDescription([wp]))
-    ids = [
-        sim.add_agent(
-            journey_id=journey_id,
-            stage_id=wp,
-            position=position,
-            state=state,
-            region_id=room,
+    wp = sim.add_target(
+        jps.Waypoint(
+            [(jps.circle_to_polygon(center=(19, 1), radius=0.5), room)]
         )
+    )
+    route = sim.add_route([jps.FixedTransition(jps.AGENT_LOCATION, wp)])
+    agents = [
+        sim.add_agent(room.at(*position), route=route, state=state)
         for position, state in agents
     ]
-    return sim, ids
+    return sim, agents
 
 
 def _front_agent_lateral_heading(anisotropy):
@@ -33,14 +29,14 @@ def _front_agent_lateral_heading(anisotropy):
     front = jps.CollisionFreeSpeedModelState(
         neighbor_repulsion_anisotropy=anisotropy
     )
-    sim, (front_id, _) = _simulation_with_agents(
+    sim, (front_agent, _) = _simulation_with_agents(
         [
             ((5.0, 1.0), front),
             ((4.6, 1.2), jps.CollisionFreeSpeedModelState()),
         ]
     )
     sim.iterate()
-    return sim.agent(front_id).state.orientation[1]
+    return front_agent.state.orientation[1]
 
 
 def test_full_anisotropy_ignores_neighbor_behind():
@@ -56,25 +52,17 @@ def test_agent_without_route_direction_still_feels_neighbors():
     sim = jps.Simulation(
         model=jps.CollisionFreeSpeedModel(), geometry=builder.build()
     )
-    stage = sim.add_direct_steering_stage()
-    journey_id = sim.add_journey(jps.JourneyDescription([stage]))
     standing = sim.add_agent(
-        journey_id=journey_id,
-        stage_id=stage,
-        position=(5.0, 1.0),
+        room.at(5.0, 1.0),
+        steer_to=room.at(5.0, 1.0),
         state=jps.CollisionFreeSpeedModelState(
             neighbor_repulsion_anisotropy=1.0
         ),
-        region_id=room,
     )
-    neighbor = sim.add_agent(
-        journey_id=journey_id,
-        stage_id=stage,
-        position=(5.35, 1.0),
+    sim.add_agent(
+        room.at(5.35, 1.0),
+        steer_to=room.at(5.35, 1.0),
         state=jps.CollisionFreeSpeedModelState(),
-        region_id=room,
     )
-    sim.agent(standing).final_target = (5.0, 1.0)
-    sim.agent(neighbor).final_target = (5.35, 1.0)
     sim.iterate()
-    assert sim.agent(standing).position[0] < 5.0
+    assert standing.location.xy[0] < 5.0

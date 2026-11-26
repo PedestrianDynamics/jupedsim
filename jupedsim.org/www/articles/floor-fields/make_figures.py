@@ -40,27 +40,32 @@ def run(with_update):
     builder = jps.GeometryBuilder()
     room = builder.add_region(polygon=shapely.box(0, 0, 20, 10), height=0.0)
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=builder.build()
+        model=jps.CollisionFreeSpeedModelTordeux2016(), geometry=builder.build()
     )
-    exit_id = simulation.add_exit_stage(
-        [(shapely.box(19, 8, 20, 10), room), (shapely.box(19, 0, 20, 2), room)]
+    exit_ = simulation.add_target(
+        jps.Exit(
+            [
+                (shapely.box(19, 8, 20, 10), room),
+                (shapely.box(19, 0, 20, 2), room),
+            ]
+        )
     )
-    journey = simulation.add_journey(jps.JourneyDescription([exit_id]))
+    route = simulation.add_route(
+        [jps.FixedTransition(jps.AGENT_LOCATION, exit_)]
+    )
     for x in np.arange(10.5, 16.5, 0.5):
         for y in np.arange(6.25, 9.8, 0.5):
             simulation.add_agent(
-                journey_id=journey,
-                stage_id=exit_id,
-                position=(x, y),
-                state=jps.CollisionFreeSpeedModelState(),
-                region_id=room,
+                room.at(x, y),
+                route=route,
+                state=jps.CollisionFreeSpeedModelTordeux2016State(),
             )
 
     default = simulation.default_speed_fields()[room]
     cx, cy = default.cell_centers
 
     def update_speed_field(radius=1.0):
-        pos = np.array([agent.position for agent in simulation.agents()])
+        pos = np.array([agent.location.xy for agent in simulation.agents()])
         if len(pos) == 0:
             return
         dist2 = (cx[..., None] - pos[:, 0]) ** 2 + (
@@ -84,7 +89,7 @@ def run(with_update):
                 np.asarray(simulation.default_speed_fields()[room].values)
             )
         if it == SNAPSHOT_IT:
-            grid = simulation.travel_times(exit_id)[room]
+            grid = simulation.travel_times(exit_)[room]
             speed = simulation.default_speed_fields()[room]
             snapshot = dict(
                 travel=np.asarray(grid.values),
@@ -93,9 +98,9 @@ def run(with_update):
             )
         if it % RECORD_EVERY == 0:
             for agent in simulation.agents():
-                rows.append((it * 0.01, agent.id, *agent.position))
+                rows.append((it * 0.01, agent.id, *agent.location.xy))
         for agent in simulation.agents():
-            last_y[agent.id] = agent.position[1]
+            last_y[agent.id] = agent.location.y
         simulation.iterate()
     t_end = simulation.iteration_count() * 0.01
     south = sum(1 for y in last_y.values() if y < 5)
@@ -182,10 +187,12 @@ def travel_time_figure(out):
     builder = jps.GeometryBuilder()
     room = builder.add_region(polygon=shapely.box(0, 0, 20, 10), height=0.0)
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=builder.build()
+        model=jps.CollisionFreeSpeedModelTordeux2016(), geometry=builder.build()
     )
-    north = simulation.add_exit_stage([(shapely.box(19, 8, 20, 10), room)])
-    simulation.add_exit_stage([(shapely.box(19, 0, 20, 2), room)])
+    north = simulation.add_target(
+        jps.Exit([(shapely.box(19, 8, 20, 10), room)])
+    )
+    simulation.add_target(jps.Exit([(shapely.box(19, 0, 20, 2), room)]))
     grid = simulation.travel_times(north)[room]
     values = np.ma.masked_invalid(grid.values)
     dirs = grid.directions

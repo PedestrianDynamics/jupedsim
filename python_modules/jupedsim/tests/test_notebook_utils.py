@@ -30,17 +30,17 @@ def single_region_file(tmp_path: pathlib.Path) -> pathlib.Path:
             trajectory_writer=writer,
             dt=DT,
         )
-        exit_id = sim.add_exit_stage(
-            [(shapely.Polygon([(9, 0), (10, 0), (10, 10), (9, 10)]), room)]
+        exit_ = sim.add_target(
+            jps.Exit(
+                [(shapely.Polygon([(9, 0), (10, 0), (10, 10), (9, 10)]), room)]
+            )
         )
-        journey_id = sim.add_journey(jps.JourneyDescription([exit_id]))
+        route = sim.add_route([jps.FixedTransition(jps.AGENT_LOCATION, exit_)])
         for position in AGENT_POSITIONS:
             sim.add_agent(
-                journey_id=journey_id,
-                stage_id=exit_id,
-                position=position,
+                room.at(*position),
+                route=route,
                 state=jps.CollisionFreeSpeedModelState(),
-                region_id=room,
             )
         for _ in range(ITERATIONS):
             sim.iterate()
@@ -105,8 +105,8 @@ def test_read_hdf5_file_requires_region_id_for_several_regions(
 
 def test_read_hdf5_file_selects_region(two_region_file):
     path, ground_floor, upper_floor = two_region_file
-    _, ground = read_hdf5_file(path, region_id=ground_floor)
-    _, upper = read_hdf5_file(path, region_id=upper_floor)
+    _, ground = read_hdf5_file(path, region_id=ground_floor.id)
+    _, upper = read_hdf5_file(path, region_id=upper_floor.id)
     assert ground.polygon.equals(shapely.box(0, 0, 5, 5))
     assert upper.polygon.equals(shapely.box(10, 0, 15, 5))
 

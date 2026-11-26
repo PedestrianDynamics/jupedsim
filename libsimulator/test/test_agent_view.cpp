@@ -30,7 +30,7 @@ GenericAgent make_agent(const Geometry& geo, Point pos, double radius = 0.2, dou
     s.radius = radius;
     return GenericAgent(
         GenericAgent::ID::invalid,
-        jps::UniqueID<Journey>::invalid,
+        jps::UniqueID<Route>::invalid,
         jps::UniqueID<BaseStage>::invalid,
         *geo.get_location_near_z(pos.x(), pos.y(), z),
         std::move(s));
@@ -260,6 +260,116 @@ TEST(AgentView, WallViewProjectsOntoTheWallAndPointsBackAtTheAgent)
     // The wall is to the agent's right, so a normal pointing back at the agent faces -x.
     EXPECT_DOUBLE_EQ(nearest.normal.x(), -1.0);
     EXPECT_NEAR(nearest.normal.y(), 0.0, 1e-12);
+}
+
+TEST(AgentView, WallsAheadAreRelativeToTheAgent)
+{
+    Environment env{};
+    env.add_agent({-1.0, 2.0});
+    const auto geo = walled_geometry();
+    const auto q = env.query(*geo);
+
+    // All three lines cross the same face of the wall block, which counts once.
+    const auto walls = env.first_agent_view(q).walls_ahead(Vector{3, 0}, 0.3);
+    ASSERT_EQ(walls.size(), 1u);
+    // The near face sits at x = 0.9, 1.9 ahead of the agent.
+    EXPECT_DOUBLE_EQ(walls[0].segment.p1.x(), 1.9);
+    EXPECT_DOUBLE_EQ(walls[0].segment.p2.x(), 1.9);
+    EXPECT_DOUBLE_EQ(walls[0].distance, 1.9);
+    EXPECT_DOUBLE_EQ(walls[0].normal.x(), -1.0);
+    EXPECT_NEAR(walls[0].normal.y(), 0.0, 1e-12);
+}
+
+TEST(AgentView, WallsAheadBeyondTheLookAheadAreNotSeen)
+{
+    Environment env{};
+    env.add_agent({-1.0, 2.0});
+    const auto geo = walled_geometry();
+    const auto q = env.query(*geo);
+
+    EXPECT_TRUE(env.first_agent_view(q).walls_ahead(Vector{1.5, 0}, 0.3).empty());
+}
+
+TEST(AgentView, WallsAheadSeeTheWallBesideTheAgent)
+{
+    // Walking along the wall block's near face (x = 0.9), 0.2 to the side of it.
+    Environment env{};
+    env.add_agent({0.7, 0.0});
+    const auto geo = walled_geometry();
+    const auto q = env.query(*geo);
+    const auto view = env.first_agent_view(q);
+
+    EXPECT_FALSE(env.first_agent_location().wall_along(Vector{0, 3}).has_value());
+    const auto walls = view.walls_ahead(Vector{0, 3}, 0.3);
+    ASSERT_EQ(walls.size(), 1u);
+    EXPECT_DOUBLE_EQ(walls[0].distance, 0.2);
+    EXPECT_DOUBLE_EQ(walls[0].normal.x(), -1.0);
+}
+
+TEST(AgentView, WallsAheadSeeACornerTheCentreLineMisses)
+{
+    // Walking down past the block's top corner (0.9, 50), 0.15 beside it: the centre line
+    // stays in the walkable area, the right-hand line crosses the block's top edge.
+    Environment env{};
+    env.add_agent({0.75, 50.6});
+    const auto geo = walled_geometry();
+    const auto q = env.query(*geo);
+    const auto view = env.first_agent_view(q);
+
+    EXPECT_FALSE(env.first_agent_location().wall_along(Vector{0, -3}).has_value());
+    const auto walls = view.walls_ahead(Vector{0, -3}, 0.3);
+    ASSERT_EQ(walls.size(), 1u);
+    EXPECT_NEAR(walls[0].closest_point.x(), 0.15, 1e-12);
+    EXPECT_NEAR(walls[0].closest_point.y(), -0.6, 1e-12);
+}
+
+TEST(AgentView, WallsAheadKeepDistinctWallsInACorner)
+{
+    // Walking along the top wall (y = 100) towards the right wall (x = 100): the centre and
+    // the right-hand line leave through x = 100, the left-hand line would start behind y = 100.
+    Environment env{};
+    env.add_agent({99.0, 99.8});
+    const auto geo = open_geometry();
+    const auto q = env.query(*geo);
+
+    const auto walls = env.first_agent_view(q).walls_ahead(Vector{3, 0}, 0.3);
+    ASSERT_EQ(walls.size(), 2u);
+    const auto [nearest, furthest] =
+        std::ranges::minmax(walls, {}, [](const WallView& w) { return w.distance; });
+    EXPECT_NEAR(nearest.distance, 0.2, 1e-12);
+    EXPECT_NEAR(nearest.normal.y(), -1.0, 1e-12);
+    EXPECT_NEAR(furthest.distance, 1.0, 1e-12);
+    EXPECT_NEAR(furthest.normal.x(), -1.0, 1e-12);
+}
+
+TEST(AgentView, WallsAheadReportACornerAsAPointWall)
+{
+    // The centre line leaves exactly through the corner (100, 100), 5 away; the side lines
+    // leave through the two walls that meet there.
+    Environment env{};
+    env.add_agent({96.0, 97.0});
+    const auto geo = open_geometry();
+    const auto q = env.query(*geo);
+
+    const auto walls = env.first_agent_view(q).walls_ahead(Vector{8, 6}, 0.3);
+    ASSERT_EQ(walls.size(), 3u);
+    const auto corner =
+        std::ranges::find_if(walls, [](const WallView& w) { return w.segment.p1 == w.segment.p2; });
+    ASSERT_NE(corner, walls.end());
+    EXPECT_NEAR(corner->distance, 5.0, 1e-12);
+    EXPECT_NEAR(corner->normal.x(), -0.8, 1e-12);
+    EXPECT_NEAR(corner->normal.y(), -0.6, 1e-12);
+}
+
+TEST(AgentView, WallsAheadWithoutADirectionSeeNoWall)
+{
+    // 0.2 beside the block's near face, but with nowhere to look.
+    Environment env{};
+    env.add_agent({0.7, 0.0});
+    const auto geo = walled_geometry();
+    const auto q = env.query(*geo);
+
+    EXPECT_TRUE(env.first_agent_view(q).walls_ahead(Vector{}, 0.3).empty());
 }
 
 TEST(AgentView, AgentsOnAnotherStoreyAreNotNeighbours)

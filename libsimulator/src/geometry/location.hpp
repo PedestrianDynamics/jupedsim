@@ -3,11 +3,13 @@
 
 #include "cfg_cgal.hpp"
 #include "kernel.hpp"
+#include "line_segment.hpp"
 
 #include <fmt/core.h>
 
 #include <cstddef>
 #include <optional>
+#include <variant>
 
 class Geometry;
 
@@ -30,6 +32,14 @@ public:
     /// Throws if the path hits a wall. On throw the location is left unchanged.
     void move_on_surface(Vector xy_direction);
 
+    /// Walk straight along @p xy_direction: the Location reached, or the first wall (in xy)
+    /// the path crosses. Where the path leaves the walkable area exactly through a corner,
+    /// that corner is returned as zero-length segment.
+    std::variant<Location, LineSegment> walk_on_surface(Vector xy_direction) const;
+
+    /// The wall of `walk_on_surface`, if the path crosses one.
+    std::optional<LineSegment> wall_along(Vector xy_direction) const;
+
     /// Feasibility variant of `move_on_surface`: walk along @p xy_direction and
     /// return the resulting Location, or `nullopt` if the straight path leaves
     /// the walkable area. Does not modify `*this`.
@@ -37,6 +47,11 @@ public:
 
     /// Whether walking straight from here arrives where @p other stands.
     bool can_walk_straight_to(const Location& other) const;
+
+    /// Whether this location was created by @p geometry.
+    bool belongs_to(const Geometry& geometry) const { return _geometry == &geometry; }
+
+    const Geometry& geometry() const { return *_geometry; }
 
 private:
     // Location uses private constructor. Only Geometry can create Location objects.

@@ -25,9 +25,10 @@ def main():
         ),
     )
 
-    exit_id = simulation.add_exit_stage([(exit_polygon, region)])
-    journey = jps.JourneyDescription([exit_id])
-    journey_id = simulation.add_journey(journey)
+    exit_ = simulation.add_target(jps.Exit([(exit_polygon, region)]))
+    route = simulation.add_route(
+        [jps.FixedTransition(jps.AGENT_LOCATION, exit_)]
+    )
 
     motivated_start_positions = jps.distribute_by_number(
         polygon=shapely.box(0, -2.5, 5, 2.5),
@@ -38,9 +39,8 @@ def main():
 
     for position in motivated_start_positions:
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=position,
+            region.at(*position),
+            route=route,
             state=jps.CollisionFreeSpeedModelState(
                 radius=0.12,
                 strength_neighbor_repulsion=8,
@@ -48,7 +48,6 @@ def main():
                 strength_geometry_repulsion=5,
                 range_geometry_repulsion=0.1,
             ),
-            region_id=region,
         )
 
     slow_start_positions = jps.distribute_by_number(
@@ -60,9 +59,8 @@ def main():
 
     for position in slow_start_positions:
         simulation.add_agent(
-            journey_id=journey_id,
-            stage_id=exit_id,
-            position=position,
+            region.at(*position),
+            route=route,
             state=jps.CollisionFreeSpeedModelState(
                 radius=0.12,
                 strength_neighbor_repulsion=30,
@@ -71,7 +69,6 @@ def main():
                 range_geometry_repulsion=0.1,
                 desired_speed=0.3,
             ),
-            region_id=region,
         )
 
     while simulation.agent_count() > 0:

@@ -34,7 +34,7 @@ struct fmt::formatter<MotivationCollisionFreeSpeedModelState> {
             "MotivationCollisionFreeSpeedModel[orientation={}, strengthNeighborRepulsion={}, "
             "rangeNeighborRepulsion={}, strengthGeometryRepulsion={}, rangeGeometryRepulsion={}, "
             "rangeXScale={}, rangeYScale={}, thetaMaxUpperBound={}, agentBuffer={}, "
-            "timeGap={}, v0={}, radius={}, headingAngle={}])",
+            "timeGap={}, v0={}, radius={}, headingAngle={}]",
             m.orientation,
             m.strength_neighbor_repulsion,
             m.range_neighbor_repulsion,

@@ -3,6 +3,8 @@
 #include "generic_agent.hpp"
 #include "geometry/location.hpp"
 #include "operational_model_state.hpp"
+#include "route.hpp"
+#include "stage.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep
 
 #include <pybind11/cast.h>
@@ -10,6 +12,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h> // IWYU pragma: keep
 
+#include <cstdint>
 #include <optional>
 #include <variant>
 
@@ -26,9 +29,21 @@ void init_agent(py::module_& m)
     py::class_<GenericAgent>(m, "_Agent")
         .def_property_readonly("id", [](const GenericAgent& agent) { return agent.id.get_id(); })
         .def_property_readonly(
-            "journey_id", [](const GenericAgent& agent) { return agent.journey_id.get_id(); })
+            "route_id",
+            [](const GenericAgent& agent) -> std::optional<uint64_t> {
+                if(agent.route_id == Route::ID::invalid) {
+                    return std::nullopt;
+                }
+                return agent.route_id.get_id();
+            })
         .def_property_readonly(
-            "stage_id", [](const GenericAgent& agent) { return agent.stage_id.get_id(); })
+            "target_id",
+            [](const GenericAgent& agent) -> std::optional<uint64_t> {
+                if(agent.stage_id == BaseStage::ID::invalid) {
+                    return std::nullopt;
+                }
+                return agent.stage_id.get_id();
+            })
         .def_property_readonly(
             "position", [](const GenericAgent& agent) { return into_tuple(agent.location.xy()); })
         .def_property_readonly(
@@ -38,16 +53,17 @@ void init_agent(py::module_& m)
             py::cpp_function(
                 [](const GenericAgent& agent) { return agent.location; }, py::keep_alive<0, 1>()))
         .def_property_readonly(
-            "final_target",
+            "current_target",
             // Same lifetime tie as for "location".
             py::cpp_function(
                 [](const GenericAgent& agent) -> std::optional<Location> {
-                    if(const auto* place = std::get_if<Location>(&agent.final_target)) {
+                    if(const auto* place = std::get_if<Location>(&agent.current_target)) {
                         return *place;
                     }
                     return std::nullopt;
                 },
                 py::keep_alive<0, 1>()))
+        .def_property_readonly("leaving", [](const GenericAgent& agent) { return agent.leaving; })
         .def_property_readonly(
             "route_orientation",
             [](const GenericAgent& agent) { return into_tuple(agent.route_orientation); })

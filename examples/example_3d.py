@@ -6,10 +6,27 @@ to its start position. Down the stairs, use different point-based waypoints to s
 agents and use an exit with multiple areas. Once again agents target the nearer one.
 """
 
+import argparse
+import pathlib
 from itertools import pairwise
 
 import jupedsim as jps
-from simulation_viewer import SimulationViewer
+
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "--viewer",
+    action="store_true",
+    help="watch the simulation in the 3D viewer instead of running it to the end",
+)
+parser.add_argument(
+    "--output",
+    type=pathlib.Path,
+    default=pathlib.Path("example_3d.h5"),
+    help="HDF5 file to write the trajectory to",
+)
+args = parser.parse_args()
+
+MAX_ITERATIONS = 20000
 
 GROUND_FLOOR = 0.0
 LANDING = 1.5
@@ -52,38 +69,45 @@ geo_builder.connect_regions(
 )
 
 sim = jps.Simulation(
-    model=jps.CollisionFreeSpeedModel(), geometry=geo_builder.build()
+    model=jps.CollisionFreeSpeedModel(),
+    geometry=geo_builder.build(),
+    trajectory_writer=jps.Hdf5TrajectoryWriter(output_file=args.output),
 )
 
 # An area on either side of the stairwell, close to the outer wall.
-upper_waypoint_id = sim.add_waypoint_stage(
-    [(rect(10, 0.5, 12, 1.5), upper), (rect(10, 18.5, 12, 19.5), upper)]
+upper_waypoint = sim.add_target(
+    jps.Waypoint(
+        [(rect(10, 0.5, 12, 1.5), upper), (rect(10, 18.5, 12, 19.5), upper)]
+    )
 )
-north_waypoint_id = sim.add_waypoint_stage(
-    [(jps.circle_to_polygon(center=(11, 16), radius=1), ground)]
+north_waypoint = sim.add_target(
+    jps.Waypoint([(jps.circle_to_polygon(center=(11, 16), radius=1), ground)])
 )
-south_waypoint_id = sim.add_waypoint_stage(
-    [(jps.circle_to_polygon(center=(11, 2), radius=1), ground)]
+south_waypoint = sim.add_target(
+    jps.Waypoint([(jps.circle_to_polygon(center=(11, 2), radius=1), ground)])
 )
 # One exit in the north-west corner and one in the south-east corner.
-exit_id = sim.add_exit_stage(
-    [(rect(0.5, 17, 1.5, 19), ground), (rect(18.5, 1, 19.5, 3), ground)]
+exit_ = sim.add_target(
+    jps.Exit(
+        [(rect(0.5, 17, 1.5, 19), ground), (rect(18.5, 1, 19.5, 3), ground)]
+    )
 )
 
 
-def add_journey_via(ground_waypoint_id):
-    stages = [upper_waypoint_id, ground_waypoint_id, exit_id]
-    journey = jps.JourneyDescription(stages)
-    for stage_id, next_stage_id in pairwise(stages):
-        journey.set_transition_for_stage(
-            stage_id, jps.Transition.create_fixed_transition(next_stage_id)
-        )
-    return sim.add_journey(journey)
+def add_route_via(ground_waypoint):
+    targets = [upper_waypoint, ground_waypoint, exit_]
+    return sim.add_route(
+        [jps.FixedTransition(jps.AGENT_LOCATION, targets[0])]
+        + [
+            jps.FixedTransition(source, target)
+            for source, target in pairwise(targets)
+        ]
+    )
 
 
-journey_ids = [
-    add_journey_via(north_waypoint_id),
-    add_journey_via(south_waypoint_id),
+routes = [
+    add_route_via(north_waypoint),
+    add_route_via(south_waypoint),
 ]
 
 # Three agents south and three north of the stairwell's centre line.
@@ -97,11 +121,9 @@ start_positions = [
 ]
 for i, position in enumerate(start_positions):
     sim.add_agent(
-        journey_id=journey_ids[i % 2],
-        stage_id=upper_waypoint_id,
-        position=position,
+        upper.at(*position),
+        route=routes[i % 2],
         state=jps.CollisionFreeSpeedModelState(),
-        region_id=upper,
     )
 
 
@@ -111,5 +133,15 @@ def on_step(sim):
     pass
 
 
-viewer = SimulationViewer(sim, on_step=on_step)
-viewer.run()
+with sim:
+    if args.viewer:
+        # Imported here: the viewer's dependencies are not needed without it.
+        from simulation_viewer import SimulationViewer
+
+        SimulationViewer(sim, on_step=on_step).run()
+    else:
+        while sim.agent_count() > 0 and sim.iteration_count() < MAX_ITERATIONS:
+            sim.iterate()
+        print(
+            f"{sim.agent_count()} agents left after {sim.iteration_count()} iterations"
+        )

@@ -10,11 +10,15 @@
 #include "line_segment.hpp"
 #include "operational_model_state.hpp"
 
+#include <boost/container/static_vector.hpp>
+
+#include <algorithm>
 #include <cmath>
 #include <concepts>
 #include <ranges>
 #include <type_traits>
 #include <utility>
+#include <variant>
 #include <vector>
 
 /// A neighbouring agent as seen from the agent that asked for it.
@@ -45,6 +49,9 @@ struct WallView {
     /// acts in. Zero for an agent standing exactly on the wall, where no direction exists.
     Vector normal;
 };
+
+/// One wall at most per line: the centre line and the two shoulder lines.
+using WallsAhead = boost::container::static_vector<WallView, 3>;
 
 inline bool intersects(const LineSegment& los, const WallView& wall)
 {
@@ -134,14 +141,19 @@ private:
     {
         return std::move(segments) |
                std::views::transform([origin = location().xy()](const LineSegment& s) {
-                   const LineSegment segment{at_offset(s.p1 - origin), at_offset(s.p2 - origin)};
-                   const Point closest_point = segment.shortest_point(Point{});
-                   return WallView{
-                       .segment = segment,
-                       .closest_point = closest_point,
-                       .distance = distance(closest_point, Point{}),
-                       .normal = (Point{} - closest_point).normalized()};
+                   return seen_from(origin, s);
                });
+    }
+
+    static WallView seen_from(Point origin, const LineSegment& s)
+    {
+        const LineSegment segment{at_offset(s.p1 - origin), at_offset(s.p2 - origin)};
+        const Point closest_point = segment.shortest_point(Point{});
+        return WallView{
+            .segment = segment,
+            .closest_point = closest_point,
+            .distance = distance(closest_point, Point{}),
+            .normal = (Point{} - closest_point).normalized()};
     }
 
 public:
@@ -149,6 +161,45 @@ public:
     auto walls_in_range(double distance) const
     {
         return as_seen_from_agent(_world.line_segments_in_range(location(), distance));
+    }
+
+    /// Approximation of the walls ahead of and beside the agent: Check for walls in moving
+    /// direction along the center and the "shoulders" ("half-width from the center"). Check
+    /// whether shoulders are "blocked" (hit a wall). The length of 'direction' is how far ahead
+    /// to look. As those checks have holes in their sight, this can miss nearby walls but is a
+    /// lot faster than `walls_in_range`.
+    WallsAhead walls_ahead(Vector direction, double half_width) const
+    {
+        const Vector side = direction.normalized().rotate90_deg() * half_width;
+        // As the radius check is symmetric, this covers both shoulder lines.
+        if(_world.no_geometry_in_range(location(), (side + direction).norm())) {
+            return {};
+        }
+        WallsAhead walls{};
+        const auto add = [&](const LineSegment& wall) {
+            const WallView view = seen_from(location().xy(), wall);
+            const LineSegment reversed{view.segment.p2, view.segment.p1};
+            if(std::ranges::none_of(walls, [&](const WallView& w) {
+                   return w.segment == view.segment || w.segment == reversed;
+               })) {
+                walls.push_back(view);
+            }
+        };
+        if(const auto wall = _world.wall_along(location(), direction)) {
+            add(*wall);
+        }
+        for(const Vector offset : {side, -side}) {
+            const auto shoulder = _world.walk_on_surface(location(), offset);
+            if(const auto* wall = std::get_if<LineSegment>(&shoulder)) {
+                // A wall beside the agent; the offset line would start behind it.
+                add(*wall);
+                continue;
+            }
+            if(const auto wall = _world.wall_along(std::get<Location>(shoulder), direction)) {
+                add(*wall);
+            }
+        }
+        return walls;
     }
 
     /// The same view, but with neighbors seen through 'states'. 'states' has to outlive the

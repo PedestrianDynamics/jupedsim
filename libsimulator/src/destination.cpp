@@ -13,6 +13,11 @@ bool Destination::contains(const Location& where) const
     return _engine->contains(where, _id);
 }
 
+double Destination::travel_time(const Location& where) const
+{
+    return _engine->travel_time(where, _id);
+}
+
 Vector Destination::orientation(const Location& from) const
 {
     return _engine->get_orientation(from, _id);

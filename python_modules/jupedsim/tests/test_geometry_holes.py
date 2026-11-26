@@ -10,11 +10,8 @@ def test_geometry_holes_returns_coordinates():
 
     surface = jps.GeometryBuilder()
     room = surface.add_region(polygon=poly, height=0.0)
-    simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModelTordeux2016(), geometry=surface.build()
-    )
-    geo = simulation.get_geometry()
+    surface.build()
 
-    polygon = shapely.from_wkt(geo.polygon(region_id=room).as_wkt())
+    polygon = shapely.from_wkt(room.polygon().as_wkt())
     assert len(polygon.interiors) == 1
     assert len(polygon.interiors[0].coords) >= 4

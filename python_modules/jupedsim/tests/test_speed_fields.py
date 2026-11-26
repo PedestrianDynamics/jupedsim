@@ -18,8 +18,12 @@ def corridor():
     sim = jps.Simulation(
         model=jps.CollisionFreeSpeedModelTordeux2016(), geometry=surface.build()
     )
-    left = sim.add_exit_stage([([(0, 0), (0.5, 0), (0.5, 4), (0, 4)], room)])
-    right = sim.add_exit_stage([([(9.5, 0), (10, 0), (10, 4), (9.5, 4)], room)])
+    left = sim.add_target(
+        jps.Exit([([(0, 0), (0.5, 0), (0.5, 4), (0, 4)], room)])
+    )
+    right = sim.add_target(
+        jps.Exit([([(9.5, 0), (10, 0), (10, 4), (9.5, 4)], room)])
+    )
     return sim, room, left, right
 
 
@@ -77,7 +81,6 @@ def test_invalid_speed_fields_are_rejected(corridor):
     sim, room, left, _ = corridor
     default = sim.default_speed_fields()[room].values
     assert default.shape[0] != default.shape[1]
-    steering = sim.add_direct_steering_stage()
 
     with pytest.raises(ValueError, match="shape"):
         sim.set_default_speed_field(room, default.T)
@@ -93,13 +96,10 @@ def test_invalid_speed_fields_are_rejected(corridor):
     with pytest.raises(jps.SimulationError, match="at least"):
         sim.set_custom_speed_field(left, room, zero)
 
-    with pytest.raises(jps.SimulationError):
-        sim.set_default_speed_field(room + 1, default)
-    with pytest.raises(jps.SimulationError):
-        sim.has_custom_speed_field(left, room + 1)
-    assert sim.custom_speed_fields(steering) == {}
-    assert not sim.has_custom_speed_field(steering, room)
-    with pytest.raises(jps.SimulationError, match="no area"):
-        sim.set_custom_speed_field(steering, room, default)
-    with pytest.raises(jps.SimulationError, match="no area"):
-        sim.clear_custom_speed_field(steering, room)
+    foreign = jps.GeometryBuilder().add_region(
+        boundary=[(0, 0), (10, 0), (10, 4), (0, 4)], height=0.0
+    )
+    with pytest.raises(ValueError, match="belongs to another geometry"):
+        sim.set_default_speed_field(foreign, default)
+    with pytest.raises(ValueError, match="belongs to another geometry"):
+        sim.has_custom_speed_field(left, foreign)

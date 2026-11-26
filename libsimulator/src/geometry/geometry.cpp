@@ -8,6 +8,7 @@
 #include "geometry/clearance_field.hpp"
 #include "geometry/location.hpp"
 #include "geometry/region_split.hpp"
+#include "id_and_name.hpp"
 #include "into.hpp"
 #include "kernel.hpp"
 #include "line_segment.hpp"
@@ -27,6 +28,7 @@
 #include <iterator>
 #include <memory>
 #include <optional>
+#include <string>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -43,10 +45,12 @@ Geometry::Geometry(epick::Mesh mesh) : _mesh(std::move(mesh))
 Geometry::Geometry(
     epick::Mesh&& mesh,
     RegionSplit&& region_split,
-    std::unique_ptr<RegionGraph2D> region_graph_2d)
+    std::unique_ptr<RegionGraph2D> region_graph_2d,
+    std::vector<std::optional<std::string>> region_names)
     : _mesh(std::move(mesh))
     , _region_graph_2d(std::move(region_graph_2d))
     , _region_split(std::move(region_split))
+    , _region_names(std::move(region_names))
 {
     // safety only: hand-crafted mesh/region-split/region_graph_2d combo should not run into this
     assert(!_mesh.has_garbage());
@@ -58,6 +62,7 @@ void Geometry::build()
     _aabb_tree =
         std::make_unique<epick::AABBTree>(_mesh.faces().begin(), _mesh.faces().end(), _mesh);
     _region = _region_split.region;
+    _region_names.resize(region_count());
     _boundary_index = make_portal_boundary_index(_mesh, _region_split);
     _region_graph = create_region_graph(_mesh, _region_split);
 
@@ -202,7 +207,10 @@ Location Geometry::get_location(double x, double y, std::size_t region_id) const
     }
     const auto face_location = locate_in_region(region_id, {x, y});
     if(face_location.face == epick::Mesh::null_face()) {
-        throw SimulationError("Point {} is not in region {}", Point{x, y}, region_id);
+        throw SimulationError(
+            "Point {} is not in region {}",
+            Point{x, y},
+            id_and_name(region_id, region_name(region_id)));
     }
     return location_at(Point{x, y}, face_location);
 }
@@ -308,7 +316,8 @@ std::vector<AreaPiece> Geometry::clip_to_region(const epick::Poly& p, size_t reg
                 pieces.push_back(AreaPiece{to_inexact(piece.outer_boundary()), region_id});
             }));
     if(pieces.empty()) {
-        throw SimulationError("Area does not intersect region {}", region_id);
+        throw SimulationError(
+            "Area does not intersect region {}", id_and_name(region_id, region_name(region_id)));
     }
     return pieces;
 }
