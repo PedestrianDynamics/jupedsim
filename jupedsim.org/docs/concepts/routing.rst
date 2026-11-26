@@ -168,11 +168,13 @@ Round-robin transition
 ^^^^^^^^^^^^^^^^^^^^^^
 
 It is also possible to model a decision making process and split the agents at a stage, with a round-robin transition.
-Here, the agents will proceed in a weighted round-robin manner.
-E.g., when defining a round-robin transition with three outgoing stages and the corresponding weights 10, 5, 1, the first 10 agents to make a choice will continue with the first given stage.
-The next 5 with the second one, and the next agent will continue with the third stage.
+The agents choosing here are split over the stages in proportion to their weights.
+The stages alternate as evenly as the weights allow.
+E.g., with two outgoing stages and the weights 3 and 2, out of every 5 agents 3 continue with the first stage and 2 with the second, in the order first, second, first, second, first.
+After this, the cycle repeats.
 
-After this, the cycle restarts with the first stage.
+Only the ratio of the weights matters: 60 and 40 give the same split as 3 and 2.
+Weights are integers from 1 to 1000000000; for a 40 % / 60 % split use 2 and 3 (or 40 and 60).
 
 .. figure:: /_static/transitions/round_robin.svg
     :width: 40%
