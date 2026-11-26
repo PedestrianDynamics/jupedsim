@@ -40,7 +40,7 @@ def run(with_update):
     builder = jps.GeometryBuilder()
     room = builder.add_region(polygon=shapely.box(0, 0, 20, 10), height=0.0)
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=builder.build()
+        model=jps.CollisionFreeSpeedModelTordeux2016(), geometry=builder.build()
     )
     exit_ = simulation.add_target(
         jps.Exit(
@@ -58,7 +58,7 @@ def run(with_update):
             simulation.add_agent(
                 room.at(x, y),
                 route=route,
-                state=jps.CollisionFreeSpeedModelState(),
+                state=jps.CollisionFreeSpeedModelTordeux2016State(),
             )
 
     default = simulation.default_speed_fields()[room]
@@ -187,7 +187,7 @@ def travel_time_figure(out):
     builder = jps.GeometryBuilder()
     room = builder.add_region(polygon=shapely.box(0, 0, 20, 10), height=0.0)
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=builder.build()
+        model=jps.CollisionFreeSpeedModelTordeux2016(), geometry=builder.build()
     )
     north = simulation.add_target(
         jps.Exit([(shapely.box(19, 8, 20, 10), room)])

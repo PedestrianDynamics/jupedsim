@@ -16,25 +16,13 @@
 
 namespace
 {
-/// How far ahead to look for a wall. The repulsion decays with `range_geometry_repulsion` (0.02 m
+/// How far ahead to look for a wall. The repulsion decays with `range_geometry_repulsion` (0.021 m
 /// by default), so a wall this far off contributes "nothing".
 constexpr double wall_search_radius = 4.0;
 /// How far beyond the body the side lines run, in units of `range_geometry_repulsion`. A wall
 /// just outside them pushes with at most exp(-5) of the strength at contact.
 constexpr double wall_margin_in_ranges = 5.0;
 } // namespace
-
-CollisionFreeSpeedModel::CollisionFreeSpeedModel(
-    double strength_neighbor_repulsion,
-    double range_neighbor_repulsion,
-    double strength_geometry_repulsion,
-    double range_geometry_repulsion)
-    : _strength_neighbor_repulsion(strength_neighbor_repulsion)
-    , _range_neighbor_repulsion(range_neighbor_repulsion)
-    , _strength_geometry_repulsion(strength_geometry_repulsion)
-    , _range_geometry_repulsion(range_geometry_repulsion)
-{
-}
 
 OperationalModelType CollisionFreeSpeedModel::type() const
 {
@@ -47,15 +35,18 @@ Vector CollisionFreeSpeedModel::compute_next_state(
     const AgentStep& step) const
 {
     const auto& current_state = std::get<State>(current);
-    const auto neighborhood = step.other_agents_in_range(
+    auto neighborhood = step.other_agents_in_range(
         _cut_off_radius, [&step](const NeighborView& n) { return step.no_geometry_between(n); });
 
+    const auto desired_direction = step.route_orientation();
+    // The route orientation is a unit vector, or zero when the agent stands on its target or
+    // inside an area destination. Normalizing keeps the vision factor a cosine in any case.
+    const auto view_direction = desired_direction.normalized();
     Vector neighbor_repulsion{};
     for(const auto& neighbor : neighborhood) {
-        neighbor_repulsion += this->neighbor_repulsion(current_state, neighbor);
+        neighbor_repulsion += this->neighbor_repulsion(current_state, neighbor, view_direction);
     }
 
-    const auto desired_direction = step.route_orientation();
     // The orientation along 'v'; where 'v' has no direction, the current one.
     const auto orientation_along = [&current_state](Vector v) {
         const Vector heading = v.normalized();
@@ -64,7 +55,8 @@ Vector CollisionFreeSpeedModel::compute_next_state(
     Vector boundary_repulsion{};
     for(const auto& wall : step.walls_ahead(
             orientation_along(desired_direction + neighbor_repulsion) * wall_search_radius,
-            current_state.radius + wall_margin_in_ranges * _range_geometry_repulsion)) {
+            current_state.radius +
+                wall_margin_in_ranges * current_state.range_geometry_repulsion)) {
         boundary_repulsion += this->boundary_repulsion(current_state, wall);
     }
 
@@ -101,6 +93,20 @@ void CollisionFreeSpeedModel::check_model_constraint(
     constexpr double time_gap_min = 0.1;
     constexpr double time_gap_max = 10.;
     validate_constraint(time_gap, time_gap_min, time_gap_max, "timeGap");
+
+    validate_constraint(
+        current_state.neighbor_repulsion_anisotropy, 0.0, 1.0, "neighborRepulsionAnisotropy");
+
+    // Both repulsion terms divide by the ranges; any finite strength and range is allowed.
+    constexpr double finite_max = std::numeric_limits<double>::max();
+    validate_constraint(
+        current_state.strength_neighbor_repulsion, 0.0, finite_max, "strengthNeighborRepulsion");
+    validate_constraint(
+        current_state.range_neighbor_repulsion, 0.0, finite_max, "rangeNeighborRepulsion", true);
+    validate_constraint(
+        current_state.strength_geometry_repulsion, 0.0, finite_max, "strengthGeometryRepulsion");
+    validate_constraint(
+        current_state.range_geometry_repulsion, 0.0, finite_max, "rangeGeometryRepulsion", true);
 
     const auto neighbors = view.other_agents_in_range(2.0);
     for(const auto& neighbor : neighbors) {
@@ -155,13 +161,21 @@ double CollisionFreeSpeedModel::get_spacing(
 }
 Vector CollisionFreeSpeedModel::neighbor_repulsion(
     const State& current_state,
-    const NeighborView& neighbor) const
+    const NeighborView& neighbor,
+    const Vector& view_direction) const
 {
     const auto& other = std::get<State>(*neighbor.state);
     const auto [distance, direction] = neighbor.relative_position.norm_and_normalized();
     const auto l = current_state.radius + other.radius;
-    return direction * -(this->_strength_neighbor_repulsion *
-                         exp((l - distance) / this->_range_neighbor_repulsion));
+    // Vision factor as in the GCFM: a neighbor counts with the cosine of its angle to the
+    // unit view direction, and not at all when it is behind. Without a view direction every
+    // neighbor counts fully.
+    const auto vision =
+        view_direction == Vector{} ? 1.0 : std::max(view_direction.scalar_product(direction), 0.0);
+    const auto anisotropy = current_state.neighbor_repulsion_anisotropy;
+    const auto weight = 1.0 - anisotropy + anisotropy * vision;
+    return direction * -(weight * current_state.strength_neighbor_repulsion *
+                         exp((l - distance) / current_state.range_neighbor_repulsion));
 }
 
 Vector CollisionFreeSpeedModel::boundary_repulsion(
@@ -169,7 +183,7 @@ Vector CollisionFreeSpeedModel::boundary_repulsion(
     const WallView& boundary) const
 {
     const auto l = current_state.radius;
-    const auto r_iw =
-        -_strength_geometry_repulsion * exp((l - boundary.distance) / _range_geometry_repulsion);
+    const auto r_iw = -current_state.strength_geometry_repulsion *
+                      exp((l - boundary.distance) / current_state.range_geometry_repulsion);
     return -boundary.normal * r_iw; // The repulsion points away from the agent
 }

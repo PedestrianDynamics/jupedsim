@@ -326,7 +326,7 @@ def travel_time_file(tmp_path):
         output_file=out, every_nth_frame=1, write_travel_times=True
     )
     sim = jps.Simulation(
-        model=jps.CollisionFreeSpeedModelV2(),
+        model=jps.CollisionFreeSpeedModel(),
         geometry=surface.build(),
         trajectory_writer=writer,
         dt=0.01,
@@ -427,7 +427,7 @@ def test_hdf5_trajectory_loading_travel_times_of_a_target_added_later(
         output_file=out, every_nth_frame=1, write_travel_times=True
     )
     sim = jps.Simulation(
-        model=jps.CollisionFreeSpeedModelV2(),
+        model=jps.CollisionFreeSpeedModel(),
         geometry=surface.build(),
         trajectory_writer=writer,
         dt=0.01,

@@ -6,9 +6,9 @@ add_library(pyjupedsim MODULE
     build_info.cpp
     callback_views.cpp
     callback_views.hpp
+    collision_free_speed_model_tordeux2016.cpp
     collision_free_speed_model.cpp
-    collision_free_speed_model_v2.cpp
-    collision_free_speed_model_v3.cpp
+    motivation_collision_free_speed_model.cpp
     conversion.cpp
     conversion.hpp
     generalized_centrifugal_force_model.cpp

@@ -221,7 +221,7 @@ void init_python_model(py::module_& m)
         Every operational model is passed to a :class:`~jupedsim.Simulation` as a
         configured instance carrying its model-level parameters, e.g.
         :class:`~jupedsim.SocialForceModel`,
-        :class:`~jupedsim.CollisionFreeSpeedModel` or
+        :class:`~jupedsim.CollisionFreeSpeedModelTordeux2016` or
         :class:`~jupedsim.WarpDriverModel`. Custom Python models are passed as
         instances of a :class:`~jupedsim.CustomOperationalModel` subclass.
     )");

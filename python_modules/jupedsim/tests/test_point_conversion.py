@@ -37,26 +37,26 @@ def _add(sim, room, route, position, state):
     ids=["ints", "floats", "list", "numpy"],
 )
 def test_position_accepts_any_two_element_sequence(position):
-    sim, room, route = _room(jps.CollisionFreeSpeedModelV2())
+    sim, room, route = _room(jps.CollisionFreeSpeedModel())
     agent = _add(
         sim,
         room,
         route,
         position,
-        jps.CollisionFreeSpeedModelV2State(),
+        jps.CollisionFreeSpeedModelState(),
     )
     assert agent.location.xy == (5.0, 5.0)
 
 
 def test_position_rejects_wrong_length():
-    sim, room, route = _room(jps.CollisionFreeSpeedModelV2())
+    sim, room, route = _room(jps.CollisionFreeSpeedModel())
     with pytest.raises(TypeError):
         _add(
             sim,
             room,
             route,
             (1, 2, 3),
-            jps.CollisionFreeSpeedModelV2State(),
+            jps.CollisionFreeSpeedModelState(),
         )
 
 
@@ -66,30 +66,30 @@ def test_position_rejects_wrong_length():
     ids=["ints", "floats", "list", "numpy"],
 )
 def test_orientation_accepts_any_two_element_sequence(orientation):
-    sim, room, route = _room(jps.CollisionFreeSpeedModelV2())
+    sim, room, route = _room(jps.CollisionFreeSpeedModel())
     agent = _add(
         sim,
         room,
         route,
         (5, 5),
-        jps.CollisionFreeSpeedModelV2State(orientation=orientation),
+        jps.CollisionFreeSpeedModelState(orientation=orientation),
     )
     assert agent.state.orientation == (1.0, 0.0)
 
 
 def test_orientation_rejects_wrong_length():
     with pytest.raises(TypeError):
-        jps.CollisionFreeSpeedModelV2State(orientation=(1, 2, 3))
+        jps.CollisionFreeSpeedModelState(orientation=(1, 2, 3))
 
 
 @pytest.mark.parametrize("bad", [math.nan, math.inf])
 def test_non_finite_position_is_not_in_region(bad):
-    sim, room, route = _room(jps.CollisionFreeSpeedModelV2())
+    sim, room, route = _room(jps.CollisionFreeSpeedModel())
     with pytest.raises(jps.SimulationError, match="is not in region"):
         _add(
             sim,
             room,
             route,
             (bad, 5.0),
-            jps.CollisionFreeSpeedModelV2State(),
+            jps.CollisionFreeSpeedModelState(),
         )

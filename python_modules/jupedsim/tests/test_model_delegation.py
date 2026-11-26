@@ -80,13 +80,13 @@ def _run(sim, room, route, state, steps=40):
 
 def test_delegated_model_walks_towards_the_exit():
     sim, route, room = _make_sim(
-        _DelegatingModel(jps.CollisionFreeSpeedModelV3())
+        _DelegatingModel(jps.MotivationCollisionFreeSpeedModel())
     )
     trajectory = _run(
         sim,
         room,
         route,
-        _Wrapped(sub=jps.CollisionFreeSpeedModelV3State()),
+        _Wrapped(sub=jps.MotivationCollisionFreeSpeedModelState()),
     )
 
     assert trajectory[-1][0] > trajectory[0][0] + 1.0
@@ -95,23 +95,23 @@ def test_delegated_model_walks_towards_the_exit():
 def test_delegation_matches_the_native_model_exactly():
     """The delegated run must reproduce the built-in model step for step."""
     native_sim, native_route, native_room = _make_sim(
-        jps.CollisionFreeSpeedModelV3()
+        jps.MotivationCollisionFreeSpeedModel()
     )
     native = _run(
         native_sim,
         native_room,
         native_route,
-        jps.CollisionFreeSpeedModelV3State(),
+        jps.MotivationCollisionFreeSpeedModelState(),
     )
 
     delegating_sim, delegating_route, delegating_room = _make_sim(
-        _DelegatingModel(jps.CollisionFreeSpeedModelV3())
+        _DelegatingModel(jps.MotivationCollisionFreeSpeedModel())
     )
     delegated = _run(
         delegating_sim,
         delegating_room,
         delegating_route,
-        _Wrapped(sub=jps.CollisionFreeSpeedModelV3State()),
+        _Wrapped(sub=jps.MotivationCollisionFreeSpeedModelState()),
     )
 
     assert delegated == native
@@ -119,9 +119,9 @@ def test_delegation_matches_the_native_model_exactly():
 
 def test_delegated_state_is_advanced():
     """The sub-state returned by the built-in model is a new, updated object."""
-    initial = jps.CollisionFreeSpeedModelV3State()
+    initial = jps.MotivationCollisionFreeSpeedModelState()
     sim, route, room = _make_sim(
-        _DelegatingModel(jps.CollisionFreeSpeedModelV3())
+        _DelegatingModel(jps.MotivationCollisionFreeSpeedModel())
     )
     # Off the exit axis, so that the model has to turn and the change is visible.
     agent = sim.add_agent(
@@ -145,11 +145,12 @@ def test_wrong_state_type_is_reported_with_both_names():
     sim.add_agent(
         room.at(1.0, 10.0),
         route=route,
-        state=_Wrapped(sub=jps.CollisionFreeSpeedModelV3State()),
+        state=_Wrapped(sub=jps.MotivationCollisionFreeSpeedModelState()),
     )
 
     with pytest.raises(
-        jps.SimulationError, match="SocialForceModel.*CollisionFreeSpeedModelV3"
+        jps.SimulationError,
+        match="SocialForceModel.*MotivationCollisionFreeSpeedModel",
     ):
         sim.iterate()
 
@@ -176,7 +177,7 @@ def _run_pair(sim, room, route, state_of, steps=40):
 def test_neighbors_are_unreadable_without_the_hook():
     """The failure the hook exists for, and the message that points at it."""
     sim, route, room = _make_sim(
-        _DelegatingModel(jps.CollisionFreeSpeedModelV3())
+        _DelegatingModel(jps.MotivationCollisionFreeSpeedModel())
     )
     with pytest.raises(
         jps.SimulationError, match="with_neighbor_state_mapping"
@@ -185,7 +186,7 @@ def test_neighbors_are_unreadable_without_the_hook():
             sim,
             room,
             route,
-            lambda: _Wrapped(sub=jps.CollisionFreeSpeedModelV3State()),
+            lambda: _Wrapped(sub=jps.MotivationCollisionFreeSpeedModelState()),
             steps=1,
         )
 
@@ -193,23 +194,25 @@ def test_neighbors_are_unreadable_without_the_hook():
 def test_repacked_neighbors_match_the_native_model_exactly():
     """Two interacting agents, mapped 1:1 -- must reproduce the built-in model."""
     native_sim, native_route, native_room = _make_sim(
-        jps.CollisionFreeSpeedModelV3()
+        jps.MotivationCollisionFreeSpeedModel()
     )
     native = _run_pair(
         native_sim,
         native_room,
         native_route,
-        jps.CollisionFreeSpeedModelV3State,
+        jps.MotivationCollisionFreeSpeedModelState,
     )
 
     sim, route, room = _make_sim(
-        _DelegatingModel(jps.CollisionFreeSpeedModelV3(), repack_neighbors=True)
+        _DelegatingModel(
+            jps.MotivationCollisionFreeSpeedModel(), repack_neighbors=True
+        )
     )
     delegated = _run_pair(
         sim,
         room,
         route,
-        lambda: _Wrapped(sub=jps.CollisionFreeSpeedModelV3State()),
+        lambda: _Wrapped(sub=jps.MotivationCollisionFreeSpeedModelState()),
     )
 
     assert delegated == native
@@ -219,16 +222,18 @@ def test_repacked_neighbors_are_actually_seen():
     """A mapping that inflates neighbors must change the outcome."""
 
     def _fat(_):
-        return jps.CollisionFreeSpeedModelV3State(radius=0.5)
+        return jps.MotivationCollisionFreeSpeedModelState(radius=0.5)
 
     sim, route, room = _make_sim(
-        _DelegatingModel(jps.CollisionFreeSpeedModelV3(), repack_neighbors=True)
+        _DelegatingModel(
+            jps.MotivationCollisionFreeSpeedModel(), repack_neighbors=True
+        )
     )
     lean = _run_pair(
         sim,
         room,
         route,
-        lambda: _Wrapped(sub=jps.CollisionFreeSpeedModelV3State()),
+        lambda: _Wrapped(sub=jps.MotivationCollisionFreeSpeedModelState()),
     )
 
     class _FatNeighbors(_DelegatingModel):
@@ -238,13 +243,13 @@ def test_repacked_neighbors_are_actually_seen():
             return replace(state, sub=sub), movement
 
     fat_sim, fat_route, fat_room = _make_sim(
-        _FatNeighbors(jps.CollisionFreeSpeedModelV3())
+        _FatNeighbors(jps.MotivationCollisionFreeSpeedModel())
     )
     fat = _run_pair(
         fat_sim,
         fat_room,
         fat_route,
-        lambda: _Wrapped(sub=jps.CollisionFreeSpeedModelV3State()),
+        lambda: _Wrapped(sub=jps.MotivationCollisionFreeSpeedModelState()),
     )
 
     assert fat != lean
@@ -259,7 +264,9 @@ def test_a_wrong_mapping_blames_the_mapping():
             sub, movement = self._inner.compute_next_state(state.sub, step)
             return replace(state, sub=sub), movement
 
-    sim, route, room = _make_sim(_Broken(jps.CollisionFreeSpeedModelV3()))
+    sim, route, room = _make_sim(
+        _Broken(jps.MotivationCollisionFreeSpeedModel())
+    )
     with pytest.raises(
         jps.SimulationError,
         match="mapping passed to with_neighbor_state_mapping.. has to return",
@@ -268,15 +275,17 @@ def test_a_wrong_mapping_blames_the_mapping():
             sim,
             room,
             route,
-            lambda: _Wrapped(sub=jps.CollisionFreeSpeedModelV3State()),
+            lambda: _Wrapped(sub=jps.MotivationCollisionFreeSpeedModelState()),
             steps=1,
         )
 
 
 def test_step_argument_must_be_a_step():
-    model = jps.CollisionFreeSpeedModelV3()
+    model = jps.MotivationCollisionFreeSpeedModel()
     with pytest.raises(jps.SimulationError, match="expects the step"):
-        model.compute_next_state(jps.CollisionFreeSpeedModelV3State(), 42)
+        model.compute_next_state(
+            jps.MotivationCollisionFreeSpeedModelState(), 42
+        )
 
 
 def test_delegated_random_streams_match_the_native_model_exactly():
@@ -339,7 +348,9 @@ def test_seed_state_rejects_a_foreign_state():
     with pytest.raises(
         jps.SimulationError, match="WarpDriverModel cannot seed a state"
     ):
-        jps.WarpDriverModel().seed_state(jps.CollisionFreeSpeedModelV3State())
+        jps.WarpDriverModel().seed_state(
+            jps.MotivationCollisionFreeSpeedModelState()
+        )
 
 
 @pytest.mark.parametrize(

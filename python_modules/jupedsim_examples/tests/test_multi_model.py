@@ -37,13 +37,13 @@ class MultiModel(jps.CustomOperationalModel):
     def __init__(self):
         super().__init__()
         self._social_force = PythonSocialForceModel()
-        self._collision_free = jps.CollisionFreeSpeedModelV3()
+        self._collision_free = jps.MotivationCollisionFreeSpeedModel()
 
     @staticmethod
     def _as_social_force_state(neighbor):
         """How a neighbor is seen by the social force model.
 
-        It reads ``radius`` and ``velocity``. CollisionFreeSpeedModelV3 has no
+        It reads ``radius`` and ``velocity``. MotivationCollisionFreeSpeedModel has no
         velocity -- it stores a heading only -- so the neighbor's speed has to
         be reconstructed from its orientation and desired speed.
         """
@@ -66,7 +66,9 @@ class MultiModel(jps.CustomOperationalModel):
         """
         if neighbor.kind == "collision_free":
             return neighbor.sub
-        return jps.CollisionFreeSpeedModelV3State(radius=neighbor.sub.radius)
+        return jps.MotivationCollisionFreeSpeedModelState(
+            radius=neighbor.sub.radius
+        )
 
     def compute_next_state(self, state, step):
         if state.kind == "social_force":
@@ -111,7 +113,7 @@ def _social_force_agent():
 def _collision_free_agent():
     return MultiModelState(
         kind="collision_free",
-        sub=jps.CollisionFreeSpeedModelV3State(),
+        sub=jps.MotivationCollisionFreeSpeedModelState(),
     )
 
 
@@ -146,7 +148,9 @@ def test_each_agent_keeps_its_own_state_type():
         sim.iterate()
 
     assert isinstance(left.state.sub, PythonSocialForceModelState)
-    assert isinstance(right.state.sub, jps.CollisionFreeSpeedModelV3State)
+    assert isinstance(
+        right.state.sub, jps.MotivationCollisionFreeSpeedModelState
+    )
 
 
 def test_the_models_see_each_other():

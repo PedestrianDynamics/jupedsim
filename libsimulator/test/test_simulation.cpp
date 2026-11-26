@@ -8,7 +8,7 @@
 #include "mesh_fixtures.hpp"
 #include "operational_models/agent_rng.hpp"
 #include "operational_models/anticipation_velocity_model/anticipation_velocity_model.hpp"
-#include "operational_models/collision_free_speed_model/collision_free_speed_model.hpp"
+#include "operational_models/collision_free_speed_model_tordeux2016/collision_free_speed_model_tordeux2016.hpp"
 #include "polygon.hpp"
 #include "route.hpp"
 #include "simulation.hpp"
@@ -32,11 +32,11 @@
 
 namespace
 {
-using State = CollisionFreeSpeedModel::State;
+using State = CollisionFreeSpeedModelTordeux2016::State;
 
-std::unique_ptr<CollisionFreeSpeedModel> model()
+std::unique_ptr<CollisionFreeSpeedModelTordeux2016> model()
 {
-    return std::make_unique<CollisionFreeSpeedModel>(8.0, 0.1, 5.0, 0.02);
+    return std::make_unique<CollisionFreeSpeedModelTordeux2016>(8.0, 0.1, 5.0, 0.02);
 }
 
 /// The switchback stair straight from a surface mesh, the way an OBJ file arrives: a geometry

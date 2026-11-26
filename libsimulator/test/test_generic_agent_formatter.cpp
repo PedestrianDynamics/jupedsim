@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "anticipation_velocity_model_state.hpp"
 #include "collision_free_speed_model_state.hpp"
-#include "collision_free_speed_model_v2_state.hpp"
+#include "collision_free_speed_model_tordeux2016_state.hpp"
 #include "generalized_centrifugal_force_model_state.hpp"
 #include "generic_agent.hpp"
 #include "geometry/geometry.hpp"
@@ -34,15 +34,15 @@ TEST(GenericAgentFormatter, FormatsGeneralizedCentrifugalForceModelAgent)
     ASSERT_NO_THROW((void) fmt::format("{}", agent));
 }
 
-TEST(GenericAgentFormatter, FormatsCollisionFreeSpeedModelAgent)
+TEST(GenericAgentFormatter, FormatsCollisionFreeSpeedModelTordeux2016Agent)
 {
-    auto agent = make_agent(CollisionFreeSpeedModelState{});
+    auto agent = make_agent(CollisionFreeSpeedModelTordeux2016State{});
     ASSERT_NO_THROW((void) fmt::format("{}", agent));
 }
 
-TEST(GenericAgentFormatter, FormatsCollisionFreeSpeedModelV2Agent)
+TEST(GenericAgentFormatter, FormatsCollisionFreeSpeedModelAgent)
 {
-    auto agent = make_agent(CollisionFreeSpeedModelV2State{});
+    auto agent = make_agent(CollisionFreeSpeedModelState{});
     ASSERT_NO_THROW((void) fmt::format("{}", agent));
 }
 

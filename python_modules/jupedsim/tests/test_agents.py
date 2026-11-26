@@ -12,7 +12,7 @@ class _Room:
             boundary=[(0, 0), (10, 0), (10, 10), (0, 10)], height=0.0
         )
         self.sim = jps.Simulation(
-            model=model or jps.CollisionFreeSpeedModel(),
+            model=model or jps.CollisionFreeSpeedModelTordeux2016(),
             geometry=surface.build(),
             dt=0.01,
         )
@@ -191,7 +191,7 @@ def test_a_location_of_another_geometry_is_rejected():
         r.sim.add_agent(other.at(2, 5), route=r.route)
 
     shared = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=r.sim.geometry
+        model=jps.CollisionFreeSpeedModelTordeux2016(), geometry=r.sim.geometry
     )
     shared.add_agent(r.at(2, 5), steer_to=r.at(8, 5))
     assert shared.agent_count() == 1

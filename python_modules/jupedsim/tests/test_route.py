@@ -9,7 +9,9 @@ def _simulation():
         boundary=[(0, 0), (10, 0), (10, 10), (0, 10)], height=0.0
     )
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=surface.build(), dt=0.01
+        model=jps.CollisionFreeSpeedModelTordeux2016(),
+        geometry=surface.build(),
+        dt=0.01,
     )
     return simulation, room
 

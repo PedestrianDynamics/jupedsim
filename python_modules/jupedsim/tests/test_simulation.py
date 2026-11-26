@@ -45,7 +45,7 @@ def u_stair(**simulation_args):
         to_edge=((8, 9), (8, 12)),
     )
     args = {
-        "model": jps.CollisionFreeSpeedModel(),
+        "model": jps.CollisionFreeSpeedModelTordeux2016(),
         "dt": 0.01,
     } | simulation_args
     return jps.Simulation(geometry=surface.build(), **args), ground, upper
@@ -55,7 +55,9 @@ def square_simulation():
     surface = jps.GeometryBuilder()
     room = surface.add_region(boundary=rect(0, 0, 10, 10), height=0.0)
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=surface.build(), dt=0.01
+        model=jps.CollisionFreeSpeedModelTordeux2016(),
+        geometry=surface.build(),
+        dt=0.01,
     )
     return simulation, room
 
@@ -76,7 +78,7 @@ def test_agents_spawn_on_either_of_two_stacked_floors():
         sim.add_agent(
             region_id.at(*STACKED_XY),
             route=route,
-            state=jps.CollisionFreeSpeedModelState(),
+            state=jps.CollisionFreeSpeedModelTordeux2016State(),
         )
     assert sim.agent_count() == 2
 
@@ -124,7 +126,7 @@ def test_locations_are_the_native_type():
     agent = sim.add_agent(
         ground.at(*STACKED_XY),
         route=route,
-        state=jps.CollisionFreeSpeedModelState(),
+        state=jps.CollisionFreeSpeedModelTordeux2016State(),
     )
     location = upper.at(*STACKED_XY)
     assert type(location) is jps.Location
@@ -141,7 +143,7 @@ def test_an_agent_reports_the_floor_it_stands_on():
         region_id: sim.add_agent(
             region_id.at(*STACKED_XY),
             route=route,
-            state=jps.CollisionFreeSpeedModelState(),
+            state=jps.CollisionFreeSpeedModelTordeux2016State(),
         )
         for region_id in (ground, upper)
     }
@@ -160,7 +162,7 @@ def test_a_location_does_not_follow_the_agent_it_came_from():
     agent = sim.add_agent(
         ground.at(*STACKED_XY),
         route=route,
-        state=jps.CollisionFreeSpeedModelState(),
+        state=jps.CollisionFreeSpeedModelTordeux2016State(),
     )
     where_it_started = agent.location
     sim.iterate(50)
@@ -186,8 +188,11 @@ def test_an_agent_is_steered_to_a_location():
 # (SocialForceModel, GeneralizedCentrifugalForceModel) stall at the stair's
 # turn and are deliberately absent.
 WALK_UP_MODELS = [
+    (
+        jps.CollisionFreeSpeedModelTordeux2016,
+        jps.CollisionFreeSpeedModelTordeux2016State,
+    ),
     (jps.CollisionFreeSpeedModel, jps.CollisionFreeSpeedModelState),
-    (jps.CollisionFreeSpeedModelV2, jps.CollisionFreeSpeedModelV2State),
     (jps.WarpDriverModel, jps.WarpDriverModelState),
     (
         lambda: jps.AnticipationVelocityModel(rng_seed=1),
@@ -199,7 +204,7 @@ WALK_UP_MODELS = [
 @pytest.mark.parametrize(
     "model, state",
     WALK_UP_MODELS,
-    ids=["cfsm", "cfsm_v2", "warp_driver", "avm"],
+    ids=["cfsm_tordeux2016", "cfsm", "warp_driver", "avm"],
 )
 def test_agents_walk_up_the_u_stair_to_an_exit_on_the_floor_above(model, state):
     # No waypoints on the way: the exit upstairs is the only stage, so the
@@ -247,7 +252,7 @@ def test_one_exit_with_an_area_on_each_floor_is_reached_from_both():
         sim.add_agent(
             region_id.at(*STACKED_XY),
             route=route,
-            state=jps.CollisionFreeSpeedModelState(),
+            state=jps.CollisionFreeSpeedModelTordeux2016State(),
         ): z
         for region_id, z in ((ground, GROUND_Z), (upper, UPPER_Z))
     }
@@ -271,14 +276,16 @@ def test_an_exit_area_reaching_over_a_seam_stays_in_its_region():
         to_edge=((14, 0), (14, 10)),
     )
     sim = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=surface.build(), dt=0.01
+        model=jps.CollisionFreeSpeedModelTordeux2016(),
+        geometry=surface.build(),
+        dt=0.01,
     )
     # The exit reaches 2 m onto the ramp, where the agent stands.
     exit_ = sim.add_target(jps.Exit([(rect(8, 4, 12, 6), ground)]))
     sim.add_agent(
         ramp.at(11, 5),
         route=sim.add_route([jps.FixedTransition(jps.AGENT_LOCATION, exit_)]),
-        state=jps.CollisionFreeSpeedModelState(),
+        state=jps.CollisionFreeSpeedModelTordeux2016State(),
     )
     sim.iterate()
     assert sim.agent_count() == 1
@@ -298,7 +305,7 @@ def test_the_exit_an_agent_walks_towards_is_the_one_on_its_own_floor():
     agent = sim.add_agent(
         ground.at(*STACKED_XY),
         route=route,
-        state=jps.CollisionFreeSpeedModelState(),
+        state=jps.CollisionFreeSpeedModelTordeux2016State(),
     )
     for _ in range(1000):
         sim.iterate()
@@ -382,7 +389,9 @@ def test_simulation_rejects_a_geometry_builder():
     builder = jps.GeometryBuilder()
     builder.add_region(boundary=rect(0, 0, 10, 10), height=0.0)
     with pytest.raises(TypeError):
-        jps.Simulation(model=jps.CollisionFreeSpeedModel(), geometry=builder)
+        jps.Simulation(
+            model=jps.CollisionFreeSpeedModelTordeux2016(), geometry=builder
+        )
 
 
 def test_a_geometry_is_shared_not_consumed():
@@ -392,15 +401,15 @@ def test_a_geometry_is_shared_not_consumed():
     engine = jps.SurfaceMeshShortestPathRoutingEngine(geometry)
     with pytest.raises(jps.SimulationError):
         jps.Simulation(
-            model=jps.CollisionFreeSpeedModel(),
+            model=jps.CollisionFreeSpeedModelTordeux2016(),
             geometry=geometry,
             floorfield_options=jps.FloorfieldOptions(cell_size=-1),
         )
     first = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=geometry
+        model=jps.CollisionFreeSpeedModelTordeux2016(), geometry=geometry
     )
     second = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=geometry
+        model=jps.CollisionFreeSpeedModelTordeux2016(), geometry=geometry
     )
     del first, second
     gc.collect()

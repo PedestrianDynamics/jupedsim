@@ -19,7 +19,7 @@ def test_can_query_agents_in_range():
         boundary=[(0, 0), (100, 0), (100, 100), (0, 100)], height=0.0
     )
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(),
+        model=jps.CollisionFreeSpeedModelTordeux2016(),
         geometry=surface.build(),
     )
     exit = simulation.add_target(
@@ -48,7 +48,7 @@ def test_can_query_agents_in_range():
             simulation.add_agent(
                 room.at(*new_pos),
                 route=route,
-                state=jps.CollisionFreeSpeedModelState(),
+                state=jps.CollisionFreeSpeedModelTordeux2016State(),
             ).id
         )
 
@@ -94,7 +94,7 @@ def test_can_run_simulation():
     surface = jps.GeometryBuilder()
     room = surface.add_region(polygon=p1.union(p2), height=0.0)
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=surface.build()
+        model=jps.CollisionFreeSpeedModelTordeux2016(), geometry=surface.build()
     )
     exit_ = simulation.add_target(
         jps.Exit([([(18, 4), (20, 4), (20, 6), (18, 6)], room)])
@@ -113,7 +113,7 @@ def test_can_run_simulation():
             simulation.add_agent(
                 room.at(*new_pos),
                 route=route,
-                state=jps.CollisionFreeSpeedModelState(),
+                state=jps.CollisionFreeSpeedModelTordeux2016State(),
             ).id
         )
 
@@ -124,7 +124,7 @@ def test_can_run_simulation():
     agent = simulation.add_agent(
         room.at(6, 6),
         route=route,
-        state=jps.CollisionFreeSpeedModelState(),
+        state=jps.CollisionFreeSpeedModelTordeux2016State(),
     )
 
     for actual, expected in zip(simulation.agents(), initial_agent_positions):
@@ -157,7 +157,7 @@ def test_get_single_agent_from_simulation():
     surface = jps.GeometryBuilder()
     room = surface.add_region(polygon=p1.union(p2), height=0.0)
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=surface.build()
+        model=jps.CollisionFreeSpeedModelTordeux2016(), geometry=surface.build()
     )
     exit_id = simulation.add_target(
         jps.Exit([([(18, 4), (20, 4), (20, 6), (18, 6)], room)])
@@ -175,7 +175,7 @@ def test_get_single_agent_from_simulation():
             simulation.add_agent(
                 room.at(*new_pos),
                 route=route,
-                state=jps.CollisionFreeSpeedModelState(),
+                state=jps.CollisionFreeSpeedModelTordeux2016State(),
             ).id
         )
 
@@ -199,7 +199,7 @@ def test_get_agent_non_existing_agent_from_simulation():
     surface = jps.GeometryBuilder()
     room = surface.add_region(polygon=p1.union(p2), height=0.0)
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=surface.build()
+        model=jps.CollisionFreeSpeedModelTordeux2016(), geometry=surface.build()
     )
 
     exit_id = simulation.add_target(
@@ -213,7 +213,7 @@ def test_get_agent_non_existing_agent_from_simulation():
     agent = simulation.add_agent(
         room.at(7, 7),
         route=route,
-        state=jps.CollisionFreeSpeedModelState(),
+        state=jps.CollisionFreeSpeedModelTordeux2016State(),
     )
 
     assert simulation.agent(agent.id) == agent
@@ -238,7 +238,7 @@ def test_agent_can_be_removed_from_simulation():
     surface = jps.GeometryBuilder()
     room = surface.add_region(polygon=p1.union(p2), height=0.0)
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=surface.build()
+        model=jps.CollisionFreeSpeedModelTordeux2016(), geometry=surface.build()
     )
     exit_ = simulation.add_target(
         jps.Exit([([(18, 4), (20, 4), (20, 6), (18, 6)], room)])
@@ -257,7 +257,7 @@ def test_agent_can_be_removed_from_simulation():
             simulation.add_agent(
                 room.at(*new_pos),
                 route=route,
-                state=jps.CollisionFreeSpeedModelState(),
+                state=jps.CollisionFreeSpeedModelTordeux2016State(),
             ).id
         )
 
@@ -302,7 +302,7 @@ def test_agent_can_not_be_added_outside_geometry():
         boundary=[(0, 0), (100, 0), (100, 100), (0, 100)], height=0.0
     )
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(),
+        model=jps.CollisionFreeSpeedModelTordeux2016(),
         geometry=surface.build(),
     )
 
@@ -318,7 +318,7 @@ def test_agent_can_not_be_added_outside_geometry():
     simulation.add_agent(
         room.at(*agent_position),
         route=route,
-        state=jps.CollisionFreeSpeedModelState(),
+        state=jps.CollisionFreeSpeedModelTordeux2016State(),
     )
 
     with pytest.raises(
@@ -328,7 +328,7 @@ def test_agent_can_not_be_added_outside_geometry():
         assert simulation.add_agent(
             room.at(-50, -50),
             route=route,
-            state=jps.CollisionFreeSpeedModelState(),
+            state=jps.CollisionFreeSpeedModelTordeux2016State(),
         )
 
 

@@ -6,15 +6,23 @@ import numpy as np
 import pytest
 
 
-@pytest.fixture
-def square_room_100x100_cfsm():
+@pytest.fixture(
+    params=[
+        (jps.CollisionFreeSpeedModel, jps.CollisionFreeSpeedModelState),
+        (
+            jps.CollisionFreeSpeedModelTordeux2016,
+            jps.CollisionFreeSpeedModelTordeux2016State,
+        ),
+    ],
+    ids=["default", "tordeux2016"],
+)
+def square_room_100x100_cfsm(request):
+    model_type, state_type = request.param
     surface = jps.GeometryBuilder()
     room = surface.add_region(
         boundary=[(-50, -50), (50, -50), (50, 50), (-50, 50)], height=0.0
     )
-    simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=surface.build()
-    )
+    simulation = jps.Simulation(model=model_type(), geometry=surface.build())
 
     exit_ = simulation.add_target(
         jps.Exit([([(49, -3), (49, 3), (50, 3), (50, -3)], room)])
@@ -24,7 +32,7 @@ def square_room_100x100_cfsm():
     )
     agent_position = (0, 0)
 
-    return simulation, route, exit_, agent_position, room
+    return simulation, route, exit_, agent_position, room, state_type
 
 
 @pytest.fixture
@@ -52,22 +60,26 @@ def square_room_100x100_gcfm():
     "radius",
     np.arange(0.01, 2, 0.5),
 )
-def test_collision_free_speed_model_can_set_radius(
+def test_collision_free_speed_models_can_set_radius(
     square_room_100x100_cfsm, radius
 ):
-    simulation, route, exit_, agent_position, room = square_room_100x100_cfsm
+    simulation, route, exit_, agent_position, room, state_type = (
+        square_room_100x100_cfsm
+    )
 
     simulation.add_agent(
         room.at(*agent_position),
         route=route,
-        state=jps.CollisionFreeSpeedModelState(radius=radius),
+        state=state_type(radius=radius),
     )
 
 
-def test_collision_free_speed_model_can_not_set_radius_too_small(
+def test_collision_free_speed_models_can_not_set_radius_too_small(
     square_room_100x100_cfsm,
 ):
-    simulation, route, exit_, agent_position, room = square_room_100x100_cfsm
+    simulation, route, exit_, agent_position, room, state_type = (
+        square_room_100x100_cfsm
+    )
 
     with pytest.raises(
         jps.SimulationError, match=r"Model constraint violation: radius -1 .*"
@@ -75,14 +87,16 @@ def test_collision_free_speed_model_can_not_set_radius_too_small(
         simulation.add_agent(
             room.at(*agent_position),
             route=route,
-            state=jps.CollisionFreeSpeedModelState(radius=-1),
+            state=state_type(radius=-1),
         )
 
 
-def test_collision_free_speed_model_can_not_set_radius_zero(
+def test_collision_free_speed_models_can_not_set_radius_zero(
     square_room_100x100_cfsm,
 ):
-    simulation, route, exit_, agent_position, room = square_room_100x100_cfsm
+    simulation, route, exit_, agent_position, room, state_type = (
+        square_room_100x100_cfsm
+    )
 
     with pytest.raises(
         jps.SimulationError, match=r"Model constraint violation: radius 0 .*"
@@ -90,14 +104,16 @@ def test_collision_free_speed_model_can_not_set_radius_zero(
         simulation.add_agent(
             room.at(*agent_position),
             route=route,
-            state=jps.CollisionFreeSpeedModelState(radius=0),
+            state=state_type(radius=0),
         )
 
 
-def test_collision_free_speed_model_can_not_set_radius_too_large(
+def test_collision_free_speed_models_can_not_set_radius_too_large(
     square_room_100x100_cfsm,
 ):
-    simulation, route, exit_, agent_position, room = square_room_100x100_cfsm
+    simulation, route, exit_, agent_position, room, state_type = (
+        square_room_100x100_cfsm
+    )
 
     with pytest.raises(
         jps.SimulationError, match=r"Model constraint violation: radius 2.1 .*"
@@ -105,27 +121,31 @@ def test_collision_free_speed_model_can_not_set_radius_too_large(
         simulation.add_agent(
             room.at(*agent_position),
             route=route,
-            state=jps.CollisionFreeSpeedModelState(radius=2.1),
+            state=state_type(radius=2.1),
         )
 
 
 @pytest.mark.parametrize("desired_speed", np.arange(0.0, 10, 1))
-def test_collision_free_speed_model_can_set_desired_speed(
+def test_collision_free_speed_models_can_set_desired_speed(
     square_room_100x100_cfsm, desired_speed
 ):
-    simulation, route, exit_, agent_position, room = square_room_100x100_cfsm
+    simulation, route, exit_, agent_position, room, state_type = (
+        square_room_100x100_cfsm
+    )
 
     simulation.add_agent(
         room.at(*agent_position),
         route=route,
-        state=jps.CollisionFreeSpeedModelState(desired_speed=desired_speed),
+        state=state_type(desired_speed=desired_speed),
     )
 
 
-def test_collision_free_speed_model_can_not_set_desired_speed_too_small(
+def test_collision_free_speed_models_can_not_set_desired_speed_too_small(
     square_room_100x100_cfsm,
 ):
-    simulation, route, exit_, agent_position, room = square_room_100x100_cfsm
+    simulation, route, exit_, agent_position, room, state_type = (
+        square_room_100x100_cfsm
+    )
 
     with pytest.raises(
         jps.SimulationError, match=r"Model constraint violation: v0 -1 .*"
@@ -133,14 +153,16 @@ def test_collision_free_speed_model_can_not_set_desired_speed_too_small(
         simulation.add_agent(
             room.at(*agent_position),
             route=route,
-            state=jps.CollisionFreeSpeedModelState(desired_speed=-1),
+            state=state_type(desired_speed=-1),
         )
 
 
-def test_collision_free_speed_model_can_not_set_desired_speed_too_large(
+def test_collision_free_speed_models_can_not_set_desired_speed_too_large(
     square_room_100x100_cfsm,
 ):
-    simulation, route, exit_, agent_position, room = square_room_100x100_cfsm
+    simulation, route, exit_, agent_position, room, state_type = (
+        square_room_100x100_cfsm
+    )
 
     with pytest.raises(
         jps.SimulationError, match=r"Model constraint violation: v0 10.1 .*"
@@ -148,27 +170,31 @@ def test_collision_free_speed_model_can_not_set_desired_speed_too_large(
         simulation.add_agent(
             room.at(*agent_position),
             route=route,
-            state=jps.CollisionFreeSpeedModelState(desired_speed=10.1),
+            state=state_type(desired_speed=10.1),
         )
 
 
 @pytest.mark.parametrize("time_gap", [*np.arange(0.1, 10, 1), 10])
-def test_collision_free_speed_model_can_set_time_gap(
+def test_collision_free_speed_models_can_set_time_gap(
     square_room_100x100_cfsm, time_gap
 ):
-    simulation, route, exit_, agent_position, room = square_room_100x100_cfsm
+    simulation, route, exit_, agent_position, room, state_type = (
+        square_room_100x100_cfsm
+    )
 
     simulation.add_agent(
         room.at(*agent_position),
         route=route,
-        state=jps.CollisionFreeSpeedModelState(time_gap=time_gap),
+        state=state_type(time_gap=time_gap),
     )
 
 
-def test_collision_free_speed_model_can_not_set_time_gap_too_small(
+def test_collision_free_speed_models_can_not_set_time_gap_too_small(
     square_room_100x100_cfsm,
 ):
-    simulation, route, exit_, agent_position, room = square_room_100x100_cfsm
+    simulation, route, exit_, agent_position, room, state_type = (
+        square_room_100x100_cfsm
+    )
 
     with pytest.raises(
         jps.SimulationError, match=r"Model constraint violation: timeGap -1 .*"
@@ -176,14 +202,16 @@ def test_collision_free_speed_model_can_not_set_time_gap_too_small(
         simulation.add_agent(
             room.at(*agent_position),
             route=route,
-            state=jps.CollisionFreeSpeedModelState(time_gap=-1),
+            state=state_type(time_gap=-1),
         )
 
 
-def test_collision_free_speed_model_can_not_set_time_too_large(
+def test_collision_free_speed_models_can_not_set_time_too_large(
     square_room_100x100_cfsm,
 ):
-    simulation, route, exit_, agent_position, room = square_room_100x100_cfsm
+    simulation, route, exit_, agent_position, room, state_type = (
+        square_room_100x100_cfsm
+    )
 
     with pytest.raises(
         jps.SimulationError,
@@ -192,16 +220,18 @@ def test_collision_free_speed_model_can_not_set_time_too_large(
         simulation.add_agent(
             room.at(*agent_position),
             route=route,
-            state=jps.CollisionFreeSpeedModelState(time_gap=10.1),
+            state=state_type(time_gap=10.1),
         )
 
 
 @pytest.mark.parametrize("radius", np.arange(0.1, 0.5, 0.1))
-def test_collision_free_speed_model_can_not_add_agent_too_close_to_wall(
+def test_collision_free_speed_models_can_not_add_agent_too_close_to_wall(
     square_room_100x100_cfsm,
     radius,
 ):
-    simulation, route, exit_, agent_position, room = square_room_100x100_cfsm
+    simulation, route, exit_, agent_position, room, state_type = (
+        square_room_100x100_cfsm
+    )
 
     with pytest.raises(
         jps.SimulationError,
@@ -210,7 +240,116 @@ def test_collision_free_speed_model_can_not_add_agent_too_close_to_wall(
         simulation.add_agent(
             room.at(50 - (0.99 * radius), 0),
             route=route,
-            state=jps.CollisionFreeSpeedModelState(radius=radius),
+            state=state_type(radius=radius),
+        )
+
+
+def _add_collision_free_speed_model_agent(state):
+    surface = jps.GeometryBuilder()
+    room = surface.add_region(
+        boundary=[(-50, -50), (50, -50), (50, 50), (-50, 50)], height=0.0
+    )
+    simulation = jps.Simulation(
+        model=jps.CollisionFreeSpeedModel(), geometry=surface.build()
+    )
+    exit_ = simulation.add_target(
+        jps.Exit([([(49, -3), (49, 3), (50, 3), (50, -3)], room)])
+    )
+    route = simulation.add_route(
+        [jps.FixedTransition(jps.AGENT_LOCATION, exit_)]
+    )
+    simulation.add_agent(room.at(0, 0), route=route, state=state)
+
+
+@pytest.mark.parametrize("anisotropy", [0.0, 0.25, 0.5, 0.75, 1.0])
+def test_collision_free_speed_model_can_set_neighbor_repulsion_anisotropy(
+    anisotropy,
+):
+    _add_collision_free_speed_model_agent(
+        jps.CollisionFreeSpeedModelState(
+            neighbor_repulsion_anisotropy=anisotropy
+        )
+    )
+
+
+@pytest.mark.parametrize("anisotropy", [-0.1, 1.1])
+def test_collision_free_speed_model_can_not_set_neighbor_repulsion_anisotropy_out_of_range(
+    anisotropy,
+):
+    with pytest.raises(
+        jps.SimulationError,
+        match=rf"Model constraint violation: neighborRepulsionAnisotropy {anisotropy} .*",
+    ):
+        _add_collision_free_speed_model_agent(
+            jps.CollisionFreeSpeedModelState(
+                neighbor_repulsion_anisotropy=anisotropy
+            )
+        )
+
+
+def test_collision_free_speed_model_can_not_set_neighbor_repulsion_anisotropy_nan():
+    with pytest.raises(
+        jps.SimulationError,
+        match=r"Model constraint violation: neighborRepulsionAnisotropy nan .*",
+    ):
+        _add_collision_free_speed_model_agent(
+            jps.CollisionFreeSpeedModelState(
+                neighbor_repulsion_anisotropy=float("nan")
+            )
+        )
+
+
+_CFSM_REPULSION_PARAMETERS = {
+    "strength_neighbor_repulsion": "strengthNeighborRepulsion",
+    "range_neighbor_repulsion": "rangeNeighborRepulsion",
+    "strength_geometry_repulsion": "strengthGeometryRepulsion",
+    "range_geometry_repulsion": "rangeGeometryRepulsion",
+}
+
+
+@pytest.mark.parametrize("field", _CFSM_REPULSION_PARAMETERS)
+@pytest.mark.parametrize("value", [0.01, 1.0, 100.0])
+def test_collision_free_speed_model_can_set_repulsion_parameter(field, value):
+    _add_collision_free_speed_model_agent(
+        jps.CollisionFreeSpeedModelState(**{field: value})
+    )
+
+
+@pytest.mark.parametrize(
+    "field", ["strength_neighbor_repulsion", "strength_geometry_repulsion"]
+)
+def test_collision_free_speed_model_can_set_repulsion_strength_zero(field):
+    _add_collision_free_speed_model_agent(
+        jps.CollisionFreeSpeedModelState(**{field: 0.0})
+    )
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("strength_neighbor_repulsion", -1.0),
+        ("range_neighbor_repulsion", 0.0),
+        ("range_neighbor_repulsion", -0.1),
+        ("strength_geometry_repulsion", -1.0),
+        ("range_geometry_repulsion", 0.0),
+        ("range_geometry_repulsion", -0.1),
+        *(
+            (field, v)
+            for field in _CFSM_REPULSION_PARAMETERS
+            for v in (float("nan"), float("inf"))
+        ),
+    ],
+)
+def test_collision_free_speed_model_can_not_set_repulsion_parameter(
+    field, value
+):
+    name = _CFSM_REPULSION_PARAMETERS[field]
+    with pytest.raises(
+        jps.SimulationError,
+        match=rf"Model constraint violation: {name} {value:g} .*",
+    ):
+        _add_collision_free_speed_model_agent(
+            jps.CollisionFreeSpeedModelState(**{field: value})
         )
 
 

@@ -14,6 +14,8 @@ class AgentStep;
 class AgentView;
 struct GenericAgent;
 
+/// Throws unless @p value lies in [value_min, value_max], or (value_min, value_max] with
+/// @p exclude_min. NaN is never in range.
 template <typename T>
 void validate_constraint(
     T value,
@@ -23,7 +25,7 @@ void validate_constraint(
     bool exclude_min = false)
 {
     if(exclude_min) {
-        if(value <= value_min || value > value_max) {
+        if(!(value > value_min && value <= value_max)) {
             throw SimulationError(
                 "Model constraint violation: {} {} not in allowed range, "
                 "{} needs to be in ({},{}]",
@@ -35,7 +37,7 @@ void validate_constraint(
         }
 
     } else {
-        if(value < value_min || value > value_max) {
+        if(!(value >= value_min && value <= value_max)) {
             throw SimulationError(
                 "Model constraint violation: {} {} not in allowed range, "
                 "{} needs to be in [{},{}]",

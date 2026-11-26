@@ -14,7 +14,7 @@ def _square_room_5x5():
         height=0.0,
     )
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=surface.build()
+        model=jps.CollisionFreeSpeedModelTordeux2016(), geometry=surface.build()
     )
     return simulation, room
 
@@ -35,7 +35,7 @@ def square_room_5x5_with_obstacle():
         height=0.0,
     )
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=surface.build()
+        model=jps.CollisionFreeSpeedModelTordeux2016(), geometry=surface.build()
     )
     return simulation, room
 
@@ -140,7 +140,7 @@ def test_an_agent_standing_at_the_edge_of_an_exit_leaves():
         boundary=[(0, 0), (10, 0), (10, 10), (0, 10)], height=0.0
     )
     simulation = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=surface.build()
+        model=jps.CollisionFreeSpeedModelTordeux2016(), geometry=surface.build()
     )
     exit_ = simulation.add_target(
         jps.Exit([([(8.05, 4), (9.5, 4), (9.5, 6), (8.05, 6)], room)])
@@ -195,7 +195,7 @@ def test_travel_times_follow_the_floorfield_options():
         height=0.0,
     )
     sim = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(),
+        model=jps.CollisionFreeSpeedModelTordeux2016(),
         geometry=surface.build(),
         floorfield_options=jps.FloorfieldOptions(cell_size=0.1),
     )

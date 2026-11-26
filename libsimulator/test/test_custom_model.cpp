@@ -2,14 +2,14 @@
 #include "agent_view.hpp"
 #include "anticipation_velocity_model_state.hpp"
 #include "collision_free_speed_model_state.hpp"
-#include "collision_free_speed_model_v2_state.hpp"
-#include "collision_free_speed_model_v3_state.hpp"
+#include "collision_free_speed_model_tordeux2016_state.hpp"
 #include "custom_model_state.hpp"
 #include "generalized_centrifugal_force_model_state.hpp"
 #include "generic_agent.hpp"
 #include "geometry/geometry.hpp"
 #include "geometry_fixtures.hpp"
 #include "kernel.hpp"
+#include "motivation_collision_free_speed_model_state.hpp"
 #include "neighborhood_search.hpp"
 #include "operational_decision_system.hpp"
 #include "operational_model_state.hpp"
@@ -163,14 +163,14 @@ TEST(ModelTypeOf, MapsEveryAgentModelDataToItsOperationalModelType)
         model_type_of(OperationalModelState{GeneralizedCentrifugalForceModelState{}}),
         OperationalModelType::GeneralizedCentrifugalForce);
     ASSERT_EQ(
+        model_type_of(OperationalModelState{CollisionFreeSpeedModelTordeux2016State{}}),
+        OperationalModelType::CollisionFreeSpeedTordeux2016);
+    ASSERT_EQ(
         model_type_of(OperationalModelState{CollisionFreeSpeedModelState{}}),
         OperationalModelType::CollisionFreeSpeed);
     ASSERT_EQ(
-        model_type_of(OperationalModelState{CollisionFreeSpeedModelV2State{}}),
-        OperationalModelType::CollisionFreeSpeedV2);
-    ASSERT_EQ(
-        model_type_of(OperationalModelState{CollisionFreeSpeedModelV3State{}}),
-        OperationalModelType::CollisionFreeSpeedV3);
+        model_type_of(OperationalModelState{MotivationCollisionFreeSpeedModelState{}}),
+        OperationalModelType::MotivationCollisionFreeSpeed);
     ASSERT_EQ(
         model_type_of(OperationalModelState{AnticipationVelocityModelState{}}),
         OperationalModelType::AnticipationVelocityModel);

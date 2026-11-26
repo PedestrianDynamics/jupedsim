@@ -16,7 +16,7 @@ def corridor():
         boundary=[(0, 0), (10, 0), (10, 4), (0, 4)], height=0.0
     )
     sim = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=surface.build()
+        model=jps.CollisionFreeSpeedModelTordeux2016(), geometry=surface.build()
     )
     left = sim.add_target(
         jps.Exit([([(0, 0), (0.5, 0), (0.5, 4), (0, 4)], room)])

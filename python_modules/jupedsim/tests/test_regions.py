@@ -75,7 +75,7 @@ def test_a_location_outlives_its_builder_and_geometry():
 def test_a_region_of_another_geometry_is_rejected():
     builder, _ = _builder()
     sim = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=builder.build()
+        model=jps.CollisionFreeSpeedModelTordeux2016(), geometry=builder.build()
     )
     other_builder, other_room = _builder()
     other_builder.build()
@@ -88,7 +88,7 @@ def test_a_region_of_another_geometry_is_rejected():
 def test_travel_times_are_given_by_region():
     builder, room = _builder()
     sim = jps.Simulation(
-        model=jps.CollisionFreeSpeedModel(), geometry=builder.build()
+        model=jps.CollisionFreeSpeedModelTordeux2016(), geometry=builder.build()
     )
     exit_ = sim.add_target(
         jps.Exit([([(9, 0), (10, 0), (10, 10), (9, 10)], room)])

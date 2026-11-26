@@ -16,15 +16,15 @@ from jupedsim.pyjupedsim import (
     AnticipationVelocityModelState,
     CollisionFreeSpeedModel,
     CollisionFreeSpeedModelState,
-    CollisionFreeSpeedModelV2,
-    CollisionFreeSpeedModelV2State,
-    CollisionFreeSpeedModelV3,
-    CollisionFreeSpeedModelV3State,
+    CollisionFreeSpeedModelTordeux2016,
+    CollisionFreeSpeedModelTordeux2016State,
     FloorfieldOptions,
     GeneralizedCentrifugalForceModel,
     GeneralizedCentrifugalForceModelState,
     Geometry,
     Location,
+    MotivationCollisionFreeSpeedModel,
+    MotivationCollisionFreeSpeedModelState,
     OperationalModel,
     Region,
     SimulationError,
@@ -45,9 +45,9 @@ from jupedsim.target import Exit, RouteTarget, Waypoint
 
 _STATE_TYPES = {
     GeneralizedCentrifugalForceModel: GeneralizedCentrifugalForceModelState,
+    CollisionFreeSpeedModelTordeux2016: CollisionFreeSpeedModelTordeux2016State,
     CollisionFreeSpeedModel: CollisionFreeSpeedModelState,
-    CollisionFreeSpeedModelV2: CollisionFreeSpeedModelV2State,
-    CollisionFreeSpeedModelV3: CollisionFreeSpeedModelV3State,
+    MotivationCollisionFreeSpeedModel: MotivationCollisionFreeSpeedModelState,
     AnticipationVelocityModel: AnticipationVelocityModelState,
     SocialForceModel: SocialForceModelState,
     WarpDriverModel: WarpDriverModelState,
@@ -70,9 +70,9 @@ class Simulation:
         self,
         *,
         model: (
-            CollisionFreeSpeedModel
-            | CollisionFreeSpeedModelV2
-            | CollisionFreeSpeedModelV3
+            CollisionFreeSpeedModelTordeux2016
+            | CollisionFreeSpeedModel
+            | MotivationCollisionFreeSpeedModel
             | GeneralizedCentrifugalForceModel
             | SocialForceModel
             | AnticipationVelocityModel
@@ -90,8 +90,9 @@ class Simulation:
         Args:
             model:
                 Defines the operational model used in the simulation. Every built-in model is passed
-                as a configured instance carrying its model-level parameters, e.g.
-                :class:`~jupedsim.CollisionFreeSpeedModel` or :class:`~jupedsim.SocialForceModel`.
+                as a configured instance, e.g. :class:`~jupedsim.CollisionFreeSpeedModel` or
+                :class:`~jupedsim.SocialForceModel`. A model with model-level parameters carries
+                them in this instance.
                 Custom Python models are passed as instances of a
                 :class:`~jupedsim.CustomOperationalModel` subclass.
 
@@ -244,9 +245,9 @@ class Simulation:
         steer_to: Location | None = None,
         state: (
             GeneralizedCentrifugalForceModelState
+            | CollisionFreeSpeedModelTordeux2016State
             | CollisionFreeSpeedModelState
-            | CollisionFreeSpeedModelV2State
-            | CollisionFreeSpeedModelV3State
+            | MotivationCollisionFreeSpeedModelState
             | AnticipationVelocityModelState
             | SocialForceModelState
             | WarpDriverModelState

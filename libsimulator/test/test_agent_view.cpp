@@ -8,7 +8,7 @@
 #include "kernel.hpp"
 #include "line_segment.hpp"
 #include "neighborhood_search.hpp"
-#include "operational_models/collision_free_speed_model/collision_free_speed_model.hpp"
+#include "operational_models/collision_free_speed_model_tordeux2016/collision_free_speed_model_tordeux2016.hpp"
 #include "test_common.hpp"
 #include "unique_id.hpp"
 
@@ -22,7 +22,7 @@
 
 namespace
 {
-using State = CollisionFreeSpeedModel::State;
+using State = CollisionFreeSpeedModelTordeux2016::State;
 
 GenericAgent make_agent(const Geometry& geo, Point pos, double radius = 0.2, double z = 0.0)
 {

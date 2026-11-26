@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "collision_free_speed_model_v3.hpp"
+#include "motivation_collision_free_speed_model.hpp"
 
 #include "conversion.hpp"
 #include "kernel.hpp"
@@ -12,12 +12,13 @@
 
 namespace py = pybind11;
 
-void init_collision_free_speed_model_v3(py::module_& m)
+void init_motivation_collision_free_speed_model(py::module_& m)
 {
-    py::class_<CollisionFreeSpeedModelV3, OperationalModel, py::smart_holder> model(
-        m, "CollisionFreeSpeedModelV3");
+    py::class_<MotivationCollisionFreeSpeedModel, OperationalModel, py::smart_holder> model(
+        m, "MotivationCollisionFreeSpeedModel");
     model.doc() = clean_doc(R"(
-        Collision Free Speed Model V3.
+        Motivation Collision Free Speed Model as published by Üsten et al. (2026)
+        (https://arxiv.org/abs/2604.26858).
 
         Variant of the Collision Free Speed Model with anisotropic neighbor
         interaction and relaxed heading dynamics. The walking direction is obtained
@@ -27,19 +28,19 @@ void init_collision_free_speed_model_v3(py::module_& m)
         heading angle is relaxed in time to suppress jitter.
 
         The model has no model-level parameters; all parameters are per agent, see
-        :class:`~jupedsim.CollisionFreeSpeedModelV3State`. The model instance is
+        :class:`~jupedsim.MotivationCollisionFreeSpeedModelState`. The model instance is
         passed to the simulation:
 
         .. code:: python
 
             sim = jupedsim.Simulation(
-                model=jupedsim.CollisionFreeSpeedModelV3(),
+                model=jupedsim.MotivationCollisionFreeSpeedModel(),
                 geometry=...,
             )
             sim.add_agent(
                 region.at(1.0, 1.0),
                 route=route,
-                state=jupedsim.CollisionFreeSpeedModelV3State(desired_speed=1.4),
+                state=jupedsim.MotivationCollisionFreeSpeedModelState(desired_speed=1.4),
             )
 
         .. warning::
@@ -49,10 +50,11 @@ void init_collision_free_speed_model_v3(py::module_& m)
     )");
     model.def(py::init<>());
 
-    const CollisionFreeSpeedModelV3::State d{};
-    py::class_<CollisionFreeSpeedModelV3::State> state(m, "CollisionFreeSpeedModelV3State");
+    const MotivationCollisionFreeSpeedModel::State d{};
+    py::class_<MotivationCollisionFreeSpeedModel::State> state(
+        m, "MotivationCollisionFreeSpeedModelState");
     state.doc() = clean_doc(R"(
-        Per-agent state of the Collision Free Speed Model V3.
+        Per-agent state of the Motivation Collision Free Speed Model.
 
         All arguments are keyword-only with sensible defaults, and every argument is
         also a read/write attribute of the same name.
@@ -96,7 +98,7 @@ void init_collision_free_speed_model_v3(py::module_& m)
                         double desired_speed,
                         double radius,
                         double heading_angle) {
-                return CollisionFreeSpeedModelV3::State{
+                return MotivationCollisionFreeSpeedModel::State{
                     .orientation = orientation,
                     .strength_neighbor_repulsion = strength_neighbor_repulsion,
                     .range_neighbor_repulsion = range_neighbor_repulsion,
@@ -125,24 +127,27 @@ void init_collision_free_speed_model_v3(py::module_& m)
             py::arg("desired_speed") = d.v0,
             py::arg("radius") = d.radius,
             py::arg("heading_angle") = d.heading_angle)
-        .def_readwrite("orientation", &CollisionFreeSpeedModelV3::State::orientation)
+        .def_readwrite("orientation", &MotivationCollisionFreeSpeedModel::State::orientation)
         .def_readwrite(
             "strength_neighbor_repulsion",
-            &CollisionFreeSpeedModelV3::State::strength_neighbor_repulsion)
+            &MotivationCollisionFreeSpeedModel::State::strength_neighbor_repulsion)
         .def_readwrite(
-            "range_neighbor_repulsion", &CollisionFreeSpeedModelV3::State::range_neighbor_repulsion)
+            "range_neighbor_repulsion",
+            &MotivationCollisionFreeSpeedModel::State::range_neighbor_repulsion)
         .def_readwrite(
             "strength_geometry_repulsion",
-            &CollisionFreeSpeedModelV3::State::strength_geometry_repulsion)
+            &MotivationCollisionFreeSpeedModel::State::strength_geometry_repulsion)
         .def_readwrite(
-            "range_geometry_repulsion", &CollisionFreeSpeedModelV3::State::range_geometry_repulsion)
-        .def_readwrite("range_x_scale", &CollisionFreeSpeedModelV3::State::range_x_scale)
-        .def_readwrite("range_y_scale", &CollisionFreeSpeedModelV3::State::range_y_scale)
+            "range_geometry_repulsion",
+            &MotivationCollisionFreeSpeedModel::State::range_geometry_repulsion)
+        .def_readwrite("range_x_scale", &MotivationCollisionFreeSpeedModel::State::range_x_scale)
+        .def_readwrite("range_y_scale", &MotivationCollisionFreeSpeedModel::State::range_y_scale)
         .def_readwrite(
-            "theta_max_upper_bound", &CollisionFreeSpeedModelV3::State::theta_max_upper_bound)
-        .def_readwrite("agent_buffer", &CollisionFreeSpeedModelV3::State::agent_buffer)
-        .def_readwrite("time_gap", &CollisionFreeSpeedModelV3::State::time_gap)
-        .def_readwrite("desired_speed", &CollisionFreeSpeedModelV3::State::v0)
-        .def_readwrite("radius", &CollisionFreeSpeedModelV3::State::radius)
-        .def_readwrite("heading_angle", &CollisionFreeSpeedModelV3::State::heading_angle);
+            "theta_max_upper_bound",
+            &MotivationCollisionFreeSpeedModel::State::theta_max_upper_bound)
+        .def_readwrite("agent_buffer", &MotivationCollisionFreeSpeedModel::State::agent_buffer)
+        .def_readwrite("time_gap", &MotivationCollisionFreeSpeedModel::State::time_gap)
+        .def_readwrite("desired_speed", &MotivationCollisionFreeSpeedModel::State::v0)
+        .def_readwrite("radius", &MotivationCollisionFreeSpeedModel::State::radius)
+        .def_readwrite("heading_angle", &MotivationCollisionFreeSpeedModel::State::heading_angle);
 }

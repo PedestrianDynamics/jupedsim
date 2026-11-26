@@ -4,7 +4,7 @@
 #include "geometry/location.hpp"
 #include "geometry_fixtures.hpp"
 #include "kernel.hpp"
-#include "operational_models/collision_free_speed_model/collision_free_speed_model.hpp"
+#include "operational_models/collision_free_speed_model_tordeux2016/collision_free_speed_model_tordeux2016.hpp"
 #include "polygon.hpp"
 #include "records.hpp"
 #include "route.hpp"
@@ -138,7 +138,7 @@ TEST(LeastTargetedTransition, NextIsCorrect)
 
 namespace
 {
-using State = CollisionFreeSpeedModel::State;
+using State = CollisionFreeSpeedModelTordeux2016::State;
 using testing::HasSubstr;
 using testing::ThrowsMessage;
 
@@ -149,7 +149,7 @@ protected:
     test_geometries::SingleRoom _room = test_geometries::rectangle({0, 0}, {20, 20});
     std::size_t _room_id = _room.room_id;
     Simulation _sim{
-        std::make_unique<CollisionFreeSpeedModel>(8.0, 0.1, 5.0, 0.02),
+        std::make_unique<CollisionFreeSpeedModelTordeux2016>(8.0, 0.1, 5.0, 0.02),
         std::move(_room.geometry),
         0.01,
         FloorfieldOptions{}};

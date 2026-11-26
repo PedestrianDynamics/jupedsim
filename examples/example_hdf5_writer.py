@@ -34,7 +34,7 @@ def main() -> None:
     out = pathlib.Path("example_traj.h5")
     with jps.Hdf5TrajectoryWriter(output_file=out, every_nth_frame=4) as writer:
         sim = jps.Simulation(
-            model=jps.CollisionFreeSpeedModelV2(),
+            model=jps.CollisionFreeSpeedModel(),
             geometry=geo_builder.build(),
             trajectory_writer=writer,
             dt=0.01,
@@ -55,7 +55,7 @@ def main() -> None:
             sim.add_agent(
                 region.at(*position),
                 route=route,
-                state=jps.CollisionFreeSpeedModelV2State(),
+                state=jps.CollisionFreeSpeedModelState(),
             )
 
         while sim.agent_count() > 0 and sim.iteration_count() < 2000:

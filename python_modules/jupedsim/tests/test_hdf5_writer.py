@@ -23,7 +23,7 @@ def square_simulation(tmp_path: pathlib.Path):
         every_nth_frame=1,
     )
     sim = jps.Simulation(
-        model=jps.CollisionFreeSpeedModelV2(),
+        model=jps.CollisionFreeSpeedModel(),
         geometry=surface.build(),
         trajectory_writer=writer,
         dt=0.01,
@@ -38,7 +38,7 @@ def square_simulation(tmp_path: pathlib.Path):
         sim.add_agent(
             room.at(x, y),
             route=route,
-            state=jps.CollisionFreeSpeedModelV2State(),
+            state=jps.CollisionFreeSpeedModelState(),
         )
     for _ in range(50):
         sim.iterate()
@@ -104,7 +104,7 @@ def test_close_is_idempotent(tmp_path):
     out = tmp_path / "empty.h5"
     writer = jps.Hdf5TrajectoryWriter(output_file=out, every_nth_frame=1)
     sim = jps.Simulation(
-        model=jps.CollisionFreeSpeedModelV2(),
+        model=jps.CollisionFreeSpeedModel(),
         geometry=surface.build(),
         trajectory_writer=writer,
         dt=0.01,
@@ -160,7 +160,7 @@ def test_regions_round_trip(tmp_path):
     out = tmp_path / "regions.h5"
     writer = jps.Hdf5TrajectoryWriter(output_file=out, every_nth_frame=1)
     sim = jps.Simulation(
-        model=jps.CollisionFreeSpeedModelV2(),
+        model=jps.CollisionFreeSpeedModel(),
         geometry=surface.build(),
         trajectory_writer=writer,
         dt=0.01,
@@ -194,7 +194,7 @@ def _square_simulation(writer):
         polygon=shapely.Polygon([(0, 0), (5, 0), (5, 5), (0, 5)]), height=0.0
     )
     return jps.Simulation(
-        model=jps.CollisionFreeSpeedModelV2(),
+        model=jps.CollisionFreeSpeedModel(),
         geometry=surface.build(),
         trajectory_writer=writer,
         dt=0.01,
@@ -254,7 +254,7 @@ def test_travel_times_round_trip(tmp_path):
         output_file=out, every_nth_frame=1, write_travel_times=True
     )
     sim = jps.Simulation(
-        model=jps.CollisionFreeSpeedModelV2(),
+        model=jps.CollisionFreeSpeedModel(),
         geometry=surface.build(),
         trajectory_writer=writer,
         dt=0.01,

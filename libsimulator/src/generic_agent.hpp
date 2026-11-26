@@ -2,12 +2,12 @@
 #pragma once
 #include "anticipation_velocity_model_state.hpp"
 #include "collision_free_speed_model_state.hpp"
-#include "collision_free_speed_model_v2_state.hpp"
-#include "collision_free_speed_model_v3_state.hpp"
+#include "collision_free_speed_model_tordeux2016_state.hpp"
 #include "custom_model_state.hpp"
 #include "generalized_centrifugal_force_model_state.hpp"
 #include "geometry/location.hpp"
 #include "kernel.hpp"
+#include "motivation_collision_free_speed_model_state.hpp"
 #include "operational_models/operational_model_state.hpp"
 #include "operational_models/operational_model_type.hpp"
 #include "routing_target.hpp"
@@ -75,14 +75,14 @@ inline OperationalModelType model_type_of(const OperationalModelState& model)
             [](const GeneralizedCentrifugalForceModelState&) {
                 return OperationalModelType::GeneralizedCentrifugalForce;
             },
+            [](const CollisionFreeSpeedModelTordeux2016State&) {
+                return OperationalModelType::CollisionFreeSpeedTordeux2016;
+            },
             [](const CollisionFreeSpeedModelState&) {
                 return OperationalModelType::CollisionFreeSpeed;
             },
-            [](const CollisionFreeSpeedModelV2State&) {
-                return OperationalModelType::CollisionFreeSpeedV2;
-            },
-            [](const CollisionFreeSpeedModelV3State&) {
-                return OperationalModelType::CollisionFreeSpeedV3;
+            [](const MotivationCollisionFreeSpeedModelState&) {
+                return OperationalModelType::MotivationCollisionFreeSpeed;
             },
             [](const AnticipationVelocityModelState&) {
                 return OperationalModelType::AnticipationVelocityModel;
