@@ -227,7 +227,7 @@ The B→A direction is the same set mirrored, because it is sampled from B's own
 ### 3.8 Speed field: walls slow agents down, portals don't
 - **Decision:** Speed is `clamp(dist_to_nearest_wall / wall_influence_radius, MIN_SPEED, 1)` inside the polygon and 0 outside, with `MIN_SPEED = 0.01 m/s`. A cell that a wall runs through is not walkable (see 7.4). The nearest wall is found with an R-tree (`rstar`). This is the region's *default* speed field; users can replace it (see 7.3).
 - **Why:** It keeps routes off walls without blocking narrow doors, and a door is not treated as a wall.
-- **Parameters:** `cell_size` (default 0.2 m) and `wall_influence_radius` (default 0.5 m), set per simulation through `FloorfieldOptions`.
+- **Parameters:** `cell_size` (default 0.2 m) and `wall_influence_radius` (default 0.3 m), set per simulation through `FloorfieldOptions`. In a passage narrower than twice the radius the field leads to the centre line, which lowers the flow through it; a smaller radius costs wall distance at corners (discussion #1756).
 
 ### 3.9 Destinations are registered up front and solved lazily
 - **Decision:** `add_point_destination` snaps to the nearest walkable cell within two cells. `add_area_destination` takes one or more pieces, each inside one region, and agents head for the nearest piece. A destination is solved on first query and then kept.
@@ -306,7 +306,7 @@ Allow the use of a finer grid in places where it is needed, potentially using a 
 Items that were on the list above and are now done, with how they were done.
 
 ### 7.1 Field parameters exposed (#1702, `a41e3c374`)
-`cell_size` and `wall_influence_radius` were constants in `floorfield_routing_engine.cpp`. They are now a `FloorfieldOptions` struct (defaults 0.2 m and 0.5 m) passed to `Simulation`, and in Python as `jps.Simulation(..., floorfield_options=jps.FloorfieldOptions(cell_size=..., wall_influence_radius=...))`. The options apply to the whole simulation, not per region. The only check is the existing one in `validate_settings`: both must be positive and finite.
+`cell_size` and `wall_influence_radius` were constants in `floorfield_routing_engine.cpp`. They are now a `FloorfieldOptions` struct (defaults 0.2 m and 0.5 m at the time; the radius is now 0.3 m, see 3.8) passed to `Simulation`, and in Python as `jps.Simulation(..., floorfield_options=jps.FloorfieldOptions(cell_size=..., wall_influence_radius=...))`. The options apply to the whole simulation, not per region. The only check is the existing one in `validate_settings`: both must be positive and finite.
 
 ### 7.2 Travel times and directions exposed to Python (`428715586`)
 The grids go through C++, not straight from Rust to Python. The bridge got `region_directions` next to `region_travel_times` and `region_grid`; `FloorfieldRoutingEngine::travel_times` builds a `TravelTimeGrid` from them, and `Simulation.travel_times(stage_id)` returns one per region (`origin`, `width`, `height`, `cell_size`, `extent`, `values`, `directions`). `directions()` works on cells directly instead of calling the point-based `direction()` once per cell: the solution and the destination's cells are looked up once, and both share `direction_at_cell`, so the results agree at cell centres (up to rounding, since `direction()` blends). `Hdf5TrajectoryWriter(write_travel_times=True)` stores all grids in `/travel_times` on close, `Hdf5TrajectoryLoader.load_travel_times()` reads them back in the same form, and the trame viewer draws them (`d44e903a0`, `babca8b5f`).

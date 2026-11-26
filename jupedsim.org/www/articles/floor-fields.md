@@ -51,7 +51,7 @@ simulation = jps.Simulation(
     geometry=geo,
     floorfield_options=jps.FloorfieldOptions(
         cell_size=0.2,  # m, the default
-        wall_influence_radius=0.5,  # m, the default
+        wall_influence_radius=0.3,  # m, the default
     ),
 )
 ```
@@ -195,9 +195,9 @@ while simulation.agent_count() > 0:
     simulation.iterate()
 ```
 
-Without the update, 92 of the 96 agents queue at the north-east area, the one
-closest to them, and the room is empty after 22.8 s. With it, 36 agents switch to
-the south-east area once the queue builds up, and the room is empty after 18.3 s.
+Without the update, 93 of the 96 agents queue at the north-east area, the one
+closest to them, and the room is empty after 23.8 s. With it, 34 agents switch to
+the south-east area once the queue builds up, and the room is empty after 16.8 s.
 
 ```{figure} floor-fields/congestion.gif
 :alt: Animation of both runs, one above the other: without the update nearly all agents queue at the north-east area; with it, part of the crowd turns to the south-east area
@@ -211,7 +211,7 @@ agents crowd.
 :alt: Four panels: travel time to the exit at 8 s without and with the update, the updated speed field at 8 s, and the number of agents in the room over time for both runs
 
 Why agents switch. (a) Without the update the travel time ignores the crowd,
-and 92 of the 96 agents head for the north-east area. (b) With the update the queue
+and 93 of the 96 agents head for the north-east area. (b) With the update the queue
 slows the speed field (c), the travel time through the queue grows, and for the
 agents in the south part of the crowd the south-east area becomes quicker. (d)
 Agents in the room over time.
