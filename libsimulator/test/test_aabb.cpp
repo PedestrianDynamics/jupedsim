@@ -22,7 +22,7 @@ TEST(AABB, CanConstructFromVector)
 TEST(AABB, CannotConstructFromEmptyVector)
 {
     const std::vector<Point> c{};
-    ASSERT_THROW(const AABB aabb(c), SimulationError);
+    ASSERT_THROW(const AABB aabb(c), JupedsimInternalError);
 }
 
 TEST(AABB, CanConstructFromPositivePoints)

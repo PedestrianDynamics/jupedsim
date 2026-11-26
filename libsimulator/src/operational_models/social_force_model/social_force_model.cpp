@@ -67,7 +67,7 @@ void SocialForceModel::check_model_constraint(const GenericAgent& agent, const A
     // does not break immediately
     auto throw_unless_positive = [](double value, std::string name) {
         if(value <= 0) {
-            throw SimulationError(
+            throw InvalidValueError(
                 "Model constraint violation: {} {} not in allowed range, "
                 "{} needs to be positive",
                 name,
@@ -77,7 +77,7 @@ void SocialForceModel::check_model_constraint(const GenericAgent& agent, const A
     };
     auto throw_if_negative = [](double value, std::string name) {
         if(value < 0) {
-            throw SimulationError(
+            throw InvalidValueError(
                 "Model constraint violation: {} {} not in allowed range, "
                 "{} must not be negative",
                 name,
@@ -105,7 +105,7 @@ void SocialForceModel::check_model_constraint(const GenericAgent& agent, const A
         const auto distance = neighbor.relative_position.norm();
 
         if(current_state.radius >= distance) {
-            throw SimulationError(
+            throw InvalidValueError(
                 "Model constraint violation: Agent at {} too close to agent at {}: distance {}, "
                 "radius {}",
                 agent.location.xy(),
@@ -116,7 +116,7 @@ void SocialForceModel::check_model_constraint(const GenericAgent& agent, const A
     }
     const auto max_radius = current_state.radius / 2;
     if(!view.walls_in_range(max_radius).empty()) {
-        throw SimulationError(
+        throw InvalidValueError(
             "Model constraint violation: Agent at {} too close to geometry boundaries, distance < "
             "{}/2",
             agent.location.xy(),

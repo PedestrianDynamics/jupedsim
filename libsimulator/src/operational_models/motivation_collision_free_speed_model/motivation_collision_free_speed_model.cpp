@@ -188,7 +188,7 @@ void MotivationCollisionFreeSpeedModel::check_model_constraint(
         const auto contact_dist = current_state.radius + neighbor_state.radius;
         const auto distance = neighbor.relative_position.norm();
         if(contact_dist >= distance) {
-            throw SimulationError(
+            throw InvalidValueError(
                 "Model constraint violation: Agent {} too close to agent {}: distance {}",
                 agent.location.xy(),
                 agent.location.xy() + neighbor.relative_position,
@@ -197,7 +197,7 @@ void MotivationCollisionFreeSpeedModel::check_model_constraint(
     }
 
     if(!view.walls_in_range(current_state.radius).empty()) {
-        throw SimulationError(
+        throw InvalidValueError(
             "Model constraint violation: Agent at {} too close to geometry boundaries, distance "
             "< {}",
             agent.location.xy(),

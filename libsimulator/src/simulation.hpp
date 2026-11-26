@@ -84,6 +84,8 @@ private:
 
     /// Throws SimulationError if the current state is in the mask @p forbidden.
     void throw_if_state(State forbidden, const char* operation) const;
+    /// Throws NotFoundError if the geometry has no region @p region_id.
+    void throw_if_unknown_region(std::size_t region_id) const;
     /// Throws unless @p location lies on this simulation's geometry.
     void check_on_own_geometry(const Location& location, const char* what) const;
     Route& route(Route::ID route_id);

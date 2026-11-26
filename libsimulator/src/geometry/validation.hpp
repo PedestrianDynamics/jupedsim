@@ -91,7 +91,7 @@ concept CgalPoint =
 /// @param points to check, any input range of 2D or 3D CGAL points.
 /// @param dist minimum distance between all pairs of points, must be > 0.
 /// @return the first pair found that is closer than @p dist, or nothing.
-/// @throws SimulationError if @p dist <= 0, or a coordinate is not finite or too large for a
+/// @throws JupedsimInternalError if @p dist <= 0, or a coordinate is not finite or too large for a
 ///         grid with cell size @p dist.
 template <std::ranges::input_range Range>
     requires CgalPoint<std::ranges::range_value_t<Range>>
@@ -99,8 +99,7 @@ auto find_clearance_violation(Range&& points, double dist) -> std::optional<
     std::pair<std::ranges::range_value_t<Range>, std::ranges::range_value_t<Range>>>
 {
     if(dist <= 0) {
-        throw SimulationError(
-            "Internal Error: find_clearance_violation needs dist > 0, got {}.", dist);
+        throw JupedsimInternalError("find_clearance_violation needs dist > 0, got {}.", dist);
     }
     using Point = std::ranges::range_value_t<Range>;
     constexpr size_t dimension = Point::Ambient_dimension::value;
@@ -125,8 +124,8 @@ auto find_clearance_violation(Range&& points, double dist) -> std::optional<
             const double coordinate = std::floor(CGAL::to_double(p.cartesian(axis)) / dist);
             // Also rejects NaN and infinity.
             if(!(std::abs(coordinate) < max_cell)) {
-                throw SimulationError(
-                    "Internal Error: find_clearance_violation got the coordinate {}, which is "
+                throw JupedsimInternalError(
+                    "find_clearance_violation got the coordinate {}, which is "
                     "not finite or too large for dist {}.",
                     p,
                     dist);

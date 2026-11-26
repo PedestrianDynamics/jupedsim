@@ -22,25 +22,25 @@ Polygon::Polygon(const std::vector<Point>& points)
 {
     for(const auto& p : points) {
         if(!std::isfinite(p.x()) || !std::isfinite(p.y())) {
-            throw SimulationError("Polygon coordinates must be finite");
+            throw InvalidValueError("Polygon coordinates must be finite");
         }
     }
     const bool closed = points.size() > 1 && (points.back() - points.front()).is_zero_length();
     const size_t count = closed ? points.size() - 1 : points.size();
     if(count < 3) {
-        throw SimulationError("Polygon must have at least 3 points");
+        throw InvalidValueError("Polygon must have at least 3 points");
     }
     for(size_t index = 0; index < count; ++index) {
         _polygon.push_back({points[index].x(), points[index].y()});
     }
 
     if(!_polygon.is_simple()) {
-        throw SimulationError("Polygon is not simple");
+        throw InvalidValueError("Polygon is not simple");
     }
 
     switch(_polygon.orientation()) {
         case CGAL::Orientation::COLLINEAR:
-            throw SimulationError("Polygon may not be collinear.");
+            throw InvalidValueError("Polygon may not be collinear.");
         case CGAL::Orientation::CLOCKWISE:
             _polygon.reverse_orientation();
         case CGAL::Orientation::COUNTERCLOCKWISE:
@@ -86,7 +86,7 @@ std::tuple<Point, double> Polygon::containing_circle() const
 std::string as_wkt(const epick::PolyWithHoles& polygon)
 {
     if(polygon.is_unbounded()) {
-        throw SimulationError("Empty polygon.");
+        throw JupedsimInternalError("Empty polygon.");
     }
     // fmt's "{}" is the shortest decimal that reads back to the same double.
     std::string wkt{"POLYGON ("};

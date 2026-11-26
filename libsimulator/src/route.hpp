@@ -28,7 +28,7 @@ public:
     FixedTransitionDescription(BaseStage::ID next) : _next(next)
     {
         if(next == BaseStage::ID::invalid.get_id()) {
-            throw SimulationError("Can not create fixed transition from invalid target id.");
+            throw JupedsimInternalError("Fixed transition target id is invalid.");
         }
     };
 
@@ -45,12 +45,11 @@ public:
         : _weighted_stages(weighted_stages)
     {
         if(_weighted_stages.empty()) {
-            throw SimulationError("A round robin transition needs at least one target.");
+            throw JupedsimInternalError("A round robin transition needs at least one target.");
         }
         for(const auto& [stage_id, _] : _weighted_stages) {
             if(stage_id == BaseStage::ID::invalid.get_id()) {
-                throw SimulationError(
-                    "Can not create round robin transition from invalid target id.");
+                throw JupedsimInternalError("Round robin transition target id is invalid.");
             }
         }
     };
@@ -71,12 +70,11 @@ public:
         : _target_candidates(std::move(target_candidates))
     {
         if(_target_candidates.empty()) {
-            throw SimulationError("A least targeted transition needs at least one target.");
+            throw JupedsimInternalError("A least targeted transition needs at least one target.");
         }
         for(const auto& stage_id : _target_candidates) {
             if(stage_id == BaseStage::ID::invalid.get_id()) {
-                throw SimulationError(
-                    "Can not create least targeted transition from invalid target id.");
+                throw JupedsimInternalError("Least targeted transition target id is invalid.");
             }
         }
     }
@@ -128,7 +126,7 @@ public:
     {
         for(auto const& [_, weight] : _weighted_stages) {
             if(weight == 0) {
-                throw SimulationError("RoundRobinTransition no weight may be zero.");
+                throw JupedsimInternalError("RoundRobinTransition no weight may be zero.");
             }
             _sum_weights += weight;
         }

@@ -5,6 +5,7 @@
 #include "conversion.hpp"
 #include "polygon.hpp"
 #include "region.hpp"
+#include "simulation_error.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep
 
 #include <pybind11/pybind11.h>
@@ -40,14 +41,14 @@ void init_geometry(py::module_& m)
             [](const std::shared_ptr<Geometry>& geometry, const py::object& key) {
                 if(py::isinstance<py::bool_>(key) ||
                    !(py::isinstance<py::int_>(key) || py::isinstance<py::str>(key))) {
-                    throw py::type_error(
-                        py::str("key must be a region id or name, got {}")
-                            .format(py::type::of(key).attr("__name__")));
+                    throw InvalidTypeError(
+                        "key must be a region id or name, got {}",
+                        std::string(py::str(py::type::of(key).attr("__name__"))));
                 }
                 if(py::isinstance<py::int_>(key)) {
                     const auto id = key.cast<long long>();
                     if(id < 0 || static_cast<std::size_t>(id) >= geometry->region_count()) {
-                        throw py::key_error(py::str("no region with id {}").format(id));
+                        throw NotFoundError("no region with id {}", id);
                     }
                     return region_of(geometry, static_cast<std::size_t>(id));
                 }
@@ -57,7 +58,7 @@ void init_geometry(py::module_& m)
                         return region_of(geometry, id);
                     }
                 }
-                throw py::key_error(py::str("no region named {!r}").format(name));
+                throw NotFoundError("no region named '{}'", name);
             },
             py::arg("key"),
             clean_doc(R"(

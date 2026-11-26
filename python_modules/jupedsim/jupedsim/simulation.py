@@ -22,12 +22,14 @@ from jupedsim.pyjupedsim import (
     GeneralizedCentrifugalForceModel,
     GeneralizedCentrifugalForceModelState,
     Geometry,
+    InvalidTypeError,
+    InvalidValueError,
     Location,
     MotivationCollisionFreeSpeedModel,
     MotivationCollisionFreeSpeedModelState,
+    NotFoundError,
     OperationalModel,
     Region,
-    SimulationError,
     SocialForceModel,
     SocialForceModelState,
     SpeedGrid,
@@ -122,7 +124,7 @@ class Simulation:
         elif isinstance(model, CustomOperationalModel):
             the_model = _PythonModel(model)
         else:
-            raise TypeError(
+            raise InvalidTypeError(
                 "model must be a built-in operational model instance or a "
                 "CustomOperationalModel instance, got "
                 f"{type(model).__name__}"
@@ -177,7 +179,7 @@ class Simulation:
                 already used.
         """
         if not isinstance(description, Waypoint | Exit):
-            raise TypeError(
+            raise InvalidTypeError(
                 "description must be a jupedsim.Waypoint or jupedsim.Exit, got "
                 f"{type(description).__name__}"
             )
@@ -294,17 +296,17 @@ class Simulation:
         location = self._checked_location(location, "location")
         if state is None:
             if self._default_state is None:
-                raise ValueError(
+                raise InvalidValueError(
                     "custom models need state=; pass your model's agent state"
                 )
             state = self._default_state()
         elif not isinstance(state, tuple(_STATE_TYPES.values())):
             state = _CustomModelState(state)
         if (route is None) == (steer_to is None):
-            raise ValueError("use route= or steer_to=, one of them")
+            raise InvalidValueError("use route= or steer_to=, one of them")
         if steer_to is not None:
             if first_target is not None:
-                raise ValueError(
+                raise InvalidValueError(
                     "first_target= selects a target of route=; it does not apply "
                     "to steer_to="
                 )
@@ -680,19 +682,19 @@ class Simulation:
         if isinstance(key, str):
             agent_id = self._obj.agent_named(key)
             if agent_id is None:
-                raise KeyError(f"no agent named {key!r}")
+                raise NotFoundError(f"no agent named {key!r}")
             return Agent(self, agent_id)
         # The native lookup crashes on anything but an int.
         if isinstance(key, bool) or not isinstance(key, int):
-            raise TypeError(
+            raise InvalidTypeError(
                 f"key must be an agent id or name, got {type(key).__name__}"
             )
         # Fails on a closed simulation with its own error, unlike the lookup below.
         self._obj.agent_count()
         try:
             self._obj.agent(key)
-        except SimulationError:
-            raise KeyError(f"no agent with id {key}") from None
+        except NotFoundError:
+            raise NotFoundError(f"no agent with id {key}") from None
         return Agent(self, key)
 
     def target(self, key: int | str) -> RouteTarget:
@@ -726,25 +728,25 @@ class Simulation:
             for handle in handles:
                 if handle.name == key:
                     return handle
-            raise KeyError(f"no {kind} named {key!r}")
+            raise NotFoundError(f"no {kind} named {key!r}")
         if isinstance(key, bool) or not isinstance(key, int):
-            raise TypeError(
+            raise InvalidTypeError(
                 f"key must be a {kind} id or name, got {type(key).__name__}"
             )
         for handle in handles:
             if handle.id == key:
                 return handle
-        raise KeyError(f"no {kind} with id {key}")
+        raise NotFoundError(f"no {kind} with id {key}")
 
     def _own(self, handle: object, kind: type[_Handle], what: str) -> _Handle:
         """``handle``, checked to be a ``kind`` of this simulation."""
         if not isinstance(handle, kind):
-            raise TypeError(
+            raise InvalidTypeError(
                 f"{what} must be a {kind.__name__}, got {type(handle).__name__}"
             )
         if handle._simulation is not self:
             word = "Target" if kind is RouteTarget else kind.__name__
-            raise ValueError(
+            raise InvalidValueError(
                 f"{word} {id_and_name(handle)} belongs to another simulation"
             )
         return handle
@@ -753,7 +755,7 @@ class Simulation:
         """Id of ``region``, checked to be a :class:`~jupedsim.Region` of this
         simulation's geometry."""
         if not isinstance(region, Region):
-            raise TypeError(
+            raise InvalidTypeError(
                 f"region must be a Region, got {type(region).__name__}"
             )
         try:
@@ -761,7 +763,7 @@ class Simulation:
         except KeyError:
             own = None
         if own != region:
-            raise ValueError(
+            raise InvalidValueError(
                 f"Region {id_and_name(region)} belongs to another geometry"
             )
         return region.id
@@ -773,7 +775,7 @@ class Simulation:
     @staticmethod
     def _checked_location(location: object, what: str) -> Location:
         if not isinstance(location, Location):
-            raise TypeError(
+            raise InvalidTypeError(
                 f"{what} must be a Location, e.g. region.at(x, y), got "
                 f"{type(location).__name__}"
             )

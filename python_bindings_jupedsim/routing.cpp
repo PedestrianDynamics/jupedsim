@@ -4,18 +4,17 @@
 #include "geometry/geometry.hpp"
 #include "geometry/location.hpp"
 #include "region.hpp"
+#include "simulation_error.hpp"
 #include "surface_mesh_shortest_path_routing_engine.hpp"
 #include "type_casters.hpp" // IWYU pragma: keep
 
 #include <CGAL/Polygon_mesh_processing/IO/polygon_mesh_io.h>
-#include <fmt/format.h>
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h> // IWYU pragma: keep
 
 #include <algorithm>
 #include <memory>
-#include <stdexcept>
 #include <string>
 #include <tuple>
 #include <vector>
@@ -30,13 +29,12 @@ void check_cell_count(const TravelTimeGrid& grid)
 {
     const auto cells = grid.info.cell_count();
     if(grid.values.size() != cells || grid.directions.size() != cells) {
-        throw std::logic_error(
-            fmt::format(
-                "TravelTimeGrid of {}x{} cells holds {} values and {} directions",
-                grid.info.width,
-                grid.info.height,
-                grid.values.size(),
-                grid.directions.size()));
+        throw JupedsimInternalError(
+            "TravelTimeGrid of {}x{} cells holds {} values and {} directions",
+            grid.info.width,
+            grid.info.height,
+            grid.values.size(),
+            grid.directions.size());
     }
 }
 
@@ -186,12 +184,11 @@ void init_routing(py::module_& m)
             [](const SpeedGrid& g) {
                 const auto cells = g.info.cell_count();
                 if(g.values.size() != cells) {
-                    throw std::logic_error(
-                        fmt::format(
-                            "SpeedGrid of {}x{} cells holds {} values",
-                            g.info.width,
-                            g.info.height,
-                            g.values.size()));
+                    throw JupedsimInternalError(
+                        "SpeedGrid of {}x{} cells holds {} values",
+                        g.info.width,
+                        g.info.height,
+                        g.values.size());
                 }
                 py::array_t<double> values(
                     {static_cast<py::ssize_t>(g.info.height),

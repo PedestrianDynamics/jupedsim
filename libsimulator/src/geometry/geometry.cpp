@@ -80,10 +80,10 @@ void Geometry::build()
 epick::PolyWithHoles Geometry::polygon(size_t region_id) const
 {
     if(!_region_graph_2d) {
-        throw SimulationError("Geometry is built from mesh and has no 2D polygons");
+        throw JupedsimInternalError("Geometry is built from mesh and has no 2D polygons");
     }
     if(region_id >= region_count()) {
-        throw SimulationError("Unknown region ID {}", region_id);
+        throw NotFoundError("Unknown region ID {}", region_id);
     }
     return (*_region_graph_2d)[region_id];
 }
@@ -203,11 +203,11 @@ Geometry::locate_in_region(std::size_t region_id, const epick::Point2D& xy) cons
 Location Geometry::get_location(double x, double y, std::size_t region_id) const
 {
     if(region_id >= region_count()) {
-        throw SimulationError("Unknown region ID {}", region_id);
+        throw NotFoundError("Unknown region ID {}", region_id);
     }
     const auto face_location = locate_in_region(region_id, {x, y});
     if(face_location.face == epick::Mesh::null_face()) {
-        throw SimulationError(
+        throw InvalidValueError(
             "Point {} is not in region {}",
             Point{x, y},
             id_and_name(region_id, region_name(region_id)));
@@ -316,7 +316,7 @@ std::vector<AreaPiece> Geometry::clip_to_region(const epick::Poly& p, size_t reg
                 pieces.push_back(AreaPiece{to_inexact(piece.outer_boundary()), region_id});
             }));
     if(pieces.empty()) {
-        throw SimulationError(
+        throw InvalidValueError(
             "Area does not intersect region {}", id_and_name(region_id, region_name(region_id)));
     }
     return pieces;

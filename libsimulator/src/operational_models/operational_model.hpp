@@ -26,7 +26,7 @@ void validate_constraint(
 {
     if(exclude_min) {
         if(!(value > value_min && value <= value_max)) {
-            throw SimulationError(
+            throw InvalidValueError(
                 "Model constraint violation: {} {} not in allowed range, "
                 "{} needs to be in ({},{}]",
                 name,
@@ -38,7 +38,7 @@ void validate_constraint(
 
     } else {
         if(!(value >= value_min && value <= value_max)) {
-            throw SimulationError(
+            throw InvalidValueError(
                 "Model constraint violation: {} {} not in allowed range, "
                 "{} needs to be in [{},{}]",
                 name,

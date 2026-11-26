@@ -82,7 +82,7 @@ def test_collision_free_speed_models_can_not_set_radius_too_small(
     )
 
     with pytest.raises(
-        jps.SimulationError, match=r"Model constraint violation: radius -1 .*"
+        ValueError, match=r"Model constraint violation: radius -1 .*"
     ):
         simulation.add_agent(
             room.at(*agent_position),
@@ -1207,7 +1207,7 @@ def test_add_agent_rejects_state_of_different_model_on_custom_simulation():
     )
 
     with pytest.raises(
-        jps.SimulationError,
+        TypeError,
         match="does not match the simulation's operational model",
     ):
         simulation.add_agent(
@@ -1326,6 +1326,19 @@ def test_custom_model_update_wrong_movement_type_names_source():
     with pytest.raises(
         jps.SimulationError,
         match=r"Movement returned by compute_next_state\(\) is of wrong type",
+    ):
+        simulation.iterate()
+
+
+@pytest.mark.parametrize("movement", [(float("nan"), 0.0), (0.0, float("inf"))])
+def test_custom_model_update_non_finite_movement_is_rejected(movement):
+    simulation = _custom_model_simulation_with_agent(
+        _ConstantMovementModel(movement)
+    )
+
+    with pytest.raises(
+        ValueError,
+        match=r"Movement returned by compute_next_state\(\) must be finite",
     ):
         simulation.iterate()
 

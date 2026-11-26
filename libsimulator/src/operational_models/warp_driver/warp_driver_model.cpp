@@ -351,7 +351,7 @@ WarpDriverModel::WarpDriverModel(
     , _rng_seeder(rng_seed)
 {
     if(sigma <= 0.0) {
-        throw SimulationError("WarpDriverModel: sigma must be > 0, got {}", sigma);
+        throw InvalidValueError("WarpDriverModel: sigma must be > 0, got {}", sigma);
     }
     _intrinsic_field.compute(sigma);
 }
@@ -365,54 +365,54 @@ void WarpDriverModel::check_model_constraint(const GenericAgent& agent, const Ag
 {
     const auto* data = std::get_if<State>(&agent.state);
     if(!data) {
-        throw SimulationError(
+        throw InvalidTypeError(
             "WarpDriverModel constraint check: agent {} does not have WarpDriverModel data",
             agent.id);
     }
     if(data->radius <= 0.0) {
-        throw SimulationError(
+        throw InvalidValueError(
             "WarpDriverModel constraint check: agent {} has invalid radius {}",
             agent.id,
             data->radius);
     }
     if(data->v0 < 0.0) {
-        throw SimulationError(
+        throw InvalidValueError(
             "WarpDriverModel constraint check: agent {} has invalid v0 {}", agent.id, data->v0);
     }
     if(this->_time_horizon <= 0.0) {
-        throw SimulationError(
+        throw InvalidValueError(
             "WarpDriverModel constraint check: agent {} has invalid timeHorizon {}, must be > 0",
             agent.id,
             this->_time_horizon);
     }
     if(this->_step_size <= 0.0) {
-        throw SimulationError(
+        throw InvalidValueError(
             "WarpDriverModel constraint check: agent {} has invalid stepSize {}, must be > 0",
             agent.id,
             this->_step_size);
     }
     if(this->_num_samples < 1) {
-        throw SimulationError(
+        throw InvalidValueError(
             "WarpDriverModel constraint check: agent {} has invalid numSamples {}, must be >= 1",
             agent.id,
             this->_num_samples);
     }
     if(this->_time_uncertainty < 0.0) {
-        throw SimulationError(
+        throw InvalidValueError(
             "WarpDriverModel constraint check: agent {} has invalid timeUncertainty {}, must be "
             ">= 0",
             agent.id,
             this->_time_uncertainty);
     }
     if(this->_velocity_uncertainty_x < 0.0) {
-        throw SimulationError(
+        throw InvalidValueError(
             "WarpDriverModel constraint check: agent {} has invalid velocityUncertaintyX {}, must "
             "be >= 0",
             agent.id,
             this->_velocity_uncertainty_x);
     }
     if(this->_velocity_uncertainty_y < 0.0) {
-        throw SimulationError(
+        throw InvalidValueError(
             "WarpDriverModel constraint check: agent {} has invalid velocityUncertaintyY {}, must "
             "be >= 0",
             agent.id,
@@ -424,7 +424,7 @@ void WarpDriverModel::check_model_constraint(const GenericAgent& agent, const Ag
         const auto distance = neighbor.relative_position.norm();
 
         if(data->radius >= distance) {
-            throw SimulationError(
+            throw InvalidValueError(
                 "Model constraint violation: Agent at {} too close to agent at {}: distance {}, "
                 "radius {}",
                 agent.location.xy(),
@@ -435,7 +435,7 @@ void WarpDriverModel::check_model_constraint(const GenericAgent& agent, const Ag
     }
     const auto max_radius = data->radius / 2;
     if(!view.walls_in_range(max_radius).empty()) {
-        throw SimulationError(
+        throw InvalidValueError(
             "Model constraint violation: Agent at {} too close to geometry boundaries, distance < "
             "{}/2",
             agent.location.xy(),

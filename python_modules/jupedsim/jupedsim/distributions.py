@@ -5,22 +5,22 @@ import shapely
 from jupedsim.internal.grid import Grid
 
 
-class AgentNumberError(Exception):
+class AgentNumberError(ValueError):
     def __init__(self, message):
         self.message = message
 
 
-class IncorrectParameterError(Exception):
+class IncorrectParameterError(ValueError):
     def __init__(self, message):
         self.message = message
 
 
-class OverlappingCirclesError(Exception):
+class OverlappingCirclesError(ValueError):
     def __init__(self, message):
         self.message = message
 
 
-class NegativeValueError(Exception):
+class NegativeValueError(ValueError):
     def __init__(self, message):
         self.message = message
 

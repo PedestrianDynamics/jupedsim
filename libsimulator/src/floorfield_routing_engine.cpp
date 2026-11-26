@@ -64,7 +64,7 @@ ff::RegionGraph to_floorfield(const Geometry& geometry)
 {
     const auto* graph = geometry.region_graph_2d();
     if(graph == nullptr) {
-        throw SimulationError("Routing needs a geometry built from regions, not a raw mesh.");
+        throw JupedsimInternalError("Routing needs a geometry built from regions, not a raw mesh.");
     }
     const auto& g = *graph;
     ff::RegionGraph out{};

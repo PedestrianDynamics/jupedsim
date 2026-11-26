@@ -8,6 +8,8 @@ from typing import TYPE_CHECKING, Final
 
 from jupedsim.internal.messages import id_and_name
 from jupedsim.pyjupedsim import (
+    InvalidTypeError,
+    InvalidValueError,
     _FixedTransitionDescription,
     _LeastTargetedTransitionDescription,
     _RoundRobinTransitionDescription,
@@ -38,7 +40,7 @@ Source = RouteTarget | _AgentLocation
 
 def _checked_source(source: object) -> Source:
     if not isinstance(source, RouteTarget | _AgentLocation):
-        raise TypeError(
+        raise InvalidTypeError(
             "source must be a RouteTarget or jupedsim.AGENT_LOCATION, got "
             f"{type(source).__name__}"
         )
@@ -47,12 +49,12 @@ def _checked_source(source: object) -> Source:
 
 def _checked_target(target: object) -> RouteTarget:
     if isinstance(target, _AgentLocation):
-        raise ValueError(
+        raise InvalidValueError(
             "AGENT_LOCATION cannot be the target of a transition; it is where an "
             "agent joins the route"
         )
     if not isinstance(target, RouteTarget):
-        raise TypeError(
+        raise InvalidTypeError(
             f"targets must be RouteTargets, got {type(target).__name__}"
         )
     return target
@@ -109,7 +111,7 @@ class RoundRobinTransition:
     ) -> None:
         self._source = _checked_source(source)
         if not weights:
-            raise ValueError(
+            raise InvalidValueError(
                 "a round robin transition needs at least one target"
             )
         for target, weight in weights.items():
@@ -119,7 +121,7 @@ class RoundRobinTransition:
                 or not isinstance(weight, int)
                 or weight <= 0
             ):
-                raise ValueError(
+                raise InvalidValueError(
                     f"weights must be positive integers, got {weight!r} for "
                     f"target {id_and_name(target)}"
                 )
@@ -162,7 +164,7 @@ class LeastTargetedTransition:
         self._source = _checked_source(source)
         self._candidates = tuple(_checked_target(t) for t in targets)
         if not self._candidates:
-            raise ValueError(
+            raise InvalidValueError(
                 "a least targeted transition needs at least one target"
             )
 

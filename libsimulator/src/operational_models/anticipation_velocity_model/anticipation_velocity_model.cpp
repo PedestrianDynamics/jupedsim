@@ -161,7 +161,7 @@ void AnticipationVelocityModel::check_model_constraint(
         const auto contanctd_dist = r + neighbor_model.radius;
         const auto distance = neighbor.relative_position.norm();
         if(contanctd_dist >= distance) {
-            throw SimulationError(
+            throw InvalidValueError(
                 "Model constraint violation: Agent {} too close to agent {}: distance {}",
                 agent.location.xy(),
                 agent.location.xy() + neighbor.relative_position,
@@ -170,7 +170,7 @@ void AnticipationVelocityModel::check_model_constraint(
     }
 
     if(!view.walls_in_range(r).empty()) {
-        throw SimulationError(
+        throw InvalidValueError(
             "Model constraint violation: Agent at {} too close to geometry boundaries, distance "
             "< {}",
             agent.location.xy(),
