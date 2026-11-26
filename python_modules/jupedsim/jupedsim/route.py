@@ -93,13 +93,15 @@ class FixedTransition:
 class RoundRobinTransition:
     """Distributes the agents reaching ``source`` over targets by weight.
 
-    The agents deciding here go to the targets in turn, as many in a row to each as
-    its weight says: with weights ``{a: 2, b: 1}`` the sequence is a, a, b, a, a, b,
-    ... The sequence is counted per route and source.
+    The targets take turns in proportion to their weights, mixed as evenly as
+    possible: with weights ``{a: 2, b: 1}`` the sequence is a, b, a, a, b, a,
+    ... Only the ratio matters, ``{a: 60, b: 40}`` gives the same sequence as
+    ``{a: 3, b: 2}``. The sequence is counted per route and source.
 
     Args:
         source: The target the transition leaves, or :data:`AGENT_LOCATION`.
-        weights: Positive integer weight of every target that can follow.
+        weights: Integer weight from 1 to 1000000000 of every target that can
+            follow.
     """
 
     __slots__ = ("_source", "_weights")
@@ -117,11 +119,11 @@ class RoundRobinTransition:
             if (
                 isinstance(weight, bool)
                 or not isinstance(weight, int)
-                or weight <= 0
+                or not 1 <= weight <= 1_000_000_000
             ):
                 raise ValueError(
-                    f"weights must be positive integers, got {weight!r} for "
-                    f"target {id_and_name(target)}"
+                    "weights must be integers from 1 to 1000000000, got "
+                    f"{weight!r} for target {id_and_name(target)}"
                 )
         self._weights = dict(weights)
 

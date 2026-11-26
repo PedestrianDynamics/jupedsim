@@ -53,11 +53,13 @@ def test_a_route_with_every_transition_kind_leads_to_the_exit():
     assert visited == {first, upper, lower, last, exit_}
 
 
-@pytest.mark.parametrize("weight", [0, -1, 1.5, True])
-def test_round_robin_weights_must_be_positive_integers(weight):
+@pytest.mark.parametrize("weight", [0, -1, 0.4, True, 1_000_000_001])
+def test_round_robin_weights_must_be_integers_in_range(weight):
     sim, room = _simulation()
     wp = _waypoint(sim, room, (2, 5))
-    with pytest.raises(ValueError, match="weights must be positive integers"):
+    with pytest.raises(
+        ValueError, match="weights must be integers from 1 to 1000000000"
+    ):
         jps.RoundRobinTransition(jps.AGENT_LOCATION, {wp: weight})
 
 

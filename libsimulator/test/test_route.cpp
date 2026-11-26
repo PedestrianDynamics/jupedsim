@@ -63,28 +63,37 @@ TEST(RoundRobinTransition, SimpleNextIsCorrect)
     }
 }
 
-TEST(RoundRobinTransition, WeightedRoundRobin)
+TEST(RoundRobinTransition, WeightedRoundRobinInterleaves)
 {
     int stage1;
     int stage2;
     int stage3;
+    auto* s1 = reinterpret_cast<BaseStage*>(&stage1);
+    auto* s2 = reinterpret_cast<BaseStage*>(&stage2);
+    auto* s3 = reinterpret_cast<BaseStage*>(&stage3);
 
-    std::vector<std::tuple<BaseStage*, uint64_t>> weighted_stages = {
-        {reinterpret_cast<BaseStage*>(&stage1), 1},
-        {reinterpret_cast<BaseStage*>(&stage2), 2},
-        {reinterpret_cast<BaseStage*>(&stage3), 3}};
+    RoundRobinTransition sut({{s1, 1}, {s2, 2}, {s3, 3}});
 
-    RoundRobinTransition sut(weighted_stages);
-
+    const std::vector<BaseStage*> cycle{s3, s2, s1, s3, s2, s3};
     for(auto i = 0; i < 5; ++i) {
-        ASSERT_EQ(std::get<0>(weighted_stages[0]), sut.next_stage());
+        for(auto* stage : cycle) {
+            ASSERT_EQ(sut.next_stage(), stage);
+        }
+    }
+}
 
-        ASSERT_EQ(std::get<0>(weighted_stages[1]), sut.next_stage());
-        ASSERT_EQ(std::get<0>(weighted_stages[1]), sut.next_stage());
+TEST(RoundRobinTransition, OnlyTheRatioOfTheWeightsMatters)
+{
+    int stage1;
+    int stage2;
+    auto* s1 = reinterpret_cast<BaseStage*>(&stage1);
+    auto* s2 = reinterpret_cast<BaseStage*>(&stage2);
 
-        ASSERT_EQ(std::get<0>(weighted_stages[2]), sut.next_stage());
-        ASSERT_EQ(std::get<0>(weighted_stages[2]), sut.next_stage());
-        ASSERT_EQ(std::get<0>(weighted_stages[2]), sut.next_stage());
+    RoundRobinTransition small({{s1, 3}, {s2, 2}});
+    RoundRobinTransition large({{s1, 60}, {s2, 40}});
+
+    for(auto i = 0; i < 20; ++i) {
+        ASSERT_EQ(small.next_stage(), large.next_stage());
     }
 }
 
@@ -93,6 +102,15 @@ TEST(RoundRobinTransition, ZeroWeightGivesException)
     int stage1;
     std::vector<std::tuple<BaseStage*, uint64_t>> weighted_stages = {
         {reinterpret_cast<BaseStage*>(&stage1), 0}};
+
+    ASSERT_THROW(RoundRobinTransition sut(weighted_stages), SimulationError);
+}
+
+TEST(RoundRobinTransition, TooLargeWeightGivesException)
+{
+    int stage1;
+    std::vector<std::tuple<BaseStage*, uint64_t>> weighted_stages = {
+        {reinterpret_cast<BaseStage*>(&stage1), RoundRobinTransition::max_weight + 1}};
 
     ASSERT_THROW(RoundRobinTransition sut(weighted_stages), SimulationError);
 }
@@ -296,7 +314,7 @@ TEST_F(FollowRoute, TheFirstTransitionChoosesTheFirstStage)
     for(const double x : {2.0, 4.0, 6.0, 8.0}) {
         first_stages.push_back(_sim.agent(add_agent({x, 2}, route)).stage_id);
     }
-    EXPECT_EQ(first_stages, (std::vector<BaseStage::ID>{wp1, wp1, wp2, wp1}));
+    EXPECT_EQ(first_stages, (std::vector<BaseStage::ID>{wp1, wp2, wp1, wp1}));
 }
 
 TEST_F(FollowRoute, AGivenFirstStageTakesNoTurnInTheFirstTransition)

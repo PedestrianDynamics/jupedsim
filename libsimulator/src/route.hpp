@@ -115,39 +115,53 @@ public:
     BaseStage* next_stage() override { return _next; }
 };
 
+/// Smooth weighted round-robin (as in nginx): spreads each target's turns evenly over the cycle.
+/// Each decision credits every target with its weight; the target with the most credit (ties: the
+/// earlier one) is chosen and pays the sum of the weights. So within every sum-of-weights
+/// decisions each target is chosen exactly weight times.
 class RoundRobinTransition : public Transition
 {
+public:
+    /// Keeps the current weights far from overflow.
+    static constexpr uint64_t max_weight = 1'000'000'000;
+
 private:
-    std::vector<std::tuple<BaseStage*, uint64_t>> _weighted_stages{};
-    uint64_t _next_called{};
-    uint64_t _sum_weights{};
+    struct Target {
+        BaseStage* stage;
+        int64_t weight;
+        int64_t current;
+    };
+    std::vector<Target> _targets{};
+    int64_t _sum_weights{};
 
 public:
-    RoundRobinTransition(std::vector<std::tuple<BaseStage*, uint64_t>> weighted_stages)
-        : _weighted_stages(std::move(weighted_stages))
+    RoundRobinTransition(const std::vector<std::tuple<BaseStage*, uint64_t>>& weighted_stages)
     {
-        for(auto const& [_, weight] : _weighted_stages) {
+        _targets.reserve(weighted_stages.size());
+        for(auto const& [stage, weight] : weighted_stages) {
             if(weight == 0) {
                 throw SimulationError("RoundRobinTransition no weight may be zero.");
             }
-            _sum_weights += weight;
+            if(weight > max_weight) {
+                throw SimulationError(
+                    "RoundRobinTransition weights must be at most {}.", max_weight);
+            }
+            _targets.push_back({stage, static_cast<int64_t>(weight), 0});
+            _sum_weights += static_cast<int64_t>(weight);
         }
     }
 
     BaseStage* next_stage() override
     {
-        uint64_t sum_weights_so_far = 0;
-        BaseStage* candidate{};
-        for(const auto& [stage, weight] : _weighted_stages) {
-            if(sum_weights_so_far <= _next_called) {
-                candidate = stage;
-            } else {
-                break;
+        Target* chosen{};
+        for(auto& target : _targets) {
+            target.current += target.weight;
+            if(chosen == nullptr || target.current > chosen->current) {
+                chosen = &target;
             }
-            sum_weights_so_far += weight;
         }
-        _next_called = (_next_called + 1) % _sum_weights;
-        return candidate;
+        chosen->current -= _sum_weights;
+        return chosen->stage;
     }
 };
 
