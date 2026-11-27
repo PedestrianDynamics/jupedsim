@@ -73,12 +73,12 @@ def main():
             jps.FixedTransition(waypoint, exits[0]),
         ]
     )
-    long_stages = [*waypoints[1:], exits[1]]
+    long_targets = [*waypoints[1:], exits[1]]
     long_route = simulation.add_route(
-        [jps.FixedTransition(jps.AGENT_LOCATION, long_stages[0])]
+        [jps.FixedTransition(jps.AGENT_LOCATION, long_targets[0])]
         + [
             jps.FixedTransition(source, target)
-            for source, target in zip(long_stages, long_stages[1:])
+            for source, target in zip(long_targets, long_targets[1:])
         ]
     )
 
