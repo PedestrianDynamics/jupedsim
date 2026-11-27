@@ -309,10 +309,6 @@ void init_simulation(py::module_& m)
         .def("delta_time", [](const Simulation& sim) { return sim.dt(); })
         .def("iteration_count", [](const Simulation& sim) { return sim.iteration(); })
         .def(
-            "agents",
-            [](Simulation& sim) { return py::make_iterator(sim.agents()); },
-            py::keep_alive<0, 1>())
-        .def(
             "agent_ids",
             [](Simulation& sim) {
                 const auto& agents = sim.agents();
