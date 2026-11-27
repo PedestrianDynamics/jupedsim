@@ -233,7 +233,7 @@ def travel_time_figure(out):
         bbox=dict(boxstyle="round,pad=0.25", fc="white", ec="none", alpha=0.85),
     )
     ax.annotate(
-        "slower within 0.5 m of a wall:\ncontours bend, arrows turn away",
+        "slower within 0.3 m of a wall:\ncontours bend, arrows turn away",
         xy=(9.5, 0.3),
         xytext=(4.0, 2.2),
         fontsize=8.5,

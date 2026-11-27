@@ -457,7 +457,9 @@ mod tests {
         for (cell, (d, t)) in (0u32..).zip(dirs.iter().zip(&tt)) {
             if t.is_finite() {
                 let (x, y) = grid.cell_center(cell);
-                assert_eq!(*d, ff.region_direction(0, pt(x, y), exit).unwrap());
+                let at = ff.region_direction(0, pt(x, y), exit).unwrap();
+                let off = (d.x - at.x).hypot(d.y - at.y);
+                assert!(off < 1e-12, "cell {cell}: {d:?} vs {at:?}");
             } else {
                 assert!(d.x.is_nan() && d.y.is_nan(), "cell {cell}: {d:?}");
             }

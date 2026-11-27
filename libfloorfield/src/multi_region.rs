@@ -454,9 +454,11 @@ impl MultiRegionFloorfield {
     /// Which way to walk from (x, y) in `region` towards `dest`: a unit
     /// vector, or the zero vector once there.
     ///
-    /// * Downhill along the travel-time gradient, taken at the point's cell or,
-    ///   if that is an obstacle (next to a slanted wall), at the nearest
-    ///   walkable cell within two cells.
+    /// * Downhill along the travel-time gradient, blended bilinearly from the
+    ///   four cell centres around the point (`interpolated_direction`). If
+    ///   none of them counts or they cancel: taken at the point's cell or, if
+    ///   that is an obstacle (next to a slanted wall), at the nearest walkable
+    ///   cell within two cells.
     /// * Inside an area destination (a cell of one of its pieces): zero.
     /// * Inside the cell of a point destination: straight towards the point,
     ///   zero exactly on it.
@@ -480,6 +482,17 @@ impl MultiRegionFloorfield {
             .find(|s| s.region == region && s.cells.binary_search(&cell).is_ok())
             .map(|s| s.kind);
         let query = d.solution.as_ref().expect("solved above").query[region].as_deref();
+        if source.is_none() {
+            let in_source = |c: u32| {
+                d.sources
+                    .iter()
+                    .any(|s| s.region == region && s.cells.binary_search(&c).is_ok())
+            };
+            let blended = interpolated_direction(&self.regions[region], query, (x, y), &in_source);
+            if let Some(dir) = blended {
+                return Ok(dir);
+            }
+        }
         direction_at_cell(&self.regions[region], query, cell, source, (x, y))
             .ok_or_else(|| no_descent(region, (x, y), dest))
     }
@@ -1013,6 +1026,55 @@ fn direction_at_cell(
         return Some(unit(-gx, -gy));
     }
     steepest_descent(g, query, cell)
+}
+
+/// The downhill directions at the four cell centres around `p`, weighted
+/// bilinearly: at a cell border the direction changes smoothly instead of
+/// jumping from one cell's to the next's. Cells that are not walkable, have no
+/// finite time or belong to the destination are left out and the weights
+/// renormalised. `None` if no cell counts or the weighted directions cancel.
+///
+/// The four cells are never separated by a wall: a cell a wall runs through
+/// is not walkable, and a wall along a cell edge has its other side outside
+/// the region.
+fn interpolated_direction(
+    g: &RegionGrid,
+    query: Option<&[f32]>,
+    p: (f64, f64),
+    in_source: &dyn Fn(u32) -> bool,
+) -> Option<(f64, f64)> {
+    let query = query?;
+    let cs = g.grid.cell_size;
+    let fx = (p.0 - g.grid.origin[0]) / cs - 0.5;
+    let fy = (p.1 - g.grid.origin[1]) / cs - 0.5;
+    let (c0, r0) = (fx.floor(), fy.floor());
+    let (tx, ty) = (fx - c0, fy - r0);
+    let (mut sx, mut sy, mut sw) = (0.0, 0.0, 0.0);
+    for (dr, dc, w) in [
+        (0, 0, (1.0 - tx) * (1.0 - ty)),
+        (0, 1, tx * (1.0 - ty)),
+        (1, 0, (1.0 - tx) * ty),
+        (1, 1, tx * ty),
+    ] {
+        let (r, c) = (r0 as i64 + dr, c0 as i64 + dc);
+        if r < 0 || c < 0 || r >= i64::from(g.grid.height) || c >= i64::from(g.grid.width) {
+            continue;
+        }
+        let cell = r as u32 * g.grid.width + c as u32;
+        if !g.walkable(cell) || !query[cell as usize].is_finite() || in_source(cell) {
+            continue;
+        }
+        let centre = g.grid.cell_center(cell);
+        if let Some((dx, dy)) = direction_at_cell(g, Some(query), cell, None, centre) {
+            sx += w * dx;
+            sy += w * dy;
+            sw += w;
+        }
+    }
+    if sw <= 0.0 || sx.hypot(sy) <= 1e-6 * sw {
+        return None;
+    }
+    Some(unit(sx, sy))
 }
 
 /// The error for a `None` from `direction_at_cell`: a bug, reported rather
@@ -2020,8 +2082,23 @@ mod tests {
         );
     }
 
-    /// `directions` works on cells, `direction` on points: they must agree at
-    /// every cell centre, also next to a seam (halo cells hold finite values
+    /// On the centre line of a corridor narrower than twice the wall influence
+    /// radius the cells on either side point towards each other. Blended, they
+    /// lead along the corridor on both sides of the cell border.
+    #[test]
+    fn direction_is_continuous_across_a_cell_border() {
+        let mut ff = build(vec![region(rect(0., 0., 20., 1.))], vec![]).unwrap();
+        let dest = ff
+            .add_area_destination(&[piece(0, rect(18., 0., 19., 1.))])
+            .unwrap();
+        for y in [0.5 - 1e-9, 0.5 + 1e-9] {
+            let (dx, dy) = ff.direction(0, 5.1, y, dest).unwrap();
+            assert!(dx > 0.99 && dy.abs() < 1e-6, "y = {y}: ({dx}, {dy})");
+        }
+    }
+
+    /// `directions` works on cells, `direction` on points: they must agree
+    /// (up to rounding, `direction` blends) at every cell centre, also next to a seam (halo cells hold finite values
     /// but are obstacles) and inside each piece of an area destination.
     #[test]
     fn directions_match_direction_at_every_cell_centre_across_a_seam() {
@@ -2042,7 +2119,9 @@ mod tests {
                 for (cell, (d, t)) in (0u32..).zip(dirs.iter().zip(&tt)) {
                     if t.is_finite() {
                         let (x, y) = grid.cell_center(cell);
-                        assert_eq!(*d, ff.direction(region, x, y, dest).unwrap());
+                        let at = ff.direction(region, x, y, dest).unwrap();
+                        let off = (d.0 - at.0).hypot(d.1 - at.1);
+                        assert!(off < 1e-12, "cell {cell}: {d:?} vs {at:?}");
                     } else {
                         assert!(d.0.is_nan() && d.1.is_nan(), "cell {cell}: {d:?}");
                     }

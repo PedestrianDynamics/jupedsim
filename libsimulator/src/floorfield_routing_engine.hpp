@@ -18,7 +18,7 @@ struct FloorfieldOptions {
     // The speed field value is linearly decreased from this influence radius (in meter) to the
     // boundary. Reducing the speed field near walls has the effect that agents are not routed
     // unphysically close to the wall.
-    double wall_influence_radius = 0.5;
+    double wall_influence_radius = 0.3;
 };
 
 /// Placement of one region's floor field grid. All regions share one lattice, so grids of
