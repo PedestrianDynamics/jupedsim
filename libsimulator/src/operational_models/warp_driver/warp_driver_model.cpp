@@ -181,10 +181,9 @@ STP warp_velocity_forward(const STP& s, double speed_b)
 }
 
 // W_r: radius scaling (B.7). W_r(s) = s ★ (1/α, 1/α, 1).
-STP warp_radius_forward(const STP& s, double radius_b)
+STP warp_radius_forward(const STP& s, double inv_radius_b)
 {
-    const double inv_r = 1.0 / std::max(radius_b, 1e-6);
-    return STP{s.x * inv_r, s.y * inv_r, s.t};
+    return STP{s.x * inv_radius_b, s.y * inv_radius_b, s.t};
 }
 
 // W_ts: time uncertainty. Scale (x,y) by 1/(1 + lambda*t)
@@ -208,10 +207,9 @@ VelocityUncertaintyScale velocity_uncertainty_factors(double uncertainty_x, doub
 
 // W_vu: velocity uncertainty (B.13). Anisotropic scaling:
 // β₁ = 1/(1 + α₁) compresses x, β₂ = 1 + α₂ expands y.
-STP warp_velocity_uncertainty_forward(const STP& s, double uncertainty_x, double uncertainty_y)
+STP warp_velocity_uncertainty_forward(const STP& s, VelocityUncertaintyScale scale)
 {
-    const auto [beta1, beta2] = velocity_uncertainty_factors(uncertainty_x, uncertainty_y);
-    return STP{s.x * beta1, s.y * beta2, s.t};
+    return STP{s.x * scale.beta1, s.y * scale.beta2, s.t};
 }
 
 // Full composition: forward from a's frame to b's Intrinsic Field space
@@ -222,11 +220,12 @@ struct WarpParams {
     Vector orient_a;
     Vector orient_b;
     double speed_b;
-    double radius_b;
+    double inv_radius_b;
     double lambda;
-    double velocity_uncertainty_x;
-    double velocity_uncertainty_y;
+    VelocityUncertaintyScale vel_uncertainty;
     double time_horizon;
+    double cos_ab;
+    double sin_ab;
 };
 
 // Probability scaling (B.5 + B.14): product of inverse probability transforms.
@@ -234,19 +233,16 @@ struct WarpParams {
 double probability_scale(const STP& s_original, const WarpParams& p)
 {
     const double beta_tu = 1.0 / (1.0 + p.lambda * std::max(s_original.t, 0.0));
-    const auto [beta1, beta2] =
-        velocity_uncertainty_factors(p.velocity_uncertainty_x, p.velocity_uncertainty_y);
-    return beta_tu * beta_tu * beta1 * beta2;
+    return beta_tu * beta_tu * p.vel_uncertainty.beta1 * p.vel_uncertainty.beta2;
 }
 
-STP compose_forward(const STP& s, const WarpParams& p)
+STP compose_forward(const STP& s, const WarpParams& p, STP& s_at_tu)
 {
     auto s1 = warp_local_forward(s, p.rel_pos_b, p.orient_a, p.orient_b);
     auto s2 = warp_velocity_forward(s1, p.speed_b);
-    auto s3 = warp_radius_forward(s2, p.radius_b);
-    auto s4 = warp_time_uncertainty_forward(s3, p.lambda);
-    auto s5 =
-        warp_velocity_uncertainty_forward(s4, p.velocity_uncertainty_x, p.velocity_uncertainty_y);
+    s_at_tu = warp_radius_forward(s2, p.inv_radius_b);
+    auto s4 = warp_time_uncertainty_forward(s_at_tu, p.lambda);
+    auto s5 = warp_velocity_uncertainty_forward(s4, p.vel_uncertainty);
     // Normalize time: map [0, time_horizon] -> [0, 1]
     s5.t = (p.time_horizon > 0.0) ? s5.t / p.time_horizon : 0.0;
     return s5;
@@ -254,7 +250,11 @@ STP compose_forward(const STP& s, const WarpParams& p)
 
 // Gradient transform: takes 2D gradient from IntrinsicField, returns 3D space-time gradient
 // in a's frame. Applies inverse Jacobians in reverse order.
-STP compose_gradient_inverse(const Vector& grad_i, const STP& s_original, const WarpParams& p)
+STP compose_gradient_inverse(
+    const Vector& grad_i,
+    const STP& s_original,
+    const STP& s_at_tu,
+    const WarpParams& p)
 {
     // Start with 3-component gradient in Intrinsic Field space: (grad_i.x, grad_i.y, 0)
     // since dI/dt = 0
@@ -269,23 +269,14 @@ STP compose_gradient_inverse(const Vector& grad_i, const STP& s_original, const 
 
     // W_vu^-1: anisotropic scaling (B.15). Inverse scales gradient by the
     // forward factors (beta1, beta2) since J_vu = diag(beta1, beta2, 1).
-    {
-        const auto [beta1, beta2] =
-            velocity_uncertainty_factors(p.velocity_uncertainty_x, p.velocity_uncertainty_y);
-        gx *= beta1;
-        gy *= beta2;
-    }
+    gx *= p.vel_uncertainty.beta1;
+    gy *= p.vel_uncertainty.beta2;
 
     // W_tu^-1 (B.6): spatial gradient scaled by beta, temporal gets cross-terms.
-    // Coordinates at W_tu input = after W_ref -> W_v -> W_r on s_original.
-    // TODO(perf): compose_forward already computes this intermediate; cache and
-    // reuse instead of recomputing the three warps here. ~15% per-sample saving.
+    // Reuses s_at_tu computed during compose_forward (after W_ref -> W_v -> W_r).
     {
         const double t = s_original.t;
         const double beta = 1.0 / (1.0 + p.lambda * std::max(t, 0.0));
-        auto s_at_tu = warp_local_forward(s_original, p.rel_pos_b, p.orient_a, p.orient_b);
-        s_at_tu = warp_velocity_forward(s_at_tu, p.speed_b);
-        s_at_tu = warp_radius_forward(s_at_tu, p.radius_b);
         const double gamma1 = -p.lambda * beta * beta * s_at_tu.x;
         const double gamma2 = -p.lambda * beta * beta * s_at_tu.y;
         const double gx_old = gx;
@@ -302,19 +293,11 @@ STP compose_gradient_inverse(const Vector& grad_i, const STP& s_original, const 
         gt -= p.speed_b * gx;
     }
 
-    // W_local inverse Jacobian: rotate from b's frame back to a's frame
+    // W_local inverse Jacobian: rotate from b's frame back to a's frame using
+    // precomputed R_a^T * R_b coefficients (cos_ab, sin_ab).
     {
-        const double cos_a = p.orient_a.x();
-        const double sin_a = p.orient_a.y();
-        const double cos_b = p.orient_b.x();
-        const double sin_b = p.orient_b.y();
-
-        // Combined rotation: b's frame -> world -> a's frame
-        // R_a^T * R_b applied to gradient
-        const double cos_ab = cos_a * cos_b + sin_a * sin_b;
-        const double sin_ab = sin_a * cos_b - cos_a * sin_b;
-        const double gx_new = cos_ab * gx + sin_ab * gy;
-        const double gy_new = -sin_ab * gx + cos_ab * gy;
+        const double gx_new = p.cos_ab * gx + p.sin_ab * gy;
+        const double gy_new = -p.sin_ab * gx + p.cos_ab * gy;
         gx = gx_new;
         gy = gy_new;
     }
@@ -536,6 +519,11 @@ Vector WarpDriverModel::compute_next_state(
             Sample{t, STP{speed * t, lateral_perturbation, t}, 0.0, STP{0, 0, 0}};
     }
 
+    const auto vel_uncertainty =
+        velocity_uncertainty_factors(this->_velocity_uncertainty_x, this->_velocity_uncertainty_y);
+    const double cos_a = effective_orient.x();
+    const double sin_a = effective_orient.y();
+
     for(const auto& neighbor : neighbors) {
         const auto* nb_data = std::get_if<State>(neighbor.state);
         if(!nb_data) {
@@ -550,27 +538,26 @@ Vector WarpDriverModel::compute_next_state(
             nb_orient = nb_orient.normalized();
         }
 
-        // Neighbor speed (from v0)
-        const double nb_speed = nb_data->v0;
+        const double cos_b = nb_orient.x();
+        const double sin_b = nb_orient.y();
+        const double combined_radius = agent_data.radius + nb_data->radius; // Minkowski sum
 
-        // TODO(perf): WarpParams and all neighbor-derived constants (orientation,
-        // speed, Minkowski radius, rotation matrix cos_ab/sin_ab used in the
-        // gradient inverse) are loop-invariant w.r.t. the sample index. Hoist
-        // them out of the sample loop and precompute once per (ped, neighbor).
         WarpParams wp{};
         wp.rel_pos_b = neighbor.relative_position;
         wp.orient_a = effective_orient;
         wp.orient_b = nb_orient;
-        wp.speed_b = nb_speed;
-        wp.radius_b = agent_data.radius + nb_data->radius; // Minkowski sum
+        wp.speed_b = nb_data->v0;
+        wp.inv_radius_b = 1.0 / std::max(combined_radius, 1e-6);
         wp.lambda = this->_time_uncertainty;
-        wp.velocity_uncertainty_x = this->_velocity_uncertainty_x;
-        wp.velocity_uncertainty_y = this->_velocity_uncertainty_y;
+        wp.vel_uncertainty = vel_uncertainty;
         wp.time_horizon = this->_time_horizon;
+        wp.cos_ab = cos_a * cos_b + sin_a * sin_b;
+        wp.sin_ab = sin_a * cos_b - cos_a * sin_b;
 
         for(auto& s : samples) {
             // Forward warp sample point to neighbor's Intrinsic Field space
-            STP warped = compose_forward(s.r, wp);
+            STP s_at_tu{};
+            STP warped = compose_forward(s.r, wp, s_at_tu);
 
             // Time validity check: must be in [0, 1] (normalized)
             if(warped.t < 0.0 || warped.t > 1.0) {
@@ -586,7 +573,7 @@ Vector WarpDriverModel::compute_next_state(
             }
 
             // Transform gradient back to agent's frame
-            STP grad_b = compose_gradient_inverse(grad_i, s.r, wp);
+            STP grad_b = compose_gradient_inverse(grad_i, s.r, s_at_tu, wp);
 
             // Union formula: p_new = p + p_b - p * p_b
             double p_old = s.p_total;
