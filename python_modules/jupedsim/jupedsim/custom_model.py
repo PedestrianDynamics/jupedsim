@@ -81,7 +81,7 @@ class CustomOperationalModel(ABC):
         added. A model delegating to a built-in one that draws random numbers
         (e.g. :class:`~jupedsim.AnticipationVelocityModel` or
         :class:`~jupedsim.WarpDriverModel`) has to seed the delegated state
-        here with :meth:`~jupedsim.OperationalModel.seed_state`; otherwise the
+        here with that model's ``seed_state``; otherwise the
         built-in model raises on its first step.
 
         .. code:: python
