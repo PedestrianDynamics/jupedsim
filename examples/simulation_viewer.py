@@ -124,7 +124,7 @@ class SimulationViewer:
         """Build the walkable-surface mesh once. Holds both a height scalar and a per-cell
         region id so the floor can be recoloured (see _draw_floor) without reloading."""
         # Native geometry obj has the 3D info.
-        geo = self._sim._obj.get_geometry()
+        geo = self._sim.geometry
         verts = np.asarray(geo.vertices(), dtype=float)
         tris = np.asarray(geo.triangles(), dtype=np.int64)
         faces = np.hstack(
