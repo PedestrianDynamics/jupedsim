@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
-"""Example showing nearest waypoint/exit stage routing.
+"""Example showing routing to the nearest area of a waypoint or exit.
 
 Six agents walk towards a waypoint with multiple areas and each targets the area closer
 to its start position. Down the stairs, use different point-based waypoints to split the
