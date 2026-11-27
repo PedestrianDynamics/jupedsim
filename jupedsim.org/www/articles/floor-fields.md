@@ -177,7 +177,7 @@ cx, cy = default.cell_centers
 
 
 def update_speed_field(radius=1.0):
-    pos = np.array([agent.position for agent in simulation.agents()])
+    pos = np.array([agent.location.xy for agent in simulation.agents()])
     if len(pos) == 0:
         return
     dist2 = (cx[..., None] - pos[:, 0]) ** 2 + (cy[..., None] - pos[:, 1]) ** 2
