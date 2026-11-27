@@ -305,18 +305,25 @@ class Hdf5TrajectoryWriter(TrajectoryWriter):
             )
             self._frame_idx = 0
 
-        for agent in simulation._obj.agents():
-            self._records_written += 1
-            loc = agent.location
-            self._trajectory_buffer[self._record_idx] = (
-                frame,
-                agent.id,
-                loc.x,
-                loc.y,
-                loc.z,
-                loc.region_id,
+        ids, xyz, region_ids = simulation._obj.agent_locations()
+        self._records_written += len(ids)
+        start = 0
+        while start < len(ids):
+            count = min(
+                len(ids) - start, self._records_to_cache - self._record_idx
             )
-            self._record_idx += 1
+            end = start + count
+            rows = self._trajectory_buffer[
+                self._record_idx : self._record_idx + count
+            ]
+            rows["frame"] = frame
+            rows["id"] = ids[start:end]
+            rows["x"] = xyz[start:end, 0]
+            rows["y"] = xyz[start:end, 1]
+            rows["z"] = xyz[start:end, 2]
+            rows["region_id"] = region_ids[start:end]
+            self._record_idx += count
+            start = end
             if self._record_idx == self._records_to_cache:
                 self._append(
                     self._trajectory_ds,
