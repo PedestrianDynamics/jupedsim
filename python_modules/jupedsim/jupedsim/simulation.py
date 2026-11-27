@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
 import types
-from collections.abc import Callable, Iterator, Sequence
+from collections.abc import Iterator, Sequence
 from typing import Any, Self, TypeVar
 
 import numpy.typing as npt
@@ -637,35 +637,18 @@ class Simulation:
         """
         return self._obj.iteration_count()
 
-    def agents(
-        self, *, filter: Callable[[Agent], bool] | None = None
-    ) -> Iterator[Agent]:
+    def agents(self) -> Iterator[Agent]:
         """Agents in the simulation.
 
         The set of agents is snapshot when this method is called; agents added or removed afterwards
         are not reflected by the returned iterator.
 
-        .. code:: python
-
-            for agent in sim.agents(
-                filter=lambda a: a.route == route_c and a.current_target == wp2
-            ):
-                agent.reroute(first_target=wp3)
-
-        Args:
-            filter: Selects the agents for which it returns ``True``; all agents if not
-                given.
-
         Returns:
-            Iterator over handles to the agents. The handles resolve the agent on every
-            attribute access and stay valid across :func:`iterate` as long as the agent
+            Iterator over handles to all agents in the simulation. The handles resolve the agent on
+            every attribute access and stay valid across :func:`iterate` as long as the agent
             exists.
         """
-        ids = self._obj.agent_ids()
-        handles = (Agent(self, agent_id) for agent_id in ids)
-        if filter is None:
-            return handles
-        return (agent for agent in handles if filter(agent))
+        return iter(Agent(self, agent_id) for agent_id in self._obj.agent_ids())
 
     def agent(self, key: int | str) -> Agent:
         """Look an agent up by id or by name.
