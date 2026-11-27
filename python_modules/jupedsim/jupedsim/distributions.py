@@ -59,12 +59,7 @@ def __get_bounding_box(polygon):
 
 def __min_distance_to_polygon(pt, polygon):
     """returns the minimal distance between a point and every line segment of a polygon"""
-    pt = shapely.Point(pt)
-    min_dist = polygon.exterior.distance(pt)
-    for hole in polygon.interiors:
-        candidate_dist = hole.distance(pt)
-        min_dist = min(min_dist, candidate_dist)
-    return min_dist
+    return polygon.boundary.distance(shapely.Point(pt))
 
 
 def distribute_by_number(
