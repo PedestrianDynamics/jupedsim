@@ -42,8 +42,9 @@ Such a region can be added like:
     # or, equivalently, from the points of the boundary
     room = geo_builder.add_region(boundary=[(0, 0), (10, 0), (10, 10), (0, 10)], height=0.0)
 
-:meth:`~jupedsim.GeometryBuilder.add_region` returns the id of the new region.
-Agents and stages are placed in a region by this id, see :doc:`routing`.
+:meth:`~jupedsim.GeometryBuilder.add_region` returns the new region.
+Agents are placed in it with ``room.at(x, y)``, and each area of a target is given together
+with its region, see :doc:`routing`.
 
 A walkable area may consist of several regions, e.g. floors at different heights joined by stairs.
 Each of them is added with its own call to :meth:`~jupedsim.GeometryBuilder.add_region`.
