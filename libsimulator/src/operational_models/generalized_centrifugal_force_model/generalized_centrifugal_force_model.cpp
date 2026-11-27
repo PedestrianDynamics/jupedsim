@@ -3,6 +3,7 @@
 
 #include "agent_view.hpp"
 #include "ellipse.hpp"
+#include "force_reach.hpp"
 #include "generic_agent.hpp"
 #include "kernel.hpp"
 #include "macros.hpp"
@@ -16,13 +17,6 @@
 
 #include <algorithm>
 #include <cmath>
-
-namespace
-{
-/// How far ahead to look for a wall. The force reaches max_geometry_interaction_distance beyond the
-/// agent's ellipse, 3.4 m with the default parameters. Use the 4m default of previous impl.
-constexpr double wall_search_radius = 4.0;
-} // namespace
 
 GeneralizedCentrifugalForceModel::GeneralizedCentrifugalForceModel(
     double strength_neighbor_repulsion,
@@ -55,8 +49,12 @@ Vector GeneralizedCentrifugalForceModel::compute_next_state(
     const AgentStep& step) const
 {
     const auto& current_state = std::get<State>(current);
-    const auto neighborhood = step.other_agents_in_range(
-        _cut_off_radius, [&step](const NeighborView& n) { return step.no_geometry_between(n); });
+    // The force vanishes beyond `max_neighbor_interaction_distance`.
+    const auto neighborhood =
+        step.other_agents_in_range(_cut_off_radius, [&](const NeighborView& n) {
+            return agent_to_agent_spacing(current_state, n) < _max_neighbor_interaction_distance &&
+                   step.no_geometry_between(n);
+        });
     Vector f_rep;
     for(const auto& neighbor : neighborhood) {
         f_rep += force_rep_ped(current_state, neighbor);
@@ -78,9 +76,14 @@ Vector GeneralizedCentrifugalForceModel::compute_next_state(
     const Vector velocity_without_walls =
         (current_state.orientation * current_state.speed) +
         (fd + f_rep).guarded_division(current_state.mass) * step.dt();
+    // The force reaches `max_geometry_interaction_distance` beyond the ellipse.
+    const double longer_semi_axis =
+        std::max(current_state.b_max, current_state.a_min + current_state.av * current_state.speed);
+    const double wall_reach =
+        std::min(_max_geometry_interaction_distance + longer_semi_axis, max_wall_search_radius);
     // The side lines run along the widest the ellipse gets, plus the interpolation margin.
     for(const auto& wall : step.walls_ahead(
-            velocity_without_walls.normalized() * wall_search_radius,
+            velocity_without_walls.normalized() * wall_reach,
             current_state.b_max + _max_geometry_interpolation_distance)) {
         repwall += force_rep_wall(current_state, wall);
     }

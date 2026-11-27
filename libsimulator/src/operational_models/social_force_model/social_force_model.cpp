@@ -2,6 +2,7 @@
 #include "social_force_model.hpp"
 
 #include "agent_view.hpp"
+#include "force_reach.hpp"
 #include "generic_agent.hpp"
 #include "kernel.hpp"
 #include "operational_model.hpp"
@@ -9,14 +10,12 @@
 #include "operational_model_type.hpp"
 #include "simulation_error.hpp"
 
+#include <algorithm>
 #include <cmath>
 #include <string>
 
 namespace
 {
-/// How far ahead to look for a wall. The obstacle force decays with `force_distance` (0.08 m by
-/// default), so a wall this far off contributes "nothing".
-constexpr double wall_search_radius = 4.0;
 /// How far beyond the body the side lines run, in units of `force_distance`. A wall just outside
 /// them pushes with at most exp(-5) of the strength at contact.
 constexpr double wall_margin_in_ranges = 5.0;
@@ -39,17 +38,29 @@ Vector SocialForceModel::compute_next_state(
 {
     const auto& current_state = std::get<State>(current);
     auto forces = driving_force(current_state, step.route_orientation());
+    // The repelling forces compete with the driving force from standstill.
+    const double driving =
+        current_state.mass * current_state.desired_speed / current_state.reaction_time;
 
-    auto neighborhood = step.other_agents_in_range(
-        _cut_off_radius, [&step](const NeighborView& n) { return step.no_geometry_between(n); });
+    const double neighbor_reach =
+        reach_beyond_contact(current_state.agent_scale, current_state.force_distance, driving);
+    auto neighborhood = step.other_agents_in_range(_cut_off_radius, [&](const NeighborView& n) {
+        const double contact = current_state.radius + std::get<State>(*n.state).radius;
+        return n.relative_position.norm() < contact + neighbor_reach && step.no_geometry_between(n);
+    });
     Vector f_rep;
     for(const auto& neighbor : neighborhood) {
         f_rep += agent_force(current_state, neighbor);
     }
     forces += f_rep.guarded_division(current_state.mass);
     Vector obstacle_f{};
+    const double wall_reach = std::min(
+        current_state.radius +
+            reach_beyond_contact(
+                current_state.obstacle_scale, current_state.force_distance, driving),
+        max_wall_search_radius);
     for(const auto& wall : step.walls_ahead(
-            (current_state.velocity + forces * step.dt()).normalized() * wall_search_radius,
+            (current_state.velocity + forces * step.dt()).normalized() * wall_reach,
             current_state.radius + wall_margin_in_ranges * current_state.force_distance)) {
         obstacle_f += obstacle_force(current_state, wall);
     }
