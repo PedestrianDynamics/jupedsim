@@ -82,6 +82,51 @@ def test_payload_shape_and_values(square_simulation):
     assert (data["region_id"] == 0).all()
 
 
+def test_rows_match_the_agents_across_buffer_flushes(tmp_path):
+    surface = jps.GeometryBuilder()
+    room = surface.add_region(
+        polygon=shapely.Polygon([(0, 0), (20, 0), (20, 10), (0, 10)]),
+        height=0.0,
+    )
+    out_filename = tmp_path / "traj.h5"
+    writer = jps.Hdf5TrajectoryWriter(
+        output_file=out_filename, every_nth_frame=1
+    )
+    sim = jps.Simulation(
+        model=jps.CollisionFreeSpeedModel(),
+        geometry=surface.build(),
+        trajectory_writer=writer,
+    )
+    exit_ = sim.add_target(
+        jps.Exit(
+            [(shapely.Polygon([(19, 0), (20, 0), (20, 10), (19, 10)]), room)]
+        )
+    )
+    route = sim.add_route([jps.FixedTransition(jps.AGENT_LOCATION, exit_)])
+    for x, y in [(2, 2), (2, 4), (2, 6), (2, 8)]:
+        sim.add_agent(room.at(x, y), route=route)
+
+    def rows(frame):
+        return [
+            (frame, a.id, *a.location.xy, a.location.z, a.location.region_id)
+            for a in sim.agents()
+        ]
+
+    # 4 agents do not divide the buffer, so frames straddle its flushes.
+    assert writer._records_to_cache % 4 != 0
+    frame_count = writer._records_to_cache // 4 + 10
+    expected = rows(0)
+    for frame in range(1, frame_count):
+        sim.iterate()
+        expected += rows(frame)
+    writer.close()
+
+    with h5py.File(out_filename, "r") as hf:
+        data = hf["trajectory"][:]
+    assert data.shape == (frame_count * 4,)
+    assert (data == np.array(expected, dtype=writer.trajectory_dtype())).all()
+
+
 def test_metadata_attributes(square_simulation):
     with h5py.File(square_simulation, "r") as hf:
         for key in (

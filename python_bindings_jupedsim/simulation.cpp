@@ -324,6 +324,31 @@ void init_simulation(py::module_& m)
                 return ids;
             })
         .def(
+            // (ids, xyz, region ids) of all agents in id order, as copied arrays of shape (n,),
+            // (n, 3) and (n,).
+            "agent_locations",
+            [](Simulation& sim) {
+                const auto& agents = sim.agents();
+                const auto count = static_cast<py::ssize_t>(agents.size());
+                py::array_t<uint64_t> ids(count);
+                py::array_t<double> xyz({count, py::ssize_t{3}});
+                py::array_t<uint64_t> region_ids(count);
+                auto id = ids.mutable_unchecked<1>();
+                auto position = xyz.mutable_unchecked<2>();
+                auto region_id = region_ids.mutable_unchecked<1>();
+                py::ssize_t i = 0;
+                for(const auto& agent : agents) {
+                    const auto& location = agent.location;
+                    id(i) = agent.id.get_id();
+                    position(i, 0) = location.xy().x();
+                    position(i, 1) = location.xy().y();
+                    position(i, 2) = location.z();
+                    region_id(i) = location.region();
+                    ++i;
+                }
+                return py::make_tuple(ids, xyz, region_ids);
+            })
+        .def(
             // TRANSIENT ONLY: the returned object wraps a raw reference into the
             // simulation's agent storage. It must not be stored across iterate();
             // callers (Python agent handles) resolve it freshly inside every
