@@ -96,9 +96,9 @@ argument gives you access to all required data:
     * - ``simulation.delta_time()``
       - Time step length in seconds
 
-    * - ``simulation.get_geometry()``
-      - The simulation geometry; ``.polygon(region_id=...)`` provides the 2D polygon
-        of a region.
+    * - ``simulation.geometry``
+      - The simulation geometry; ``.regions()`` lists its regions, and a region's
+        ``.polygon()`` provides its 2D polygon.
 
 Each :class:`~jupedsim.agent.Agent` exposes:
 
@@ -112,11 +112,11 @@ Each :class:`~jupedsim.agent.Agent` exposes:
     * - ``agent.id``
       - Unique numeric ID
 
-    * - ``agent.position``
-      - ``(x, y)`` tuple of the agent's position
+    * - ``agent.location``
+      - Where the agent stands: ``.x``, ``.y``, ``.z`` and its ``.region``
 
-    * - ``agent.orientation``
-      - ``(x, y)`` tuple of the agent's orientation vector
+    * - ``agent.route_orientation``
+      - ``(x, y)`` unit vector towards the agent's current target
 
     * - ``agent.state``
       - Model-specific state (speed, radius, etc.)
@@ -294,8 +294,8 @@ Travel times
 ------------
 
 With ``write_travel_times=True`` the writer also stores the floor field travel
-times and walking directions to every waypoint and exit stage when it is
-closed. The loader returns them per stage in the same form as
+times and walking directions to every waypoint and exit when it is
+closed. The loader returns them per target in the same form as
 :meth:`jupedsim.Simulation.travel_times`, one grid per region::
 
     import matplotlib.pyplot as plt

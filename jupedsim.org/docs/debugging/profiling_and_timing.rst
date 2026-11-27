@@ -71,12 +71,16 @@ The C++ core automatically times these regions during every call to
 * ``"Total Iteration"`` — cumulative time spent inside ``iterate()``
 * ``"Agent Removal System"``
 * ``"Neighborhood Search"``
-* ``"Stage System"``
 * ``"Strategical Decision System"``
 * ``"Tactical Decision System"``
 * ``"Operational Decision System"``
+
+and these in the calls that set up or query the simulation:
+
+* ``"Add Target"``
+* ``"Add Route"``
 * ``"Add Agent"``
-* ``"Add Journey"``
+* ``"Agents in Range"`` and ``"Agents in Polygon"`` — recorded only at the Debug level
 
 Python timer API
 ================
