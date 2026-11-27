@@ -661,7 +661,7 @@ class Simulation:
             attribute access and stay valid across :func:`iterate` as long as the agent
             exists.
         """
-        ids = [agent.id for agent in self._obj.agents()]
+        ids = self._obj.agent_ids()
         handles = (Agent(self, agent_id) for agent_id in ids)
         if filter is None:
             return handles

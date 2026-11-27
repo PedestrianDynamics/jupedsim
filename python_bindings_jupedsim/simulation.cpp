@@ -313,6 +313,17 @@ void init_simulation(py::module_& m)
             [](Simulation& sim) { return py::make_iterator(sim.agents()); },
             py::keep_alive<0, 1>())
         .def(
+            "agent_ids",
+            [](Simulation& sim) {
+                const auto& agents = sim.agents();
+                std::vector<uint64_t> ids;
+                ids.reserve(agents.size());
+                for(const auto& agent : agents) {
+                    ids.push_back(agent.id.get_id());
+                }
+                return ids;
+            })
+        .def(
             // TRANSIENT ONLY: the returned object wraps a raw reference into the
             // simulation's agent storage. It must not be stored across iterate();
             // callers (Python agent handles) resolve it freshly inside every
