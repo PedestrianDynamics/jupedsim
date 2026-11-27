@@ -14,6 +14,9 @@ If you want to know in more detail how the simulation works, have a look:
     * - :doc:`Routing <routing>`
       - How the routing is handled in *JuPedSim*
 
+    * - :doc:`Iteration Process <iteration>`
+      - Internal execution order of a simulation step and why each phase is ordered this way
+
     * - :doc:`Custom Serialization <custom_serialization>`
       - How to write a custom trajectory serializer
 
@@ -23,4 +26,5 @@ If you want to know in more detail how the simulation works, have a look:
 
     Geometry <geometry>
     Routing <routing>
+    Iteration Process <iteration>
     Custom Serialization <custom_serialization>
