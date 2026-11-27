@@ -305,7 +305,7 @@ class Hdf5TrajectoryWriter(TrajectoryWriter):
             )
             self._frame_idx = 0
 
-        for agent in simulation._obj.agents():
+        for agent in simulation.agents():
             self._records_written += 1
             loc = agent.location
             self._trajectory_buffer[self._record_idx] = (

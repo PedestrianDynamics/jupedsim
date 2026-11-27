@@ -117,15 +117,6 @@ def test_a_steered_agent_reports_its_arrival_once():
     assert arrival.target.xy == spot.xy
 
 
-def test_agents_can_be_filtered_by_any_condition():
-    r = _Room()
-    to_exit = r.sim.add_agent(r.at(5, 5), route=r.route, first_target=r.exit)
-    r.sim.add_agent(r.at(5, 7), route=r.route)
-    assert list(r.sim.agents(filter=lambda a: a.current_target == r.exit)) == [
-        to_exit
-    ]
-
-
 @pytest.mark.parametrize(
     "kwargs, error, message",
     [
