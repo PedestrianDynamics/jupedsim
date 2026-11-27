@@ -20,8 +20,8 @@ Everything here is part of the upcoming JuPedSim 2.0 and available on the
 
 ## What a floor field is
 
-A destination is the area of a waypoint or an exit; in the API it is identified by
-the id of its stage (`stage_id`). For every destination, JuPedSim covers each region of
+A destination is the area of a waypoint or an exit; in the API it is the target
+`add_target` returned. For every destination, JuPedSim covers each region of
 your walkable surface with a grid of square cells and computes, for every cell, the
 travel time to the destination. The computation follows a wave that starts in the
 destination's area and spreads out at the local walking speed: around obstacles, through
@@ -72,7 +72,7 @@ two cells wide.
 
 ## Looking at the fields
 
-`Simulation.travel_times(stage_id)` returns one grid per region, keyed by region id.
+`Simulation.travel_times(target)` returns one grid per region, keyed by region.
 Each grid has its travel times in seconds and the walking direction an agent would
 get in every cell, and plots directly with matplotlib:
 
@@ -82,10 +82,12 @@ import numpy as np
 import shapely
 
 geo = jps.GeometryBuilder()
-room = geo.add_region(polygon=shapely.box(0, 0, 20, 10))
-simulation = jps.Simulation(model=jps.CollisionFreeSpeedModel(), geometry=geo)
-north = simulation.add_exit_stage([(shapely.box(19, 8, 20, 10), room)])
-south = simulation.add_exit_stage([(shapely.box(19, 0, 20, 2), room)])
+room = geo.add_region(polygon=shapely.box(0, 0, 20, 10), height=0.0)
+simulation = jps.Simulation(
+    model=jps.CollisionFreeSpeedModel(), geometry=geo.build()
+)
+north = simulation.add_target(jps.Exit([(shapely.box(19, 8, 20, 10), room)]))
+south = simulation.add_target(jps.Exit([(shapely.box(19, 0, 20, 2), room)]))
 
 grid = simulation.travel_times(north)[room]
 plt.imshow(
@@ -126,8 +128,8 @@ writer = jps.Hdf5TrajectoryWriter(output_file=path, write_travel_times=True)
 writer.close()
 
 with jps.Hdf5TrajectoryLoader(path) as loader:
-    for stage_id in loader.load_travel_time_stage_ids():
-        grids = loader.load_travel_times(stage_id)  # {region_id: grid}
+    for target_id in loader.load_travel_time_target_ids():
+        grids = loader.load_travel_times(target_id)  # {region_id: grid}
 ```
 
 The travel times are written when the writer is closed, so destinations added during the
@@ -147,20 +149,22 @@ import jupedsim as jps
 import shapely
 
 geo = jps.GeometryBuilder()
-room = geo.add_region(polygon=shapely.box(0, 0, 20, 10))
-simulation = jps.Simulation(model=jps.CollisionFreeSpeedModel(), geometry=geo)
-exit_id = simulation.add_exit_stage(
-    [(shapely.box(19, 8, 20, 10), room), (shapely.box(19, 0, 20, 2), room)]
+room = geo.add_region(polygon=shapely.box(0, 0, 20, 10), height=0.0)
+simulation = jps.Simulation(
+    model=jps.CollisionFreeSpeedModel(), geometry=geo.build()
 )
-journey = simulation.add_journey(jps.JourneyDescription([exit_id]))
+exit_ = simulation.add_target(
+    jps.Exit(
+        [(shapely.box(19, 8, 20, 10), room), (shapely.box(19, 0, 20, 2), room)]
+    )
+)
+route = simulation.add_route([jps.FixedTransition(jps.AGENT_LOCATION, exit_)])
 for x in np.arange(10.5, 16.5, 0.5):
     for y in np.arange(6.25, 9.8, 0.5):
         simulation.add_agent(
-            journey_id=journey,
-            stage_id=exit_id,
-            position=(x, y),
+            room.at(x, y),
+            route=route,
             state=jps.CollisionFreeSpeedModelState(),
-            region_id=room,
         )
 
 
@@ -218,11 +222,11 @@ Agents in the room over time.
 ```
 
 - **The default speed field** of a region is used by every destination. Use
-  `set_default_speed_field(region_id, values)` to change it for all of them.
+  `set_default_speed_field(region, values)` to change it for all of them.
 - **A destination can have its own** speed field in a region, for example when only
-  the agents heading for one destination should react to the congestion: `set_custom_speed_field(stage_id, region_id,
-  values)`. `custom_speed_fields(stage_id)` shows which regions have one, and
-  `clear_custom_speed_field(stage_id, region_id)` goes back to the default.
+  the agents heading for one destination should react to the congestion: `set_custom_speed_field(target, region,
+  values)`. `custom_speed_fields(target)` shows which regions have one, and
+  `clear_custom_speed_field(target, region)` goes back to the default.
 - **Values** are an array of shape `(height, width)` on the region's grid, in m/s.
   On walkable cells they must be finite and at least 0.01 m/s; whether a cell is
   walkable is decided by the geometry, not by the speed field, so values on cells
