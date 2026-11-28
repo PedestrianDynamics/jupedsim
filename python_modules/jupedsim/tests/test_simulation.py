@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
 import gc
+from dataclasses import dataclass, replace
 
 import jupedsim as jps
 import pytest
@@ -416,3 +417,49 @@ def test_a_geometry_is_shared_not_consumed():
     path = engine.get_shortest_path((1, 1, 0), (9, 9, 0))
     assert path[0] == pytest.approx((1, 1, 0))
     assert path[-1] == pytest.approx((9, 9, 0))
+
+
+@dataclass(kw_only=True, frozen=True)
+class _FixedMovementState:
+    movement: tuple[float, float]
+    steps: int = 0
+
+
+class _FixedMovementModel(jps.CustomOperationalModel):
+    """Moves each agent by the movement in its state, walls or not."""
+
+    def compute_next_state(self, state, step):
+        return replace(state, steps=state.steps + 1), state.movement
+
+
+def test_move_into_wall_cancels_location_update():
+    warnings = []
+    jps.set_warning_callback(warnings.append)
+    surface = jps.GeometryBuilder()
+    room = surface.add_region(boundary=rect(0, 0, 4, 2), height=0.0)
+    sim = jps.Simulation(model=_FixedMovementModel(), geometry=surface.build())
+    exit_id = sim.add_exit_stage([(rect(0, 0, 0.5, 2), room)])
+    journey_id = sim.add_journey(jps.JourneyDescription([exit_id]))
+
+    def add_agent(position, movement):
+        return sim.add_agent(
+            journey_id=journey_id,
+            stage_id=exit_id,
+            position=position,
+            state=_FixedMovementState(movement=movement),
+            region_id=room,
+        )
+
+    blocked = add_agent((3.5, 1.0), (1.0, 0.0))
+    free = add_agent((1.5, 1.0), (0.0, 0.1))
+
+    sim.iterate()
+
+    # Blocked agent performs update, but location is not changed
+    assert sim.agent(blocked).position == pytest.approx((3.5, 1.0))
+    assert sim.agent(blocked).state.steps == 1
+    assert sim.agent(free).position == pytest.approx((1.5, 1.1))
+    assert sim.agent(free).state.steps == 1
+    assert len(warnings) == 1
+    assert f"agent {blocked} " in warnings[0]
+    assert "hit a wall" in warnings[0]

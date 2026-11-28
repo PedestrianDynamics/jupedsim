@@ -6,6 +6,7 @@
 #include "generic_agent.hpp"
 #include "geometry/geometry.hpp"
 #include "kernel.hpp"
+#include "logger.hpp"
 #include "neighborhood_search.hpp"
 #include "operational_model.hpp"
 #include "operational_model_state.hpp"
@@ -49,7 +50,15 @@ public:
             auto& next = _next[index];
             const AgentStep step{env_query, current, dt};
             const Vector movement = _model->compute_next_state(current.state, next.state, step);
-            next.location.move_on_surface(movement);
+            if(const auto next_location = next.location.try_move_on_surface(movement)) {
+                next.location = *next_location;
+            } else {
+                LOG_WARNING(
+                    "Update of agent {} at {} by {} hit a wall. Location update got cancelled.",
+                    current.id,
+                    current.location,
+                    movement);
+            }
         }
         // Swap in the computed generation. This is safe because no caller retains
         // pointers/references across an iteration (Python-side agent handles resolve per
